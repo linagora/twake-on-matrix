@@ -438,7 +438,7 @@ class InputBar extends StatelessWidget {
             keyboardType: keyboardType!,
             textInputAction: textInputAction,
             autofocus: autofocus!,
-            style: const TextStyle(fontSize: 15, height: 1.1),
+            style: const TextStyle(fontSize: 15),
             onSubmitted: (text) {
               // fix for library for now
               // it sets the types for the callback incorrectly
