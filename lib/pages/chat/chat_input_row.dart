@@ -199,10 +199,10 @@ class ChatInputRow extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border.all(
                       width: 1,
-                      color: const Color(0xFFE1E3E6),
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(25)),
-                    color: const Color(0xFFF2F3F5),
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
                   ),
                   child: Row(
                     children: [
@@ -222,8 +222,7 @@ class ChatInputRow extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: L10n.of(context)!.writeAMessage,
                             hintMaxLines: 1,
-                            hintStyle:
-                                const TextStyle(fontSize: 15, height: 1.1),
+                            hintStyle: const TextStyle(fontSize: 15, color: Color(0xFF818C99)),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             filled: false,
