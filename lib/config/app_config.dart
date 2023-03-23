@@ -12,7 +12,7 @@ abstract class AppConfig {
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
   static const Color chatColor = primaryColor;
-  static Color? colorSchemeSeed = primaryColor;
+  static Color colorSchemeSeed = primaryColor;
   static const double messageFontSize = 15.75;
   static const bool allowOtherHomeservers = true;
   static const bool enableRegistration = true;

@@ -42,7 +42,7 @@ class ReplyContent extends StatelessWidget {
         html: html!,
         defaultTextStyle: TextStyle(
           color: ownMessage
-              ? Theme.of(context).colorScheme.onPrimary
+              ? Theme.of(context).colorScheme.onBackground
               : Theme.of(context).colorScheme.onBackground,
           fontSize: fontSize,
         ),
@@ -61,7 +61,7 @@ class ReplyContent extends StatelessWidget {
         maxLines: 1,
         style: TextStyle(
           color: ownMessage
-              ? Theme.of(context).colorScheme.onPrimary
+              ? Theme.of(context).colorScheme.onBackground
               : Theme.of(context).colorScheme.onBackground,
           fontSize: fontSize,
         ),
@@ -75,7 +75,7 @@ class ReplyContent extends StatelessWidget {
           height: fontSize * 2 + 6,
           color: ownMessage
               ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onBackground,
+              : Theme.of(context).colorScheme.onPrimary,
         ),
         const SizedBox(width: 6),
         Flexible(
@@ -94,7 +94,7 @@ class ReplyContent extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: ownMessage
                           ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onBackground,
+                          : Theme.of(context).colorScheme.onPrimary,
                       fontSize: fontSize,
                     ),
                   );
