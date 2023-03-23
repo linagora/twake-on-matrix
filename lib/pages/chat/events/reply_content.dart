@@ -25,7 +25,8 @@ class ReplyContent extends StatelessWidget {
     final timeline = this.timeline;
     final displayEvent =
         timeline != null ? replyEvent.getDisplayEvent(timeline) : replyEvent;
-    final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
+    const fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
+    const fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
     if (AppConfig.renderHtml &&
         [EventTypes.Message, EventTypes.Encrypted]
             .contains(displayEvent.type) &&
@@ -44,11 +45,12 @@ class ReplyContent extends StatelessWidget {
           color: ownMessage
               ? Theme.of(context).colorScheme.onBackground
               : Theme.of(context).colorScheme.onBackground,
-          fontSize: fontSize,
+          fontSize: fontSizeDisplayContent,
+          overflow: TextOverflow.ellipsis,
         ),
         maxLines: 1,
         room: displayEvent.room,
-        emoteSize: fontSize * 1.5,
+        emoteSize: fontSizeDisplayContent * 1.5,
       );
     } else {
       replyBody = Text(
@@ -63,7 +65,7 @@ class ReplyContent extends StatelessWidget {
           color: ownMessage
               ? Theme.of(context).colorScheme.onBackground
               : Theme.of(context).colorScheme.onBackground,
-          fontSize: fontSize,
+          fontSize: fontSizeDisplayContent,
         ),
       );
     }
@@ -72,7 +74,7 @@ class ReplyContent extends StatelessWidget {
       children: <Widget>[
         Container(
           width: 3,
-          height: fontSize * 2 + 6,
+          height: fontSizeDisplayContent * 2 + 6,
           color: ownMessage
               ? Theme.of(context).colorScheme.onPrimary
               : Theme.of(context).colorScheme.onPrimary,
@@ -95,7 +97,7 @@ class ReplyContent extends StatelessWidget {
                       color: ownMessage
                           ? Theme.of(context).colorScheme.onPrimary
                           : Theme.of(context).colorScheme.onPrimary,
-                      fontSize: fontSize,
+                      fontSize: fontSizeDisplayName,
                     ),
                   );
                 },
