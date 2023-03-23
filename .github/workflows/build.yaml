@@ -1,0 +1,50 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+
+name: Build
+
+env:
+  FLUTTER_VERSION: 3.7.7
+
+jobs:
+  build_debug:
+    name: Build debug version
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: android
+            runner: ubuntu-latest
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Setup Java
+        if: matrix.os == 'android'
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin" # See 'Supported distributions' for available options
+          java-version: "11"
+
+      - name: Build debug APK
+        run: |
+          ./scripts/build-android-debug.sh
+          cp build/app/outputs/apk/debug/app-debug.apk twake-on-matrix-debug.apk
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: twake-on-matrix-dev
+          path: |
+            twake-on-matrix-debug.apk
