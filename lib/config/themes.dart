@@ -110,6 +110,8 @@ abstract class FluffyThemes {
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,
           onPrimary: brightness == Brightness.light ? const Color(0xFF007AFF) : const Color(0xFF0A84FF),
+          tertiaryContainer: brightness == Brightness.light ? const Color(0xFFF2F3F5) : const Color(0xFF2C2D2F),
+          onTertiaryContainer: brightness == Brightness.light ? const Color(0xFFE1E3E6) : const Color(0xFF2C2D2F),
         ),
       );
 }
