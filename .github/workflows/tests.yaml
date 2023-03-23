@@ -1,0 +1,148 @@
+on:
+  pull_request:
+  workflow_dispatch:
+
+name: Tests
+
+env:
+  FLUTTER_VERSION: 3.7.6
+
+jobs:
+  code_analyze:
+    name: Analyze code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Run code analysis
+        uses: dart-code-checker/dart-code-metrics-action@v3
+        with:
+          pull_request_comment: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  widget_test:
+    name: Widget test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Run widget test
+        run: flutter test
+
+  # integration_test:
+  #   name: Integration test
+  #   runs-on: macos-latest
+  #   strategy:
+  #     matrix:
+  #       homeserver:
+  #         - synapse
+  #         - dendrite
+  #         - conduit
+  #       # flavor:
+  #       #   - google
+  #       #   - nongoogle
+  #     fail-fast: false
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: ${{ env.FLUTTER_VERSION }}
+  #         channel: "stable"
+  #         cache: true
+
+  #     - name: Setup Java
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: "temurin"
+  #         java-version: "11"
+
+  #     - name: Install dependencies
+  #       run: |
+  #         brew install ldns grep scrcpy ffmpeg docker
+  #         flutter pub get
+  #         colima start
+
+  #     - name: Prepare homeservers
+  #       env:
+  #         HOMESERVER: localhost
+  #       run: |
+  #         # Create test users environment variables
+  #         source ./scripts/integration-create-environment-variables.sh
+
+  #         # Create matrix homeservers containers
+  #         ./scripts/integration-server-${{ matrix.homeserver }}.sh
+
+  #         # Set homeserver IP and create test users
+  #         ./scripts/integration-prepare-homeserver.sh
+
+  #         # Set users environment variables for next step
+  #         echo USER1_NAME="alice" >> $GITHUB_ENV
+  #         echo USER1_PW="AliceInWonderland">> $GITHUB_ENV
+  #         echo USER2_NAME="bob" >> $GITHUB_ENV
+  #         echo USER2_PW="JoWirSchaffenDas" >> $GITHUB_ENV
+
+  #     # - name: Run integration tests for non-Google builds
+  #     #   uses: reactivecircus/android-emulator-runner@v2
+  #     #   if: matrix.flavor == 'nongoogle'
+  #     #   env:
+  #     #     HOMESERVER: localhost
+  #     #   with:
+  #     #     api-level: 31
+  #     #     target: google_apis
+  #     #     arch: x86_64
+  #     #     script: |
+  #     #       scrcpy --no-display --record video-${{ matrix.flavor }}.mkv &
+  #     #       flutter test integration_test --dart-define=HOMESERVER=$HOMESERVER --dart-define=USER1_NAME=$USER1_NAME --dart-define=USER2_NAME=$USER2_NAME --dart-define=USER1_PW=$USER1_PW --dart-define=USER2_PW=$USER2_PW || ( sleep 10 && exit 1 )
+  #     #       # Convert the video record to mp4
+  #     #       ffmpeg -i video-${{ matrix.flavor }}.mkv -vf scale=iw/2:-2 -crf 40 -b:v 2000k -preset fast video-${{ matrix.flavor }}.mp4 || true
+  #     #   timeout-minutes: 30
+
+  #     - name: Run integration tests for Google builds
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       # if: matrix.flavor == 'google'
+  #       env:
+  #         HOMESERVER: localhost
+  #       with:
+  #         api-level: 31
+  #         target: google_apis
+  #         arch: x86_64
+  #         script: |
+  #           scrcpy --no-display --record video-${{ matrix.flavor }}.mkv &
+
+  #           flutter test integration_test --dart-define=HOMESERVER=$HOMESERVER --dart-define=USER1_NAME=$USER1_NAME --dart-define=USER2_NAME=$USER2_NAME --dart-define=USER1_PW=$USER1_PW --dart-define=USER2_PW=$USER2_PW || ( sleep 10 && exit 1 )
+  #           # Convert the video record to mp4
+  #           ffmpeg -i video-${{ matrix.flavor }}.mkv -vf scale=iw/2:-2 -crf 40 -b:v 2000k -preset fast video-${{ matrix.flavor }}.mp4 || true
+  #         pre-emulator-launch-script: |
+  #           git apply ./scripts/enable-android-google-services.patch
+  #       timeout-minutes: 30
+
+  #     - name: Upload video
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: integration-test-recording
+  #         path: video-${{ matrix.flavor }}.mp4
