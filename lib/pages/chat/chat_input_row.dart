@@ -193,7 +193,6 @@ class ChatInputRow extends StatelessWidget {
                 ),
               Expanded(
                 child: Container(
-                  constraints: const BoxConstraints(maxHeight: 50),
                   alignment: Alignment.center,
                   padding: const EdgeInsets.only(left: 12.0, right: 4),
                   decoration: BoxDecoration(

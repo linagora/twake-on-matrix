@@ -82,22 +82,13 @@ class Message extends StatelessWidget {
         ? nextEvent!.senderId == event.senderId && !displayTime
         : false;
     final textColor = ownMessage
-        ? Theme.of(context).colorScheme.onPrimary
+        ? Theme.of(context).colorScheme.onBackground
         : Theme.of(context).colorScheme.onBackground;
     final rowMainAxisAlignment =
         ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
-    final borderRadius = BorderRadius.only(
-      topLeft: !ownMessage
-          ? const Radius.circular(4)
-          : const Radius.circular(AppConfig.borderRadius),
-      topRight: const Radius.circular(AppConfig.borderRadius),
-      bottomLeft: const Radius.circular(AppConfig.borderRadius),
-      bottomRight: ownMessage
-          ? const Radius.circular(4)
-          : const Radius.circular(AppConfig.borderRadius),
-    );
+    final borderRadius = BorderRadius.circular(18);
     final noBubble = {
           MessageTypes.Video,
           MessageTypes.Image,
@@ -201,7 +192,10 @@ class Message extends StatelessWidget {
                     ),
                     padding: noBubble || noPadding
                         ? EdgeInsets.zero
-                        : EdgeInsets.all(16 * AppConfig.bubbleSizeFactor),
+                        : EdgeInsets.symmetric(
+                            vertical: 8 * AppConfig.bubbleSizeFactor,
+                            horizontal: 12 * AppConfig.bubbleSizeFactor,
+                          ),
                     constraints: const BoxConstraints(
                       maxWidth: FluffyThemes.columnWidth * 1.5,
                     ),
