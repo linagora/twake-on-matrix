@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
-if [ -z $HOMESERVER ]; then
+if [ -z "$HOMESERVER" ]; then
   echo "Please ensure HOMESERVER environment variable is set to the IP or hostname of the homeserver."
   exit 1
 fi
-if [ -z $USER1_NAME ]; then
+if [ -z "$USER1_NAME" ]; then
   echo "Please ensure USER1_NAME environment variable is set to first user name."
   exit 1
 fi
-if [ -z $USER1_PW ]; then
+if [ -z "$USER1_PW" ]; then
   echo "Please ensure USER1_PW environment variable is set to first user password."
   exit 1
 fi
-if [ -z $USER2_NAME ]; then
+if [ -z "$USER2_NAME" ]; then
   echo "Please ensure USER2_NAME environment variable is set to second user name."
   exit 1
 fi
-if [ -z $USER2_PW ]; then
+if [ -z "$USER2_PW" ]; then
   echo "Please ensure USER2_PW environment variable is set to second user password."
   exit 1
 fi
