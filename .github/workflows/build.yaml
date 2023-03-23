@@ -1,11 +1,5 @@
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "refactor/ui"
-  pull_request:
-    branches:
-      - "refactor/ui"
 
 name: Build
 
