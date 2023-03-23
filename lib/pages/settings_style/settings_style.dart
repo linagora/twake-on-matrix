@@ -37,8 +37,10 @@ class SettingsStyleController extends State<SettingsStyle> {
   }
 
   void setChatColor(Color? color) async {
-    AppConfig.colorSchemeSeed = color;
-    ThemeController.of(context).setPrimaryColor(color);
+    if (color != null) {
+      AppConfig.colorSchemeSeed = color;
+      ThemeController.of(context).setPrimaryColor(color);
+    }
   }
 
   ThemeMode get currentTheme => ThemeController.of(context).themeMode;
