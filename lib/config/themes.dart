@@ -45,8 +45,6 @@ abstract class FluffyThemes {
       ThemeData(
         visualDensity: VisualDensity.standard,
         useMaterial3: true,
-        brightness: brightness,
-        colorSchemeSeed: seed ?? AppConfig.colorSchemeSeed,
         textTheme: PlatformInfos.isDesktop || PlatformInfos.isWeb
             ? brightness == Brightness.light
                 ? Typography.material2018().black.merge(fallbackTextTheme)
@@ -107,6 +105,11 @@ abstract class FluffyThemes {
               borderRadius: BorderRadius.circular(AppConfig.borderRadius),
             ),
           ),
+        ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: seed ?? AppConfig.colorSchemeSeed,
+          brightness: brightness,
+          onPrimary: brightness == Brightness.light ? const Color(0xFF007AFF) : const Color(0xFF0A84FF),
         ),
       );
 }

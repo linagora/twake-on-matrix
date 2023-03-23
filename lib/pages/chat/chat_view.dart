@@ -7,7 +7,6 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
@@ -283,68 +282,51 @@ class ChatView extends StatelessWidget {
                                   maxWidth: FluffyThemes.columnWidth * 2.5,
                                 ),
                                 alignment: Alignment.center,
-                                child: Material(
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft:
-                                        Radius.circular(AppConfig.borderRadius),
-                                    bottomRight:
-                                        Radius.circular(AppConfig.borderRadius),
-                                  ),
-                                  clipBehavior: Clip.hardEdge,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? Colors.transparent
-                                      : Colors.black,
-                                  child: controller.room?.isAbandonedDMRoom ==
-                                          true
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            TextButton.icon(
-                                              style: TextButton.styleFrom(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                                foregroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .error,
-                                              ),
-                                              icon: const Icon(
-                                                Icons.archive_outlined,
-                                              ),
-                                              onPressed: controller.leaveChat,
-                                              label: Text(
-                                                L10n.of(context)!.leave,
-                                              ),
+                                child: controller.room?.isAbandonedDMRoom ==
+                                        true
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              padding: const EdgeInsets.all(16),
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
                                             ),
-                                            TextButton.icon(
-                                              style: TextButton.styleFrom(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                              ),
-                                              icon: const Icon(
-                                                Icons.chat_outlined,
-                                              ),
-                                              onPressed:
-                                                  controller.recreateChat,
-                                              label: Text(
-                                                L10n.of(context)!.reopenChat,
-                                              ),
+                                            icon: const Icon(
+                                              Icons.archive_outlined,
                                             ),
-                                          ],
-                                        )
-                                      : Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const ConnectionStatusHeader(),
-                                            ReactionsPicker(controller),
-                                            ReplyDisplay(controller),
-                                            ChatInputRow(controller),
-                                            ChatEmojiPicker(controller),
-                                          ],
-                                        ),
-                                ),
+                                            onPressed: controller.leaveChat,
+                                            label: Text(
+                                              L10n.of(context)!.leave,
+                                            ),
+                                          ),
+                                          TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              padding: const EdgeInsets.all(16),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.chat_outlined,
+                                            ),
+                                            onPressed: controller.recreateChat,
+                                            label: Text(
+                                              L10n.of(context)!.reopenChat,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const ConnectionStatusHeader(),
+                                          ReactionsPicker(controller),
+                                          ReplyDisplay(controller),
+                                          ChatInputRow(controller),
+                                          ChatEmojiPicker(controller),
+                                        ],
+                                      ),
                               ),
                           ],
                         ),

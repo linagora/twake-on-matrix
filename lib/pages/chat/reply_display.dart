@@ -10,6 +10,7 @@ import 'events/reply_content.dart';
 
 class ReplyDisplay extends StatelessWidget {
   final ChatController controller;
+
   const ReplyDisplay(this.controller, {Key? key}) : super(key: key);
 
   @override
@@ -22,28 +23,32 @@ class ReplyDisplay extends StatelessWidget {
           : 0,
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(),
-      child: Material(
-        color: Theme.of(context).secondaryHeaderColor,
-        child: Row(
-          children: <Widget>[
-            IconButton(
-              tooltip: L10n.of(context)!.close,
-              icon: const Icon(Icons.close),
-              onPressed: controller.cancelReplyEventAction,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const SizedBox(
+            width: 56,
+          ),
+          Expanded(
+            child: controller.replyEvent != null
+                ? ReplyContent(
+                    controller.replyEvent!,
+                    timeline: controller.timeline!,
+                  )
+                : _EditContent(
+                    controller.editEvent?.getDisplayEvent(controller.timeline!),
+                  ),
+          ),
+          IconButton(
+            padding: EdgeInsets.zero,
+            tooltip: L10n.of(context)!.close,
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
-            Expanded(
-              child: controller.replyEvent != null
-                  ? ReplyContent(
-                      controller.replyEvent!,
-                      timeline: controller.timeline!,
-                    )
-                  : _EditContent(
-                      controller.editEvent
-                          ?.getDisplayEvent(controller.timeline!),
-                    ),
-            ),
-          ],
-        ),
+            onPressed: controller.cancelReplyEventAction,
+          ),
+        ],
       ),
     );
   }
