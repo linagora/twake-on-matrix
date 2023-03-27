@@ -61,7 +61,7 @@ packages:
     dependency: transitive
     description:
       name: args
-pod install --repo-update      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7fe21e6e768b02792034dd440"
+      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7fe21e6e768b02792034dd440"
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
@@ -81,6 +81,14 @@ pod install --repo-update      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7
       url: "https://pub.dev"
     source: hosted
     version: "0.1.13"
+  auto_size_text:
+    dependency: "direct main"
+    description:
+      name: auto_size_text
+      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   badges:
     dependency: "direct main"
     description:
@@ -754,7 +762,7 @@ pod install --repo-update      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7
     source: git
     version: "1.1.2"
   flutter_svg:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_svg
       sha256: "9ac1967e2f72a08af11b05b39167920f90d043cf67163d13a544a358c8f31afa"
@@ -1411,10 +1419,10 @@ pod install --repo-update      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7
     dependency: transitive
     description:
       name: permission_handler_apple
-      sha256: "9c370ef6a18b1c4b2f7f35944d644a56aa23576f23abee654cf73968de93f163"
+      sha256: ee96ac32f5a8e6f80756e25b25b9f8e535816c8e6665a96b6d70681f8c4f7e85
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.7"
+    version: "9.0.8"
   permission_handler_platform_interface:
     dependency: transitive
     description:

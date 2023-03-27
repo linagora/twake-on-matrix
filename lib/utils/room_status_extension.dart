@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 import '../config/app_config.dart';
-import 'date_time_extension.dart';
 
 extension RoomStatusExtension on Room {
   CachedPresence? get directChatPresence =>
@@ -13,23 +12,47 @@ extension RoomStatusExtension on Room {
   String getLocalizedStatus(BuildContext context) {
     if (isDirectChat) {
       final directChatPresence = this.directChatPresence;
-      if (directChatPresence != null &&
-          (directChatPresence.lastActiveTimestamp != null ||
-              directChatPresence.currentlyActive != null)) {
-        if (directChatPresence.statusMsg?.isNotEmpty ?? false) {
-          return directChatPresence.statusMsg!;
-        }
+      if (directChatPresence != null) {
         if (directChatPresence.currentlyActive == true) {
-          return L10n.of(context)!.currentlyActive;
+          return 'online';
         }
         if (directChatPresence.lastActiveTimestamp == null) {
-          return L10n.of(context)!.lastSeenLongTimeAgo;
+          return 'online long time ago';
         }
         final time = directChatPresence.lastActiveTimestamp!;
-        return L10n.of(context)!
-            .lastActiveAgo(time.localizedTimeShort(context));
+
+        if (DateTime.now().isAfter(time.subtract(const Duration(hours: 1)))) {
+          return 'online ${DateTime.now().minute - time.minute} min ago';
+        } else if (DateTime.now()
+            .isAfter(time.subtract(const Duration(hours: 24)))) {
+          final timeOffline = DateTime.now().difference(time);
+          return 'online ${timeOffline.inHours} h ${timeOffline.inMinutes - (timeOffline.inHours * 60)} min ago';
+        } else if (DateTime.now()
+            .isAfter(time.subtract(const Duration(days: 7)))) {
+          final timeOffline = DateTime.now().difference(time);
+          return 'online ${timeOffline.inDays} day ago';
+        } else if (DateTime.now()
+            .isAfter(time.subtract(const Duration(days: 30)))) {
+          final timeOffline = DateTime.now().difference(time);
+          return 'online ${(timeOffline.inDays / 7).truncate()} week ago';
+        } else if (DateTime.now()
+            .isAfter(time.subtract(const Duration(days: 365)))) {
+          final timeOffline = DateTime.now().difference(time);
+          return 'online ${(timeOffline.inDays / 30).truncate()} month ago';
+        }
+        // if (directChatPresence.statusMsg?.isNotEmpty ?? false) {
+        //   return directChatPresence.statusMsg!;
+        // }
+        // if (directChatPresence.currentlyActive == true) {
+        //   return L10n.of(context)!.currentlyActive;
+        // }
+        // if (directChatPresence.lastActiveTimestamp == null) {
+        //   return L10n.of(context)!.lastSeenLongTimeAgo;
+        // }
+        // return L10n.of(context)!
+        //     .lastActiveAgo(time.localizedTimeShort(context));
       }
-      return L10n.of(context)!.lastSeenLongTimeAgo;
+      return 'online long time ago';
     }
     return L10n.of(context)!
         .countParticipants(summary.mJoinedMemberCount.toString());
@@ -41,13 +64,13 @@ extension RoomStatusExtension on Room {
     typingUsers.removeWhere((User u) => u.id == client.userID);
 
     if (AppConfig.hideTypingUsernames) {
-      typingText = L10n.of(context)!.isTyping;
+      typingText = 'typing a message';
       if (typingUsers.first.id != directChatMatrixID) {
         typingText =
             L10n.of(context)!.numUsersTyping(typingUsers.length.toString());
       }
     } else if (typingUsers.length == 1) {
-      typingText = L10n.of(context)!.isTyping;
+      typingText = 'typing a message';
       if (typingUsers.first.id != directChatMatrixID) {
         typingText =
             L10n.of(context)!.userIsTyping(typingUsers.first.calcDisplayname());
