@@ -109,9 +109,24 @@ abstract class FluffyThemes {
         colorScheme: ColorScheme.fromSeed(
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,
-          onPrimary: brightness == Brightness.light ? const Color(0xFF007AFF) : const Color(0xFF0A84FF),
-          tertiaryContainer: brightness == Brightness.light ? const Color(0xFFF2F3F5) : const Color(0xFF2C2D2F),
-          onTertiaryContainer: brightness == Brightness.light ? const Color(0xFFE1E3E6) : const Color(0xFF2C2D2F),
+          primary: brightness == Brightness.light
+              ? const Color(0xFFDEEEFF)
+              : const Color(0xFF0A84FF),
+          onPrimary: brightness == Brightness.light
+              ? const Color(0xFF007AFF)
+              : const Color(0xFF0A84FF),
+          tertiaryContainer: brightness == Brightness.light
+              ? const Color(0xFFF2F3F5)
+              : const Color(0xFF2C2D2F),
+          onTertiaryContainer: brightness == Brightness.light
+              ? const Color(0xFFE1E3E6)
+              : const Color(0xFF2C2D2F),
+          secondary: brightness == Brightness.light
+              ? const Color(0xFF818C99)
+              : Colors.white,
+          onSecondary: brightness == Brightness.light
+              ? const Color(0xFF0A84FF)
+              : const Color(0xFFDEEEFF),
         ),
       );
 }
