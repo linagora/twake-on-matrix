@@ -1,6 +1,8 @@
+import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -11,6 +13,7 @@ import 'package:fluffychat/widgets/avatar.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;
+
   const ChatAppBarTitle(this.controller, {Key? key}) : super(key: key);
 
   @override
@@ -43,29 +46,100 @@ class ChatAppBarTitle extends StatelessWidget {
                   VRouter.of(context).toSegments(['rooms', room.id, 'details']),
       child: Row(
         children: [
-          Hero(
-            tag: 'content_banner',
-            child: Avatar(
-              mxContent: room.avatar,
-              name: room.getLocalizedDisplayname(
-                MatrixLocals(L10n.of(context)!),
+          Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 3, top: 3),
+                child: Hero(
+                  tag: 'content_banner',
+                  child: Avatar(
+                    mxContent: room.avatar,
+                    name: room.getLocalizedDisplayname(
+                      MatrixLocals(L10n.of(context)!),
+                    ),
+                    size: 32,
+                  ),
+                ),
               ),
-              size: 32,
-            ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: room.isDirectChat == true
+                    ? Container(
+                        width: 15,
+                        height: 15,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                          color:
+                              room.directChatPresence?.currentlyActive == true
+                                  ? const Color(0xFF5AD439)
+                                  : const Color(0xFF818C99),
+                          shape: BoxShape.circle,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ],
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                _buildStatusContent(context, room),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  _buildStatusContent(BuildContext context, Room room) {
+    if (room.getLocalizedTypingText(context).isEmpty) {
+      return Text(
+        room.getLocalizedStatus(context),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+        ),
+      );
+    } else {
+      return Row(
+        children: [
+          Image.asset(
+            'assets/typing.gif',
+            height: 10,
+            color: Theme.of(context).colorScheme.onPrimary,
+            filterQuality: FilterQuality.high,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            room.getLocalizedTypingText(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
+          )
+        ],
+      );
+    }
   }
 }

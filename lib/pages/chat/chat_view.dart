@@ -11,12 +11,10 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
-import 'package:fluffychat/pages/chat/encryption_button.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reactions_picker.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
-import 'package:fluffychat/widgets/chat_settings_popup_menu.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
@@ -127,11 +125,25 @@ class ChatView extends StatelessWidget {
             controller.room!.isDirectChat)
           IconButton(
             onPressed: controller.onPhoneButtonTap,
-            icon: const Icon(Icons.call_outlined),
+            icon: Image.asset(
+              'assets/ic_phone_call.png',
+              width: 28,
+              height: 28,
+            ),
             tooltip: L10n.of(context)!.placeCall,
           ),
-        EncryptionButton(controller.room!),
-        ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
+        IconButton(
+          onPressed: null,
+          icon: Image.asset(
+            'assets/ic_video_call.png',
+            width: 28,
+            height: 28,
+          ),
+          tooltip: L10n.of(context)!.placeCall,
+        ),
+        const SizedBox(width: 4),
+        // EncryptionButton(controller.room!),
+        // ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
       ];
     }
   }
@@ -199,7 +211,11 @@ class ChatView extends StatelessWidget {
                       : UnreadRoomsBadge(
                           filter: (r) => r.id != controller.roomId!,
                           badgePosition: BadgePosition.topEnd(end: 8, top: 4),
-                          child: const Center(child: BackButton()),
+                          child: Center(
+                            child: BackButton(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
                   titleSpacing: 0,
                   title: ChatAppBarTitle(controller),

@@ -8,7 +8,6 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
-import 'package:fluffychat/pages/chat/typing_indicators.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -52,7 +51,7 @@ class ChatEventList extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SeenByRow(controller),
-                TypingIndicators(controller),
+                // TypingIndicators(controller),
               ],
             );
           }
