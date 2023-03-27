@@ -22,7 +22,7 @@ extension RoomStatusExtension on Room {
         final time = directChatPresence.lastActiveTimestamp!;
 
         if (DateTime.now().isAfter(time.subtract(const Duration(hours: 1)))) {
-          return L10n.of(context)!.onlineMinAgo(DateTime.now().minute - time.minute);
+          return L10n.of(context)!.onlineMinAgo(DateTime.now().difference(time).inMinutes);
         } else if (DateTime.now()
             .isAfter(time.subtract(const Duration(hours: 24)))) {
           final timeOffline = DateTime.now().difference(time);

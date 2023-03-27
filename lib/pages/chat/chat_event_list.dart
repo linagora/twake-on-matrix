@@ -7,7 +7,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -15,6 +14,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
+
   const ChatEventList({
     Key? key,
     required this.controller,
@@ -47,14 +47,8 @@ class ChatEventList extends StatelessWidget {
         (BuildContext context, int i) {
           // Footer to display typing indicator and read receipts:
           if (i == 0) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SeenByRow(controller),
-              ],
-            );
+            return const SizedBox.shrink();
           }
-
           // Request history button or progress indicator:
           if (i == controller.timeline!.events.length + 1) {
             if (controller.timeline!.isRequestingHistory) {
@@ -108,6 +102,7 @@ class ChatEventList extends StatelessWidget {
                     nextEvent: i < controller.timeline!.events.length
                         ? controller.timeline!.events[i]
                         : null,
+                    controller: controller,
                   )
                 : Container(),
           );

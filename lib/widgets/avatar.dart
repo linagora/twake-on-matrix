@@ -12,7 +12,7 @@ class Avatar extends StatelessWidget {
   final String? name;
   final double size;
   final void Function()? onTap;
-  static const double defaultSize = 56;
+  static const double defaultSize = 36;
   final Client? client;
   final double fontSize;
   final defaultGradientColorStart = const Color(0xFFBDF4A1);
