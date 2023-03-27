@@ -114,7 +114,7 @@ class _Reaction extends StatelessWidget {
     final textColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
-    final color = Theme.of(context).scaffoldBackgroundColor;
+    const color = Colors.transparent;
     final fontSize = DefaultTextStyle.of(context).style.fontSize;
     Widget content;
     if (reactionKey!.startsWith('mxc://')) {
@@ -142,7 +142,7 @@ class _Reaction extends StatelessWidget {
         renderKey = renderKey.getRange(0, 9) + Characters('…');
       }
       content = Text(
-        '$renderKey $count',
+        '$renderKey',
         style: TextStyle(
           color: textColor,
           fontSize: DefaultTextStyle.of(context).style.fontSize,
@@ -159,12 +159,12 @@ class _Reaction extends StatelessWidget {
           border: reacted!
               ? Border.all(
                   width: 1,
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.transparent,
                 )
               : null,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
         child: content,
       ),
     );
