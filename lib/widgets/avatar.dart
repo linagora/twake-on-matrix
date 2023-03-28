@@ -5,14 +5,18 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 
+import 'package:auto_size_text/auto_size_text.dart';
+
 class Avatar extends StatelessWidget {
   final Uri? mxContent;
   final String? name;
   final double size;
   final void Function()? onTap;
-  static const double defaultSize = 44;
+  static const double defaultSize = 56;
   final Client? client;
   final double fontSize;
+  final defaultGradientColorStart = const Color(0xFFBDF4A1);
+  final defaultGradientColorEnd = const Color(0xFF52CE64);
 
   const Avatar({
     this.mxContent,
@@ -20,7 +24,7 @@ class Avatar extends StatelessWidget {
     this.size = defaultSize,
     this.onTap,
     this.client,
-    this.fontSize = 18,
+    this.fontSize = 22,
     Key? key,
   }) : super(key: key);
 
@@ -35,27 +39,45 @@ class Avatar extends StatelessWidget {
         fallbackLetters = name;
       }
     }
-    final noPic = mxContent == null ||
-        mxContent.toString().isEmpty ||
-        mxContent.toString() == 'null';
+    final noPic =
+        mxContent == null || mxContent.toString().isEmpty || mxContent.toString() == 'null';
     final textWidget = Center(
-      child: Text(
-        fallbackLetters,
-        style: TextStyle(
-          color: noPic ? Colors.white : null,
-          fontSize: fontSize,
+      child: AutoSizeText(
+          fallbackLetters.toUpperCase(),
+          maxLines: 1,
+          minFontSize: 8,
+          maxFontSize: fontSize,
+          style: TextStyle(
+            color: noPic ? Colors.white : null,
+            fontSize: fontSize,
+            fontFamily: 'SFProRounded',
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-    );
+    );  
     final borderRadius = BorderRadius.circular(size / 2);
     final container = ClipRRect(
       borderRadius: borderRadius,
       child: Container(
         width: size,
         height: size,
-        color: noPic
-            ? name?.lightColorAvatar
-            : Theme.of(context).secondaryHeaderColor,
+        color: noPic ? null : Theme.of(context).secondaryHeaderColor,
+        decoration: noPic
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    name?.lightColorAvatarGradientStart ?? defaultGradientColorStart,
+                    name?.lightColorAvatarGradientEnd ?? defaultGradientColorEnd,
+                  ],
+                  stops: const [
+                    0.1484,
+                    0.9603,
+                  ],
+                ),
+              )
+            : null,
         child: noPic
             ? textWidget
             : MxcImage(
