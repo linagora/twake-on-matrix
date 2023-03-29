@@ -14,45 +14,34 @@ extension RoomStatusExtension on Room {
       final directChatPresence = this.directChatPresence;
       if (directChatPresence != null) {
         if (directChatPresence.currentlyActive == true) {
-          return 'online';
+          return L10n.of(context)!.onlineStatus;
         }
         if (directChatPresence.lastActiveTimestamp == null) {
-          return 'online long time ago';
+          return L10n.of(context)!.onlineLongTimeAgo;
         }
         final time = directChatPresence.lastActiveTimestamp!;
 
         if (DateTime.now().isAfter(time.subtract(const Duration(hours: 1)))) {
-          return 'online ${DateTime.now().minute - time.minute} min ago';
+          return L10n.of(context)!.onlineMinAgo(DateTime.now().minute - time.minute);
         } else if (DateTime.now()
             .isAfter(time.subtract(const Duration(hours: 24)))) {
           final timeOffline = DateTime.now().difference(time);
-          return 'online ${timeOffline.inHours} h ${timeOffline.inMinutes - (timeOffline.inHours * 60)} min ago';
+          return L10n.of(context)!.onlineHourAgo(timeOffline.inHours,timeOffline.inMinutes - (timeOffline.inHours * 60));
         } else if (DateTime.now()
             .isAfter(time.subtract(const Duration(days: 7)))) {
           final timeOffline = DateTime.now().difference(time);
-          return 'online ${timeOffline.inDays} day ago';
+          return L10n.of(context)!.onlineDayAgo(timeOffline.inDays);
         } else if (DateTime.now()
             .isAfter(time.subtract(const Duration(days: 30)))) {
           final timeOffline = DateTime.now().difference(time);
-          return 'online ${(timeOffline.inDays / 7).truncate()} week ago';
+          return L10n.of(context)!.onlineWeekAgo((timeOffline.inDays / 7).truncate());
         } else if (DateTime.now()
             .isAfter(time.subtract(const Duration(days: 365)))) {
           final timeOffline = DateTime.now().difference(time);
-          return 'online ${(timeOffline.inDays / 30).truncate()} month ago';
+          return L10n.of(context)!.onlineMonthAgo((timeOffline.inDays / 30).truncate());
         }
-        // if (directChatPresence.statusMsg?.isNotEmpty ?? false) {
-        //   return directChatPresence.statusMsg!;
-        // }
-        // if (directChatPresence.currentlyActive == true) {
-        //   return L10n.of(context)!.currentlyActive;
-        // }
-        // if (directChatPresence.lastActiveTimestamp == null) {
-        //   return L10n.of(context)!.lastSeenLongTimeAgo;
-        // }
-        // return L10n.of(context)!
-        //     .lastActiveAgo(time.localizedTimeShort(context));
       }
-      return 'online long time ago';
+      return L10n.of(context)!.onlineLongTimeAgo;
     }
     return L10n.of(context)!
         .countParticipants(summary.mJoinedMemberCount.toString());
@@ -64,13 +53,13 @@ extension RoomStatusExtension on Room {
     typingUsers.removeWhere((User u) => u.id == client.userID);
 
     if (AppConfig.hideTypingUsernames) {
-      typingText = 'typing a message';
+      typingText = L10n.of(context)!.isTyping;
       if (typingUsers.first.id != directChatMatrixID) {
         typingText =
             L10n.of(context)!.numUsersTyping(typingUsers.length.toString());
       }
     } else if (typingUsers.length == 1) {
-      typingText = 'typing a message';
+      typingText = L10n.of(context)!.isTyping;
       if (typingUsers.first.id != directChatMatrixID) {
         typingText =
             L10n.of(context)!.userIsTyping(typingUsers.first.calcDisplayname());
