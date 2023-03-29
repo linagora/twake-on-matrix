@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:matrix/matrix.dart';
 
 class SeenByRow extends StatelessWidget {
   final ChatController controller;
   final String? eventId;
+  final EventStatus? eventStatus;
 
-  const SeenByRow(this.controller, {this.eventId, Key? key}) : super(key: key);
+  const SeenByRow(
+    this.controller, {
+    this.eventId,
+    this.eventStatus,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +23,26 @@ class SeenByRow extends StatelessWidget {
       eventId: eventId,
     );
     // const maxAvatars = 7;
-    return seenByUsers.isEmpty
+    return eventStatus == EventStatus.sending
         ? Image.asset(
-            'assets/ic_send_status.png',
+            'assets/ic_sending.png',
             color: Theme.of(context).colorScheme.secondary,
             width: 16,
             height: 16,
           )
-        : Image.asset(
-            'assets/ic_read_status.png',
-            color: Theme.of(context).colorScheme.onSecondary,
-            width: 16,
-            height: 16,
-          );
+        : seenByUsers.isEmpty
+            ? Image.asset(
+                'assets/ic_send_status.png',
+                color: Theme.of(context).colorScheme.secondary,
+                width: 16,
+                height: 16,
+              )
+            : Image.asset(
+                'assets/ic_read_status.png',
+                color: Theme.of(context).colorScheme.onSecondary,
+                width: 16,
+                height: 16,
+              );
     // return Container(
     //   width: double.infinity,
     //   alignment: Alignment.center,

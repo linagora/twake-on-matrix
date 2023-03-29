@@ -121,13 +121,9 @@ class Message extends StatelessWidget {
                   child: SizedBox(
                     width: 16 * AppConfig.bubbleSizeFactor,
                     height: 16 * AppConfig.bubbleSizeFactor,
-                    child: event.status == EventStatus.sending
-                        ? const CircularProgressIndicator.adaptive(
-                            strokeWidth: 2,
-                          )
-                        : event.status == EventStatus.error
-                            ? const Icon(Icons.error, color: Colors.red)
-                            : null,
+                    child: event.status == EventStatus.error
+                        ? const Icon(Icons.error, color: Colors.red)
+                        : null,
                   ),
                 ),
               ),
@@ -281,6 +277,7 @@ class Message extends StatelessWidget {
                                 SeenByRow(
                                   controller,
                                   eventId: event.eventId,
+                                  eventStatus: event.status,
                                 ),
                               ],
                             ],
