@@ -1074,7 +1074,7 @@
             "link": {}
         }
     },
-    "isTyping": "is typing…",
+    "isTyping": "typing a message",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -2519,5 +2519,38 @@
     "reopenChat": "Reopen chat",
     "noBackupWarning": "Warning! Without enabling chat backup, you will lose access to your encrypted messages. It is highly recommended to enable the chat backup first before logging out.",
     "noOtherDevicesFound": "No other devices found",
-    "fileIsTooBigForServer": "The server reports that the file is too large to be sent."
+    "fileIsTooBigForServer": "The server reports that the file is too large to be sent.",
+    "onlineStatus": "online",
+    "onlineLongTimeAgo": "online long time ago",
+    "onlineMinAgo": "online {min} min ago",
+    "@onlineMinAgo": {
+        "placeholders": {
+            "min": {}
+        }
+    },
+    "onlineHourAgo": "online {hour} h {min} min ago",
+    "@onlineHourAgo": {
+        "placeholders": {
+            "hour": {},
+            "min": {}
+        }
+    },
+    "onlineDayAgo": "online {day} day ago",
+    "@onlineDayAgo": {
+        "placeholders": {
+            "day": {}
+        }
+    },
+    "onlineWeekAgo": "online {week} week ago",
+    "@onlineWeekAgo": {
+        "placeholders": {
+            "week": {}
+        }
+    },
+    "onlineMonthAgo": "online {month} month ago",
+    "@onlineMonthAgo": {
+        "placeholders": {
+            "month": {}
+        }
+    }
 }
