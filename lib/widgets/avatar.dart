@@ -59,6 +59,7 @@ class Avatar extends StatelessWidget {
     final container = ClipRRect(
       borderRadius: borderRadius,
       child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         width: size,
         height: size,
         color: noPic ? null : Theme.of(context).secondaryHeaderColor,
