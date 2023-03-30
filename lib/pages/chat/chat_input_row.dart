@@ -221,7 +221,8 @@ class ChatInputRow extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: L10n.of(context)!.writeAMessage,
                             hintMaxLines: 1,
-                            hintStyle: const TextStyle(fontSize: 15, color: Color(0xFF818C99)),
+                            hintStyle: const TextStyle(
+                                fontSize: 15, color: Color(0xFF818C99)),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             filled: false,
@@ -268,14 +269,17 @@ class ChatInputRow extends StatelessWidget {
               ),
               if (PlatformInfos.platformCanRecord &&
                   controller.inputText.isEmpty)
-                InkWell(
-                  onTap: controller.voiceMessageAction,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Icon(
-                      Icons.mic_none_outlined,
-                      color: Color(0xFF007AFF),
-                      size: 24,
+                Container(
+                  height: 56,
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    iconSize: 28,
+                    onPressed: controller.voiceMessageAction,
+                    tooltip: L10n.of(context)!.send,
+                    icon: Image.asset(
+                      'assets/ic_voice_message.png',
+                      width: 28,
+                      height: 28,
                     ),
                   ),
                 ),
