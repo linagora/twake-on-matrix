@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/custom_svg_icons.dart';
 import 'package:flutter/material.dart';
 
 
@@ -26,7 +27,7 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       actions: [
         SvgPicture.asset(
-          'assets/human.svg',
+          CustomSVGIcons.addIcon,
           color: Theme.of(context).colorScheme.primary,
           width: 28,
           height: 28,
@@ -34,7 +35,7 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
         Padding(
           padding: const EdgeInsets.only(left: 24.0, right: 12.0),
           child: SvgPicture.asset(
-            'assets/edit.svg',
+            CustomSVGIcons.editIcon,
             color: Theme.of(context).colorScheme.primary,
             width: 28,
             height: 28,
