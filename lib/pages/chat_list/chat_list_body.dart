@@ -55,8 +55,7 @@ class ChatListViewBody extends StatelessWidget {
             .where((s) => s.hasRoomUpdate)
             .rateLimit(const Duration(seconds: 1)),
         builder: (context, _) {
-          if (controller.activeFilter == ActiveFilter.spaces &&
-              !controller.isSearchMode) {
+          if (controller.activeFilter == ActiveFilter.spaces && !controller.isSearchMode) {
             return SpaceView(
               controller,
               scrollController: controller.scrollController,
@@ -80,80 +79,8 @@ class ChatListViewBody extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (controller.isSearchMode) ...[
-                        SearchTitle(
-                          title: L10n.of(context)!.publicRooms,
-                          icon: const Icon(Icons.explore_outlined),
-                        ),
-                        AnimatedContainer(
-                          clipBehavior: Clip.hardEdge,
-                          decoration: const BoxDecoration(),
-                          height: roomSearchResult == null ||
-                                  roomSearchResult.chunk.isEmpty
-                              ? 0
-                              : 106,
-                          duration: FluffyThemes.animationDuration,
-                          curve: FluffyThemes.animationCurve,
-                          child: roomSearchResult == null
-                              ? null
-                              : ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: roomSearchResult.chunk.length,
-                                  itemBuilder: (context, i) => _SearchItem(
-                                    title: roomSearchResult.chunk[i].name ??
-                                        roomSearchResult.chunk[i].canonicalAlias
-                                            ?.localpart ??
-                                        L10n.of(context)!.group,
-                                    avatar: roomSearchResult.chunk[i].avatarUrl,
-                                    onPressed: () => showAdaptiveBottomSheet(
-                                      context: context,
-                                      builder: (c) => PublicRoomBottomSheet(
-                                        roomAlias: roomSearchResult
-                                                .chunk[i].canonicalAlias ??
-                                            roomSearchResult.chunk[i].roomId,
-                                        outerContext: context,
-                                        chunk: roomSearchResult.chunk[i],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                        ),
-                        SearchTitle(
-                          title: L10n.of(context)!.users,
-                          icon: const Icon(Icons.group_outlined),
-                        ),
-                        AnimatedContainer(
-                          clipBehavior: Clip.hardEdge,
-                          decoration: const BoxDecoration(),
-                          height: userSearchResult == null ||
-                                  userSearchResult.results.isEmpty
-                              ? 0
-                              : 106,
-                          duration: FluffyThemes.animationDuration,
-                          curve: FluffyThemes.animationCurve,
-                          child: userSearchResult == null
-                              ? null
-                              : ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: userSearchResult.results.length,
-                                  itemBuilder: (context, i) => _SearchItem(
-                                    title: userSearchResult
-                                            .results[i].displayName ??
-                                        userSearchResult
-                                            .results[i].userId.localpart ??
-                                        L10n.of(context)!.unknownDevice,
-                                    avatar:
-                                        userSearchResult.results[i].avatarUrl,
-                                    onPressed: () => showAdaptiveBottomSheet(
-                                      context: context,
-                                      builder: (c) => ProfileBottomSheet(
-                                        userId:
-                                            userSearchResult.results[i].userId,
-                                        outerContext: context,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                        ),
+                        ..._buildPublicRooms(context, roomSearchResult),
+                        ..._buildUsers(context, userSearchResult),
                         SearchTitle(
                           title: L10n.of(context)!.stories,
                           icon: const Icon(Icons.camera_alt_outlined),
@@ -289,6 +216,82 @@ class ChatListViewBody extends StatelessWidget {
         },
       ),
     );
+  }
+
+  List<Widget> _buildPublicRooms(context, roomSearchResult) {
+    if (roomSearchResult == null || roomSearchResult.chunk.isEmpty) return [const SizedBox.shrink()];
+
+    return [
+      SearchTitle(
+        title: L10n.of(context)!.publicRooms,
+        icon: const Icon(Icons.explore_outlined),
+      ),
+      AnimatedContainer(
+        clipBehavior: Clip.hardEdge,
+        decoration: const BoxDecoration(),
+        height: roomSearchResult == null || roomSearchResult.chunk.isEmpty ? 0 : 106,
+        duration: FluffyThemes.animationDuration,
+        curve: FluffyThemes.animationCurve,
+        child: roomSearchResult == null
+            ? null
+            : ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: roomSearchResult.chunk.length,
+                itemBuilder: (context, i) => _SearchItem(
+                  title: roomSearchResult.chunk[i].name ??
+                      roomSearchResult.chunk[i].canonicalAlias?.localpart ??
+                      L10n.of(context)!.group,
+                  avatar: roomSearchResult.chunk[i].avatarUrl,
+                  onPressed: () => showAdaptiveBottomSheet(
+                    context: context,
+                    builder: (c) => PublicRoomBottomSheet(
+                      roomAlias: roomSearchResult.chunk[i].canonicalAlias ??
+                          roomSearchResult.chunk[i].roomId,
+                      outerContext: context,
+                      chunk: roomSearchResult.chunk[i],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildUsers(context, userSearchResult) {
+    if (userSearchResult == null || userSearchResult.results.isEmpty) return [const SizedBox.shrink()];
+
+    return [
+      SearchTitle(
+        title: L10n.of(context)!.users,
+        icon: const Icon(Icons.group_outlined),
+      ),
+      AnimatedContainer(
+        clipBehavior: Clip.hardEdge,
+        decoration: const BoxDecoration(),
+        height: userSearchResult == null || userSearchResult.results.isEmpty ? 0 : 106,
+        duration: FluffyThemes.animationDuration,
+        curve: FluffyThemes.animationCurve,
+        child: userSearchResult == null
+            ? null
+            : ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: userSearchResult.results.length,
+                itemBuilder: (context, i) => _SearchItem(
+                  title: userSearchResult.results[i].displayName ??
+                      userSearchResult.results[i].userId.localpart ??
+                      L10n.of(context)!.unknownDevice,
+                  avatar: userSearchResult.results[i].avatarUrl,
+                  onPressed: () => showAdaptiveBottomSheet(
+                    context: context,
+                    builder: (c) => ProfileBottomSheet(
+                      userId: userSearchResult.results[i].userId,
+                      outerContext: context,
+                    ),
+                  ),
+                ),
+              ),
+      )
+    ];
   }
 }
 
