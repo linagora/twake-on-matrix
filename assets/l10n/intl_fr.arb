@@ -1551,7 +1551,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "search": "Rechercher",
+  "search": "Rechercher des personnes ou salons",
   "@search": {
     "type": "text",
     "placeholders": {}
