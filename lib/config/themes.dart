@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -113,7 +114,7 @@ abstract class FluffyThemes {
               ? const Color(0xFFDEEEFF)
               : const Color(0xFF0A84FF),
           onPrimary: brightness == Brightness.light
-              ? const Color(0xFF007AFF)
+              ? AppColor.primary
               : const Color(0xFF0A84FF),
           tertiaryContainer: brightness == Brightness.light
               ? const Color(0xFFF2F3F5)
@@ -130,7 +131,7 @@ abstract class FluffyThemes {
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
-              ? const Color(0xFF007AFF)
+              ? AppColor.primary
               : const Color(0xFF0A84FF),
         ),
       );
