@@ -128,6 +128,11 @@ abstract class FluffyThemes {
               ? const Color(0xFF0A84FF)
               : const Color(0xFFDEEEFF),
         ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: brightness == Brightness.light
+              ? const Color(0xFF007AFF)
+              : const Color(0xFF0A84FF),
+        ),
       );
 }
 
