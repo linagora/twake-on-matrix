@@ -2552,5 +2552,13 @@
         "placeholders": {
             "month": {}
         }
-    }
+    },
+    "noMessageHereYet": "No message here yet...",
+    "sendMessageGuide": "Send a message or tap on the greeting bellow.",
+    "youCreatedAChanel": "You created a Chanel",
+    "chanelCanHave": "Chanel can have:",
+    "upTo100000Members": "Up to 100.000 members",
+    "persistentChatHistory": "Persistent Chat history",
+    "multiInteractionThreadedDiscussion": "Multi-interaction threaded discussion",
+    "addMember": "Add members"
 }

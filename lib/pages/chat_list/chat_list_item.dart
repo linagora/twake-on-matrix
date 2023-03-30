@@ -121,7 +121,8 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMuted = room.pushRuleState != PushRuleState.notify;
     final typingText = room.getLocalizedTypingText(context);
-    final ownMessage = room.lastEvent?.senderId == Matrix.of(context).client.userID;
+    final ownMessage =
+        room.lastEvent?.senderId == Matrix.of(context).client.userID;
     final unread = room.isUnread || room.membership == Membership.invite;
     final unreadBubbleSize = unread || room.hasNewMessages
         ? room.notificationCount > 0
@@ -180,24 +181,25 @@ class ChatListItem extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Wrap(
-                              spacing: 6,
-                              children: [
-                                if (room.isFavourite)
-                                  SvgPicture.asset(
-                                    CustomSVGIcons.pinIcon,
-                                    width: 16,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                if (isMuted)
-                                  SvgPicture.asset(
-                                    CustomSVGIcons.muteIcon,
-                                    width: 16,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                              ],
-                            )),
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Wrap(
+                            spacing: 6,
+                            children: [
+                              if (room.isFavourite)
+                                SvgPicture.asset(
+                                  CustomSVGIcons.pinIcon,
+                                  width: 16,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              if (isMuted)
+                                SvgPicture.asset(
+                                  CustomSVGIcons.muteIcon,
+                                  width: 16,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -219,7 +221,9 @@ class ChatListItem extends StatelessWidget {
               subtitle: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  if (typingText.isEmpty && ownMessage && room.lastEvent!.status.isSending) ...[
+                  if (typingText.isEmpty &&
+                      ownMessage &&
+                      room.lastEvent!.status.isSending) ...[
                     const SizedBox(
                       width: 16,
                       height: 16,
@@ -258,7 +262,8 @@ class ChatListItem extends StatelessWidget {
                                   plaintextBody: true,
                                   removeMarkdown: true,
                                   withSenderNamePrefix: !room.isDirectChat ||
-                                      room.directChatMatrixID != room.lastEvent?.senderId,
+                                      room.directChatMatrixID !=
+                                          room.lastEvent?.senderId,
                                 ) ??
                                 Future.value(L10n.of(context)!.emptyChat),
                             builder: (context, snapshot) {
@@ -266,14 +271,17 @@ class ChatListItem extends StatelessWidget {
                                 room.membership == Membership.invite
                                     ? L10n.of(context)!.youAreInvitedToThisChat
                                     : snapshot.data ??
-                                        room.lastEvent?.calcLocalizedBodyFallback(
+                                        room.lastEvent
+                                            ?.calcLocalizedBodyFallback(
                                           MatrixLocals(L10n.of(context)!),
                                           hideReply: true,
                                           hideEdit: true,
                                           plaintextBody: true,
                                           removeMarkdown: true,
-                                          withSenderNamePrefix: !room.isDirectChat ||
-                                              room.directChatMatrixID != room.lastEvent?.senderId,
+                                          withSenderNamePrefix:
+                                              !room.isDirectChat ||
+                                                  room.directChatMatrixID !=
+                                                      room.lastEvent?.senderId,
                                         ) ??
                                         L10n.of(context)!.emptyChat,
                                 softWrap: false,
@@ -281,7 +289,9 @@ class ChatListItem extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: 'Inter',
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   decoration: room.lastEvent?.redacted == true
                                       ? TextDecoration.lineThrough
                                       : null,
@@ -296,16 +306,22 @@ class ChatListItem extends StatelessWidget {
                     curve: FluffyThemes.animationCurve,
                     padding: const EdgeInsets.symmetric(horizontal: 7),
                     height: unreadBubbleSize,
-                    width: room.notificationCount == 0 && !unread && !room.hasNewMessages
+                    width: room.notificationCount == 0 &&
+                            !unread &&
+                            !room.hasNewMessages
                         ? 0
-                        : (unreadBubbleSize - 9) * room.notificationCount.toString().length + 9,
+                        : (unreadBubbleSize - 9) *
+                                room.notificationCount.toString().length +
+                            9,
                     decoration: BoxDecoration(
-                      color: room.highlightCount > 0 || room.membership == Membership.invite
+                      color: room.highlightCount > 0 ||
+                              room.membership == Membership.invite
                           ? Colors.red
                           : room.notificationCount > 0 || room.markedUnread
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                      borderRadius:
+                          BorderRadius.circular(AppConfig.borderRadius),
                     ),
                     child: Center(
                       child: room.notificationCount > 0
@@ -315,8 +331,12 @@ class ChatListItem extends StatelessWidget {
                                 color: room.highlightCount > 0
                                     ? Colors.white
                                     : room.notificationCount > 0
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
                                 fontSize: 13,
                               ),
                             )
