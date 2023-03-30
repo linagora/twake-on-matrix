@@ -1681,7 +1681,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "search": "Search",
+    "search": "Search for people and channels",
     "@search": {
         "type": "text",
         "placeholders": {}

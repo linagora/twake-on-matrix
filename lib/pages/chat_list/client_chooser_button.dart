@@ -1,8 +1,10 @@
+import 'package:fluffychat/widgets/twake_components/twake_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
@@ -217,12 +219,23 @@ class ClientChooserButton extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(99),
-              child: Avatar(
-                mxContent: snapshot.data?.avatarUrl,
-                name: snapshot.data?.displayName ??
-                    matrix.client.userID!.localpart,
-                size: 28,
-                fontSize: 12,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Row(
+                  children: [
+                    TwakeAvatar(
+                      mxContent: snapshot.data?.avatarUrl,
+                      name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
+                      size: 36,
+                      fontSize: 20,
+                    ),
+                    const SizedBox(width: 8.0),
+                    SvgPicture.asset(
+                      'assets/arrow_icon.svg',
+                      color: const Color(0x9999a2ad),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
