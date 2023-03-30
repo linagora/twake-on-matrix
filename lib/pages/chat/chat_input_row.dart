@@ -222,7 +222,7 @@ class ChatInputRow extends StatelessWidget {
                             hintText: L10n.of(context)!.writeAMessage,
                             hintMaxLines: 1,
                             hintStyle: const TextStyle(
-                                fontSize: 15, color: Color(0xFF818C99)),
+                              fontSize: 15, color: Color(0xFF818C99),),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             filled: false,
@@ -325,24 +325,24 @@ class _ChatAccountPicker extends StatelessWidget {
         builder: (context, snapshot) => PopupMenuButton<String>(
           onSelected: _popupMenuButtonSelected,
           itemBuilder: (BuildContext context) => clients
-              .map((client) => PopupMenuItem<String>(
-                    value: client!.userID,
-                    child: FutureBuilder<Profile>(
-                      future: client.fetchOwnProfile(),
-                      builder: (context, snapshot) => ListTile(
-                        leading: Avatar(
-                          mxContent: snapshot.data?.avatarUrl,
-                          name: snapshot.data?.displayName ??
-                              client.userID!.localpart,
-                          size: 20,
-                        ),
-                        title:
-                            Text(snapshot.data?.displayName ?? client.userID!),
-                        contentPadding: const EdgeInsets.all(0),
+              .map(
+                (client) => PopupMenuItem<String>(
+                  value: client!.userID,
+                  child: FutureBuilder<Profile>(
+                    future: client.fetchOwnProfile(),
+                    builder: (context, snapshot) => ListTile(
+                      leading: Avatar(
+                        mxContent: snapshot.data?.avatarUrl,
+                        name: snapshot.data?.displayName ??
+                            client.userID!.localpart,
+                        size: 20,
                       ),
+                      title: Text(snapshot.data?.displayName ?? client.userID!),
+                      contentPadding: const EdgeInsets.all(0),
                     ),
-                  ))
-              .toList(),
+                  ),
+                ),
+          ).toList(),
           child: Avatar(
             mxContent: snapshot.data?.avatarUrl,
             name: snapshot.data?.displayName ??

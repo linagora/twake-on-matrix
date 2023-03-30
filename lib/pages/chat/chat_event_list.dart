@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat_empty_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -29,6 +30,21 @@ class ChatEventList extends StatelessWidget {
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < controller.timeline!.events.length; i++) {
       thisEventsKeyMap[controller.timeline!.events[i].eventId] = i;
+    }
+
+    if (!controller.timeline!.events.any(
+      (e) => {
+        EventTypes.Message,
+        EventTypes.Sticker,
+        EventTypes.Encrypted,
+        EventTypes.CallInvite,
+      }.contains(e.type),
+    )) {
+      return Center(
+        child: ChatEmptyView(
+          isDirectChat: controller.room?.isDirectChat == true,
+        ),
+      );
     }
 
     return ListView.custom(
