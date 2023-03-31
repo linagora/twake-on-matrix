@@ -22,7 +22,6 @@ class StartChatFloatingActionButton extends StatelessWidget {
         VRouter.of(context).to('/newgroup');
         break;
       case ActiveFilter.spaces:
-        VRouter.of(context).to('/newspace');
         break;
     }
   }
