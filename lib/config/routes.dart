@@ -16,7 +16,6 @@ import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart'
 import 'package:fluffychat/pages/login/login.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
-import 'package:fluffychat/pages/new_space/new_space.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
 import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
@@ -113,10 +112,6 @@ class AppRoutes {
               path: '/newgroup',
               widget: const NewGroup(),
             ),
-            VWidget(
-              path: '/newspace',
-              widget: const NewSpace(),
-            ),
           ],
         ),
       ];
@@ -164,11 +159,6 @@ class AppRoutes {
                 VWidget(
                   path: '/newgroup',
                   widget: const NewGroup(),
-                  buildTransition: _fadeTransition,
-                ),
-                VWidget(
-                  path: '/newspace',
-                  widget: const NewSpace(),
                   buildTransition: _fadeTransition,
                 ),
                 VNester(

@@ -42,7 +42,6 @@ enum PopupMenuAction {
   settings,
   invite,
   newGroup,
-  newSpace,
   setStatus,
   archive,
 }
