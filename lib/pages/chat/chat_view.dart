@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -271,12 +272,7 @@ class ChatView extends StatelessWidget {
                                 child: Builder(
                                   builder: (context) {
                                     if (controller.timeline == null) {
-                                      return const Center(
-                                        child:
-                                            CircularProgressIndicator.adaptive(
-                                          strokeWidth: 2,
-                                        ),
-                                      );
+                                      return const ChatLoadingView();
                                     }
 
                                     return ChatEventList(
