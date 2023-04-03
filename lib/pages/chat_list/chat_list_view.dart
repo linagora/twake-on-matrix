@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,10 +14,9 @@ import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
-import '../../widgets/matrix.dart';
 import 'chat_list_body.dart';
 import 'chat_list_header.dart';
-import 'start_chat_fab.dart';
+import 'select_chat_list_fab.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
@@ -185,10 +185,7 @@ class ChatListView extends StatelessWidget {
                             destinations: getNavigationDestinations(context),
                           )
                         : null,
-                    floatingActionButtonLocation:
-                        controller.filteredRooms.isEmpty
-                            ? FloatingActionButtonLocation.centerFloat
-                            : null,
+                    floatingActionButtonLocation:FloatingActionButtonLocation.centerFloat,
                     floatingActionButton: selectMode == SelectMode.normal
                         ? KeyBoardShortcuts(
                             keysToPress: {
@@ -198,7 +195,7 @@ class ChatListView extends StatelessWidget {
                             onKeysPressed: () =>
                                 VRouter.of(context).to('/newprivatechat'),
                             helpLabel: L10n.of(context)!.newChat,
-                            child: StartChatFloatingActionButton(
+                            child: SelectChatListFloatingActionButton(
                               controller: controller,
                             ),
                           )
