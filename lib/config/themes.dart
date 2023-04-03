@@ -111,28 +111,28 @@ abstract class FluffyThemes {
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,
           primary: brightness == Brightness.light
-              ? const Color(0xFFDEEEFF)
-              : const Color(0xFF0A84FF),
+              ? AppColor.colorDEEEFF
+              : AppColor.secondaryPrimary,
           onPrimary: brightness == Brightness.light
               ? AppColor.primary
-              : const Color(0xFF0A84FF),
+              : AppColor.secondaryPrimary,
           tertiaryContainer: brightness == Brightness.light
-              ? const Color(0xFFF2F3F5)
-              : const Color(0xFF2C2D2F),
+              ? AppColor.colorF2F3F5
+              : AppColor.color2C2D2F,
           onTertiaryContainer: brightness == Brightness.light
-              ? const Color(0xFFE1E3E6)
-              : const Color(0xFF2C2D2F),
+              ? AppColor.colorE1E3E6
+              : AppColor.color2C2D2F,
           secondary: brightness == Brightness.light
-              ? const Color(0xFF818C99)
+              ? AppColor.color818C99
               : Colors.white,
           onSecondary: brightness == Brightness.light
-              ? const Color(0xFF0A84FF)
-              : const Color(0xFFDEEEFF),
+              ? AppColor.secondaryPrimary
+              : AppColor.colorDEEEFF,
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
               ? AppColor.primary
-              : const Color(0xFF0A84FF),
+              : AppColor.secondaryPrimary,
         ),
       );
 }
