@@ -1,6 +1,8 @@
-import 'package:fluffychat/utils/color.dart';
+import 'package:fluffychat/resource/colors.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChatEmptyView extends StatelessWidget {
   const ChatEmptyView({
@@ -45,8 +47,8 @@ class ChatEmptyView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Image.asset(
-              'assets/banner_empty_chat.png',
+            SvgPicture.asset(
+              ImagePaths.bannerEmptyChat,
               width: 128,
               height: 128,
             ),
@@ -103,8 +105,8 @@ class ChatEmptyView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.asset(
-          'assets/ic_done.png',
+        SvgPicture.asset(
+          ImagePaths.icDone,
           width: 20,
           height: 20,
         ),
@@ -127,8 +129,8 @@ class ChatEmptyView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(
-          'assets/ic_add_member.png',
+        SvgPicture.asset(
+          ImagePaths.icAdd,
           width: 20,
           height: 20,
         ),
@@ -145,5 +147,4 @@ class ChatEmptyView extends StatelessWidget {
       ],
     );
   }
-
 }

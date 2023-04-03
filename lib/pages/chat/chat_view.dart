@@ -1,9 +1,11 @@
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
@@ -126,8 +128,8 @@ class ChatView extends StatelessWidget {
             controller.room!.isDirectChat)
           IconButton(
             onPressed: controller.onPhoneButtonTap,
-            icon: Image.asset(
-              'assets/ic_phone_call.png',
+            icon: SvgPicture.asset(
+              ImagePaths.icPhoneCall,
               width: 28,
               height: 28,
             ),
@@ -135,8 +137,8 @@ class ChatView extends StatelessWidget {
           ),
         IconButton(
           onPressed: null,
-          icon: Image.asset(
-            'assets/ic_video_call.png',
+          icon: SvgPicture.asset(
+            ImagePaths.icVideoCall,
             width: 28,
             height: 28,
           ),
