@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/color.dart';
+import 'package:fluffychat/resource/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

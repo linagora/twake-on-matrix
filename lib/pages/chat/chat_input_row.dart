@@ -1,8 +1,10 @@
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
 
@@ -68,7 +70,7 @@ class ChatInputRow extends StatelessWidget {
                               children: <Widget>[
                                 Text(L10n.of(context)!.tryToSendAgain),
                                 const SizedBox(width: 4),
-                                Image.asset('assets/ic_send.png'),
+                                SvgPicture.asset(ImagePaths.icSend),
                               ],
                             ),
                           ),
@@ -93,8 +95,8 @@ class ChatInputRow extends StatelessWidget {
                   clipBehavior: Clip.hardEdge,
                   decoration: const BoxDecoration(),
                   child: PopupMenuButton<String>(
-                    icon: Image.asset(
-                      'assets/ic_add.png',
+                    icon: SvgPicture.asset(
+                      ImagePaths.icAddFile,
                       width: 28,
                       height: 28,
                     ),
@@ -222,7 +224,9 @@ class ChatInputRow extends StatelessWidget {
                             hintText: L10n.of(context)!.writeAMessage,
                             hintMaxLines: 1,
                             hintStyle: const TextStyle(
-                              fontSize: 15, color: Color(0xFF818C99),),
+                              fontSize: 15,
+                              color: Color(0xFF818C99),
+                            ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             filled: false,
@@ -253,10 +257,10 @@ class ChatInputRow extends StatelessWidget {
                                 child: child,
                               );
                             },
-                            child: Image.asset(
+                            child: SvgPicture.asset(
                               controller.showEmojiPicker
-                                  ? 'assets/ic_keyboard.png'
-                                  : 'assets/ic_emoji.png',
+                                  ? ImagePaths.icKeyBoard
+                                  : ImagePaths.icEmoji,
                               width: 28,
                               height: 28,
                             ),
@@ -276,8 +280,8 @@ class ChatInputRow extends StatelessWidget {
                     iconSize: 28,
                     onPressed: controller.voiceMessageAction,
                     tooltip: L10n.of(context)!.send,
-                    icon: Image.asset(
-                      'assets/ic_voice_message.png',
+                    icon: SvgPicture.asset(
+                      ImagePaths.icVoiceMessage,
                       width: 28,
                       height: 28,
                     ),
@@ -291,7 +295,7 @@ class ChatInputRow extends StatelessWidget {
                     iconSize: 34,
                     onPressed: controller.send,
                     tooltip: L10n.of(context)!.send,
-                    icon: Image.asset('assets/ic_send.png'),
+                    icon: SvgPicture.asset(ImagePaths.icSend),
                   ),
                 ),
             ],
@@ -342,7 +346,8 @@ class _ChatAccountPicker extends StatelessWidget {
                     ),
                   ),
                 ),
-          ).toList(),
+              )
+              .toList(),
           child: Avatar(
             mxContent: snapshot.data?.avatarUrl,
             name: snapshot.data?.displayName ??
