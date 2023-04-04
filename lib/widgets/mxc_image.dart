@@ -23,6 +23,7 @@ class MxcImage extends StatefulWidget {
   final ThumbnailMethod thumbnailMethod;
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
+  final bool rounded;
 
   const MxcImage({
     this.uri,
@@ -38,6 +39,7 @@ class MxcImage extends StatefulWidget {
     this.animationCurve = FluffyThemes.animationCurve,
     this.thumbnailMethod = ThumbnailMethod.scale,
     this.cacheKey,
+    this.rounded = false,
     Key? key,
   }) : super(key: key);
 
@@ -48,6 +50,7 @@ class MxcImage extends StatefulWidget {
 class _MxcImageState extends State<MxcImage> {
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
+
   Uint8List? get _imageData {
     final cacheKey = widget.cacheKey;
     return cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
@@ -164,18 +167,23 @@ class _MxcImageState extends State<MxcImage> {
       firstChild: placeholder(context),
       secondChild: data == null || data.isEmpty
           ? Container()
-          : Image.memory(
-              data,
-              width: widget.width,
-              height: widget.height,
-              fit: widget.fit,
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (context, __, ___) {
-                _isCached = false;
-                _imageData = null;
-                WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
-                return placeholder(context);
-              },
+          : ClipRRect(
+              borderRadius: widget.rounded
+                  ? BorderRadius.circular(8.0)
+                  : BorderRadius.zero,
+              child: Image.memory(
+                data,
+                width: widget.width,
+                height: widget.height,
+                fit: widget.fit,
+                filterQuality: FilterQuality.medium,
+                errorBuilder: (context, __, ___) {
+                  _isCached = false;
+                  _imageData = null;
+                  WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+                  return placeholder(context);
+                },
+              ),
             ),
     );
   }
