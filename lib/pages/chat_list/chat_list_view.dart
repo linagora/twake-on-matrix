@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -195,8 +196,10 @@ class ChatListView extends StatelessWidget {
                             onKeysPressed: () =>
                                 VRouter.of(context).to('/newprivatechat'),
                             helpLabel: L10n.of(context)!.newChat,
-                            child: SelectChatListFloatingActionButton(
-                              controller: controller,
+                            child: PlatformInfos.isDesktop || PlatformInfos.isWeb
+                                ? const SizedBox.shrink()
+                                : SelectChatListFloatingActionButton(
+                                    controller: controller,
                             ),
                           )
                         : null,
