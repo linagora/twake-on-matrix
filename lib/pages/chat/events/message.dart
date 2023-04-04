@@ -1,7 +1,6 @@
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:matrix/matrix.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
@@ -13,7 +12,6 @@ import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
-import 'message_reactions.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'verification_request_content.dart';
@@ -94,12 +92,13 @@ class Message extends StatelessWidget {
 
     final displayEvent = event.getDisplayEvent(timeline);
     final borderRadius = BorderRadius.circular(18);
-    final noBubble = {
-          MessageTypes.Video,
-          MessageTypes.Image,
-          MessageTypes.Sticker
-        }.contains(event.messageType) &&
+    final noBubble = {MessageTypes.Video, MessageTypes.Sticker}
+            .contains(event.messageType) &&
         !event.redacted;
+    final timelineOverlayMessage = {
+      MessageTypes.Video,
+      MessageTypes.Image,
+    }.contains(event.messageType);
     final noPadding = {
       MessageTypes.File,
       MessageTypes.Audio,
@@ -176,7 +175,6 @@ class Message extends StatelessWidget {
               padding: const EdgeInsets.only(left: 8),
               child: Material(
                 color: noBubble ? Colors.transparent : color,
-                elevation: event.type == EventTypes.Sticker ? 0 : 4,
                 shadowColor: Colors.black.withAlpha(64),
                 borderRadius: borderRadius,
                 clipBehavior: Clip.antiAlias,
@@ -196,7 +194,7 @@ class Message extends StatelessWidget {
                         ? EdgeInsets.zero
                         : EdgeInsets.symmetric(
                             vertical: 8 * AppConfig.bubbleSizeFactor,
-                            horizontal: 12 * AppConfig.bubbleSizeFactor,
+                            horizontal: 8 * AppConfig.bubbleSizeFactor,
                           ),
                     constraints: const BoxConstraints(
                       maxWidth: FluffyThemes.columnWidth * 1.5,
@@ -246,42 +244,35 @@ class Message extends StatelessWidget {
                                 );
                               },
                             ),
-                          MessageContent(
-                            displayEvent,
-                            textColor: textColor,
-                            onInfoTab: onInfoTab,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
+                          Stack(
                             children: [
-                              if (event.hasAggregatedEvents(
-                                timeline,
-                                RelationshipTypes.reaction,
-                              )) ...[
-                                MessageReactions(event, timeline),
-                                const SizedBox(width: 4),
-                              ],
-                              Text(
-                                DateFormat("HH:mm")
-                                    .format(event.originServerTs),
-                                style: TextStyle(
-                                  fontSize: 11 * AppConfig.fontSizeFactor,
-                                  color: ownMessage
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : const Color(0xFF818C99),
-                                ),
+                              MessageContent(
+                                displayEvent,
+                                textColor: textColor,
+                                onInfoTab: onInfoTab,
                               ),
-                              if (ownMessage) ...[
-                                const SizedBox(width: 4),
-                                SeenByRow(
-                                  controller,
-                                  eventId: event.eventId,
-                                  eventStatus: event.status,
+                              if (timelineOverlayMessage)
+                                Positioned(
+                                  right: 8,
+                                  bottom: 8,
+                                  child: MessageTime(
+                                    timelineOverlayMessage: timelineOverlayMessage,
+                                    controller: controller,
+                                    event: event,
+                                    ownMessage: ownMessage,
+                                    timeline: timeline,
+                                  ),
                                 ),
-                              ],
                             ],
                           ),
+                          if (!timelineOverlayMessage)
+                            MessageTime(
+                              timelineOverlayMessage: timelineOverlayMessage,
+                              controller: controller,
+                              event: event,
+                              ownMessage: ownMessage,
+                              timeline: timeline,
+                            ),
                           if (event.hasAggregatedEvents(
                             timeline,
                             RelationshipTypes.edit,

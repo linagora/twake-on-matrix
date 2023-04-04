@@ -10,12 +10,14 @@ class SeenByRow extends StatelessWidget {
   final ChatController controller;
   final String? eventId;
   final EventStatus? eventStatus;
+  final bool timelineOverlayMessage;
 
   const SeenByRow(
     this.controller, {
     this.eventId,
     this.eventStatus,
     Key? key,
+    required this.timelineOverlayMessage,
   }) : super(key: key);
 
   @override
@@ -29,7 +31,9 @@ class SeenByRow extends StatelessWidget {
         ? SvgPicture.asset(
             ImagePaths.icSending,
             colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.secondary,
+              timelineOverlayMessage
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.secondary,
               BlendMode.srcIn,
             ),
             width: 16,
@@ -39,7 +43,9 @@ class SeenByRow extends StatelessWidget {
             ? SvgPicture.asset(
                 ImagePaths.icSendStatus,
                 colorFilter: ColorFilter.mode(
-                  Theme.of(context).colorScheme.secondary,
+                  timelineOverlayMessage
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.secondary,
                   BlendMode.srcIn,
                 ),
                 width: 16,
@@ -48,7 +54,9 @@ class SeenByRow extends StatelessWidget {
             : SvgPicture.asset(
                 ImagePaths.icReadStatus,
                 colorFilter: ColorFilter.mode(
-                  Theme.of(context).colorScheme.onSecondary,
+                  timelineOverlayMessage
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSecondary,
                   BlendMode.srcIn,
                 ),
                 width: 16,
