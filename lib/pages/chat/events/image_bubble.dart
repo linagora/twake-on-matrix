@@ -94,6 +94,7 @@ class ImageBubble extends StatelessWidget {
                   )
                 : null,
             child: MxcImage(
+              rounded: true,
               event: event,
               width: width,
               height: height,
