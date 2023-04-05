@@ -24,6 +24,7 @@ class MessageTime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 28,
       padding: timelineOverlayMessage
           ? const EdgeInsets.symmetric(
               vertical: 6,
