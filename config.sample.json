@@ -1,9 +1,9 @@
 {
-  "application_name": "FluffyChat",
-  "application_welcome_message": null,
-  "default_homeserver": "matrix.org",
-  "web_base_url": "https://fluffychat.im/web",
-  "privacy_url": "https://fluffychat.im/en/privacy.html",
+  "application_name": "Twake",
+  "application_welcome_message": "Welcome to Twake!",
+  "default_homeserver": "matrix.linagora.com",
+  "web_base_url": "https://twakematrix-on-commit.twake.app",
+  "privacy_url": "https://twake.app/en/privacy/",
   "render_html": false,
   "hide_redacted_events": false,
   "hide_unknown_events": false

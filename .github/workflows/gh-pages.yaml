@@ -1,0 +1,52 @@
+on:
+  push:
+    branches:
+      - "main"
+      - "refactor/ui"
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: 3.7.7
+
+name: Deploying on GitHub Pages
+
+jobs:
+  deploy_page:
+    name: Deploy on GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Setup Nix (to build libolm)
+        uses: cachix/install-nix-action@v19
+
+      - name: Build libolm
+        run: |
+          rm -rf assets/js
+          nix build -v "git+https://gitlab.matrix.org/matrix-org/olm.git#javascript" -o assets/js
+          sudo chmod 777 -R assets/js
+          cd assets/js/ && mv javascript package
+
+      - name: Build Web version
+        run: |
+          flutter config --enable-web
+          flutter clean
+          flutter pub get
+          flutter build web --release --verbose --source-maps --base-href="/"
+          cp config.sample.json ./build/web/config.json
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          cname: "twakematrix-on-commit.twake.app"
