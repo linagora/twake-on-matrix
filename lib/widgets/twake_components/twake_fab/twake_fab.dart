@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_fab/twake_fab_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -5,8 +6,8 @@ class TwakeFloatingButton extends StatelessWidget {
   const TwakeFloatingButton({
     Key? key,
     required this.svgString,
-    this.svgWidth = 28,
-    this.svgHeight = 28,
+    this.svgWidth = TwakeFabStyle.defaultSize,
+    this.svgHeight = TwakeFabStyle.defaultSize,
     required this.buttonText,
     this.isSelected = false,
     this.notificationCount = 0,
@@ -38,37 +39,24 @@ class TwakeFloatingButton extends StatelessWidget {
                   svgString,
                   width: svgWidth,
                   height: svgHeight,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.secondary,
+                  color: TwakeFabStyle.iconColor(context, isSelected),
                 ),
                 if (notificationCount > 0)
                   Positioned(
                     top: 0,
                     right: 0,
                     child: Container(
-                      width: 25,
-                      height: 20,
+                      width: TwakeFabStyle.notificationBubbleWidth,
+                      height: TwakeFabStyle.notificationBubbleHeight,
                       decoration: BoxDecoration(
-                        color: const Color(0xffff3347),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : const Color.fromARGB(239, 36, 36, 36),
-                          width: 1,
-                        ),
+                        color: TwakeFabStyle.notificationBubbleBackgroundColor,
+                        borderRadius: TwakeFabStyle.notificationBubbleBorderRadius,
+                        border: TwakeFabStyle.notificationBubbleBorder(context),
                       ),
                       child: Center(
                         child: Text(
                           notificationCount.toString(),
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.3,
-                          ),
+                          style: TwakeFabStyle.notificationBubbleTextStyle,
                         ),
                       ),
                     ),
@@ -77,15 +65,7 @@ class TwakeFloatingButton extends StatelessWidget {
             ),
             Text(
               buttonText,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.secondary,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
-              ),
+              style: TwakeFabStyle.buttonTextStyle(context, isSelected),
             ),
           ],
         ),
