@@ -17,7 +17,7 @@ import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'chat_list_body.dart';
 import 'chat_list_header.dart';
-import 'select_chat_list_fab.dart';
+import 'select_chat_list_fab/select_chat_list_fab.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
