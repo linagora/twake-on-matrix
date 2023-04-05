@@ -1,10 +1,11 @@
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/pages/chat_list/select_chat_list_fab/select_chat_list_fab_style.dart';
 import 'package:fluffychat/utils/custom_svg_icons.dart';
-import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'chat_list.dart';
+import '../chat_list.dart';
 
 class SelectChatListFloatingActionButton extends StatefulWidget {
   final ChatListController controller;
@@ -34,30 +35,17 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
     return AnimatedContainer(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
-      width: widget.controller.filteredRooms.isEmpty ? null : 263,
+      width: widget.controller.filteredRooms.isEmpty ? null : SelectChatListFabStyle.buttonWidth,
       child: Container(
         alignment: Alignment.center,
-        height: 66,
+        height: SelectChatListFabStyle.buttonHeight,
         decoration: BoxDecoration(
-          boxShadow: Theme.of(context).brightness == Brightness.light ? const [
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.12),
-              offset: Offset(0, 0),
-              blurRadius: 2,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.16),
-              offset: Offset(0, 0),
-              blurRadius: 96,
-            ),
-          ] : [],
-          color: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : const Color.fromARGB(239, 36, 36, 36),
-          borderRadius: const BorderRadius.all(Radius.circular(32)),
+          boxShadow: SelectChatListFabStyle.boxShadow(context),
+          color: SelectChatListFabStyle.backgroundColor(context),
+          borderRadius: SelectChatListFabStyle.borderRadius,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          padding: SelectChatListFabStyle.innerPadding,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -65,24 +53,24 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.groups,
                 svgString: CustomSVGIcons.groupsIcon,
-                svgHeight: 28,
-                svgWidth: 28,
+                svgHeight: SelectChatListFabStyle.fabButtonSize,
+                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 notificationCount: 12,
                 onTap: () => _onPressedGroup(context),
               ),
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.messages,
                 svgString: CustomSVGIcons.messagesIcon,
-                svgHeight: 28,
-                svgWidth: 28,
+                svgHeight: SelectChatListFabStyle.fabButtonSize,
+                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 isSelected: true,
                 onTap: () => _onPressedMessages(context),
               ),
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.profile,
                 svgString: CustomSVGIcons.rectangleInfoIcon,
-                svgHeight: 28,
-                svgWidth: 28,
+                svgHeight: SelectChatListFabStyle.fabButtonSize,
+                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 onTap: () => _onPressedProfile(context),
               )
             ],
