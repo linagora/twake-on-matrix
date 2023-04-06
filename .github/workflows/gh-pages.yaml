@@ -41,7 +41,7 @@ jobs:
           flutter config --enable-web
           flutter clean
           flutter pub get
-          flutter build web --release --verbose --source-maps --base-href="/"
+          flutter build web --release --verbose --source-maps --base-href="/web/"
           cp config.sample.json ./build/web/config.json
 
       - name: Deploy to GitHub Pages
@@ -50,3 +50,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           cname: "twakematrix-on-commit.twake.app"
+          destination_dir: "web"
