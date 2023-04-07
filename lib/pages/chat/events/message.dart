@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:flutter/material.dart';
 
@@ -93,7 +94,6 @@ class Message extends StatelessWidget {
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
         final displayEvent = event.getDisplayEvent(timeline);
-        final borderRadius = BorderRadius.circular(18);
         final noBubble = {MessageTypes.Video, MessageTypes.Sticker}
                 .contains(event.messageType) &&
             !event.redacted;
@@ -118,13 +118,13 @@ class Message extends StatelessWidget {
         final rowChildren = <Widget>[
           sameSender || ownMessage
               ? SizedBox(
-                  width: Avatar.defaultSize,
+                  width: MessageStyle.avatarSize,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Center(
                       child: SizedBox(
-                        width: 16 * AppConfig.bubbleSizeFactor,
-                        height: 16 * AppConfig.bubbleSizeFactor,
+                        width: MessageStyle.errorStatusPlaceHolderWidth,
+                        height: MessageStyle.errorStatusPlaceHolderHeight,
                         child: event.status == EventStatus.error
                             ? const Icon(Icons.error, color: Colors.red)
                             : null,
@@ -138,7 +138,7 @@ class Message extends StatelessWidget {
                     final user =
                         snapshot.data ?? event.senderFromMemoryOrFallback;
                     return Avatar(
-                      size: 36,
+                      size: MessageStyle.avatarSize,
                       mxContent: user.avatarUrl,
                       name: user.calcDisplayname(),
                       onTap: () => onAvatarTab!(event),
@@ -152,7 +152,7 @@ class Message extends StatelessWidget {
               children: [
                 if (!sameSender)
                   Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 4),
+                    padding: MessageStyle.notSameSenderPadding,
                     child: ownMessage || event.room.isDirectChat
                         ? const SizedBox(height: 12)
                         : FutureBuilder<User?>(
@@ -164,14 +164,16 @@ class Message extends StatelessWidget {
                                           .calcDisplayname();
                               return Text(
                                 displayname,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: (Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? displayname.color
-                                      : displayname.lightColorText),
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: (Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? displayname.color
+                                          : displayname.lightColorText),
+                                    ),
                               );
                             },
                           ),
@@ -182,7 +184,7 @@ class Message extends StatelessWidget {
                   child: Material(
                     color: noBubble ? Colors.transparent : color,
                     shadowColor: Colors.black.withAlpha(64),
-                    borderRadius: borderRadius,
+                    borderRadius: MessageStyle.bubbleBorderRadius,
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
                       onHover: (b) => useMouse = true,
@@ -191,7 +193,7 @@ class Message extends StatelessWidget {
                           : () => onSelect!(event),
                       onLongPress:
                           !longPressSelect ? null : () => onSelect!(event),
-                      borderRadius: borderRadius,
+                      borderRadius: MessageStyle.bubbleBorderRadius,
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius:
@@ -400,9 +402,7 @@ class Message extends StatelessWidget {
                         padding: const EdgeInsets.all(6.0),
                         child: Text(
                           event.originServerTs.localizedTime(context),
-                          style: TextStyle(
-                            fontSize: 14 * AppConfig.fontSizeFactor,
-                          ),
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                     ),
