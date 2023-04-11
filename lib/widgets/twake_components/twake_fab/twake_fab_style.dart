@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 
 class TwakeFabStyle {
   static const double defaultSize = 28;
-
-  static Color iconColor(BuildContext context, bool isSelected) {
-    return isSelected
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.secondary;
-  }
+  static const Color defaultPrimaryColor = Color(0xFF99A2AD);
 
   static const double notificationBubbleWidth = 25;
   static const double notificationBubbleHeight = 20;
@@ -38,7 +33,7 @@ class TwakeFabStyle {
       fontFamily: 'Inter',
       color: isSelected
           ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.secondary,
+          : TwakeFabStyle.defaultPrimaryColor,
       fontSize: 10,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.3,
