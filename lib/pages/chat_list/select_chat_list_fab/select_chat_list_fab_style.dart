@@ -28,5 +28,4 @@ class SelectChatListFabStyle {
 
   static const BorderRadius borderRadius = BorderRadius.all(Radius.circular(32));
   static const EdgeInsets innerPadding = EdgeInsets.symmetric(horizontal: 0, vertical: 8);
-  static const double fabButtonSize = 56.0;
 }

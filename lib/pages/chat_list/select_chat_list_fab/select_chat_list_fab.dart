@@ -53,24 +53,18 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.groups,
                 svgString: CustomSVGIcons.groupsIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 notificationCount: 12,
                 onTap: () => _onPressedGroup(context),
               ),
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.messages,
                 svgString: CustomSVGIcons.messagesIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 isSelected: true,
                 onTap: () => _onPressedMessages(context),
               ),
               TwakeFloatingButton(
                 buttonText: L10n.of(context)!.profile,
                 svgString: CustomSVGIcons.rectangleInfoIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
                 onTap: () => _onPressedProfile(context),
               )
             ],
