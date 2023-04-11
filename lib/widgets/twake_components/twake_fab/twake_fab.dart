@@ -8,6 +8,8 @@ class TwakeFloatingButton extends StatelessWidget {
     required this.svgString,
     this.svgWidth = TwakeFabStyle.defaultSize,
     this.svgHeight = TwakeFabStyle.defaultSize,
+    this.svgColor = TwakeFabStyle.defaultPrimaryColor,
+    this.textStyle,
     required this.buttonText,
     this.isSelected = false,
     this.notificationCount = 0,
@@ -16,6 +18,8 @@ class TwakeFloatingButton extends StatelessWidget {
   final String svgString;
   final double svgWidth;
   final double svgHeight;
+  final Color svgColor;
+  final TextStyle? textStyle;
   final String buttonText;
   final bool isSelected;
   final int notificationCount;
@@ -23,23 +27,23 @@ class TwakeFloatingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: InkWell(
-        onTap: () => {},
-        child: Column(
-          children: [
-            Stack(
+    return InkWell(
+      onTap: () => {},
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 5.0),
+          Expanded(
+            child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: svgWidth + 20,
-                  height: svgHeight + 8,
+                  width: svgWidth + TwakeFabStyle.notificationBubbleWidth,
                 ),
                 SvgPicture.asset(
                   svgString,
-                  width: svgWidth,
-                  height: svgHeight,
-                  color: TwakeFabStyle.iconColor(context, isSelected),
+                  fit: BoxFit.fitHeight,
+                  color: svgColor,
                 ),
                 if (notificationCount > 0)
                   Positioned(
@@ -63,12 +67,15 @@ class TwakeFloatingButton extends StatelessWidget {
                   ),
               ],
             ),
-            Text(
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
               buttonText,
-              style: TwakeFabStyle.buttonTextStyle(context, isSelected),
+              style: textStyle ?? TwakeFabStyle.buttonTextStyle(context, isSelected),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
