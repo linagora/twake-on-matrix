@@ -2565,5 +2565,6 @@
     "@profile": {
         "type": "text",
         "placeholders": {}
-    }
+    },
+    "channels": "Channels"
 }
