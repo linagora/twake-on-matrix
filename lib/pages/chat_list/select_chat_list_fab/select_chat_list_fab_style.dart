@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 class SelectChatListFabStyle {
-  static const double buttonWidth = 263;
   static const double buttonHeight = 66;
+
+  static buttonWidth(BuildContext context) {
+    return 0.7 * MediaQuery.of(context).size.width;
+  }
+
   static List<BoxShadow> boxShadow(BuildContext context) {
     return Theme.of(context).brightness == Brightness.light
         ? const [
@@ -28,5 +32,5 @@ class SelectChatListFabStyle {
 
   static const BorderRadius borderRadius = BorderRadius.all(Radius.circular(32));
   static const EdgeInsets innerPadding = EdgeInsets.symmetric(horizontal: 0, vertical: 8);
-  static const double fabButtonSize = 56.0;
+  static const double fabButtonSize = 32.0;
 }

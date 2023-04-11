@@ -8,4 +8,5 @@ class CustomSVGIcons {
   static String groupsIcon = '${baseAssetUrl}groups.svg';
   static String messagesIcon = '${baseAssetUrl}messages.svg';
   static String rectangleInfoIcon = '${baseAssetUrl}rectangle_info.svg';
+  static String channelsIcon = '${baseAssetUrl}channels.svg';
 }

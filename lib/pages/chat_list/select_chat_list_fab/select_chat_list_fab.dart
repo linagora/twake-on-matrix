@@ -35,46 +35,45 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
     return AnimatedContainer(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
-      width: widget.controller.filteredRooms.isEmpty ? null : SelectChatListFabStyle.buttonWidth,
+      width: widget.controller.filteredRooms.isEmpty 
+        ? null
+        : SelectChatListFabStyle.buttonWidth(context),
       child: Container(
         alignment: Alignment.center,
         height: SelectChatListFabStyle.buttonHeight,
+        width: SelectChatListFabStyle.buttonWidth(context),
         decoration: BoxDecoration(
           boxShadow: SelectChatListFabStyle.boxShadow(context),
           color: SelectChatListFabStyle.backgroundColor(context),
           borderRadius: SelectChatListFabStyle.borderRadius,
         ),
-        child: Padding(
-          padding: SelectChatListFabStyle.innerPadding,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TwakeFloatingButton(
-                buttonText: L10n.of(context)!.groups,
-                svgString: CustomSVGIcons.groupsIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
-                notificationCount: 12,
-                onTap: () => _onPressedGroup(context),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TwakeFloatingButton(
+              buttonText: L10n.of(context)!.channels,
+              svgString: CustomSVGIcons.channelsIcon,
+              notificationCount: 12,
+              onTap: () => _onPressedGroup(context),
+            ),
+            TwakeFloatingButton(
+              buttonText: L10n.of(context)!.messages,
+              svgString: CustomSVGIcons.messagesIcon,
+              textStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary, 
+                fontSize: 10,
               ),
-              TwakeFloatingButton(
-                buttonText: L10n.of(context)!.messages,
-                svgString: CustomSVGIcons.messagesIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
-                isSelected: true,
-                onTap: () => _onPressedMessages(context),
-              ),
-              TwakeFloatingButton(
-                buttonText: L10n.of(context)!.profile,
-                svgString: CustomSVGIcons.rectangleInfoIcon,
-                svgHeight: SelectChatListFabStyle.fabButtonSize,
-                svgWidth: SelectChatListFabStyle.fabButtonSize,
-                onTap: () => _onPressedProfile(context),
-              )
-            ],
-          ),
+              svgColor: Theme.of(context).colorScheme.onPrimary,
+              isSelected: true,
+              onTap: () => _onPressedMessages(context),
+            ),
+            TwakeFloatingButton(
+              buttonText: L10n.of(context)!.profile,
+              svgString: CustomSVGIcons.rectangleInfoIcon,
+              onTap: () => _onPressedProfile(context),
+            )
+          ],
         ),
       ),
     );
