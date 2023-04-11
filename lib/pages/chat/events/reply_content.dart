@@ -44,6 +44,8 @@ class ReplyContent extends StatelessWidget {
         defaultTextStyle: TextStyle(
           color: Theme.of(context).colorScheme.onBackground,
           fontSize: fontSizeDisplayContent,
+          fontFamily: 'SFProText',
+          fontWeight: FontWeight.w400,
           overflow: TextOverflow.ellipsis,
         ),
         maxLines: 1,
