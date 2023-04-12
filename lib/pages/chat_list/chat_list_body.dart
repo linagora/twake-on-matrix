@@ -1,3 +1,5 @@
+import 'package:expandable/expandable.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animations/animations.dart';
@@ -41,7 +43,7 @@ class ChatListViewBody extends StatelessWidget {
           animation: primaryAnimation,
           secondaryAnimation: secondaryAnimation,
           transitionType: SharedAxisTransitionType.vertical,
-          fillColor: Theme.of(context).scaffoldBackgroundColor,
+          fillColor: Theme.of(context).colorScheme.onPrimaryContainer,
           child: child,
         );
       },
@@ -69,6 +71,9 @@ class ChatListViewBody extends StatelessWidget {
                   ActiveFilter.messages,
                 }.contains(controller.activeFilter) &&
                 client.storiesRooms.isNotEmpty;
+            if (PlatformInfos.isDesktop || PlatformInfos.isWeb) {
+              return _buildExpandableWidget(context, rooms, roomSearchResult, userSearchResult, displayStoriesHeader);
+            }
             return ListView.builder(
               controller: controller.scrollController,
               // add +1 space below in order to properly scroll below the spaces bar
@@ -212,6 +217,136 @@ class ChatListViewBody extends StatelessWidget {
                 ),
               ),
             ),
+          );
+        },
+      ),
+    );
+  }
+
+  ExpandablePanel _buildExpandableWidget(
+      BuildContext context,
+      List<Room> rooms,
+      QueryPublicRoomsResponse? roomSearchResult,
+      SearchUserDirectoryResponse? userSearchResult,
+      bool displayStoriesHeader,
+  ) {
+    return ExpandablePanel(
+      controller: ExpandableController(initialExpanded: true),
+      header: Container(
+        color: Theme.of(context).brightness == Brightness.light
+            ? const Color(0xfff5f5f5)
+            : const Color(0x222c2d2f),
+        child: Row(children: [
+          Container(
+            padding: const EdgeInsets.only(left: 16),
+            alignment: Alignment.centerLeft,
+            height: 32,
+            child: Text(
+              L10n.of(context)!.allMessages.toUpperCase(),
+              style: const TextStyle(
+                color: Color(0xaaa7a8ac),
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          const Spacer(),
+          ExpandableIcon(
+            theme: const ExpandableThemeData(
+              expandIcon: Icons.expand_less,
+              collapseIcon: Icons.expand_more,
+              iconColor: Color(0x777c8793),
+              iconSize: 20,
+              iconPadding: EdgeInsets.only(right: 5),
+              iconPlacement: ExpandablePanelIconPlacement.right,
+              hasIcon: false,
+            ),
+          ),
+        ]),
+      ),
+      theme: const ExpandableThemeData(
+        headerAlignment: ExpandablePanelHeaderAlignment.center,
+        tapBodyToCollapse: true,
+        tapBodyToExpand: true,
+        hasIcon: false,
+        useInkWell: true,
+        animationDuration: Duration(milliseconds: 300),
+        tapHeaderToExpand: true,
+      ),
+      collapsed: Container(),
+      expanded: ListView.builder(
+        shrinkWrap: true,
+        controller: controller.scrollController,
+        // add +1 space below in order to properly scroll below the spaces bar
+        itemCount: rooms.length + 1,
+        itemBuilder: (BuildContext context, int i) {
+          if (i == 0) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (controller.isSearchMode) ...[
+                  ..._buildPublicRooms(context, roomSearchResult),
+                  ..._buildUsers(context, userSearchResult),
+                ],
+                const ConnectionStatusHeader(),
+                AnimatedContainer(
+                  height: controller.isTorBrowser ? 64 : 0,
+                  duration: FluffyThemes.animationDuration,
+                  curve: FluffyThemes.animationCurve,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: const BoxDecoration(),
+                  child: Material(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: ListTile(
+                      leading: const Icon(Icons.vpn_key),
+                      title: Text(L10n.of(context)!.dehydrateTor),
+                      subtitle: Text(L10n.of(context)!.dehydrateTorLong),
+                      trailing: const Icon(Icons.chevron_right_outlined),
+                      onTap: controller.dehydrate,
+                    ),
+                  ),
+                ),
+                if (controller.isSearchMode)
+                  SearchTitle(
+                    title: L10n.of(context)!.chats,
+                    icon: const Icon(Icons.chat_outlined),
+                  ),
+                if (rooms.isEmpty && !controller.isSearchMode)
+                  Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/start_chat.png',
+                          height: 256,
+                        ),
+                        const Divider(height: 1),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }
+          i--;
+          if (!rooms[i]
+              .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!))
+              .toLowerCase()
+              .contains(
+                controller.searchController.text.toLowerCase(),
+              )) {
+            return Container();
+          }
+          return ChatListItem(
+            rooms[i],
+            key: Key('chat_list_item_${rooms[i].id}'),
+            selected: controller.selectedRoomIds.contains(rooms[i].id),
+            onTap: controller.selectMode == SelectMode.select
+                ? () => controller.toggleSelection(rooms[i].id)
+                : null,
+            onLongPress: () => controller.toggleSelection(rooms[i].id),
+            activeChat: controller.activeChat == rooms[i].id,
           );
         },
       ),

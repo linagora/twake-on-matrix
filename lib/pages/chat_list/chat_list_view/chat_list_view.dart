@@ -1,3 +1,7 @@
+import 'package:fluffychat/pages/chat_list/chat_list_body.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_view/chat_list_view_style.dart';
+import 'package:fluffychat/pages/chat_list/select_chat_list_fab/select_chat_list_fab.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +19,6 @@ import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
-import 'chat_list_body.dart';
-import 'chat_list_header.dart';
-import 'select_chat_list_fab/select_chat_list_fab.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
@@ -124,7 +125,11 @@ class ChatListView extends StatelessWidget {
                         .toList();
                     final destinations = getNavigationDestinations(context);
 
-                    return SizedBox(
+                    return Container(
+                      decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      borderRadius: FluffyThemes.isColumnMode(context) ? ChatListViewStyle.containerBorderRadius : BorderRadius.zero,
+                      ),
                       width: 64,
                       child: ListView.builder(
                         scrollDirection: Axis.vertical,
@@ -164,45 +169,51 @@ class ChatListView extends StatelessWidget {
                     );
                   },
                 ),
-                Container(
-                  color: Theme.of(context).dividerColor,
-                  width: 1,
-                ),
+                if (PlatformInfos.isMobile)
+                  Container(
+                    color: Theme.of(context).dividerColor,
+                    width: 1,
+                  ),
               ],
+              if (FluffyThemes.isColumnMode(context))
+                const SizedBox(width: 16.0),
               Expanded(
                 child: GestureDetector(
                   onTap: FocusManager.instance.primaryFocus?.unfocus,
                   excludeFromSemantics: true,
                   behavior: HitTestBehavior.translucent,
-                  child: Scaffold(
-                    appBar: ChatListHeader(controller: controller),
-                    body: ChatListViewBody(controller),
-                    bottomNavigationBar: controller.displayNavigationBar
-                        ? NavigationBar(
-                            height: 64,
-                            selectedIndex: controller.selectedIndex,
-                            onDestinationSelected:
-                                controller.onDestinationSelected,
-                            destinations: getNavigationDestinations(context),
-                          )
-                        : null,
-                    floatingActionButtonLocation:FloatingActionButtonLocation.centerFloat,
-                    floatingActionButton: selectMode == SelectMode.normal
-                        ? KeyBoardShortcuts(
-                            keysToPress: {
-                              LogicalKeyboardKey.controlLeft,
-                              LogicalKeyboardKey.keyN
-                            },
-                            onKeysPressed: () =>
-                                VRouter.of(context).to('/newprivatechat'),
-                            helpLabel: L10n.of(context)!.newChat,
-                            child: PlatformInfos.isDesktop || PlatformInfos.isWeb
-                                ? const SizedBox.shrink()
-                                : SelectChatListFloatingActionButton(
-                                    controller: controller,
-                            ),
-                          )
-                        : null,
+                  child: ClipRRect(
+                    borderRadius: FluffyThemes.isColumnMode(context) ? ChatListViewStyle.containerBorderRadius : BorderRadius.zero,
+                    child: Scaffold(
+                      appBar: ChatListHeader(controller: controller),
+                      body: ChatListViewBody(controller),
+                      bottomNavigationBar: controller.displayNavigationBar
+                          ? NavigationBar(
+                              height: 64,
+                              selectedIndex: controller.selectedIndex,
+                              onDestinationSelected:
+                                  controller.onDestinationSelected,
+                              destinations: getNavigationDestinations(context),
+                            )
+                          : null,
+                      floatingActionButtonLocation:FloatingActionButtonLocation.centerFloat,
+                      floatingActionButton: selectMode == SelectMode.normal
+                          ? KeyBoardShortcuts(
+                              keysToPress: {
+                                LogicalKeyboardKey.controlLeft,
+                                LogicalKeyboardKey.keyN
+                              },
+                              onKeysPressed: () =>
+                                  VRouter.of(context).to('/newprivatechat'),
+                              helpLabel: L10n.of(context)!.newChat,
+                              child: PlatformInfos.isDesktop || PlatformInfos.isWeb
+                                  ? const SizedBox.shrink()
+                                  : SelectChatListFloatingActionButton(
+                                      controller: controller,
+                              ),
+                            )
+                          : null,
+                    ),
                   ),
                 ),
               ),

@@ -16,8 +16,9 @@ import 'chat_list.dart';
 
 class ClientChooserButton extends StatelessWidget {
   final ChatListController controller;
+  final String? titleString;
 
-  const ClientChooserButton(this.controller, {Key? key}) : super(key: key);
+  const ClientChooserButton(this.controller, {Key? key, this.titleString = ''}) : super(key: key);
 
   List<PopupMenuEntry<Object>> _bundleMenuItems(BuildContext context) {
     final matrix = Matrix.of(context);
@@ -213,7 +214,15 @@ class ClientChooserButton extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Row(
                   children: [
-                    TwakeAvatar(
+                    titleString!.isNotEmpty ? Text(
+                      '$titleString',
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
+                    ) : TwakeAvatar(
                       mxContent: snapshot.data?.avatarUrl,
                       name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
                       size: 36,

@@ -97,6 +97,7 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
+  expandable: ^5.0.1
 dev_dependencies:
   dart_code_metrics: ^4.10.1
   flutter_lints: ^2.0.1

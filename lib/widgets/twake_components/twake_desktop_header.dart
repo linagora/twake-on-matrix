@@ -5,30 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
+class TwakeDesktopHeader extends StatelessWidget implements PreferredSizeWidget {
   final ChatListController controller;
 
-  const TwakeHeader({Key? key, required this.controller}) : super(key: key);
+  const TwakeDesktopHeader({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       toolbarHeight: 52.0,
       automaticallyImplyLeading: false,
-      leadingWidth: 70,
+      leadingWidth: 200,
       leading: SizedBox(
         width: 0,
-        child: ClientChooserButton(controller),
+        child: ClientChooserButton(controller, titleString: L10n.of(context)!.directMessages),
       ),
-      title: SvgPicture.asset(
-        'assets/twake.svg',
-        color: Theme.of(context).colorScheme.background,
-      ),
-      centerTitle: true,
       actions: [
         SvgPicture.asset(
-          CustomSVGIcons.addIcon,
+          CustomSVGIcons.settingsIcon,
           color: Theme.of(context).colorScheme.primary,
           width: 28,
           height: 28,

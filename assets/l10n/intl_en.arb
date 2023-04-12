@@ -2566,5 +2566,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "channels": "Channels"
+    "channels": "Channels",
+    "directMessages": "Direct Messages",
+    "allMessages": "All messages"
 }
