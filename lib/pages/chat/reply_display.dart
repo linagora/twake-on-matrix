@@ -44,7 +44,7 @@ class ReplyDisplay extends StatelessWidget {
             tooltip: L10n.of(context)!.close,
             icon: Icon(
               Icons.close,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
             onPressed: controller.cancelReplyEventAction,
           ),

@@ -56,7 +56,7 @@ class SeenByRow extends StatelessWidget {
                 colorFilter: ColorFilter.mode(
                   timelineOverlayMessage
                       ? Colors.white
-                      : Theme.of(context).colorScheme.onSecondary,
+                      : Theme.of(context).colorScheme.secondary,
                   BlendMode.srcIn,
                 ),
                 width: 16,

@@ -94,7 +94,10 @@ dependencies:
   vrouter: ^1.2.0+21
   wakelock: ^0.6.1+1
   webrtc_interface: ^1.0.10
-
+  linagora_design_flutter:
+    git:
+      url: git@github.com:linagora/linagora-design-flutter.git
+      ref: master
 dev_dependencies:
   dart_code_metrics: ^4.10.1
   flutter_lints: ^2.0.1

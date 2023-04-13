@@ -73,9 +73,7 @@ class Message extends StatelessWidget {
         final client = Matrix.of(context).client;
         final ownMessage = event.senderId == client.userID;
         final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
-        var color = Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : Theme.of(context).colorScheme.surfaceVariant;
+        var color = Theme.of(context).colorScheme.secondary;
         final displayTime = event.type == EventTypes.RoomCreate ||
             nextEvent == null ||
             !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
@@ -87,14 +85,12 @@ class Message extends StatelessWidget {
                 ].contains(nextEvent!.type)
             ? nextEvent!.senderId == event.senderId && !displayTime
             : false;
-        final textColor = ownMessage
-            ? Theme.of(context).colorScheme.onBackground
-            : Theme.of(context).colorScheme.onBackground;
+        final textColor = Theme.of(context).colorScheme.onBackground;
         final rowMainAxisAlignment =
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
         final displayEvent = event.getDisplayEvent(timeline);
-        final noBubble = {MessageTypes.Video, MessageTypes.Sticker}
+        final noBubble = { MessageTypes.Video, MessageTypes.Sticker}
                 .contains(event.messageType) &&
             !event.redacted;
         final timelineOverlayMessage = {
@@ -183,7 +179,6 @@ class Message extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8),
                   child: Material(
                     color: noBubble ? Colors.transparent : color,
-                    shadowColor: Colors.black.withAlpha(64),
                     borderRadius: MessageStyle.bubbleBorderRadius,
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
