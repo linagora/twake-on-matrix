@@ -21,8 +21,9 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
         width: 0,
         child: ClientChooserButton(controller),
       ),
-      title: Image.asset(
-        'assets/twake.png',
+      title: SvgPicture.asset(
+        'assets/twake.svg',
+        color: Theme.of(context).colorScheme.background,
       ),
       centerTitle: true,
       actions: [
