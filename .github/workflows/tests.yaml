@@ -28,11 +28,12 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Run code analysis
-        uses: dart-code-checker/dart-code-metrics-action@v3
+      - uses: webfactory/ssh-agent@v0.8.0
         with:
-          pull_request_comment: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Run code analysis
+        run: ./scripts/code_analyze.sh
 
   widget_test:
     name: Widget test
@@ -47,6 +48,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
+
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Run widget test
         run: flutter test

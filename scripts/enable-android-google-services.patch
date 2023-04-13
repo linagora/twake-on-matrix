@@ -5,7 +5,7 @@ index 001fbd72..339b35af 100644
 @@ -44,7 +44,7 @@ android {
  
      defaultConfig {
-         applicationId "chat.fluffy.fluffychat"
+         applicationId "com.twake.twake"
 -        minSdkVersion 16
 +        minSdkVersion 19
          targetSdkVersion 31
