@@ -42,9 +42,7 @@ class ReplyContent extends StatelessWidget {
       replyBody = HtmlMessage(
         html: html!,
         defaultTextStyle: TextStyle(
-          color: ownMessage
-              ? Theme.of(context).colorScheme.onBackground
-              : Theme.of(context).colorScheme.onBackground,
+          color: Theme.of(context).colorScheme.onBackground,
           fontSize: fontSizeDisplayContent,
           overflow: TextOverflow.ellipsis,
         ),
@@ -62,9 +60,7 @@ class ReplyContent extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
         style: TextStyle(
-          color: ownMessage
-              ? Theme.of(context).colorScheme.onBackground
-              : Theme.of(context).colorScheme.onBackground,
+          color: Theme.of(context).colorScheme.onBackground,
           fontSize: fontSizeDisplayContent,
         ),
       );
@@ -76,8 +72,8 @@ class ReplyContent extends StatelessWidget {
           width: 3,
           height: fontSizeDisplayContent * 2 + 6,
           color: ownMessage
-              ? Theme.of(context).colorScheme.onSecondary
-              : Theme.of(context).colorScheme.onPrimary,
+              ? Theme.of(context).colorScheme.onPrimaryContainer
+              : Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(width: 6),
         Flexible(
@@ -95,8 +91,8 @@ class ReplyContent extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: ownMessage
-                          ? Theme.of(context).colorScheme.onSecondary
-                          : Theme.of(context).colorScheme.onPrimary,
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : Theme.of(context).colorScheme.primary,
                       fontSize: fontSizeDisplayName,
                     ),
                   );

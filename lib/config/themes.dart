@@ -1,6 +1,6 @@
-import 'package:fluffychat/resource/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:vrouter/vrouter.dart';
 
@@ -111,28 +111,28 @@ abstract class FluffyThemes {
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,
           primary: brightness == Brightness.light
-              ? AppColor.colorDEEEFF
-              : AppColor.secondaryPrimary,
+              ? LinagoraSysColors.material().primary
+              : LinagoraSysColors.material().primaryDark,
           onPrimary: brightness == Brightness.light
-              ? AppColor.primary
-              : AppColor.secondaryPrimary,
+              ? LinagoraSysColors.material().onPrimary
+              : LinagoraSysColors.material().onPrimaryDark,
           tertiaryContainer: brightness == Brightness.light
-              ? AppColor.colorF2F3F5
-              : AppColor.color2C2D2F,
+              ? LinagoraSysColors.material().tertiaryContainer
+              : LinagoraSysColors.material().tertiaryContainerDark,
           onTertiaryContainer: brightness == Brightness.light
-              ? AppColor.colorE1E3E6
-              : AppColor.color2C2D2F,
+              ? LinagoraSysColors.material().onTertiaryContainer
+              : LinagoraSysColors.material().onTertiaryContainerDark,
           secondary: brightness == Brightness.light
-              ? AppColor.color818C99
-              : Colors.white,
+              ? LinagoraSysColors.material().secondary
+              : LinagoraSysColors.material().secondaryDark,
           onSecondary: brightness == Brightness.light
-              ? AppColor.secondaryPrimary
-              : AppColor.colorDEEEFF,
+              ? LinagoraSysColors.material().onSecondary
+              : LinagoraSysColors.material().onSecondaryDark,
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
-              ? AppColor.primary
-              : AppColor.secondaryPrimary,
+              ? LinagoraSysColors.material().primary
+              : LinagoraSysColors.material().primaryDark,
         ),
       );
 }

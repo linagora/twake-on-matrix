@@ -215,7 +215,7 @@ class ChatView extends StatelessWidget {
                           badgePosition: BadgePosition.topEnd(end: 8, top: 4),
                           child: Center(
                             child: BackButton(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
