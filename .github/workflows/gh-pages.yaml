@@ -26,6 +26,10 @@ jobs:
           channel: "stable"
           cache: true
 
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
       - name: Setup Nix (to build libolm)
         uses: cachix/install-nix-action@v19
 

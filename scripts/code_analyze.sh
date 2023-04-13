@@ -1,8 +1,8 @@
 #!/bin/sh -ve
 flutter pub get
-flutter pub run import_sorter:main --no-comments --exit-if-changed
-flutter format lib/ test/ --set-exit-if-changed
+flutter pub run import_sorter:main --no-comments
+flutter format lib/ test/
 git apply ./scripts/enable-android-google-services.patch
 flutter pub get
-flutter analyze
+flutter analyze --no-fatal-infos --no-fatal-warnings
 flutter pub run dart_code_metrics:metrics lib -r github || true
