@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -18,7 +19,7 @@ class MultipleEmotesSettingsView extends StatelessWidget {
     final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: const TwakeBackButton(),
         title: Text(L10n.of(context)!.emotePacks),
       ),
       body: StreamBuilder(

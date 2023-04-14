@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+import 'twake_components/twake_back_button/twake_back_button.dart';
+
 class LogViewer extends StatefulWidget {
   const LogViewer({Key? key}) : super(key: key);
 
@@ -22,7 +24,7 @@ class LogViewerState extends State<LogViewer> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(logLevel.toString()),
-        leading: const BackButton(),
+        leading: const TwakeBackButton(),
         actions: [
           IconButton(
             icon: const Icon(Icons.zoom_in_outlined),

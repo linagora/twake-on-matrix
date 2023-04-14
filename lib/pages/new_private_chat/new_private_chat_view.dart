@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -24,7 +25,7 @@ class NewPrivateChatView extends StatelessWidget {
         min(MediaQuery.of(context).size.width - 16, 200).toDouble();
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: const TwakeBackButton(),
         title: Text(L10n.of(context)!.newChat),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         actions: [

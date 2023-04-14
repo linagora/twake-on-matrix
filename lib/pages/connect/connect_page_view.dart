@@ -8,6 +8,8 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
+
 import 'sso_button.dart';
 
 class ConnectPageView extends StatelessWidget {
@@ -20,7 +22,7 @@ class ConnectPageView extends StatelessWidget {
     final identityProviders = controller.identityProviders;
     return LoginScaffold(
       appBar: AppBar(
-        leading: controller.loading ? null : const BackButton(),
+        leading: controller.loading ? null : const TwakeBackButton(),
         automaticallyImplyLeading: !controller.loading,
         centerTitle: true,
         title: Text(

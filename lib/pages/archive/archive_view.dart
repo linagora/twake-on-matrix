@@ -5,6 +5,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 
 class ArchiveView extends StatelessWidget {
   final ArchiveController controller;
@@ -18,7 +19,7 @@ class ArchiveView extends StatelessWidget {
       future: controller.getArchive(context),
       builder: (BuildContext context, snapshot) => Scaffold(
         appBar: AppBar(
-          leading: const BackButton(),
+          leading: const TwakeBackButton(),
           title: Text(L10n.of(context)!.archive),
           actions: [
             if (snapshot.data?.isNotEmpty ?? false)

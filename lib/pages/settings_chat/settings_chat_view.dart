@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,7 @@ class SettingsChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(L10n.of(context)!.chat)),
+      appBar: AppBar(leading: const TwakeBackButton(), title: Text(L10n.of(context)!.chat)),
       body: ListTileTheme(
         iconColor: Theme.of(context).textTheme.bodyLarge!.color,
         child: MaxWidthBody(

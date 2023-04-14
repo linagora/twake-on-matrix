@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -15,7 +16,7 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoginScaffold(
       appBar: AppBar(
-        leading: controller.loading ? null : const BackButton(),
+        leading: controller.loading ? null : const TwakeBackButton(),
         automaticallyImplyLeading: !controller.loading,
         centerTitle: true,
         title: Text(

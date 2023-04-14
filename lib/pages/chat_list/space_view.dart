@@ -7,6 +7,7 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
@@ -230,7 +231,7 @@ class _SpaceViewState extends State<SpaceView> {
             itemBuilder: (context, i) {
               if (i == 0) {
                 return ListTile(
-                  leading: BackButton(
+                  leading: TwakeBackButton(
                     onPressed: () =>
                         widget.controller.setActiveSpace(parentSpace?.id),
                   ),

@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -214,8 +215,8 @@ class ChatView extends StatelessWidget {
                           filter: (r) => r.id != controller.roomId!,
                           badgePosition: BadgePosition.topEnd(end: 8, top: 4),
                           child: Center(
-                            child: BackButton(
-                              color: Theme.of(context).colorScheme.primary,
+                            child: TwakeBackButton(
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ),

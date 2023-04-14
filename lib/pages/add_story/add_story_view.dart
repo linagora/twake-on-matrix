@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:video_player/video_player.dart';
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 
 import 'add_story.dart';
 
@@ -17,7 +18,7 @@ class AddStoryView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade900,
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: const TwakeBackButton(color: Colors.white),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: Colors.transparent,
         elevation: 0,

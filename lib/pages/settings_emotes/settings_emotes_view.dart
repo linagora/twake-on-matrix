@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +22,7 @@ class EmotesSettingsView extends StatelessWidget {
     final imageKeys = controller.pack!.images.keys.toList();
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: const TwakeBackButton(),
         title: Text(L10n.of(context)!.emoteSettings),
       ),
       floatingActionButton: controller.showSave

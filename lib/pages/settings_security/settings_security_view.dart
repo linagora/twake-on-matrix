@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_back_button/twake_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -16,7 +17,7 @@ class SettingsSecurityView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(L10n.of(context)!.security)),
+      appBar: AppBar(leading: const TwakeBackButton(), title: Text(L10n.of(context)!.security)),
       body: ListTileTheme(
         iconColor: Theme.of(context).colorScheme.onBackground,
         child: MaxWidthBody(
