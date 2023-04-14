@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
 
 class ChatListViewStyle {
-  static BorderRadius containerBorderRadius = BorderRadius.circular(16);
+  static const BorderRadius containerBorderRadius = BorderRadius.all(Radius.circular(16));
 }

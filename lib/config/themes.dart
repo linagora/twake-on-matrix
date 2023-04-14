@@ -130,7 +130,7 @@ abstract class FluffyThemes {
               : LinagoraSysColors.material().onSecondaryDark,
           onPrimaryContainer: brightness == Brightness.light
               ? Colors.white
-              : const Color(0x1119191a)
+              : const Color.fromARGB(255, 25, 25, 26)
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
