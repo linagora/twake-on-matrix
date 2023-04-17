@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -7,7 +8,7 @@ import 'package:matrix_link_text/link_text.dart';
 import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../utils/localized_exception_extension.dart';
 
@@ -118,7 +119,7 @@ class PublicRoomBottomSheet extends StatelessWidget {
                       child: Avatar(
                         mxContent: profile.avatarUrl,
                         name: profile.name ?? roomAlias,
-                        size: Avatar.defaultSize * 3,
+                        size: AvatarStyle.defaultSize * 3,
                         fontSize: 36,
                       ),
                     ),

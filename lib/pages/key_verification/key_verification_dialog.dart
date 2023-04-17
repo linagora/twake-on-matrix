@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,7 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
   Future<void> show(BuildContext context) => showAdaptiveBottomSheet(
@@ -170,7 +171,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             Avatar(
               mxContent: user?.avatarUrl,
               name: displayName,
-              size: Avatar.defaultSize * 2,
+              size: AvatarStyle.defaultSize * 2,
             ),
             const SizedBox(height: 16),
             Text(
@@ -208,8 +209,8 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
                     name: displayName,
                   ),
                   const SizedBox(
-                    width: Avatar.defaultSize + 2,
-                    height: Avatar.defaultSize + 2,
+                    width: AvatarStyle.defaultSize + 2,
+                    height: AvatarStyle.defaultSize + 2,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ],

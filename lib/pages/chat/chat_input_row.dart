@@ -10,7 +10,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../../config/themes.dart';
 import 'chat.dart';
@@ -353,6 +353,7 @@ class _ChatAccountPicker extends StatelessWidget {
             name: snapshot.data?.displayName ??
                 controller.matrix!.client.userID!.localpart,
             size: 20,
+            fontSize: 8,
           ),
         ),
       ),
