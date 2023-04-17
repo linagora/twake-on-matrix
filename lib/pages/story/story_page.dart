@@ -21,7 +21,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extensio
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/story_theme_data.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class StoryPage extends StatefulWidget {

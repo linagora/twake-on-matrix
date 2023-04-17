@@ -9,7 +9,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;
@@ -53,6 +53,7 @@ class ChatAppBarTitle extends StatelessWidget {
                 child: Hero(
                   tag: 'content_banner',
                   child: Avatar(
+                    fontSize: 15,
                     mxContent: room.avatar,
                     name: room.getLocalizedDisplayname(
                       MatrixLocals(L10n.of(context)!),

@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -8,7 +9,7 @@ import 'package:vrouter/vrouter.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'settings.dart';
 
@@ -65,13 +66,13 @@ class SettingsView extends StatelessWidget {
                                 color: Theme.of(context).dividerColor,
                               ),
                               borderRadius: BorderRadius.circular(
-                                Avatar.defaultSize * 2.5,
+                                AvatarStyle.defaultSize * 2.5,
                               ),
                             ),
                             child: Avatar(
                               mxContent: profile?.avatarUrl,
                               name: displayname,
-                              size: Avatar.defaultSize * 2.5,
+                              size: AvatarStyle.defaultSize * 2.5,
                               fontSize: 18 * 2.5,
                             ),
                           ),
