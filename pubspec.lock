@@ -82,7 +82,7 @@ packages:
     source: hosted
     version: "0.1.13"
   auto_size_text:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: auto_size_text
       sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
@@ -1092,7 +1092,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "63cd4dfee10daef9e9f515d52ca461d418bfeea3"
+      resolved-ref: ad2098d95dfe624db985e0547cd0866684dbee4f
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
