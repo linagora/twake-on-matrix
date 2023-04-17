@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-cd android
-echo $FDROID_KEY | base64 --decode --ignore-garbage > key.jks
-echo "storePassword=${FDROID_KEY_PASS}" >> key.properties
-echo "keyPassword=${FDROID_KEY_PASS}" >> key.properties
-echo "keyAlias=key" >> key.properties
-echo "storeFile=../key.jks" >> key.properties
-echo $PLAYSTORE_DEPLOY_KEY >> keys.json
-ls | grep key
-bundle install
-bundle update fastlane
-bundle exec fastlane set_build_code_internal
-cd ..
+# git apply ../scripts/enable-android-google-services.patch
+# echo "$GOOGLE_SERVICES_JSON" > app/google-services.json
+echo "$ANDROID_KEYSTORE" | base64 --decode --ignore-garbage > android.jks
+echo "storePassword=${ANDROID_STORE_PASS}" >> key.properties
+echo "keyPassword=${ANDROID_KEY_PASS}" >> key.properties
+echo "keyAlias=${ANDROID_KEY_ALIAS}" >> key.properties
+echo "storeFile=../android.jks" >> key.properties
+echo "$PLAYSTORE_DEPLOY_KEY" >> keys.json

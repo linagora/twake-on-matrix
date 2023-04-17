@@ -36,12 +36,17 @@ platform :android do
   end
 
   lane :deploy_internal_test do
+    track = "internal"
     versions = google_play_track_version_codes(
-        track: "internal",
+        track: track,
         json_key: "./keys.json"
-      )
+    )
     last_version = versions[0].to_i
-    upload_to_play_store(track: 'internal', aab: '../build/app/outputs/bundle/release/app-release.aab', version_code: "#{last_version+1}")
+    version_name = last_git_tag.gsub("v", "")
+    upload_to_play_store(track: track,
+                         aab: '../build/app/outputs/bundle/release/app-release.aab',
+                         version_code: "#{last_version+1}",
+                         version_name: version_name)
   end
 
   lane :deploy_candidate do

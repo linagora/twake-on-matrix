@@ -1,0 +1,69 @@
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  FLUTTER_VERSION: 3.7.7
+
+name: Release app
+
+jobs:
+  release:
+    name: Release on stores
+    runs-on: ${{ matrix.runner }}
+    environment: prod
+
+    strategy:
+      matrix:
+        include:
+          - os: android
+            runner: ubuntu-latest
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "ruby"
+          bundler-cache: true
+          working-directory: ${{ matrix.os }}
+
+      - name: Setup Java
+        if: matrix.os == 'android'
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin" # See 'Supported distributions' for available options
+          java-version: "11"
+
+      - name: Prepare Android release
+        if: matrix.os == 'android'
+        env:
+          # GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          ANDROID_STORE_PASS: ${{ secrets.ANDROID_STORE_PASS }}
+          ANDROID_KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
+        run: ./scripts/prepare-android-release.sh
+        working-directory: ${{ matrix.os }}
+
+      - name: Release on Play Store internal track
+        if: matrix.os == 'android'
+        run: ./scripts/release-playstore-beta.sh
+        working-directory: ${{ matrix.os }}
