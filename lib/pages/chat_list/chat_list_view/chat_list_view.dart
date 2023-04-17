@@ -16,8 +16,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 
 class ChatListView extends StatelessWidget {
@@ -72,12 +70,6 @@ class ChatListView extends StatelessWidget {
             child: const Icon(Icons.chat),
           ),
           label: L10n.of(context)!.chats,
-        ),
-      if (controller.spaces.isNotEmpty)
-        const NavigationDestination(
-          icon: Icon(Icons.workspaces_outlined),
-          selectedIcon: Icon(Icons.workspaces),
-          label: 'Spaces',
         ),
     ];
   }
@@ -145,25 +137,6 @@ class ChatListView extends StatelessWidget {
                             );
                           }
                           i -= destinations.length;
-                          final isSelected =
-                              controller.activeFilter == ActiveFilter.spaces &&
-                                  rootSpaces[i].id == controller.activeSpaceId;
-                          return NaviRailItem(
-                            toolTip: rootSpaces[i].getLocalizedDisplayname(
-                              MatrixLocals(L10n.of(context)!),
-                            ),
-                            isSelected: isSelected,
-                            onTap: () =>
-                                controller.setActiveSpace(rootSpaces[i].id),
-                            icon: Avatar(
-                              mxContent: rootSpaces[i].avatar,
-                              name: rootSpaces[i].getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)!),
-                              ),
-                              size: 32,
-                              fontSize: 12,
-                            ),
-                          );
                         },
                       ),
                     );

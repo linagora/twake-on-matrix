@@ -72,7 +72,7 @@ class ChatListViewBody extends StatelessWidget {
                 }.contains(controller.activeFilter) &&
                 client.storiesRooms.isNotEmpty;
             if (PlatformInfos.isDesktop || PlatformInfos.isWeb) {
-              return _buildExpandableWidget(context, rooms, roomSearchResult, userSearchResult, displayStoriesHeader);
+              return SingleChildScrollView(child: _buildExpandableWidget(context, rooms, roomSearchResult, userSearchResult, displayStoriesHeader));
             }
             return ListView.builder(
               controller: controller.scrollController,
