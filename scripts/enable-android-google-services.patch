@@ -1,5 +1,5 @@
 diff --git a/android/app/build.gradle b/android/app/build.gradle
-index 001fbd72..339b35af 100644
+index c4aeaf66..e88cb4b3 100644
 --- a/android/app/build.gradle
 +++ b/android/app/build.gradle
 @@ -44,7 +44,7 @@ android {
@@ -119,7 +119,7 @@ index 1afc4606..894d1571 100644
          return provideEngine(this)
      }
 diff --git a/android/build.gradle b/android/build.gradle
-index 85aa8647..3b7e09e7 100644
+index add94531..6739ec3a 100644
 --- a/android/build.gradle
 +++ b/android/build.gradle
 @@ -8,7 +8,7 @@ buildscript {
@@ -132,7 +132,7 @@ index 85aa8647..3b7e09e7 100644
  }
  
 diff --git a/lib/utils/background_push.dart b/lib/utils/background_push.dart
-index cd79b0ab..c2db0f1e 100644
+index 5f5b7618..35928203 100644
 --- a/lib/utils/background_push.dart
 +++ b/lib/utils/background_push.dart
 @@ -39,7 +39,7 @@ import '../config/setting_keys.dart';
@@ -154,10 +154,10 @@ index cd79b0ab..c2db0f1e 100644
    DateTime? lastReceivedPush;
  
 diff --git a/pubspec.yaml b/pubspec.yaml
-index 6999d0b8..b2c9144f 100644
+index e8e039d8..9eb74e28 100644
 --- a/pubspec.yaml
 +++ b/pubspec.yaml
-@@ -26,7 +26,7 @@ dependencies:
+@@ -25,7 +25,7 @@ dependencies:
    emoji_picker_flutter: ^1.5.1
    emoji_proposal: ^0.0.1
    emojis: ^0.9.9
