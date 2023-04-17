@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -14,7 +15,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/custom_svg_icons.dart';
 
 import '../../config/themes.dart';
-import '../../widgets/avatar.dart';
+import '../../widgets/avatar/avatar.dart';
 import '../../widgets/matrix.dart';
 import '../chat/send_file_dialog.dart';
 
@@ -153,11 +154,11 @@ class ChatListItem extends StatelessWidget {
               onLongPress: onLongPress,
               leading: selected
                   ? SizedBox(
-                      width: Avatar.defaultSize,
-                      height: Avatar.defaultSize,
+                      width: AvatarStyle.defaultSize,
+                      height: AvatarStyle.defaultSize,
                       child: Material(
                         color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(Avatar.defaultSize),
+                        borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
                         child: const Icon(Icons.check, color: Colors.white),
                       ),
                     )
@@ -171,13 +172,16 @@ class ChatListItem extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        Text(
-                          displayname,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          style: const TextStyle(
-                            fontFamily: 'SFProDisplayHeavy',
+                        Expanded(
+                          child: Text(
+                            displayname,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: const TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              fontFamily: 'SFProDisplayHeavy',
+                            ),
                           ),
                         ),
                         Padding(

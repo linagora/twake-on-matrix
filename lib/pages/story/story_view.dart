@@ -14,7 +14,7 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import '../../config/themes.dart';
 
 class StoryView extends StatelessWidget {

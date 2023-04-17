@@ -9,7 +9,7 @@ import 'package:swipe_to_action/swipe_to_action.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
@@ -135,6 +135,7 @@ class Message extends StatelessWidget {
                         snapshot.data ?? event.senderFromMemoryOrFallback;
                     return Avatar(
                       size: MessageStyle.avatarSize,
+                      fontSize: MessageStyle.fontSize,
                       mxContent: user.avatarUrl,
                       name: user.calcDisplayname(),
                       onTap: () => onAvatarTab!(event),

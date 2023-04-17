@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
