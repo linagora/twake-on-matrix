@@ -61,10 +61,10 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
               buttonText: L10n.of(context)!.messages,
               svgString: CustomSVGIcons.messagesIcon,
               textStyle: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary, 
+                color: Theme.of(context).colorScheme.primary, 
                 fontSize: 10,
               ),
-              svgColor: Theme.of(context).colorScheme.onPrimary,
+              svgColor: Theme.of(context).colorScheme.primary,
               isSelected: true,
               onTap: () => _onPressedMessages(context),
             ),
