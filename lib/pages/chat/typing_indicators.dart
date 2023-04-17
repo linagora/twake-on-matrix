@@ -1,9 +1,10 @@
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class TypingIndicators extends StatelessWidget {
@@ -23,7 +24,7 @@ class TypingIndicators extends StatelessWidget {
       child: AnimatedContainer(
         constraints:
             const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
-        height: typingUsers.isEmpty ? 0 : Avatar.defaultSize + bottomPadding,
+        height: typingUsers.isEmpty ? 0 : AvatarStyle.defaultSize + bottomPadding,
         duration: FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         alignment: controller.timeline!.events.isNotEmpty &&
@@ -40,10 +41,10 @@ class TypingIndicators extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              height: Avatar.defaultSize,
+              height: AvatarStyle.defaultSize,
               width: typingUsers.length < 2
-                  ? Avatar.defaultSize
-                  : Avatar.defaultSize + 16,
+                  ? AvatarStyle.defaultSize
+                  : AvatarStyle.defaultSize + 16,
               child: Stack(
                 children: [
                   if (typingUsers.isNotEmpty)

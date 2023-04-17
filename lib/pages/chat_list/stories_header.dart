@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -8,7 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 enum ContextualRoomAction {
@@ -92,7 +93,7 @@ class StoriesHeader extends StatelessWidget {
     if (Matrix.of(context).shareContent != null) {
       return ListTile(
         leading: CircleAvatar(
-          radius: Avatar.defaultSize / 2,
+          radius: AvatarStyle.defaultSize / 2,
           backgroundColor: Theme.of(context).colorScheme.surface,
           foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
           child: const Icon(Icons.camera_alt_outlined),
@@ -193,7 +194,7 @@ class _StoryButton extends StatelessWidget {
               children: [
                 const SizedBox(height: 8),
                 Material(
-                  borderRadius: BorderRadius.circular(Avatar.defaultSize),
+                  borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
@@ -211,14 +212,14 @@ class _StoryButton extends StatelessWidget {
                       color: unread
                           ? null
                           : Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(Avatar.defaultSize),
+                      borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
                     ),
                     child: Stack(
                       children: [
                         Material(
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius:
-                              BorderRadius.circular(Avatar.defaultSize),
+                              BorderRadius.circular(AvatarStyle.defaultSize),
                           child: Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: CircleAvatar(

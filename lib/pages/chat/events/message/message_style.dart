@@ -6,6 +6,7 @@ class MessageStyle {
   static final errorStatusPlaceHolderWidth = 16 * AppConfig.bubbleSizeFactor;
   static final errorStatusPlaceHolderHeight = 16 * AppConfig.bubbleSizeFactor;
   static const double avatarSize = 36;
+  static const double fontSize = 15;
   static const notSameSenderPadding = EdgeInsets.only(left: 8.0, bottom: 4);
 
   static const double buttonHeight = 66;
