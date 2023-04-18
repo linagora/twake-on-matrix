@@ -173,34 +173,38 @@ class ChatListItem extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            displayname,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: const TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontFamily: 'SFProDisplayHeavy',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Wrap(
-                            spacing: 6,
+                          child: Row(
                             children: [
-                              if (room.isFavourite)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.pinIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                              Text(
+                                displayname,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  fontFamily: 'SFProDisplayHeavy',
                                 ),
-                              if (isMuted)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.muteIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Wrap(
+                                  spacing: 6,
+                                  children: [
+                                    if (room.isFavourite)
+                                      SvgPicture.asset(
+                                        CustomSVGIcons.pinIcon,
+                                        width: 16,
+                                        color: const Color(0xFF99A2AD),
+                                      ),
+                                    if (isMuted)
+                                      SvgPicture.asset(
+                                        CustomSVGIcons.muteIcon,
+                                        width: 16,
+                                        color: const Color(0xFF99A2AD),
+                                      ),
+                                  ],
                                 ),
+                              ),
                             ],
                           ),
                         ),
