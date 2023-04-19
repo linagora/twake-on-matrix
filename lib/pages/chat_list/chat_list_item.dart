@@ -1,3 +1,4 @@
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
@@ -173,43 +174,77 @@ class ChatListItem extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            displayname,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: const TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontFamily: 'SFProDisplayHeavy',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Wrap(
-                            spacing: 6,
+                          child: Row(
                             children: [
-                              if (room.isFavourite)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.pinIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                              Text(
+                                displayname,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  fontFamily: 'SFProDisplayHeavy',
                                 ),
-                              if (isMuted)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.muteIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Wrap(
+                                  spacing: 6,
+                                  children: [
+                                    if (room.isFavourite)
+                                      SvgPicture.asset(
+                                        CustomSVGIcons.pinIcon,
+                                        width: 16,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    if (isMuted)
+                                      SvgPicture.asset(
+                                        CustomSVGIcons.muteIcon,
+                                        width: 16,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                  ],
                                 ),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4.0),
-                    child: Text(
+                  Row(
+                    children: [
+                      FutureBuilder(
+                        future: room.getTimeline(),
+                        builder: (context, AsyncSnapshot<Timeline> snapshot) {
+                          // Have seen the last message
+                          if (room.lastEvent != null &&
+                              room.lastEvent!.status == EventStatus.sent &&
+                              room.lastEvent!.senderId != Matrix.of(context).client.userID) {
+                            if (snapshot.hasData) {
+                              SvgPicture.asset(
+                                ImagePaths.icReadStatus,
+                                colorFilter: ColorFilter.mode(
+                                  room
+                                          .getSeenByUsers(
+                                            snapshot.data!,
+                                            eventId: room.lastEvent!.eventId,
+                                          )
+                                          .isEmpty
+                                      ? Colors.white
+                                      : Theme.of(context).colorScheme.secondary,
+                                  BlendMode.srcIn,
+                                ),
+                                width: 16,
+                                height: 16,
+                              );
+                            }
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      const SizedBox(width: 3.71),
+                      Text(
                       room.timeCreated.localizedTimeShort(context),
                       style: TextStyle(
                         fontSize: 13,
@@ -218,7 +253,7 @@ class ChatListItem extends StatelessWidget {
                             ? Theme.of(context).colorScheme.secondary
                             : Theme.of(context).textTheme.bodyMedium!.color,
                       ),
-                    ),
+                    )],
                   ),
                 ],
               ),
