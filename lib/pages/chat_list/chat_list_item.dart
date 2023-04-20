@@ -213,38 +213,21 @@ class ChatListItem extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      FutureBuilder(
-                        future: room.getTimeline(),
-                        builder: (context, AsyncSnapshot<Timeline> snapshot) {
-                          // Have seen the last message
-                          if (room.lastEvent != null &&
-                              room.lastEvent!.status == EventStatus.sent &&
-                              room.lastEvent!.senderId != Matrix.of(context).client.userID) {
-                            if (snapshot.hasData) {
-                              SvgPicture.asset(
-                                ImagePaths.icReadStatus,
-                                colorFilter: ColorFilter.mode(
-                                  room
-                                          .getSeenByUsers(
-                                            snapshot.data!,
-                                            eventId: room.lastEvent!.eventId,
-                                          )
-                                          .isEmpty
-                                      ? Colors.white
-                                      : Theme.of(context).colorScheme.secondary,
-                                  BlendMode.srcIn,
-                                ),
-                                width: 16,
-                                height: 16,
-                              );
-                            }
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
+                      if (room.lastEvent != null &&
+                          room.lastEvent!.senderId == Matrix.of(context).client.userID)
+                        SvgPicture.asset(
+                          ImagePaths.icReadStatus,
+                          colorFilter: ColorFilter.mode(
+                            room.lastEvent!.status == EventStatus.synced
+                                ? Theme.of(context).colorScheme.secondary
+                                : const Color(0xFF99A2AD),
+                            BlendMode.srcIn,
+                          ),
+                          width: 16,
+                          height: 16,
+                        ),
                       const SizedBox(width: 3.71),
-                      Text(
-                      room.timeCreated.localizedTimeShort(context),
+                      Text(room.timeCreated.localizedTimeShort(context),
                       style: TextStyle(
                         fontSize: 13,
                         fontFamily: 'SFProText',
