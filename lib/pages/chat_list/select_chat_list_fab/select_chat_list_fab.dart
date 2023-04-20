@@ -1,6 +1,6 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/select_chat_list_fab/select_chat_list_fab_style.dart';
-import 'package:fluffychat/utils/custom_svg_icons.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -53,15 +53,15 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
           children: [
             TwakeFloatingButton(
               buttonText: L10n.of(context)!.channels,
-              svgString: CustomSVGIcons.channelsIcon,
+              svgString: ImagePaths.icChannels,
               notificationCount: 12,
               onTap: () => _onPressedGroup(context),
             ),
             TwakeFloatingButton(
               buttonText: L10n.of(context)!.messages,
-              svgString: CustomSVGIcons.messagesIcon,
+              svgString: ImagePaths.icMessages,
               textStyle: TextStyle(
-                color: Theme.of(context).colorScheme.primary, 
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 10,
               ),
               svgColor: Theme.of(context).colorScheme.primary,
@@ -70,7 +70,7 @@ class _SelectChatListFloatingActionButtonState extends State<SelectChatListFloat
             ),
             TwakeFloatingButton(
               buttonText: L10n.of(context)!.profile,
-              svgString: CustomSVGIcons.rectangleInfoIcon,
+              svgString: ImagePaths.icRectangleInfo,
               onTap: () => _onPressedProfile(context),
             )
           ],

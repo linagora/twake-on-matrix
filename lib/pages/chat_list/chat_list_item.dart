@@ -13,7 +13,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/custom_svg_icons.dart';
 
 import '../../config/themes.dart';
 import '../../widgets/avatar/avatar.dart';
@@ -193,13 +192,13 @@ class ChatListItem extends StatelessWidget {
                                   children: [
                                     if (room.isFavourite)
                                       SvgPicture.asset(
-                                        CustomSVGIcons.pinIcon,
+                                        ImagePaths.icPin,
                                         width: 16,
                                         color: Theme.of(context).colorScheme.primary,
                                       ),
                                     if (isMuted)
                                       SvgPicture.asset(
-                                        CustomSVGIcons.muteIcon,
+                                        ImagePaths.icMute,
                                         width: 16,
                                         color: Theme.of(context).colorScheme.primary,
                                       ),

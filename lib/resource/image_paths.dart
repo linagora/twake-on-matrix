@@ -14,6 +14,13 @@ class ImagePaths {
   static String get icVideoCall => _getImagePath('ic_video_call.svg');
   static String get icVoiceMessage => _getImagePath('ic_voice_message.svg');
   static String get icKeyBoard => _getImagePath('ic_keyboard.svg');
+  static String get icMute => _getImagePath('ic_mute.svg');
+  static String get icPin => _getImagePath('ic_pin.svg');
+  static String get icAddPeople => _getImagePath('ic_add_people.svg');
+  static String get icEdit => _getImagePath('ic_edit.svg');
+  static String get icMessages => _getImagePath('ic_messages.svg');
+  static String get icRectangleInfo => _getImagePath('ic_rectangle_info.svg');
+  static String get icChannels => _getImagePath('ic_channels.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
