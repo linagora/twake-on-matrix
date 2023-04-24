@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -94,6 +95,15 @@ extension RoomStatusExtension on Room {
       (user) =>
           user.id == client.userID || user.id == timeline.events.first.senderId,
     );
+    return lastReceipts.toList();
+  }
+
+  List<User> getSeenByUsersFromLastEvent() {
+    final lastReceipts = lastEvent!.receipts.whereNot(
+      (receipt) =>
+          receipt.user.id == client.userID,
+    ).map((receipt) => receipt.user);
+
     return lastReceipts.toList();
   }
 }

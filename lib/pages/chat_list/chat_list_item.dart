@@ -218,7 +218,7 @@ class ChatListItem extends StatelessWidget {
                         SvgPicture.asset(
                           ImagePaths.icReadStatus,
                           colorFilter: ColorFilter.mode(
-                            room.lastEvent!.status == EventStatus.synced
+                            room.getSeenByUsersFromLastEvent().isNotEmpty
                                 ? Theme.of(context).colorScheme.secondary
                                 : const Color(0xFF99A2AD),
                             BlendMode.srcIn,
