@@ -1,4 +1,4 @@
-import 'package:fluffychat/entity/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/pages/contacts/presentation/extension/list_contact_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 

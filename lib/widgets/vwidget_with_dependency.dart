@@ -1,5 +1,5 @@
+import 'package:fluffychat/di/abstract_di.dart';
 import 'package:fluffychat/di/base_di.dart';
-import 'package:fluffychat/di/di_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -55,7 +55,7 @@ class VWidgetWithDependency extends VGuard {
   /// differently and are also not closeable with the back swipe gesture.
   final bool fullscreenDialog;
 
-  final DIInterface di;
+  final BaseDI di;
 
   final OnFinishedBind? onFinishedBind;
 

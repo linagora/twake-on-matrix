@@ -1,12 +1,12 @@
+import 'package:fluffychat/di/abstract_di.dart';
 import 'package:fluffychat/di/base_di.dart';
-import 'package:fluffychat/di/di_interface.dart';
 import 'package:flutter/material.dart';
 
 mixin ShowDialogMixin {
   
   void showDialogWithDependency({
     required BuildContext context,
-    required DIInterface di,
+    required BaseDI di,
     required RoutePageBuilder pageBuilder,
     OnFinishedBind? onFinishedBind,
   }) {

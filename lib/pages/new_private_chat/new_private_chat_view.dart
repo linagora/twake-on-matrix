@@ -1,134 +1,153 @@
-import 'dart:math';
-
+import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:vrouter/vrouter.dart';
 
 class NewPrivateChatView extends StatelessWidget {
   final NewPrivateChatController controller;
 
   const NewPrivateChatView(this.controller, {Key? key}) : super(key: key);
 
-  static const double _qrCodePadding = 8;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
+        child: NewPrivateChatAppBar(newPrivateChatController: controller),),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16.0, right: 10.0),
+        child: ExpansionList(
+          title: "Twake users (3)",
+          newPrivateChatController: controller,
+        ),
+      )
+    );
+  }
+}
+
+class NewPrivateChatAppBar extends StatefulWidget {
+
+  final NewPrivateChatController newPrivateChatController;
+
+  const NewPrivateChatAppBar({
+    super.key,
+    required this.newPrivateChatController,
+  });
+
+  @override
+  State<NewPrivateChatAppBar> createState() => _NewPrivateChatAppBarState();
+}
+
+class _NewPrivateChatAppBarState extends State<NewPrivateChatAppBar> {
+  bool isSearchBarShow = false;
+
+  late final TextEditingController textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController = TextEditingController();
+    textEditingController.addListener(() {
+      widget.newPrivateChatController.onSearchBarChanged(textEditingController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    textEditingController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final qrCodeSize =
-        min(MediaQuery.of(context).size.width - 16, 200).toDouble();
-    return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
-        title: Text(L10n.of(context)!.newChat),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextButton(
-              onPressed: () => VRouter.of(context).to('/newgroup'),
-              child: Text(
-                L10n.of(context)!.createNewGroup,
-                style:
-                    TextStyle(color: Theme.of(context).colorScheme.secondary),
+    return AppBar(
+      toolbarHeight: 64,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: Colors.black.withOpacity(0.15))),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                offset: const Offset(0, 1),
+                blurRadius: 3,
+                spreadRadius: 1,
               ),
-            ),
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: MaxWidthBody(
-              withScrolling: true,
-              child: Container(
-                margin: const EdgeInsets.all(_qrCodePadding),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(_qrCodePadding * 2),
-                child: Material(
-                  borderRadius: BorderRadius.circular(12),
-                  elevation: 10,
-                  color: Colors.white,
-                  shadowColor: Theme.of(context).appBarTheme.shadowColor,
-                  clipBehavior: Clip.hardEdge,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      QrImage(
-                        data:
-                            'https://matrix.to/#/${Matrix.of(context).client.userID}',
-                        version: QrVersions.auto,
-                        size: qrCodeSize,
-                      ),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          fixedSize:
-                              Size.fromWidth(qrCodeSize - (2 * _qrCodePadding)),
-                        ),
-                        icon: Icon(Icons.adaptive.share_outlined),
-                        label: Text(L10n.of(context)!.shareYourInviteLink),
-                        onPressed: controller.inviteAction,
-                      ),
-                      const SizedBox(height: 8),
-                      if (PlatformInfos.isMobile) ...[
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer,
-                            fixedSize: Size.fromWidth(
-                              qrCodeSize - (2 * _qrCodePadding),
-                            ),
-                          ),
-                          icon: const Icon(Icons.qr_code_scanner_outlined),
-                          label: Text(L10n.of(context)!.scanQrCode),
-                          onPressed: controller.openScannerAction,
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ],
-                  ),
-                ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                offset: const Offset(0, 1),
+                blurRadius: 80,
               ),
-            ),
-          ),
-          MaxWidthBody(
-            withScrolling: false,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Form(
-                key: controller.formKey,
-                child: TextFormField(
-                  controller: controller.controller,
-                  autocorrect: false,
-                  textInputAction: TextInputAction.go,
-                  focusNode: controller.textFieldFocus,
-                  onFieldSubmitted: controller.submitAction,
-                  validator: controller.validateForm,
-                  inputFormatters: controller.removeMatrixToFormatters,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    labelText: L10n.of(context)!.enterInviteLinkOrMatrixId,
-                    hintText: '@username',
-                    prefixText: NewPrivateChatController.prefixNoProtocol,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.send_outlined),
-                      onPressed: controller.submitAction,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+            ],
+          ),)),
+    automaticallyImplyLeading: false,
+    backgroundColor: Theme.of(context).colorScheme.background,
+    titleSpacing: 0,
+    leading: TwakeIconButton(
+      icon: Icons.arrow_back,
+      onPressed: () => VRouter.of(context).pop(),
+      tooltip: "Back",
+      paddingAll: 8.0,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+    ),
+    title: isSearchBarShow 
+      ? SizedBox(
+        height: 24,
+        child: TextField(
+          autofocus: true,
+          maxLines: 1,
+          buildCounter: (
+            BuildContext context, {
+            required int currentLength,
+            required int? maxLength,
+            required bool isFocused,
+          }) => const SizedBox.shrink(),
+          maxLength: 200,
+          controller: textEditingController,
+          decoration: null,
+        ),
+      )
+      : Text(
+        L10n.of(context)!.newChat,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface
+      ),),
+    actions: isSearchBarShow
+      ? [
+        TwakeIconButton(
+          onPressed: () => {
+            setState(() => isSearchBarShow = false)
+          }, 
+          tooltip: "Close",
+          icon: Icons.close,
+          paddingAll: 10.0,
+          margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 6.0),),
+      ]
+      : [
+        TwakeIconButton(
+          icon: Icons.search,
+          onPressed: () => openSearchBar(), 
+          tooltip: "Search",
+          paddingAll: 10.0,
+          margin: const EdgeInsets.symmetric(vertical: 10.0),),
+        TwakeIconButton(
+          icon: Icons.more_vert,
+          onPressed: () {}, 
+          tooltip: "More",
+          paddingAll: 10.0,
+          margin: const EdgeInsets.symmetric(vertical: 10.0),),
+      ],
+      );
+  }
+
+  void openSearchBar() {
+    setState(() {
+      isSearchBarShow = true;
+    });
   }
 }

@@ -1,17 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:async';
 
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:matrix/matrix.dart';
+import 'package:dartz/dartz.dart' hide State;
+import 'package:debounce_throttle/debounce_throttle.dart';
+import 'package:fluffychat/domain/model/contact/contact_query.dart';
+import 'package:fluffychat/domain/state/contact/get_contacts_success.dart';
+import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
+import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/pages/contacts/presentation/model/presentation_contacts_info.dart';
+import 'package:fluffychat/state/failure.dart';
+import 'package:flutter/material.dart';
+import 'package:fluffychat/pages/contacts/presentation/extension/list_presentation_contact_extension.dart';
 
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/pages/new_private_chat/qr_scanner_modal.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:get_it/get_it.dart';
 
 class NewPrivateChat extends StatefulWidget {
   const NewPrivateChat({Key? key}) : super(key: key);
@@ -21,65 +23,65 @@ class NewPrivateChat extends StatefulWidget {
 }
 
 class NewPrivateChatController extends State<NewPrivateChat> {
-  final TextEditingController controller = TextEditingController();
-  final FocusNode textFieldFocus = FocusNode();
-  final formKey = GlobalKey<FormState>();
-  bool loading = false;
+  static const debouncerIntervalInMilliseconds = 250;
 
-  // remove leading matrix.to from text field in order to simplify pasting
-  final List<TextInputFormatter> removeMatrixToFormatters = [
-    FilteringTextInputFormatter.deny(NewPrivateChatController.prefix),
-    FilteringTextInputFormatter.deny(NewPrivateChatController.prefixNoProtocol),
-  ];
+  late final LookupContactsInteractor _lookupNetworkContactsInteractor = GetIt.instance.get<LookupContactsInteractor>();
+  late final FetchContactsInteractor _fetchContactInteractor = GetIt.instance.get<FetchContactsInteractor>();
+  late final Debouncer<String> _debouncer;
 
-  static const Set<String> supportedSigils = {'@', '!', '#'};
+  final Map<ContactType, Set<PresentationContact>> _mapCacheContacts = {};
 
-  static const String prefix = 'https://matrix.to/#/';
-  static const String prefixNoProtocol = 'matrix.to/#/';
+  String searchKeyword = "";
 
-  void submitAction([_]) async {
-    controller.text = controller.text.trim();
-    if (!formKey.currentState!.validate()) return;
-    UrlLauncher(context, '$prefix${controller.text}').openMatrixToUrl();
+  final StreamController<Either<Failure, GetContactsSuccess>> networkStreamController = StreamController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDebouncer();
+    _getCurrentContact();
   }
-
-  String? validateForm(String? value) {
-    if (value!.isEmpty) {
-      return L10n.of(context)!.pleaseEnterAMatrixIdentifier;
-    }
-    if (!controller.text.isValidMatrixId ||
-        !supportedSigils.contains(controller.text.sigil)) {
-      return L10n.of(context)!.makeSureTheIdentifierIsValid;
-    }
-    if (controller.text == Matrix.of(context).client.userID) {
-      return L10n.of(context)!.youCannotInviteYourself;
-    }
-    return null;
-  }
-
-  void inviteAction() => FluffyShare.share(
-        'https://matrix.to/#/${Matrix.of(context).client.userID}',
-        context,
-      );
-
-  void openScannerAction() async {
-    if (PlatformInfos.isAndroid) {
-      final info = await DeviceInfoPlugin().androidInfo;
-      if (info.version.sdkInt < 21) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              L10n.of(context)!.unsupportedAndroidVersionLong,
-            ),
-          ),
-        );
-        return;
-      }
-    }
-    await showAdaptiveBottomSheet(
-      context: context,
-      builder: (_) => const QrScannerModal(),
+  
+   void _initializeDebouncer() {
+    _debouncer = Debouncer(
+      const Duration(milliseconds: debouncerIntervalInMilliseconds), 
+      initialValue: '',
     );
+    
+    _debouncer.values.listen((searchKeyword) async {
+      debugPrint(searchKeyword);
+      if (searchKeyword.isEmpty) {
+        _getCurrentContact();
+      } else {
+        _fetchRemoteContacts(searchKeyword);
+      }
+    });
+  }
+
+  void _getCurrentContact() {
+    _fetchContactInteractor.execute().listen((event) {
+      networkStreamController.add(event);
+    });
+  }
+
+  void _fetchRemoteContacts(String searchKeyword) {
+    _lookupNetworkContactsInteractor
+        .execute(cacheContacts: _mapCacheContacts[ContactType.server]?.toContacts(), query: ContactQuery(keyword: searchKeyword))
+        .listen((event) {
+          networkStreamController.add(event);
+        });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    networkStreamController.close();
+    _debouncer.cancel();
+  }
+
+  void onSearchBarChanged(String keyword) {
+    _debouncer.setValue(keyword);
+    searchKeyword = keyword;
   }
 
   @override

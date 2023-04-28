@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:vrouter/vrouter.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 
 import 'chat_list_body.dart';
 import 'chat_list_header.dart';
@@ -183,7 +184,7 @@ class ChatListView extends StatelessWidget {
                             destinations: getNavigationDestinations(context),
                           )
                         : null,
-                    floatingActionButtonLocation:FloatingActionButtonLocation.centerFloat,
+                    floatingActionButtonLocation:FloatingActionButtonLocation.endFloat,
                     floatingActionButton: selectMode == SelectMode.normal
                         ? KeyBoardShortcuts(
                             keysToPress: {
@@ -193,7 +194,10 @@ class ChatListView extends StatelessWidget {
                             onKeysPressed: () =>
                                 VRouter.of(context).to('/newprivatechat'),
                             helpLabel: L10n.of(context)!.newChat,
-                            child: const SizedBox.shrink(),
+                            child: TwakeFloatingActionButton(
+                              icon: Icons.mode_edit_outline_outlined,
+                              onTap: () => VRouter.of(context).to('/newprivatechat'),
+                            ),
                           )
                         : null,
                   ),

@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class TwakeIconButton extends StatelessWidget {
 
+  final BoxDecoration? buttonDecoration;
+
   final IconData? icon;
 
   final String? imagePath;
@@ -32,12 +34,14 @@ class TwakeIconButton extends StatelessWidget {
     this.fill, 
     this.weight, 
     this.margin = const EdgeInsets.all(0),
+    this.buttonDecoration,
   }): super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: margin,
+      decoration: buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
       child: InkWell(
         onTap: onPressed,
         customBorder: const CircleBorder(),
