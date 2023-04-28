@@ -4,7 +4,7 @@ publish_to: none
 version: 1.10.0+2331
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   adaptive_dialog: ^1.8.0+1
@@ -68,7 +68,7 @@ dependencies:
   native_imaging: ^0.1.0
   package_info_plus: ^1.3.0
   path_provider: ^2.0.9
-  permission_handler: ^10.0.0
+  permission_handler: ^10.2.0
   pin_code_text_field: ^1.8.0
   provider: ^6.0.2
   punycode: ^1.0.0
@@ -97,6 +97,17 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
+  flutter_contacts: ^1.1.6
+  after_layout: ^1.2.0
+  contacts_service:
+    git:
+      url: git@github.com:linagora/flutter_contacts.git
+      ref: master
+  equatable: ^2.0.5
+  get_it: ^7.2.0
+  dio: ^5.1.1
+  dartz: ^0.10.1
+  debounce_throttle: ^2.0.0
 dev_dependencies:
   dart_code_metrics: ^4.10.1
   flutter_lints: ^2.0.1
