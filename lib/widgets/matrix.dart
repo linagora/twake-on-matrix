@@ -12,6 +12,7 @@ import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions
 import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:fluffychat/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -270,6 +271,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       initSettings();
     }
     initLoadingDialog();
+
+    Logs().i("matrix:initState(): accessToken: ${client.accessToken}");
+    getIt.get<AuthorizationInterceptor>().accessToken = client.accessToken;
   }
 
   void initLoadingDialog() {

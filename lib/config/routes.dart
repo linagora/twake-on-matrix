@@ -1,3 +1,6 @@
+import 'package:fluffychat/pages/contacts/di/contact_di.dart';
+import 'package:fluffychat/pages/contacts/presentation/contacts_picker.dart';
+import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
 import 'package:flutter/material.dart';
 
 import 'package:vrouter/vrouter.dart';
@@ -50,6 +53,11 @@ class AppRoutes {
           path: '/rooms',
           widget: const ChatList(),
           stackedRoutes: [
+            VWidgetWithDependency(
+              di: ContactDI(),
+              path: '/contacts/picker',
+              widget: const ContactsPicker(),
+            ),
             VWidget(
               path: '/stories/create',
               widget: const AddStoryPage(),
@@ -104,7 +112,8 @@ class AppRoutes {
                 ),
               ],
             ),
-            VWidget(
+            VWidgetWithDependency(
+              di: ContactDI(),
               path: '/newprivatechat',
               widget: const NewPrivateChat(),
             ),
@@ -194,6 +203,10 @@ class AppRoutes {
                 ),
               ],
             ),
+            VWidget(
+              path: '/contacts/picker',
+              widget: const ContactsPicker(),
+            )
           ],
         ),
         VWidget(

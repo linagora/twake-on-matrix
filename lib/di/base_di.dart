@@ -12,7 +12,6 @@ abstract class BaseDI extends AbstractDI {
         scopeName: scopeName,
       );
     }
-
     onFinishedBind?.call();
   }
 

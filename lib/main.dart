@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/di/global/network_di.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -37,6 +38,8 @@ void main() async {
     queryParameters
         .addAll(Uri.parse(html.window.location.href).queryParameters);
   }
+
+  NetworkDI().bind();
 
   runApp(
     PlatformInfos.isMobile
