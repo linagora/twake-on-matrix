@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/global/network_di.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +36,8 @@ void main() async {
     queryParameters
         .addAll(Uri.parse(html.window.location.href).queryParameters);
   }
+
+  NetworkDI().bind();
 
   runApp(
     PlatformInfos.isMobile
