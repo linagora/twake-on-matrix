@@ -1,12 +1,17 @@
+import 'package:fluffychat/pages/contacts/di/contact_di.dart';
+import 'package:fluffychat/pages/contacts/presentation/contacts_picker.dart';
 import 'package:fluffychat/utils/custom_svg_icons.dart';
+import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:vrouter/vrouter.dart';
 
-class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
+class TwakeHeader extends StatelessWidget with ShowDialogMixin implements PreferredSizeWidget {
   final ChatListController controller;
 
   const TwakeHeader({Key? key, required this.controller}) : super(key: key);
@@ -35,11 +40,30 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 24.0, right: 12.0),
-          child: SvgPicture.asset(
-            CustomSVGIcons.editIcon,
-            color: Theme.of(context).colorScheme.primary,
-            width: 28,
-            height: 28,
+          child: InkWell(
+            onTap: () {
+              if (kIsWeb || MediaQuery.of(context).size.shortestSide >= 600) {
+                showDialogWithDependency(
+                  context: context,
+                  di: ContactDI(),
+                  pageBuilder: ((context, animation, secondaryAnimation) {
+                    return Center(
+                      child: Container(
+                        width: 500,
+                        height: 500,
+                        child: const ContactsPicker()),
+                    );
+                  }));
+              } else {
+                VRouter.of(context).to('/contacts/picker');
+              }
+            },
+            child: SvgPicture.asset(
+              CustomSVGIcons.editIcon,
+              color: Theme.of(context).colorScheme.primary,
+              width: 28,
+              height: 28,
+            ),
           ),
         ),
       ],
