@@ -2543,5 +2543,7 @@
   "noOtherDevicesFound": "Aucun autre appareil trouvé",
   "@noOtherDevicesFound": {},
   "noBackupWarning": "Attention ! Sans l'activation de la sauvegarde de la discussion, vous perdrez l'accès à vos messages chiffrés. Il est fortement recommandé d'activer la sauvegarde de la discussion avant de se déconnecter.",
-  "@noBackupWarning": {}
+  "@noBackupWarning": {},
+  "fileIsTooBigForServer": "Le serveur reporte que le fichier est trop large pour être envoyé.",
+  "@fileIsTooBigForServer": {}
 }
