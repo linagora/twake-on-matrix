@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/contacts/domain/usecases/get_local_contacts_int
 import 'package:fluffychat/pages/contacts/domain/usecases/get_network_contacts_interactor.dart';
 import 'package:fluffychat/pages/contacts/presentation/model/presentation_contacts_info.dart';
 import 'package:fluffychat/pages/contacts/presentation/contacts_picker_view.dart';
+import 'package:fluffychat/pages/dialog_creation/dialog_creation.dart';
 import 'package:fluffychat/state/failure.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +30,13 @@ class ContactsPickerController extends State<ContactsPicker> {
   late final GetNetworkContactsInteractor _getNetworkContactsInteractor = GetIt.instance.get<GetNetworkContactsInteractor>();
   late final Debouncer<String> _debouncer;
 
-  final Set<PresentationContact> selectedContacts = {};
+  Set<PresentationContact> selectedContacts = {};
   final Map<ContactType, Set<PresentationContact>> _mapCacheContacts = {};
 
   final StreamController<dartz.Either<Failure, GetContactsSuccess>> localStreamController = StreamController();
   final StreamController<dartz.Either<Failure, GetContactsSuccess>> networkStreamController = StreamController();
+
+  ValueNotifier<bool> haveSelectedContactsNotifier = ValueNotifier(false);
 
   @override
   void initState() {
@@ -103,6 +106,13 @@ class ContactsPickerController extends State<ContactsPicker> {
 
   void onSearchBarChanged(String searchKeyword) {
     _debouncer.setValue(searchKeyword);
+  }
+
+  void moveToCreateRoomDialog() {
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => DialogCreation(selectedContacts: selectedContacts,));
   }
 
   @override

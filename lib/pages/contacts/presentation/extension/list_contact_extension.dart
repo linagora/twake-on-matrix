@@ -6,7 +6,10 @@ extension ListContactExtension on Set<Contact> {
     final Set<PresentationContact> results = {};
     for (final contact in this) {
       for (final email in contact.emails) {
-        results.add(PresentationContact(displayName: contact.displayName, email: email));
+        results.add(PresentationContact(
+          displayName: contact.displayName, 
+          email: email,
+          matrixUserId: contact.matrixUserId));
       }
     }
     return results;

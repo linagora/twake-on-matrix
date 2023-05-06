@@ -93,6 +93,7 @@ class _ExpansionPanelContactListState extends State<ExpansionPanelContactList> {
             } else {
               selectedContacts.remove(contact);
             }
+            widget.contactsPickerController.haveSelectedContactsNotifier.value = selectedContacts.isNotEmpty;
           });
         }
       },

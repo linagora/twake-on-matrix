@@ -17,7 +17,6 @@ import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
@@ -116,10 +115,6 @@ class AppRoutes {
               path: '/newprivatechat',
               widget: const NewPrivateChat(),
             ),
-            VWidget(
-              path: '/newgroup',
-              widget: const NewGroup(),
-            ),
           ],
         ),
       ];
@@ -162,11 +157,6 @@ class AppRoutes {
                 VWidget(
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
-                  buildTransition: _fadeTransition,
-                ),
-                VWidget(
-                  path: '/newgroup',
-                  widget: const NewGroup(),
                   buildTransition: _fadeTransition,
                 ),
                 VNester(

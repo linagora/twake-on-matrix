@@ -1,14 +1,17 @@
+import 'package:fluffychat/pages/dialog_creation/dialog_creation.dart';
+import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 
-class NewGroupView extends StatelessWidget {
-  final NewGroupController controller;
+class DialogCreationView extends StatelessWidget {
 
-  const NewGroupView(this.controller, {Key? key}) : super(key: key);
+  final DialogCreationController controller;
+
+  const DialogCreationView({
+    super.key,
+    required this.controller
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,4 +59,5 @@ class NewGroupView extends StatelessWidget {
       ),
     );
   }
+
 }

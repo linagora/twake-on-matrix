@@ -6,11 +6,14 @@ class PresentationContact extends Equatable {
 
   final String displayName;
 
+  final String? matrixUserId;
+
   const PresentationContact({
     required this.email,
-    required this.displayName
+    required this.displayName,
+    this.matrixUserId
   });
   
   @override
-  List<Object?> get props => [email, displayName];
+  List<Object?> get props => [email, displayName, matrixUserId];
 }

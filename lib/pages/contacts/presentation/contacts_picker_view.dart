@@ -6,7 +6,6 @@ import 'package:fluffychat/pages/contacts/presentation/widget/search_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-
 class ContactsPickerView extends StatelessWidget {
 
   final ContactsPickerController contactsPickerController;
@@ -19,7 +18,11 @@ class ContactsPickerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Contacts')),
+      appBar: AppBar(
+        title: const Text('Contacts'),
+        actions: [
+          CreateGroupButton(controller: contactsPickerController),
+        ],),
       body: SingleChildScrollView(
         child: CustomScrollView(
         shrinkWrap: true,
@@ -53,5 +56,29 @@ class ContactsPickerView extends StatelessWidget {
         ],
       ),
       ));
+  }
+}
+
+class CreateGroupButton extends StatelessWidget {
+  
+  final ContactsPickerController controller;
+
+  const CreateGroupButton({
+    super.key,
+    required this.controller
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.haveSelectedContactsNotifier,
+      child: const Icon(Icons.navigate_next),
+      builder: (context, value, child) {
+        return IconButton(
+          onPressed: value 
+            ? controller.moveToCreateRoomDialog 
+            : null,
+          icon: child!);
+      });
   }
 }

@@ -5,6 +5,7 @@ class TomClientDataSource extends ContactDataSource {
   @override
   Future<Set<Contact>> getContacts() {
     return Future.delayed(Duration(seconds: 5), () => {
+      Contact(emails: {'qatest4@linagora.com'}, displayName: "qatest4", matrixUserId: "@qatest4:matrix.linagora.com"),
       Contact(emails: {'qkdo@linagora.com', 'quangkhai@gmail.com', 'qk123@gmail.com'}, displayName: 'Quang Khai'),
       Contact(emails: {'superman@linagora.com'}, displayName: 'bro whatup'),
       Contact(emails: {'supersonic@gmail.com'}, displayName: 'sonic'),
