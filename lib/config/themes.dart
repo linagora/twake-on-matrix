@@ -111,23 +111,86 @@ abstract class FluffyThemes {
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,
           primary: brightness == Brightness.light
-              ? LinagoraSysColors.material().primary
-              : LinagoraSysColors.material().primaryDark,
+            ? LinagoraSysColors.material().primary
+            : LinagoraSysColors.material().primaryDark,
           onPrimary: brightness == Brightness.light
-              ? LinagoraSysColors.material().onPrimary
-              : LinagoraSysColors.material().onPrimaryDark,
+            ? LinagoraSysColors.material().onPrimary
+            : LinagoraSysColors.material().onPrimaryDark,
+          primaryContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().primaryContainer
+            : LinagoraSysColors.material().primaryContainerDark,
+          onPrimaryContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().onPrimaryContainer
+            : LinagoraSysColors.material().onPrimaryContainerDark,
+          inversePrimary: brightness == Brightness.light
+            ? LinagoraSysColors.material().inversePrimary
+            : LinagoraSysColors.material().inversePrimaryDark,
+          tertiary: brightness == Brightness.light
+            ? LinagoraSysColors.material().tertiary
+            : LinagoraSysColors.material().tertiaryDark,
+          onTertiary: brightness == Brightness.light
+            ? LinagoraSysColors.material().onTertiary
+            : LinagoraSysColors.material().onTertiaryDark,
           tertiaryContainer: brightness == Brightness.light
-              ? LinagoraSysColors.material().tertiaryContainer
-              : LinagoraSysColors.material().tertiaryContainerDark,
+            ? LinagoraSysColors.material().tertiaryContainer
+            : LinagoraSysColors.material().tertiaryContainerDark,
           onTertiaryContainer: brightness == Brightness.light
-              ? LinagoraSysColors.material().onTertiaryContainer
-              : LinagoraSysColors.material().onTertiaryContainerDark,
+            ? LinagoraSysColors.material().onTertiaryContainer
+            : LinagoraSysColors.material().onTertiaryContainerDark,
           secondary: brightness == Brightness.light
-              ? LinagoraSysColors.material().secondary
-              : LinagoraSysColors.material().secondaryDark,
+            ? LinagoraSysColors.material().secondary
+            : LinagoraSysColors.material().secondaryDark,
           onSecondary: brightness == Brightness.light
-              ? LinagoraSysColors.material().onSecondary
-              : LinagoraSysColors.material().onSecondaryDark,
+            ? LinagoraSysColors.material().onSecondary
+            : LinagoraSysColors.material().onSecondaryDark,
+          secondaryContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().secondaryContainer
+            : LinagoraSysColors.material().secondaryContainerDark,
+          onSecondaryContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().onSecondaryContainer
+            : LinagoraSysColors.material().onSecondaryContainerDark,
+          background: brightness == Brightness.light
+            ? LinagoraSysColors.material().background
+            : LinagoraSysColors.material().backgroundDark,
+          onBackground: brightness == Brightness.light
+            ? LinagoraSysColors.material().onBackground
+            : LinagoraSysColors.material().onBackgroundDark,
+          error: brightness == Brightness.light
+            ? LinagoraSysColors.material().error
+            : LinagoraSysColors.material().errorDark,
+          onError: brightness == Brightness.light
+            ? LinagoraSysColors.material().onError
+            : LinagoraSysColors.material().onErrorDark,
+          errorContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().errorContainer
+            : LinagoraSysColors.material().errorContainerDark,
+          onErrorContainer: brightness == Brightness.light
+            ? LinagoraSysColors.material().onErrorContainer
+            : LinagoraSysColors.material().onErrorContainerDark,
+          surface: brightness == Brightness.light
+            ? LinagoraSysColors.material().surface
+            : LinagoraSysColors.material().surfaceDark,
+          onSurface: brightness == Brightness.light
+            ? LinagoraSysColors.material().onSurface
+            : LinagoraSysColors.material().onSurfaceDark,
+          surfaceTint: brightness == Brightness.light
+              ? LinagoraSysColors.material().surfaceTint
+              : LinagoraSysColors.material().surfaceTintDark,
+          surfaceVariant: brightness == Brightness.light
+              ? LinagoraSysColors.material().surfaceVariant
+              : LinagoraSysColors.material().surfaceVariantDark,
+          onSurfaceVariant: brightness == Brightness.light
+            ? LinagoraSysColors.material().onSurfaceVariant
+            : LinagoraSysColors.material().onSurfaceVariantDark,
+          inverseSurface: brightness == Brightness.light
+            ? LinagoraSysColors.material().inverseSurface
+            : LinagoraSysColors.material().inverseSurfaceDark,
+          onInverseSurface: brightness == Brightness.light
+            ? LinagoraSysColors.material().onInverseSurface
+            : LinagoraSysColors.material().onInverseSurfaceDark,
+          shadow: brightness == Brightness.light
+            ? LinagoraSysColors.material().shadow
+            : LinagoraSysColors.material().shadowDark,
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
