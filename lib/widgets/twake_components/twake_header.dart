@@ -1,9 +1,8 @@
-import 'package:fluffychat/utils/custom_svg_icons.dart';
-import 'package:flutter/material.dart';
-
-
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
+import 'package:fluffychat/utils/custom_svg_icons.dart';
+import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -14,32 +13,28 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: 52.0,
+      toolbarHeight: TwakeHeaderStyle.toolbarHeight,
       automaticallyImplyLeading: false,
-      leadingWidth: 70,
+      leadingWidth: TwakeHeaderStyle.leadingWidth,
       leading: SizedBox(
         width: 0,
         child: ClientChooserButton(controller),
       ),
       title: SvgPicture.asset(
-        'assets/twake.svg',
-        color: Theme.of(context).colorScheme.background,
+        CustomSVGIcons.titleChatList,
+        colorFilter: ColorFilter.mode(
+          Theme.of(context).colorScheme.onBackground,
+          BlendMode.srcIn,
+        ),
+        height: TwakeHeaderStyle.titleHeight,
       ),
       centerTitle: true,
-      actions: [
-        SvgPicture.asset(
-          CustomSVGIcons.addIcon,
-          color: Theme.of(context).colorScheme.primary,
-          width: 28,
-          height: 28,
-        ),
+      actions: const [
         Padding(
-          padding: const EdgeInsets.only(left: 24.0, right: 12.0),
-          child: SvgPicture.asset(
-            CustomSVGIcons.editIcon,
-            color: Theme.of(context).colorScheme.primary,
-            width: 28,
-            height: 28,
+          padding: EdgeInsets.only(left: 16.0, right: 16.0),
+          child: Icon(
+            Icons.more_vert,
+            size: TwakeHeaderStyle.moreIconSize,
           ),
         ),
       ],
