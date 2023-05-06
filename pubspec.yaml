@@ -138,18 +138,15 @@ flutter:
     - family: NotoEmoji
       fonts:
         - asset: fonts/NotoEmoji/NotoColorEmoji.ttf
-    - family: SFProRounded
-      fonts:
-        - asset: fonts/SFPro/SF-Pro-Rounded-Regular.ttf
-    - family: SFProDisplayHeavy
-      fonts:
-        - asset: fonts/SFPro/SFProDisplay-Heavy.ttf
-    - family: SFProText
-      fonts:
-        - asset: fonts/SFPro/SFProText-Regular.ttf
     - family: Inter
       fonts:
-        - asset: fonts/Inter/Inter-VariableFont_slnt,wght.ttf
+        - asset: fonts/Inter/Inter-Bold.ttf
+          weight: 700
+        - asset: fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+        - asset: fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: fonts/Inter/Inter-Regular.ttf
 
 msix_config:
   display_name: FluffyChat

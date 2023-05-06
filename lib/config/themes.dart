@@ -19,8 +19,8 @@ abstract class FluffyThemes {
       !VRouter.of(context).path.startsWith('/settings');
 
   static const fallbackTextStyle = TextStyle(
-    fontFamily: 'Roboto',
-    fontFamilyFallback: ['NotoEmoji'],
+    fontFamily: 'Inter',
+    fontFamilyFallback: ['Roboto'],
   );
 
   static var fallbackTextTheme = const TextTheme(
@@ -48,8 +48,8 @@ abstract class FluffyThemes {
         useMaterial3: true,
         textTheme: PlatformInfos.isDesktop || PlatformInfos.isWeb
             ? brightness == Brightness.light
-                ? Typography.material2018().black.merge(fallbackTextTheme)
-                : Typography.material2018().white.merge(fallbackTextTheme)
+                ? Typography.material2021().black.merge(fallbackTextTheme)
+                : Typography.material2021().white.merge(fallbackTextTheme)
             : null,
         snackBarTheme: const SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
