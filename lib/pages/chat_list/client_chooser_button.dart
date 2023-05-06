@@ -1,16 +1,14 @@
-import 'package:fluffychat/widgets/twake_components/twake_avatar.dart';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/pages/chat_list/client_chooser_button_style.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import '../../utils/fluffy_share.dart';
 import 'chat_list.dart';
 
@@ -206,30 +204,25 @@ class ClientChooserButton extends StatelessWidget {
           PopupMenuButton<Object>(
             onSelected: (o) => _clientSelected(o, context),
             itemBuilder: _bundleMenuItems,
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(99),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Row(
-                  children: [
-                    TwakeAvatar(
-                      mxContent: snapshot.data?.avatarUrl,
-                      name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
-                      size: 36,
-                      fontSize: 20,
-                    ),
-                    const SizedBox(width: 8.0),
-                    SvgPicture.asset(
-                      'assets/arrow_icon.svg',
-                      color: const Color(0x9999a2ad),
-                    )
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+              child: Row(
+                children: [
+                  Avatar(
+                    mxContent: snapshot.data?.avatarUrl,
+                    name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
+                    size: ClientChooserButtonStyle.avatarSizeInAppBar,
+                    fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: ClientChooserButtonStyle.dropDownIconSize,
+                  ),
+                ],
               ),
             ),
           ),
-        ],
+        ]
       ),
     );
   }

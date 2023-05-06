@@ -1,10 +1,9 @@
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-
 import 'package:vrouter/vrouter.dart';
 
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'app_config.dart';
 
 abstract class FluffyThemes {
@@ -70,14 +69,17 @@ abstract class FluffyThemes {
           filled: true,
         ),
         appBarTheme: AppBarTheme(
-          surfaceTintColor:
-              brightness == Brightness.light ? Colors.white : Colors.black,
-          shadowColor: Colors.black.withAlpha(64),
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: brightness.reversed,
             statusBarBrightness: brightness,
           ),
+          foregroundColor: brightness == Brightness.light
+              ? LinagoraSysColors.material().onBackground
+              : LinagoraSysColors.material().onBackgroundDark,
+          backgroundColor: brightness == Brightness.light
+              ? LinagoraSysColors.material().background
+              : LinagoraSysColors.material().backgroundDark,
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
