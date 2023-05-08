@@ -1,18 +1,14 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
-
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/custom_svg_icons.dart';
 
 import '../../config/themes.dart';
 import '../../widgets/avatar/avatar.dart';
@@ -178,10 +174,8 @@ class ChatListItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             softWrap: false,
-                            style: const TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontFamily: 'SFProDisplayHeavy',
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.merge(const TextStyle(overflow: TextOverflow.ellipsis)),
                           ),
                         ),
                         Padding(
@@ -190,16 +184,14 @@ class ChatListItem extends StatelessWidget {
                             spacing: 6,
                             children: [
                               if (room.isFavourite)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.pinIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                                const Icon(
+                                  Icons.push_pin_outlined,
+                                  size: 20,
                                 ),
                               if (isMuted)
-                                SvgPicture.asset(
-                                  CustomSVGIcons.muteIcon,
-                                  width: 16,
-                                  color: Theme.of(context).colorScheme.primary,
+                                const Icon(
+                                  Icons.volume_off_outlined,
+                                  size: 20,
                                 ),
                             ],
                           ),
@@ -211,13 +203,7 @@ class ChatListItem extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 4.0),
                     child: Text(
                       room.timeCreated.localizedTimeShort(context),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'SFProText',
-                        color: unread
-                            ? Theme.of(context).colorScheme.secondary
-                            : Theme.of(context).textTheme.bodyMedium!.color,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
                 ],
@@ -291,15 +277,7 @@ class ChatListItem extends StatelessWidget {
                                 softWrap: false,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                  decoration: room.lastEvent?.redacted == true
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
                               );
                             },
                           ),
@@ -351,11 +329,6 @@ class ChatListItem extends StatelessWidget {
               ),
               onTap: () => clickAction(context),
             ),
-            const Divider(
-              height: 0,
-              indent: 82,
-              thickness: 0.6,
-            )
           ],
         ),
       ),
