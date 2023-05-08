@@ -1,21 +1,19 @@
-import 'package:flutter/material.dart';
-
 import 'package:animations/animations.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/chat_list/stories_header.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/profile_bottom_sheet.dart';
 import 'package:fluffychat/widgets/public_room_bottom_sheet.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
+
 import '../../config/themes.dart';
 import '../../widgets/connection_status_header.dart';
 import '../../widgets/matrix.dart';
@@ -64,11 +62,7 @@ class ChatListViewBody extends StatelessWidget {
           }
           if (controller.waitForFirstSync && client.prevBatch != null) {
             final rooms = controller.filteredRooms;
-            final displayStoriesHeader = {
-                  ActiveFilter.allChats,
-                  ActiveFilter.messages,
-                }.contains(controller.activeFilter) &&
-                client.storiesRooms.isNotEmpty;
+            const displayStoriesHeader = false;
             return ListView.builder(
               controller: controller.scrollController,
               // add +1 space below in order to properly scroll below the spaces bar
