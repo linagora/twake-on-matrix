@@ -1,23 +1,20 @@
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'package:badges/badges.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:vrouter/vrouter.dart';
+
 import 'chat_list_body.dart';
 import 'chat_list_header.dart';
-import 'select_chat_list_fab/select_chat_list_fab.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
@@ -196,11 +193,7 @@ class ChatListView extends StatelessWidget {
                             onKeysPressed: () =>
                                 VRouter.of(context).to('/newprivatechat'),
                             helpLabel: L10n.of(context)!.newChat,
-                            child: PlatformInfos.isDesktop || PlatformInfos.isWeb
-                                ? const SizedBox.shrink()
-                                : SelectChatListFloatingActionButton(
-                                    controller: controller,
-                            ),
+                            child: const SizedBox.shrink(),
                           )
                         : null,
                   ),
