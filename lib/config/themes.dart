@@ -19,7 +19,7 @@ abstract class FluffyThemes {
 
   static const fallbackTextStyle = TextStyle(
     fontFamily: 'Inter',
-    fontFamilyFallback: ['Roboto'],
+    fontFamilyFallback: ['Inter'],
   );
 
   static var fallbackTextTheme = const TextTheme(
@@ -45,6 +45,7 @@ abstract class FluffyThemes {
       ThemeData(
         visualDensity: VisualDensity.standard,
         useMaterial3: true,
+        fontFamily: 'Inter',
         textTheme: PlatformInfos.isDesktop || PlatformInfos.isWeb
             ? brightness == Brightness.light
                 ? Typography.material2021().black.merge(fallbackTextTheme)
