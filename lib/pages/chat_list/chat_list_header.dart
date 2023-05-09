@@ -48,6 +48,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                               textInputAction: TextInputAction.search,
                               onChanged: controller.onSearchEnter,
                               decoration: InputDecoration(
+                                filled: true,
                                 contentPadding: const EdgeInsets.all(0),
                                 fillColor: Theme.of(context).colorScheme.surface,
                                 border: OutlineInputBorder(
