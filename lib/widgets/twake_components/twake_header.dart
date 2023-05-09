@@ -21,11 +21,9 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
         child: ClientChooserButton(controller),
       ),
       title: SvgPicture.asset(
-        CustomSVGIcons.titleChatList,
-        colorFilter: ColorFilter.mode(
-          Theme.of(context).colorScheme.onBackground,
-          BlendMode.srcIn,
-        ),
+        Theme.of(context).brightness == Brightness.light
+            ? CustomSVGIcons.titleChatListLight
+            : CustomSVGIcons.titleChatListDark,
         height: TwakeHeaderStyle.titleHeight,
       ),
       centerTitle: true,
