@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
@@ -168,7 +169,7 @@ class ChatListItem extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        Expanded(
+                        Flexible(
                           child: Text(
                             displayname,
                             overflow: TextOverflow.ellipsis,
@@ -178,24 +179,24 @@ class ChatListItem extends StatelessWidget {
                                 ?.merge(const TextStyle(overflow: TextOverflow.ellipsis)),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Wrap(
-                            spacing: 6,
-                            children: [
-                              if (room.isFavourite)
-                                const Icon(
-                                  Icons.push_pin_outlined,
-                                  size: 20,
-                                ),
-                              if (isMuted)
-                                const Icon(
-                                  Icons.volume_off_outlined,
-                                  size: 20,
-                                ),
-                            ],
+                        if (room.isFavourite)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4.0),
+                            child: Icon(
+                              Icons.push_pin_outlined,
+                              size: ChatListItemStyle.readIconSize,
+                              color: ChatListItemStyle.readIconColor,
+                            ),
                           ),
-                        ),
+                        if (isMuted)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4.0),
+                            child: Icon(
+                              Icons.volume_off_outlined,
+                              size: ChatListItemStyle.readIconSize,
+                              color: ChatListItemStyle.readIconColor,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -205,7 +206,7 @@ class ChatListItem extends StatelessWidget {
                       room.timeCreated.localizedTimeShort(context),
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
-                  ),
+                  )
                 ],
               ),
               subtitle: Row(
@@ -231,7 +232,7 @@ class ChatListItem extends StatelessWidget {
                     child: Icon(
                       Icons.edit_outlined,
                       color: Theme.of(context).colorScheme.secondary,
-                      size: 14,
+                      size: ChatListItemStyle.editIconSize,
                     ),
                   ),
                   Expanded(
