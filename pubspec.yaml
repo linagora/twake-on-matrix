@@ -97,9 +97,14 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
-  overflow_view: ^0.3.1 
+  overflow_view: ^0.3.1
+  dio: ^5.1.2
+  get_it: ^7.6.0
+  equatable: ^2.0.5
+  json_annotation: ^4.8.1
 dev_dependencies:
-  dart_code_metrics: ^4.10.1
+  build_runner: ^2.3.3
+  dart_code_metrics: ^5.7.3
   flutter_lints: ^2.0.1
   flutter_native_splash: ^2.0.3+1
   flutter_test:
@@ -107,6 +112,7 @@ dev_dependencies:
   import_sorter: ^4.6.0
   integration_test:
     sdk: flutter
+  json_serializable: ^6.6.2
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
 
