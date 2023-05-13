@@ -1,13 +1,13 @@
+import 'package:collection/collection.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:collection/collection.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'utils/background_push.dart';
 import 'widgets/fluffy_chat_app.dart';
 import 'widgets/lock_screen.dart';
@@ -25,6 +25,8 @@ void main() async {
   final firstClient = clients.firstOrNull;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
+
+  GetItInitializer().setUp();
 
   if (PlatformInfos.isMobile) {
     BackgroundPush.clientOnly(clients.first);
