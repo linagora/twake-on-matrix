@@ -54,7 +54,9 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Run widget test
-        run: flutter test
+        run: |
+          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+          flutter test
 
   # integration_test:
   #   name: Integration test
