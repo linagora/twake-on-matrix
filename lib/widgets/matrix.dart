@@ -454,7 +454,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (tomServer != null) {
       _setUpToMServer(tomServer);
     }
-
+    final identityServer = loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
+    if (identityServer != null) {
+      _setUpIdentityServer(identityServer);
+    }
   }
 
   void _setUpToMServer(ToMServerInformation tomServer) {
@@ -464,6 +467,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       );
       tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
     }
+  }
+
+  void _setUpIdentityServer(IdentityServerInformation identityServer) {
+    final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.identityServerUrlInterceptorName,
+    );
+    identityServerUrlInterceptor.changeBaseUrl(identityServer.baseUrl.toString());
   }
 
   @override

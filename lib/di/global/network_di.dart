@@ -10,7 +10,11 @@ import 'package:get_it/get_it.dart';
 class NetworkDI extends BaseDI {
 
   static const tomServerUrlInterceptorName = 'tomServerDynamicUrlInterceptor';
-  static const identityUrlInterceptorName = 'identityDynamicUrlInterceptor';
+  static const tomServerDioName = 'tomServerDioName';
+
+  static const identityServerUrlInterceptorName = 'identityDynamicUrlInterceptor';
+  static const identityServerDioName = 'identityServerName';
+
   static const acceptHeaderDefault = 'application/json';
   static const contentTypeHeaderDefault = 'application/json';
 
@@ -38,18 +42,31 @@ class NetworkDI extends BaseDI {
     );
     get.registerLazySingleton(
       () => DynamicUrlInterceptors(),
-      instanceName: identityUrlInterceptorName,
+      instanceName: identityServerUrlInterceptorName,
     );
   }
 
   void _bindDio(GetIt get) {
+    _bindDioForTomServer(get);
+    _bindDioForIdentityServer(get);
+  }
+
+  void _bindDioForTomServer(GetIt get) {
     final dio = Dio(get.get<BaseOptions>());
     dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: tomServerUrlInterceptorName));
-    dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: identityUrlInterceptorName));
     if (kDebugMode) {
       dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
     }
-    get.registerLazySingleton<Dio>(() => dio);
+    get.registerLazySingleton<Dio>(() => dio, instanceName: tomServerDioName);
+  }
+
+  void _bindDioForIdentityServer(GetIt get) {
+    final dio = Dio(get.get<BaseOptions>());
+    dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: identityServerUrlInterceptorName));
+    if (kDebugMode) {
+      dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    }
+    get.registerLazySingleton<Dio>(() => dio, instanceName: identityServerDioName);
   }
 
   void _bindDioClient(GetIt get) {
