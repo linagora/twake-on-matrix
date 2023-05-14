@@ -1,7 +1,7 @@
 #!/bin/sh -ve
 git apply ./scripts/enable-android-google-services.patch
 flutter clean
-flutter pub get
+flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
 cd ios
 rm -rf Pods
 rm -f Podfile.lock
