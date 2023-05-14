@@ -56,12 +56,6 @@ void main() {
 
       final actual = DiscoveryInformation.fromJson(multipleCustomizationFields);
 
-      final requestUri = Uri(path: '_matrix/client/versions');
-      final server = Uri.parse('https://${actual.mHomeserver.baseUrl.toString()}');
-      print(server.toString());
-      final request = server.resolveUri(requestUri);
-      print(request.toString());
-
       expect(actual, isNotNull);
       expect(actual.additionalProperties['m.integrations'], isNotNull);
       expect(actual.additionalProperties['t.server'], isNotNull);

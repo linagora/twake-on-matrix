@@ -2,12 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/di/global/network_di.dart';
+import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:fluffychat/domain/model/tom_server_information.dart';
+import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/uia_request_manager.dart';
+import 'package:fluffychat/utils/voip_plugin.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,11 +31,6 @@ import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vrouter/vrouter.dart';
 
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/uia_request_manager.dart';
-import 'package:fluffychat/utils/voip_plugin.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
@@ -171,10 +175,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           .where((l) => l == LoginState.loggedIn)
           .first
           .then((_) {
+            Logs().d('MatrixState::getLoginClient() Login successful');
         if (!widget.clients.contains(_loginClientCandidate)) {
           widget.clients.add(_loginClientCandidate!);
         }
         ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
+        Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
         _loginClientCandidate = null;
         widget.router!.currentState!.to('/rooms');
@@ -341,6 +347,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           );
         }
       } else {
+        Logs().d('MatrixState::_registerSubs: $state');
+        setUpToMServices(c);
         widget.router?.currentState?.to(
           state == LoginState.loggedIn ? '/rooms' : '/home',
           queryParameters: widget.router?.currentState?.queryParameters ?? {},
@@ -396,6 +404,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     _initWithStore();
 
     for (final c in widget.clients) {
+      Logs().d('MatrixState::initMatrix: ${c.clientName} calling registerSubs');
       _registerSubs(c.clientName);
     }
 
@@ -438,6 +447,23 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       return;
     }
     voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
+  }
+
+  void setUpToMServices(Client client) {
+    final tomServer = loginHomeserverSummary?.tomServer;
+    if (tomServer != null) {
+      _setUpToMServer(tomServer);
+    }
+
+  }
+
+  void _setUpToMServer(ToMServerInformation tomServer) {
+    if (tomServer.baseUrl != null) {
+      final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+        instanceName: NetworkDI.tomServerUrlInterceptorName,
+      );
+      tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
+    }
   }
 
   @override
