@@ -2566,5 +2566,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "channels": "Channels"
+    "channels": "Channels",
+    "chatMessage": "Chat message"
 }
