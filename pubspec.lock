@@ -1267,11 +1267,10 @@ packages:
   overflow_view:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "4aa125e438251b5e5fed525dde2f587734994c6b"
-      url: "git@github.com:sherlockvn/overflow_view.git"
-    source: git
+      name: overflow_view
+      sha256: "46741be6ccc3d10ac4e14907c1a0e1799857ac4bbea8a485ac803e32637cc326"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.3.1"
   package_config:
     dependency: transitive

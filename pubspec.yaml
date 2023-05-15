@@ -97,10 +97,7 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
-  overflow_view: 
-    git:
-      url: git@github.com:sherlockvn/overflow_view.git
-      ref: master
+  overflow_view: ^0.3.1 
 dev_dependencies:
   dart_code_metrics: ^4.10.1
   flutter_lints: ^2.0.1
@@ -144,7 +141,24 @@ flutter:
         - asset: fonts/NotoEmoji/NotoColorEmoji.ttf
     - family: Inter
       fonts:
-        - asset: fonts/Inter/Inter-VariableFont_slnt,wght.ttf
+        - asset: fonts/Inter/Inter-Thin.ttf
+          weight: 100
+        - asset: fonts/Inter/Inter-ExtraLight.ttf
+          weight: 200
+        - asset: fonts/Inter/Inter-Light.ttf
+          weight: 300
+        - asset: fonts/Inter/Inter-Regular.ttf
+          weight: 400
+        - asset: fonts/Inter/Inter-Medium.ttf
+          weight: 500
+        - asset: fonts/Inter/Inter-SemiBold.ttf
+          weight: 600
+        - asset: fonts/Inter/Inter-Bold.ttf
+          weight: 700
+        - asset: fonts/Inter/Inter-ExtraBold.ttf
+          weight: 800
+        - asset: fonts/Inter/Inter-Black.ttf
+          weight: 900
 
 msix_config:
   display_name: FluffyChat
