@@ -1092,7 +1092,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: e2681cddaf89d4e7e9c5d8a868edb8c8b38fd790
+      resolved-ref: ebc6ee5031f37b260c5d8241b44a35a1e4c0aea4
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
@@ -1264,6 +1264,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  overflow_view:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "4aa125e438251b5e5fed525dde2f587734994c6b"
+      url: "git@github.com:sherlockvn/overflow_view.git"
+    source: git
+    version: "0.3.1"
   package_config:
     dependency: transitive
     description:
@@ -2093,6 +2102,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  value_layout_builder:
+    dependency: transitive
+    description:
+      name: value_layout_builder
+      sha256: "98202ec1807e94ac72725b7f0d15027afde513c55c69ff3f41bcfccb950831bc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   vector_graphics:
     dependency: transitive
     description:

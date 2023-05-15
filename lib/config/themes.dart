@@ -1,6 +1,7 @@
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -8,6 +9,7 @@ import 'app_config.dart';
 
 abstract class FluffyThemes {
   static const double columnWidth = 360.0;
+  static const double iconSize = 24.0;
 
   static bool isColumnModeByWidth(double width) => width > columnWidth * 2 + 64;
 
@@ -67,7 +69,13 @@ abstract class FluffyThemes {
             borderSide: BorderSide.none,
             borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
           ),
-          filled: true,
+          hintStyle: fallbackTextTheme.bodyLarge?.merge(
+            TextStyle(
+              fontSize: 17,
+              color: LinagoraRefColors.material().neutralVariant[60],
+              overflow: TextOverflow.ellipsis
+            ),
+          )
         ),
         appBarTheme: AppBarTheme(
           systemOverlayStyle: SystemUiOverlayStyle(
@@ -199,6 +207,22 @@ abstract class FluffyThemes {
           cursorColor: brightness == Brightness.light
               ? LinagoraSysColors.material().primary
               : LinagoraSysColors.material().primaryDark,
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: ButtonStyle(
+            iconSize: MaterialStateProperty.all(iconSize),
+            iconColor: MaterialStateProperty.all(
+              brightness == Brightness.light
+                ? Colors.black
+                : Colors.white
+            ),
+          )
+        ),
+        iconTheme: IconThemeData(
+          size: iconSize,
+          color: brightness == Brightness.light
+            ? LinagoraSysColors.material().onSurface
+            : LinagoraSysColors.material().onSurfaceDark
         ),
       );
 }
