@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+
+
 extension StringCasingExtension on String {
   String removeDiacritics() {
     const withDia =
@@ -33,5 +38,9 @@ extension StringCasingExtension on String {
     }
 
     return codeUnits.toString().toUpperCase();
+  }
+
+  String capitalize(BuildContext context) {
+    return toBeginningOfSentenceCase(this, L10n.of(context)!.localeName) ?? this;
   }
 }

@@ -97,6 +97,10 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
+  overflow_view: 
+    git:
+      url: git@github.com:sherlockvn/overflow_view.git
+      ref: master
 dev_dependencies:
   dart_code_metrics: ^4.10.1
   flutter_lints: ^2.0.1
