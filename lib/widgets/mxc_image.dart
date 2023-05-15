@@ -166,10 +166,16 @@ class _MxcImageState extends State<MxcImage> {
           data == null ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       firstChild: placeholder(context),
       secondChild: data == null || data.isEmpty
-          ? Container()
+          ? Container(
+            decoration: BoxDecoration(
+              borderRadius: widget.rounded
+                  ? BorderRadius.circular(12.0)
+                  : BorderRadius.zero,
+            ),
+          )
           : ClipRRect(
               borderRadius: widget.rounded
-                  ? BorderRadius.circular(8.0)
+                  ? BorderRadius.circular(12.0)
                   : BorderRadius.zero,
               child: Image.memory(
                 data,

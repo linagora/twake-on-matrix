@@ -61,7 +61,7 @@ abstract class AppConfig {
   static const String emojiFontName = 'Noto Emoji';
   static const String emojiFontUrl =
       'https://github.com/googlefonts/noto-emoji/';
-  static const double borderRadius = 10.0;
+  static const double borderRadius = 20.0;
   static const double columnWidth = 360.0;
 
   static void loadFromJson(Map<String, dynamic> json) {
