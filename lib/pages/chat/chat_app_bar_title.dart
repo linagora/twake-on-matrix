@@ -1,4 +1,6 @@
+import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -44,66 +46,69 @@ class ChatAppBarTitle extends StatelessWidget {
               ? null
               : () =>
                   VRouter.of(context).toSegments(['rooms', room.id, 'details']),
-      child: Row(
-        children: [
-          Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 3, top: 3),
-                child: Hero(
-                  tag: 'content_banner',
-                  child: Avatar(
-                    fontSize: 15,
-                    mxContent: room.avatar,
-                    name: room.getLocalizedDisplayname(
-                      MatrixLocals(L10n.of(context)!),
-                    ),
-                    size: 36,
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: room.isDirectChat == true
-                    ? Container(
-                        width: 15,
-                        height: 15,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
-                          color:
-                              room.directChatPresence?.currentlyActive == true
-                                  ? const Color(0xFF5AD439)
-                                  : const Color(0xFF818C99),
-                          shape: BoxShape.circle,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Row(
+          children: [
+            Stack(
               children: [
-                Text(
-                  room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Padding(
+                  padding: const EdgeInsets.only(right: 3, top: 3),
+                  child: Hero(
+                    tag: 'content_banner',
+                    child: Avatar(
+                      fontSize: ChatAppBarTitleStyle.avatarFontSize,
+                      mxContent: room.avatar,
+                      name: room.getLocalizedDisplayname(
+                        MatrixLocals(L10n.of(context)!),
+                      ),
+                      size: ChatAppBarTitleStyle.avatarSize,
+                    ),
                   ),
                 ),
-                _buildStatusContent(context, room),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: room.isDirectChat == true
+                      ? Container(
+                          width: ChatAppBarTitleStyle.statusSize,
+                          height: ChatAppBarTitleStyle.statusSize,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: ChatAppBarTitleStyle.statusBorderColor,
+                              width: ChatAppBarTitleStyle.statusBorderSize,
+                            ),
+                            color:
+                                room.directChatPresence?.currentlyActive == true
+                                    ? ChatAppBarTitleStyle.currentlyActiveColor
+                                    : ChatAppBarTitleStyle.currentlyInactiveColor,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName
+                    ),
+                  ),
+                  _buildStatusContent(context, room),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -111,12 +116,12 @@ class ChatAppBarTitle extends StatelessWidget {
   _buildStatusContent(BuildContext context, Room room) {
     if (room.getLocalizedTypingText(context).isEmpty) {
       return Text(
-        room.getLocalizedStatus(context),
+        room.getLocalizedStatus(context).capitalize(context),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
+        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+          color: Theme.of(context).colorScheme.tertiary,
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent
         ),
       );
     } else {
@@ -137,6 +142,7 @@ class ChatAppBarTitle extends StatelessWidget {
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w400,
+              letterSpacing: 0.5
             ),
           )
         ],
