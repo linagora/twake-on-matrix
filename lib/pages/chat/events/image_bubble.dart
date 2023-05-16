@@ -26,7 +26,7 @@ class ImageBubble extends StatelessWidget {
     this.backgroundColor,
     this.fit = BoxFit.cover,
     this.thumbnailOnly = true,
-    this.width = 400,
+    this.width = 256,
     this.height = 300,
     this.animated = false,
     this.onTap,
@@ -87,6 +87,9 @@ class ImageBubble extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: const Duration(seconds: 1),
           child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20)
+            ),
             constraints: maxSize
                 ? BoxConstraints(
                     maxWidth: width,
