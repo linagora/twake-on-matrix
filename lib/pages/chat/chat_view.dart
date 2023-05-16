@@ -1,11 +1,11 @@
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/pages/chat/chat_view_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
@@ -36,33 +36,33 @@ class ChatView extends StatelessWidget {
     if (controller.selectMode) {
       return [
         if (controller.canEditSelectedEvents)
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
+          TwakeIconButton(
+            icon: Icons.edit_outlined,
             tooltip: L10n.of(context)!.edit,
             onPressed: controller.editSelectedEventAction,
           ),
-        IconButton(
-          icon: const Icon(Icons.copy_outlined),
+        TwakeIconButton(
+          icon: Icons.copy_outlined,
           tooltip: L10n.of(context)!.copy,
           onPressed: controller.copyEventsAction,
         ),
         if (controller.canSaveSelectedEvent)
           // Use builder context to correctly position the share dialog on iPad
           Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.adaptive.share),
+            builder: (context) => TwakeIconButton(
+              icon: Icons.adaptive.share,
               tooltip: L10n.of(context)!.share,
               onPressed: () => controller.saveSelectedEvent(context),
             ),
           ),
         if (controller.canRedactSelectedEvents)
-          IconButton(
-            icon: const Icon(Icons.delete_outlined),
+          TwakeIconButton(
+            icon: Icons.delete_outlined,
             tooltip: L10n.of(context)!.redactMessage,
             onPressed: controller.redactEventsAction,
           ),
-        IconButton(
-          icon: const Icon(Icons.push_pin_outlined),
+        TwakeIconButton(
+          icon: Icons.push_pin_outlined,
           onPressed: controller.pinEvent,
           tooltip: L10n.of(context)!.pinMessage,
         ),
@@ -126,25 +126,27 @@ class ChatView extends StatelessWidget {
       return [
         if (Matrix.of(context).voipPlugin != null &&
             controller.room!.isDirectChat)
-          IconButton(
+          TwakeIconButton(
             onPressed: controller.onPhoneButtonTap,
-            icon: SvgPicture.asset(
-              ImagePaths.icPhoneCall,
-              width: 28,
-              height: 28,
-            ),
+            icon: Icons.call_outlined,
             tooltip: L10n.of(context)!.placeCall,
+            paddingAll: 6.0,
+            margin: EdgeInsets.symmetric(vertical: ChatViewStyle.paddingVerticalActionButtons),
           ),
-        IconButton(
-          onPressed: null,
-          icon: SvgPicture.asset(
-            ImagePaths.icVideoCall,
-            width: 28,
-            height: 28,
+          TwakeIconButton(
+            onPressed: () {print;},
+            icon: Icons.videocam_outlined,
+            tooltip: L10n.of(context)!.placeCall,
+            paddingAll: 6.0,
+            margin: EdgeInsets.symmetric(vertical: ChatViewStyle.paddingVerticalActionButtons),
           ),
-          tooltip: L10n.of(context)!.placeCall,
-        ),
-        const SizedBox(width: 4),
+          TwakeIconButton(
+            onPressed: () {print;},
+            icon: Icons.more_vert,
+            tooltip: "more",
+            paddingAll: 6.0,
+            margin: const EdgeInsets.only(right: 10.0),
+          ),
         // EncryptionButton(controller.room!),
         // ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
       ];
@@ -198,30 +200,34 @@ class ChatView extends StatelessWidget {
             builder: (BuildContext context, snapshot) {
               return Scaffold(
                 appBar: AppBar(
-                  actionsIconTheme: IconThemeData(
-                    color: controller.selectedEvents.isEmpty
-                        ? null
-                        : Theme.of(context).colorScheme.primary,
-                  ),
+                  toolbarHeight: 64,
+                  surfaceTintColor: Colors.transparent,
+                  leadingWidth: 8 + 24 + 8,
                   leading: controller.selectMode
-                      ? IconButton(
-                          icon: const Icon(Icons.close),
+                      ? TwakeIconButton(
+                          icon: Icons.close,
                           onPressed: controller.clearSelectedEvents,
                           tooltip: L10n.of(context)!.close,
-                          color: Theme.of(context).colorScheme.primary,
                         )
                       : UnreadRoomsBadge(
                           filter: (r) => r.id != controller.roomId!,
                           badgePosition: BadgePosition.topEnd(end: 8, top: 4),
-                          child: Center(
-                            child: BackButton(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          child: TwakeIconButton(
+                            tooltip: "Back",
+                            icon: Icons.arrow_back,
+                            onPressed: () => VRouter.of(context).pop(),
+                            paddingAll: 8.0,
+                            margin: const EdgeInsets.symmetric(vertical: 12.0),
                           ),
                         ),
                   titleSpacing: 0,
                   title: ChatAppBarTitle(controller),
                   actions: _appBarActions(context),
+                  bottom: PreferredSize(
+                    preferredSize: const Size(double.infinity, 4),
+                    child: Container(
+                      color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08), 
+                      height: 1,)),
                 ),
                 floatingActionButton: controller.showScrollDownButton &&
                         controller.selectedEvents.isEmpty
@@ -247,20 +253,6 @@ class ChatView extends StatelessWidget {
                           height: double.infinity,
                           fit: BoxFit.cover,
                           filterQuality: FilterQuality.medium,
-                        )
-                      else
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              colors: [
-                                colorScheme.primaryContainer.withAlpha(64),
-                                colorScheme.secondaryContainer.withAlpha(64),
-                                colorScheme.tertiaryContainer.withAlpha(64),
-                                colorScheme.primaryContainer.withAlpha(64),
-                              ],
-                            ),
-                          ),
                         ),
                       SafeArea(
                         child: Column(
