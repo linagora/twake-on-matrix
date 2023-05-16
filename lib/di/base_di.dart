@@ -1,9 +1,9 @@
+import 'package:fluffychat/di/abstract_di.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
-typedef OnFinishedBind = void Function();
-
-abstract class BaseDI {
+abstract class BaseDI extends AbstractDI {
+  @override
   void bind({OnFinishedBind? onFinishedBind}) {
     Logs().d('DI::bind() start binding $scopeName');
     if (currentScope != scopeName) {
@@ -22,6 +22,7 @@ abstract class BaseDI {
 
   void setUp(GetIt get);
 
+  @override
   Future<void> unbind() async {
     Logs().d("DI::unbind Unbinding $scopeName");
     await GetIt.instance.popScope();

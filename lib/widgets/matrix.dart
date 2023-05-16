@@ -9,7 +9,9 @@ import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
+import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -347,8 +349,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           );
         }
       } else {
-        Logs().d('MatrixState::_registerSubs: $state');
-        setUpToMServices(c);
+        setUpToMServicesInLogin(c);
         widget.router?.currentState?.to(
           state == LoginState.loggedIn ? '/rooms' : '/home',
           queryParameters: widget.router?.currentState?.queryParameters ?? {},
@@ -408,6 +409,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       _registerSubs(c.clientName);
     }
 
+    _retrieveLocalToMConfiguration();
+
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
@@ -449,7 +452,30 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
   }
 
-  void setUpToMServices(Client client) {
+  void _retrieveLocalToMConfiguration() async {
+    try {
+      final tomConfigurationRepository = getIt
+        .get<ToMConfigurationsRepository>();
+      final toMConfigurations = await tomConfigurationRepository
+        .getTomConfigurations(client.clientName);
+      setUpToMServices(
+        toMConfigurations.tomServerInformation,
+        toMConfigurations.identityServerInformation,
+      );
+    } catch (e) {
+      Logs().e('MatrixState::_retrieveToMConfiguration: $e');
+    }
+  }
+
+  void setUpToMServices(ToMServerInformation tomServer, IdentityServerInformation? identityServer) {
+    Logs().d('MatrixState::setUpToMServices: $tomServer, $identityServer');
+    _setUpToMServer(tomServer);
+    if (identityServer != null) {
+      _setUpIdentityServer(identityServer);
+    }
+  }
+
+  void setUpToMServicesInLogin(Client client) {
     final tomServer = loginHomeserverSummary?.tomServer;
     if (tomServer != null) {
       _setUpToMServer(tomServer);
@@ -458,6 +484,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
+    _storeToMConfiguration(client, tomServer, identityServer);
   }
 
   void _setUpToMServer(ToMServerInformation tomServer) {
@@ -465,6 +492,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
         instanceName: NetworkDI.tomServerUrlInterceptorName,
       );
+      Logs().d('MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}');
       tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
     }
   }
@@ -473,7 +501,19 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
+    Logs().d('MatrixState::_setUpIdentityServer: ${identityServerUrlInterceptor.hashCode}');
     identityServerUrlInterceptor.changeBaseUrl(identityServer.baseUrl.toString());
+  }
+
+  void _storeToMConfiguration(Client client, ToMServerInformation? tomServerInformation, IdentityServerInformation? identityServerInformation) {
+    if (tomServerInformation != null) {
+      final configuration = ToMConfigurations(
+        tomServerInformation: tomServerInformation,
+        identityServerInformation: identityServerInformation,
+      );
+      final ToMConfigurationsRepository configurationRepository = getIt.get<ToMConfigurationsRepository>();
+      configurationRepository.saveTomConfigurations(client.clientName, configuration);
+    }
   }
 
   @override
