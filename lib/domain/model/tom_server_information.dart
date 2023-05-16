@@ -5,6 +5,8 @@ part 'tom_server_information.g.dart';
 
 @JsonSerializable()
 class ToMServerInformation with EquatableMixin {
+  static const String tomServerKey = 't.server';
+
   @JsonKey(name: 'base_url')
   final Uri? baseUrl;
 
