@@ -176,7 +176,9 @@ class ChatListItem extends StatelessWidget {
                             maxLines: 1,
                             softWrap: false,
                             style: Theme.of(context).textTheme.titleMedium
-                                ?.merge(const TextStyle(overflow: TextOverflow.ellipsis)),
+                                ?.merge(const TextStyle(
+                                  overflow: TextOverflow.ellipsis, 
+                                  letterSpacing: 0.15)),
                           ),
                         ),
                         if (room.isFavourite)
@@ -278,7 +280,9 @@ class ChatListItem extends StatelessWidget {
                                 softWrap: false,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  letterSpacing: 0.4
+                                ),
                               );
                             },
                           ),
