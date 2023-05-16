@@ -2567,5 +2567,11 @@
         "placeholders": {}
     },
     "channels": "Channels",
-    "chatMessage": "Chat message"
+    "chatMessage": "Chat message",
+    "permissionAccess": "Permission access",
+    "permissionExplainsFirst": "To help you connect with your friends and collaborate with your team, allow ",
+    "permissionExplainsTail": " to access Contact on this device.",
+    "appName": "Twake",
+    "deny": "Deny",
+    "allow": "Allow"
 }

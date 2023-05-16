@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/widgets/contact_permission_dialog.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
@@ -15,8 +19,6 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -25,6 +27,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
@@ -268,6 +271,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       initSettings();
     }
     initLoadingDialog();
+    askForContactPermission();
   }
 
   void initLoadingDialog() {
@@ -277,6 +281,18 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       LoadingDialog.defaultOnError =
           (e) => (e as Object?)!.toLocalizedString(context);
     });
+  }
+
+  void askForContactPermission() async {
+    if (!kIsWeb && await Permission.contacts.isDenied) {
+      final l10n = L10n.of(context)!;
+      showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (context) {
+          return ContactPermissionDialog(l10n: l10n);
+        });
+    }
   }
 
   Future<void> initConfig() async {
