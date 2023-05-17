@@ -2567,5 +2567,12 @@
         "placeholders": {}
     },
     "channels": "Channels",
-    "chatMessage": "Chat message"
+    "chatMessage": "Chat message",
+    "welcomeToTwake": "Welcome to Twake, {user}",
+    "@welcomeToTwake": {
+        "placeholders": {
+            "user": {}
+        }
+    },
+    "startNewChatMessage": "It's nice having a chat with your friends and collaborating with your teams.\nLet's start a dialog, create a chat, or join an existing one."
 }
