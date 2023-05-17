@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/chat_list/stories_header.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
@@ -12,6 +13,7 @@ import 'package:fluffychat/widgets/profile_bottom_sheet.dart';
 import 'package:fluffychat/widgets/public_room_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../config/themes.dart';
@@ -63,6 +65,49 @@ class ChatListViewBody extends StatelessWidget {
           if (controller.waitForFirstSync && client.prevBatch != null) {
             final rooms = controller.filteredRooms;
             const displayStoriesHeader = false;
+            if (rooms.isEmpty && !controller.isSearchMode) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 64),
+                  SvgPicture.asset(
+                    ImagePaths.icSkeletons,
+                  ),
+                  const SizedBox(height: 16),
+                  FutureBuilder<Profile?>(
+                    // ignore: unnecessary_cast
+                    future: (client.fetchOwnProfile() as Future<Profile?>).onError((e, s) => null),
+                    builder: (context, snapshotProfile) {
+                      if (snapshotProfile.connectionState != ConnectionState.done) {
+                        return const SizedBox();
+                      }
+                      final name = snapshotProfile.data?.displayName ?? '👋';
+                      return Column(
+                        children: [
+                          Text(
+                            L10n.of(context)!.welcomeToTwake(name),
+                            style: Theme
+                              .of(context)
+                              .textTheme
+                              .titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 32, right: 32, top: 8),
+                            child: Text(
+                              L10n.of(context)!.startNewChatMessage,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              );
+            }
             return ListView.builder(
               controller: controller.scrollController,
               // add +1 space below in order to properly scroll below the spaces bar
@@ -107,20 +152,6 @@ class ChatListViewBody extends StatelessWidget {
                         SearchTitle(
                           title: L10n.of(context)!.chats,
                           icon: const Icon(Icons.chat_outlined),
-                        ),
-                      if (rooms.isEmpty && !controller.isSearchMode)
-                        Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/start_chat.png',
-                                height: 256,
-                              ),
-                              const Divider(height: 1),
-                            ],
-                          ),
                         ),
                     ],
                   );

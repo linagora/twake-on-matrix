@@ -1,9 +1,7 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/utils/custom_svg_icons.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
   final ChatListController controller;
@@ -19,12 +17,6 @@ class TwakeHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: SizedBox(
         width: 0,
         child: ClientChooserButton(controller),
-      ),
-      title: SvgPicture.asset(
-        Theme.of(context).brightness == Brightness.light
-            ? CustomSVGIcons.titleChatListLight
-            : CustomSVGIcons.titleChatListDark,
-        height: TwakeHeaderStyle.titleHeight,
       ),
       centerTitle: true,
       actions: const [
