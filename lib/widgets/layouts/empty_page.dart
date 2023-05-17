@@ -31,6 +31,7 @@ class EmptyPage extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 48),
           if (loading)
             Center(
               child: SizedBox(
