@@ -105,6 +105,7 @@ dependencies:
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
+  flutter_launcher_icons: 0.11.0
   flutter_lints: ^2.0.1
   flutter_native_splash: ^2.0.3+1
   flutter_test:
@@ -117,10 +118,18 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
 
+flutter_icons:
+  android: false
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icons/icon_launcher.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icons/icon_launcher.png"
+
 flutter_native_splash:
-  color: "#ffffff"
-  color_dark: "#000000"
+  color: "#000000"
   image: "assets/info-logo.png"
+  branding: "assets/branding.png"
 
 flutter:
   generate: true
@@ -128,6 +137,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/icons/
     - assets/sounds/
     - assets/js/
     - assets/js/package/
