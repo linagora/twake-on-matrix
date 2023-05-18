@@ -18,6 +18,7 @@ class HtmlMessage extends StatelessWidget {
   final TextStyle? defaultTextStyle;
   final TextStyle? linkStyle;
   final double? emoteSize;
+  final Widget? bottomWidgetSpan;
 
   const HtmlMessage({
     Key? key,
@@ -27,6 +28,7 @@ class HtmlMessage extends StatelessWidget {
     this.defaultTextStyle,
     this.linkStyle,
     this.emoteSize,
+    this.bottomWidgetSpan,
   }) : super(key: key);
 
   @override
@@ -56,6 +58,7 @@ class HtmlMessage extends StatelessWidget {
       data: renderHtml,
       defaultTextStyle: defaultTextStyle,
       emoteSize: emoteSize,
+      bottomWidgetSpan: bottomWidgetSpan,
       linkStyle: linkStyle ??
           themeData.textTheme.bodyMedium!.copyWith(
             color: themeData.colorScheme.secondary,
