@@ -41,13 +41,7 @@ jobs:
           cd assets/js/ && mv javascript package
 
       - name: Build Web version
-        run: |
-          flutter config --enable-web
-          flutter clean
-          flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
-          flutter build web --release --verbose --source-maps --base-href="/web/"
-          cp config.sample.json ./build/web/config.json
+        run: ./scripts/build-web.sh
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
