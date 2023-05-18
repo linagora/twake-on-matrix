@@ -1,10 +1,11 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/events/message_reactions.dart';
+import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
+import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 
 class MessageTime extends StatelessWidget {
   const MessageTime({
@@ -15,6 +16,7 @@ class MessageTime extends StatelessWidget {
     required this.timeline,
     required this.timelineOverlayMessage,
   }) : super(key: key);
+
   final ChatController controller;
   final Event event;
   final bool ownMessage;
@@ -24,43 +26,36 @@ class MessageTime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 28,
       padding: timelineOverlayMessage
           ? const EdgeInsets.symmetric(
-              vertical: 6,
+              vertical: 4,
               horizontal: 8,
             )
           : null,
       decoration: timelineOverlayMessage
           ? BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.black.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(12),
+              color: LinagoraStateLayer(Colors.black).opacityLayer3,
             )
           : null,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (event.hasAggregatedEvents(
-            timeline,
-            RelationshipTypes.reaction,
-          )) ...[
-            MessageReactions(event, timeline),
-            const SizedBox(width: 4),
-          ],
           Text(
             DateFormat("HH:mm").format(event.originServerTs),
-            style: TextStyle(
-              fontSize: 11 * AppConfig.fontSizeFactor,
-              color: timelineOverlayMessage
-                  ? Colors.white
-                  : ownMessage
-                      ? Theme.of(context).colorScheme.secondary
-                      : const Color(0xFF818C99),
+            style: Theme.of(context).textTheme.bodySmall?.merge(
+              TextStyle(
+                color: timelineOverlayMessage
+                ? Colors.white
+                : LinagoraRefColors.material().neutral[50],
+                letterSpacing: 0.4
+              ),
             ),
           ),
           if (ownMessage) ...[
-            const SizedBox(width: 4),
+            SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
             SeenByRow(
               controller,
               timelineOverlayMessage: timelineOverlayMessage,
@@ -73,3 +68,5 @@ class MessageTime extends StatelessWidget {
     );
   }
 }
+
+

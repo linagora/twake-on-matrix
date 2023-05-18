@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 
@@ -33,11 +34,11 @@ class SeenByRow extends StatelessWidget {
             colorFilter: ColorFilter.mode(
               timelineOverlayMessage
                   ? Colors.white
-                  : Theme.of(context).colorScheme.secondary,
+                  : Theme.of(context).colorScheme.primary,
               BlendMode.srcIn,
             ),
-            width: 16,
-            height: 16,
+            width: MessageTimeStyle.seenByRowIconSize,
+            height: MessageTimeStyle.seenByRowIconSize,
           )
         : seenByUsers.isEmpty
             ? SvgPicture.asset(
@@ -45,22 +46,22 @@ class SeenByRow extends StatelessWidget {
                 colorFilter: ColorFilter.mode(
                   timelineOverlayMessage
                       ? Colors.white
-                      : Theme.of(context).colorScheme.secondary,
+                      : Theme.of(context).colorScheme.primary,
                   BlendMode.srcIn,
                 ),
-                width: 16,
-                height: 16,
+                width: MessageTimeStyle.seenByRowIconSize,
+                height: MessageTimeStyle.seenByRowIconSize,
               )
             : SvgPicture.asset(
                 ImagePaths.icReadStatus,
                 colorFilter: ColorFilter.mode(
                   timelineOverlayMessage
                       ? Colors.white
-                      : Theme.of(context).colorScheme.secondary,
+                      : Theme.of(context).colorScheme.primary,
                   BlendMode.srcIn,
                 ),
-                width: 16,
-                height: 16,
+                width: MessageTimeStyle.seenByRowIconSize,
+                height: MessageTimeStyle.seenByRowIconSize,
               );
     // return Container(
     //   width: double.infinity,
