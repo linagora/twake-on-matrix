@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message_reactions_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:overflow_view/overflow_view.dart';
 
 class MessageReactions extends StatelessWidget {
   final Event event;
@@ -46,9 +48,49 @@ class MessageReactions extends StatelessWidget {
 
     final reactionList = reactionMap.values.toList();
     reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
-    return Wrap(
+    return ReactionsList(
+      reactionList: reactionList, 
+      allReactionEvents: allReactionEvents, 
+      event: event, 
+      client: client);
+  }
+}
+
+class ReactionsList extends StatelessWidget {
+  const ReactionsList({
+    Key? key,
+    required this.reactionList,
+    required this.allReactionEvents,
+    required this.event,
+    required this.client,
+  }) : super(key: key);
+
+  final List<_ReactionEntry> reactionList;
+  final Set<Event> allReactionEvents;
+  final Event event;
+  final Client client;
+
+  @override
+  Widget build(BuildContext context) {
+    return OverflowView.flexible(
       spacing: 4.0,
-      runSpacing: 4.0,
+      builder: (context, index) {
+        return InkWell(
+          child: Container(
+            width: MessageReactionsStyle.moreReactionContainer,
+            height: MessageReactionsStyle.moreReactionContainer,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(color: MessageReactionsStyle.borderColor),
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.only(top: 1.0, bottom: 4.0),
+            child: Icon(
+              Icons.more_horiz_rounded, 
+              size: MessageReactionsStyle.moreReactionIconSize,),
+          ),
+        );
+      },
       children: [
         ...reactionList
             .map(
@@ -81,16 +123,15 @@ class MessageReactions extends StatelessWidget {
             )
             .toList(),
         if (allReactionEvents.any((e) => e.status.isSending))
-          const SizedBox(
-            width: 28,
-            height: 28,
-            child: Padding(
+          SizedBox(
+            width: MessageReactionsStyle.loadingReactionSize,
+            height: MessageReactionsStyle.loadingReactionSize,
+            child: const Padding(
               padding: EdgeInsets.all(4.0),
               child: CircularProgressIndicator.adaptive(strokeWidth: 1),
             ),
           ),
-      ],
-    );
+      ],);
   }
 }
 
@@ -111,10 +152,7 @@ class _Reaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
-    const color = Colors.transparent;
+    final color = Theme.of(context).colorScheme.surface;
     final fontSize = DefaultTextStyle.of(context).style.fontSize;
     Widget content;
     if (reactionKey!.startsWith('mxc://')) {
@@ -130,7 +168,7 @@ class _Reaction extends StatelessWidget {
           Text(
             count.toString(),
             style: TextStyle(
-              color: textColor,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: DefaultTextStyle.of(context).style.fontSize,
             ),
           ),
@@ -143,9 +181,11 @@ class _Reaction extends StatelessWidget {
       }
       content = Text(
         '$renderKey',
+        strutStyle: const StrutStyle(
+          forceStrutHeight: true,
+        ),
         style: TextStyle(
-          color: textColor,
-          fontSize: DefaultTextStyle.of(context).style.fontSize,
+          fontSize: MessageReactionsStyle.renderKeyFontSize,
         ),
       );
     }
@@ -154,18 +194,23 @@ class _Reaction extends StatelessWidget {
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       child: Container(
+        width: MessageReactionsStyle.reactionContainerWidth,
         decoration: BoxDecoration(
           color: color,
-          border: reacted!
-              ? Border.all(
-                  width: 1,
-                  color: Colors.transparent,
-                )
-              : null,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+          border: Border.all(color: MessageReactionsStyle.reactionBorderColor),
+          borderRadius: BorderRadius.circular(MessageReactionsStyle.reactionBorderRadius),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
-        child: content,
+        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            content,
+            const SizedBox(width: 4,),
+            Text('$count', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface
+            )),
+          ],
+        ),
       ),
     );
   }

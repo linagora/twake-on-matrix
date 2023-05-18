@@ -1,8 +1,9 @@
+import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/widgets/twake_link_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:matrix/matrix.dart';
-import 'package:matrix_link_text/link_text.dart';
+import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'package:fluffychat/pages/chat/events/video_player.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
@@ -26,12 +27,16 @@ class MessageContent extends StatelessWidget {
   final Event event;
   final Color textColor;
   final void Function(Event)? onInfoTab;
+  final Widget endOfBubbleWidget;
+  final Color backgroundColor;
 
   const MessageContent(
     this.event, {
     this.onInfoTab,
     Key? key,
     required this.textColor,
+    required this.endOfBubbleWidget,
+    required this.backgroundColor,
   }) : super(key: key);
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -66,7 +71,7 @@ class MessageContent extends StatelessWidget {
           leading: CloseButton(onPressed: Navigator.of(context).pop),
           title: Text(
             l10n.whyIsThisMessageEncrypted,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: MessageContentStyle.appBarFontSize),
           ),
         ),
         body: SafeArea(
@@ -109,8 +114,8 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Image:
             return ImageBubble(
               event,
-              width: 400,
-              height: 300,
+              width: MessageContentStyle.imageBubbleWidth,
+              height: MessageContentStyle.imageBubbleHeight,
               fit: BoxFit.cover,
             );
           case MessageTypes.Sticker:
@@ -153,20 +158,29 @@ class MessageContent extends StatelessWidget {
               final bigEmotes = event.onlyEmotes &&
                   event.numberEmotes > 0 &&
                   event.numberEmotes <= 10;
-              return HtmlMessage(
-                html: html,
-                defaultTextStyle: TextStyle(
-                  color: textColor,
-                  fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                ),
-                linkStyle: TextStyle(
-                  color: textColor.withAlpha(150),
-                  fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                  decoration: TextDecoration.underline,
-                  decorationColor: textColor.withAlpha(150),
-                ),
-                room: event.room,
-                emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+              return Padding(
+                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                child: HtmlMessage(
+                    html: html,
+                    defaultTextStyle: TextStyle(
+                      color: textColor,
+                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                    ),
+                    linkStyle: TextStyle(
+                      color: textColor.withAlpha(150),
+                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                      decoration: TextDecoration.underline,
+                      decorationColor: textColor.withAlpha(150),
+                    ),
+                    room: event.room,
+                    emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+                    bottomWidgetSpan: Visibility(
+                      visible: false,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: endOfBubbleWidget),
+                  ),
               );
             }
             // else we fall through to the normal message rendering
@@ -233,6 +247,7 @@ class MessageContent extends StatelessWidget {
                 },
               );
             }
+            
             final bigEmotes = event.onlyEmotes &&
                 event.numberEmotes > 0 &&
                 event.numberEmotes <= 10;
@@ -242,25 +257,31 @@ class MessageContent extends StatelessWidget {
                 hideReply: true,
               ),
               builder: (context, snapshot) {
-                return LinkText(
-                  text: snapshot.data ??
-                      event.calcLocalizedBodyFallback(
-                        MatrixLocals(L10n.of(context)!),
-                        hideReply: true,
-                      ),
-                  textStyle: TextStyle(
-                    color: textColor,
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                    decoration:
-                        event.redacted ? TextDecoration.lineThrough : null,
-                  ),
-                  linkStyle: TextStyle(
-                    color: textColor.withAlpha(150),
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                    decoration: TextDecoration.underline,
-                    decorationColor: textColor.withAlpha(150),
-                  ),
-                  onLinkTap: (url) => UrlLauncher(context, url).launchUrl(),
+                final text = snapshot.data ??
+                  event.calcLocalizedBodyFallback(
+                    MatrixLocals(L10n.of(context)!),
+                    hideReply: true,
+                  );
+
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: TwakeLinkText(
+                    text: text,
+                    textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onBackground,
+                      letterSpacing: MessageContentStyle.letterSpacingMessageContent
+                    ),
+                    linkStyle: TextStyle(
+                      color: textColor.withAlpha(150),
+                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                      decoration: TextDecoration.underline,
+                      decorationColor: textColor.withAlpha(150),), 
+                      childWidget: Visibility(
+                        visible: false,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: endOfBubbleWidget,)),
                 );
               },
             );
@@ -322,8 +343,9 @@ class _ButtonContent extends StatelessWidget {
       label: Text(label, overflow: TextOverflow.ellipsis),
       style: OutlinedButton.styleFrom(
         foregroundColor: textColor,
-        backgroundColor: Colors.white.withAlpha(64),
+        backgroundColor: MessageContentStyle.backgroundColorButton,
       ),
     );
   }
 }
+

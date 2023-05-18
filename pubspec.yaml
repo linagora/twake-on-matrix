@@ -4,7 +4,7 @@ publish_to: none
 version: 1.10.0+2331
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   adaptive_dialog: ^1.8.0+1
@@ -37,7 +37,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_map: ^3.1.0
-  flutter_matrix_html: ^1.1.0
+#  flutter_matrix_html: ^1.1.0
   flutter_olm: ^1.2.0
   flutter_openssl_crypto: ^0.1.0
   flutter_ringtone_player: ^3.1.1
@@ -95,7 +95,11 @@ dependencies:
   webrtc_interface: ^1.0.10
   linagora_design_flutter:
     git:
-      url: git@github.com:linagora/linagora-design-flutter.git
+      url: https://github.com/linagora/linagora-design-flutter.git
+      ref: master
+  flutter_matrix_html:
+    git:
+      url: git@github.com:linagora/flutter_matrix_html.git
       ref: master
   overflow_view: ^0.3.1
   dio: ^5.1.2
