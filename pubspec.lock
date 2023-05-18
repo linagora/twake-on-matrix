@@ -780,17 +780,18 @@ packages:
     dependency: transitive
     description:
       name: flutter_math_fork
-      sha256: cfec964c4975c6becc64291eb9b782fe70df5e0c5bfe0763d9e856432fcc6fcd
+      sha256: fa511bdcb91fc35eac155ec5790883886dd9de6572fea549f1ad4660ef6804e9
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.2+2"
+    version: "0.6.3+1"
   flutter_matrix_html:
     dependency: "direct main"
     description:
-      name: flutter_matrix_html
-      sha256: "78db9930ffd8a3fed18fd04f024b56b6f545553ad4fc5a07bfdc3ec9eaba5298"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: f278ec988183a0df9a1af84e30c0cb497615a105
+      url: "git@github.com:linagora/flutter_matrix_html.git"
+    source: git
     version: "1.1.0"
   flutter_native_splash:
     dependency: "direct dev"
@@ -1261,7 +1262,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: ebc6ee5031f37b260c5d8241b44a35a1e4c0aea4
-      url: "git@github.com:linagora/linagora-design-flutter.git"
+      url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
   lints:
