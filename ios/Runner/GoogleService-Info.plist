@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>865731724731-ofdr7e6m04murgb1bvchlj9oaos0q5i3.apps.googleusercontent.com</string>
+	<string>492265884073-p6ssgrq23gkot2n5duiijl2t7b44777q.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.865731724731-ofdr7e6m04murgb1bvchlj9oaos0q5i3</string>
+	<string>com.googleusercontent.apps.492265884073-p6ssgrq23gkot2n5duiijl2t7b44777q</string>
 	<key>API_KEY</key>
-	<string>AIzaSyA8ZUBcuny0HjPwF2Q2fvDyQTC5dG2VHlE</string>
+	<string>AIzaSyBQNqPIWurYEnpg8kfY2s9Gpt824B2MQEM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>865731724731</string>
+	<string>492265884073</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>im.fluffychat.app</string>
+	<string>com.linagora.ios.twake</string>
 	<key>PROJECT_ID</key>
-	<string>fluffychat-ef3e8</string>
+	<string>twake-195010</string>
 	<key>STORAGE_BUCKET</key>
-	<string>fluffychat-ef3e8.appspot.com</string>
+	<string>twake-195010.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:865731724731:ios:79fd983ce46cb40c64309e</string>
+	<string>1:492265884073:ios:80dc441ca63b9f036b5cb8</string>
+	<key>DATABASE_URL</key>
+	<string>https://twake-195010.firebaseio.com</string>
 </dict>
 </plist>

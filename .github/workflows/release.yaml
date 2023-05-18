@@ -20,6 +20,8 @@ jobs:
         include:
           - os: android
             runner: ubuntu-latest
+          - os: ios
+            runner: macos-latest
       fail-fast: false
 
     steps:
@@ -63,7 +65,23 @@ jobs:
         run: ../scripts/prepare-android-release.sh
         working-directory: ${{ matrix.os }}
 
+      - name: Prepare iOS release
+        if: matrix.os == 'ios'
+        run: ../scripts/prepare-ios.sh
+        working-directory: ${{ matrix.os }}
+
       - name: Release on Play Store internal track
         if: matrix.os == 'android'
         run: ../scripts/release-playstore-beta.sh
+        working-directory: ${{ matrix.os }}
+
+      - name: Release on TestFlight
+        if: matrix.os == 'ios'
+        env:
+          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: ../scripts/release-ios-testflight.sh
         working-directory: ${{ matrix.os }}
