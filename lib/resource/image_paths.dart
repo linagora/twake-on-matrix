@@ -1,7 +1,6 @@
 import 'package:fluffychat/resource/assets_paths.dart';
 
 class ImagePaths {
-  static String get bannerEmptyChat => _getImagePath('banner_empty_chat.svg');
   static String get icAddFile => _getImagePath('ic_add_file.svg');
   static String get icAdd => _getImagePath('ic_add.svg');
   static String get icDone => _getImagePath('ic_done.svg');
