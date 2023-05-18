@@ -12,7 +12,6 @@
 
 # Uncomment the line if you want fastlane to automatically update itself
 update_fastlane
-
 default_platform(:android)
 
 platform :android do
@@ -22,13 +21,12 @@ platform :android do
         json_key: "./keys.json"
       )
     last_version = versions[0].to_i
+    version_name = last_git_tag.gsub("v", "")
     Dir.chdir("../..") do
       re = /version:\s([0-9]*\.[0-9]*\.[0-9]*)\+[0-9]*/i
       config = File.read("./pubspec.yaml")
-      version_name = config.match(re).captures
 
-      subst = "version: #{version_name[0]}+#{last_version+2}"
-
+      subst = "version: #{version_name}+#{last_version+1}"
       result = config.gsub(re, subst)
 
       File.open("./pubspec.yaml", 'w') { |file| file.write(result) }
@@ -37,16 +35,8 @@ platform :android do
 
   lane :deploy_internal_test do
     track = "internal"
-    versions = google_play_track_version_codes(
-        track: track,
-        json_key: "./keys.json"
-    )
-    last_version = versions[0].to_i
-    version_name = last_git_tag.gsub("v", "")
     upload_to_play_store(track: track,
-                         aab: '../build/app/outputs/bundle/release/app-release.aab',
-                         version_code: "#{last_version+1}",
-                         version_name: version_name)
+                         aab: '../build/app/outputs/bundle/release/app-release.aab')
   end
 
   lane :deploy_candidate do
