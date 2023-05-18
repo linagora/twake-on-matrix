@@ -47,10 +47,9 @@ class ChatEmptyView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            SvgPicture.asset(
-              ImagePaths.bannerEmptyChat,
-              width: 128,
-              height: 128,
+            Text(
+              '🤗',
+              style: Theme.of(context).textTheme.titleLarge?.merge(const TextStyle(fontSize: 88)),
             ),
           ],
         ),
