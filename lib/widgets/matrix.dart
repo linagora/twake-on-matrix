@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
@@ -473,6 +474,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
+    setUpAuthorization(client);
   }
 
   void setUpToMServicesInLogin(Client client) {
@@ -485,6 +487,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       _setUpIdentityServer(identityServer);
     }
     _storeToMConfiguration(client, tomServer, identityServer);
+    setUpAuthorization(client);
+  }
+
+  void setUpAuthorization(Client client) {
+    final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    authorizationInterceptor.accessToken = client.accessToken;
   }
 
   void _setUpToMServer(ToMServerInformation tomServer) {
