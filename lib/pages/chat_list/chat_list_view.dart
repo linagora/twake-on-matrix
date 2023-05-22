@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -183,7 +184,7 @@ class ChatListView extends StatelessWidget {
                             destinations: getNavigationDestinations(context),
                           )
                         : null,
-                    floatingActionButtonLocation:FloatingActionButtonLocation.centerFloat,
+                    floatingActionButtonLocation:FloatingActionButtonLocation.endFloat,
                     floatingActionButton: selectMode == SelectMode.normal
                         ? KeyBoardShortcuts(
                             keysToPress: {
@@ -193,7 +194,10 @@ class ChatListView extends StatelessWidget {
                             onKeysPressed: () =>
                                 VRouter.of(context).to('/newprivatechat'),
                             helpLabel: L10n.of(context)!.newChat,
-                            child: const SizedBox.shrink(),
+                            child: TwakeFloatingActionButton(
+                              icon: Icons.mode_edit_outline_outlined,
+                              onTap: () => VRouter.of(context).to('/newprivatechat'),
+                            ),
                           )
                         : null,
                   ),

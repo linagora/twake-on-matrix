@@ -103,7 +103,6 @@ dependencies:
       ref: master
   overflow_view: ^0.3.1
   json_annotation: ^4.8.1
-  after_layout: ^1.2.0
   contacts_service:
     git:
       url: git@github.com:linagora/flutter_contacts.git
