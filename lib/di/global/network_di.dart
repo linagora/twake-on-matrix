@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
@@ -27,12 +29,12 @@ class NetworkDI extends BaseDI {
   }
 
   void _bindBaseOption(GetIt get) {
-    // final headers = {
-    //   HttpHeaders.acceptHeader: acceptHeaderDefault,
-    //   HttpHeaders.contentTypeHeader: contentTypeHeaderDefault
-    // };
+    final headers = {
+      HttpHeaders.acceptHeader: acceptHeaderDefault,
+      HttpHeaders.contentTypeHeader: contentTypeHeaderDefault
+    };
 
-    get.registerLazySingleton<BaseOptions>(() => BaseOptions());
+    get.registerLazySingleton<BaseOptions>(() => BaseOptions(headers: headers));
   }
 
   void _bindInterceptor(GetIt get) {
