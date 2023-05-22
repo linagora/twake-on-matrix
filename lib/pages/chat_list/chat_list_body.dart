@@ -71,8 +71,11 @@ class ChatListViewBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 64),
-                  SvgPicture.asset(
-                    ImagePaths.icSkeletons,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(ImagePaths.icSkeletons,),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<Profile?>(
