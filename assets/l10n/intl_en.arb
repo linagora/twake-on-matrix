@@ -2574,5 +2574,30 @@
             "user": {}
         }
     },
-    "startNewChatMessage": "It's nice having a chat with your friends and collaborating with your teams.\nLet's start a dialog, create a chat, or join an existing one."
+    "startNewChatMessage": "It's nice having a chat with your friends and collaborating with your teams.\nLet's start a dialog, create a chat, or join an existing one.",
+    "statusDot": "⬤",
+    "active": "Activated",
+    "inactive": "Not-activated",
+    "newGroupChat": "New Group Chat",
+    "getHelp": "Get help",
+    "countTwakeUsers": "Twake users ({count})",
+    "@countTwakeUsers": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "expand": "Expand",
+    "shrink": "Shrink",
+    "noResultForKeyword": "No results for \"{keyword}\"",
+    "@noResultForKeyword": {
+        "placeholders": {
+            "keyword": {}
+        }
+    },
+    "searchResultNotFound1": "• Make sure there are no typos in your search.\n",
+    "searchResultNotFound2": "• You might not have the user in your address book.\n",
+    "searchResultNotFound3": "• Check the contact access permission, the user might be in your contact list.\n",
+    "searchResultNotFound4": "• If the reason is not listed above, ",
+    "searchResultNotFound5": "seek helps.",
+    "more": "More"
 }
