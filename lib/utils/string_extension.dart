@@ -43,4 +43,17 @@ extension StringCasingExtension on String {
   String capitalize(BuildContext context) {
     return toBeginningOfSentenceCase(this, L10n.of(context)!.localeName) ?? this;
   }
+
+  bool isNumber() {
+    if (isEmpty) {
+      return false;
+    }
+    
+    final number = num.tryParse(this);
+    return number != null;
+  }
+
+  String toTomMatrixId() {
+    return '@$this:tom-dev.xyz';
+  }
 }
