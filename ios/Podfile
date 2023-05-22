@@ -48,6 +48,8 @@ post_install do |installer|
         '$(inherited)',
         # dart: PermissionGroup.microphone
         'PERMISSION_MICROPHONE=1',
+        ## dart: PermissionGroup.contacts
+        'PERMISSION_CONTACTS=1',
       ]
     end
   end
