@@ -95,7 +95,7 @@ dependencies:
   webrtc_interface: ^1.0.10
   linagora_design_flutter:
     git:
-      url: https://github.com/linagora/linagora-design-flutter.git
+      url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
   flutter_matrix_html:
     git:
