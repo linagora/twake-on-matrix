@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.3"
+  after_layout:
+    dependency: "direct main"
+    description:
+      name: after_layout
+      sha256: "95a1cb2ca1464f44f14769329fbf15987d20ab6c88f8fc5d359bd362be625f29"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   analyzer:
     dependency: transitive
     description:
@@ -313,6 +321,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
+  contacts_service:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "083024c6200f4773e34c471b4001cd76fe1c9cec"
+      url: "git@github.com:linagora/flutter_contacts.git"
+    source: git
+    version: "0.6.3"
   convert:
     dependency: transitive
     description:
@@ -385,6 +402,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.16"
+  dartz:
+    dependency: "direct main"
+    description:
+      name: dartz
+      sha256: e6acf34ad2e31b1eb00948692468c30ab48ac8250e0f0df661e29f12dd252168
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.1"
   dbus:
     dependency: transitive
     description:
@@ -393,6 +418,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.8"
+  debounce_throttle:
+    dependency: "direct main"
+    description:
+      name: debounce_throttle
+      sha256: c95cf47afda975fc507794a52040a16756fb2f31ad3027d4e691c41862ff5692
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   desktop_drop:
     dependency: "direct main"
     description:
@@ -1761,6 +1794,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   random_string:
     dependency: transitive
     description:
@@ -1993,6 +2034,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  simple_observable:
+    dependency: transitive
+    description:
+      name: simple_observable
+      sha256: b392795c48f8b5f301b4c8f73e15f56e38fe70f42278c649d8325e859a783301
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   skeletons:
     dependency: "direct main"
     description:
