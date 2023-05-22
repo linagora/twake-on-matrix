@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -10,6 +6,7 @@ import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settin
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
+import 'package:fluffychat/pages/contacts/di/contact_di.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
@@ -33,6 +30,9 @@ import 'package:fluffychat/widgets/layouts/loading_view.dart';
 import 'package:fluffychat/widgets/layouts/side_view_layout.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
+import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
+import 'package:flutter/material.dart';
+import 'package:vrouter/vrouter.dart';
 
 class AppRoutes {
   final bool columnMode;
@@ -104,7 +104,8 @@ class AppRoutes {
                 ),
               ],
             ),
-            VWidget(
+            VWidgetWithDependency(
+              di: ContactDI(),
               path: '/newprivatechat',
               widget: const NewPrivateChat(),
             ),
