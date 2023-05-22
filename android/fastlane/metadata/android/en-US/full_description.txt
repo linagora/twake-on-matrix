@@ -1,32 +1,7 @@
-FluffyChat is an open, nonprofit and cute matrix messenger app for Ubuntu Touch, Android and iOS.
+Twake is The Open Digital Workplace. Team channels, direct chat, task management, drive and calendar; all in one place. Quickly and effortlessly access all your content, manage your workspaces, collaborators and customers, work efficiently and gain productivity.
 
-Open
-Opensource and open development where everyone can join.
+We are GDPR compliant, GAFAM and BATX free, driven by open-source and based in Europe. All your data is securely hosted in Europe, free from the Cloud act or the Patriot Act.
 
-Nonprofit
-FluffyChat is donation funded.
+So what are you waiting for? Let's Twake together!
 
-Cute ♥
-Cute design and many theme settings including a dark mode. 
-
-One-to-one and groupchats
-Unlimited groups and direct chats.
-
-Easy
-FluffyChat is made as simple to use as possible.
-
-Free
-Free to use for everyone without ads.
-
-Decentralized
-There is no "FluffyChat server" you are forced to use. Use the server you find trustworthy or host your own.
-
-Compatible
-Compatible with Element, Fractal, Nekho and all matrix messengers.
-
-
-FluffyChat comes with a dream
-
-Imagine a world where everyone can choose the messenger they like and is still able to chat with all of their friends.
-A world where there are no companies spying on you when you send selfies to friends and lovers.
-And a world where apps are made for fluffyness and not for profit. ♥
+Twake is powered by Linagora - creating digital independence.
