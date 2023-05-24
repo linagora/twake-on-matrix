@@ -1,16 +1,12 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
-import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
-import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
+import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
+import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
 class NewPrivateChat extends StatefulWidget {
@@ -21,61 +17,45 @@ class NewPrivateChat extends StatefulWidget {
 }
 
 class NewPrivateChatController extends State<NewPrivateChat> {
-  static const debouncerIntervalInMilliseconds = 250;
 
-  late final LookupContactsInteractor _lookupNetworkContactsInteractor = GetIt.instance.get<LookupContactsInteractor>();
-  late final FetchContactsInteractor _fetchContactsInteractor = GetIt.instance.get<FetchContactsInteractor>();
-  late final Debouncer<String> _debouncer;
-
-  String searchKeyword = "";
+  final searchContactsController = SearchContactsController();
+  final fetchContactsController = FetchContactsController();
 
   final StreamController<Either<Failure, GetContactsSuccess>> networkStreamController = StreamController();
 
   @override
   void initState() {
     super.initState();
-    _initializeDebouncer();
+    searchContactsController.init();
+    searchContactsController.onSearchKeywordChanged = (String text) {
+      if (text.isEmpty) {
+        fetchContactsController.fetchCurrentTomContacts();
+      }
+    };
+    listenSearchContacts();
+    listenContactsStartList();
   }
-  
-   void _initializeDebouncer() {
-    _debouncer = Debouncer(
-      const Duration(milliseconds: debouncerIntervalInMilliseconds), 
-      initialValue: '',
-    );
-    
-    _debouncer.values.listen((searchKeyword) async {
-      Logs().d("NewPrivateChatController::_initializeDebouncer: searchKeyword: {searchKeyword}");
-      _fetchRemoteContacts(searchKeyword);
+
+  void listenContactsStartList() {
+    fetchContactsController.streamController.stream.listen((event) {
+      Logs().d('NewPrivateChatController::fetchContacts() - event: $event');
+      networkStreamController.add(event);
     });
   }
 
-  void _fetchRemoteContacts(String searchKeyword) {
-    _lookupNetworkContactsInteractor
-      .execute(query: ContactQuery(keyword: searchKeyword))
-      .listen((event) {
-        Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
-        networkStreamController.add(event);
-      });
-  }
-
-  void fetchCurrentTomContacts() {
-    _fetchContactsInteractor
-      .execute()
-      .listen((event) {
-        networkStreamController.add(event);
-      });
+  void listenSearchContacts() {
+    searchContactsController.lookupStreamController.stream.listen((event) {
+      Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
+      networkStreamController.add(event);
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     networkStreamController.close();
-    _debouncer.cancel();
-  }
-
-  void onSearchBarChanged(String keyword) {
-    _debouncer.setValue(keyword);
-    searchKeyword = keyword;
+    searchContactsController.dispose();
+    fetchContactsController.dispose();
   }
 
   @override
