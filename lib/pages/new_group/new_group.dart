@@ -1,11 +1,15 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
+import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:flutter/material.dart';
 
-import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:matrix/matrix.dart' as sdk;
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:matrix/matrix.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({Key? key}) : super(key: key);
@@ -15,30 +19,65 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends State<NewGroup> {
-  TextEditingController controller = TextEditingController();
-  bool publicGroup = false;
+  final searchContactsController = SearchContactsController();
+  final fetchContactsController = FetchContactsController();
+  final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
 
-  void setPublicGroup(bool b) => setState(() => publicGroup = b);
+  final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
+  final haveSelectedContactsNotifier = ValueNotifier(false);
 
-  void submitAction([_]) async {
-    final client = Matrix.of(context).client;
-    final roomID = await showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        final roomId = await client.createGroupChat(
-          visibility:
-              publicGroup ? sdk.Visibility.public : sdk.Visibility.private,
-          preset: publicGroup
-              ? sdk.CreateRoomPreset.publicChat
-              : sdk.CreateRoomPreset.privateChat,
-          groupName: controller.text.isNotEmpty ? controller.text : null,
-        );
-        return roomId;
-      },
-    );
-    if (roomID.error == null) {
-      VRouter.of(context).toSegments(['rooms', roomID.result!, 'invite']);
-    }
+  @override
+  void initState() {
+    super.initState();
+    searchContactsController.init();
+    searchContactsController.onSearchKeywordChanged = (String text) {
+      if (text.isEmpty) {
+        fetchContactsController.fetchCurrentTomContacts();
+      }
+    };
+    listenContactsStartList();
+    listenSearchContacts();
+  }
+
+  void listenContactsStartList() {
+    fetchContactsController.streamController.stream.listen((event) {
+      Logs().d('NewGroupController::fetchContacts() - event: $event');
+      contactStreamController.add(event);
+    });
+  }
+
+  void listenSearchContacts() {
+    searchContactsController.lookupStreamController.stream.listen((event) {
+      Logs().d('NewGroupController::_fetchRemoteContacts() - event: $event');
+      contactStreamController.add(event);
+    });
+  }
+
+  void selectContact(PresentationContact contact) {
+    final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
+    newSelectedContactsMap[contact] = true;
+    selectedContactsMapNotifier.value = newSelectedContactsMap;
+
+    haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
+  }
+
+  void unselectContact(PresentationContact contact) {
+    final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
+    newSelectedContactsMap.remove(contact);
+    selectedContactsMapNotifier.value = newSelectedContactsMap;
+
+    haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    contactStreamController.close();
+    searchContactsController.dispose();
+    fetchContactsController.dispose();
+
+    selectedContactsMapNotifier.dispose();
+    haveSelectedContactsNotifier.dispose();
   }
 
   @override

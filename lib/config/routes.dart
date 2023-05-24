@@ -109,7 +109,8 @@ class AppRoutes {
               path: '/newprivatechat',
               widget: const NewPrivateChat(),
             ),
-            VWidget(
+            VWidgetWithDependency(
+              di: ContactDI(),
               path: '/newgroup',
               widget: const NewGroup(),
             ),
@@ -157,7 +158,8 @@ class AppRoutes {
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,
                 ),
-                VWidget(
+                VWidgetWithDependency(
+                  di: ContactDI(),
                   path: '/newgroup',
                   widget: const NewGroup(),
                   buildTransition: _fadeTransition,

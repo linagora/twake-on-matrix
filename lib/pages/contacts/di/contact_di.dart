@@ -3,7 +3,6 @@ import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/di/base_di.dart';
-import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
