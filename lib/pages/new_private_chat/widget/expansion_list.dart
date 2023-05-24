@@ -32,14 +32,14 @@ class _ExpansionList extends State<ExpansionList> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.newPrivateChatController;
+    final searchContactsController = widget.newPrivateChatController.searchContactsController;
     return StreamBuilder<Either<Failure, GetContactsSuccess>>(
       stream: widget.newPrivateChatController.networkStreamController.stream,
       builder: (context, AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
 
         final newGroupButton = _buildIconTextTileButton(
           context: context,
-          onPressed: () {},
+          onPressed: () => VRouter.of(context).to('/newgroup'),
           iconData: Icons.supervisor_account_outlined,
           text: L10n.of(context)!.newGroupChat,
         );
@@ -60,7 +60,7 @@ class _ExpansionList extends State<ExpansionList> {
             ),),
         );
 
-        if (!snapshot.hasData || controller.searchKeyword.isEmpty) {
+        if (!snapshot.hasData || searchContactsController.searchKeyword.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -75,7 +75,7 @@ class _ExpansionList extends State<ExpansionList> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12,),
-              NoContactsFound(keyword: controller.searchKeyword),
+              NoContactsFound(keyword: searchContactsController.searchKeyword),
               moreListTile,
               newGroupButton,
               getHelpsButton,
@@ -93,7 +93,7 @@ class _ExpansionList extends State<ExpansionList> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12,),
-              NoContactsFound(keyword: controller.searchKeyword),
+              NoContactsFound(keyword: searchContactsController.searchKeyword),
               moreListTile,
               newGroupButton,
               getHelpsButton,
@@ -101,20 +101,23 @@ class _ExpansionList extends State<ExpansionList> {
           );
         }
 
-        final isSearchEmpty = widget.newPrivateChatController.searchKeyword.isEmpty;
+        final isSearchEmpty = searchContactsController.searchKeyword.isEmpty;
         final expansionList = [
           const SizedBox(height: 4,),
           _buildTitle(contactsList.length),
           if (isShow)
             for (final contact in contactsList)...[
-              ExpansionContactListTile(
-                contact: contact,
-                onTap: () async {
-                  if (contact.displayName != null && contact.displayName!.isNotEmpty) {
-                    final roomId = await Matrix.of(context).client.startDirectChat(contact.displayName!.toTomMatrixId());
-                    VRouter.of(context).toSegments(['rooms', roomId]);
-                  }
-                },)
+              InkWell(
+                borderRadius: BorderRadius.circular(16.0),
+                child: ExpansionContactListTile(
+                  contact: contact,
+                  onTap: () async {
+                    if (contact.displayName != null && contact.displayName!.isNotEmpty) {
+                      final roomId = await Matrix.of(context).client.startDirectChat(contact.displayName!.toTomMatrixId());
+                      VRouter.of(context).toSegments(['rooms', roomId]);
+                    }
+                  },),
+              )
             ]
         ];
 

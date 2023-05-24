@@ -1,41 +1,34 @@
-import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
+import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:vrouter/vrouter.dart';
 
-class NewPrivateChatAppBar extends StatefulWidget {
+class SearchContactAppBar extends StatefulWidget {
 
-  final NewPrivateChatController newPrivateChatController;
+  final SearchContactsController searchContactsController;
+  final void Function() onCloseSearchBar;
 
-  const NewPrivateChatAppBar({
+  final String title;
+
+  final String? hintText;
+
+  const SearchContactAppBar({
     super.key,
-    required this.newPrivateChatController,
+    required this.searchContactsController,
+    required this.onCloseSearchBar,
+    required this.title,
+    this.hintText,
   });
 
   @override
-  State<NewPrivateChatAppBar> createState() => _NewPrivateChatAppBarState();
+  State<SearchContactAppBar> createState() => _SearchContactAppBarState();
 }
 
-class _NewPrivateChatAppBarState extends State<NewPrivateChatAppBar> {
+class _SearchContactAppBarState extends State<SearchContactAppBar> {
   bool isSearchBarShow = false;
 
-  late final TextEditingController textEditingController;
-
-  @override
-  void initState() {
-    super.initState();
-    textEditingController = TextEditingController();
-    textEditingController.addListener(() {
-      widget.newPrivateChatController.onSearchBarChanged(textEditingController.text);
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    textEditingController.dispose();
-  }
+  late final SearchContactsController searchContactController = widget.searchContactsController;
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +64,8 @@ class _NewPrivateChatAppBarState extends State<NewPrivateChatAppBar> {
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
     ),
     title: isSearchBarShow 
-      ? SizedBox(
-        height: 24,
+      ? Padding(
+        padding: const EdgeInsets.only(top: 8.0),
         child: TextField(
           autofocus: true,
           maxLines: 1,
@@ -83,12 +76,20 @@ class _NewPrivateChatAppBarState extends State<NewPrivateChatAppBar> {
             required bool isFocused,
           }) => const SizedBox.shrink(),
           maxLength: 200,
-          controller: textEditingController,
-          decoration: null,
+          cursorHeight: 26,
+          scrollPadding: const EdgeInsets.all(0),
+          controller: searchContactController.textEditingController,
+          decoration: InputDecoration(
+            isCollapsed: true,
+            hintText: widget.hintText,
+            hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: LinagoraRefColors.material().neutral[60],
+            ),
+          ),
         ),
       )
       : Text(
-        L10n.of(context)!.newChat,
+        widget.title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
           color: Theme.of(context).colorScheme.onSurface
       ),),
@@ -97,8 +98,8 @@ class _NewPrivateChatAppBarState extends State<NewPrivateChatAppBar> {
         TwakeIconButton(
           onPressed: () {
             setState(() => isSearchBarShow = false);
-            widget.newPrivateChatController.searchKeyword = "";
-            widget.newPrivateChatController.fetchCurrentTomContacts();
+            searchContactController.searchKeyword = "";
+            widget.onCloseSearchBar();
           }, 
           tooltip: "Close",
           icon: Icons.close,
