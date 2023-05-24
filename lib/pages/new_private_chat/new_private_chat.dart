@@ -20,8 +20,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
-
-  final StreamController<Either<Failure, GetContactsSuccess>> networkStreamController = StreamController();
+  final networkStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
 
   @override
   void initState() {

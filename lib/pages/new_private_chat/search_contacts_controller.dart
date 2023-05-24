@@ -52,14 +52,13 @@ class SearchContactsController {
   }
 
   void onSearchBarChanged(String keyword) {
-    if (keyword.isNotEmpty) {
-      _debouncer.setValue(keyword);
-      searchKeyword = keyword;
-    }
+    _debouncer.setValue(keyword);
+    searchKeyword = keyword;
   }
 
   void dispose() {
     _debouncer.cancel();
     textEditingController.dispose();
+    lookupStreamController.close();
   }
 }

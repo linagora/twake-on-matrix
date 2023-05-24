@@ -2599,5 +2599,6 @@
     "searchResultNotFound3": "• Check the contact access permission, the user might be in your contact list.\n",
     "searchResultNotFound4": "• If the reason is not listed above, ",
     "searchResultNotFound5": "seek helps.",
-    "more": "More"
+    "more": "More",
+    "whoWouldYouLikeToAdd": "Who would you like to add?"
 }
