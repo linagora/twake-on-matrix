@@ -1637,7 +1637,7 @@
       "type": {}
     }
   },
-  "userAndOthersAreTyping": "{username} ir dar {count} kiti rašo…",
+  "userAndOthersAreTyping": "{username} ir dar {count} kiti rašo",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1645,7 +1645,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} ir {username2} rašo…",
+  "userAndUserAreTyping": "{username} ir {username2} rašo",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1653,7 +1653,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} rašo…",
+  "userIsTyping": "{username} rašo",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
@@ -2263,7 +2263,7 @@
       "server2": {}
     }
   },
-  "numUsersTyping": "{count} vartotojai rašo…",
+  "numUsersTyping": "{count} vartotojai rašo",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {

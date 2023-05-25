@@ -987,7 +987,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} käyttäjää kirjoittavat…",
+    "numUsersTyping": "{count} käyttäjää kirjoittavat",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1741,7 +1741,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} kirjoittaa…",
+    "userIsTyping": "{username} kirjoittaa",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

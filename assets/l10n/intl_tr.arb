@@ -1241,7 +1241,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} kullanıcı yazıyor…",
+  "numUsersTyping": "{count} kullanıcı yazıyor",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1912,7 +1912,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} ve {count} diğer kişi yazıyor…",
+  "userAndOthersAreTyping": "{username} ve {count} diğer kişi yazıyor",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1920,7 +1920,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} ve {username2} yazıyor…",
+  "userAndUserAreTyping": "{username} ve {username2} yazıyor",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1928,7 +1928,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} yazıyor…",
+  "userIsTyping": "{username} yazıyor",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

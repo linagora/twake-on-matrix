@@ -1237,7 +1237,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} пользователей печатают…",
+    "numUsersTyping": "{count} пользователей печатают",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1908,7 +1908,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} и {count} других участников печатают…",
+    "userAndOthersAreTyping": "{username} и {count} других участников печатают",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1916,7 +1916,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} и {username2} печатают…",
+    "userAndUserAreTyping": "{username} и {username2} печатают",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1924,7 +1924,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} печатает…",
+    "userIsTyping": "{username} печатает",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

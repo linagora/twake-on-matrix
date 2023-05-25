@@ -1457,7 +1457,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} oraz {count} innych pisze…",
+  "userAndOthersAreTyping": "{username} oraz {count} innych pisze",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1465,7 +1465,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} oraz {username2} piszą…",
+  "userAndUserAreTyping": "{username} oraz {username2} piszą",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1473,7 +1473,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} pisze…",
+  "userIsTyping": "{username} pisze",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

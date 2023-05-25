@@ -1886,7 +1886,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} tajpas…",
+    "userIsTyping": "{username} tajpas",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

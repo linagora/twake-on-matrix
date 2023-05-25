@@ -1924,7 +1924,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} píše…",
+  "userIsTyping": "{username} píše",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

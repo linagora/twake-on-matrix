@@ -1241,7 +1241,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} utilisateur·ices écrivent…",
+  "numUsersTyping": "{count} utilisateur·ices écrivent",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1928,7 +1928,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} est en train d'écrire…",
+  "userIsTyping": "{username} est en train d'écrire",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

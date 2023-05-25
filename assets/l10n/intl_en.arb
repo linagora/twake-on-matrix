@@ -1346,7 +1346,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} users are typing…",
+    "numUsersTyping": "{count} users are typing",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -2073,7 +2073,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} is typing…",
+    "userIsTyping": "{username} is typing",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

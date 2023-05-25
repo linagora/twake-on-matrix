@@ -1148,7 +1148,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} a {count} dalších píšu…",
+    "userAndOthersAreTyping": "{username} a {count} dalších píšu",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1156,7 +1156,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} a {username2} píšu…",
+    "userAndUserAreTyping": "{username} a {username2} píšu",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1164,7 +1164,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} píše…",
+    "userIsTyping": "{username} píše",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {
