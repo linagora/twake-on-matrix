@@ -1094,7 +1094,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count}人が入力中…",
+  "numUsersTyping": "{count}人が入力中",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1691,7 +1691,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username}と他{count}名が入力しています…",
+  "userAndOthersAreTyping": "{username}と他{count}名が入力しています",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1699,7 +1699,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username}と{username2}が入力しています…",
+  "userAndUserAreTyping": "{username}と{username2}が入力しています",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1707,7 +1707,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username}が入力しています…",
+  "userIsTyping": "{username}が入力しています",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

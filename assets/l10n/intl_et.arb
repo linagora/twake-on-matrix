@@ -1924,7 +1924,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} kirjutab…",
+  "userIsTyping": "{username} kirjutab",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

@@ -1240,7 +1240,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} personen typen…",
+  "numUsersTyping": "{count} personen typen",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1911,7 +1911,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} en {count} anderen zijn aan het typen …",
+  "userAndOthersAreTyping": "{username} en {count} anderen zijn aan het typen",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1919,7 +1919,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} en {username2} zijn aan het typen …",
+  "userAndUserAreTyping": "{username} en {username2} zijn aan het typen",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1927,7 +1927,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} is aan het typen …",
+  "userIsTyping": "{username} is aan het typen",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

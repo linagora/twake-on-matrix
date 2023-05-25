@@ -1188,7 +1188,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} 人正在输入…",
+    "numUsersTyping": "{count} 人正在输入",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1834,7 +1834,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} 和其他 {count} 人正在输入…",
+    "userAndOthersAreTyping": "{username} 和其他 {count} 人正在输入",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1842,7 +1842,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} 和 {username2} 正在输入…",
+    "userAndUserAreTyping": "{username} 和 {username2} 正在输入",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1850,7 +1850,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} 正在输入…",
+    "userIsTyping": "{username} 正在输入",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

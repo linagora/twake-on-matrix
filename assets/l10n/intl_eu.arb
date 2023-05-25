@@ -1212,7 +1212,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} idazten ari da…",
+  "userIsTyping": "{username} idazten ari da",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
@@ -1487,7 +1487,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} erabiltzaile idazten ari dira…",
+  "numUsersTyping": "{count} erabiltzaile idazten ari dira",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {

@@ -1061,14 +1061,14 @@
       "username": {}
     }
   },
-  "userIsTyping": "{username}이 입력 중…",
+  "userIsTyping": "{username}이 입력 중",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
       "username": {}
     }
   },
-  "userAndUserAreTyping": "{username}과 {username2}가 입력 중…",
+  "userAndUserAreTyping": "{username}과 {username2}가 입력 중",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1076,7 +1076,7 @@
       "username2": {}
     }
   },
-  "userAndOthersAreTyping": "{username}과 {count}명이 입력 중…",
+  "userAndOthersAreTyping": "{username}과 {count}명이 입력 중",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1191,7 +1191,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count}명이 입력 중…",
+  "numUsersTyping": "{count}명이 입력 중",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {

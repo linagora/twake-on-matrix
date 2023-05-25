@@ -1262,7 +1262,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} يكتب…",
+    "userIsTyping": "{username} يكتب",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

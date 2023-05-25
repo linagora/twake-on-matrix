@@ -1028,7 +1028,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} användare skriver…",
+  "numUsersTyping": "{count} användare skriver",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1595,7 +1595,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} och {count} andra skriver…",
+  "userAndOthersAreTyping": "{username} och {count} andra skriver",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1603,7 +1603,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} och {username2} skriver…",
+  "userAndUserAreTyping": "{username} och {username2} skriver",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1611,7 +1611,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} skriver…",
+  "userIsTyping": "{username} skriver",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {

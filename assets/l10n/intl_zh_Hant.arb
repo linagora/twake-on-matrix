@@ -1076,7 +1076,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count}個人正在輸入…",
+    "numUsersTyping": "{count}個人正在輸入",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1653,7 +1653,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username}和其他{count}個人正在輸入…",
+    "userAndOthersAreTyping": "{username}和其他{count}個人正在輸入",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1661,7 +1661,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username}和{username2}正在輸入…",
+    "userAndUserAreTyping": "{username}和{username2}正在輸入",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1669,7 +1669,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username}正在輸入…",
+    "userIsTyping": "{username}正在輸入",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

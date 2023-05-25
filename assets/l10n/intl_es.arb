@@ -1425,7 +1425,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} está escribiendo…",
+    "userIsTyping": "{username} está escribiendo",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

@@ -1202,7 +1202,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} korisnika pišu …",
+    "numUsersTyping": "{count} korisnika pišu",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1874,7 +1874,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} piše …",
+    "userIsTyping": "{username} piše",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

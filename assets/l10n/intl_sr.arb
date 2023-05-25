@@ -1170,7 +1170,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} корисника куца…",
+    "numUsersTyping": "{count} корисника куца",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1797,7 +1797,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} и {count} корисника куцају…",
+    "userAndOthersAreTyping": "{username} и {count} корисника куцају",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1805,7 +1805,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} и {username2} куцају…",
+    "userAndUserAreTyping": "{username} и {username2} куцају",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1813,7 +1813,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} куца…",
+    "userIsTyping": "{username} куца",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

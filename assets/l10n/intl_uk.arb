@@ -1147,7 +1147,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "userAndOthersAreTyping": "{username} та {count} інших пишуть…",
+  "userAndOthersAreTyping": "{username} та {count} інших пишуть",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1155,7 +1155,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} і {username2} пишуть…",
+  "userAndUserAreTyping": "{username} і {username2} пишуть",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1163,7 +1163,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} пише…",
+  "userIsTyping": "{username} пише",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
@@ -1503,7 +1503,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} користувачів пишуть…",
+  "numUsersTyping": "{count} користувачів пишуть",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {

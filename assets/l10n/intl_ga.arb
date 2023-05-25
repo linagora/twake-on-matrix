@@ -1964,7 +1964,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "Tá {count} úsáideoirí ag clóscríobh…",
+    "numUsersTyping": "Tá {count} úsáideoirí ag clóscríobh",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -2044,7 +2044,7 @@
             "type": {}
         }
     },
-    "userIsTyping": "Tá {username} ag clóscríobh…",
+    "userIsTyping": "Tá {username} ag clóscríobh",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {

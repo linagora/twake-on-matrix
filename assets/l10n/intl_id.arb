@@ -1264,14 +1264,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "userIsTyping": "{username} sedang mengetik…",
+  "userIsTyping": "{username} sedang mengetik",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
       "username": {}
     }
   },
-  "userAndUserAreTyping": "{username} dan {username2} sedang mengetik…",
+  "userAndUserAreTyping": "{username} dan {username2} sedang mengetik",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1279,7 +1279,7 @@
       "username2": {}
     }
   },
-  "userAndOthersAreTyping": "{username} dan {count} lainnya sedang mengetik…",
+  "userAndOthersAreTyping": "{username} dan {count} lainnya sedang mengetik",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1766,7 +1766,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} pengguna sedang mengetik…",
+  "numUsersTyping": "{count} pengguna sedang mengetik",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {

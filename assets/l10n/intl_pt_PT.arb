@@ -1268,7 +1268,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "Estão {count} utilizadores(as) a escrever…",
+    "numUsersTyping": "Estão {count} utilizadores(as) a escrever",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
