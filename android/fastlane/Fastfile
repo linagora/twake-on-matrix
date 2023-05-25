@@ -17,9 +17,9 @@ default_platform(:android)
 platform :android do
   lane :set_build_code_internal do
     versions = google_play_track_version_codes(
-        track: "internal",
-        json_key: "./keys.json"
-      )
+      track: "internal",
+      json_key: "./keys.json"
+    )
     last_version = versions[0].to_i
     version_name = last_git_tag.gsub("v", "")
     Dir.chdir("../..") do
@@ -30,6 +30,10 @@ platform :android do
       result = config.gsub(re, subst)
 
       File.open("./pubspec.yaml", 'w') { |file| file.write(result) }
+    end
+
+    File.open("./metadata/android/en-US/changelogs/#{last_version+1}.txt", 'w') do |file|
+      file.write(changelog_from_git_commits(between: [sh("git tag | tail -2 | head -1").strip, last_git_tag]))
     end
   end
 

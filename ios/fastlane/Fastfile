@@ -43,7 +43,7 @@ platform :ios do
       export_method: "app-store"
     )
     upload_to_testflight(
-      skip_waiting_for_build_processing: true,
+      changelog: changelog_from_git_commits(between: [sh("git tag | tail -2 | head -1").strip, last_git_tag]),
       ipa: "Runner.ipa"
     )
   end
@@ -70,4 +70,3 @@ platform :ios do
     # slack(message: "Successfully uploaded a new App Store build")
   end
 end
-
