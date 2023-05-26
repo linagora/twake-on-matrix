@@ -1,4 +1,5 @@
-import 'package:fluffychat/pages/chat/chat_empty_view.dart';
+import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
+import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -41,9 +42,9 @@ class ChatEventList extends StatelessWidget {
       }.contains(e.type),
     )) {
       return Center(
-        child: ChatEmptyView(
-          isDirectChat: controller.room?.isDirectChat == true,
-        ),
+        child: controller.room?.isDirectChat ?? true 
+          ? const DirectChatEmptyView()
+          : const GroupChatEmptyView(),
       );
     }
 
