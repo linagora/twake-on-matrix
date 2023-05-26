@@ -1,8 +1,11 @@
 import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
+import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 
 typedef OnExpansionListTileTap = void Function();
 
@@ -53,8 +56,16 @@ class ExpansionContactListTile extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (contact.matrixId != null && contact.matrixId!.isCurrentMatrixId(context)) ... [
+                          const SizedBox(width: 8.0),
+                          TwakeChip(
+                            text: L10n.of(context)!.owner,
+                            textColor: Theme.of(context).colorScheme.primary,
+                          )
+                        ],
                         const SizedBox(width: 8.0,),
-                        ContactStatusWidget(status: contact.status,),
+                        if (contact.status != null)
+                          ContactStatusWidget(status: contact.status!,),
                       ],
                     ),
                   ),

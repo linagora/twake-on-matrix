@@ -25,9 +25,6 @@ class SearchContactsController {
     _initializeDebouncer();
     textEditingController.addListener(() {
       onSearchBarChanged(textEditingController.text);
-      if (onSearchKeywordChanged != null) {
-        onSearchKeywordChanged!(textEditingController.text);
-      }
     });
   }
 
@@ -40,6 +37,9 @@ class SearchContactsController {
     _debouncer.values.listen((keyword) async {
       Logs().d("SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword");
       searchKeyword = keyword;
+      if (onSearchKeywordChanged != null) {
+        onSearchKeywordChanged!(textEditingController.text);
+      }
       fetchLookupContacts();
     });
   }

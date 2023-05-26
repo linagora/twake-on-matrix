@@ -7,11 +7,11 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ContactStatusWidget extends StatelessWidget {
 
-  final ContactStatus? status;
+  final ContactStatus status;
 
   ContactStatusWidget({
     super.key,
-    this.status,
+    required this.status,
   });
 
   final Color activeColor = const Color(0xFF43A843);
@@ -30,17 +30,16 @@ class ContactStatusWidget extends StatelessWidget {
               ? activeColor
               : inactiveColor,
           ),
-          if (status != null) 
-            status == ContactStatus.active 
-              ? Text(" ${L10n.of(context)!.active}",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: activeColor,
-                ),)
-              : Text(" ${L10n.of(context)!.inactive}",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: inactiveColor,
-                ),
+          status == ContactStatus.active 
+            ? Text(" ${L10n.of(context)!.active}",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: activeColor,
+              ),)
+            : Text(" ${L10n.of(context)!.inactive}",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: inactiveColor,
               ),
+            ),
         ],
       ),
     );

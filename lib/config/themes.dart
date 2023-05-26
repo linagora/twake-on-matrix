@@ -202,6 +202,9 @@ abstract class FluffyThemes {
           shadow: brightness == Brightness.light
             ? LinagoraSysColors.material().shadow
             : LinagoraSysColors.material().shadowDark,
+          outline: brightness == Brightness.light
+            ? LinagoraSysColors.material().outline
+            : LinagoraSysColors.material().outlineDark,
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: brightness == Brightness.light
@@ -213,16 +216,47 @@ abstract class FluffyThemes {
             iconSize: MaterialStateProperty.all(iconSize),
             iconColor: MaterialStateProperty.all(
               brightness == Brightness.light
-                ? Colors.black
-                : Colors.white
+                ? LinagoraSysColors.material().onSurface
+                : LinagoraSysColors.material().onSurfaceDark,
             ),
           )
         ),
         iconTheme: IconThemeData(
           size: iconSize,
           color: brightness == Brightness.light
-            ? LinagoraSysColors.material().onSurface
-            : LinagoraSysColors.material().onSurfaceDark
+            ? LinagoraSysColors.material().onBackground
+            : LinagoraSysColors.material().onBackgroundDark
+        ),
+        switchTheme: SwitchThemeData(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          overlayColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return LinagoraSysColors.material().primary;
+              } else {
+                return LinagoraSysColors.material().outline;
+              }
+            },
+          ),
+          thumbColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return LinagoraSysColors.material().onPrimary;
+              } else {
+                return LinagoraSysColors.material().outline;
+              }
+            }
+          ),
+          trackColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return LinagoraSysColors.material().primary;
+              }
+              else {
+                return LinagoraSysColors.material().surface;
+              }
+            }
+          ),
         ),
       );
 }

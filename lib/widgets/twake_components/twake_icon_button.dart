@@ -21,12 +21,12 @@ class TwakeIconButton extends StatelessWidget {
 
   final double? weight;
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const TwakeIconButton({
     Key? key, 
-    required this.onPressed,
     required this.tooltip,
+    this.onPressed,
     this.icon, 
     this.imagePath,
     this.paddingAll,
