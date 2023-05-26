@@ -840,8 +840,8 @@
             "senderName": {}
         }
     },
-    "enterAGroupName": "Enter a group name",
-    "@enterAGroupName": {
+    "enterGroupName": "Enter group name",
+    "@enterGroupName": {
         "type": "text",
         "placeholders": {}
     },
@@ -2555,11 +2555,11 @@
     },
     "noMessageHereYet": "No message here yet...",
     "sendMessageGuide": "Send a message or tap on the greeting bellow.",
-    "youCreatedAChanel": "You created a Chanel",
-    "chanelCanHave": "Chanel can have:",
+    "youCreatedGroupChat": "You created a Group chat",
+    "groupChatsCanHave": "Group chats can have:",
     "upTo100000Members": "Up to 100.000 members",
     "persistentChatHistory": "Persistent Chat history",
-    "multiInteractionThreadedDiscussion": "Multi-interaction threaded discussion",
+    "multiInteractionThreadedDiscussion": "Multi-interaction threaded discussions",
     "addMember": "Add members",
     "profile": "Profile",
     "@profile": {
@@ -2600,5 +2600,23 @@
     "searchResultNotFound4": "• If the reason is not listed above, ",
     "searchResultNotFound5": "seek helps.",
     "more": "More",
-    "whoWouldYouLikeToAdd": "Who would you like to add?"
+    "whoWouldYouLikeToAdd": "Who would you like to add?",
+    "addAPhoto": "Add a photo",
+    "maxImageSize": "Maximum file size: {max}MB",
+    "@maxImageSize": {
+        "placeholders": {
+            "max": {}
+        }
+    },
+    "makeThisGroupPrivate": "Make this group private",
+    "groupPrivateDescription": "This group will only be visible to those who are invited. From the group settings, you can change this at any time.",
+    "enableE2EEncryption": "Enable end-to-end encryption",
+    "owner": "Owner",
+    "participantsCount": "Participants ({count})",
+    "@participantsCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "back": "Back"
 }

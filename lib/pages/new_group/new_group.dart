@@ -4,8 +4,11 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
+import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
@@ -22,21 +25,38 @@ class NewGroupController extends State<NewGroup> {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
+  final groupNameTextEditingController = TextEditingController();
 
   final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
   final haveSelectedContactsNotifier = ValueNotifier(false);
+  final haveGroupNameNotifier = ValueNotifier(false);
+  final isEnableEEEncryptionNotifier = ValueNotifier(true);
+
+  String groupName = "";
+  bool isGroupPrivate = false;
 
   @override
   void initState() {
     super.initState();
     searchContactsController.init();
-    searchContactsController.onSearchKeywordChanged = (String text) {
-      if (text.isEmpty) {
-        fetchContactsController.fetchCurrentTomContacts();
-      }
-    };
+    onSearchKeywordChanged();
     listenContactsStartList();
     listenSearchContacts();
+    listenGroupNameChanged();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    contactStreamController.close();
+    searchContactsController.dispose();
+    fetchContactsController.dispose();
+    groupNameTextEditingController.dispose();
+
+    selectedContactsMapNotifier.dispose();
+    haveSelectedContactsNotifier.dispose();
+    isEnableEEEncryptionNotifier.dispose();
+    haveGroupNameNotifier.dispose();
   }
 
   void listenContactsStartList() {
@@ -52,6 +72,17 @@ class NewGroupController extends State<NewGroup> {
       contactStreamController.add(event);
     });
   }
+
+  void onSearchKeywordChanged() {
+    searchContactsController.onSearchKeywordChanged = (String text) {
+      if (text.isEmpty) {
+        fetchContactsController.fetchCurrentTomContacts();
+      }
+    };
+  }
+
+  Iterable<PresentationContact> get contactsList
+    => selectedContactsMapNotifier.value.keys;
 
   void selectContact(PresentationContact contact) {
     final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
@@ -80,8 +111,18 @@ class NewGroupController extends State<NewGroup> {
     return newContactsList;
   }
 
-    selectedContactsMapNotifier.dispose();
-    haveSelectedContactsNotifier.dispose();
+  void moveToNewGroupInfoScreen() async {
+    await showDialog(
+      useSafeArea: false,
+      context: context, 
+      useRootNavigator: false,
+      builder: (context) {
+        return NewGroupChatInfo(
+          contactsList: getAllContactsGroupChat(),
+          newGroupController: this,
+        );
+      },
+    );
   }
 
   @override
