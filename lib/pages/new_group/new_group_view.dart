@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/search_contact_appbar.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:matrix/matrix.dart';
 
 class NewGroupView extends StatelessWidget {
   final NewGroupController controller;
@@ -55,9 +53,7 @@ class NewGroupView extends StatelessWidget {
         },
         child: TwakeFloatingActionButton(
           icon: Icons.arrow_forward,
-          onTap: () {
-            Logs().d("NewGroupView::FloatingActionButton: tapped");
-          },
+          onTap: () => controller.moveToNewGroupInfoScreen(),
         ),
       ),
     );
