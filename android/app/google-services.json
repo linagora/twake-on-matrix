@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "492265884073",
+    "firebase_url": "https://twake-195010.firebaseio.com",
+    "project_id": "twake-195010",
+    "storage_bucket": "twake-195010.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492265884073:android:fba0d50aace57d8d",
+        "android_client_info": {
+          "package_name": "com.twake.twake"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "492265884073-e89325dclv982tp2tbjpmi57l95r1r4o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.twake.twake",
+            "certificate_hash": "4a7b9a321569fbdb610e8cd8b4fe6bc1ae7d2a9a"
+          }
+        },
+        {
+          "client_id": "492265884073-g537tkljd8ilrg4c63t0s86fgk97mol7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX6d-jWjhiYiP2RsRdWTrpKt9yCW0M5Zc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "492265884073-g537tkljd8ilrg4c63t0s86fgk97mol7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "492265884073-758idkadb1l2kh348fk84rn13su5rks6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.linagora.twake"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

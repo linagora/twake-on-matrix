@@ -43,7 +43,6 @@ platform :ios do
       export_method: "app-store"
     )
     upload_to_testflight(
-      changelog: changelog_from_git_commits(between: [sh("git tag | tail -2 | head -1").strip, last_git_tag])[0..3999],
       ipa: "Runner.ipa"
     )
   end
