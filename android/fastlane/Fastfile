@@ -31,10 +31,6 @@ platform :android do
 
       File.open("./pubspec.yaml", 'w') { |file| file.write(result) }
     end
-
-    File.open("./metadata/android/en-US/changelogs/#{last_version+1}.txt", 'w') do |file|
-      file.write(changelog_from_git_commits(between: [sh("git tag | tail -2 | head -1").strip, last_git_tag])[0..499])
-    end
   end
 
   lane :deploy_internal_test do

@@ -39,7 +39,7 @@ import '../config/setting_keys.dart';
 import 'famedlysdk_store.dart';
 import 'platform_infos.dart';
 
-//import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 
 class NoTokenException implements Exception {
   String get cause => 'Cannot get firebase token';
@@ -65,7 +65,7 @@ class BackgroundPush {
 
   final pendingTests = <String, Completer<void>>{};
 
-  final dynamic firebase = null; //FcmSharedIsolate();
+  final dynamic firebase = FcmSharedIsolate();
 
   DateTime? lastReceivedPush;
 
