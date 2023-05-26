@@ -69,12 +69,16 @@ class NewGroupController extends State<NewGroup> {
     haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    contactStreamController.close();
-    searchContactsController.dispose();
-    fetchContactsController.dispose();
+  Set<PresentationContact> getAllContactsGroupChat() {
+    final newContactsList = {
+          PresentationContact(
+            displayName: "You",
+            matrixId: Matrix.of(context).client.userID,
+          )
+        };
+    newContactsList.addAll(getSelectedValidContacts(contactsList));
+    return newContactsList;
+  }
 
     selectedContactsMapNotifier.dispose();
     haveSelectedContactsNotifier.dispose();

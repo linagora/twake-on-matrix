@@ -15,7 +15,7 @@ class PresentationContact extends Equatable {
     this.email,
     this.displayName,
     this.matrixId,
-    this.status
+    this.status,
   });
   
   @override

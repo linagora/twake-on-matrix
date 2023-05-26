@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -46,5 +47,12 @@ extension StringCasingExtension on String {
 
   String toTomMatrixId() {
     return '@$this:tom-dev.xyz';
+  }
+  
+  bool isCurrentMatrixId(BuildContext context) {
+    if (isEmpty) {
+      return false;
+    }
+    return Matrix.of(context).client.userID == this;
   }
 }
