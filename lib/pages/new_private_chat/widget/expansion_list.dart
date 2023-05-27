@@ -111,7 +111,10 @@ class _ExpansionList extends State<ExpansionList> {
                 contact: contact,
                 onTap: () async {
                   if (contact.displayName != null && contact.displayName!.isNotEmpty) {
-                    final roomId = await Matrix.of(context).client.startDirectChat(contact.displayName!.toTomMatrixId());
+                    final roomId = await Matrix.of(context).client.startDirectChat(
+                      contact.displayName!.toTomMatrixId(),
+                      enableEncryption: true,
+                    );
                     VRouter.of(context).toSegments(['rooms', roomId]);
                   }
                 },)

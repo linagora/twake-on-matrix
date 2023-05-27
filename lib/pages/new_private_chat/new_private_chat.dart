@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';

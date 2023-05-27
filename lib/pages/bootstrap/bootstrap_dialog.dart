@@ -79,6 +79,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
 
   @override
   void initState() {
+    Logs().d('BootstrapDialog::initState ${widget.client.accountData.toString()}');
+    Logs().d('BootstrapDialog::initState key: ${widget.client.accountData['m.secret_storage.key.wAfpTPuzaJt1KP4cUL0xeCTtVM9ewdBY']?.toJson()}');
+    Logs().d('BootstrapDialog::initState default key: ${widget.client.accountData['m.secret_storage.default_key']?.toJson()}');
     _createBootstrap(widget.wipe);
     super.initState();
   }
@@ -103,6 +106,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         : const LinearProgressIndicator();
     titleText = L10n.of(context)!.loadingPleaseWait;
 
+    Logs().d('BootstrapDialog: ${widget.client.accountData.toString()}');
+    Logs().d('BootstrapDialog: key: ${widget.client.accountData['m.secret_storage.key.wAfpTPuzaJt1KP4cUL0xeCTtVM9ewdBY']?.toJson()}');
+    Logs().d('BootstrapDialog: default key: ${widget.client.accountData['m.secret_storage.default_key']?.toJson()}');
     if (bootstrap.newSsssKey?.recoveryKey != null &&
         _recoveryKeyStored == false) {
       final key = bootstrap.newSsssKey!.recoveryKey;

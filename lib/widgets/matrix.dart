@@ -13,6 +13,8 @@ import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions
 import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecases/save_recovery_words_interactor.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -260,6 +262,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       PlatformInfos.isLinux ? NotificationsClient() : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
+  final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
+
   @override
   void initState() {
     super.initState();
@@ -351,6 +356,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         }
       } else {
         setUpToMServicesInLogin(c);
+        _handleRecoveryWordsOnFirstLogin();
         widget.router?.currentState?.to(
           state == LoginState.loggedIn ? '/rooms' : '/home',
           queryParameters: widget.router?.currentState?.queryParameters ?? {},
@@ -503,6 +509,23 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       Logs().d('MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}');
       tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
     }
+  }
+
+  void _handleRecoveryWordsOnFirstLogin() async {
+    Logs().d('MatrixState::_handleRecoveryWordsOnFirstLogin');
+    Logs().d('MatrixState::_handleRecoveryWordsOnFirstLogin: ${client.accountData.toString()}');
+    // if (!client.isUnknownSession) return;
+
+
+    // if (!client.encryption!.crossSigning.enabled) {
+    //   client.encryption!.bootstrap().wipeSsss(true);
+    //   client.encryption!.bootstrap().unlockedSsss();
+    //   client.encryption!.bootstrap().newSsss().then((_) async {
+    //     final ssss = client.encryption!.ssss;
+    //     final mainKey = await ssss.open(ssss.defaultKeyId).getStored(EventTypes.CrossSigningMasterKey);
+    //     await _saveRecoveryWordsInteractor.execute(mainKey);
+    //   });
+    // }
   }
 
   void _setUpIdentityServer(IdentityServerInformation identityServer) {

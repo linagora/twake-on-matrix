@@ -11,6 +11,7 @@
 .history
 .svn/
 prime
+*.g.dart
 
 # libolm package
 /assets/js/package

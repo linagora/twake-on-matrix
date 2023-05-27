@@ -200,6 +200,9 @@ class SettingsController extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
+    Logs().d('Settings::build ${client.accountData.toString()}');
+    Logs().d('Settings::build key: ${client.accountData['m.secret_storage.key.wAfpTPuzaJt1KP4cUL0xeCTtVM9ewdBY']?.toJson()}');
+    Logs().d('Settings::build default key: ${client.accountData['m.secret_storage.default_key']?.toJson()}');
     profileFuture ??= client.getProfileFromUserId(
       client.userID!,
       cache: !profileUpdated,
