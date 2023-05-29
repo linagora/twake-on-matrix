@@ -60,7 +60,7 @@ class NetworkDI extends BaseDI {
   void _bindDioForTomServer(GetIt get) {
     final dio = Dio(get.get<BaseOptions>());
     dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: tomServerUrlInterceptorName));
-
+    dio.interceptors.add(get.get<AuthorizationInterceptor>());
     if (kDebugMode) {
       dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
     }
