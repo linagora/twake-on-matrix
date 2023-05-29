@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/configuration/tom_configuration_di.dart';
 import 'package:fluffychat/di/global/hive_di.dart';
 import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
+import 'package:fluffychat/di/presentation/recovery_words_di.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
@@ -20,5 +21,6 @@ class GetItInitializer {
     HiveDI().bind();
     NetworkConnectivityDI().bind();
     ToMConfigurationDI().bind();
+    RecoveryWordsDI().bind();
   }
 }

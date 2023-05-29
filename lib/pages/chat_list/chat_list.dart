@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
@@ -71,6 +75,10 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentFileStreamSubscription;
 
   StreamSubscription? _intentUriStreamSubscription;
+
+  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
+
+  bool get displayNavigationBar => false;
 
   String? activeSpaceId;
 
@@ -539,10 +547,24 @@ class ChatListController extends State<ChatList>
 
       // Display first login bootstrap if enabled
       if (client.encryption?.keyManager.enabled == true) {
+        Logs().d('ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled');
         if (await client.encryption?.keyManager.isCached() == false ||
             await client.encryption?.crossSigning.isCached() == false ||
             client.isUnknownSession && !mounted) {
-          await BootstrapDialog(client: client).show(context);
+          final recoveryWords = await _getRecoveryWords();
+          if (recoveryWords != null) {
+            await TomBootstrapDialog(client: client, recoveryWords: recoveryWords)
+              .show(context);
+          } else {
+            Logs().d('ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap');
+            await BootstrapDialog(client: client).show(context);
+          }
+        }
+      } else {
+        Logs().d('ChatListController::_waitForFirstSync(): encryption is not enabled');
+        final recoveryWords = await _getRecoveryWords();
+        if (recoveryWords == null) {
+          await TomBootstrapDialog(client: client).show(context);
         }
       }
     }
@@ -666,6 +688,15 @@ class ChatListController extends State<ChatList>
     if (!kIsWeb) return;
     final isTor = await TorBrowserDetector.isTorBrowser;
     isTorBrowser = isTor;
+  }
+
+  Future<RecoveryWords?> _getRecoveryWords() async {
+    return await _getRecoveryWordsInteractor.execute()
+      .then((either) => either.fold(
+        (failure) => null,
+        (success) => success.words,
+      ),
+    );
   }
 
   Future<void> dehydrate() =>
