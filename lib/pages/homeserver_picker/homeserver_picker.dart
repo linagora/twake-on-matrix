@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -29,8 +31,9 @@ class HomeserverPicker extends StatefulWidget {
   HomeserverPickerController createState() => HomeserverPickerController();
 }
 
-class HomeserverPickerController extends State<HomeserverPicker> {
-  bool isLoading = false;
+class HomeserverPickerController extends State<HomeserverPicker> with ConnectPageMixin {
+  
+  HomeserverState state = HomeserverState.enterServerName;
   final TextEditingController homeserverController = TextEditingController(
     text: AppConfig.defaultHomeserver,
   );
@@ -65,7 +68,7 @@ class HomeserverPickerController extends State<HomeserverPicker> {
   }
 
   void _updateFocus() {
-    if (benchmarkResults == null) _loadHomeserverList();
+    if (benchmarkResults == null) loadHomeserverList();
     if (homeserverFocusNode.hasFocus) {
       setState(() {
         displayServerList = true;
@@ -85,15 +88,18 @@ class HomeserverPickerController extends State<HomeserverPicker> {
         searchTerm = text;
       });
 
-  List<HomeserverBenchmarkResult> get filteredHomeservers => benchmarkResults!
+  List<HomeserverBenchmarkResult> filteredHomeservers(String searchTerm) {
+
+    return benchmarkResults!
       .where(
         (element) =>
             element.homeserver.baseUrl.host.contains(searchTerm) ||
             (element.homeserver.description?.contains(searchTerm) ?? false),
       )
       .toList();
+  } 
 
-  void _loadHomeserverList() async {
+  void loadHomeserverList() async {
     try {
       final homeserverList =
           await const JoinmatrixOrgParser().fetchHomeservers();
@@ -126,8 +132,7 @@ class HomeserverPickerController extends State<HomeserverPicker> {
     setState(() {
       homeserverFocusNode.unfocus();
       error = null;
-      isLoading = true;
-      searchTerm = '';
+      state = HomeserverState.loading;
       displayServerList = false;
     });
 
@@ -139,6 +144,7 @@ class HomeserverPickerController extends State<HomeserverPicker> {
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
+
       matrix.loginHomeserverSummary =
           await matrix.getLoginClient().checkHomeserver(homeserver);
       final ssoSupported = matrix.loginHomeserverSummary!.loginFlows
@@ -154,17 +160,55 @@ class HomeserverPickerController extends State<HomeserverPicker> {
       if (!ssoSupported && matrix.loginRegistrationSupported == false) {
         // Server does not support SSO or registration. We can skip to login page:
         VRouter.of(context).to('login');
+      } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
+        setState(() {
+          state = HomeserverState.ssoLoginServer;
+          FocusManager.instance.primaryFocus?.unfocus();
+        });
       } else {
+        state = HomeserverState.otherLoginMethod;
         VRouter.of(context).to('connect');
       }
     } catch (e) {
+      state = HomeserverState.wrongServerName;
       setState(() => error = (e).toLocalizedString(context));
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
     }
   }
+
+  void loginButtonPressed() async {
+    switch (state) {
+      case HomeserverState.enterServerName:
+        await checkHomeserverAction();
+        break;
+      case HomeserverState.loading:
+        break;
+      case HomeserverState.ssoLoginServer:
+        await checkHomeserverAction();
+        Map<String, dynamic>? rawLoginTypes;
+        await Matrix.of(context)
+          .getLoginClient()
+          .request(
+            RequestType.GET,
+            '/client/r0/login',
+          )
+          .then((loginTypes) => rawLoginTypes = loginTypes,
+          );
+        final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
+
+        if (supportsSso(context) && identitiesProvider?.length == 1) {
+          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
+        }
+        break;
+      case HomeserverState.wrongServerName:
+        await checkHomeserverAction();
+        break;
+      default: 
+        await checkHomeserverAction();
+        break;
+    }
+    setState(() {});
+  }
+  
 
   @override
   void dispose() {

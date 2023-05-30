@@ -2618,5 +2618,8 @@
             "count": {}
         }
     },
-    "back": "Back"
+    "back": "Back",
+    "loginWithSSO": "Log in with SSO",
+    "wrongServerName": "Wrong server name",
+    "serverNameWrongExplain": "Server address was sent to you by company admin. Check the invitation email."
 }

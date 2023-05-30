@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -17,7 +16,7 @@ class ConnectPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatar = Matrix.of(context).loginAvatar;
-    final identityProviders = controller.identityProviders;
+    final identityProviders = controller.identityProviders(rawLoginTypes: controller.rawLoginTypes);
     return LoginScaffold(
       appBar: AppBar(
         leading: controller.loading ? null : const BackButton(),
@@ -147,7 +146,7 @@ class ConnectPageView extends StatelessWidget {
               ),
             ),
           ],
-          if (controller.supportsSso)
+          if (controller.supportsSso(context))
             identityProviders == null
                 ? const SizedBox(
                     height: 74,
@@ -182,7 +181,9 @@ class ConnectPageView extends StatelessWidget {
                                       height: 32,
                                     ),
                               onPressed: () => controller
-                                  .ssoLoginAction(identityProviders.single.id!),
+                                  .ssoLoginAction(
+                                    context: context,
+                                    id: identityProviders.single.id!),
                               label: Text(
                                 identityProviders.single.name ??
                                     identityProviders.single.brand ??
@@ -195,13 +196,15 @@ class ConnectPageView extends StatelessWidget {
                               for (final identityProvider in identityProviders)
                                 SsoButton(
                                   onPressed: () => controller
-                                      .ssoLoginAction(identityProvider.id!),
+                                      .ssoLoginAction(
+                                        context: context,
+                                        id: identityProvider.id!),
                                   identityProvider: identityProvider,
                                 ),
                             ].toList(),
                           ),
                   ),
-          if (controller.supportsLogin)
+          if (controller.supportsLogin(context))
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Hero(
