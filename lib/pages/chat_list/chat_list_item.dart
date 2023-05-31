@@ -293,7 +293,7 @@ class ChatListItem extends StatelessWidget {
                   width: ChatListItemStyle.notificationBadgeSize(unread, room.hasNewMessages, room.notificationCount),
                   decoration: BoxDecoration(
                     color: room.highlightCount > 0 || room.membership == Membership.invite
-                        ? Colors.red
+                        ? Theme.of(context).colorScheme.primary
                         : room.notificationCount > 0 || room.markedUnread
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.primaryContainer,
@@ -304,8 +304,9 @@ class ChatListItem extends StatelessWidget {
                         ? Text(
                             room.notificationCount.toString(),
                             style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  letterSpacing: -0.5,
                                   color: room.highlightCount > 0
-                                      ? Colors.white
+                                      ? Theme.of(context).colorScheme.onPrimary
                                       : room.notificationCount > 0
                                           ? Theme.of(context).colorScheme.onPrimary
                                           : Theme.of(context).colorScheme.onPrimaryContainer,

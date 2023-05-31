@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart' as b;
@@ -26,12 +27,8 @@ class UnreadRoomsBadge extends StatelessWidget {
           .stream
           .where((syncUpdate) => syncUpdate.hasRoomUpdate),
       builder: (context, _) {
-        final unreadCount = Matrix.of(context)
-            .client
-            .rooms
-            .where(filter)
-            .where((r) => (r.isUnread || r.membership == Membership.invite))
-            .length;
+        final unreadCount = getNotificationsCount(context);
+
         return b.Badge(
           alignment: Alignment.bottomRight,
           badgeContent: Text(
@@ -54,5 +51,15 @@ class UnreadRoomsBadge extends StatelessWidget {
         );
       },
     );
+  }
+
+  int getNotificationsCount(BuildContext context) {
+    return Matrix.of(context)
+        .client
+        .rooms
+        .where(filter)
+        .where((r) => (r.isUnread || r.membership == Membership.invite))
+        .map((element) => element.isUnread ? element.notificationCount : 1)
+        .sum;
   }
 }

@@ -209,16 +209,12 @@ class ChatView extends StatelessWidget {
                           onPressed: controller.clearSelectedEvents,
                           tooltip: L10n.of(context)!.close,
                         )
-                      : UnreadRoomsBadge(
-                          filter: (r) => r.id != controller.roomId!,
-                          badgePosition: BadgePosition.topEnd(end: 8, top: 4),
-                          child: TwakeIconButton(
-                            tooltip: "Back",
-                            icon: Icons.arrow_back,
-                            onPressed: () => VRouter.of(context).pop(),
-                            paddingAll: 8.0,
-                            margin: const EdgeInsets.symmetric(vertical: 12.0),
-                          ),
+                      : TwakeIconButton(
+                          tooltip: "Back",
+                          icon: Icons.arrow_back,
+                          onPressed: () => VRouter.of(context).pop(),
+                          paddingAll: 8.0,
+                          margin: const EdgeInsets.symmetric(vertical: 12.0),
                         ),
                   titleSpacing: 0,
                   title: ChatAppBarTitle(controller),
