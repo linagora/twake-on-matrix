@@ -44,7 +44,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                         : SizedBox(
                             height: ChatListHeaderStyle.searchBarHeight,
                             child: TextField(
-                              controller: controller.searchController,
+                              controller: controller.searchChatController,
                               textInputAction: TextInputAction.search,
                               onChanged: controller.onSearchEnter,
                               decoration: InputDecoration(

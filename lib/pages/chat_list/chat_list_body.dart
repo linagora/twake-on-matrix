@@ -131,7 +131,7 @@ class ChatListViewBody extends StatelessWidget {
                       if (displayStoriesHeader)
                         StoriesHeader(
                           key: const Key('stories_header'),
-                          filter: controller.searchController.text,
+                          filter: controller.searchChatController.text,
                         ),
                       const ConnectionStatusHeader(),
                       AnimatedContainer(
@@ -164,7 +164,7 @@ class ChatListViewBody extends StatelessWidget {
                     .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!))
                     .toLowerCase()
                     .contains(
-                      controller.searchController.text.toLowerCase(),
+                      controller.searchChatController.text.toLowerCase(),
                     )) {
                   return Container();
                 }
