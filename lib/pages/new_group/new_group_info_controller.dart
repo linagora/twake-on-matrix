@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/data/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';

@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/contacts/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/data/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
