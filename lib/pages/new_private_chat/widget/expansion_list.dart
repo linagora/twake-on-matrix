@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
@@ -91,7 +92,10 @@ class _ExpansionList extends State<ExpansionList> {
           (success) => success.contacts.expand((contact) => contact.toPresentationContacts()),
         ).toSet();
 
-        if (contactsList.isEmpty) {
+        final contactsListSorted = contactsList.sorted(
+          (a, b) => widget.newPrivateChatController.comparePresentationContacts(a, b));
+
+        if (contactsListSorted.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -107,9 +111,9 @@ class _ExpansionList extends State<ExpansionList> {
         final isSearchEmpty = searchContactsController.searchKeyword.isEmpty;
         final expansionList = [
           const SizedBox(height: 4,),
-          _buildTitle(contactsList.length),
+          _buildTitle(contactsListSorted.length),
           if (isShow)
-            for (final contact in contactsList)...[
+            for (final contact in contactsListSorted)...[
               InkWell(
                 onTap: () async {
                   await showFutureLoadingDialog(

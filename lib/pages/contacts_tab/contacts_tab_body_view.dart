@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/data/model/presentation_contact.dart';
@@ -22,7 +23,7 @@ class ContactsTabBodyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(4.0),
         child: StreamBuilder<Either<Failure, GetContactsSuccess>>(
           stream: controller.contactsStreamController.stream,
           builder: (context, snapshot) {
@@ -38,8 +39,10 @@ class ContactsTabBodyView extends StatelessWidget {
               (left) => <PresentationContact>[],
               (right) => right.contacts.expand((contact) => contact.toPresentationContacts()),
             );
+
+            final contactsListSorted = contactsList.sorted((a, b) => controller.comparePresentationContacts(a, b));
         
-            if (contactsList.isEmpty) {
+            if (contactsListSorted.isEmpty) {
               if (controller.searchContactsController.searchKeyword.isEmpty) {
                 return const EmptyContactBody();
               } else {
@@ -51,7 +54,7 @@ class ContactsTabBodyView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: contactsList
+                children: contactsListSorted
                   .map<Widget>((contact) => ExpansionContactListTile(contact: contact))
                   .toList(),
               ),
