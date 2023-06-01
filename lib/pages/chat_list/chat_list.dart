@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/chat_list/contacts_tab_controller.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
@@ -93,7 +94,7 @@ class ChatList extends StatefulWidget {
 }
 
 class ChatListController extends State<ChatList>
-    with TickerProviderStateMixin, RouteAware {
+    with TickerProviderStateMixin, RouteAware, ComparablePresentationContactMixin {
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
