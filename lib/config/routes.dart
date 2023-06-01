@@ -6,7 +6,7 @@ import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settin
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
-import 'package:fluffychat/pages/contacts/di/contact_di.dart';
+import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
@@ -46,8 +46,9 @@ class AppRoutes {
       ];
 
   List<VRouteElement> get _mobileRoutes => [
-        VWidget(
+        VWidgetWithDependency(
           path: '/rooms',
+          di: ContactDI(),
           widget: const ChatList(),
           stackedRoutes: [
             VWidget(

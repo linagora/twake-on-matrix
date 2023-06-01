@@ -20,11 +20,7 @@ extension ChatListExtension on ChatListController {
     return [
       if (AppConfig.separateChatTypes) ...[
         NavigationDestination(
-          icon: UnreadRoomsBadge(
-            badgePosition: badgePosition,
-            filter: getRoomFilterByActiveFilter(ActiveFilter.groups),
-            child: const Icon(Icons.contacts_outlined),
-          ),
+          icon: const Icon(Icons.contacts_outlined),
           label: L10n.of(context)!.contacts,
         ),
         NavigationDestination(
@@ -36,11 +32,7 @@ extension ChatListExtension on ChatListController {
           label: L10n.of(context)!.chat,
         ),
         NavigationDestination(
-          icon: UnreadRoomsBadge(
-            badgePosition: badgePosition,
-            filter: getRoomFilterByActiveFilter(ActiveFilter.messages),
-            child: const Icon(Icons.web_stories_outlined),
-          ),
+          icon: const Icon(Icons.web_stories_outlined),
           label: L10n.of(context)!.stories,
         ),
       ] else
