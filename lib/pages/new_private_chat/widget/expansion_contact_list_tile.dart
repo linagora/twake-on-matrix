@@ -13,12 +13,9 @@ class ExpansionContactListTile extends StatelessWidget {
 
   final PresentationContact contact;
 
-  final OnExpansionListTileTap onTap;
-
   const ExpansionContactListTile({
     super.key,
     required this.contact,
-    required this.onTap
   });
 
   @override

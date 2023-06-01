@@ -20,7 +20,7 @@ class NewGroupView extends StatelessWidget {
         child: SearchContactAppBar(
           title: L10n.of(context)!.newGroupChat,
           searchContactsController: controller.searchContactsController,
-          onCloseSearchBar: () => controller.fetchContactsController.fetchCurrentTomContacts(),
+          onCloseSearchBar: () => controller.searchContactsController.onCloseSearchTapped(),
           hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
         ),
       ),

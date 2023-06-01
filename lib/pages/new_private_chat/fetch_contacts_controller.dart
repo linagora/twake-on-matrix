@@ -8,8 +8,8 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
 
 class FetchContactsController {
-  final FetchContactsInteractor _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
-  final StreamController<Either<Failure, GetContactsSuccess>> streamController = StreamController();
+  final _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
+  final streamController = StreamController<Either<Failure, GetContactsSuccess>>();
 
   void fetchCurrentTomContacts() {
     _fetchContactsInteractor

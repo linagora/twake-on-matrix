@@ -33,6 +33,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     };
     listenSearchContacts();
     listenContactsStartList();
+    fetchContactsController.fetchCurrentTomContacts();
   }
 
   void listenContactsStartList() {

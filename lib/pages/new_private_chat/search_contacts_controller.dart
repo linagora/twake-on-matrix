@@ -18,12 +18,18 @@ class SearchContactsController {
   final TextEditingController textEditingController = TextEditingController();
   StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController = StreamController();
   void Function(String)? onSearchKeywordChanged;
+  late final isSearchModeNotifier = ValueNotifier(false);
 
   String searchKeyword = "";
 
   void init() {
     _initializeDebouncer();
     textEditingController.addListener(() {
+      if (textEditingController.text.isNotEmpty) {
+        isSearchModeNotifier.value = true;
+      } else {
+        isSearchModeNotifier.value = false;
+      }
       onSearchBarChanged(textEditingController.text);
     });
   }
@@ -56,8 +62,15 @@ class SearchContactsController {
     searchKeyword = keyword;
   }
 
+  void onCloseSearchTapped() {
+    textEditingController.clear();
+  }
+
   void dispose() {
     _debouncer.cancel();
+    textEditingController.removeListener(() {
+      Logs().d("SearchContactsController: dispose(): remove Listerners");
+    });
     textEditingController.dispose();
     lookupStreamController.close();
   }

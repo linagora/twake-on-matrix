@@ -23,63 +23,59 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0.0, right: 0.0),
-      child: Column(
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(16.0),
-            onTap: () => toggleExpansionList(),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 2.0),
-              child: Row(
-                children: [
-                  SizedBox(
-                    height: 44,
-                    child: Row(
-                      children: [
-                        Text(L10n.of(context)!.participantsCount(widget.contactsList.length),
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: LinagoraRefColors.material().neutral[40],
-                          ),),
-                      ],
-                    ),
+    return Column(
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(16.0),
+          onTap: () => toggleExpansionList(),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 2.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 44,
+                  child: Row(
+                    children: [
+                      Text(L10n.of(context)!.participantsCount(widget.contactsList.length),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),),
+                    ],
                   ),
-                  const Expanded(child: SizedBox.shrink()),
-                  TwakeIconButton(
-                    paddingAll: 6,
-                    buttonDecoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                    ),
-                    icon: isExpanded 
-                      ? Icons.expand_less 
-                      : Icons.expand_more, 
-                    tooltip: isExpanded 
-                      ? L10n.of(context)!.shrink 
-                      : L10n.of(context)!.expand,
+                ),
+                const Expanded(child: SizedBox.shrink()),
+                TwakeIconButton(
+                  paddingAll: 6,
+                  buttonDecoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   ),
-                ],
-              ),
+                  icon: isExpanded 
+                    ? Icons.expand_less 
+                    : Icons.expand_more, 
+                  tooltip: isExpanded 
+                    ? L10n.of(context)!.shrink 
+                    : L10n.of(context)!.expand,
+                ),
+              ],
             ),
           ),
-          isExpanded
-          ? Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: widget.contactsList
-                  .map(
-                    (contact) => ExpansionContactListTile(
-                      contact: contact, 
-                      onTap: () {},
-                    ),)
-                  .toList(),
-              ),
+        ),
+        isExpanded
+        ? Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: widget.contactsList
+                .map(
+                  (contact) => ExpansionContactListTile(
+                    contact: contact,
+                  ),)
+                .toList(),
             ),
-          )
-          : const Offstage(),
-        ],
-      ),
+          ),
+        )
+        : const Offstage(),
+      ],
     );
   }
 

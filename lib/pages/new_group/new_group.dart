@@ -43,6 +43,7 @@ class NewGroupController extends State<NewGroup> {
     listenContactsStartList();
     listenSearchContacts();
     listenGroupNameChanged();
+    fetchContactsController.fetchCurrentTomContacts();
   }
 
   @override

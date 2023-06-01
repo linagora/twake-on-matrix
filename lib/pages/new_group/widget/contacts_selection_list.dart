@@ -6,6 +6,7 @@ import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dar
 import 'package:fluffychat/data/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:flutter/material.dart';
 
@@ -32,7 +33,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
       builder: (context, snapshot) {
         final searchKeyword = widget.newGroupController.searchContactsController.searchKeyword;
         if (!snapshot.hasData) {
-          return const SizedBox.shrink();
+          return const LoadingContactWidget();
         }
 
         final contactsList = snapshot.data!.fold(
@@ -74,8 +75,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                           children: [
                             Expanded(
                               child: ExpansionContactListTile(
-                                contact: contactsList[i], 
-                                onTap: () {}),
+                                contact: contactsList[i]),
                             ),
                             Checkbox(
                               value: selectedContactsMap[contactsList[i]] ?? false,
