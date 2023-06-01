@@ -78,6 +78,7 @@ abstract class FluffyThemes {
           )
         ),
         appBarTheme: AppBarTheme(
+          titleSpacing: 0,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: brightness.reversed,
@@ -258,6 +259,15 @@ abstract class FluffyThemes {
             }
           ),
         ),
+        navigationBarTheme: NavigationBarThemeData(
+          height: 64,
+          backgroundColor: LinagoraSysColors.material().surface,
+          shadowColor: Colors.black.withOpacity(0.15),
+          elevation: 4.0,
+        ),
+        navigationRailTheme: NavigationRailThemeData(
+          indicatorColor: LinagoraSysColors.material().secondaryContainer,
+        )
       );
 }
 
