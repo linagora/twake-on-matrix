@@ -309,6 +309,8 @@ class ChatController extends State<Chat> {
       });
 
   Future<void> send() async {
+    scrollDown();
+
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
     final prefs = await SharedPreferences.getInstance();
