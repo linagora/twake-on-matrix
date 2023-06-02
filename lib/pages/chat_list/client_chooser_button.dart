@@ -94,46 +94,17 @@ class ClientChooserButton extends StatelessWidget {
           ),
         ...matrix.accountBundles[bundle]!
             .map(
-              (client) => PopupMenuItem(
-                value: client,
-                child: FutureBuilder<Profile?>(
-                  // analyzer does not understand this type cast for error
-                  // handling
-                  //
-                  // ignore: unnecessary_cast
-                  future: (client!.fetchOwnProfile() as Future<Profile?>)
-                      .onError((e, s) => null),
-                  builder: (context, snapshot) => Row(
-                    children: [
-                      Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
-                        name: snapshot.data?.displayName ??
-                            client.userID!.localpart,
-                        size: 32,
-                        fontSize: 12,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          snapshot.data?.displayName ??
-                              client.userID!.localpart!,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () => controller.editBundlesForAccount(
-                          client.userID,
-                          bundle,
-                        ),
-                      ),
-                    ],
+              (client) {
+                return PopupMenuItem(
+                  value: client,
+                  child: ProfileWidget(
+                    controller: controller, 
+                    bundle: bundle,
+                    client: client!,
                   ),
-                ),
-              ),
-            )
-            .toList(),
+                );
+              } 
+            ).toList(),
       ],
       PopupMenuItem(
         value: SettingsAction.addAccount,
@@ -154,66 +125,72 @@ class ClientChooserButton extends StatelessWidget {
 
     int clientCount = 0;
     matrix.accountBundles.forEach((key, value) => clientCount += value.length);
-    return FutureBuilder<Profile>(
-      future: matrix.client.fetchOwnProfile(),
-      builder: (context, snapshot) => Stack(
-        alignment: Alignment.center,
-        children: [
-          ...List.generate(
-            clientCount,
-            (index) => KeyBoardShortcuts(
-              keysToPress: _buildKeyboardShortcut(index + 1),
-              helpLabel: L10n.of(context)!.switchToAccount(index + 1),
-              onKeysPressed: () => _handleKeyboardShortcut(
-                matrix,
-                index,
-                context,
+    return FutureBuilder<Profile?>(
+      future: controller.fetchOwnProfile(client: matrix.client),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator.adaptive());
+        }
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            ...List.generate(
+              clientCount,
+              (index) => KeyBoardShortcuts(
+                keysToPress: _buildKeyboardShortcut(index + 1),
+                helpLabel: L10n.of(context)!.switchToAccount(index + 1),
+                onKeysPressed: () => _handleKeyboardShortcut(
+                  matrix,
+                  index,
+                  context,
+                ),
+                child: Container(),
               ),
+            ),
+            KeyBoardShortcuts(
+              keysToPress: {
+                LogicalKeyboardKey.controlLeft,
+                LogicalKeyboardKey.tab
+              },
+              helpLabel: L10n.of(context)!.nextAccount,
+              onKeysPressed: () => _nextAccount(matrix, context),
               child: Container(),
             ),
-          ),
-          KeyBoardShortcuts(
-            keysToPress: {
-              LogicalKeyboardKey.controlLeft,
-              LogicalKeyboardKey.tab
-            },
-            helpLabel: L10n.of(context)!.nextAccount,
-            onKeysPressed: () => _nextAccount(matrix, context),
-            child: Container(),
-          ),
-          KeyBoardShortcuts(
-            keysToPress: {
-              LogicalKeyboardKey.controlLeft,
-              LogicalKeyboardKey.shiftLeft,
-              LogicalKeyboardKey.tab
-            },
-            helpLabel: L10n.of(context)!.previousAccount,
-            onKeysPressed: () => _previousAccount(matrix, context),
-            child: Container(),
-          ),
-          PopupMenuButton<Object>(
-            onSelected: (o) => _clientSelected(o, context),
-            itemBuilder: _bundleMenuItems,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-              child: Row(
-                children: [
-                  Avatar(
-                    mxContent: snapshot.data?.avatarUrl,
-                    name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
-                    size: ClientChooserButtonStyle.avatarSizeInAppBar,
-                    fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                  ),
-                  Icon(
-                    Icons.keyboard_arrow_down,
-                    size: ClientChooserButtonStyle.dropDownIconSize,
-                  ),
-                ],
+            KeyBoardShortcuts(
+              keysToPress: {
+                LogicalKeyboardKey.controlLeft,
+                LogicalKeyboardKey.shiftLeft,
+                LogicalKeyboardKey.tab
+              },
+              helpLabel: L10n.of(context)!.previousAccount,
+              onKeysPressed: () => _previousAccount(matrix, context),
+              child: Container(),
+            ),
+            PopupMenuButton<Object>(
+              onSelected: (o) => _clientSelected(o, context),
+              itemBuilder: _bundleMenuItems,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+                child: Row(
+                  children: [
+                    Avatar(
+                      mxContent: snapshot.data?.avatarUrl,
+                      name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
+                      size: ClientChooserButtonStyle.avatarSizeInAppBar,
+                      fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down,
+                      size: ClientChooserButtonStyle.dropDownIconSize,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ]
-      ),
+          ]
+        );
+      } 
     );
   }
 
@@ -340,6 +317,64 @@ class ClientChooserButton extends StatelessWidget {
     final client = matrix.client;
     final lastIndex = _shortcutIndexOfClient(matrix, client);
     _handleKeyboardShortcut(matrix, lastIndex! - 1, context);
+  }
+}
+
+class ProfileWidget extends StatefulWidget {
+  const ProfileWidget({
+    super.key,
+    required this.controller,
+    required this.bundle,
+    required this.client,
+  });
+
+  final ChatListController controller;
+  final String? bundle;
+  final Client client;
+
+  @override
+  State<ProfileWidget> createState() => _ProfileWidgetState();
+}
+
+class _ProfileWidgetState extends State<ProfileWidget> {
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Profile?>(
+      future: widget.controller.fetchOwnProfile(client: widget.client),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator.adaptive());
+        }
+        return Row(
+          children: [
+            Avatar(
+              mxContent: snapshot.data?.avatarUrl,
+              name: snapshot.data?.displayName ??
+                  widget.client.userID!.localpart,
+              size: 32,
+              fontSize: 12,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                snapshot.data?.displayName ??
+                    widget.client.userID!.localpart!,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 12),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => widget.controller.editBundlesForAccount(
+                widget.client.userID,
+                widget.bundle,
+              ),
+            ),
+          ],
+        ); 
+      },
+    );
   }
 }
 
