@@ -19,10 +19,10 @@ class StateMessage extends StatelessWidget {
       ),
       child: Center(
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           ),
           child: FutureBuilder<String>(
             future: event.calcLocalizedBody(MatrixLocals(L10n.of(context)!)),
@@ -33,11 +33,11 @@ class StateMessage extends StatelessWidget {
                       MatrixLocals(L10n.of(context)!),
                     ),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14 * AppConfig.fontSizeFactor,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
                   decoration:
                       event.redacted ? TextDecoration.lineThrough : null,
+                  letterSpacing: 0.4,
                 ),
               );
             },
