@@ -80,7 +80,7 @@ class ChatListViewBody extends StatelessWidget {
                   const SizedBox(height: 16),
                   FutureBuilder<Profile?>(
                     // ignore: unnecessary_cast
-                    future: (client.fetchOwnProfile() as Future<Profile?>).onError((e, s) => null),
+                    future: controller.fetchOwnProfile(client: client),
                     builder: (context, snapshotProfile) {
                       if (snapshotProfile.connectionState != ConnectionState.done) {
                         return const SizedBox();

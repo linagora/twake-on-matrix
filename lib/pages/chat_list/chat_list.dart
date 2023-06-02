@@ -21,6 +21,8 @@ import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vrouter/vrouter.dart';
+import 'package:async/async.dart';
+
 
 import '../../../utils/account_bundles.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -71,7 +73,22 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentUriStreamSubscription;
 
   String? activeSpaceId;
-  
+
+  late final profileMemoizers = <Client?, AsyncMemoizer<Profile>>{};
+
+  Future<Profile?> fetchOwnProfile({required Client client}) {
+    if (!profileMemoizers.containsKey(client)) {
+      profileMemoizers[client] = AsyncMemoizer();
+    }
+    return profileMemoizers[client]!.runOnce(() async {
+      return await client.fetchOwnProfile();
+    });
+  }
+
+  void updateProfile(Client? client) {
+    profileMemoizers[client] = AsyncMemoizer<Profile>();
+  }
+
   void resetActiveSpaceId() {
     setState(() {
       activeSpaceId = null;
