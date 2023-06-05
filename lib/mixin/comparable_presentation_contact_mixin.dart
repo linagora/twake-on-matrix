@@ -1,5 +1,5 @@
 
-import 'package:fluffychat/data/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 class ComparablePresentationContactMixin {
   int comparePresentationContacts(PresentationContact contact1, PresentationContact contact2) {

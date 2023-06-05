@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/data/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';

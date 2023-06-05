@@ -12,13 +12,23 @@ class ChatListView extends StatelessWidget {
     return Scaffold(
       appBar: controller.buildAppBar(),
       body: controller.buildBody(),
-      bottomNavigationBar: NavigationBar(
-        height: 80,
-        surfaceTintColor: Theme.of(context).colorScheme.surface,
-        selectedIndex: controller.selectedIndex,
-        onDestinationSelected:
-            controller.onDestinationSelected,
-        destinations: controller.getNavigationDestinations(context),
+      extendBody: true,
+      bottomNavigationBar: SizedBox(
+        height: 108,
+        child: ListView(
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            const SizedBox(height: 16.0),
+            NavigationBar(
+              height: 80,
+              surfaceTintColor: Theme.of(context).colorScheme.surface,
+              selectedIndex: controller.selectedIndex,
+              onDestinationSelected:
+                  controller.onDestinationSelected,
+              destinations: controller.getNavigationDestinations(context),
+            ),
+          ],
+        ),
       ),
       floatingActionButtonLocation:FloatingActionButtonLocation.endFloat,
       floatingActionButton: controller.buildFloatingButton(),
