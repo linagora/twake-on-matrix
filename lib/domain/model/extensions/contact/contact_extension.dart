@@ -1,6 +1,6 @@
 
 import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/data/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 extension ContactExtension on Contact {
   Set<PresentationContact> toPresentationContacts() {
