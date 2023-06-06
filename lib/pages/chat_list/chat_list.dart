@@ -5,7 +5,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
-import 'package:fluffychat/pages/chat_list/contacts_tab_controller.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -17,18 +16,11 @@ import 'package:fluffychat/utils/tor_stub.dart'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vrouter/vrouter.dart';
-import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
-import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
-import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 
 import '../../../utils/account_bundles.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -59,35 +51,12 @@ enum ActiveFilter {
   spaces
 }
 
-enum BottomTabbar {
-  chats(tabIndex: 1),
-  contacts(tabIndex: 0),
-  stories(tabIndex: 2);
-
-  const BottomTabbar({
-    required this.tabIndex,
-  });
-
-  factory BottomTabbar.fromIndex(int? index) {
-    switch (index) {
-      case 0:
-        return BottomTabbar.contacts;
-      case 1:
-        return BottomTabbar.chats;
-      case 2: 
-        return BottomTabbar.stories;
-      default: 
-        return BottomTabbar.chats;
-    }
-  }
-
-  final int tabIndex;
-}
-
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
 
-  const ChatList({Key? key}) : super(key: key);
+  final Widget? child;
+
+  const ChatList({Key? key, this.child}) : super(key: key);
 
   @override
   ChatListController createState() => ChatListController();
@@ -102,12 +71,6 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentUriStreamSubscription;
 
   String? activeSpaceId;
-
-  BottomTabbar activeBottomTabbar = BottomTabbar.chats;
-
-  final searchContactsController = SearchContactsController();
-  final fetchContactsController = FetchContactsController();
-  final contactsStreamController = BehaviorSubject<Either<Failure, GetContactsSuccess>>();
   
   void resetActiveSpaceId() {
     setState(() {
@@ -120,37 +83,6 @@ class ChatListController extends State<ChatList>
       activeSpaceId = spaceId;
       activeFilter = ActiveFilter.spaces;
     });
-  }
-
-  ActiveFilter getActiveFilterByDestination(int? i) {
-    switch (i) {
-      case 1:
-        return ActiveFilter.messages;
-      default:
-        return ActiveFilter.messages;
-    }
-  }
-
-  int get selectedIndex => activeBottomTabbar.tabIndex;
-
-  BottomTabbar getBottomTabbar(int? i) {
-    return BottomTabbar.fromIndex(i);
-  }
-
-  void onDestinationSelected(int? i) {
-      setState(() {
-        activeFilter = getActiveFilterByDestination(i);
-        activeBottomTabbar = getBottomTabbar(i);
-        beforeEnterBottomTabbar(activeBottomTabbar);
-      });
-  }
-
-  void beforeEnterBottomTabbar(BottomTabbar tabbar) {
-    if (activeBottomTabbar == BottomTabbar.stories) {
-      Fluttertoast.showToast(msg: "Stories is not ready yet!");
-    } else if (activeBottomTabbar == BottomTabbar.contacts) {
-      fetchContactsController.fetchCurrentTomContacts();
-    }
   }
 
   ActiveFilter activeFilter = AppConfig.separateChatTypes
@@ -392,9 +324,6 @@ class ChatListController extends State<ChatList>
       if (mounted) {
         searchServer = await Store().getItem(_serverStoreNamespace);
         Matrix.of(context).backgroundPush?.setupPush();
-        searchContactsController.init();
-        listenContactsStartList();
-        listenSearchContacts();
       }
     });
 
@@ -408,9 +337,6 @@ class ChatListController extends State<ChatList>
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
-    searchContactsController.dispose();
-    fetchContactsController.dispose();
-    contactsStreamController.close();
     super.dispose();
   }
 
@@ -710,7 +636,7 @@ class ChatListController extends State<ChatList>
   @override
   Widget build(BuildContext context) {
     Matrix.of(context).navigatorContext = context;
-    return ChatListView(this);
+    return ChatListView(controller: this);
   }
 
   void _hackyWebRTCFixForWeb() {

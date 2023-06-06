@@ -1,15 +1,15 @@
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:vrouter/vrouter.dart';
 
 class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
-  
-  final ChatListController controller;
 
-  const ContactsAppBar({
+  final ContactsTabController controller;
+
+  const ContactsAppBar(this.controller, {
     super.key,
-    required this.controller,
   });
 
   @override
@@ -29,7 +29,7 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
           left: 8.0, 
           right: 4.0,
         ),
-        onPressed: () => controller.onDestinationSelected(BottomTabbar.chats.tabIndex),
+        onPressed: () => VRouter.of(context).to('/rooms'),
       ),
       title: Text(L10n.of(context)!.contacts,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(

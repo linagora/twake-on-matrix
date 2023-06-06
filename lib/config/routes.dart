@@ -146,7 +146,7 @@ class AppRoutes {
                 di: ContactDI(),
                 path: '/newprivatechat',
                 widget: const NewPrivateChat(),
-                buildTransition: _bottomToTopTransition,
+                buildTransition: _rightToLeftTransition,
               ),
               VWidgetWithDependency(
                 di: ContactDI(),
