@@ -2057,7 +2057,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} and {count} others are typing…",
+    "userAndOthersAreTyping": "{username} and {count} others are typing",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -2065,7 +2065,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} and {username2} are typing…",
+    "userAndUserAreTyping": "{username} and {username2} are typing",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {

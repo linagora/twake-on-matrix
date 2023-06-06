@@ -1185,7 +1185,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "isTyping": "ag clóscríobh…",
+    "isTyping": "ag clóscríobh",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1689,7 +1689,7 @@
             "username": {}
         }
     },
-    "userAndUserAreTyping": "Tá {username} agus {username2} ag clóscríobh…",
+    "userAndUserAreTyping": "Tá {username} agus {username2} ag clóscríobh",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1697,7 +1697,7 @@
             "username2": {}
         }
     },
-    "userAndOthersAreTyping": "tá {username} agus {count} daoine eile ag clóscríobh…",
+    "userAndOthersAreTyping": "tá {username} agus {count} daoine eile ag clóscríobh",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {

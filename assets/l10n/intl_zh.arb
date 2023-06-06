@@ -952,7 +952,7 @@
             "link": {}
         }
     },
-    "isTyping": "正在输入…",
+    "isTyping": "正在输入",
     "@isTyping": {
         "type": "text",
         "placeholders": {}

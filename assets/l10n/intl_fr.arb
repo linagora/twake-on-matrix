@@ -987,7 +987,7 @@
       "link": {}
     }
   },
-  "isTyping": "est en train d'écrire…",
+  "isTyping": "est en train d'écrire",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1912,7 +1912,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} et {count} autres sont en train d'écrire…",
+  "userAndOthersAreTyping": "{username} et {count} autres sont en train d'écrire",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1920,7 +1920,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} et {username2} sont en train d'écrire…",
+  "userAndUserAreTyping": "{username} et {username2} sont en train d'écrire",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

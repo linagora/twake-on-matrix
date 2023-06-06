@@ -857,7 +857,7 @@
             "link": {}
         }
     },
-    "isTyping": "sta scrivendo…",
+    "isTyping": "sta scrivendo",
     "@isTyping": {
         "type": "text",
         "placeholders": {}

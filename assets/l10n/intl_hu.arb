@@ -667,7 +667,7 @@
       "link": {}
     }
   },
-  "isTyping": "gépel…",
+  "isTyping": "gépel",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1296,7 +1296,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} és {count} másik résztvevő gépel…",
+  "userAndOthersAreTyping": "{username} és {count} másik résztvevő gépel",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1304,7 +1304,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} és {username2} gépel…",
+  "userAndUserAreTyping": "{username} és {username2} gépel",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

@@ -637,7 +637,7 @@
             "link": {}
         }
     },
-    "isTyping": "يكتب…",
+    "isTyping": "يكتب",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1246,7 +1246,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} و {count} أخرون يكتبون…",
+    "userAndOthersAreTyping": "{username} و {count} أخرون يكتبون",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1254,7 +1254,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} و {username2} يكتبان…",
+    "userAndUserAreTyping": "{username} و {username2} يكتبان",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1859,7 +1859,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} يكتبون…",
+    "numUsersTyping": "{count} يكتبون",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {

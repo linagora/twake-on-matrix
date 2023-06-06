@@ -987,7 +987,7 @@
       "link": {}
     }
   },
-  "isTyping": "yazıyor…",
+  "isTyping": "yazıyor",
   "@isTyping": {
     "type": "text",
     "placeholders": {}

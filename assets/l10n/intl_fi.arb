@@ -1201,7 +1201,7 @@
             "groupName": {}
         }
     },
-    "isTyping": "kirjoittaa…",
+    "isTyping": "kirjoittaa",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1725,7 +1725,7 @@
             "type": {}
         }
     },
-    "userAndOthersAreTyping": "{username} ja {count} muuta kirjoittavat…",
+    "userAndOthersAreTyping": "{username} ja {count} muuta kirjoittavat",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1733,7 +1733,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} ja {username2} kirjoittavat…",
+    "userAndUserAreTyping": "{username} ja {username2} kirjoittavat",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {

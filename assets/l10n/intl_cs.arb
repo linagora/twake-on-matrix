@@ -983,7 +983,7 @@
       "link": {}
     }
   },
-  "isTyping": "píše…",
+  "isTyping": "píše",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1237,7 +1237,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} uživatelé píší…",
+  "numUsersTyping": "{count} uživatelé píší",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1908,7 +1908,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} a {count} dalších píší…",
+  "userAndOthersAreTyping": "{username} a {count} dalších píší",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1916,7 +1916,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} a {username2} píší…",
+  "userAndUserAreTyping": "{username} a {username2} píší",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

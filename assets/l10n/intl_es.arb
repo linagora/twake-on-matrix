@@ -735,7 +735,7 @@
             "link": {}
         }
     },
-    "isTyping": "está escribiendo…",
+    "isTyping": "está escribiendo",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1409,7 +1409,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} y {count} más están escribiendo…",
+    "userAndOthersAreTyping": "{username} y {count} más están escribiendo",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1417,7 +1417,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} y {username2} están escribiendo…",
+    "userAndUserAreTyping": "{username} y {username2} están escribiendo",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1688,7 +1688,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} usuarios están escribiendo…",
+    "numUsersTyping": "{count} usuarios están escribiendo",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {

@@ -983,7 +983,7 @@
       "link": {}
     }
   },
-  "isTyping": "está escribindo…",
+  "isTyping": "está escribindo",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1908,7 +1908,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} e {count} máis están escribindo…",
+  "userAndOthersAreTyping": "{username} e {count} máis están escribindo",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1916,7 +1916,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} e {username2} están escribindo…",
+  "userAndUserAreTyping": "{username} e {username2} están escribindo",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

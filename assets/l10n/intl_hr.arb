@@ -966,7 +966,7 @@
             "link": {}
         }
     },
-    "isTyping": "piše …",
+    "isTyping": "piše",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1858,7 +1858,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} i još {count} korisnika pišu …",
+    "userAndOthersAreTyping": "{username} i još {count} korisnika pišu",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1866,7 +1866,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} i {username2} pišu …",
+    "userAndUserAreTyping": "{username} i {username2} pišu",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {

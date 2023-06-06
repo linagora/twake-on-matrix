@@ -612,7 +612,7 @@
       "link": {}
     }
   },
-  "isTyping": "idazten ari da…",
+  "isTyping": "idazten ari da",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1196,7 +1196,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "userAndOthersAreTyping": "{username} eta beste {count} idazten ari dira…",
+  "userAndOthersAreTyping": "{username} eta beste {count} idazten ari dira",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1204,7 +1204,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} eta {username2} idazten ari dira…",
+  "userAndUserAreTyping": "{username} eta {username2} idazten ari dira",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1212,7 +1212,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} idazten ari da",
+  "userIsTyping": "{username} idazten ari da…",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
