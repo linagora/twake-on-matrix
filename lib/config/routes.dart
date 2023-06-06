@@ -4,9 +4,11 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
+import 'package:fluffychat/pages/chat_list/home_screen.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
@@ -46,78 +48,117 @@ class AppRoutes {
       ];
 
   List<VRouteElement> get _mobileRoutes => [
-        VWidgetWithDependency(
-          path: '/rooms',
-          di: ContactDI(),
-          widget: const ChatList(),
-          stackedRoutes: [
-            VWidget(
-              path: '/stories/create',
-              widget: const AddStoryPage(),
-            ),
-            VWidget(
-              path: '/stories/:roomid',
-              widget: const StoryPage(),
-              stackedRoutes: [
-                VWidget(
-                  path: 'share',
-                  widget: const AddStoryPage(),
-                ),
-              ],
-            ),
-            VWidget(
-              path: '/spaces/:roomid',
-              widget: const ChatDetails(),
-              stackedRoutes: _chatDetailsRoutes,
-            ),
-            VWidget(
-              path: ':roomid',
-              widget: const Chat(),
-              stackedRoutes: [
-                VWidget(
-                  path: 'encryption',
-                  widget: const ChatEncryptionSettings(),
-                ),
-                VWidget(
-                  path: 'invite',
-                  widget: const InvitationSelection(),
-                ),
-                VWidget(
-                  path: 'details',
-                  widget: const ChatDetails(),
-                  stackedRoutes: _chatDetailsRoutes,
-                ),
-              ],
-            ),
-            VWidget(
-              path: '/settings',
-              widget: const Settings(),
-              stackedRoutes: _settingsRoutes,
-            ),
-            VWidget(
-              path: '/archive',
-              widget: const Archive(),
-              stackedRoutes: [
-                VWidget(
-                  path: ':roomid',
-                  widget: const Chat(),
-                  buildTransition: _dynamicTransition,
-                ),
-              ],
-            ),
-            VWidgetWithDependency(
-              di: ContactDI(),
-              path: '/newprivatechat',
-              widget: const NewPrivateChat(),
-            ),
-            VWidgetWithDependency(
-              di: ContactDI(),
-              path: '/newgroup',
-              widget: const NewGroup(),
-            ),
-          ],
-        ),
-      ];
+        VRouter(routes: [
+          VNester(
+            key: const ValueKey("rooms"),
+            path: '/rooms',
+            widgetBuilder: (child) => HomeScreen(child: child,),
+            buildTransition: _leftToRightTransition,
+            nestedRoutes: [
+              VWidget(
+                path: null, 
+                widget: const ChatList(),
+                buildTransition: _bottomToTopTransition,
+              ),
+              VWidgetWithDependency(
+                path: '/contactsTab', 
+                widget: const ContactsTab(),
+                di: ContactDI(),
+                buildTransition: _bottomToTopTransition,
+              ),
+              VWidget(
+                path: '/stories', 
+                widget: const Scaffold(),
+                buildTransition: _bottomToTopTransition,
+              ),
+            ],
+          ),
+          VPopHandler(
+            onPop: (vRedirector) async {
+              vRedirector.to('/rooms');
+            },
+            stackedRoutes: [
+              VWidget(
+                path: '/stories/create',
+                widget: const AddStoryPage(),
+                buildTransition: _rightToLeftTransition,
+              ),
+              VWidget(
+                path: '/stories/:roomid',
+                widget: const StoryPage(),
+                buildTransition: _rightToLeftTransition,
+                stackedRoutes: [
+                  VWidget(
+                    path: 'share',
+                    widget: const AddStoryPage(),
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                ],
+              ),
+              VWidget(
+                path: '/spaces/:roomid',
+                widget: const ChatDetails(),
+                stackedRoutes: _chatDetailsRoutes,
+                buildTransition: _rightToLeftTransition,
+              ),
+              VWidget(
+                path: '/rooms/:roomid',
+                widget: const Chat(),
+                buildTransition: _rightToLeftTransition,
+                stackedRoutes: [
+                  VWidget(
+                    path: 'encryption',
+                    widget: const ChatEncryptionSettings(),
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                  VWidget(
+                    path: 'invite',
+                    widget: const InvitationSelection(),
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                  VWidget(
+                    path: 'details',
+                    widget: const ChatDetails(),
+                    stackedRoutes: _chatDetailsRoutes,
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                ],
+              ),
+              VWidget(
+                path: '/settings',
+                widget: const Settings(),
+                stackedRoutes: _settingsRoutes,
+                buildTransition: _bottomToTopTransition,
+              ),
+              VWidget(
+                path: '/archive',
+                widget: const Archive(),
+                buildTransition: _rightToLeftTransition,
+                stackedRoutes: [
+                  VWidget(
+                    path: ':roomid',
+                    widget: const Chat(),
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                ],
+              ),
+              VWidgetWithDependency(
+                di: ContactDI(),
+                path: '/newprivatechat',
+                widget: const NewPrivateChat(),
+                buildTransition: _bottomToTopTransition,
+              ),
+              VWidgetWithDependency(
+                di: ContactDI(),
+                path: '/newgroup',
+                widget: const NewGroup(),
+                buildTransition: _rightToLeftTransition,
+              ),
+            ],
+          )
+        ],),
+  ];
+        
   List<VRouteElement> get _tabletRoutes => [
         VNester(
           path: '/rooms',
@@ -318,27 +359,27 @@ class AppRoutes {
         VWidget(
           path: 'notifications',
           widget: const SettingsNotifications(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
         ),
         VWidget(
           path: 'style',
           widget: const SettingsStyle(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
         ),
         VWidget(
           path: 'devices',
           widget: const DevicesSettings(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
         ),
         VWidget(
           path: 'chat',
           widget: const SettingsChat(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
           stackedRoutes: [
             VWidget(
               path: 'emotes',
               widget: const EmotesSettings(),
-              buildTransition: _dynamicTransition,
+              buildTransition: _rightToLeftTransition,
             ),
           ],
         ),
@@ -374,29 +415,29 @@ class AppRoutes {
         VWidget(
           path: 'security',
           widget: const SettingsSecurity(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
           stackedRoutes: [
             VWidget(
               path: 'stories',
               widget: const SettingsStories(),
-              buildTransition: _dynamicTransition,
+              buildTransition: _rightToLeftTransition,
             ),
             VWidget(
               path: 'ignorelist',
               widget: const SettingsIgnoreList(),
-              buildTransition: _dynamicTransition,
+              buildTransition: _rightToLeftTransition,
             ),
             VWidget(
               path: '3pid',
               widget: const Settings3Pid(),
-              buildTransition: _dynamicTransition,
+              buildTransition: _rightToLeftTransition,
             ),
           ],
         ),
         VWidget(
           path: 'logs',
           widget: const LogViewer(),
-          buildTransition: _dynamicTransition,
+          buildTransition: _rightToLeftTransition,
         ),
       ];
 
@@ -405,4 +446,50 @@ class AppRoutes {
 
   FadeTransition _fadeTransition(animation1, _, child) =>
       FadeTransition(opacity: animation1, child: child);
+  
+  SlideTransition _bottomToTopTransition(animation, secondaryAnimation, child) {
+    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.bottomToTop);
+  }
+
+  SlideTransition _topToBottomTransition(animation, secondaryAnimation, child) {
+    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.topToBottom);
+  }
+
+  SlideTransition _leftToRightTransition(animation, secondaryAnimation, child) {
+    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.leftToRight);
+  }
+
+  SlideTransition _rightToLeftTransition(animation, secondaryAnimation, child) {
+    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.rightToLeft);
+  }
+
+  SlideTransition _buildSlideTransition(
+    Animation animation, 
+    Animation secondaryAnimation, 
+    Widget child, 
+    SlideTransitionType type,
+  ) {
+    final begin = type.begin;
+    const end = Offset(0, 0);
+    const curve = Curves.ease;
+    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  }
+}
+
+enum SlideTransitionType {
+  bottomToTop(begin: Offset(0, 1)),
+  topToBottom(begin: Offset(0, -1)),
+  leftToRight(begin: Offset(-1, 0)),
+  rightToLeft(begin: Offset(1, 0));
+
+  final Offset begin;
+
+  const SlideTransitionType({
+    required this.begin,
+  });
 }

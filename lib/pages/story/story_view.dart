@@ -15,6 +15,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:vrouter/vrouter.dart';
 import '../../config/themes.dart';
 
 class StoryView extends StatelessWidget {
@@ -54,7 +55,7 @@ class StoryView extends StatelessWidget {
         leading: IconButton(
           color: Colors.white,
           icon: const Icon(Icons.close),
-          onPressed: Navigator.of(context).pop,
+          onPressed: () => context.vRouter.pop(),
         ),
         title: ListTile(
           contentPadding: EdgeInsets.zero,
