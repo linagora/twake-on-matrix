@@ -39,16 +39,6 @@ class ClientChooserButton extends StatelessWidget {
         ),
       ),
       PopupMenuItem(
-        value: SettingsAction.newGroup,
-        child: Row(
-          children: [
-            const Icon(Icons.group_add_outlined),
-            const SizedBox(width: 18),
-            Text(L10n.of(context)!.createNewGroup),
-          ],
-        ),
-      ),
-      PopupMenuItem(
         value: SettingsAction.invite,
         child: Row(
           children: [
@@ -262,9 +252,6 @@ class ClientChooserButton extends StatelessWidget {
         case SettingsAction.newStory:
           VRouter.of(context).to('/stories/create');
           break;
-        case SettingsAction.newGroup:
-          VRouter.of(context).to('/newgroup');
-          break;
         case SettingsAction.invite:
           FluffyShare.share(
             L10n.of(context)!.inviteText(
@@ -359,7 +346,6 @@ class ClientChooserButton extends StatelessWidget {
 enum SettingsAction {
   addAccount,
   newStory,
-  newGroup,
   newSpace,
   invite,
   settings,
