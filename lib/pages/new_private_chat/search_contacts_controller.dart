@@ -68,9 +68,6 @@ class SearchContactsController {
 
   void dispose() {
     _debouncer.cancel();
-    textEditingController.removeListener(() {
-      Logs().d("SearchContactsController: dispose(): remove Listerners");
-    });
     textEditingController.dispose();
     lookupStreamController.close();
   }

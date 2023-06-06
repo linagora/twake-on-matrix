@@ -2621,7 +2621,7 @@
     "back": "Back",
     "loginWithSSO": "Log in with SSO",
     "wrongServerName": "Wrong server name",
-    "serverNameWrongExplain": "Server address was sent to you by company admin. Check the invitation email."
+    "serverNameWrongExplain": "Server address was sent to you by company admin. Check the invitation email.",
     "contacts": "Contacts",
     "searchForContacts": "Search for contacts",
     "soonThereHaveContacts": "Soon there will be contacts",

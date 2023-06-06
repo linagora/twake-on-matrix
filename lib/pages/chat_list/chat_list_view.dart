@@ -1,37 +1,43 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_widget_extension.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_body_stream.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:vrouter/vrouter.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
 
-  const ChatListView(this.controller, {Key? key}) : super(key: key);
+  const ChatListView({
+    Key? key,
+    required this.controller, 
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: controller.buildAppBar(),
-      body: controller.buildBody(),
+      appBar: ChatListHeader(controller: controller),
+      body: ChatListBodyStream(controller: controller),
       extendBody: true,
-      bottomNavigationBar: SizedBox(
-        height: 108,
-        child: ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            const SizedBox(height: 16.0),
-            NavigationBar(
-              height: 80,
-              surfaceTintColor: Theme.of(context).colorScheme.surface,
-              selectedIndex: controller.selectedIndex,
-              onDestinationSelected:
-                  controller.onDestinationSelected,
-              destinations: controller.getNavigationDestinations(context),
-            ),
-          ],
-        ),
-      ),
       floatingActionButtonLocation:FloatingActionButtonLocation.endFloat,
-      floatingActionButton: controller.buildFloatingButton(),
+      floatingActionButton: controller.selectMode == SelectMode.normal
+        ? KeyBoardShortcuts(
+          keysToPress: {
+            LogicalKeyboardKey.controlLeft,
+            LogicalKeyboardKey.keyN
+          },
+          onKeysPressed: () =>
+              VRouter.of(context).to('/newprivatechat'),
+          helpLabel: L10n.of(context)!.newChat,
+          child: TwakeFloatingActionButton(
+            icon: Icons.mode_edit_outline_outlined,
+            onTap: () => VRouter.of(context).to('/newprivatechat'),
+          ),
+        )
+        : null,
     );
   }
 }
