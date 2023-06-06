@@ -865,7 +865,7 @@
       "link": {}
     }
   },
-  "isTyping": "が入力しています…",
+  "isTyping": "が入力しています",
   "@isTyping": {
     "type": "text",
     "placeholders": {}

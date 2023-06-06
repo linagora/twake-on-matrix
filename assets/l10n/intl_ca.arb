@@ -755,7 +755,7 @@
             "link": {}
         }
     },
-    "isTyping": "escrivint…",
+    "isTyping": "escrivint",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -981,7 +981,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} usuaris escrivint…",
+    "numUsersTyping": "{count} usuaris escrivint",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1502,7 +1502,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} i {count} més estan escrivint…",
+    "userAndOthersAreTyping": "{username} i {count} més estan escrivint",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1510,7 +1510,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} i {username2} estan escrivint…",
+    "userAndUserAreTyping": "{username} i {username2} estan escrivint",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {

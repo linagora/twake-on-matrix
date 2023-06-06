@@ -847,7 +847,7 @@
             "link": {}
         }
     },
-    "isTyping": "正在輸入...…",
+    "isTyping": "正在輸入",
     "@isTyping": {
         "type": "text",
         "placeholders": {}

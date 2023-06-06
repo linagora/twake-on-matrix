@@ -983,7 +983,7 @@
       "link": {}
     }
   },
-  "isTyping": "kirjutab…",
+  "isTyping": "kirjutab",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1237,7 +1237,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} kasutajat kirjutavad…",
+  "numUsersTyping": "{count} kasutajat kirjutavad",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1908,7 +1908,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} ja {count} muud kirjutavad…",
+  "userAndOthersAreTyping": "{username} ja {count} muud kirjutavad",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1916,7 +1916,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} ja {username2} kirjutavad…",
+  "userAndUserAreTyping": "{username} ja {username2} kirjutavad",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

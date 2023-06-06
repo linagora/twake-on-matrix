@@ -983,7 +983,7 @@
             "link": {}
         }
     },
-    "isTyping": "печатает…",
+    "isTyping": "печатает",
     "@isTyping": {
         "type": "text",
         "placeholders": {}

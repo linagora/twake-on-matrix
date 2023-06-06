@@ -1902,7 +1902,7 @@
       "username": {}
     }
   },
-  "isTyping": "가 입력 중…",
+  "isTyping": "가 입력 중",
   "@isTyping": {
     "type": "text",
     "placeholders": {}

@@ -978,7 +978,7 @@
       "link": {}
     }
   },
-  "isTyping": "schreibt …",
+  "isTyping": "schreibt",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
@@ -1224,14 +1224,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} Mitglieder schreiben …",
+  "numUsersTyping": "{count} Mitglieder schreiben",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "obtainingLocation": "Standort wird ermittelt …",
+  "obtainingLocation": "Standort wird ermittelt",
   "@obtainingLocation": {
     "type": "text",
     "placeholders": {}
@@ -1895,7 +1895,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} und {count} andere schreiben …",
+  "userAndOthersAreTyping": "{username} und {count} andere schreiben",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1903,7 +1903,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} und {username2} schreiben …",
+  "userAndUserAreTyping": "{username} und {username2} schreiben",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {

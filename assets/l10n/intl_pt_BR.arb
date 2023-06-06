@@ -982,7 +982,7 @@
             "link": {}
         }
     },
-    "isTyping": "está escrevendo…",
+    "isTyping": "está escrevendo",
     "@isTyping": {
         "type": "text",
         "placeholders": {}

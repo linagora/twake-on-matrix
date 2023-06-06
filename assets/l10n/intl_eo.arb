@@ -972,7 +972,7 @@
             "link": {}
         }
     },
-    "isTyping": "tajpas…",
+    "isTyping": "tajpas",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1208,7 +1208,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} uzantoj tajpas…",
+    "numUsersTyping": "{count} uzantoj tajpas",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1870,7 +1870,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} kaj {count} aliaj tajpas…",
+    "userAndOthersAreTyping": "{username} kaj {count} aliaj tajpas",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1878,7 +1878,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} kaj {username2} tajpas…",
+    "userAndUserAreTyping": "{username} kaj {username2} tajpas",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
