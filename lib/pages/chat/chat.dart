@@ -772,7 +772,11 @@ class ChatController extends State<Chat> {
     _updateScrollController();
   }
 
-  void scrollDown() => scrollController.jumpTo(0);
+  void scrollDown() {
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(0);
+    }
+  }
 
   void onEmojiSelected(_, Emoji? emoji) {
     switch (emojiPickerType) {
