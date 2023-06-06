@@ -256,7 +256,7 @@ class ChatListItem extends StatelessWidget {
                     if (snapshot.data == '' || snapshot.data == null || room.lastEvent == null) {
                       return const SizedBox.shrink();
                     }
-          
+
                     final isMentionned = snapshot.data!.getAllMentionedUserIdsFromMessage(room).contains(Matrix.of(context).client.userID);
                     return AnimatedContainer(
                       duration: FluffyThemes.animationDuration,

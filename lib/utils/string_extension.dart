@@ -65,6 +65,7 @@ extension StringCasingExtension on String {
         mentions.add(mention);
       }
     }
+
     return mentions;
   }
 
@@ -77,6 +78,6 @@ extension StringCasingExtension on String {
       }
     }
 
-    return getMentionsFromMessage();
+    return mentionUserIds;
   }
 }
