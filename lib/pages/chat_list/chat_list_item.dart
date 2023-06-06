@@ -6,10 +6,10 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -164,6 +164,7 @@ class ChatListItem extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
                       children: [
@@ -184,7 +185,7 @@ class ChatListItem extends StatelessWidget {
                         ),
                         if (room.isFavourite)
                           Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
+                            padding: const EdgeInsets.only(left: 10),
                             child: Icon(
                               Icons.push_pin_outlined,
                               size: ChatListItemStyle.readIconSize,
@@ -193,7 +194,7 @@ class ChatListItem extends StatelessWidget {
                           ),
                         if (isMuted)
                           Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
+                            padding: const EdgeInsets.only(left: 10),
                             child: Icon(
                               Icons.volume_off_outlined,
                               size: ChatListItemStyle.readIconSize,
@@ -209,7 +210,12 @@ class ChatListItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 4.0),
                 child: Text(
                   room.timeCreated.localizedTimeShort(context),
-                  style: Theme.of(context).textTheme.labelSmall,
+                  style: Theme.of(context).textTheme.labelSmall?.merge(
+                      TextStyle(
+                        letterSpacing: 0.5,
+                        color: unread ? Theme.of(context).colorScheme.onSurface : LinagoraRefColors.material().neutral[50],
+                      ),
+                  ),
                 ),
               )
             ],
@@ -237,10 +243,10 @@ class ChatListItem extends StatelessWidget {
                               children: [
                                 lastSenderWidget(isGroup, unread),
                                 const SizedBox(height: 2),
-                                textContentWidget(context, isGroup)
+                                textContentWidget(context, isGroup, unread)
                               ],
                             )
-                          : textContentWidget(context, isGroup)),
+                          : textContentWidget(context, isGroup, unread)),
                 ),
                 const SizedBox(width: 8),
                 FutureBuilder<String>(
@@ -324,7 +330,7 @@ class ChatListItem extends StatelessWidget {
     );
   }
 
-  FutureBuilder<String> textContentWidget(BuildContext context, bool isGroup) {
+  FutureBuilder<String> textContentWidget(BuildContext context, bool isGroup, bool unread) {
     return FutureBuilder<String>(
       future: room.lastEvent?.calcLocalizedBody(
             MatrixLocals(L10n.of(context)!),
@@ -350,35 +356,36 @@ class ChatListItem extends StatelessWidget {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(letterSpacing: 0.4),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              letterSpacing: 0.4,
+              color: unread
+                  ? Theme.of(context).colorScheme.onSurface
+                  : LinagoraRefColors.material().neutral[50],
+          ),
         );
       },
     );
   }
 
   Row typingTextWidget(String typingText, BuildContext context) {
+    final displayedTypingText = "~ $typingText…";
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Flexible(
           child: Text(
-              typingText,
-              style: Theme.of(context).textTheme.labelLarge?.merge(
-                    TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      letterSpacing: -0.007,
-                      fontWeight: FontWeight.w400,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: ChatListItemStyle.isTypingFontSize,
-                    ),
+            displayedTypingText,
+            style: Theme.of(context).textTheme.labelLarge?.merge(
+                  TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-              maxLines: 1,
-              softWrap: true,
-            ),
+                ),
+            maxLines: 1,
+            softWrap: true,
+          ),
         ),
-        const SizedBox(width: 5.25),
-        const TypingIndicator(showIndicator: true)
       ],
     );
   }
@@ -398,11 +405,9 @@ class ChatListItem extends StatelessWidget {
                     softWrap: false,
                     style: Theme.of(context).textTheme.labelLarge?.merge(
                           TextStyle(
-                            fontSize: ChatListItemStyle.lastSenderFontSize,
                             overflow: TextOverflow.ellipsis,
-                            letterSpacing: 0.15,
                             color: unread
-                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                ? Theme.of(context).colorScheme.onSurface
                                 : ChatListItemStyle.readMessageColor,
                           ),
                         ),

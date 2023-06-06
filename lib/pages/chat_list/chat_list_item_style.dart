@@ -3,8 +3,7 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
-  static double get readIconSize => 16;
-  static double get editIconSize => 14;
+  static double get readIconSize => 20;
   static double get mentionIconWidth => 20;
   static Color get readMessageColor => const Color(0xFF787579);
   static double unreadBadgeSize(bool unread, bool hasNewMessages, bool hasNotifications) {
@@ -24,7 +23,4 @@ class ChatListItemStyle {
                 notificationCount.toString().length +
             unreadBadgePaddingWhenMoreThanOne;
   }
-
-  static double get isTypingFontSize => 15;
-  static double get lastSenderFontSize => 14;
 }
