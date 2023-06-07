@@ -2,23 +2,23 @@ import 'package:fluffychat/widgets/twake_components/twake_loading/status_loading
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 
-class TypingIndicator extends StatefulWidget {
-  const TypingIndicator({
+class TwakeLoadingIndicator extends StatefulWidget {
+  final bool showIndicator;
+  final Color flashingCircleDarkColor;
+  final Color flashingCircleBrightColor;
+
+  const TwakeLoadingIndicator({
     super.key,
     this.showIndicator = false,
     this.flashingCircleDarkColor = const Color(0xFF0A84FF),
     this.flashingCircleBrightColor = const Color(0xFFaec1dd),
   });
 
-  final bool showIndicator;
-  final Color flashingCircleDarkColor;
-  final Color flashingCircleBrightColor;
-
   @override
-  State<TypingIndicator> createState() => _TypingIndicatorState();
+  State<TwakeLoadingIndicator> createState() => _TwakeLoadingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<TypingIndicator> with TickerProviderStateMixin {
+class _TwakeLoadingIndicatorState extends State<TwakeLoadingIndicator> with TickerProviderStateMixin {
   late AnimationController _appearanceController;
 
   late AnimationController _repeatingController;
@@ -49,7 +49,7 @@ class _TypingIndicatorState extends State<TypingIndicator> with TickerProviderSt
   }
 
   @override
-  void didUpdateWidget(TypingIndicator oldWidget) {
+  void didUpdateWidget(TwakeLoadingIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.showIndicator != oldWidget.showIndicator) {
