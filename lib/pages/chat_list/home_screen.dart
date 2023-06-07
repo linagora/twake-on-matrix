@@ -37,8 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: SizedBox(
-        height: 100,
+      bottomNavigationBar: Container(
+        color: Theme.of(context).colorScheme.surface,
+        height: 84,
         child: ListView(
           physics: const NeverScrollableScrollPhysics(),
           children: [
