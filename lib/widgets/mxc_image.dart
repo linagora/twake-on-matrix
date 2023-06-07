@@ -51,6 +51,8 @@ class _MxcImageState extends State<MxcImage> {
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
 
+  bool isLoadDone = false;
+
   Uint8List? get _imageData {
     final cacheKey = widget.cacheKey;
     return cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
@@ -134,9 +136,17 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   void _tryLoad(_) async {
-    if (_imageData != null) return;
+    if (_imageData != null){
+      setState(() {
+        isLoadDone = true;
+      });
+      return;
+    }
     try {
       await _load();
+      setState(() {
+        isLoadDone = true;
+      });
     } catch (_) {
       if (!mounted) return;
       await Future.delayed(widget.retryDuration);
@@ -163,16 +173,13 @@ class _MxcImageState extends State<MxcImage> {
     return AnimatedCrossFade(
       duration: widget.animationDuration,
       crossFadeState:
-          data == null ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      firstChild: placeholder(context),
+          isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      firstChild: SizedBox(
+        width: widget.width,
+        height: widget.height,
+      ),
       secondChild: data == null || data.isEmpty
-          ? Container(
-            decoration: BoxDecoration(
-              borderRadius: widget.rounded
-                  ? BorderRadius.circular(12.0)
-                  : BorderRadius.zero,
-            ),
-          )
+          ? placeholder(context)
           : ClipRRect(
               borderRadius: widget.rounded
                   ? BorderRadius.circular(12.0)
