@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:matrix/matrix.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
@@ -75,7 +76,6 @@ class Message extends StatelessWidget {
         final client = Matrix.of(context).client;
         final ownMessage = event.senderId == client.userID;
         final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
-        var color = Theme.of(context).colorScheme.secondary;
         final displayTime = event.type == EventTypes.RoomCreate ||
             nextEvent == null ||
             !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
@@ -107,47 +107,12 @@ class Message extends StatelessWidget {
           MessageTypes.Audio,
         }.contains(event.messageType);
 
-        if (ownMessage) {
-          color = displayEvent.status.isError
-              ? Colors.redAccent
-              : Theme.of(context).colorScheme.primary;
-        }
-
         final rowChildren = <Widget>[
-          sameSender || ownMessage
-              ? SizedBox(
-                  width: MessageStyle.avatarSize,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Center(
-                      child: SizedBox(
-                        width: MessageStyle.errorStatusPlaceHolderWidth,
-                        height: MessageStyle.errorStatusPlaceHolderHeight,
-                        child: event.status == EventStatus.error
-                            ? const Icon(Icons.error, color: Colors.red)
-                            : null,
-                      ),
-                    ),
-                  ),
-                )
-              : FutureBuilder<User?>(
-                  future: event.fetchSenderUser(),
-                  builder: (context, snapshot) {
-                    final user =
-                        snapshot.data ?? event.senderFromMemoryOrFallback;
-                    return Avatar(
-                      size: MessageStyle.avatarSize,
-                      fontSize: MessageStyle.fontSize,
-                      mxContent: user.avatarUrl,
-                      name: user.calcDisplayname(),
-                      onTap: () => onAvatarTab!(event),
-                    );
-                  },
-                ),
+          _placeHolderWidget(sameSender, ownMessage, event),
           Expanded(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start, 
+              mainAxisAlignment: ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
               children: [
                 if (ownMessage && event.messageType == MessageTypes.Image)
                   ReplyIconWidget(isOwnMessage: ownMessage),
@@ -169,8 +134,7 @@ class Message extends StatelessWidget {
                             onTap: !useMouse && longPressSelect
                                 ? () {}
                                 : () => onSelect!(event),
-                            onLongPress:
-                                !longPressSelect ? null : () => onSelect!(event),
+                            onLongPress: !longPressSelect ? null : () => onSelect!(event),
                             borderRadius: MessageStyle.bubbleBorderRadius,
                             hoverColor: Colors.transparent,
                             focusColor: Colors.transparent,
@@ -184,7 +148,7 @@ class Message extends StatelessWidget {
                                     Container(
                                       decoration: BoxDecoration(
                                         borderRadius: MessageStyle.bubbleBorderRadius,
-                                        color: ownMessage 
+                                        color: ownMessage
                                           ? Theme.of(context).colorScheme.primaryContainer
                                           : Theme.of(context).colorScheme.surface,
                                       ),
@@ -205,21 +169,21 @@ class Message extends StatelessWidget {
                                         builder: (context, availableBubbleContraints) => Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            ownMessage || event.room.isDirectChat 
+                                            ownMessage || event.room.isDirectChat
                                             ? const SizedBox(height: 0)
                                             : FutureBuilder<User?>(
                                                 future: event.fetchSenderUser(),
                                                 builder: (context, snapshot) {
-                                                  final displayname =
+                                                  final displayName =
                                                       snapshot.data?.calcDisplayname() ??
                                                           event.senderFromMemoryOrFallback
                                                               .calcDisplayname();
                                                   return Padding(
                                                     padding: EdgeInsets.only(
-                                                      left: event.messageType == MessageTypes.Image ? 0 : 8.0, 
+                                                      left: event.messageType == MessageTypes.Image ? 0 : 8.0,
                                                       bottom: 4.0),
                                                     child: Text(
-                                                      displayname,
+                                                      displayName,
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .labelMedium
@@ -310,7 +274,7 @@ class Message extends StatelessWidget {
                                                                     timeline: timeline,
                                                                   ),
                                                                 ),
-                                                                backgroundColor: ownMessage 
+                                                                backgroundColor: ownMessage
                                                                   ? Theme.of(context).colorScheme.primaryContainer
                                                                   : Theme.of(context).colorScheme.surface,
                                                               ),
@@ -423,42 +387,6 @@ class Message extends StatelessWidget {
           mainAxisAlignment: rowMainAxisAlignment,
           children: rowChildren,
         );
-        Widget container;
-        if (event.hasAggregatedEvents(timeline, RelationshipTypes.reaction) ||
-            displayTime ||
-            selected) {
-          container = Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment:
-                ownMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: <Widget>[
-              if (displayTime || selected)
-                Center(
-                  child: Material(
-                    color: displayTime
-                        ? Colors.transparent
-                        : Theme.of(context)
-                            .colorScheme
-                            .background
-                            .withOpacity(0.33),
-                    borderRadius:
-                        BorderRadius.circular(AppConfig.borderRadius / 2),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0),
-                      child: Text(
-                        event.originServerTs.localizedTime(context).toUpperCase(),
-                        style: MessageStyle.displayTime(context),
-                      ),
-                    ),
-                  ),
-                ),
-              row,
-            ],
-          );
-        } else {
-          container = row;
-        }
 
         return Swipeable(
           key: ValueKey(event.eventId),
@@ -470,27 +398,119 @@ class Message extends StatelessWidget {
           ),
           direction: SwipeDirection.endToStart,
           onSwipe: onSwipe,
-          child: Center(
-            child: Container(
-              color: selected
-                  ? Theme.of(context).primaryColor.withAlpha(100)
-                  : Theme.of(context).primaryColor.withAlpha(0),
-              constraints: const BoxConstraints(
-                maxWidth: FluffyThemes.columnWidth * 2.5,
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 8.0,
-                  right: ownMessage ? 8.0 : 16.0,
-                  top: 8.0,
-                  bottom: 8.0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: ownMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (displayTime)
+                Center(
+                  child: Material(
+                    color: displayTime
+                        ? Colors.transparent
+                        : Theme.of(context)
+                        .colorScheme
+                        .background
+                        .withOpacity(0.33),
+                    borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+                    clipBehavior: Clip.antiAlias,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0),
+                      child: Text(
+                        event.originServerTs.localizedTime(context).toUpperCase(),
+                        style: MessageStyle.displayTime(context),
+                      ),
+                    ),
+                  ),
                 ),
-                child: container,
+              GestureDetector(
+                onLongPress: () => controller.selectMode ? onSelect!(event) : null,
+                onTap: () => controller.selectMode ? onSelect!(event) : null,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: selected ? 0 : 8.0,
+                      right: selected ? 0 : ownMessage ? 8.0 : 16.0,
+                      top: selected ? 0 : 8.0,
+                      bottom: selected ? 0 : 8.0,
+                    ),
+                    child: _messageSelectedWidget(context, row),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
+    if (controller.selectMode) {
+      return const SizedBox();
+    } else if (sameSender || ownMessage) {
+      return SizedBox(
+        width: MessageStyle.avatarSize,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Center(
+            child: SizedBox(
+              width: MessageStyle.errorStatusPlaceHolderWidth,
+              height: MessageStyle.errorStatusPlaceHolderHeight,
+              child: event.status == EventStatus.error
+                  ? const Icon(Icons.error, color: Colors.red)
+                  : null,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return FutureBuilder<User?>(
+        future: event.fetchSenderUser(),
+        builder: (context, snapshot) {
+          final user = snapshot.data ?? event.senderFromMemoryOrFallback;
+          return Avatar(
+            size: MessageStyle.avatarSize,
+            fontSize: MessageStyle.fontSize,
+            mxContent: user.avatarUrl,
+            name: user.calcDisplayname(),
+            onTap: () => onAvatarTab!(event),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _messageSelectedWidget(BuildContext context, Widget child) {
+    return Container(
+      padding: EdgeInsets.all(selected ? 8 : 0),
+      color: selected
+        ? LinagoraSysColors.material().secondaryContainer
+        : Theme.of(context).primaryColor.withAlpha(0),
+      constraints: const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          if (controller.selectMode)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 18),
+                child: Icon(
+                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                  color: selected ? LinagoraSysColors.material().primary : Colors.black,
+                  size: 20,
+                ),
+              ),
+            ),
+          Expanded(
+            flex: 9,
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: child,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
