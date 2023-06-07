@@ -1,9 +1,11 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -100,7 +102,7 @@ class ChatAppBarTitle extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
-                      letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName
+                      letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
                     ),
                   ),
                   _buildStatusContent(context, room),
@@ -113,37 +115,34 @@ class ChatAppBarTitle extends StatelessWidget {
     );
   }
 
-  _buildStatusContent(BuildContext context, Room room) {
+  Widget _buildStatusContent(BuildContext context, Room room) {
+    final TextStyle? statusTextStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      fontSize: 13,
+      color: Theme.of(context).colorScheme.tertiary,
+      letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+    );
+
     if (room.getLocalizedTypingText(context).isEmpty) {
       return Text(
         room.getLocalizedStatus(context).capitalize(context),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-          color: Theme.of(context).colorScheme.tertiary,
-          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent
-        ),
+        style: statusTextStyle,
       );
     } else {
       return Row(
         children: [
-          Image.asset(
-            'assets/typing.gif',
-            height: 10,
-            color: Theme.of(context).colorScheme.onPrimary,
-            filterQuality: FilterQuality.high,
-          ),
-          const SizedBox(width: 8),
           Text(
             room.getLocalizedTypingText(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.5
-            ),
+            style: statusTextStyle,
+          ),
+          const SizedBox(width: 4),
+          TwakeLoadingIndicator(
+            showIndicator: true,
+            flashingCircleDarkColor: LinagoraSysColors.material().tertiary,
+            flashingCircleBrightColor: LinagoraSysColors.material().tertiary.withOpacity(0.4),
           )
         ],
       );
