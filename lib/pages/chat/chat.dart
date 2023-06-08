@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -56,6 +57,7 @@ class ChatController extends State<Chat> {
   String? get roomId => context.vRouter.pathParameters['roomid'];
 
   final AutoScrollController scrollController = AutoScrollController();
+  final AutoScrollController forwardListController = AutoScrollController();
 
   FocusNode inputFocus = FocusNode();
 
@@ -694,7 +696,12 @@ class ChatController extends State<Chat> {
       };
     }
     setState(() => selectedEvents.clear());
-    VRouter.of(context).to('/rooms');
+    await showDialog(
+      context: context,
+      useSafeArea: false,
+      useRootNavigator: false,
+      builder: (c) => const Forward(),
+    );
   }
 
   void sendAgainAction() {
