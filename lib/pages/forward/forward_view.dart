@@ -31,7 +31,7 @@ class _ForwardViewState extends State<ForwardView> {
     });
   }
 
-  void clickAction(BuildContext context) async {
+  void forwardAction(BuildContext context) async {
     final rooms = widget.controller.filteredRooms;
     final room = rooms.firstWhere((element) => element.id == widget.controller.selectedEvents.first);
     if (room.membership == Membership.join) {
@@ -91,7 +91,7 @@ class _ForwardViewState extends State<ForwardView> {
                 child: TwakeIconButton(
                   size: ForwardViewStyle.iconSendSize,
                   onPressed: () {
-                    clickAction(context);
+                    forwardAction(context);
                   },
                   tooltip: L10n.of(context)!.send,
                   imagePath: ImagePaths.icSend,
@@ -114,7 +114,7 @@ class _ForwardViewState extends State<ForwardView> {
       leading: Row(
         children: [
           TwakeIconButton(
-            tooltip: "Back",
+            tooltip: L10n.of(context)!.back,
             icon: Icons.arrow_back,
             onPressed: () {
               Matrix.of(context).shareContent = null;
@@ -144,7 +144,7 @@ class _ForwardViewState extends State<ForwardView> {
                     hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: LinagoraRefColors.material().neutral[60]),
                   )))
             : Text(
-              "Forward to...",
+              L10n.of(context)!.forwardTo,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName)),
@@ -154,7 +154,7 @@ class _ForwardViewState extends State<ForwardView> {
         TwakeIconButton(
           icon: Icons.search,
           onPressed: () {},
-          tooltip: "123123",
+          tooltip: L10n.of(context)!.search,
         ),
       ],
       bottom: PreferredSize(
@@ -193,7 +193,7 @@ class _ForwardViewState extends State<ForwardView> {
   Widget _recentlyChatsTitle(BuildContext context) {
     return Row(
       children: [
-        Text("Recently chats",
+        Text(L10n.of(context)!.recentlyChats,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: LinagoraRefColors.material().neutral[40])
         ),
