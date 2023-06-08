@@ -3,7 +3,6 @@ import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
-import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -15,12 +14,10 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
-import 'package:fluffychat/pages/chat/reactions_picker.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
@@ -177,7 +174,6 @@ class ChatView extends StatelessWidget {
       );
     }
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return VWidgetGuard(
       onSystemPop: (redirector) async {
@@ -322,7 +318,8 @@ class ChatView extends StatelessWidget {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           const ConnectionStatusHeader(),
-                                          ReactionsPicker(controller),
+                                          ///Currently we can't support reactions
+                                          // ReactionsPicker(controller),
                                           ReplyDisplay(controller),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),
