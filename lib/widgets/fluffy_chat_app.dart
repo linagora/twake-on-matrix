@@ -1,3 +1,5 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -36,12 +38,19 @@ class FluffyChatApp extends StatefulWidget {
 class FluffyChatAppState extends State<FluffyChatApp> {
   bool? columnMode;
   String? _initialUrl;
+  final networkConnectionService = getIt.get<NetworkConnectionService>();
 
   @override
   void initState() {
     super.initState();
-    _initialUrl =
-        widget.clients.any((client) => client.isLogged()) ? '/rooms' : '/home';
+    _initialUrl = widget.clients.any((client) => client.isLogged()) ? '/rooms' : '/home';
+    networkConnectionService.onInit();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    networkConnectionService.onDispose();
   }
 
   @override

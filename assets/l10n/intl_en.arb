@@ -2629,5 +2629,6 @@
     "loadingContacts": "Loading contacts...",
     "recentlyChats": "Recently chats",
     "search": "Search",
-    "forwardTo": "Forward to..."
+    "forwardTo": "Forward to...",
+    "noConnection": "No connection"
 }
