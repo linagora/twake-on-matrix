@@ -1,8 +1,7 @@
-package chat.fluffy.fluffychat
-
+package com.twake.twake
 import com.famedly.fcm_shared_isolate.FcmSharedIsolateService
 
-import chat.fluffy.fluffychat.MainActivity
+import com.twake.twake.MainActivity
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

@@ -50,13 +50,13 @@ abstract class AppConfig {
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
   static const String schemePrefix = 'matrix:';
-  static const String pushNotificationsChannelId = 'fluffychat_push';
-  static const String pushNotificationsChannelName = 'FluffyChat push channel';
+  static const String pushNotificationsChannelId = 'twake_push';
+  static const String pushNotificationsChannelName = 'Twake push channel';
   static const String pushNotificationsChannelDescription =
-      'Push notifications for FluffyChat';
-  static const String pushNotificationsAppId = 'chat.fluffy.fluffychat';
+      'Push notifications for Twake';
+  static const String pushNotificationsAppId = 'com.twake.twake';
   static const String pushNotificationsGatewayUrl =
-      'https://push.fluffychat.im/_matrix/push/v1/notify';
+      'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';
   static const String pushNotificationsPusherFormat = 'event_id_only';
   static const String emojiFontName = 'Noto Emoji';
   static const String emojiFontUrl =
