@@ -23,8 +23,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:fluffychat/utils/push_helper.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -32,14 +35,10 @@ import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:vrouter/vrouter.dart';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/utils/push_helper.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import 'famedlysdk_store.dart';
 import 'platform_infos.dart';
-
-import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 
 class NoTokenException implements Exception {
   String get cause => 'Cannot get firebase token';
@@ -76,15 +75,18 @@ class BackgroundPush {
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
     firebase?.setListeners(
-      onMessage: (message) => pushHelper(
-        PushNotification.fromJson(
-          Map<String, dynamic>.from(message['data'] ?? message),
-        ),
-        client: client,
-        l10n: l10n,
-        activeRoomId: router?.currentState?.pathParameters['roomid'],
-        onSelectNotification: goToRoom,
-      ),
+      onMessage: (message) {
+        Logs().d('BackgroundPush::onMessage(): $message');
+        final notification = _parseMessagePayload(message);
+        pushHelper(
+          notification,
+          client: client,
+          l10n: l10n,
+          activeRoomId: router?.currentState?.pathParameters['roomid'],
+          onSelectNotification: goToRoom,
+        );
+        Logs().d('BackgroundPush::onMessage(): finished pushHelper');
+      },
     );
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
@@ -268,6 +270,7 @@ class BackgroundPush {
     if (_fcmToken?.isEmpty ?? true) {
       try {
         _fcmToken = await firebase?.getToken();
+        Logs().d('BackgroundPush::setupFirebase(): $_fcmToken');
         if (_fcmToken == null) throw ('PushToken is null');
       } catch (e, s) {
         Logs().w('[Push] cannot get token', e, e is String ? null : s);
@@ -488,6 +491,18 @@ class BackgroundPush {
       }
     } finally {
       _clearingPushLock = false;
+    }
+  }
+
+  PushNotification _parseMessagePayload(dynamic message) {
+    Logs().d('BackgroundPush::_parseMessagePayload()');
+    try {
+      return PushNotificationExtensions().fromOriginalJson(
+        Map<String, dynamic>.from(message['data'] ?? message),
+      );
+    } catch (e) {
+      Logs().e('BackgroundPush::_parseMessagePayload() exception: $e');
+      return PushNotificationExtensions().error();
     }
   }
 }
