@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -68,27 +69,6 @@ class ChatAppBarTitle extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: room.isDirectChat == true
-                      ? Container(
-                          width: ChatAppBarTitleStyle.statusSize,
-                          height: ChatAppBarTitleStyle.statusSize,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: ChatAppBarTitleStyle.statusBorderColor,
-                              width: ChatAppBarTitleStyle.statusBorderSize,
-                            ),
-                            color:
-                                room.directChatPresence?.currentlyActive == true
-                                    ? ChatAppBarTitleStyle.currentlyActiveColor
-                                    : ChatAppBarTitleStyle.currentlyInactiveColor,
-                            shape: BoxShape.circle,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
               ],
             ),
             const SizedBox(width: 12),
@@ -115,37 +95,51 @@ class ChatAppBarTitle extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusContent(BuildContext context, Room room) {
+  StreamBuilder<ConnectivityResult> _buildStatusContent(BuildContext context, Room room) {
     final TextStyle? statusTextStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
       fontSize: 13,
       color: Theme.of(context).colorScheme.tertiary,
       letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
     );
 
-    if (room.getLocalizedTypingText(context).isEmpty) {
-      return Text(
-        room.getLocalizedStatus(context).capitalize(context),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: statusTextStyle,
-      );
-    } else {
-      return Row(
-        children: [
-          Text(
-            room.getLocalizedTypingText(context),
+    return StreamBuilder<ConnectivityResult>(
+      stream: controller.networkConnectionService.getStreamInstance(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data == ConnectivityResult.none) {
+          return Text(
+            L10n.of(context)!.noConnection,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: statusTextStyle,
-          ),
-          const SizedBox(width: 4),
-          TwakeLoadingIndicator(
-            showIndicator: true,
-            flashingCircleDarkColor: LinagoraSysColors.material().tertiary,
-            flashingCircleBrightColor: LinagoraSysColors.material().tertiary.withOpacity(0.4),
-          )
-        ],
-      );
-    }
+          );
+        }
+
+        if (room.getLocalizedTypingText(context).isEmpty) {
+          return Text(
+            room.getLocalizedStatus(context).capitalize(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: statusTextStyle,
+          );
+        } else {
+          return Row(
+            children: [
+              Text(
+                room.getLocalizedTypingText(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: statusTextStyle,
+              ),
+              const SizedBox(width: 4),
+              TwakeLoadingIndicator(
+                showIndicator: true,
+                flashingCircleDarkColor: LinagoraSysColors.material().tertiary,
+                flashingCircleBrightColor: LinagoraSysColors.material().tertiary.withOpacity(0.4),
+              )
+            ],
+          );
+        }
+      },
+    );
   }
 }

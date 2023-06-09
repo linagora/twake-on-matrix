@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
+import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -46,6 +48,8 @@ class Chat extends StatefulWidget {
 }
 
 class ChatController extends State<Chat> {
+  final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
+
   Room? room;
 
   Client? sendingClient;
