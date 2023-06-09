@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
@@ -50,9 +49,7 @@ class ForwardController extends State<Forward> {
     Logs().d("onSelectChat: $selectedEvents");
   }
 
-  ActiveFilter activeFilter = AppConfig.separateChatTypes
-      ? ActiveFilter.messages
-      : ActiveFilter.allChats;
+  final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
     switch (activeFilter) {
@@ -69,10 +66,10 @@ class ForwardController extends State<Forward> {
     }
   }
 
-  List<Room> get filteredRooms => Matrix.of(context)
+  List<Room> get filteredRoomsForAll => Matrix.of(context)
     .client
     .rooms
-    .where(getRoomFilterByActiveFilter(activeFilter))
+    .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
     .toList();
 
   @override

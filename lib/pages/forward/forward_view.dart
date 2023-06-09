@@ -32,7 +32,7 @@ class _ForwardViewState extends State<ForwardView> {
   }
 
   void forwardAction(BuildContext context) async {
-    final rooms = widget.controller.filteredRooms;
+    final rooms = widget.controller.filteredRoomsForAll;
     final room = rooms.firstWhere((element) => element.id == widget.controller.selectedEvents.first);
     if (room.membership == Membership.join) {
       final shareContent = Matrix.of(context).shareContent;
@@ -166,7 +166,7 @@ class _ForwardViewState extends State<ForwardView> {
   }
 
   Widget _chatList() {
-    final rooms = widget.controller.filteredRooms;
+    final rooms = widget.controller.filteredRoomsForAll;
     if (rooms.isEmpty) {
       const SizedBox();
     } else {

@@ -63,7 +63,7 @@ class ChatListViewBody extends StatelessWidget {
             );
           }
           if (controller.waitForFirstSync && client.prevBatch != null) {
-            final rooms = controller.filteredRooms;
+            final rooms = controller.filteredRoomsForAll;
             const displayStoriesHeader = false;
             if (rooms.isEmpty && !controller.isSearchMode) {
               return Column(
