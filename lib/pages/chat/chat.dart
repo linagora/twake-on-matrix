@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -696,12 +695,7 @@ class ChatController extends State<Chat> {
       };
     }
     setState(() => selectedEvents.clear());
-    await showDialog(
-      context: context,
-      useSafeArea: false,
-      useRootNavigator: false,
-      builder: (c) => const Forward(),
-    );
+    VRouter.of(context).to('forward');
   }
 
   void sendAgainAction() {

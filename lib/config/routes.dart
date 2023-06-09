@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/forward/forward_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -10,6 +11,7 @@ import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
+import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
@@ -119,6 +121,13 @@ class AppRoutes {
                   VWidget(
                     path: 'details',
                     widget: const ChatDetails(),
+                    stackedRoutes: _chatDetailsRoutes,
+                    buildTransition: _rightToLeftTransition,
+                  ),
+                  VWidgetWithDependency(
+                    di: ForwardDI(),
+                    path: 'forward',
+                    widget: const Forward(),
                     stackedRoutes: _chatDetailsRoutes,
                     buildTransition: _rightToLeftTransition,
                   ),
@@ -234,6 +243,13 @@ class AppRoutes {
                       path: 'invite',
                       widget: const InvitationSelection(),
                       buildTransition: _fadeTransition,
+                    ),
+                    VWidgetWithDependency(
+                      di: ForwardDI(),
+                      path: 'forward',
+                      widget: const Forward(),
+                      stackedRoutes: _chatDetailsRoutes,
+                      buildTransition: _rightToLeftTransition,
                     ),
                   ],
                 ),
