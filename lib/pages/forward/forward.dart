@@ -1,50 +1,81 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
+import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
+import 'package:fluffychat/pages/forward/presentation_forward.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:vrouter/vrouter.dart';
-
-import 'package:fluffychat/widgets/matrix.dart';
 
 class Forward extends StatefulWidget {
-  final Widget? sideView;
 
-  const Forward({Key? key, this.sideView}) : super(key: key);
+  const Forward({Key? key}) : super(key: key);
 
   @override
   ForwardController createState() => ForwardController();
 }
 
-class ForwardController extends State<Forward> {
+class ForwardController extends State<Forward> with ComparablePresentationContactMixin {
 
-  List<Room>? rooms;
-
-  Timeline? timeline;
-
-  String? get roomId => context.vRouter.pathParameters['roomid'];
+  final _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
+  final streamController = StreamController<Either<Failure, GetContactsSuccess>>();
+  final networkStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
 
   final AutoScrollController forwardListController = AutoScrollController();
 
-  List<String> selectedEvents = [];
 
+  List<PresentationForward> selectedEvents = [];
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  String? get activeChat => VRouter.of(context).pathParameters['roomid'];
+  @override
+  void initState() {
+    super.initState();
+    listenContactsStartList();
+    fetchCurrentTomContacts();
+  }
 
-  void onSelectChat(String id) {
-    if (selectedEvents.contains(id)) {
+  @override
+  void dispose() {
+    super.dispose();
+    streamController.close();
+    networkStreamController.close();
+  }
+
+  void fetchCurrentTomContacts() {
+    _fetchContactsInteractor
+        .execute()
+        .listen((event) {
+      streamController.add(event);
+    });
+  }
+
+  void listenContactsStartList() {
+    streamController.stream.listen((event) {
+      Logs().d('ForwardController::listenContactsStartList() - event: $event');
+      networkStreamController.add(event);
+    });
+  }
+
+  void onSelectChat(PresentationForward presentationForward) {
+    if (selectedEvents.contains(presentationForward)) {
       setState(
-        () => selectedEvents.remove(id),
+        () => selectedEvents.remove(presentationForward),
       );
     } else {
       setState(
-        () => selectedEvents.add(id),
+        () => selectedEvents.add(presentationForward),
       );
     }
     selectedEvents.sort(
-          (a, b) => a.compareTo(b),
+      (a, b) => a.id.compareTo(b.id),
     );
     Logs().d("onSelectChat: $selectedEvents");
   }

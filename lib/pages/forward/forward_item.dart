@@ -1,33 +1,28 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/forward/forward_item_style.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart';
 
 class ForwardItem extends StatelessWidget {
-  final Room room;
+  final String id;
+  final String displayName;
+  final Uri? uriAvatar;
   final bool selected;
   final void Function()? onTap;
 
-  const ForwardItem(
-    this.room,
-    {
-      this.selected = false,
-      this.onTap,
-      Key? key,
+  const ForwardItem({
+    required this.id,
+    required this.displayName,
+    this.selected = false,
+    this.uriAvatar,
+    this.onTap,
+    Key? key,
     }
   ) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final unread = room.isUnread || room.membership == Membership.invite;
-    final displayName = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)!),
-    );
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
@@ -48,7 +43,7 @@ class ForwardItem extends StatelessWidget {
                   child: Stack(
                     children: [
                       Avatar(
-                        mxContent: room.avatar,
+                        mxContent: uriAvatar,
                         name: displayName,
                       ),
                       if (selected)
@@ -80,7 +75,7 @@ class ForwardItem extends StatelessWidget {
                       TextStyle(
                         overflow: TextOverflow.ellipsis,
                         letterSpacing: 0.15,
-                        color: unread ? Theme.of(context).colorScheme.onSurfaceVariant : ChatListItemStyle.readMessageColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),

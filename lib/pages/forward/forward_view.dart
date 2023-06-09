@@ -1,9 +1,18 @@
 
+import 'package:collection/collection.dart';
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/forward_item.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
+import 'package:fluffychat/pages/forward/presentation_forward.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -23,6 +32,7 @@ class ForwardView extends StatefulWidget {
 
 class _ForwardViewState extends State<ForwardView> {
   bool isShowRecentlyChats = false;
+  bool isShowContactChats = false;
   bool isSearchBarShow = false;
 
   void _toggleRecentlyChats() {
@@ -31,29 +41,61 @@ class _ForwardViewState extends State<ForwardView> {
     });
   }
 
-  void forwardAction(BuildContext context) async {
-    final rooms = widget.controller.filteredRoomsForAll;
-    final room = rooms.firstWhere((element) => element.id == widget.controller.selectedEvents.first);
+  void _toggleContactChats() {
+    setState(() {
+      isShowContactChats = !isShowContactChats;
+    });
+  }
+
+  void _forwardRecentlyChatAction(List<Room> rooms) async {
+    final room = rooms.firstWhere((element) => element.id == widget.controller.selectedEvents.first.id);
+    _sendForwardMessageAction(room);
+  }
+
+  void _forwardContactsChatAction(List<Room> rooms) async {
+    final roomId = await Matrix.of(context).client.startDirectChat(
+      widget.controller.selectedEvents.first.id.toTomMatrixId()
+    );
+
+    final hasRoom = rooms.any((element) => element.id == roomId);
+    if (hasRoom) {
+      final room = rooms.firstWhere((element) => element.id == roomId);
+      _sendForwardMessageAction(room);
+    }
+  }
+
+  void _sendForwardMessageAction(Room room) async {
     if (room.membership == Membership.join) {
       final shareContent = Matrix.of(context).shareContent;
       if (shareContent != null) {
         final shareFile = shareContent.tryGet<MatrixFile>('file');
         if (shareContent.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' && shareFile != null) {
           await showDialog(
-            context: context,
-            useRootNavigator: false,
-            builder: (c) => SendFileDialog(
-              files: [shareFile],
-              room: room,
-            ),
+          context: context,
+          useRootNavigator: false,
+          builder: (c) => SendFileDialog(
+            files: [shareFile],
+            room: room,
+          ),
           );
         } else {
           room.sendEvent(shareContent);
         }
         Matrix.of(context).shareContent = null;
       }
-
       VRouter.of(context).toSegments(['rooms', room.id]);
+    }
+  }
+
+  void forwardAction(BuildContext context) async {
+    final rooms = widget.controller.filteredRoomsForAll;
+    switch (widget.controller.selectedEvents.first.type) {
+      case ForwardTypeEnum.recently:
+        _forwardRecentlyChatAction(rooms);
+        break;
+      case ForwardTypeEnum.contacts:
+        _forwardContactsChatAction(rooms);
+        break;
     }
   }
 
@@ -67,9 +109,15 @@ class _ForwardViewState extends State<ForwardView> {
         padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
         child: Column(
           children: [
-            _recentlyChatsTitle(context),
+            _buildChatHeaderFolders(
+              context,
+              title: L10n.of(context)!.recentlyChats,
+              isSelect: isShowRecentlyChats,
+              onPressed: () => _toggleRecentlyChats()
+            ),
             if (isShowRecentlyChats)
-              _chatList(),
+              _buildBodyRecentlyChatList(),
+            _buildBodyContactsChatList(context),
           ],
         ),
       ),
@@ -165,7 +213,7 @@ class _ForwardViewState extends State<ForwardView> {
     );
   }
 
-  Widget _chatList() {
+  Widget _buildBodyRecentlyChatList() {
     final rooms = widget.controller.filteredRoomsForAll;
     if (rooms.isEmpty) {
       const SizedBox();
@@ -173,15 +221,24 @@ class _ForwardViewState extends State<ForwardView> {
       return ListView.builder(
         padding: EdgeInsets.zero,
         shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         controller: widget.controller.forwardListController,
         itemCount: rooms.length,
         itemBuilder: (BuildContext context, int i) {
+
+          final displayName = rooms[i].getLocalizedDisplayname(
+            MatrixLocals(L10n.of(context)!),
+          );
+
           return ForwardItem(
-            rooms[i],
-            key: Key('chat_list_item_${rooms[i].id}'),
-            selected: widget.controller.selectedEvents.contains(rooms[i].id),
+            id: rooms[i].id,
+            key: Key('forward_recently_${rooms[i].id}'),
+            displayName: displayName,
+            selected: widget.controller.selectedEvents.contains(
+              PresentationForward(rooms[i].id, ForwardTypeEnum.recently)
+            ),
             onTap: () {
-              widget.controller.onSelectChat(rooms[i].id);
+              widget.controller.onSelectChat(PresentationForward(rooms[i].id, ForwardTypeEnum.recently));
             },
           );
         },
@@ -190,10 +247,17 @@ class _ForwardViewState extends State<ForwardView> {
     return const SizedBox();
   }
 
-  Widget _recentlyChatsTitle(BuildContext context) {
+  Widget _buildChatHeaderFolders(
+    BuildContext context,
+    {
+      required String title,
+      bool isSelect = false,
+      void Function()? onPressed
+    }
+  ) {
     return Row(
       children: [
-        Text(L10n.of(context)!.recentlyChats,
+        Text(title,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: LinagoraRefColors.material().neutral[40])
         ),
@@ -207,9 +271,9 @@ class _ForwardViewState extends State<ForwardView> {
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                icon: isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
-                onPressed: () => _toggleRecentlyChats(),
-                tooltip: isShowRecentlyChats
+                icon: isSelect ? Icons.expand_less : Icons.expand_more,
+                onPressed: onPressed,
+                tooltip: isSelect
                   ? L10n.of(context)!.shrink
                   : L10n.of(context)!.expand),
             ],
@@ -217,5 +281,57 @@ class _ForwardViewState extends State<ForwardView> {
         )
       ],
     );
+  }
+
+  Widget _buildBodyContactsChatList(BuildContext context) {
+    return StreamBuilder(
+      stream: widget.controller.networkStreamController.stream,
+      builder: (context, AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
+
+        if (!snapshot.hasData) {
+           return const SizedBox();
+         }
+
+        if (snapshot.hasError || snapshot.data?.isLeft() != false) {
+          return const SizedBox();
+        }
+
+         final contactsList = snapshot.data!.fold(
+           (failure) => <PresentationContact>[],
+           (success) => success.contacts.expand((contact) => contact.toPresentationContacts()),
+         ).toSet();
+
+         final contactsListSorted = contactsList.sorted((a, b) => widget.controller.comparePresentationContacts(a, b));
+
+         if (contactsListSorted.isEmpty) {
+          return const SizedBox();
+        }
+
+         return Column(
+           children: [
+             const SizedBox(height: 16),
+             _buildChatHeaderFolders(
+                 context,
+                 title: L10n.of(context)!.countTwakeUsers(1),
+                 isSelect: isShowContactChats,
+                 onPressed: () => _toggleContactChats()
+             ),
+             if (isShowContactChats)
+              for (final contact in contactsListSorted)...[
+                ForwardItem(
+                  id: contact.matrixId ?? '',
+                  key: Key('forward_recently_${contact.matrixId ?? ""}'),
+                  displayName: contact.displayName ?? "",
+                  selected: widget.controller.selectedEvents.contains(
+                    PresentationForward(contact.displayName ?? "", ForwardTypeEnum.contacts)),
+                  onTap: () {
+                    widget.controller.onSelectChat(
+                      PresentationForward(contact.displayName ?? "", ForwardTypeEnum.contacts));
+                  },
+                ),
+              ]
+           ],
+         );
+      });
   }
 }
