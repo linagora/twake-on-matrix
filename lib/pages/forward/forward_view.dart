@@ -61,6 +61,8 @@ class _ForwardViewState extends State<ForwardView> {
     if (hasRoom) {
       final room = rooms.firstWhere((element) => element.id == roomId);
       _sendForwardMessageAction(room);
+    } else {
+      await Matrix.of(context).client.getRoomById(roomId)!.leave();
     }
   }
 
