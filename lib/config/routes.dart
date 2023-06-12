@@ -125,7 +125,7 @@ class AppRoutes {
                     buildTransition: _rightToLeftTransition,
                   ),
                   VWidgetWithDependency(
-                    di: ForwardDI(),
+                    di: ForwardToDI(),
                     path: 'forward',
                     widget: const Forward(),
                     stackedRoutes: _chatDetailsRoutes,
@@ -243,14 +243,7 @@ class AppRoutes {
                       path: 'invite',
                       widget: const InvitationSelection(),
                       buildTransition: _fadeTransition,
-                    ),
-                    VWidgetWithDependency(
-                      di: ForwardDI(),
-                      path: 'forward',
-                      widget: const Forward(),
-                      stackedRoutes: _chatDetailsRoutes,
-                      buildTransition: _rightToLeftTransition,
-                    ),
+                    )
                   ],
                 ),
               ],

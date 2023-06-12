@@ -27,12 +27,11 @@ class ForwardController extends State<Forward> with ComparablePresentationContac
 
   final _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
   final streamController = StreamController<Either<Failure, GetContactsSuccess>>();
-  final networkStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
 
   final AutoScrollController forwardListController = AutoScrollController();
 
 
-  List<PresentationForward> selectedEvents = [];
+  List<ForwardToSelection> selectedEvents = [];
   bool get selectMode => selectedEvents.isNotEmpty;
 
   @override
@@ -46,7 +45,6 @@ class ForwardController extends State<Forward> with ComparablePresentationContac
   void dispose() {
     super.dispose();
     streamController.close();
-    networkStreamController.close();
   }
 
   void fetchCurrentTomContacts() {
@@ -60,11 +58,10 @@ class ForwardController extends State<Forward> with ComparablePresentationContac
   void listenContactsStartList() {
     streamController.stream.listen((event) {
       Logs().d('ForwardController::listenContactsStartList() - event: $event');
-      networkStreamController.add(event);
     });
   }
 
-  void onSelectChat(PresentationForward presentationForward) {
+  void onSelectChat(ForwardToSelection presentationForward) {
     if (selectedEvents.contains(presentationForward)) {
       setState(
         () => selectedEvents.remove(presentationForward),
@@ -74,9 +71,7 @@ class ForwardController extends State<Forward> with ComparablePresentationContac
         () => selectedEvents.add(presentationForward),
       );
     }
-    selectedEvents.sort(
-      (a, b) => a.id.compareTo(b.id),
-    );
+    selectedEvents.sort((current, next) => current.id.compareTo(next.id));
     Logs().d("onSelectChat: $selectedEvents");
   }
 

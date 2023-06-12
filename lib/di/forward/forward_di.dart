@@ -9,10 +9,10 @@ import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
-class ForwardDI extends BaseDI {
+class ForwardToDI extends BaseDI {
 
   @override
-  String get scopeName => 'Forward';
+  String get scopeName => 'ForwardTo';
 
   @override
   void setUp(GetIt get) {

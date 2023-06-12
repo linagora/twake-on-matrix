@@ -4,11 +4,12 @@ enum ForwardTypeEnum {
   recently,
   contacts,
 }
-class PresentationForward extends Equatable {
+
+class ForwardToSelection extends Equatable {
   final String id;
   final ForwardTypeEnum type;
 
-  const PresentationForward(this.id, this.type);
+  const ForwardToSelection(this.id, this.type);
 
   @override
   List<Object?> get props => [id, type];

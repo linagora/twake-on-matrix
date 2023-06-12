@@ -237,10 +237,10 @@ class _ForwardViewState extends State<ForwardView> {
             key: Key('forward_recently_${rooms[i].id}'),
             displayName: displayName,
             selected: widget.controller.selectedEvents.contains(
-              PresentationForward(rooms[i].id, ForwardTypeEnum.recently)
+              ForwardToSelection(rooms[i].id, ForwardTypeEnum.recently)
             ),
             onTap: () {
-              widget.controller.onSelectChat(PresentationForward(rooms[i].id, ForwardTypeEnum.recently));
+              widget.controller.onSelectChat(ForwardToSelection(rooms[i].id, ForwardTypeEnum.recently));
             },
           );
         },
@@ -287,7 +287,7 @@ class _ForwardViewState extends State<ForwardView> {
 
   Widget _buildBodyContactsChatList(BuildContext context) {
     return StreamBuilder(
-      stream: widget.controller.networkStreamController.stream,
+      stream: widget.controller.streamController.stream,
       builder: (context, AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
 
         if (!snapshot.hasData) {
@@ -325,10 +325,10 @@ class _ForwardViewState extends State<ForwardView> {
                   key: Key('forward_recently_${contact.matrixId ?? ""}'),
                   displayName: contact.displayName ?? "",
                   selected: widget.controller.selectedEvents.contains(
-                    PresentationForward(contact.displayName ?? "", ForwardTypeEnum.contacts)),
+                    ForwardToSelection(contact.displayName ?? "", ForwardTypeEnum.contacts)),
                   onTap: () {
                     widget.controller.onSelectChat(
-                      PresentationForward(contact.displayName ?? "", ForwardTypeEnum.contacts));
+                      ForwardToSelection(contact.displayName ?? "", ForwardTypeEnum.contacts));
                   },
                 ),
               ]
