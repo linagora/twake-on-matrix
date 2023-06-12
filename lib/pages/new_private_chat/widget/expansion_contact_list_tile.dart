@@ -1,8 +1,9 @@
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -10,7 +11,6 @@ import 'package:fluffychat/utils/string_extension.dart';
 typedef OnExpansionListTileTap = void Function();
 
 class ExpansionContactListTile extends StatelessWidget {
-
   final PresentationContact contact;
 
   const ExpansionContactListTile({
@@ -21,15 +21,19 @@ class ExpansionContactListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left:8.0, top: 8.0, bottom: 12.0),
+      padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RoundAvatar(
-            text: contact.displayName ?? "@",
-            size: 48,
+          FutureBuilder<Uri?>(
+            future: getAvatarUrl(context),
+            builder: (context, snapshot) {
+              return Avatar(mxContent: snapshot.data, name: contact.displayName);
+            },
           ),
-          const SizedBox(width: 12.0,),
+          const SizedBox(
+            width: 12.0,
+          ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,5 +91,13 @@ class ExpansionContactListTile extends StatelessWidget {
       ),
     );
   }
-  
+
+  Future<Uri?> getAvatarUrl(BuildContext context) async {
+    final client = Matrix.of(context).client;
+    try {
+      return await client.getAvatarUrl(contact.matrixId!);
+    } catch (e) {
+      return Future.error(e.toString());
+    }
+  }
 }
