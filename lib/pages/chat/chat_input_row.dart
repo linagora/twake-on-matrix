@@ -34,7 +34,7 @@ class ChatInputRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: controller.selectMode && controller.selectedEvents.length == 1
+        children: controller.selectMode
             ? <Widget>[
                 SizedBox(
                   height: 56,
