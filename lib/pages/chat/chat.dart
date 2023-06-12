@@ -16,6 +16,7 @@ import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -62,6 +63,10 @@ class ChatController extends State<Chat> {
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
+
+  final ImagePickerGridController imagePickerController = ImagePickerGridController();
+
+  final numberSelectedImagesNotifier = ValueNotifier<int>(0);
 
   FocusNode inputFocus = FocusNode();
 
@@ -230,11 +235,18 @@ class ChatController extends State<Chat> {
     }
   }
 
+  void registerListenerForSelectedImagesChanged() {
+    imagePickerController.addListener(() {
+      numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
+    });
+  }
+
   @override
   void initState() {
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
+    registerListenerForSelectedImagesChanged();
     super.initState();
   }
 

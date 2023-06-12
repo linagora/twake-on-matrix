@@ -1325,8 +1325,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "651d4549cb923c5d0c4506ef43eefdbbf80447d4"
+      ref: add_image_picker
+      resolved-ref: c7ef4150c4e4f3a3984c868b25dc7ae3b532bbbe
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
@@ -1690,6 +1690,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.0"
+  photo_manager:
+    dependency: transitive
+    description:
+      name: photo_manager
+      sha256: bdc4ab1fa9fb064d8ccfea6ab44119f55b220293d7ce2e19eb5a5f998db86c88
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
   pin_code_text_field:
     dependency: "direct main"
     description:

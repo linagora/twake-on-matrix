@@ -73,13 +73,15 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Share your location with your contacts in FluffyChat.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Record voice message and share them with your contacts on FluffyChat.</string>
+	<string>Record voice message and share them with your contacts on Twake.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Share motions with your contacts in FluffyChat.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Open photos from your gallery and share them with your contacts on FluffyChat.</string>
+	<string>Open photos from your gallery and share them with your contacts on Twake.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Share data with your contacts in FluffyChat.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string> Save photos/videos to device on Twake.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
