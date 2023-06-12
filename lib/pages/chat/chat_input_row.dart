@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +9,14 @@ import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import '../../config/themes.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -82,107 +84,13 @@ class ChatInputRow extends StatelessWidget {
                     : Container(),
               ]
             : <Widget>[
-                KeyBoardShortcuts(
-                  keysToPress: {
-                    LogicalKeyboardKey.altLeft,
-                    LogicalKeyboardKey.keyA
-                  },
-                  onKeysPressed: () =>
-                      controller.onAddPopupMenuButtonSelected('file'),
-                  helpLabel: L10n.of(context)!.sendFile,
-                  child: AnimatedContainer(
-                    duration: FluffyThemes.animationDuration,
-                    curve: FluffyThemes.animationCurve,
-                    height: ChatInputRowStyle.chatInputRowHeight,
-                    width: ChatInputRowStyle.chatInputRowWidth,
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: const BoxDecoration(),
-                    child: PopupMenuButton<String>(
-                      icon: const Icon(Icons.add_circle_outline, size: FluffyThemes.iconSize),
-                      onSelected: controller.onAddPopupMenuButtonSelected,
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<String>>[
-                        PopupMenuItem<String>(
-                          value: 'file',
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              child: Icon(Icons.attachment_outlined),
-                            ),
-                            title: Text(L10n.of(context)!.sendFile),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'image',
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              child: Icon(Icons.image_outlined),
-                            ),
-                            title: Text(L10n.of(context)!.sendImage),
-                            contentPadding: const EdgeInsets.all(0),
-                          ),
-                        ),
-                        if (PlatformInfos.isMobile)
-                          PopupMenuItem<String>(
-                            value: 'camera',
-                            child: ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.purple,
-                                foregroundColor: Colors.white,
-                                child: Icon(Icons.camera_alt_outlined),
-                              ),
-                              title: Text(L10n.of(context)!.openCamera),
-                              contentPadding: const EdgeInsets.all(0),
-                            ),
-                          ),
-                        if (PlatformInfos.isMobile)
-                          PopupMenuItem<String>(
-                            value: 'camera-video',
-                            child: ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                                child: Icon(Icons.videocam_outlined),
-                              ),
-                              title: Text(L10n.of(context)!.openVideoCamera),
-                              contentPadding: const EdgeInsets.all(0),
-                            ),
-                          ),
-                        if (controller.room!
-                            .getImagePacks(ImagePackUsage.sticker)
-                            .isNotEmpty)
-                          PopupMenuItem<String>(
-                            value: 'sticker',
-                            child: ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                                child: Icon(Icons.emoji_emotions_outlined),
-                              ),
-                              title: Text(L10n.of(context)!.sendSticker),
-                              contentPadding: const EdgeInsets.all(0),
-                            ),
-                          ),
-                        if (PlatformInfos.isMobile)
-                          PopupMenuItem<String>(
-                            value: 'location',
-                            child: ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Colors.brown,
-                                foregroundColor: Colors.white,
-                                child: Icon(Icons.gps_fixed_outlined),
-                              ),
-                              title: Text(L10n.of(context)!.shareLocation),
-                              contentPadding: const EdgeInsets.all(0),
-                            ),
-                          ),
-                      ],
-                    ),
+                TwakeIconButton(
+                  tooltip: L10n.of(context)!.more,
+                  margin: const EdgeInsets.only(right: 4.0),
+                  icon: Icons.add_circle_outline,
+                  onPressed: () => showImagesPickerBottomSheet(
+                    controller: controller,
+                    context: context,
                   ),
                 ),
                 if (controller.matrix!.isMultiAccount &&
@@ -349,4 +257,110 @@ class _ChatAccountPicker extends StatelessWidget {
       ),
     );
   }
+}
+
+void showImagesPickerBottomSheet({
+  required BuildContext context,
+  required ChatController controller,
+}) {
+  ImagePicker.showImagesGridBottomSheet(
+    context: context,
+    controller: controller.imagePickerController,
+    backgroundImageCamera: const AssetImage("assets/verification.png"),
+    counterImageBuilder: (counterImage) {
+      if (counterImage == 0) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 12.0, top: 16.0),
+        child: Row(
+          children: [
+            Text(L10n.of(context)!.photoSelectedCounter(counterImage),
+              style: Theme.of(context).textTheme.titleMedium,),
+            const Icon(Icons.chevron_right),
+            const Expanded(child: SizedBox.shrink()),
+            const Icon(Icons.more_vert),
+          ],
+        ),
+      );
+    },
+    noImagesWidget: const Center(
+      child: Text("No images found"),
+    ),
+    bottomWidget: ValueListenableBuilder(
+      valueListenable: controller.numberSelectedImagesNotifier,
+      builder: (context, value, child) {
+        if (value == 0) {
+          return const SizedBox.shrink();
+        }
+        return child!;
+      },
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                height: 64,
+                padding: const EdgeInsets.only(right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
+                          hintText: L10n.of(context)!.addACaption,
+                        ),
+                      ),
+                    ),
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        SvgPicture.asset(
+                          ImagePaths.icSend,
+                          width: 40,
+                          height: 40,
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              Positioned(
+                right: 12.0,
+                bottom: 2.0,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: ShapeDecoration(
+                    shape: CircleBorder(side: BorderSide(color: Theme.of(context).colorScheme.surface)),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  alignment: Alignment.center,
+                  child: ValueListenableBuilder(
+                    valueListenable: controller.numberSelectedImagesNotifier,
+                    builder: (context, value, child) {
+                      return Text("$value", style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.surface,
+                        letterSpacing: 0.1,
+                      ),);
+                    },
+                  ),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 8.0,),
+        ],
+      ),
+    )
+  );
+                
 }

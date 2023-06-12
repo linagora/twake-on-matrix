@@ -267,6 +267,17 @@ abstract class FluffyThemes {
         ),
         navigationRailTheme: NavigationRailThemeData(
           indicatorColor: LinagoraSysColors.material().secondaryContainer,
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: brightness == Brightness.light 
+            ? LinagoraSysColors.material().background
+            : LinagoraSysColors.material().backgroundDark,
+          modalBackgroundColor: brightness == Brightness.light 
+            ? LinagoraSysColors.material().background
+            : LinagoraSysColors.material().backgroundDark,
+          surfaceTintColor: brightness == Brightness.light 
+            ? LinagoraSysColors.material().background
+            : LinagoraSysColors.material().backgroundDark,
         )
       );
 }
