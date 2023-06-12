@@ -1,6 +1,5 @@
 
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/forward_item.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
@@ -10,7 +9,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 class ForwardView extends StatefulWidget {
@@ -29,32 +27,6 @@ class _ForwardViewState extends State<ForwardView> {
     setState(() {
       isShowRecentlyChats = !isShowRecentlyChats;
     });
-  }
-
-  void forwardAction(BuildContext context) async {
-    final rooms = widget.controller.filteredRoomsForAll;
-    final room = rooms.firstWhere((element) => element.id == widget.controller.selectedEvents.first);
-    if (room.membership == Membership.join) {
-      final shareContent = Matrix.of(context).shareContent;
-      if (shareContent != null) {
-        final shareFile = shareContent.tryGet<MatrixFile>('file');
-        if (shareContent.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' && shareFile != null) {
-          await showDialog(
-            context: context,
-            useRootNavigator: false,
-            builder: (c) => SendFileDialog(
-              files: [shareFile],
-              room: room,
-            ),
-          );
-        } else {
-          room.sendEvent(shareContent);
-        }
-        Matrix.of(context).shareContent = null;
-      }
-
-      VRouter.of(context).toSegments(['rooms', room.id]);
-    }
   }
 
   @override
@@ -90,9 +62,7 @@ class _ForwardViewState extends State<ForwardView> {
                 padding: const EdgeInsets.only(right: 14),
                 child: TwakeIconButton(
                   size: ForwardViewStyle.iconSendSize,
-                  onPressed: () {
-                    forwardAction(context);
-                  },
+                  onPressed: () => widget.controller.forwardAction(context),
                   tooltip: L10n.of(context)!.send,
                   imagePath: ImagePaths.icSend,
                 ),
