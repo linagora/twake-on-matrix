@@ -687,13 +687,9 @@ class ChatController extends State<Chat> {
 
   void forwardEventsAction() async {
     if (selectedEvents.length == 1) {
-      Matrix.of(context).shareContent =
-          selectedEvents.first.getDisplayEvent(timeline!).content;
+      Matrix.of(context).shareContent = selectedEvents.first.getDisplayEvent(timeline!).content;
     } else {
-      Matrix.of(context).shareContent = {
-        'msgtype': 'm.text',
-        'body': _getSelectedEventString(),
-      };
+      Matrix.of(context).shareContentList = selectedEvents.map((msg) => msg.getDisplayEvent(timeline!).content).toList();
     }
     setState(() => selectedEvents.clear());
     await showDialog(
