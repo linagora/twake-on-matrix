@@ -1,5 +1,7 @@
+
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/voip/permission_service.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,10 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
@@ -18,6 +20,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -89,10 +92,16 @@ class ChatInputRow extends StatelessWidget {
                   tooltip: L10n.of(context)!.more,
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
-                  onPressed: () => showImagesPickerBottomSheet(
-                    controller: controller,
-                    context: context,
-                  ),
+                  onPressed: () async {
+                    final currentPermission = await controller.getCurrentPhotoPermission();
+                    if (currentPermission != null) {
+                      showImagesPickerBottomSheet(
+                        controller: controller,
+                        context: context,
+                        permissionStatus: currentPermission
+                      ).whenComplete(() => controller.removeAllImageSelected());
+                    }
+                  },
                 ),
                 if (controller.matrix!.isMultiAccount &&
                     controller.matrix!.hasComplexBundles &&
@@ -260,14 +269,17 @@ class _ChatAccountPicker extends StatelessWidget {
   }
 }
 
-void showImagesPickerBottomSheet({
+Future<void> showImagesPickerBottomSheet({
   required BuildContext context,
   required ChatController controller,
-}) {
-  ImagePicker.showImagesGridBottomSheet(
+  required PermissionStatus permissionStatus,
+}) async {
+  return await ImagePicker.showImagesGridBottomSheet(
     context: context,
     controller: controller.imagePickerController,
     backgroundImageCamera: const AssetImage("assets/verification.png"),
+    permissionStatus: permissionStatus,
+    assetBackgroundColor: LinagoraSysColors.material().background,
     counterImageBuilder: (counterImage) {
       if (counterImage == 0) {
         return const SizedBox.shrink();
@@ -285,9 +297,6 @@ void showImagesPickerBottomSheet({
         ),
       );
     },
-    noImagesWidget: Center(
-      child: Text(L10n.of(context)!.noImagesFound),
-    ),
     bottomWidget: ValueListenableBuilder(
       valueListenable: controller.numberSelectedImagesNotifier,
       builder: (context, value, child) {
@@ -316,7 +325,7 @@ void showImagesPickerBottomSheet({
                     Expanded(
                       child: TextFormField(
                         onTap: () => Fluttertoast.showToast(
-                          msg: "Caption for images is not support yet.",
+                          msg:  L10n.of(context)!.captionForImagesIsNotSupportYet,
                           gravity: ToastGravity.CENTER,
                         ),
                         decoration: InputDecoration(
@@ -372,6 +381,20 @@ void showImagesPickerBottomSheet({
           const SizedBox(height: 8.0,),
         ],
       ),
-    )
-  );  
+    ),
+    goToSettingsWidget: Column(
+      children: [
+        SvgPicture.asset(ImagePaths.icPhotosSettingPermission,
+          width: 40,
+          height: 40,
+        ),
+        Text(L10n.of(context)!.tapToAllowAccessToYourGallery,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: LinagoraRefColors.material().neutral
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
 }
