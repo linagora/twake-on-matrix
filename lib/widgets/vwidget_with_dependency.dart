@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 
-class VWidgetWithDependency extends VGuard {
+class VWidgetWithDependencies extends VGuard {
 
   final String? path;
 
@@ -56,7 +56,7 @@ class VWidgetWithDependency extends VGuard {
   /// differently and are also not closeable with the back swipe gesture.
   final bool fullscreenDialog;
 
-  final BaseDI di;
+  final List<BaseDI> di;
 
   final OnFinishedBind? onFinishedBind;
 
@@ -67,7 +67,10 @@ class VWidgetWithDependency extends VGuard {
     if (beforeDI != null) {
       beforeDI!.call(vRedirector);
     }
-    di.bind(onFinishedBind: onFinishedBind);
+
+    for (final dependency in di) {
+       dependency.bind(onFinishedBind: onFinishedBind);
+    }
   }
 
   final Future<void> Function(VRedirector vRedirector)? beforeDI;
@@ -81,8 +84,11 @@ class VWidgetWithDependency extends VGuard {
   Future<void> beforeLeave(VRedirector vRedirector,
     void Function(Map<String, String> state) saveHistoryState) async {
       super.beforeLeave(vRedirector, saveHistoryState);
-      await di.unbind();
+
+    for (final dependency in di) {
+      await dependency.unbind();
     }
+  }
   
   @override
   void afterEnter(BuildContext context, String? from, String to) =>
@@ -97,7 +103,7 @@ class VWidgetWithDependency extends VGuard {
       _afterUpdate;
 
   
-  VWidgetWithDependency({
+  VWidgetWithDependencies({
     required this.path,
     required this.widget,
     this.beforeDI,

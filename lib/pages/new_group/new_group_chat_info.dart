@@ -57,7 +57,7 @@ class NewGroupChatInfo extends StatelessWidget {
                           color: LinagoraRefColors.material().neutral[40],
                         )),
                       const SizedBox(height: 32),
-                      _buildGroupNameTextFieid(context),
+                      _buildGroupNameTextField(context),
                       const SizedBox(height: 16),
                       _buildSettings(context),
                       Expanded(
@@ -84,7 +84,7 @@ class NewGroupChatInfo extends StatelessWidget {
         },
         child: TwakeFloatingActionButton(
           icon: Icons.done,
-          onTap: () => newGroupController.moveToGroupChatScreen(),
+          onTap: () => newGroupController.createNewRoomAction(),
         ),
       ),
     );
@@ -138,7 +138,7 @@ class NewGroupChatInfo extends StatelessWidget {
 
   Widget _buildChangeProfileWidget(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => newGroupController.saveAvatarAction(context),
       child: Container(
         width: 56,
         height: 56,
@@ -154,7 +154,7 @@ class NewGroupChatInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupNameTextFieid(BuildContext context) {
+  Widget _buildGroupNameTextField(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: TextField(

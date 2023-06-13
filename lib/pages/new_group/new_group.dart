@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/config/routes.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/domain/app_state/room/create_room_end_action_success.dart';
+import 'package:fluffychat/domain/app_state/room/create_room_success.dart';
+import 'package:fluffychat/pages/new_private_chat/create_room_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -15,6 +19,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
 import 'package:matrix/matrix.dart';
+import 'package:vrouter/vrouter.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({Key? key}) : super(key: key);
@@ -29,6 +34,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
   final groupchatInfoScrollController = ScrollController();
+  final createRoomStreamController = CreateRoomController();
 
   final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
   final haveSelectedContactsNotifier = ValueNotifier(false);
@@ -37,10 +43,11 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
 
   final groupNameFocusNode = FocusNode();
 
+  static const maxScrollOffsetAllowedInPixel = 380.0;
+
   String groupName = "";
   bool isGroupPublic = false;
-
-  static const maxScrollOffsetAllowedInPixel = 380.0;
+  MatrixFile? avatar;
 
   @override
   void initState() {
@@ -58,6 +65,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
         );
       }
     });
+    listenCreateRoom();
   }
 
   @override
@@ -81,6 +89,28 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     });
   }
 
+  void listenCreateRoom() {
+    createRoomStreamController.streamController.stream.listen((event) {
+      Logs().d('NewGroupController::createRoom() - event: $event');
+      event.fold(
+        (failure) => {
+          Logs().e('NewGroupController::createRoom() - failure: $failure'),
+          createRoomStreamController.dispose(),
+        },
+        (Success success) {
+          Logs().d('NewGroupController::createRoom() - success: $success');
+          if (success is CreateRoomSuccess) {
+            VRouter.of(context).toSegments(['rooms', success.roomId]);
+          }
+
+          if (success is CreateRoomEndActionSuccess) {
+            createRoomStreamController.dispose();
+          }
+        },
+      );
+    });
+  }
+
   void listenSearchContacts() {
     searchContactsController.lookupStreamController.stream.listen((event) {
       Logs().d('NewGroupController::_fetchRemoteContacts() - event: $event');
@@ -96,8 +126,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     };
   }
 
-  Iterable<PresentationContact> get contactsList
-    => selectedContactsMapNotifier.value.keys;
+  Iterable<PresentationContact> get contactsList => selectedContactsMapNotifier.value.keys;
 
   void selectContact(PresentationContact contact) {
     final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
@@ -117,11 +146,11 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
 
   Set<PresentationContact> getAllContactsGroupChat() {
     final newContactsList = {
-          PresentationContact(
-            displayName: "You",
-            matrixId: Matrix.of(context).client.userID,
-          )
-        };
+      PresentationContact(
+        displayName: "You",
+        matrixId: Matrix.of(context).client.userID,
+      )
+    };
     newContactsList.addAll(getSelectedValidContacts(contactsList));
     return newContactsList;
   }

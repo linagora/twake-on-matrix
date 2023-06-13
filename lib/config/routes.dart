@@ -1,5 +1,6 @@
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/send_image/send_image_di.dart';
+import 'package:fluffychat/di/room/room_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -61,10 +62,10 @@ class AppRoutes {
                 widget: const ChatList(),
                 buildTransition: _bottomToTopTransition,
               ),
-              VWidgetWithDependency(
+              VWidgetWithDependencies(
                 path: '/contactsTab', 
                 widget: const ContactsTab(),
-                di: ContactDI(),
+                di: [ContactDI()],
                 buildTransition: _bottomToTopTransition,
               ),
               VWidget(
@@ -102,9 +103,9 @@ class AppRoutes {
                 stackedRoutes: _chatDetailsRoutes,
                 buildTransition: rightToLeftTransition,
               ),
-              VWidgetWithDependency(
+              VWidgetWithDependencies(
                 path: '/rooms/:roomid',
-                di: SendImageDi(),
+                di: [SendImageDi()],
                 widget: const Chat(),
                 buildTransition: rightToLeftTransition,
                 stackedRoutes: [
@@ -144,14 +145,14 @@ class AppRoutes {
                   ),
                 ],
               ),
-              VWidgetWithDependency(
-                di: ContactDI(),
+              VWidgetWithDependencies(
+                di: [ContactDI()],
                 path: '/newprivatechat',
                 widget: const NewPrivateChat(),
                 buildTransition: rightToLeftTransition,
               ),
-              VWidgetWithDependency(
-                di: ContactDI(),
+              VWidgetWithDependencies(
+                di: [ContactDI(), CreateRoomDI()],
                 path: '/newgroup',
                 widget: const NewGroup(),
                 buildTransition: rightToLeftTransition,
@@ -203,8 +204,8 @@ class AppRoutes {
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,
                 ),
-                VWidgetWithDependency(
-                  di: ContactDI(),
+                VWidgetWithDependencies(
+                  di: [ContactDI(), CreateRoomDI()],
                   path: '/newgroup',
                   widget: const NewGroup(),
                   buildTransition: _fadeTransition,
