@@ -11,37 +11,39 @@ class PermissionHandlerService {
   PermissionHandlerService._internal();
 
 
-  Future<PermissionStatus> requestPermissionForPhotoActions() {
+  Future<PermissionStatus>? requestPermissionForPhotoActions() {
     if (Platform.isIOS) {
       return _handlePhotosPermissionIOSAction();
-    } else {
+    } else if (Platform.isAndroid) {
       return _handlePhotosPermissionAndroidAction();
+    } else {
+      return null;
     }
   }
 
   Future<PermissionStatus> _handlePhotosPermissionIOSAction() async {
     final currentStatus = await Permission.photos.status;
-    return _handlePermission(currentStatus);
+    return _handlePhotoPermission(currentStatus);
   }
 
   Future<PermissionStatus> _handlePhotosPermissionAndroidAction() async {
     final currentStatus = await Permission.storage.status;
-    return _handlePermission(currentStatus);
+    return _handlePhotoPermission(currentStatus);
   }
 
-
-  Future<PermissionStatus> _handlePermission(PermissionStatus currentStatus) async {
+  Future<PermissionStatus> _handlePhotoPermission(PermissionStatus currentStatus) async {
     switch (currentStatus) {
+      case PermissionStatus.permanentlyDenied:
       case PermissionStatus.denied:
-      case PermissionStatus.limited:
         final newStatus = Platform.isIOS
-          ? await Permission.mediaLibrary.request()
+          ? await Permission.photos.request()
           : await Permission.storage.request();
         return newStatus.isGranted ? PermissionStatus.granted : newStatus;
 
       case PermissionStatus.granted:
+      case PermissionStatus.limited:
+      case PermissionStatus.provisional:
       case PermissionStatus.restricted:
-      case PermissionStatus.permanentlyDenied:
         return currentStatus;
     }
   }

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
-import 'package:collection/collection.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
+import 'package:fluffychat/utils/voip/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +21,7 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,7 +36,6 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extensio
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:photo_manager/photo_manager.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -418,9 +418,6 @@ class ChatController extends State<Chat> {
     for (final entity in selectedAssets) {
       await sendImage(entity);
     }
-
-    imagePickerController.clearAssetCounter();
-    numberSelectedImagesNotifier.value = 0;
   }
 
   void openCameraAction() async {
@@ -1161,6 +1158,15 @@ class ChatController extends State<Chat> {
         replyEvent = null;
         editEvent = null;
       });
+
+  Future<PermissionStatus>? getCurrentPhotoPermission() {
+    return PermissionHandlerService().requestPermissionForPhotoActions();
+  }
+
+  void removeAllImageSelected() {
+    imagePickerController.clearAssetCounter();
+    numberSelectedImagesNotifier.value = 0;
+  }
 
   @override
   Widget build(BuildContext context) => ChatView(this);

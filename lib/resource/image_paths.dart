@@ -17,6 +17,7 @@ class ImagePaths {
   static String get icStatus => _getImagePath('ic_status.svg');
   static String get icEmptyGroupChat => _getImagePath('ic_empty_group_chat.svg');
   static String get icTwakeLogo => _getImagePath('ic_twake_logo.svg');
+  static String get icPhotosSettingPermission => _getImagePath('ic_photos_setting.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
