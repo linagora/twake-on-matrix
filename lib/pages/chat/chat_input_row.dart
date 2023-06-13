@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -284,8 +285,8 @@ void showImagesPickerBottomSheet({
         ),
       );
     },
-    noImagesWidget: const Center(
-      child: Text("No images found"),
+    noImagesWidget: Center(
+      child: Text(L10n.of(context)!.noImagesFound),
     ),
     bottomWidget: ValueListenableBuilder(
       valueListenable: controller.numberSelectedImagesNotifier,
@@ -314,6 +315,10 @@ void showImagesPickerBottomSheet({
                   children: [
                     Expanded(
                       child: TextFormField(
+                        onTap: () => Fluttertoast.showToast(
+                          msg: "Caption for images is not support yet.",
+                          gravity: ToastGravity.CENTER,
+                        ),
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
                           hintText: L10n.of(context)!.addACaption,
@@ -323,10 +328,17 @@ void showImagesPickerBottomSheet({
                     Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        SvgPicture.asset(
-                          ImagePaths.icSend,
-                          width: 40,
-                          height: 40,
+                        InkWell(
+                          borderRadius: const BorderRadius.all(Radius.circular(100)),
+                          onTap: () {
+                            controller.sendImages();
+                            Navigator.of(context).pop();
+                          },
+                          child: SvgPicture.asset(
+                            ImagePaths.icSend,
+                            width: 40,
+                            height: 40,
+                          ),
                         ),
                       ],
                     )
@@ -361,6 +373,5 @@ void showImagesPickerBottomSheet({
         ],
       ),
     )
-  );
-                
+  );  
 }

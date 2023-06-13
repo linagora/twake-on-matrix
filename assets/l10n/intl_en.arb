@@ -2630,12 +2630,13 @@
     "recentlyChats": "Recently chats",
     "search": "Search",
     "forwardTo": "Forward to...",
-    "noConnection": "No connection,
+    "noConnection": "No connection",
     "photoSelectedCounter": "{count, plural, =1{1 photo} other{{count} photos}} selected",
     "@photoSelectedCounter": {
         "placeholders": {
             "count": {}
         }
     },
-    "addACaption": "Add a caption..."
+    "addACaption": "Add a caption...",
+    "noImagesFound": "No Images found"
 }

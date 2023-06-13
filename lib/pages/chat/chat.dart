@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:collection/collection.dart';
+import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -14,9 +16,10 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -32,6 +35,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extensio
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -235,7 +239,7 @@ class ChatController extends State<Chat> {
     }
   }
 
-  void registerListenerForSelectedImagesChanged() {
+  void _registerListenerForSelectedImagesChanged() {
     imagePickerController.addListener(() {
       numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
     });
@@ -246,7 +250,7 @@ class ChatController extends State<Chat> {
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
-    registerListenerForSelectedImagesChanged();
+    _registerListenerForSelectedImagesChanged();
     super.initState();
   }
 
@@ -393,27 +397,30 @@ class ChatController extends State<Chat> {
     );
   }
 
-  void sendImageAction() async {
-    final result = await FilePickerCross.importMultipleFromStorage(
-      type: FileTypeCross.image,
-    );
-    if (result.isEmpty) return;
+  Future<void> sendImage(IndexedAssetEntity entity) async {
+    final matrixFile = await entity.toMatrixFile();
+    if (matrixFile != null) {
+      await room!.sendFileEvent(
+        matrixFile,
+        thumbnail: null,
+      ).catchError((e) {
+        Fluttertoast.showToast(
+          msg: "error: $e",
+          gravity: ToastGravity.BOTTOM,
+        );
+        return null;
+      });
+    }
+  }
 
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendFileDialog(
-        files: result
-            .map(
-              (xfile) => MatrixFile(
-                bytes: xfile.toUint8List(),
-                name: xfile.fileName!,
-              ).detectFileType,
-            )
-            .toList(),
-        room: room!,
-      ),
-    );
+  Future<void> sendImages() async {
+    final selectedAssets = imagePickerController.sortedSelectedAssets;
+    for (final entity in selectedAssets) {
+      await sendImage(entity);
+    }
+
+    imagePickerController.clearAssetCounter();
+    numberSelectedImagesNotifier.value = 0;
   }
 
   void openCameraAction() async {
@@ -987,9 +994,6 @@ class ChatController extends State<Chat> {
   void onAddPopupMenuButtonSelected(String choice) {
     if (choice == 'file') {
       sendFileAction();
-    }
-    if (choice == 'image') {
-      sendImageAction();
     }
     if (choice == 'camera') {
       openCameraAction();
