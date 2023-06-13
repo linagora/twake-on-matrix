@@ -272,9 +272,6 @@ abstract class FluffyThemes {
           backgroundColor: brightness == Brightness.light 
             ? LinagoraSysColors.material().background
             : LinagoraSysColors.material().backgroundDark,
-          modalBackgroundColor: brightness == Brightness.light 
-            ? LinagoraSysColors.material().background
-            : LinagoraSysColors.material().backgroundDark,
           surfaceTintColor: brightness == Brightness.light 
             ? LinagoraSysColors.material().background
             : LinagoraSysColors.material().backgroundDark,

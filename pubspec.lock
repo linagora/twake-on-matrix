@@ -1325,8 +1325,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: add_image_picker
-      resolved-ref: c7ef4150c4e4f3a3984c868b25dc7ae3b532bbbe
+      ref: master
+      resolved-ref: "80f53ebbd3b74d82ab5f6dcc26faa584326967f9"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
