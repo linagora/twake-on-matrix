@@ -2602,7 +2602,7 @@
     "more": "More",
     "whoWouldYouLikeToAdd": "Who would you like to add?",
     "addAPhoto": "Add a photo",
-    "maxImageSize": "Maximum file size: {max}MB",
+    "maxImageSize": "Maximum file size: {max}",
     "@maxImageSize": {
         "placeholders": {
             "max": {}
@@ -2641,5 +2641,14 @@
     "noImagesFound": "No Images found",
     "captionForImagesIsNotSupportYet": "Caption for images is not support yet.",
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
-    "changeGroupAvatar": "Change the group avatar"
+    "changeGroupAvatar": "Change the group avatar",
+    "changeGroupAvatar": "Change the group avatar",
+    "roomAvatarMaxFileSize": "The avatar size is too large",
+    "@roomAvatarMaxFileSize": {},
+    "roomAvatarMaxFileSizeLong": "The avatar size must be less than {max}",
+    "@roomAvatarMaxFileSizeLong": {
+        "placeholders": {
+            "max": {}
+        }
+    }
 }

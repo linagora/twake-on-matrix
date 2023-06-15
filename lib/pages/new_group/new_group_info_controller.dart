@@ -76,7 +76,7 @@ extension NewGroupInfoController on NewGroupController {
     return action;
   }
 
-  void saveAvatarAction(BuildContext context) async {
+  void saveAvatarAction(BuildContext context, int maxFileSize) async {
     final action = await _getSaveAvatarActions(context);
     if (action == null) return;
 
@@ -98,6 +98,15 @@ extension NewGroupInfoController on NewGroupController {
         bytes: result.toUint8List(),
         name: result.fileName!,
       );
+    }
+
+    if (file.size > maxFileSize) {
+      await showOkAlertDialog(
+        context: context,
+        title: L10n.of(context)!.roomAvatarMaxFileSize,
+        message: L10n.of(context)!.roomAvatarMaxFileSizeLong(maxFileSize),
+      );
+      return;
     }
 
     avatar = file;

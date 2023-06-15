@@ -4,12 +4,15 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
+import 'package:fluffychat/utils/int_extension.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/setting_tile.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 
 class NewGroupChatInfo extends StatelessWidget {
@@ -36,42 +39,58 @@ class NewGroupChatInfo extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraint) {
               return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: _buildChangeProfileWidget(context)),
-                      const SizedBox(height: 16.0),
-                      Text(L10n.of(context)!.addAPhoto,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).viewInsets.bottom),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FutureBuilder<ServerConfig>(
+                      future: Matrix.of(context).client.getConfig(),
+                      builder: (context, snapshot) {
+                        final maxFileSize =
+                            snapshot.data?.mUploadSize ?? newGroupController.maxFileSizeDefault;
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: _buildChangeProfileWidget(context, maxFileSize),
+                            ),
+                            const SizedBox(
+                              height: 16.0,
+                            ),
+                            Text(
+                              L10n.of(context)!.addAPhoto,
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                            ),
+                            Text(
+                              L10n.of(context)!.maxImageSize(maxFileSize.formatBytes()),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: LinagoraRefColors.material().neutral[40],
+                                  ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    _buildGroupNameTextField(context),
+                    const SizedBox(height: 16),
+                    _buildSettings(context),
+                    Expanded(
+                      child: ExpansionParticipantsList(
+                        newGroupController: newGroupController,
+                        contactsList: contactsList,
                       ),
-                      Text(L10n.of(context)!.maxImageSize(5),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: LinagoraRefColors.material().neutral[40],
-                        )),
-                      const SizedBox(height: 32),
-                      _buildGroupNameTextField(context),
-                      const SizedBox(height: 16),
-                      _buildSettings(context),
-                      Expanded(
-                        child: ExpansionParticipantsList(
-                          newGroupController: newGroupController,
-                          contactsList: contactsList,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          }),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -136,20 +155,36 @@ class NewGroupChatInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildChangeProfileWidget(BuildContext context) {
-    return GestureDetector(
-      onTap: () => newGroupController.saveAvatarAction(context),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: LinagoraRefColors.material().neutral[80],
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(Icons.camera_alt_outlined,
-          color: Theme.of(context).colorScheme.surface,
-        ),
+  Widget _buildChangeProfileWidget(BuildContext context, int maxFileSize) {
+    return ValueListenableBuilder<MatrixFile?>(
+      valueListenable: newGroupController.avatarNotifier,
+      builder: (context, value, child) => GestureDetector(
+        onTap: () => newGroupController.saveAvatarAction(context, maxFileSize),
+        child: value == null
+            ? Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: LinagoraRefColors.material().neutral[80],
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.camera_alt_outlined,
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+              )
+            : Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: MemoryImage(value.bytes),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
       ),
     );
   }
