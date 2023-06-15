@@ -32,7 +32,7 @@ extension NewGroupInfoController on NewGroupController {
           createRoomPreset:
               isGroupPublic ? CreateRoomPreset.publicChat : CreateRoomPreset.privateChat,
           enableEncryption: isEnableEEEncryptionNotifier.value,
-          avatar: avatar,
+          avatar: avatarNotifier.value,
         ));
   }
 
@@ -109,6 +109,6 @@ extension NewGroupInfoController on NewGroupController {
       return;
     }
 
-    avatar = file;
+    avatarNotifier.value = file;
   }
 }

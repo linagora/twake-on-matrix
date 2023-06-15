@@ -40,6 +40,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   final haveSelectedContactsNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
   final isEnableEEEncryptionNotifier = ValueNotifier(true);
+  final avatarNotifier = ValueNotifier<MatrixFile?>(null);
 
   final groupNameFocusNode = FocusNode();
 
@@ -80,6 +81,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     selectedContactsMapNotifier.dispose();
     haveSelectedContactsNotifier.dispose();
     isEnableEEEncryptionNotifier.dispose();
+    avatarNotifier.dispose();
     haveGroupNameNotifier.dispose();
   }
 
