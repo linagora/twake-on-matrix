@@ -46,4 +46,27 @@ extension LocalizedBody on Event {
       .tryGetMap<String, dynamic>('info')
       ?.tryGet<int>('size')
       ?.sizeString;
+
+  Uint8List? _getPlaceHolderMatrixFile(Event event) {
+    if (room.sendingFilePlaceholders.isNotEmpty) {
+      if (status == EventStatus.synced || status == EventStatus.sent) {
+        if (unsigned?.containsKey('transaction_id') == true) {
+          final transactionId = unsigned!['transaction_id'];
+          return room.sendingFilePlaceholders[transactionId]?.bytes;
+        }
+      }
+    }
+    return null;
+  }
+
+  Uint8List? getSendingImageData() {
+    if (status == EventStatus.sending) {
+      return room.sendingFilePlaceholders[eventId]?.bytes;
+    } else if (status == EventStatus.synced) {
+      return _getPlaceHolderMatrixFile(this);
+    } else if (status == EventStatus.sent) {
+      return _getPlaceHolderMatrixFile(this); 
+    }
+    return null;
+  }
 }
