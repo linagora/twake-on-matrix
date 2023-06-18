@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
-import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/voip/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,16 +16,17 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrouter/vrouter.dart';
+import 'package:fluffychat/presentation/extensions/room_extension.dart';
 
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
@@ -397,28 +398,25 @@ class ChatController extends State<Chat> {
     );
   }
 
-  Future<void> sendImage(IndexedAssetEntity entity) async {
-    final matrixFile = await entity.toMatrixFile();
-    if (matrixFile != null) {
-      await room!.sendFileEvent(
-        matrixFile,
-        thumbnail: null,
-      ).catchError((e) {
-        Fluttertoast.showToast(
-          msg: "error: $e",
-          gravity: ToastGravity.BOTTOM,
-        );
-        return null;
-      });
+  void sendImage() {
+    final assetEntity = imagePickerController.selectedAssets.first;
+    final sendImageInteractor = getIt.get<SendImageInteractor>();
+    if (assetEntity.asset.type == AssetType.image) {
+      sendImageInteractor.execute(room: room!, entity: assetEntity.asset);
+      imagePickerController.clearAssetCounter();
+      numberSelectedImagesNotifier.value = 0;
     }
   }
 
-  Future<void> sendImages() async {
-    final selectedAssets = imagePickerController.sortedSelectedAssets;
-    for (final entity in selectedAssets) {
-      await sendImage(entity);
-    }
-  }
+  // Future<void> sendImages() async {
+  //   final selectedAssets = imagePickerController.sortedSelectedAssets;
+  //   for (final entity in selectedAssets) {
+  //     await sendImage();
+  //   }
+
+  //   imagePickerController.clearAssetCounter();
+  //   numberSelectedImagesNotifier.value = 0;
+  // }
 
   void openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera

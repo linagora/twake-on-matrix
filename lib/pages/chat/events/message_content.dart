@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
 import 'package:fluffychat/widgets/twake_link_text.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,7 @@ import 'package:fluffychat/pages/chat/events/video_player.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../../../config/app_config.dart';
@@ -112,6 +114,20 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
+            if (event.status == EventStatus.error && event.messageType == MessageTypes.Image) {
+              return SizedBox(
+                width: MessageContentStyle.imageBubbleWidth,
+                height: MessageContentStyle.imageBubbleHeight,
+                child: const Center(
+                  child: Icon(Icons.error, color: Colors.red),
+                ),
+              );
+            }
+
+            final sendingImageData = event.getSendingImageData();
+            if (sendingImageData != null) {
+              return SendingImageWidget(sendingImageData: sendingImageData);
+            }
             return ImageBubble(
               event,
               width: MessageContentStyle.imageBubbleWidth,

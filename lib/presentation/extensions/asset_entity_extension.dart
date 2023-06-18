@@ -1,11 +1,11 @@
-import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
+import 'package:photo_manager/photo_manager.dart';
 
-extension AssetEntityExtension on IndexedAssetEntity {
+extension AssetEntityExtension on AssetEntity {
   Future<MatrixFile?> toMatrixFile() async {
-    final bytes = await asset.originBytes;
+    final bytes = await originBytes;
     if (bytes != null && bytes.isNotEmpty) {
-      return MatrixFile(bytes: bytes, name: await asset.titleAsync);
+      return MatrixFile(bytes: bytes, name: title ?? await titleAsync);
     }
     return null;
   }
