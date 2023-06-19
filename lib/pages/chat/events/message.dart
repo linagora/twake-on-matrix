@@ -1,19 +1,18 @@
 import 'dart:math' as math;
 
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
-import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-
-import 'package:matrix/matrix.dart';
-import 'package:swipe_to_action/swipe_to_action.dart';
-
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
+import 'package:swipe_to_action/swipe_to_action.dart';
+
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'reply_content.dart';
@@ -414,7 +413,7 @@ class Message extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
                     clipBehavior: Clip.antiAlias,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                       child: Text(
                         event.originServerTs.localizedTime(context).toUpperCase(),
                         style: MessageStyle.displayTime(context),
@@ -430,8 +429,8 @@ class Message extends StatelessWidget {
                     padding: EdgeInsets.only(
                       left: selected ? 0 : 8.0,
                       right: selected ? 0 : ownMessage ? 8.0 : 16.0,
-                      top: selected ? 0 : 8.0,
-                      bottom: selected ? 0 : 8.0,
+                      top: selected ? 0 : 1.0,
+                      bottom: selected ? 0 : 1.0,
                     ),
                     child: _messageSelectedWidget(context, row),
                   ),
@@ -451,7 +450,7 @@ class Message extends StatelessWidget {
       return SizedBox(
         width: MessageStyle.avatarSize,
         child: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 4.0),
           child: Center(
             child: SizedBox(
               width: MessageStyle.errorStatusPlaceHolderWidth,
@@ -482,7 +481,7 @@ class Message extends StatelessWidget {
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
     return Container(
-      padding: EdgeInsets.all(selected ? 8 : 0),
+      padding: EdgeInsets.symmetric(horizontal: selected ? 8 : 0, vertical: selected ? 4 : 0),
       color: selected
         ? LinagoraSysColors.material().secondaryContainer
         : Theme.of(context).primaryColor.withAlpha(0),
