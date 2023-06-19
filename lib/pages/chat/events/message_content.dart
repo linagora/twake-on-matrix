@@ -29,6 +29,7 @@ class MessageContent extends StatelessWidget {
   final void Function(Event)? onInfoTab;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
+  final Function()? onTapImage;
 
   const MessageContent(
     this.event, {
@@ -37,6 +38,7 @@ class MessageContent extends StatelessWidget {
     required this.textColor,
     required this.endOfBubbleWidget,
     required this.backgroundColor,
+    this.onTapImage,
   }) : super(key: key);
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -117,6 +119,7 @@ class MessageContent extends StatelessWidget {
               width: MessageContentStyle.imageBubbleWidth,
               height: MessageContentStyle.imageBubbleHeight,
               fit: BoxFit.cover,
+              onTap: onTapImage,
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
