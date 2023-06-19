@@ -351,7 +351,7 @@ Future<void> showImagesPickerBottomSheet({
                           InkWell(
                             borderRadius: const BorderRadius.all(Radius.circular(100)),
                             onTap: () {
-                              controller.sendImages();
+                              controller.sendImage();
                               Navigator.of(context).pop();
                             },
                             child: SvgPicture.asset(
