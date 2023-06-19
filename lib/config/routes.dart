@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/send_image/send_image_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
@@ -8,7 +9,6 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/home_screen.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
-import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
@@ -197,7 +197,8 @@ class AppRoutes {
                   buildTransition: _fadeTransition,
                   stackedRoutes: _chatDetailsRoutes,
                 ),
-                VWidget(
+                VWidgetWithDependency(
+                  di: ContactDI(),
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,
