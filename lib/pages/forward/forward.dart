@@ -117,7 +117,7 @@ class ForwardController extends State<Forward> {
     final rooms = filteredRoomsForAll;
     final room = rooms.firstWhere((element) => element.id == selectedEvents.first);
     if (room.membership == Membership.join) {
-      if (Matrix.of(context).shareContentList.isEmpty) {
+      if (Matrix.of(context).shareContentList.isEmpty && Matrix.of(context).shareContent != null) {
         _forwardOneMessageAction(context, room);
       } else {
         _forwardMoreMessageAction(context, room);
