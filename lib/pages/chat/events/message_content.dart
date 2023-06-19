@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
 import 'package:fluffychat/widgets/twake_link_text.dart';
@@ -114,7 +115,7 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.status == EventStatus.error && event.messageType == MessageTypes.Image) {
+            if (event.status == EventStatus.error) {
               return SizedBox(
                 width: MessageContentStyle.imageBubbleWidth,
                 height: MessageContentStyle.imageBubbleHeight,
@@ -126,7 +127,10 @@ class MessageContent extends StatelessWidget {
 
             final sendingImageData = event.getSendingImageData();
             if (sendingImageData != null) {
-              return SendingImageWidget(sendingImageData: sendingImageData);
+              return SendingImageWidget(
+                sendingImageData: sendingImageData,
+                event: event,
+              );
             }
             return ImageBubble(
               event,
