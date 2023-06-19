@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/voip/permission_service.dart';
@@ -408,15 +409,19 @@ class ChatController extends State<Chat> {
     }
   }
 
-  // Future<void> sendImages() async {
-  //   final selectedAssets = imagePickerController.sortedSelectedAssets;
-  //   for (final entity in selectedAssets) {
-  //     await sendImage();
-  //   }
+  Future<void> sendImages() async {
+    final selectedAssets = imagePickerController.sortedSelectedAssets;
+    final sendImagesInteractor = getIt.get<SendImagesInteractor>();
+    sendImagesInteractor.execute(
+      room: room!, 
+      entities: selectedAssets
+        .map<AssetEntity>((entity) => entity.asset)
+        .toList()
+    );
 
-  //   imagePickerController.clearAssetCounter();
-  //   numberSelectedImagesNotifier.value = 0;
-  // }
+    imagePickerController.clearAssetCounter();
+    numberSelectedImagesNotifier.value = 0;
+  }
 
   void openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
