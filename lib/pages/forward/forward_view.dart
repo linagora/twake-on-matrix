@@ -45,7 +45,9 @@ class _ForwardViewState extends State<ForwardView> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(),
+      floatingActionButton: Align(
+        alignment: const Alignment(0.5, 1.1),
+        child: _buildBottomBar()),
     );
   }
 
