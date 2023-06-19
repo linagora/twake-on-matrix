@@ -203,14 +203,14 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   Map<String, dynamic>? _shareContent;
 
-  List<Map<String, dynamic>?> get shareContentList => _shareContentList;
+  List<Map<String, dynamic>?> get shareContentList => _shareContentList ?? [];
 
   set shareContentList(List<Map<String, dynamic>?> content) {
     _shareContentList = content;
     onShareContentChanged.add(_shareContent);
   }
 
-  late List<Map<String, dynamic>?> _shareContentList;
+  List<Map<String, dynamic>?>? _shareContentList;
 
   final StreamController<Map<String, dynamic>?> onShareContentChanged =
       StreamController.broadcast();
