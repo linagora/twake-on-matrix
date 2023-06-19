@@ -1,7 +1,6 @@
 
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/voip/permission_service.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -297,6 +296,16 @@ Future<void> showImagesPickerBottomSheet({
         ),
       );
     },
+    expandedWidget: ValueListenableBuilder(
+      valueListenable: controller.numberSelectedImagesNotifier,
+      builder: (context, value, child) {
+        if (value == 0) {
+          return const SizedBox.shrink();
+        }
+        return child!;
+      },
+      child: const SizedBox(height: 50),
+    ),
     bottomWidget: ValueListenableBuilder(
       valueListenable: controller.numberSelectedImagesNotifier,
       builder: (context, value, child) {
@@ -305,81 +314,84 @@ Future<void> showImagesPickerBottomSheet({
         }
         return child!;
       },
-      child: Column(
-        children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                height: 64,
-                padding: const EdgeInsets.only(right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        onTap: () => Fluttertoast.showToast(
-                          msg:  L10n.of(context)!.captionForImagesIsNotSupportYet,
-                          gravity: ToastGravity.CENTER,
-                        ),
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
-                          hintText: L10n.of(context)!.addACaption,
-                        ),
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  height: 64,
+                  padding: const EdgeInsets.only(right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
                       ),
                     ),
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        InkWell(
-                          borderRadius: const BorderRadius.all(Radius.circular(100)),
-                          onTap: () {
-                            controller.sendImage();
-                            Navigator.of(context).pop();
-                          },
-                          child: SvgPicture.asset(
-                            ImagePaths.icSend,
-                            width: 40,
-                            height: 40,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          onTap: () => Fluttertoast.showToast(
+                            msg:  L10n.of(context)!.captionForImagesIsNotSupportYet,
+                            gravity: ToastGravity.CENTER,
+                          ),
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
+                            hintText: L10n.of(context)!.addACaption,
                           ),
                         ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Positioned(
-                right: 12.0,
-                bottom: 2.0,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: ShapeDecoration(
-                    shape: CircleBorder(side: BorderSide(color: Theme.of(context).colorScheme.surface)),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  alignment: Alignment.center,
-                  child: ValueListenableBuilder(
-                    valueListenable: controller.numberSelectedImagesNotifier,
-                    builder: (context, value, child) {
-                      return Text("$value", style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.surface,
-                        letterSpacing: 0.1,
-                      ),);
-                    },
+                      ),
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          InkWell(
+                            borderRadius: const BorderRadius.all(Radius.circular(100)),
+                            onTap: () {
+                              controller.sendImages();
+                              Navigator.of(context).pop();
+                            },
+                            child: SvgPicture.asset(
+                              ImagePaths.icSend,
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
                   ),
                 ),
-              )
-            ],
-          ),
-          const SizedBox(height: 8.0,),
-        ],
+                Positioned(
+                  right: 12.0,
+                  bottom: 2.0,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: ShapeDecoration(
+                      shape: CircleBorder(side: BorderSide(color: Theme.of(context).colorScheme.surface)),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    alignment: Alignment.center,
+                    child: ValueListenableBuilder(
+                      valueListenable: controller.numberSelectedImagesNotifier,
+                      builder: (context, value, child) {
+                        return Text("$value", style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.surface,
+                          letterSpacing: 0.1,
+                        ),);
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(height: 8.0,),
+          ],
+        ),
       ),
     ),
     goToSettingsWidget: Column(
