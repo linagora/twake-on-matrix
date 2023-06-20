@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
@@ -27,28 +29,49 @@ class NewGroupChatInfo extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(context),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-        child: Column(
-          children: [
-            _buildChangeProfileWidget(context),
-            const SizedBox(height: 16.0,),
-            Text(L10n.of(context)!.addAPhoto,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            Text(L10n.of(context)!.maxImageSize(5),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: LinagoraRefColors.material().neutral[40],
-              ),),
-            const SizedBox(height: 32,),
-            _buildGroupNameTextFieid(context),
-            const SizedBox(height: 16,),
-            _buildSettings(context),
-            Expanded(
-              child: ExpansionParticipantsList(contactsList: contactsList,),
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          controller: newGroupController.groupchatInfoScrollController,
+          child: LayoutBuilder(
+            builder: (context, constraint) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: _buildChangeProfileWidget(context)),
+                      const SizedBox(height: 16.0),
+                      Text(L10n.of(context)!.addAPhoto,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(L10n.of(context)!.maxImageSize(5),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: LinagoraRefColors.material().neutral[40],
+                        )),
+                      const SizedBox(height: 32),
+                      _buildGroupNameTextFieid(context),
+                      const SizedBox(height: 16),
+                      _buildSettings(context),
+                      Expanded(
+                        child: ExpansionParticipantsList(
+                          newGroupController: newGroupController,
+                          contactsList: contactsList,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          ),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -136,6 +159,7 @@ class NewGroupChatInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: TextField(
         controller: newGroupController.groupNameTextEditingController,
+        focusNode: newGroupController.groupNameFocusNode,
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).colorScheme.shadow),
@@ -165,11 +189,11 @@ class NewGroupChatInfo extends StatelessWidget {
           SettingTile(
             key: UniqueKey(),
             leadingIcon: Icons.back_hand_outlined,
-            settingTitle: L10n.of(context)!.makeThisGroupPrivate,
+            settingTitle: L10n.of(context)!.makeThisGroupPublic,
             settingDescription: L10n.of(context)!.groupPrivateDescription,
             onSwitchButtonChanged: (valueChanged) 
               => newGroupController.onGroupPrivacyChanged(valueChanged),
-            defaultSwitchValue: newGroupController.isGroupPrivate,
+            defaultSwitchValue: newGroupController.isGroupPublic,
           ),
           ValueListenableBuilder<bool>(
             valueListenable: newGroupController.isEnableEEEncryptionNotifier,

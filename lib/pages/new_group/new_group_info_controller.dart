@@ -2,6 +2,7 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -15,22 +16,28 @@ extension NewGroupInfoController on NewGroupController {
   }
 
   void moveToGroupChatScreen() async {
-    final roomId = await Matrix.of(context).client.createGroupChat(
-      groupName: groupName,
-      invite: getSelectedValidContacts(contactsList)
-        .map<String>((contact) => contact.matrixId!)
-        .toList(),
-      enableEncryption: isEnableEEEncryptionNotifier.value,
-      preset: isGroupPrivate 
-        ? CreateRoomPreset.privateChat
-        : CreateRoomPreset.publicChat,
+    final roomId = await showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        return await Matrix.of(context).client.createGroupChat(
+          groupName: groupName,
+          invite: getSelectedValidContacts(contactsList)
+            .map<String>((contact) => contact.matrixId!)
+            .toList(),
+          enableEncryption: isEnableEEEncryptionNotifier.value,
+          preset: isGroupPublic 
+            ? CreateRoomPreset.publicChat
+            : CreateRoomPreset.privateChat,
+        );
+      }
     );
-
-    VRouter.of(context).toSegments(['rooms', roomId]);
+    if (roomId.result != null) {
+      VRouter.of(context).toSegments(['rooms', roomId.result!]);
+    }
   }
 
   void onGroupPrivacyChanged(bool switchValue) {
-    isGroupPrivate = switchValue;
+    isGroupPublic = switchValue;
     isEnableEEEncryptionNotifier.value = !switchValue;
   }
 
