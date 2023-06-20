@@ -15,10 +15,14 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      surfaceTintColor: Colors.white,
+      surfaceTintColor: Theme.of(context).brightness == Brightness.light
+        ? Colors.white
+        : Colors.black,
       shadowColor: Colors.black.withOpacity(0.15),
       elevation: 4.0,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+        ? Colors.white
+        : Colors.black,
       automaticallyImplyLeading: false,
       centerTitle: false,
       titleSpacing: 0,
