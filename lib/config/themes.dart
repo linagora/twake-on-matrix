@@ -233,40 +233,58 @@ abstract class FluffyThemes {
           overlayColor: MaterialStateProperty.resolveWith<Color?>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return LinagoraSysColors.material().primary;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().primary
+                  : LinagoraSysColors.material().primaryDark;
               } else {
-                return LinagoraSysColors.material().outline;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().outline
+                  : LinagoraSysColors.material().outlineDark;
               }
             },
           ),
           thumbColor: MaterialStateProperty.resolveWith<Color?>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return LinagoraSysColors.material().onPrimary;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().onPrimary
+                  : LinagoraSysColors.material().onPrimaryDark;
               } else {
-                return LinagoraSysColors.material().outline;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().outline
+                  : LinagoraSysColors.material().outlineDark;
               }
             }
           ),
           trackColor: MaterialStateProperty.resolveWith<Color?>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return LinagoraSysColors.material().primary;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().primary
+                  : LinagoraSysColors.material().primaryDark;
               }
               else {
-                return LinagoraSysColors.material().surface;
+                return brightness == Brightness.light
+                  ? LinagoraSysColors.material().surface
+                  : LinagoraSysColors.material().surfaceDark;
               }
             }
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
           height: 64,
-          backgroundColor: LinagoraSysColors.material().surface,
-          shadowColor: Colors.black.withOpacity(0.15),
+          backgroundColor: brightness == Brightness.light
+            ? LinagoraSysColors.material().surface
+            : LinagoraSysColors.material().surfaceDark,
+          shadowColor: brightness == Brightness.light
+            ? Colors.black.withOpacity(0.15)
+            : Colors.white.withOpacity(0.15),
           elevation: 4.0,
         ),
         navigationRailTheme: NavigationRailThemeData(
-          indicatorColor: LinagoraSysColors.material().secondaryContainer,
+          indicatorColor: brightness == Brightness.light
+            ? LinagoraSysColors.material().secondaryContainer
+            : LinagoraSysColors.material().secondaryContainerDark,
         ),
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: brightness == Brightness.light 

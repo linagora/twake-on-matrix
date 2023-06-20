@@ -439,9 +439,11 @@ class InputBar extends StatelessWidget {
             keyboardType: keyboardType!,
             textInputAction: textInputAction,
             autofocus: autofocus!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
-              color: Colors.black,
+              color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
             ),
             onSubmitted: (text) {
               // fix for library for now
