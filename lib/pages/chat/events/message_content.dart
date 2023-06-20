@@ -304,7 +304,9 @@ class MessageContent extends StatelessWidget {
                         maintainSize: true,
                         maintainAnimation: true,
                         maintainState: true,
-                        child: endOfBubbleWidget,)),
+                        child: endOfBubbleWidget,),
+                    onLinkTap: (url) => UrlLauncher(context, url).launchUrl(),
+                  ),
                 );
               },
             );
