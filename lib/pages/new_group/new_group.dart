@@ -41,7 +41,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   final groupNameFocusNode = FocusNode();
 
   static const maxScrollOffsetAllowedInPixel = 380.0;
-  final int maxFileSizeDefault = 5 * 1024 * 1024;
+  final int maxFileSizeDefaultInMB = 5 * 1024 * 1024;
 
   String groupName = "";
   bool isGroupPublic = false;

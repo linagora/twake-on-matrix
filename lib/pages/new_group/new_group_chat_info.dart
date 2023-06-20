@@ -50,7 +50,7 @@ class NewGroupChatInfo extends StatelessWidget {
                       future: Matrix.of(context).client.getConfig(),
                       builder: (context, snapshot) {
                         final maxFileSize =
-                            snapshot.data?.mUploadSize ?? newGroupController.maxFileSizeDefault;
+                            snapshot.data?.mUploadSize ?? newGroupController.maxFileSizeDefaultInMB;
                         return Column(
                           children: [
                             Padding(
