@@ -7,21 +7,24 @@ part 'tom_contact.g.dart';
 class TomContact with EquatableMixin {
 
   @JsonKey(name: "uid")
-  final String mxid;
+  final String uid;
 
   final String? mail;
 
   @JsonKey(name: "mobile")
   final String? phoneNumber;
 
+  final String? address;
+
   const TomContact(
-    this.mxid, {
+    this.uid, {
     this.mail,
     this.phoneNumber,
+    this.address,
   });
 
   @override
-  List<Object?> get props => [mxid, mail, phoneNumber];
+  List<Object?> get props => [uid, mail, phoneNumber, address];
 
   factory TomContact.fromJson(Map<String, dynamic> json) 
     => _$TomContactFromJson(json);

@@ -3,19 +3,18 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:vrouter/vrouter.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ExpansionList extends StatefulWidget {
 
@@ -119,8 +118,8 @@ class _ExpansionList extends State<ExpansionList> {
                   await showFutureLoadingDialog(
                     context: context,
                     future: () async {
-                      if (contact.displayName != null && contact.displayName!.isNotEmpty) {
-                        final roomId = await Matrix.of(context).client.startDirectChat(contact.displayName!.toTomMatrixId());
+                      if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
+                        final roomId = await Matrix.of(context).client.startDirectChat(contact.matrixId!);
                         VRouter.of(context).toSegments(['rooms', roomId]);
                       }
                     },
