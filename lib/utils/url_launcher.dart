@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:punycode/punycode.dart';
@@ -20,7 +23,9 @@ class UrlLauncher {
   final String? url;
   final BuildContext context;
 
-  const UrlLauncher(this.context, this.url);
+  UrlLauncher(this.context, this.url);
+
+  final ChromeSafariBrowser browser = ChromeSafariBrowser();
 
   void launchUrl() {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
@@ -203,6 +208,21 @@ class UrlLauncher {
           outerContext: context,
         ),
       );
+    }
+  }
+
+  void openUrlInAppBrowser() async {
+    if (url != null) {
+      if (Platform.isAndroid) {
+        await browser.open(
+          url: Uri.parse(url!),
+          options: ChromeSafariBrowserClassOptions(
+            android: AndroidChromeCustomTabsOptions(
+              shareState: CustomTabsShareState.SHARE_STATE_ON),
+            ios: IOSSafariOptions(barCollapsingEnabled: true)));
+      } else {
+        launchUrlString(url!);
+      }
     }
   }
 }

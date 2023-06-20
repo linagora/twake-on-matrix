@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -442,7 +443,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
             cancelLabel: L10n.of(context)!.doNotShowAgain,
           );
           if (result == OkCancelResult.ok && link != null) {
-            launchUrlString(link.toString());
+            UrlLauncher(context, link.toString()).openUrlInAppBrowser();
           }
           if (result == OkCancelResult.cancel) {
             await store.setItemBool(SettingKeys.showNoGoogle, true);
