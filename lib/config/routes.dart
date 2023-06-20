@@ -198,8 +198,8 @@ class AppRoutes {
                   buildTransition: _fadeTransition,
                   stackedRoutes: _chatDetailsRoutes,
                 ),
-                VWidgetWithDependency(
-                  di: ContactDI(),
+                VWidgetWithDependencies(
+                  di: [ContactDI()],
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,
