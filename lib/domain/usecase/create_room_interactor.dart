@@ -27,8 +27,7 @@ class CreateRoomInteractor {
         yield Right(CreateRoomSuccess(roomId: roomId));
 
         if (withAvatarUpload) {
-          final Stream<Either<Failure, Success>> setRoomAvatarStream = setRoomAvatarInteractor.execute(matrixClient, roomId, newRoomInformations.avatar);
-          yield* setRoomAvatarStream;
+          yield* setRoomAvatarInteractor.execute(matrixClient, roomId, newRoomInformations.avatar);
         }
         yield Right(CreateRoomEndActionSuccess(roomId: roomId));
       }

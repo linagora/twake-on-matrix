@@ -2642,7 +2642,6 @@
     "captionForImagesIsNotSupportYet": "Caption for images is not support yet.",
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
     "changeGroupAvatar": "Change the group avatar",
-    "changeGroupAvatar": "Change the group avatar",
     "roomAvatarMaxFileSize": "The avatar size is too large",
     "@roomAvatarMaxFileSize": {},
     "roomAvatarMaxFileSizeLong": "The avatar size must be less than {max}",
