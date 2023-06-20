@@ -1,7 +1,9 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -10,9 +12,6 @@ import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import '../key_verification/key_verification_dialog.dart';
 
 class BootstrapDialog extends StatefulWidget {
@@ -98,9 +97,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
   Widget build(BuildContext context) {
     _wipe ??= widget.wipe;
     final buttons = <AdaptiveFlatButton>[];
-    Widget body = PlatformInfos.isCupertinoStyle
-        ? const CupertinoActivityIndicator()
-        : const LinearProgressIndicator();
+    Widget body = const CupertinoActivityIndicator();
     titleText = L10n.of(context)!.loadingPleaseWait;
 
     if (bootstrap.newSsssKey?.recoveryKey != null &&
@@ -443,14 +440,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     }
 
     final title = Text(titleText!);
-    if (PlatformInfos.isCupertinoStyle) {
-      return CupertinoAlertDialog(
-        title: title,
-        content: body,
-        actions: buttons,
-      );
-    }
-    return AlertDialog(
+    return CupertinoAlertDialog(
       title: title,
       content: body,
       actions: buttons,
