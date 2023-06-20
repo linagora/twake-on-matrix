@@ -26,6 +26,12 @@ class CreateRoomController {
           },
         );
       },
+      onDone: () {
+        Logs().d('NewGroupController::createRoom() - done');
+      },
+      onError: (error) {
+        Logs().e('NewGroupController::createRoom() - error: $error');
+      },
     );
   }
 }
