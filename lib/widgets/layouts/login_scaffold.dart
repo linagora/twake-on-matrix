@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:flutter/material.dart';
 
 class LoginScaffold extends StatelessWidget {
   final Widget body;
@@ -36,11 +35,8 @@ class LoginScaffold extends StatelessWidget {
     );
     if (isMobileMode) return scaffold;
     return Container(
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/login_wallpaper.png'),
-          fit: BoxFit.cover,
-        ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onBackground,
       ),
       child: Center(
         child: Padding(
