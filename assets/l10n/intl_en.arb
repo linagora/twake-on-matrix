@@ -2608,7 +2608,7 @@
             "max": {}
         }
     },
-    "makeThisGroupPrivate": "Make this group private",
+    "makeThisGroupPublic": "Make this group public",
     "groupPrivateDescription": "This group will only be visible to those who are invited. From the group settings, you can change this at any time.",
     "enableE2EEncryption": "Enable end-to-end encryption",
     "owner": "Owner",

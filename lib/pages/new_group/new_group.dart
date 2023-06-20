@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
@@ -27,14 +28,19 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   final fetchContactsController = FetchContactsController();
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
+  final groupchatInfoScrollController = ScrollController();
 
   final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
   final haveSelectedContactsNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
   final isEnableEEEncryptionNotifier = ValueNotifier(true);
 
+  final groupNameFocusNode = FocusNode();
+
   String groupName = "";
-  bool isGroupPrivate = false;
+  bool isGroupPublic = false;
+
+  static const maxScrollOffsetAllowedInPixel = 380.0;
 
   @override
   void initState() {
@@ -45,6 +51,13 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     listenSearchContacts();
     listenGroupNameChanged();
     fetchContactsController.fetchCurrentTomContacts();
+    groupchatInfoScrollController.addListener(() {
+      if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
+        groupchatInfoScrollController.jumpTo(
+          maxScrollOffsetAllowedInPixel, 
+        );
+      }
+    });
   }
 
   @override
@@ -114,16 +127,32 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   }
 
   void moveToNewGroupInfoScreen() async {
-    await showDialog(
-      useSafeArea: false,
+    groupNameFocusNode.unfocus();
+    await showGeneralDialog(
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const SizedBox.shrink();
+      },
       context: context, 
       useRootNavigator: false,
-      builder: (context) {
-        return NewGroupChatInfo(
-          contactsList: getAllContactsGroupChat(),
-          newGroupController: this,
+      barrierColor: Colors.white,
+      transitionBuilder: (context, animation1, animation2, widget) {
+        return AppRoutes.rightToLeftTransition(
+          animation1,
+          animation2,
+          NewGroupChatInfo(
+            contactsList: getAllContactsGroupChat(),
+            newGroupController: this,
+          )
         );
       },
+    );
+  }
+
+  void autoScrollWhenExpandParticipants() {
+    groupchatInfoScrollController.animateTo(
+      MediaQuery.of(context).size.height, 
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeIn,
     );
   }
 

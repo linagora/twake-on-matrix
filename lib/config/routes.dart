@@ -82,17 +82,17 @@ class AppRoutes {
               VWidget(
                 path: '/stories/create',
                 widget: const AddStoryPage(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
               ),
               VWidget(
                 path: '/stories/:roomid',
                 widget: const StoryPage(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
                 stackedRoutes: [
                   VWidget(
                     path: 'share',
                     widget: const AddStoryPage(),
-                    buildTransition: _rightToLeftTransition,
+                    buildTransition: rightToLeftTransition,
                   ),
                 ],
               ),
@@ -100,29 +100,29 @@ class AppRoutes {
                 path: '/spaces/:roomid',
                 widget: const ChatDetails(),
                 stackedRoutes: _chatDetailsRoutes,
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
               ),
               VWidgetWithDependency(
                 path: '/rooms/:roomid',
                 di: SendImageDi(),
                 widget: const Chat(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
                 stackedRoutes: [
                   VWidget(
                     path: 'encryption',
                     widget: const ChatEncryptionSettings(),
-                    buildTransition: _rightToLeftTransition,
+                    buildTransition: rightToLeftTransition,
                   ),
                   VWidget(
                     path: 'invite',
                     widget: const InvitationSelection(),
-                    buildTransition: _rightToLeftTransition,
+                    buildTransition: rightToLeftTransition,
                   ),
                   VWidget(
                     path: 'details',
                     widget: const ChatDetails(),
                     stackedRoutes: _chatDetailsRoutes,
-                    buildTransition: _rightToLeftTransition,
+                    buildTransition: rightToLeftTransition,
                   ),
                 ],
               ),
@@ -135,12 +135,12 @@ class AppRoutes {
               VWidget(
                 path: '/archive',
                 widget: const Archive(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
                 stackedRoutes: [
                   VWidget(
                     path: ':roomid',
                     widget: const Chat(),
-                    buildTransition: _rightToLeftTransition,
+                    buildTransition: rightToLeftTransition,
                   ),
                 ],
               ),
@@ -148,13 +148,13 @@ class AppRoutes {
                 di: ContactDI(),
                 path: '/newprivatechat',
                 widget: const NewPrivateChat(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
               ),
               VWidgetWithDependency(
                 di: ContactDI(),
                 path: '/newgroup',
                 widget: const NewGroup(),
-                buildTransition: _rightToLeftTransition,
+                buildTransition: rightToLeftTransition,
               ),
             ],
           )
@@ -361,27 +361,27 @@ class AppRoutes {
         VWidget(
           path: 'notifications',
           widget: const SettingsNotifications(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
         ),
         VWidget(
           path: 'style',
           widget: const SettingsStyle(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
         ),
         VWidget(
           path: 'devices',
           widget: const DevicesSettings(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
         ),
         VWidget(
           path: 'chat',
           widget: const SettingsChat(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
           stackedRoutes: [
             VWidget(
               path: 'emotes',
               widget: const EmotesSettings(),
-              buildTransition: _rightToLeftTransition,
+              buildTransition: rightToLeftTransition,
             ),
           ],
         ),
@@ -417,29 +417,29 @@ class AppRoutes {
         VWidget(
           path: 'security',
           widget: const SettingsSecurity(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
           stackedRoutes: [
             VWidget(
               path: 'stories',
               widget: const SettingsStories(),
-              buildTransition: _rightToLeftTransition,
+              buildTransition: rightToLeftTransition,
             ),
             VWidget(
               path: 'ignorelist',
               widget: const SettingsIgnoreList(),
-              buildTransition: _rightToLeftTransition,
+              buildTransition: rightToLeftTransition,
             ),
             VWidget(
               path: '3pid',
               widget: const Settings3Pid(),
-              buildTransition: _rightToLeftTransition,
+              buildTransition: rightToLeftTransition,
             ),
           ],
         ),
         VWidget(
           path: 'logs',
           widget: const LogViewer(),
-          buildTransition: _rightToLeftTransition,
+          buildTransition: rightToLeftTransition,
         ),
       ];
 
@@ -461,11 +461,11 @@ class AppRoutes {
     return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.leftToRight);
   }
 
-  SlideTransition _rightToLeftTransition(animation, secondaryAnimation, child) {
+  static SlideTransition rightToLeftTransition(animation, secondaryAnimation, child) {
     return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.rightToLeft);
   }
 
-  SlideTransition _buildSlideTransition(
+  static SlideTransition _buildSlideTransition(
     Animation animation, 
     Animation secondaryAnimation, 
     Widget child, 

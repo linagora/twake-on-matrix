@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -9,9 +10,12 @@ class ExpansionParticipantsList extends StatefulWidget {
 
   final Set<PresentationContact> contactsList;
 
+  final NewGroupController newGroupController;
+
   const ExpansionParticipantsList({
     super.key,
     required this.contactsList,
+    required this.newGroupController,
   });
 
   @override
@@ -19,11 +23,12 @@ class ExpansionParticipantsList extends StatefulWidget {
 }
 
 class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
-  bool isExpanded = true;
+  bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
           borderRadius: BorderRadius.circular(16.0),
@@ -64,6 +69,8 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
         isExpanded
         ? Expanded(
           child: SingleChildScrollView(
+            key: const ValueKey("participants list"),
+            physics: const BouncingScrollPhysics(),
             child: Column(
               children: widget.contactsList
                 .map(
@@ -82,6 +89,9 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
   void toggleExpansionList() {
     setState(() {
       isExpanded = !isExpanded;
+      if (isExpanded) {
+        widget.newGroupController.autoScrollWhenExpandParticipants();
+      }
     });
   }
 }
