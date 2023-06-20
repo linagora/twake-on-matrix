@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -109,7 +110,7 @@ class HomeserverPickerView extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => launchUrlString(AppConfig.privacyUrl),
+                    onPressed: () => UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
                     child: Text(L10n.of(context)!.privacy),
                   ),
                 ],

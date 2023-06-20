@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
@@ -39,26 +40,25 @@ class HomeserverBottomSheet extends StatelessWidget {
               title: Text(homeserverSoftware),
             ),
           ListTile(
-            onTap: () =>
-                launchUrlString(homeserver.homeserver.baseUrl.toString()),
+            onTap: () => UrlLauncher(context, homeserver.homeserver.baseUrl.toString()).openUrlInAppBrowser(),
             leading: const Icon(Icons.link_outlined),
             title: Text(homeserver.homeserver.baseUrl.toString()),
           ),
           if (registration != null)
             ListTile(
-              onTap: () => launchUrlString(registration.toString()),
+              onTap: () => UrlLauncher(context, registration.toString()).openUrlInAppBrowser(),
               leading: const Icon(Icons.person_add_outlined),
               title: Text(registration.toString()),
             ),
           if (rules != null)
             ListTile(
-              onTap: () => launchUrlString(rules.toString()),
+              onTap: () => UrlLauncher(context, rules.toString()).openUrlInAppBrowser(),
               leading: const Icon(Icons.visibility_outlined),
               title: Text(rules.toString()),
             ),
           if (privacy != null)
             ListTile(
-              onTap: () => launchUrlString(privacy.toString()),
+              onTap: () => UrlLauncher(context, privacy.toString()).openUrlInAppBrowser(),
               leading: const Icon(Icons.shield_outlined),
               title: Text(privacy.toString()),
             ),

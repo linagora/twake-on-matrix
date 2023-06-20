@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -50,11 +51,11 @@ abstract class PlatformInfos {
       children: [
         Text('Version: $version'),
         OutlinedButton(
-          onPressed: () => launchUrlString(AppConfig.sourceCodeUrl),
+          onPressed: () => UrlLauncher(context, AppConfig.sourceCodeUrl).openUrlInAppBrowser(),
           child: Text(L10n.of(context)!.sourceCode),
         ),
         OutlinedButton(
-          onPressed: () => launchUrlString(AppConfig.emojiFontUrl),
+          onPressed: () => UrlLauncher(context, AppConfig.emojiFontUrl).openUrlInAppBrowser(),
           child: const Text(AppConfig.emojiFontName),
         ),
         OutlinedButton(

@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -32,7 +33,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           title: Text(L10n.of(context)!.endToEndEncryption),
           actions: [
             TextButton(
-              onPressed: () => launchUrlString(AppConfig.encryptionTutorial),
+              onPressed: () => UrlLauncher(context, AppConfig.encryptionTutorial).openUrlInAppBrowser(),
               child: Text(L10n.of(context)!.help),
             ),
           ],
