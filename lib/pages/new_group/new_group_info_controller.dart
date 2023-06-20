@@ -23,6 +23,7 @@ extension NewGroupInfoController on NewGroupController {
   void createNewRoomAction() async {
     final client = Matrix.of(context).client;
     createRoomStreamController.createRoom(
+        context,
         client,
         NewRoomRequest(
           groupName: groupName,

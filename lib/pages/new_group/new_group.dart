@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/domain/app_state/room/create_room_end_action_success.dart';
-import 'package:fluffychat/domain/app_state/room/create_room_success.dart';
 import 'package:fluffychat/pages/new_private_chat/create_room_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
@@ -19,7 +16,6 @@ import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({Key? key}) : super(key: key);
@@ -63,11 +59,10 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     groupchatInfoScrollController.addListener(() {
       if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
         groupchatInfoScrollController.jumpTo(
-          maxScrollOffsetAllowedInPixel, 
+          maxScrollOffsetAllowedInPixel,
         );
       }
     });
-    listenCreateRoom();
   }
 
   @override
@@ -89,28 +84,6 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     fetchContactsController.streamController.stream.listen((event) {
       Logs().d('NewGroupController::fetchContacts() - event: $event');
       contactStreamController.add(event);
-    });
-  }
-
-  void listenCreateRoom() {
-    createRoomStreamController.streamController.stream.listen((event) {
-      Logs().d('NewGroupController::createRoom() - event: $event');
-      event.fold(
-        (failure) => {
-          Logs().e('NewGroupController::createRoom() - failure: $failure'),
-          createRoomStreamController.dispose(),
-        },
-        (Success success) {
-          Logs().d('NewGroupController::createRoom() - success: $success');
-          if (success is CreateRoomSuccess) {
-            VRouter.of(context).toSegments(['rooms', success.roomId]);
-          }
-
-          if (success is CreateRoomEndActionSuccess) {
-            createRoomStreamController.dispose();
-          }
-        },
-      );
     });
   }
 
