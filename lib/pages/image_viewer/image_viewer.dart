@@ -1,17 +1,17 @@
+import 'dart:typed_data';
+import 'package:fluffychat/pages/forward/forward.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import '../../utils/matrix_sdk_extensions/event_extension.dart';
 
 class ImageViewer extends StatefulWidget {
   final Event event;
+  final Uint8List? imageData;
 
-  const ImageViewer(this.event, {Key? key}) : super(key: key);
+  const ImageViewer(this.event, {Key? key, this.imageData}) : super(key: key);
 
   @override
   ImageViewerController createState() => ImageViewerController();
@@ -19,9 +19,14 @@ class ImageViewer extends StatefulWidget {
 
 class ImageViewerController extends State<ImageViewer> {
   /// Forward this image to another room.
-  void forwardAction() {
+  void forwardAction() async {
     Matrix.of(context).shareContent = widget.event.content;
-    VRouter.of(context).to('/rooms');
+    await showDialog(
+      context: context,
+      useSafeArea: false,
+      useRootNavigator: false,
+      builder: (c) => const Forward(),
+    );
   }
 
   /// Save this file with a system call.
@@ -43,5 +48,5 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   @override
-  Widget build(BuildContext context) => ImageViewerView(this);
+  Widget build(BuildContext context) => ImageViewerView(this, imageData: widget.imageData);
 }

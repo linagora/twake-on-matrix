@@ -1,54 +1,45 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {
   final ImageViewerController controller;
+  final Uint8List? imageData;
 
-  const ImageViewerView(this.controller, {Key? key}) : super(key: key);
+  const ImageViewerView(this.controller, {Key? key, this.imageData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
           onPressed: Navigator.of(context).pop,
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onSurface,
           tooltip: L10n.of(context)!.close,
         ),
-        backgroundColor: const Color(0x44000000),
+        surfaceTintColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.reply_outlined),
-            onPressed: controller.forwardAction,
-            color: Colors.white,
-            tooltip: L10n.of(context)!.share,
-          ),
-          if (!PlatformInfos.isIOS)
-            IconButton(
-              icon: const Icon(Icons.download_outlined),
-              onPressed: () => controller.saveFileAction(context),
-              color: Colors.white,
-              tooltip: L10n.of(context)!.downloadFile,
-            ),
           if (PlatformInfos.isMobile)
-            // Use builder context to correctly position the share dialog on iPad
             Builder(
               builder: (context) => IconButton(
                 onPressed: () => controller.shareFileAction(context),
                 tooltip: L10n.of(context)!.share,
-                color: Colors.white,
-                icon: Icon(Icons.adaptive.share_outlined),
+                color: Theme.of(context).colorScheme.onSurface,
+                icon: Icon(Icons.share, color: Theme.of(context).colorScheme.onSurface,),
               ),
-            )
+            ),
+          IconButton(
+            icon: Icon(Icons.shortcut, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: controller.forwardAction,
+            color: Theme.of(context).colorScheme.onSurface,
+            tooltip: L10n.of(context)!.share,
+          ),
         ],
       ),
       body: InteractiveViewer(
@@ -62,7 +53,7 @@ class ImageViewerView extends StatelessWidget {
               event: controller.widget.event,
               fit: BoxFit.contain,
               isThumbnail: false,
-              animated: true,
+              animated: false,
             ),
           ),
         ),
