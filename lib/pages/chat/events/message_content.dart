@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
 import 'package:fluffychat/widgets/twake_link_text.dart';
@@ -32,7 +31,8 @@ class MessageContent extends StatelessWidget {
   final void Function(Event)? onInfoTab;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
-  final Function()? onTapImage;
+  final Function()?  onTapPreview;
+  final Function()?  onTapSelectMode;
 
   const MessageContent(
     this.event, {
@@ -41,7 +41,8 @@ class MessageContent extends StatelessWidget {
     required this.textColor,
     required this.endOfBubbleWidget,
     required this.backgroundColor,
-    this.onTapImage,
+    this.onTapPreview,
+    this.onTapSelectMode
   }) : super(key: key);
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -139,7 +140,8 @@ class MessageContent extends StatelessWidget {
               width: MessageContentStyle.imageBubbleWidth,
               height: MessageContentStyle.imageBubbleHeight,
               fit: BoxFit.cover,
-              onTap: onTapImage,
+              onTapSelectMode: onTapSelectMode,
+              onTapPreview: onTapPreview,
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;

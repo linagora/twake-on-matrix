@@ -276,7 +276,8 @@ class Message extends StatelessWidget {
                                                                 backgroundColor: ownMessage
                                                                   ? Theme.of(context).colorScheme.primaryContainer
                                                                   : Theme.of(context).colorScheme.surface,
-                                                                onTapImage: () => controller.selectMode ? onSelect!(event) : null,
+                                                                onTapSelectMode: () => controller.selectMode ? onSelect!(event) : null,
+                                                                onTapPreview: !controller.selectMode ? () {} : null,
                                                               ),
                                                               if (timelineOverlayMessage)
                                                                 Positioned(

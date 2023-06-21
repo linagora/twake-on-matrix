@@ -26,7 +26,7 @@ class StickerState extends State<Sticker> {
       width: 400,
       height: 400,
       fit: BoxFit.contain,
-      onTap: () {
+      onTapPreview: () {
         setState(() => animated = true);
         showOkAlertDialog(
           context: context,

@@ -1,13 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 
-class ImageBubble extends StatelessWidget {
+class ImageBubble extends StatefulWidget {
   final Event event;
   final bool tapToView;
   final BoxFit fit;
@@ -17,7 +16,8 @@ class ImageBubble extends StatelessWidget {
   final bool animated;
   final double width;
   final double height;
-  final void Function()? onTap;
+  final void Function()? onTapPreview;
+  final void Function()? onTapSelectMode;
 
   const ImageBubble(
     this.event, {
@@ -29,22 +29,31 @@ class ImageBubble extends StatelessWidget {
     this.width = 256,
     this.height = 300,
     this.animated = false,
-    this.onTap,
+    this.onTapSelectMode,
+    this.onTapPreview,
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<ImageBubble> createState() => _ImageBubbleState();
+}
+
+class _ImageBubbleState extends State<ImageBubble> {
+
+  Uint8List? _imageDataCached;
+
   Widget _buildPlaceholder(BuildContext context) {
-    if (event.messageType == MessageTypes.Sticker) {
+    if (widget.event.messageType == MessageTypes.Sticker) {
       return const Center(
         child: CircularProgressIndicator.adaptive(),
       );
     }
     final String blurHashString =
-        event.infoMap['xyz.amorgan.blurhash'] is String
-            ? event.infoMap['xyz.amorgan.blurhash']
+        widget.event.infoMap['xyz.amorgan.blurhash'] is String
+            ? widget.event.infoMap['xyz.amorgan.blurhash']
             : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-    final ratio = event.infoMap['w'] is int && event.infoMap['h'] is int
-        ? event.infoMap['w'] / event.infoMap['h']
+    final ratio = widget.event.infoMap['w'] is int && widget.event.infoMap['h'] is int
+        ? widget.event.infoMap['w'] / widget.event.infoMap['h']
         : 1.0;
     var width = 32;
     var height = 32;
@@ -54,27 +63,33 @@ class ImageBubble extends StatelessWidget {
       width = (height * ratio).round();
     }
     return SizedBox(
-      width: this.width,
-      height: this.height,
+      width: widget.width,
+      height: widget.height,
       child: BlurHash(
         hash: blurHashString,
         decodingWidth: width,
         decodingHeight: height,
-        imageFit: fit,
+        imageFit: widget.fit,
       ),
     );
   }
 
-  void _onTap(BuildContext context) {
-    if (onTap != null) {
-      onTap!();
+  void _onTap(BuildContext context) async {
+    if (widget.onTapPreview != null) {
+      widget.onTapPreview!();
+    } else {
+      widget.onTapSelectMode!();
       return;
     }
-    if (!tapToView) return;
-    showDialog(
-      context: Matrix.of(context).navigatorContext,
+    if (!widget.tapToView) return;
+    await showGeneralDialog(
+      context: context,
       useRootNavigator: false,
-      builder: (_) => ImageViewer(event),
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, animationOne, animationTwo) =>
+        ImageViewer(widget.event, imageData: _imageDataCached)
     );
   }
 
@@ -83,28 +98,31 @@ class ImageBubble extends StatelessWidget {
     return InkWell(
       onTap: () => _onTap(context),
       child: Hero(
-        tag: event.eventId,
+        tag: widget.event.eventId,
         child: AnimatedSwitcher(
           duration: const Duration(seconds: 1),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20)
             ),
-            constraints: maxSize
+            constraints: widget.maxSize
                 ? BoxConstraints(
-                    maxWidth: width,
-                    maxHeight: height,
+                    maxWidth: widget.width,
+                    maxHeight: widget.height,
                   )
                 : null,
             child: MxcImage(
               rounded: true,
-              event: event,
-              width: width,
-              height: height,
-              fit: fit,
-              animated: animated,
-              isThumbnail: thumbnailOnly,
+              event: widget.event,
+              width: widget.width,
+              height: widget.height,
+              fit: widget.fit,
+              animated: widget.animated,
+              isThumbnail: widget.thumbnailOnly,
               placeholder: _buildPlaceholder,
+              callbackImage: (image) {
+                _imageDataCached = image;
+              },
             ),
           ),
         ),
