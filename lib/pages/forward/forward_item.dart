@@ -69,7 +69,7 @@ class ForwardItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     displayName,

@@ -31,8 +31,8 @@ class MessageContent extends StatelessWidget {
   final void Function(Event)? onInfoTab;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
-  final Function()?  onTapPreview;
-  final Function()?  onTapSelectMode;
+  final Function()? onTapPreview;
+  final Function()? onTapSelectMode;
 
   const MessageContent(
     this.event, {
@@ -133,6 +133,7 @@ class MessageContent extends StatelessWidget {
               return SendingImageWidget(
                 sendingImageData: sendingImageData,
                 event: event,
+                onTapPreview: onTapPreview,
               );
             }
             return ImageBubble(
