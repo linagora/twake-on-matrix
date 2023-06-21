@@ -49,119 +49,134 @@ class AppRoutes {
       ];
 
   List<VRouteElement> get _mobileRoutes => [
-        VRouter(routes: [
-          VNester(
-            key: const ValueKey("rooms"),
-            path: '/rooms',
-            widgetBuilder: (child) => HomeScreen(child: child,),
-            buildTransition: _leftToRightTransition,
-            nestedRoutes: [
-              VWidget(
-                path: null, 
-                widget: const ChatList(),
-                buildTransition: _bottomToTopTransition,
-              ),
-              VWidgetWithDependency(
-                path: '/contactsTab', 
-                widget: const ContactsTab(),
-                di: ContactDI(),
-                buildTransition: _bottomToTopTransition,
-              ),
-              VWidget(
-                path: '/stories', 
-                widget: const Scaffold(),
-                buildTransition: _bottomToTopTransition,
-              ),
-            ],
-          ),
-          VPopHandler(
-            onPop: (vRedirector) async {
-              vRedirector.to('/rooms');
-            },
-            stackedRoutes: [
-              VWidget(
-                path: '/stories/create',
-                widget: const AddStoryPage(),
-                buildTransition: rightToLeftTransition,
-              ),
-              VWidget(
-                path: '/stories/:roomid',
-                widget: const StoryPage(),
-                buildTransition: rightToLeftTransition,
+        VRouter(
+          routes: [
+            VPopHandler(
+                onSystemPop: (vRedirector) async {
+                  if (vRedirector.previousVRouterData?.url != '/rooms') {
+                    vRedirector.to('/rooms');
+                  }
+                },
                 stackedRoutes: [
-                  VWidget(
-                    path: 'share',
-                    widget: const AddStoryPage(),
-                    buildTransition: rightToLeftTransition,
-                  ),
-                ],
-              ),
-              VWidget(
-                path: '/spaces/:roomid',
-                widget: const ChatDetails(),
-                stackedRoutes: _chatDetailsRoutes,
-                buildTransition: rightToLeftTransition,
-              ),
-              VWidgetWithDependency(
-                path: '/rooms/:roomid',
-                di: SendImageDi(),
-                widget: const Chat(),
-                buildTransition: rightToLeftTransition,
-                stackedRoutes: [
-                  VWidget(
-                    path: 'encryption',
-                    widget: const ChatEncryptionSettings(),
-                    buildTransition: rightToLeftTransition,
-                  ),
-                  VWidget(
-                    path: 'invite',
-                    widget: const InvitationSelection(),
-                    buildTransition: rightToLeftTransition,
-                  ),
-                  VWidget(
-                    path: 'details',
-                    widget: const ChatDetails(),
-                    stackedRoutes: _chatDetailsRoutes,
-                    buildTransition: rightToLeftTransition,
-                  ),
-                ],
-              ),
-              VWidget(
-                path: '/settings',
-                widget: const Settings(),
-                stackedRoutes: _settingsRoutes,
-                buildTransition: _bottomToTopTransition,
-              ),
-              VWidget(
-                path: '/archive',
-                widget: const Archive(),
-                buildTransition: rightToLeftTransition,
-                stackedRoutes: [
-                  VWidget(
-                    path: ':roomid',
-                    widget: const Chat(),
-                    buildTransition: rightToLeftTransition,
-                  ),
-                ],
-              ),
-              VWidgetWithDependency(
-                di: ContactDI(),
-                path: '/newprivatechat',
-                widget: const NewPrivateChat(),
-                buildTransition: rightToLeftTransition,
-                stackedRoutes: [
-                  VWidget(
-                    path: '/newgroup',
-                    widget: const NewGroup(),
-                    buildTransition: rightToLeftTransition,
-                  ),
-                ]
-              ),
-            ],
-          )
-        ],),
-  ];
-        
+                  VNester(
+                    key: const ValueKey("rooms"),
+                    path: '/rooms',
+                    widgetBuilder: (child) => HomeScreen(
+                      child: child,
+                    ),
+                    buildTransition: _leftToRightTransition,
+                    nestedRoutes: [
+                      VWidget(
+                        path: null,
+                        widget: const ChatList(),
+                        buildTransition: _bottomToTopTransition,
+                      ),
+                      VWidgetWithDependency(
+                        path: '/contactsTab',
+                        widget: const ContactsTab(),
+                        di: ContactDI(),
+                        buildTransition: _bottomToTopTransition,
+                      ),
+                      VWidget(
+                        path: '/stories',
+                        widget: const Scaffold(),
+                        buildTransition: _bottomToTopTransition,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            VPopHandler(
+              onSystemPop: (vRedirector) async {
+                vRedirector.to('/rooms');
+              },
+              onPop: (vRedirector) async {
+                vRedirector.to('/rooms');
+              },
+              stackedRoutes: [
+                VWidget(
+                  path: '/stories/create',
+                  widget: const AddStoryPage(),
+                  buildTransition: rightToLeftTransition,
+                ),
+                VWidget(
+                  path: '/stories/:roomid',
+                  widget: const StoryPage(),
+                  buildTransition: rightToLeftTransition,
+                  stackedRoutes: [
+                    VWidget(
+                      path: 'share',
+                      widget: const AddStoryPage(),
+                      buildTransition: rightToLeftTransition,
+                    ),
+                  ],
+                ),
+                VWidget(
+                  path: '/spaces/:roomid',
+                  widget: const ChatDetails(),
+                  stackedRoutes: _chatDetailsRoutes,
+                  buildTransition: rightToLeftTransition,
+                ),
+                VWidgetWithDependency(
+                  path: '/rooms/:roomid',
+                  di: SendImageDi(),
+                  widget: const Chat(),
+                  buildTransition: rightToLeftTransition,
+                  stackedRoutes: [
+                    VWidget(
+                      path: 'encryption',
+                      widget: const ChatEncryptionSettings(),
+                      buildTransition: rightToLeftTransition,
+                    ),
+                    VWidget(
+                      path: 'invite',
+                      widget: const InvitationSelection(),
+                      buildTransition: rightToLeftTransition,
+                    ),
+                    VWidget(
+                      path: 'details',
+                      widget: const ChatDetails(),
+                      stackedRoutes: _chatDetailsRoutes,
+                      buildTransition: rightToLeftTransition,
+                    ),
+                  ],
+                ),
+                VWidget(
+                  path: '/settings',
+                  widget: const Settings(),
+                  stackedRoutes: _settingsRoutes,
+                  buildTransition: _bottomToTopTransition,
+                ),
+                VWidget(
+                  path: '/archive',
+                  widget: const Archive(),
+                  buildTransition: rightToLeftTransition,
+                  stackedRoutes: [
+                    VWidget(
+                      path: ':roomid',
+                      widget: const Chat(),
+                      buildTransition: rightToLeftTransition,
+                    ),
+                  ],
+                ),
+                VWidgetWithDependency(
+                  di: ContactDI(),
+                  path: '/newprivatechat',
+                  widget: const NewPrivateChat(),
+                  buildTransition: rightToLeftTransition,
+                ),
+                VWidgetWithDependency(
+                  di: ContactDI(),
+                  path: '/newgroup',
+                  widget: const NewGroup(),
+                  buildTransition: rightToLeftTransition,
+                ),
+              ],
+            )
+          ],
+        ),
+      ];
+
   List<VRouteElement> get _tabletRoutes => [
         VNester(
           path: '/rooms',
