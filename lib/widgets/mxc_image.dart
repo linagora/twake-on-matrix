@@ -24,6 +24,8 @@ class MxcImage extends StatefulWidget {
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
   final bool rounded;
+  final Function(Uint8List uint8list)? callbackImage;
+  final Uint8List? imageData;
 
   const MxcImage({
     this.uri,
@@ -40,6 +42,8 @@ class MxcImage extends StatefulWidget {
     this.thumbnailMethod = ThumbnailMethod.scale,
     this.cacheKey,
     this.rounded = false,
+    this.callbackImage,
+    this.imageData,
     Key? key,
   }) : super(key: key);
 
@@ -55,7 +59,11 @@ class _MxcImageState extends State<MxcImage> {
 
   Uint8List? get _imageData {
     final cacheKey = widget.cacheKey;
-    return cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
+    final image = cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
+    if (image != null ) {
+      widget.callbackImage?.call(image);
+    }
+    return image;
   }
 
   set _imageData(Uint8List? data) {
@@ -136,7 +144,12 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   void _tryLoad(_) async {
-    if (_imageData != null){
+    if (widget.imageData != null) {
+      _imageData = widget.imageData;
+      isLoadDone = true;
+      return;
+    }
+    if (_imageData != null) {
       setState(() {
         isLoadDone = true;
       });
@@ -168,36 +181,37 @@ class _MxcImageState extends State<MxcImage> {
 
   @override
   Widget build(BuildContext context) {
-    final data = _imageData;
+    return widget.animated
+      ? AnimatedCrossFade(
+        duration: widget.animationDuration,
+        crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        firstChild: SizedBox(
+          width: widget.width,
+          height: widget.height,
+        ),
+        secondChild:_buildImageWidget())
+      : _buildImageWidget();
+  }
 
-    return AnimatedCrossFade(
-      duration: widget.animationDuration,
-      crossFadeState:
-          isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      firstChild: SizedBox(
-        width: widget.width,
-        height: widget.height,
-      ),
-      secondChild: data == null || data.isEmpty
-          ? placeholder(context)
-          : ClipRRect(
-              borderRadius: widget.rounded
-                  ? BorderRadius.circular(12.0)
-                  : BorderRadius.zero,
-              child: Image.memory(
-                data,
-                width: widget.width,
-                height: widget.height,
-                fit: widget.fit,
-                filterQuality: FilterQuality.medium,
-                errorBuilder: (context, __, ___) {
-                  _isCached = false;
-                  _imageData = null;
-                  WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
-                  return placeholder(context);
-                },
-              ),
-            ),
-    );
+  Widget _buildImageWidget() {
+    final data = _imageData;
+    return data == null || data.isEmpty
+      ? placeholder(context)
+      : ClipRRect(
+          borderRadius: widget.rounded
+            ? BorderRadius.circular(12.0)
+            : BorderRadius.zero,
+          child: Image.memory(
+            data,
+            width: widget.width,
+            height: widget.height,
+            fit: widget.fit,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: (context, __, ___) {
+              _isCached = false;
+              _imageData = null;
+              WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+              return placeholder(context);
+            }));
   }
 }
