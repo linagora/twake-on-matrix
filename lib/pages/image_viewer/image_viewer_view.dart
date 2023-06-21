@@ -54,6 +54,7 @@ class ImageViewerView extends StatelessWidget {
               fit: BoxFit.contain,
               isThumbnail: false,
               animated: false,
+              imageData: imageData,
             ),
           ),
         ),

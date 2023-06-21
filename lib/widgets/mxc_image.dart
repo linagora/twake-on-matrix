@@ -1,10 +1,8 @@
 import 'dart:typed_data';
-
+import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -24,7 +22,8 @@ class MxcImage extends StatefulWidget {
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
   final bool rounded;
-  final Function(Uint8List uint8list)? callbackImage;
+  final void Function()? onTapPreview;
+  final void Function()? onTapSelectMode;
   final Uint8List? imageData;
 
   const MxcImage({
@@ -42,7 +41,8 @@ class MxcImage extends StatefulWidget {
     this.thumbnailMethod = ThumbnailMethod.scale,
     this.cacheKey,
     this.rounded = false,
-    this.callbackImage,
+    this.onTapPreview,
+    this.onTapSelectMode,
     this.imageData,
     Key? key,
   }) : super(key: key);
@@ -60,9 +60,6 @@ class _MxcImageState extends State<MxcImage> {
   Uint8List? get _imageData {
     final cacheKey = widget.cacheKey;
     final image = cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
-    if (image != null ) {
-      widget.callbackImage?.call(image);
-    }
     return image;
   }
 
@@ -144,11 +141,7 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   void _tryLoad(_) async {
-    if (widget.imageData != null) {
-      _imageData = widget.imageData;
-      isLoadDone = true;
-      return;
-    }
+    _imageData = widget.imageData;
     if (_imageData != null) {
       setState(() {
         isLoadDone = true;
@@ -167,6 +160,24 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
+  void _onTap(BuildContext context) async {
+    if (widget.onTapPreview != null) {
+      widget.onTapPreview!();
+      await showGeneralDialog(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: true,
+        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        transitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, animationOne, animationTwo) =>
+          ImageViewer(widget.event!, imageData: _imageData)
+      );
+    } else {
+      widget.onTapSelectMode!();
+      return;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -181,16 +192,19 @@ class _MxcImageState extends State<MxcImage> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.animated
-      ? AnimatedCrossFade(
-        duration: widget.animationDuration,
-        crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-        firstChild: SizedBox(
-          width: widget.width,
-          height: widget.height,
-        ),
-        secondChild:_buildImageWidget())
-      : _buildImageWidget();
+    return InkWell(
+      onTap: () => _onTap(context),
+      child: widget.animated
+        ? AnimatedCrossFade(
+          duration: widget.animationDuration,
+          crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: SizedBox(
+            width: widget.width,
+            height: widget.height,
+          ),
+          secondChild:_buildImageWidget())
+        : _buildImageWidget(),
+    );
   }
 
   Widget _buildImageWidget() {
