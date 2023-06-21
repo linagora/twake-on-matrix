@@ -1,5 +1,8 @@
-import 'dart:io';
 
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/room/create_room_loading.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
@@ -13,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
-
 
 class NewGroupChatInfo extends StatelessWidget {
 
@@ -101,9 +103,29 @@ class NewGroupChatInfo extends StatelessWidget {
           }
           return child!;
         },
-        child: TwakeFloatingActionButton(
-          icon: Icons.done,
-          onTap: () => newGroupController.createNewRoomAction(),
+        child: ValueListenableBuilder<Either<Failure, Success>?>(
+          valueListenable: newGroupController.createRoomController.createRoomStateNotifier,
+          builder: (context, value, child) {
+            if (value == null) {
+              return child!;
+            } else {
+              return value.fold(
+                (failure) => child!,
+                (success) {
+                  if (success is CreateRoomLoading) {
+                    return const TwakeFloatingActionButton(
+                      customIcon: CircularProgressIndicator()
+                    );
+                  } else {
+                    return child!;
+                  }
+                });
+            }
+          },
+          child: TwakeFloatingActionButton(
+            icon: Icons.done,
+            onTap: () => newGroupController.createNewRoomAction(),
+          ),
         ),
       ),
     );

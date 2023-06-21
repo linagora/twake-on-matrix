@@ -6,6 +6,7 @@ class TwakeFloatingActionButton extends StatelessWidget {
   final Function()? onTap;
 
   final IconData? icon;
+  final Widget? customIcon;
 
   final String? imagePath;
 
@@ -14,6 +15,7 @@ class TwakeFloatingActionButton extends StatelessWidget {
     this.onTap, 
     this.icon, 
     this.imagePath,
+    this.customIcon,
   });
 
   @override
@@ -46,7 +48,9 @@ class TwakeFloatingActionButton extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: icon != null 
               ? Icon(icon, color: Theme.of(context).colorScheme.onPrimaryContainer,)
-              : imagePath != null ? SvgPicture.asset(imagePath!) : null,
+              : customIcon != null
+                  ? customIcon!
+                  : imagePath != null ? SvgPicture.asset(imagePath!) : null,
           ),
         ),
       ),

@@ -9,10 +9,9 @@ class SetRoomAvatarInteractor {
   Stream<Either<Failure, Success>> execute(Client matrixClient, String roomId, MatrixFile? newAvatar) async* {
     try {
       final setAvatarEventId = await matrixClient.getRoomById(roomId)!.setAvatar(newAvatar);
-
-      yield Right(SetRoomAvatarSuccess(roomAvatarEventId: setAvatarEventId));
+      yield Right(SetRoomAvatarSuccess(roomId: roomId, roomAvatarEventId: setAvatarEventId));
     } catch (exception) {
-      yield Left(SetRoomAvatarFailed(exception: exception));
+      yield Left(SetRoomAvatarFailed(roomId: roomId, exception: exception));
     }
   }
 }

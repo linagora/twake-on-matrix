@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/pages/new_private_chat/create_room_controller.dart';
+import 'package:fluffychat/pages/new_group/create_room_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -30,7 +30,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
   final groupchatInfoScrollController = ScrollController();
-  final createRoomStreamController = CreateRoomController();
+  final createRoomController = CreateRoomController();
 
   final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
   final haveSelectedContactsNotifier = ValueNotifier(false);
@@ -67,6 +67,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
 
   @override
   void dispose() {
+    Logs().d('NewGroupController dispose');
     super.dispose();
     contactStreamController.close();
     searchContactsController.dispose();
@@ -78,6 +79,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     isEnableEEEncryptionNotifier.dispose();
     avatarNotifier.dispose();
     haveGroupNameNotifier.dispose();
+    createRoomController.dispose();
   }
 
   void listenContactsStartList() {
@@ -150,7 +152,9 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
           )
         );
       },
-    );
+    ).whenComplete(() {
+      Logs().d('NewGroupController::moveToNewGroupInfoScreen whenComplete');
+    });
   }
 
   void autoScrollWhenExpandParticipants() {
