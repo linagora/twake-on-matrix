@@ -18,6 +18,9 @@ class ImageViewer extends StatefulWidget {
 }
 
 class ImageViewerController extends State<ImageViewer> {
+
+  final ValueNotifier<bool> showAppbarPreview = ValueNotifier(false);
+
   /// Forward this image to another room.
   void forwardAction() async {
     Matrix.of(context).shareContent = widget.event.content;
@@ -27,6 +30,10 @@ class ImageViewerController extends State<ImageViewer> {
       useRootNavigator: false,
       builder: (c) => const Forward(),
     );
+  }
+
+  void toggleAppbarPreview() {
+    showAppbarPreview.value = !showAppbarPreview.value;
   }
 
   /// Save this file with a system call.
