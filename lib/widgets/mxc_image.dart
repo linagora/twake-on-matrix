@@ -25,6 +25,7 @@ class MxcImage extends StatefulWidget {
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final Uint8List? imageData;
+  final bool isPreview;
 
   const MxcImage({
     this.uri,
@@ -44,6 +45,7 @@ class MxcImage extends StatefulWidget {
     this.onTapPreview,
     this.onTapSelectMode,
     this.imageData,
+    this.isPreview = false,
     Key? key,
   }) : super(key: key);
 
@@ -172,8 +174,10 @@ class _MxcImageState extends State<MxcImage> {
         pageBuilder: (_, animationOne, animationTwo) =>
           ImageViewer(widget.event!, imageData: _imageData)
       );
-    } else {
+    } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
+      return;
+    } else {
       return;
     }
   }
@@ -193,7 +197,7 @@ class _MxcImageState extends State<MxcImage> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _onTap(context),
+      onTap: widget.isPreview ? null : () => _onTap(context),
       child: widget.animated
         ? AnimatedCrossFade(
           duration: widget.animationDuration,
