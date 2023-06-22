@@ -236,14 +236,18 @@ class ChatListItem extends StatelessWidget {
                 ],
                 Expanded(
                   child: typingText.isNotEmpty
-                      ? Column(children: [typingTextWidget(typingText, context), const Spacer()])
+                      ? Column(
+                        children: [
+                          Expanded(child: typingTextWidget(typingText, context)), 
+                          const Spacer(),
+                        ])
                       : (isGroup
                           ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                lastSenderWidget(isGroup, unread),
+                                Flexible(child: lastSenderWidget(isGroup, unread)),
                                 const SizedBox(height: 2),
-                                textContentWidget(context, isGroup, unread)
+                                Flexible(child: textContentWidget(context, isGroup, unread))
                               ],
                             )
                           : textContentWidget(context, isGroup, unread)),
