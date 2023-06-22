@@ -15,6 +15,7 @@ import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_profiles_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -32,7 +33,6 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vrouter/vrouter.dart';
 
 import '../config/app_config.dart';
@@ -85,6 +85,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool? loginRegistrationSupported;
 
   BackgroundPush? backgroundPush;
+
+  MatrixProfilesService profilesService = MatrixProfilesService();
 
   Client get client {
     if (widget.clients.isEmpty) {
@@ -243,6 +245,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
+  final onPresenceChanged = <String, StreamSubscription>{};
+  final onRoomState = <String, StreamSubscription>{};
+
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
 
@@ -382,6 +387,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
             .listen(showLocalNotification);
       });
     }
+
+    onPresenceChanged[name] ??= c.onPresenceChanged.stream.listen((event) => profilesService.presenceEventHandler(name, event));
+    onRoomState[name] ??= c.onRoomState.stream.listen((event) => profilesService.roomStateHandler);
   }
 
   void _cancelSubs(String name) {
@@ -393,6 +401,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onLoginStateChanged.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
+    onPresenceChanged[name]?.cancel();
+    onPresenceChanged.remove(name);
+    onRoomState[name]?.cancel();
+    onRoomState.remove(name);
   }
 
   void initMatrix() {
@@ -453,6 +465,14 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
 
     createVoipPlugin();
+  }
+
+  void initProfilesService() {
+    profilesService.init(widget.clients);
+  }
+
+  void clearProfilesService() {
+    profilesService.clearProfileCache();
   }
 
   void createVoipPlugin() async {
@@ -606,6 +626,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     backgroundPush?.onRoomSync?.cancel();
 
     linuxNotifications?.close();
+    clearProfilesService();
 
     super.dispose();
   }
