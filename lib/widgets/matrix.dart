@@ -245,8 +245,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
-  final onPresenceChanged = <String, StreamSubscription>{};
-  final onRoomState = <String, StreamSubscription>{};
+  final onSync = <String, StreamSubscription>{};
+  // final onRoomState = <String, StreamSubscription>{};
 
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
@@ -388,8 +388,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       });
     }
 
-    onPresenceChanged[name] ??= c.onPresenceChanged.stream.listen((event) => profilesService.presenceEventHandler(name, event));
-    onRoomState[name] ??= c.onRoomState.stream.listen((event) => profilesService.roomStateHandler);
+    onSync[name] ??= c.onSync.stream.listen((event) => profilesService.syncEventHandler(name, event));
   }
 
   void _cancelSubs(String name) {
@@ -401,10 +400,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onLoginStateChanged.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
-    onPresenceChanged[name]?.cancel();
-    onPresenceChanged.remove(name);
-    onRoomState[name]?.cancel();
-    onRoomState.remove(name);
+    onSync[name]?.cancel();
+    onSync.remove(name);
   }
 
   void initMatrix() {

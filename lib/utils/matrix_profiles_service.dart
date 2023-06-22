@@ -31,17 +31,18 @@ class MatrixProfilesService {
     return _profileCache.keys.firstWhere((element) => element.clientName == clientName);
   }
 
-  void presenceEventHandler(String clientName, CachedPresence event) async {
-    Logs().v('MatrixProfilesService::presenceEventHandler():event: ${event.toString()}');
+  void syncEventHandler(String clientName, SyncUpdate update) async {
+    Logs().v('MatrixProfilesService::presenceEventHandler():event: ${update.toString()}');
     final client = _getClientByName(clientName);
-    if (_profileCache[client]?.userId == event.userid) {
-      _profileCache[client] =
-          await client.getProfileFromUserId(event.userid, cache: false, getFromRooms: false);
-    }
-  }
 
-  void roomStateHandler(Event event) {
-    Logs().v('MatrixProfilesService::roomStateHandler():event: ${event.toString()}');
+    // TODO : check if active user
+    if (update.hasPresenceUpdate) {
+      _profileCache[client] = await client.fetchOwnProfile();
+    }
+
+    if (update.hasRoomUpdate) {
+      _profileCache[client] = await client.fetchOwnProfile();
+    }
   }
 
   void clearProfileCache() {
