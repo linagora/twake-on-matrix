@@ -117,6 +117,7 @@ dependencies:
   photo_manager: ^2.6.0
   flutter_inappwebview: ^5.7.2+3
   tuple: ^2.0.2
+  lottie: ^2.3.2
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
