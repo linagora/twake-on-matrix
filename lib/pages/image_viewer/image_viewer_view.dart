@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {
@@ -15,63 +16,73 @@ class ImageViewerView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBarPreview(),
-      body: GestureDetector(
-        onTap: () {},
-        onDoubleTap: () => controller.toggleAppbarPreview(),
-        child: InteractiveViewer(
-          minScale: 1.0,
-          maxScale: 10.0,
-          onInteractionEnd: controller.onInteractionEnds,
-          child: Center(
-            child: Hero(
-              tag: controller.widget.event.eventId,
-              child: MxcImage(
-                event: controller.widget.event,
-                fit: BoxFit.contain,
-                isThumbnail: false,
-                animated: false,
-                imageData: imageData,
-                isPreview: true,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {},
+            onDoubleTap: () => controller.toggleAppbarPreview(),
+            child: InteractiveViewer(
+              minScale: 1.0,
+              maxScale: 10.0,
+              onInteractionEnd: controller.onInteractionEnds,
+              child: Center(
+                child: Hero(
+                  tag: controller.widget.event.eventId,
+                  child: MxcImage(
+                    event: controller.widget.event,
+                    fit: BoxFit.contain,
+                    isThumbnail: false,
+                    animated: false,
+                    imageData: imageData,
+                    isPreview: true,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+          _buildAppBarPreview(),
+        ],
       ),
     );
   }
 
-  PreferredSize _buildAppBarPreview() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(64),
+  Widget _buildAppBarPreview() {
+    return Container(
+      color: LinagoraSysColors.material().onTertiaryContainer.withOpacity(0.5),
+      padding: const EdgeInsets.only(top: 56),
       child: ValueListenableBuilder<bool>(
         valueListenable: controller.showAppbarPreview,
         builder: (context, showAppbar, _) {
           if (showAppbar) {
-            return AppBar(
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
-                onPressed: Navigator.of(context).pop,
-                color: Theme.of(context).colorScheme.onSurface,
-                tooltip: L10n.of(context)!.close,
-              ),
-              surfaceTintColor: Colors.transparent,
-              actions: [
-                if (PlatformInfos.isMobile)
-                  Builder(
-                    builder: (context) => IconButton(
-                      onPressed: () => controller.shareFileAction(context),
-                      tooltip: L10n.of(context)!.share,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      icon: Icon(Icons.share, color: Theme.of(context).colorScheme.onSurface,),
-                    ),
-                  ),
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 IconButton(
-                  icon: Icon(Icons.shortcut, color: Theme.of(context).colorScheme.onSurface),
-                  onPressed: controller.forwardAction,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  tooltip: L10n.of(context)!.share,
+                  icon: Icon(Icons.close, color: LinagoraSysColors.material().onPrimary),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  color: LinagoraSysColors.material().onPrimary,
+                  tooltip: L10n.of(context)!.close,
+                ),
+                Row(
+                  children: [
+                    if (PlatformInfos.isMobile)
+                      Builder(
+                        builder: (context) => IconButton(
+                          onPressed: () => controller.shareFileAction(context),
+                          tooltip: L10n.of(context)!.share,
+                          color: LinagoraSysColors.material().onPrimary,
+                          icon: Icon(Icons.share, color: LinagoraSysColors.material().onPrimary)
+                        ),
+                      ),
+                    IconButton(
+                      icon: Icon(Icons.shortcut, color: LinagoraSysColors.material().onPrimary),
+                      onPressed: controller.forwardAction,
+                      color: LinagoraSysColors.material().onPrimary,
+                      tooltip: L10n.of(context)!.share,
+                    ),
+                  ],
                 ),
               ],
             );
