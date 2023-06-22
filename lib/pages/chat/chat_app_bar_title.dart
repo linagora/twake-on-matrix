@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -113,8 +114,8 @@ class ChatAppBarTitle extends StatelessWidget {
             style: statusTextStyle,
           );
         }
-
-        if (room.getLocalizedTypingText(context).isEmpty) {
+        final typingText = room.getLocalizedTypingText(context);
+        if (typingText.isEmpty) {
           return Text(
             room.getLocalizedStatus(context).capitalize(context),
             maxLines: 1,
@@ -123,19 +124,27 @@ class ChatAppBarTitle extends StatelessWidget {
           );
         } else {
           return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                room.getLocalizedTypingText(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: statusTextStyle,
+              Expanded(
+                child: Text(
+                  typingText,
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  style: statusTextStyle,
+                ),
               ),
-              const SizedBox(width: 4),
-              TwakeLoadingIndicator(
-                showIndicator: true,
-                flashingCircleDarkColor: LinagoraSysColors.material().tertiary,
-                flashingCircleBrightColor: LinagoraSysColors.material().tertiary.withOpacity(0.4),
-              )
+              SizedBox(
+                width: 32,
+                height: 16,
+                child: Transform.translate(
+                  offset: const Offset(0, -2),
+                  child: LottieBuilder.asset(
+                    'assets/typing-indicator.zip', fit: BoxFit.fitWidth,
+                    width: 32,
+                    ),
+                ),
+              ),
             ],
           );
         }
