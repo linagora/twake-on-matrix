@@ -17,6 +17,7 @@ class SendImagesInteractor {
         await room.sendImageFileEvent(
           txIdMapToImageInfo.value1[txId]!,
           fakeImageEvent: txIdMapToImageInfo.value2[txId],
+          shrinkImageMaxDimension: 1600,
           txid: txId,
         );
 
