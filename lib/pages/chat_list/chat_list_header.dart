@@ -106,12 +106,12 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   child: ClientChooserButton(controller),
                 ),
-              if (selectMode == SelectMode.select && controller.spaces.isNotEmpty)
-                IconButton(
-                  tooltip: L10n.of(context)!.addToSpace,
-                  icon: const Icon(Icons.workspaces_outlined),
-                  onPressed: controller.addToSpace,
-                ),
+              // if (selectMode == SelectMode.select && controller.spaces.isNotEmpty)
+              //   IconButton(
+              //     tooltip: L10n.of(context)!.addToSpace,
+              //     icon: const Icon(Icons.workspaces_outlined),
+              //     onPressed: controller.addToSpace,
+              //   ),
               if (selectMode == SelectMode.select)
                 IconButton(
                   tooltip: L10n.of(context)!.toggleUnread,
