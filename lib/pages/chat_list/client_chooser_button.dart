@@ -28,26 +28,26 @@ class ClientChooserButton extends StatelessWidget {
                 : 1,
       );
     return <PopupMenuEntry<Object>>[
-      PopupMenuItem(
-        value: SettingsAction.newStory,
-        child: Row(
-          children: [
-            const Icon(Icons.camera_outlined),
-            const SizedBox(width: 18),
-            Text(L10n.of(context)!.yourStory),
-          ],
-        ),
-      ),
-      PopupMenuItem(
-        value: SettingsAction.invite,
-        child: Row(
-          children: [
-            Icon(Icons.adaptive.share_outlined),
-            const SizedBox(width: 18),
-            Text(L10n.of(context)!.inviteContact),
-          ],
-        ),
-      ),
+      // PopupMenuItem(
+      //   value: SettingsAction.newStory,
+      //   child: Row(
+      //     children: [
+      //       const Icon(Icons.camera_outlined),
+      //       const SizedBox(width: 18),
+      //       Text(L10n.of(context)!.yourStory),
+      //     ],
+      //   ),
+      // ),
+      // PopupMenuItem(
+      //   value: SettingsAction.invite,
+      //   child: Row(
+      //     children: [
+      //       Icon(Icons.adaptive.share_outlined),
+      //       const SizedBox(width: 18),
+      //       Text(L10n.of(context)!.inviteContact),
+      //     ],
+      //   ),
+      // ),
       PopupMenuItem(
         value: SettingsAction.archive,
         child: Row(
