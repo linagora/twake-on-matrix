@@ -106,16 +106,16 @@ class ClientChooserButton extends StatelessWidget {
               } 
             ).toList(),
       ],
-      PopupMenuItem(
-        value: SettingsAction.addAccount,
-        child: Row(
-          children: [
-            const Icon(Icons.person_add_outlined),
-            const SizedBox(width: 18),
-            Text(L10n.of(context)!.addAccount),
-          ],
-        ),
-      ),
+      // PopupMenuItem(
+      //   value: SettingsAction.addAccount,
+      //   child: Row(
+      //     children: [
+      //       const Icon(Icons.person_add_outlined),
+      //       const SizedBox(width: 18),
+      //       Text(L10n.of(context)!.addAccount),
+      //     ],
+      //   ),
+      // ),
     ];
   }
 
@@ -364,13 +364,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               ),
             ),
             const SizedBox(width: 12),
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () => widget.controller.editBundlesForAccount(
-                widget.client.userID,
-                widget.bundle,
-              ),
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.edit_outlined),
+            //   onPressed: () => widget.controller.editBundlesForAccount(
+            //     widget.client.userID,
+            //     widget.bundle,
+            //   ),
+            // ),
           ],
         ); 
       },
