@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
+import 'package:fluffychat/pages/chat/dialog_permission_camera_widget.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
+import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/voip/permission_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -22,13 +26,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrouter/vrouter.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
-
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
@@ -38,6 +39,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extensio
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -399,12 +401,13 @@ class ChatController extends State<Chat> {
     );
   }
 
-  void sendImage() {
+  void sendImage() async {
     final assetEntity = imagePickerController.selectedAssets.first;
     final sendImageInteractor = getIt.get<SendImageInteractor>();
     if (assetEntity.asset.type == AssetType.image) {
-      sendImageInteractor.execute(room: room!, entity: assetEntity.asset);
-      imagePickerController.clearAssetCounter();
+      final matrixFile = await assetEntity.asset.toMatrixFile();
+      sendImageInteractor.execute(room: room!, matrixFile: matrixFile);
+      removeAllImageSelected();
       numberSelectedImagesNotifier.value = 0;
     }
   }
@@ -1166,6 +1169,34 @@ class ChatController extends State<Chat> {
 
   Future<PermissionStatus>? getCurrentPhotoPermission() {
     return PermissionHandlerService().requestPermissionForPhotoActions();
+  }
+
+  Future<PermissionStatus>? getCurrentCameraPermission() {
+    return PermissionHandlerService().requestPermissionForCameraActions();
+  }
+
+  Future<void> goToSettings() async {
+    final result = await showCupertinoModalPopup<bool?>(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => const CupertinoDialogPermissionCamera(),
+    );
+
+    if (result == true) {
+      Navigator.pop(context);
+    }
+  }
+  void imagePickAction() async {
+    Navigator.pop(context);
+    final assetEntity = await CameraPicker.pickFromCamera(
+      context,
+      locale: window.locale,
+    );
+    if (assetEntity != null && assetEntity.type == AssetType.image) {
+      final matrixFile = await assetEntity.toMatrixFile();
+      final sendImageInteractor = getIt.get<SendImageInteractor>();
+      sendImageInteractor.execute(room: room!, matrixFile: matrixFile);
+    }
   }
 
   void removeAllImageSelected() {

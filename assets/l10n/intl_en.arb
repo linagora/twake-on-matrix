@@ -2640,5 +2640,6 @@
     "addACaption": "Add a caption...",
     "noImagesFound": "No Images found",
     "captionForImagesIsNotSupportYet": "Caption for images is not support yet.",
-    "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery"
+    "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
+    "tapToAllowAccessToYourCamera": "Tap to allow access to your Camera"
 }
