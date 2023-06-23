@@ -24,12 +24,17 @@ class ExpansionContactListTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
       child: FutureBuilder<ProfileInformation?>(
-        future: getProfiles(context),
+        future: getProfile(context),
         builder: (context, snapshot) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Avatar(mxContent: snapshot.data?.avatarUrl, name: contact.displayName),
+              IgnorePointer(
+                child: Avatar(
+                  mxContent: snapshot.data?.avatarUrl, 
+                  name: contact.displayName,
+                ),
+              ),
               const SizedBox(
                 width: 12.0,
               ),
@@ -108,7 +113,7 @@ class ExpansionContactListTile extends StatelessWidget {
     }
   }
 
-  Future<ProfileInformation?> getProfiles(BuildContext context) async {
+  Future<ProfileInformation?> getProfile(BuildContext context) async {
     final client = Matrix.of(context).client;
     if (contact.matrixId == null) {
       return Future.error(Exception("MatrixId is null"));

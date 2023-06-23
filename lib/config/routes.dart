@@ -149,12 +149,13 @@ class AppRoutes {
                 path: '/newprivatechat',
                 widget: const NewPrivateChat(),
                 buildTransition: rightToLeftTransition,
-              ),
-              VWidgetWithDependency(
-                di: ContactDI(),
-                path: '/newgroup',
-                widget: const NewGroup(),
-                buildTransition: rightToLeftTransition,
+                stackedRoutes: [
+                  VWidget(
+                    path: '/newgroup',
+                    widget: const NewGroup(),
+                    buildTransition: rightToLeftTransition,
+                  ),
+                ]
               ),
             ],
           )
