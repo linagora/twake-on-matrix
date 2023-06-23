@@ -36,7 +36,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>ShareMedia</string>
-				<string>im.fluffychat</string>
+				<string>twake.chat</string>
 				<string>matrix</string>
 			</array>
 		</dict>
