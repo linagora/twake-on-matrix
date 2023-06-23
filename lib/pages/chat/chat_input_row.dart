@@ -92,12 +92,14 @@ class ChatInputRow extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
                   onPressed: () async {
-                    final currentPermission = await controller.getCurrentPhotoPermission();
-                    if (currentPermission != null) {
+                    final currentPermissionPhotos = await controller.getCurrentPhotoPermission();
+                    final currentPermissionCamera = await controller.getCurrentCameraPermission();
+                    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
                       showImagesPickerBottomSheet(
                         controller: controller,
                         context: context,
-                        permissionStatus: currentPermission
+                        permissionStatusPhotos: currentPermissionPhotos,
+                        permissionStatusCamera: currentPermissionCamera,
                       ).whenComplete(() => controller.removeAllImageSelected());
                     }
                   },
@@ -271,13 +273,14 @@ class _ChatAccountPicker extends StatelessWidget {
 Future<void> showImagesPickerBottomSheet({
   required BuildContext context,
   required ChatController controller,
-  required PermissionStatus permissionStatus,
+  required PermissionStatus permissionStatusPhotos,
+  required PermissionStatus permissionStatusCamera,
 }) async {
   return await ImagePicker.showImagesGridBottomSheet(
     context: context,
     controller: controller.imagePickerController,
     backgroundImageCamera: const AssetImage("assets/verification.png"),
-    permissionStatus: permissionStatus,
+    permissionStatus: permissionStatusPhotos,
     assetBackgroundColor: LinagoraSysColors.material().background,
     counterImageBuilder: (counterImage) {
       if (counterImage == 0) {
@@ -407,6 +410,12 @@ Future<void> showImagesPickerBottomSheet({
           textAlign: TextAlign.center,
         ),
       ],
+    ),
+    cameraWidget: UseCameraWidget(
+      onPressed: permissionStatusCamera == PermissionStatus.granted
+        ? () => controller.imagePickAction()
+        : () => controller.goToSettings(),
+      backgroundImage: const AssetImage("assets/verification.png"),
     ),
   );
 }

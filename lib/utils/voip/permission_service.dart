@@ -21,6 +21,16 @@ class PermissionHandlerService {
     }
   }
 
+  Future<PermissionStatus> requestPermissionForCameraActions() async {
+    final currentStatus = await Permission.camera.status;
+    if (currentStatus == PermissionStatus.denied || currentStatus == PermissionStatus.permanentlyDenied) {
+      final newStatus = await Permission.camera.request();
+      return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+    } else {
+      return currentStatus;
+    }
+  }
+
   Future<PermissionStatus> _handlePhotosPermissionIOSAction() async {
     final currentStatus = await Permission.photos.status;
     return _handlePhotoPermission(currentStatus);

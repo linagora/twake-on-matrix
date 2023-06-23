@@ -38,6 +38,7 @@ extension SendImage on Room {
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
+      Logs().d('SendImage::sendImageFileEvent(): FileSized ${file.bytes.lengthInBytes} || maxMediaSize $maxMediaSize');
       if (maxMediaSize != null && maxMediaSize < file.bytes.lengthInBytes) {
         throw FileTooBigMatrixException(file.bytes.lengthInBytes, maxMediaSize);
       }
@@ -102,18 +103,20 @@ extension SendImage on Room {
                 contentType: uploadThumbnail.mimeType,
               )
             : null;
-      } on MatrixException catch (_) {
+      } on MatrixException catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
+        Logs().v('Error: $e');
         rethrow;
-      } catch (_) {
+      } catch (e) {
         if (DateTime.now().isAfter(timeoutDate)) {
           fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
               .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
           await handleImageFakeSync(fakeImageEvent);
           rethrow;
         }
+        Logs().v('Error: $e');
         Logs().v('Send File into room failed. Try again...');
         await Future.delayed(const Duration(seconds: 1));
       }
