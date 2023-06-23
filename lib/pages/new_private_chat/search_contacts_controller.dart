@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class SearchContactsController {
-  static const debouncerIntervalInMilliseconds = 400;
+  static const debouncerIntervalInMilliseconds = 300;
 
   final LookupContactsInteractor _lookupNetworkContactsInteractor = getIt.get<LookupContactsInteractor>();
   late final Debouncer<String> _debouncer;
@@ -63,6 +63,10 @@ class SearchContactsController {
   }
 
   void onCloseSearchTapped() {
+    textEditingController.clear();
+  }
+
+  void clearSearchBar() {
     textEditingController.clear();
   }
 

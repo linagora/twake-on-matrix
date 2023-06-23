@@ -24,33 +24,51 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         child: ValueListenableBuilder<Map<PresentationContact, bool>>(
           valueListenable: contactsNotifier,
           builder: (context, selectedContacts, child) {
+            Widget selectedContactsListWidget;
             if (selectedContacts.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: selectedContacts.keys
-                  .map((contact) => InkWell(
-                    borderRadius: BorderRadius.circular(12.0),
-                    onTap: () => widget.newGroupController.unselectContact(contact),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: AvatarWithBottomIconWidget(
-                        presentationContact: contact,
-                        icon: Icons.close,
+              selectedContactsListWidget = SizedBox(width: MediaQuery.of(context).size.width,);
+            } else {
+              selectedContactsListWidget = Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: selectedContacts.keys
+                    .map((contact) => Tooltip(
+                      message: '${contact.displayName}',
+                      preferBelow: false,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12.0),
+                        onTap: () => widget.newGroupController.unselectContact(contact),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: AvatarWithBottomIconWidget(
+                            presentationContact: contact,
+                            icon: Icons.close,
+                            ),
                         ),
+                      ),
                     ),
-                  ),
-                  )
-                  .toList(),
-              ),
-            );
+                    )
+                    .toList(),
+                ),
+              );
+            }
+
+            if (selectedContacts.length <= 1) {
+              return AnimatedSize(
+                curve: Curves.easeIn,
+                alignment: Alignment.bottomLeft,
+                duration: const Duration(milliseconds: 250),
+                child: selectedContactsListWidget,
+              );
+            }
+          
+            return selectedContactsListWidget;
           }
         ),
       ),

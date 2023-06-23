@@ -98,7 +98,6 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
         TwakeIconButton(
           onPressed: () {
             setState(() => isSearchBarShow = false);
-            searchContactController.searchKeyword = "";
             widget.onCloseSearchBar();
           }, 
           tooltip: "Close",

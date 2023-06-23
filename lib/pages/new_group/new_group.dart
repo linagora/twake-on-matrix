@@ -103,6 +103,7 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
     newSelectedContactsMap[contact] = true;
     selectedContactsMapNotifier.value = newSelectedContactsMap;
+    searchContactsController.clearSearchBar();
 
     haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
   }
@@ -111,17 +112,18 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
     newSelectedContactsMap.remove(contact);
     selectedContactsMapNotifier.value = newSelectedContactsMap;
+    searchContactsController.clearSearchBar();
 
     haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
   }
 
   Set<PresentationContact> getAllContactsGroupChat() {
     final newContactsList = {
-          PresentationContact(
-            displayName: "You",
-            matrixId: Matrix.of(context).client.userID,
-          )
-        };
+      PresentationContact(
+        displayName: "You",
+        matrixId: Matrix.of(context).client.userID,
+      )
+    };
     newContactsList.addAll(getSelectedValidContacts(contactsList));
     return newContactsList;
   }
