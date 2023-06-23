@@ -196,19 +196,25 @@ class _MxcImageState extends State<MxcImage> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: widget.isPreview ? null : () => _onTap(context),
-      child: widget.animated
-        ? AnimatedCrossFade(
-          duration: widget.animationDuration,
-          crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          firstChild: SizedBox(
-            width: widget.width,
-            height: widget.height,
-          ),
-          secondChild:_buildImageWidget())
-        : _buildImageWidget(),
-    );
+    final imageWidget = widget.animated
+      ? AnimatedCrossFade(
+        duration: widget.animationDuration,
+        crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        firstChild: SizedBox(
+          width: widget.width,
+          height: widget.height,
+        ),
+        secondChild:_buildImageWidget())
+      : _buildImageWidget();
+    
+    if (widget.isPreview) {
+      return InkWell(
+        onTap: () => _onTap(context),
+        child: imageWidget,
+      );
+    } else {
+      return imageWidget;
+    }
   }
 
   Widget _buildImageWidget() {
