@@ -2498,11 +2498,12 @@ packages:
   video_compress:
     dependency: "direct main"
     description:
-      name: video_compress
-      sha256: "407693726e674a1e1958801deb2d9daf5a5297707ba6d03375007012dae7389a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.2"
+      path: "."
+      ref: master
+      resolved-ref: caf41183e84adebd6ef5c8fba547937daf556a65
+      url: "git@github.com:SpectoraSoftware/VideoCompress.git"
+    source: git
+    version: "1.0.0"
   video_player:
     dependency: "direct main"
     description:
