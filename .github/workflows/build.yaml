@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron: '30 17 * * *'
+    - cron: '0 11 * * *'
 
 name: Build
 
