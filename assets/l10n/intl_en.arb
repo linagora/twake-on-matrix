@@ -2644,5 +2644,9 @@
     "tapToAllowAccessToYourCamera": "You can enable camera access in the Settings app to make video calls in",
     "twake": "Twake",
     "dismiss": "Dismiss",
-    "permissionAccess": "Permission access"
+    "permissionAccess": "Permission access",
+    "allow": "Allow",
+    "explainStoragePermission": "Twake need access to your storage to preview file",
+    "explainGoToStorageSetting": "Twake need access to your storage to preview file, go to settings to allow this permission"
+
 }

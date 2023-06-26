@@ -58,6 +58,14 @@ class PermissionHandlerService {
     }
   }
 
+  Future<bool> get hasStoragePermission async {
+    return await Permission.storage.isGranted;
+  }
+
+  Future<PermissionStatus> get storagePermissionStatus async {
+    return await Permission.storage.status;
+  }
+
   void goToSettingsForPermissionActions() {
     openAppSettings();
   }

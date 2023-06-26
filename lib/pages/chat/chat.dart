@@ -2,14 +2,24 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:dartz/dartz.dart' hide State, OpenFile;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
+import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
+import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
+import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
+import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
+import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
+import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/dialog_permission_camera_widget.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
-import 'package:fluffychat/utils/voip/permission_service.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:fluffychat/utils/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -20,15 +30,21 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrouter/vrouter.dart';
+import 'package:fluffychat/presentation/extensions/room_extension.dart';
+
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
@@ -443,6 +459,102 @@ class ChatController extends State<Chat> {
         room: room!,
       ),
     );
+  }
+
+
+
+  void onFileTapped({required Event event}) async {
+    final permissionHandler = PermissionHandlerService();
+    final storagePermissionStatus = await permissionHandler.storagePermissionStatus;
+    switch (storagePermissionStatus) {
+      case PermissionStatus.denied:
+        await showDialog(
+          useRootNavigator: false,
+          context: context, 
+          builder: (context) {
+            return PermissionDialog(
+              permission: Permission.storage, 
+              explainTextRequestPermission: Text(L10n.of(context)!.explainStoragePermission),
+              icon: const Icon(Icons.preview_outlined),
+            );
+          }
+        );
+        if (await permissionHandler.storagePermissionStatus == PermissionStatus.granted) {
+          _handleDownloadFileForPreview(event: event);
+        }
+        break;
+      case PermissionStatus.granted:
+        _handleDownloadFileForPreview(event: event);
+        break;
+      case PermissionStatus.permanentlyDenied:
+        showDialog(
+          useRootNavigator: false,
+          context: context, 
+          builder: (context) {
+            return PermissionDialog(
+              permission: Permission.storage, 
+              explainTextRequestPermission: Text(L10n.of(context)!.explainGoToStorageSetting),
+              icon: const Icon(Icons.preview_outlined),
+            );
+          }
+        );
+        break;
+      case PermissionStatus.restricted:
+      case PermissionStatus.limited:
+      case PermissionStatus.provisional:
+        break;
+    }
+    
+  }
+
+
+  void _handleDownloadFileForPreview({required Event event}) async {
+    final downloadFileForPreviewInteractor = getIt.get<DownloadFileForPreviewInteractor>();
+    final tempDirPath = (await getTemporaryDirectory()).path;
+    downloadFileForPreviewInteractor.execute(
+      event: event,
+      tempDirPath: tempDirPath,
+    ).listen((event) {
+      event.fold(
+        (failure) {
+          if (failure is DownloadFileForPreviewFailure) {
+            Fluttertoast.showToast(msg: 'Error: ${failure.exception}');
+          }
+        },
+        (success) {
+          if (success is DownloadFileForPreviewSuccess) {
+            _openDownloadedFileForPreview(downloadFileForPreviewResponse: success.downloadFileForPreviewResponse);
+            Navigator.of(context).pop();
+          } else if (success is DownloadFileForPreviewLoading) {
+            showDialog(
+              context: context,
+              useRootNavigator: false,
+              builder: (BuildContext context) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            );
+          }
+        });
+    });
+  }
+
+  void _openDownloadedFileForPreview({
+    required DownloadFileForPreviewResponse downloadFileForPreviewResponse
+  }) async {
+    final mimeType = downloadFileForPreviewResponse.mimeType;
+    final openResults = await OpenFile.open(
+      downloadFileForPreviewResponse.filePath,
+      type: mimeType,
+      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType]).value
+    );
+    Logs().d('ChatController:_openDownloadedFileForPreview(): ${openResults.message}');
+    
+    if (openResults.type != ResultType.done) {
+      await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
+      return;
+    }
   }
 
   void openVideoCameraAction() async {

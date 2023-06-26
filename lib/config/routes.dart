@@ -1,5 +1,5 @@
 import 'package:fluffychat/di/contact/contact_di.dart';
-import 'package:fluffychat/di/send_image/send_image_di.dart';
+import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -119,7 +119,7 @@ class AppRoutes {
                 ),
                 VWidgetWithDependency(
                   path: '/rooms/:roomid',
-                  di: SendImageDi(),
+                  di: ChatScreenDi(),
                   widget: const Chat(),
                   buildTransition: rightToLeftTransition,
                   stackedRoutes: [

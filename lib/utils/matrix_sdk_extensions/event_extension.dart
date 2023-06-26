@@ -8,20 +8,33 @@ import 'package:fluffychat/utils/size_string.dart';
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {
-  Future<LoadingDialogResult<MatrixFile?>> _getFile(BuildContext context) =>
-      showFutureLoadingDialog(
-        context: context,
-        future: downloadAndDecryptAttachment,
-      );
+  Future<LoadingDialogResult<MatrixFile?>> getFile(BuildContext context) =>
+    showFutureLoadingDialog(
+      context: context,
+      future: downloadAndDecryptAttachment,
+    );
 
   void saveFile(BuildContext context) async {
-    final matrixFile = await _getFile(context);
+    final matrixFile = await getFile(context);
 
     matrixFile.result?.save(context);
   }
 
+  String get filename {
+    return content.tryGet<String>('filename') ?? body;
+  }
+
+  String? get fileType {
+    return (filename.contains('.')
+      ? filename.split('.').last.toUpperCase()
+      : content
+          .tryGetMap<String, dynamic>('info')
+          ?.tryGet<String>('mimetype')
+          ?.toUpperCase());
+  }
+
   void shareFile(BuildContext context) async {
-    final matrixFile = await _getFile(context);
+    final matrixFile = await getFile(context);
 
     matrixFile.result?.share(context);
   }
