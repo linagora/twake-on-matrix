@@ -1,3 +1,4 @@
+import 'package:any_link_preview/any_link_preview.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -75,5 +76,17 @@ extension StringCasingExtension on String {
     }
 
     return mentionUserIds;
+  }
+
+  String? getFirstValidUrl() {
+    final RegExp regex = RegExp(r'https:\/\/[^\s]+');
+    final List<String?> matches = regex.allMatches(this).map((m) => m.group(0)).toList();
+
+    if (matches.isEmpty) {
+      return null;
+    }
+
+    final String? firstValidLink = matches.firstWhere((link) => AnyLinkPreview.isValidLink(link!));
+    return firstValidLink;
   }
 }
