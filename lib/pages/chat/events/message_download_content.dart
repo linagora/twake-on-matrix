@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -7,23 +8,25 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 class MessageDownloadContent extends StatelessWidget {
   final Event event;
   final Color textColor;
+  final ChatController controller; 
 
-  const MessageDownloadContent(this.event, this.textColor, {Key? key})
+  static const defaultUnknownMimeType = 'application/octet-stream';
+
+  const MessageDownloadContent(
+    this.event, 
+    this.textColor, 
+    {Key? key, required this.controller})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final filename = event.content.tryGet<String>('filename') ?? event.body;
-    final filetype = (filename.contains('.')
-        ? filename.split('.').last.toUpperCase()
-        : event.content
-                .tryGetMap<String, dynamic>('info')
-                ?.tryGet<String>('mimetype')
-                ?.toUpperCase() ??
-            'UNKNOWN');
+    final filename = event.filename;
+    final filetype = event.fileType;
     final sizeString = event.sizeString;
     return InkWell(
-      onTap: () => event.saveFile(context),
+      onTap: () async {
+        controller.onFileTapped(event: event);
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -37,12 +40,14 @@ class MessageDownloadContent extends StatelessWidget {
                   color: textColor,
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  filename,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    filename,
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],
@@ -54,7 +59,7 @@ class MessageDownloadContent extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  filetype,
+                  filetype ?? defaultUnknownMimeType,
                   style: TextStyle(
                     color: textColor.withAlpha(150),
                   ),

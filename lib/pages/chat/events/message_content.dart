@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
 import 'package:fluffychat/widgets/twake_link_text.dart';
@@ -33,11 +34,13 @@ class MessageContent extends StatelessWidget {
   final Color backgroundColor;
   final Function()? onTapPreview;
   final Function()? onTapSelectMode;
+  final ChatController controller;
 
   const MessageContent(
     this.event, {
     this.onInfoTab,
     Key? key,
+    required this.controller,
     required this.textColor,
     required this.endOfBubbleWidget,
     required this.backgroundColor,
@@ -162,14 +165,14 @@ class MessageContent extends StatelessWidget {
                 color: textColor,
               );
             }
-            return MessageDownloadContent(event, textColor);
+            return MessageDownloadContent(event, textColor, controller: controller);
           case MessageTypes.Video:
             if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
               return EventVideoPlayer(event);
             }
-            return MessageDownloadContent(event, textColor);
+            return MessageDownloadContent(event, textColor, controller: controller);
           case MessageTypes.File:
-            return MessageDownloadContent(event, textColor);
+            return MessageDownloadContent(event, textColor, controller: controller);
 
           case MessageTypes.Text:
           case MessageTypes.Notice:

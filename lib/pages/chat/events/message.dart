@@ -273,6 +273,7 @@ class Message extends StatelessWidget {
                                                                     timeline: timeline,
                                                                   ),
                                                                 ),
+                                                                controller: controller,
                                                                 backgroundColor: ownMessage
                                                                   ? Theme.of(context).colorScheme.primaryContainer
                                                                   : Theme.of(context).colorScheme.surface,
