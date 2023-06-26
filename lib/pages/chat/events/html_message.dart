@@ -1,3 +1,8 @@
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -5,11 +10,6 @@ import 'package:flutter_matrix_html/flutter_html.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/widgets/matrix.dart';
-import '../../../config/app_config.dart';
-import '../../../config/setting_keys.dart';
-import '../../../pages/image_viewer/image_viewer.dart';
-import '../../../utils/matrix_sdk_extensions/matrix_locals.dart';
-import '../../../utils/url_launcher.dart';
 
 class HtmlMessage extends StatelessWidget {
   final String html;

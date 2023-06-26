@@ -123,6 +123,7 @@ dependencies:
   wechat_camera_picker: ^3.8.0
   open_file: ^3.3.2
   mime: ^1.0.4
+  any_link_preview: ^3.0.0
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3

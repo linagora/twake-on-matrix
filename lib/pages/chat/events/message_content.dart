@@ -1,6 +1,11 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/twake_link_text.dart';
 import 'package:flutter/material.dart';
 
@@ -14,10 +19,6 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import '../../../config/app_config.dart';
-import '../../../utils/platform_infos.dart';
-import '../../../utils/url_launcher.dart';
-import '../../bootstrap/bootstrap_dialog.dart';
 import 'audio_player.dart';
 import 'cute_events.dart';
 import 'html_message.dart';
@@ -192,26 +193,26 @@ class MessageContent extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                 child: HtmlMessage(
-                    html: html,
-                    defaultTextStyle: TextStyle(
-                      color: textColor,
-                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                    ),
-                    linkStyle: TextStyle(
-                      color: textColor.withAlpha(150),
-                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                      decoration: TextDecoration.underline,
-                      decorationColor: textColor.withAlpha(150),
-                    ),
-                    room: event.room,
-                    emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
-                    bottomWidgetSpan: Visibility(
-                      visible: false,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      child: endOfBubbleWidget),
+                  html: html,
+                  defaultTextStyle: TextStyle(
+                    color: textColor,
+                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
                   ),
+                  linkStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                    decorationColor: textColor.withAlpha(150),
+                  ),
+                  room: event.room,
+                  emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+                  bottomWidgetSpan: Visibility(
+                    visible: false,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: endOfBubbleWidget,
+                  ),
+                ),
               );
             }
             // else we fall through to the normal message rendering
@@ -294,28 +295,26 @@ class MessageContent extends StatelessWidget {
                     hideReply: true,
                   );
 
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: TwakeLinkText(
-                    text: text,
-                    textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                return TwakeLinkText(
+                  text: text,
+                  textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontSize: fontSize,
                       color: Theme.of(context).colorScheme.onBackground,
-                      letterSpacing: MessageContentStyle.letterSpacingMessageContent
-                    ),
-                    linkStyle: TextStyle(
-                      color: textColor.withAlpha(150),
-                      fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                      decoration: TextDecoration.underline,
-                      decorationColor: textColor.withAlpha(150),), 
-                      childWidget: Visibility(
-                        visible: false,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: endOfBubbleWidget,),
-                    onLinkTap: (url) => UrlLauncher(context, url).launchUrl(),
+                      letterSpacing: MessageContentStyle.letterSpacingMessageContent),
+                  linkStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                    decorationColor: textColor.withAlpha(150),
                   ),
+                  childWidget: Visibility(
+                    visible: false,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: endOfBubbleWidget,
+                  ),
+                  firstValidUrl: text.getFirstValidUrl(),
+                  onLinkTap: (url) => UrlLauncher(context, url).launchUrl(),
                 );
               },
             );
