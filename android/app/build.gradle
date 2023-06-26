@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         applicationId "com.twake.twake"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 31
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
