@@ -2641,5 +2641,8 @@
     "noImagesFound": "No Images found",
     "captionForImagesIsNotSupportYet": "Caption for images is not support yet.",
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
-    "tapToAllowAccessToYourCamera": "Tap to allow access to your Camera"
+    "tapToAllowAccessToYourCamera": "You can enable camera access in the Settings app to make video calls in",
+    "twake": "Twake",
+    "dismiss": "Dismiss",
+    "permissionAccess": "Permission access"
 }
