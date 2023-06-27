@@ -1,17 +1,20 @@
 
+import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class SendImageInteractor {
   Future<void> execute({
     required Room room,
-    MatrixFile? matrixFile,
+    required AssetEntity entity,
     String? txId,
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
+    final matrixFile = await entity.toMatrixFile();
     if (matrixFile != null) {
       try {
         final mxcUri = await room.sendImageFileEvent(

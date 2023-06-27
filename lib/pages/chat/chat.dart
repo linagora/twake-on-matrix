@@ -7,7 +7,6 @@ import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/dialog_permission_camera_widget.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/voip/permission_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -401,13 +400,12 @@ class ChatController extends State<Chat> {
     );
   }
 
-  void sendImage() async {
+  void sendImage() {
     final assetEntity = imagePickerController.selectedAssets.first;
     final sendImageInteractor = getIt.get<SendImageInteractor>();
     if (assetEntity.asset.type == AssetType.image) {
-      final matrixFile = await assetEntity.asset.toMatrixFile();
-      sendImageInteractor.execute(room: room!, matrixFile: matrixFile);
-      removeAllImageSelected();
+      sendImageInteractor.execute(room: room!, entity: assetEntity.asset);
+      imagePickerController.clearAssetCounter();
       numberSelectedImagesNotifier.value = 0;
     }
   }
@@ -1176,7 +1174,7 @@ class ChatController extends State<Chat> {
   }
 
   Future<void> goToSettings() async {
-    final result = await showCupertinoModalPopup<bool?>(
+    final result = await showDialog<bool?>(
       context: context,
       useRootNavigator: false,
       builder: (c) => const CupertinoDialogPermissionCamera(),
@@ -1193,9 +1191,8 @@ class ChatController extends State<Chat> {
       locale: window.locale,
     );
     if (assetEntity != null && assetEntity.type == AssetType.image) {
-      final matrixFile = await assetEntity.toMatrixFile();
       final sendImageInteractor = getIt.get<SendImageInteractor>();
-      sendImageInteractor.execute(room: room!, matrixFile: matrixFile);
+      sendImageInteractor.execute(room: room!, entity: assetEntity);
     }
   }
 
