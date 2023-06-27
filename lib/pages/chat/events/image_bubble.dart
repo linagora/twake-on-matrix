@@ -34,7 +34,7 @@ class ImageBubble extends StatelessWidget {
     this.animated = false,
     this.onTapSelectMode,
     this.onTapPreview,
-    this.animationDuration = FluffyThemes.animationDuration,
+    this.animationDuration = const Duration(milliseconds: 500),
     Key? key,
   }) : super(key: key);
 
