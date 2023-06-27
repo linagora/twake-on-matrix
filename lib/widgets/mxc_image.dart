@@ -53,7 +53,7 @@ class MxcImage extends StatefulWidget {
   State<MxcImage> createState() => _MxcImageState();
 }
 
-class _MxcImageState extends State<MxcImage> {
+class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
 
@@ -191,22 +191,19 @@ class _MxcImageState extends State<MxcImage> {
   Widget placeholder(BuildContext context) =>
       widget.placeholder?.call(context) ??
       const Center(
+        key: Key(FluffyThemes.placeholderKey),
         child: CircularProgressIndicator.adaptive(),
       );
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final imageWidget = widget.animated
-      ? AnimatedCrossFade(
-        duration: widget.animationDuration,
-        crossFadeState: isLoadDone ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-        firstChild: SizedBox(
-          width: widget.width,
-          height: widget.height,
-        ),
-        secondChild:_buildImageWidget())
+      ? AnimatedSwitcher(
+          duration: widget.animationDuration,
+          child: _buildImageWidget())
       : _buildImageWidget();
-    
+
     if (widget.isPreview) {
       return InkWell(
         onTap: () => _onTap(context),
@@ -222,6 +219,7 @@ class _MxcImageState extends State<MxcImage> {
     return data == null || data.isEmpty
       ? placeholder(context)
       : ClipRRect(
+          key: Key('${data.hashCode}'),
           borderRadius: widget.rounded
             ? BorderRadius.circular(12.0)
             : BorderRadius.zero,
@@ -238,4 +236,8 @@ class _MxcImageState extends State<MxcImage> {
               return placeholder(context);
             }));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

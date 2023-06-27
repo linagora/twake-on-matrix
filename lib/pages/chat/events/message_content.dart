@@ -146,6 +146,8 @@ class MessageContent extends StatelessWidget {
               fit: BoxFit.cover,
               onTapSelectMode: onTapSelectMode,
               onTapPreview: onTapPreview,
+              imageData: sendingImageData,
+              animated: true,
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;

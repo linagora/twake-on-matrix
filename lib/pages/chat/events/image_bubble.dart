@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:fluffychat/config/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
@@ -15,9 +18,12 @@ class ImageBubble extends StatelessWidget {
   final double height;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
+  final Uint8List? imageData;
+  final Duration animationDuration;
 
   const ImageBubble(
     this.event, {
+    this.imageData,
     this.tapToView = true,
     this.maxSize = true,
     this.backgroundColor,
@@ -28,6 +34,7 @@ class ImageBubble extends StatelessWidget {
     this.animated = false,
     this.onTapSelectMode,
     this.onTapPreview,
+    this.animationDuration = FluffyThemes.animationDuration,
     Key? key,
   }) : super(key: key);
 
@@ -90,6 +97,9 @@ class ImageBubble extends StatelessWidget {
             placeholder: _buildPlaceholder,
             onTapPreview: onTapPreview,
             onTapSelectMode: onTapSelectMode,
+            imageData: imageData,
+            isPreview: true,
+            animationDuration: animationDuration,
           ),
         ),
       ),
