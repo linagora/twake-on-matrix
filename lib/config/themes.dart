@@ -41,10 +41,7 @@ abstract class FluffyThemes {
   );
 
   static const Duration animationDuration = Duration(milliseconds: 250);
-  static const Duration animationDurationMedium = Duration(milliseconds: 500);
   static const Curve animationCurve = Curves.easeInOut;
-
-  static const String placeholderKey = 'placeholder';
 
   static ThemeData buildTheme(Brightness brightness, [Color? seed]) =>
       ThemeData(

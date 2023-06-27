@@ -36,7 +36,7 @@ class MxcImage extends StatefulWidget {
     this.placeholder,
     this.isThumbnail = true,
     this.animated = false,
-    this.animationDuration = FluffyThemes.animationDuration,
+    this.animationDuration = const Duration(milliseconds: 500),
     this.retryDuration = const Duration(seconds: 2),
     this.animationCurve = FluffyThemes.animationCurve,
     this.thumbnailMethod = ThumbnailMethod.scale,
@@ -54,9 +54,9 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  static const String placeholderKey = 'placeholder';
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
-
   bool isLoadDone = false;
 
   Uint8List? get _imageData {
@@ -191,7 +191,7 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
   Widget placeholder(BuildContext context) =>
       widget.placeholder?.call(context) ??
       const Center(
-        key: Key(FluffyThemes.placeholderKey),
+        key: Key(placeholderKey),
         child: CircularProgressIndicator.adaptive(),
       );
 
