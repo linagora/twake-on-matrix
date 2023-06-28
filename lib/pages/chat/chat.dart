@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:dartz/dartz.dart' hide State, OpenFile;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
@@ -15,6 +14,7 @@ import 'package:fluffychat/domain/model/preview_file/supported_preview_file_type
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
+import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/dialog_permission_camera_widget.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -28,7 +28,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -44,6 +43,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrouter/vrouter.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
+
 
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
@@ -395,25 +395,19 @@ class ChatController extends State<Chat> {
   }
 
   void sendFileAction() async {
-    final result = await FilePickerCross.importMultipleFromStorage(
-      type: FileTypeCross.any,
+    final sendFileInteractor = getIt.get<SendFileInteractor>();
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      withData: true,
     );
-    if (result.isEmpty) return;
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendFileDialog(
-        files: result
-            .map(
-              (xfile) => MatrixFile(
-                bytes: xfile.toUint8List(),
-                name: xfile.fileName!,
-              ).detectFileType,
-            )
-            .toList(),
-        room: room!,
-      ),
-    );
+    if (result != null && result.files.isEmpty) return;
+
+    final matrixFiles = result!.files.map((xFile) => MatrixFile(
+      bytes: xFile.bytes!,
+      name: xFile.name,
+    ).detectFileType).toList();
+    sendFileInteractor.execute(room: room!, matrixFiles: matrixFiles);
+    Navigator.pop(context);
   }
 
   void sendImage() {
@@ -470,10 +464,10 @@ class ChatController extends State<Chat> {
       case PermissionStatus.denied:
         await showDialog(
           useRootNavigator: false,
-          context: context, 
+          context: context,
           builder: (context) {
             return PermissionDialog(
-              permission: Permission.storage, 
+              permission: Permission.storage,
               explainTextRequestPermission: Text(L10n.of(context)!.explainStoragePermission),
               icon: const Icon(Icons.preview_outlined),
             );
@@ -489,10 +483,10 @@ class ChatController extends State<Chat> {
       case PermissionStatus.permanentlyDenied:
         showDialog(
           useRootNavigator: false,
-          context: context, 
+          context: context,
           builder: (context) {
             return PermissionDialog(
-              permission: Permission.storage, 
+              permission: Permission.storage,
               explainTextRequestPermission: Text(L10n.of(context)!.explainGoToStorageSetting),
               icon: const Icon(Icons.preview_outlined),
             );
@@ -504,7 +498,7 @@ class ChatController extends State<Chat> {
       case PermissionStatus.provisional:
         break;
     }
-    
+
   }
 
 
@@ -550,7 +544,7 @@ class ChatController extends State<Chat> {
       uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType]).value
     );
     Logs().d('ChatController:_openDownloadedFileForPreview(): ${openResults.message}');
-    
+
     if (openResults.type != ResultType.done) {
       await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
       return;
@@ -1311,6 +1305,31 @@ class ChatController extends State<Chat> {
   void removeAllImageSelected() {
     imagePickerController.clearAssetCounter();
     numberSelectedImagesNotifier.value = 0;
+  }
+
+  List<ChatActions> get listChatActions => [
+    ChatActions.gallery,
+    ChatActions.documents,
+    ChatActions.location,
+    ChatActions.contact
+  ];
+
+
+  void onClickItemAction(ChatActions action) async {
+    switch (action) {
+      case ChatActions.gallery:
+        print("gallery");
+        break;
+      case ChatActions.documents:
+        sendFileAction();
+        break;
+      case ChatActions.location:
+        print("location");
+        break;
+      case ChatActions.contact:
+        print("contact");
+        break;
+    }
   }
 
   @override

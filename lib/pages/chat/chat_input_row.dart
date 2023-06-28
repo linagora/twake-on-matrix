@@ -1,5 +1,5 @@
-
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
+import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -303,7 +303,7 @@ Future<void> showImagesPickerBottomSheet({
       valueListenable: controller.numberSelectedImagesNotifier,
       builder: (context, value, child) {
         if (value == 0) {
-          return const SizedBox.shrink();
+          return const SizedBox(height: 90);
         }
         return child!;
       },
@@ -313,7 +313,29 @@ Future<void> showImagesPickerBottomSheet({
       valueListenable: controller.numberSelectedImagesNotifier,
       builder: (context, value, child) {
         if (value == 0) {
-          return const SizedBox.shrink();
+          return Container(
+            // height: 64,
+            padding: const EdgeInsets.only(top: 8.0, bottom: 34.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: controller.listChatActions.map((action) {
+                return Expanded(
+                  child: ItemActionOnBottom(
+                    chatActions: action,
+                    onItemAction: (action) => controller.onClickItemAction(action),
+                  ),
+                );
+              }).toList()
+            ),
+          );
         }
         return child!;
       },

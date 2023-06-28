@@ -2647,6 +2647,9 @@
     "permissionAccess": "Permission access",
     "allow": "Allow",
     "explainStoragePermission": "Twake need access to your storage to preview file",
-    "explainGoToStorageSetting": "Twake need access to your storage to preview file, go to settings to allow this permission"
-
+    "explainGoToStorageSetting": "Twake need access to your storage to preview file, go to settings to allow this permission",
+    "gallery": "Gallery",
+    "documents": "Documents",
+    "location": "Location",
+    "contact": "Contact"
 }
