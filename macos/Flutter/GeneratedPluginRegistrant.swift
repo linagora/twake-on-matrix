@@ -22,7 +22,7 @@ import flutter_webrtc
 import geolocator_apple
 import just_audio
 import macos_ui
-import package_info_plus_macos
+import package_info_plus
 import path_provider_foundation
 import photo_manager
 import record_macos
