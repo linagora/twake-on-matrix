@@ -1,7 +1,8 @@
+import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:file_picker_cross/file_picker_cross.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
@@ -206,15 +207,16 @@ class EmotesSettingsController extends State<EmotesSettings> {
     });
   }
 
-  void imagePickerAction(
-    ValueNotifier<ImagePackImageContent?> controller,
-  ) async {
-    final result =
-        await FilePickerCross.importFromStorage(type: FileTypeCross.image);
-    if (result.fileName == null) return;
+  void imagePickerAction(ValueNotifier<ImagePackImageContent?> controller) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    final pickedFile = result?.files.firstOrNull;
+    if (pickedFile == null) return;
     var file = MatrixImageFile(
-      bytes: result.toUint8List(),
-      name: result.fileName!,
+      bytes: pickedFile.bytes!,
+      name: pickedFile.name,
     );
     try {
       file = (await file.generateThumbnail(
@@ -226,10 +228,10 @@ class EmotesSettingsController extends State<EmotesSettings> {
     final uploadResp = await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).client.uploadContent(
-            file.bytes,
-            filename: file.name,
-            contentType: file.mimeType,
-          ),
+        file.bytes,
+        filename: file.name,
+        contentType: file.mimeType,
+      ),
     );
     if (uploadResp.error == null) {
       setState(() {
