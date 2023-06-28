@@ -8,13 +8,13 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 class MessageDownloadContent extends StatelessWidget {
   final Event event;
   final Color textColor;
-  final ChatController controller; 
+  final ChatController controller;
 
   static const defaultUnknownMimeType = 'application/octet-stream';
 
   const MessageDownloadContent(
-    this.event, 
-    this.textColor, 
+    this.event,
+    this.textColor,
     {Key? key, required this.controller})
       : super(key: key);
 
@@ -40,14 +40,15 @@ class MessageDownloadContent extends StatelessWidget {
                   color: textColor,
                 ),
                 const SizedBox(width: 16),
-                Expanded(
+                Flexible(
                   child: Text(
                     filename,
+                    maxLines: 2,
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.bold,
-                      overflow: TextOverflow.ellipsis,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
@@ -15,7 +14,6 @@ import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.d
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/chat/dialog_permission_camera_widget.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
@@ -42,9 +40,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vrouter/vrouter.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
-
-
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
@@ -396,18 +391,14 @@ class ChatController extends State<Chat> {
 
   void sendFileAction() async {
     final sendFileInteractor = getIt.get<SendFileInteractor>();
+    Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       withData: true,
     );
-    if (result != null && result.files.isEmpty) return;
+    if (result == null && result?.files.isEmpty == true) return;
 
-    final matrixFiles = result!.files.map((xFile) => MatrixFile(
-      bytes: xFile.bytes!,
-      name: xFile.name,
-    ).detectFileType).toList();
-    sendFileInteractor.execute(room: room!, matrixFiles: matrixFiles);
-    Navigator.pop(context);
+    sendFileInteractor.execute(room: room!, filePickerResult: result!);
   }
 
   void sendImage() {
@@ -424,7 +415,7 @@ class ChatController extends State<Chat> {
     final selectedAssets = imagePickerController.sortedSelectedAssets;
     final sendImagesInteractor = getIt.get<SendImagesInteractor>();
     sendImagesInteractor.execute(
-      room: room!, 
+      room: room!,
       entities: selectedAssets
         .map<AssetEntity>((entity) => entity.asset)
         .toList()
@@ -1283,13 +1274,29 @@ class ChatController extends State<Chat> {
     final result = await showDialog<bool?>(
       context: context,
       useRootNavigator: false,
-      builder: (c) => const CupertinoDialogPermissionCamera(),
+      builder: (c) => PermissionDialog(
+        permission: Permission.camera,
+        explainTextRequestPermission: RichText(
+          text: TextSpan(
+            text: '${L10n.of(context)!.tapToAllowAccessToYourCamera} ',
+            style: Theme.of(context).textTheme.titleSmall,
+            children: <TextSpan>[
+              TextSpan(text: '${L10n.of(context)!.twake}.', style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+            ],
+          ),
+        ),
+        icon: const Icon(Icons.camera_alt),
+        onAcceptButton: () => PermissionHandlerService().goToSettingsForPermissionActions(),
+      ),
     );
 
     if (result == true) {
       Navigator.pop(context);
     }
   }
+
   void imagePickAction() async {
     Navigator.pop(context);
     final assetEntity = await CameraPicker.pickFromCamera(
@@ -1318,16 +1325,13 @@ class ChatController extends State<Chat> {
   void onClickItemAction(ChatActions action) async {
     switch (action) {
       case ChatActions.gallery:
-        print("gallery");
         break;
       case ChatActions.documents:
         sendFileAction();
         break;
       case ChatActions.location:
-        print("location");
         break;
       case ChatActions.contact:
-        print("contact");
         break;
     }
   }
