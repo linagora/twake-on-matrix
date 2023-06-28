@@ -1,5 +1,5 @@
-import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/chat/chat_di.dart';
+import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
