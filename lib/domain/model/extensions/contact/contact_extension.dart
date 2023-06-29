@@ -8,8 +8,17 @@ extension ContactExtension on Contact {
       displayName: displayName,
       matrixId: matrixId,
       status: status,
-    ),);
+    )).toSet() ?? {};
 
-    return listContacts?.toSet() ?? {};
+    if (emails == null || emails!.isEmpty) {
+      listContacts.add(PresentationContact(
+        email: null,
+        displayName: displayName,
+        matrixId: matrixId,
+        status: status,
+      ));
+    }
+
+    return listContacts;
   }
 }
