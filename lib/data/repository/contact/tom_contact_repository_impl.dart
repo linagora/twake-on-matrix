@@ -11,7 +11,12 @@ class TomContactRepositoryImpl implements ContactRepository {
   TomContactRepositoryImpl();
 
   @override
-  Future<List<Contact>> searchContact({required ContactQuery query}) {
-    return datasource.searchContacts(query: query);
+  Future<List<Contact>> searchContact({required ContactQuery query, int? limit, int? offset}) {
+    return datasource.searchContacts(query: query, limit: limit, offset: offset);
+  }
+
+  @override
+  Future<List<Contact>> loadMoreContact({required ContactQuery query, int? limit, int? offset}) {
+    return datasource.searchContacts(query: query, limit: limit, offset: offset);
   }
 }
