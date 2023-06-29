@@ -13,14 +13,20 @@ class LookupMxidRequest with EquatableMixin {
 
   final String? val;
 
+  final int? limit;
+
+  final int? offset;
+
   LookupMxidRequest({
     required this.scope,
     required this.fields,
     this.val,
+    this.limit,
+    this.offset
   });
     
   @override
-  List<Object?> get props => [scope, fields, val];
+  List<Object?> get props => [scope, fields, val, limit, offset];
 
   factory LookupMxidRequest.fromJson(Map<String, dynamic> json) 
     => _$LookupMxidRequestFromJson(json);
