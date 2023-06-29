@@ -892,12 +892,11 @@ packages:
   flutter_matrix_html:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: f278ec988183a0df9a1af84e30c0cb497615a105
-      url: "git@github.com:linagora/flutter_matrix_html.git"
-    source: git
-    version: "1.1.0"
+      name: flutter_matrix_html
+      sha256: "5084ea9fdd1ce32ad7c353d76ecd41b6da5727f50f9ee1052e2fc2acc3e3967b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter_native_splash:
     dependency: "direct dev"
     description:
