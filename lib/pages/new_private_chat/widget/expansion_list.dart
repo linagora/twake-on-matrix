@@ -2,19 +2,14 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:vrouter/vrouter.dart';
 
 class ExpansionList extends StatefulWidget {
 
@@ -30,27 +25,27 @@ class ExpansionList extends StatefulWidget {
 }
 
 class _ExpansionList extends State<ExpansionList> {
-  bool isShow = true;
 
   @override
   Widget build(BuildContext context) {
     final searchContactsController = widget.newPrivateChatController.searchContactsController;
+    final fetchContactsController = widget.newPrivateChatController.fetchContactsController;
     return StreamBuilder<Either<Failure, GetContactsSuccess>>(
       stream: widget.newPrivateChatController.networkStreamController.stream,
       builder: (context, AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
 
-        final newGroupButton = _buildIconTextTileButton(
-          context: context,
-          onPressed: () => VRouter.of(context).to('/newgroup'),
-          iconData: Icons.supervisor_account_outlined,
-          text: L10n.of(context)!.newGroupChat,
+        final newGroupButton = _IconTextTileButton(
+          context: context, 
+          onPressed: () => widget.newPrivateChatController.goToNewGroupChat(), 
+          iconData: Icons.supervisor_account_outlined, 
+          text: L10n.of(context)!.newGroupChat
         );
 
-        final getHelpsButton = _buildIconTextTileButton(
-          context: context,
-          iconData: Icons.question_mark,
-          onPressed: () {},
-          text: L10n.of(context)!.getHelp,
+        final getHelpsButton = _IconTextTileButton(
+          context: context, 
+          onPressed:() => {}, 
+          iconData: Icons.question_mark, 
+          text: L10n.of(context)!.getHelp
         );
 
         final moreListTile = Padding(
@@ -86,10 +81,7 @@ class _ExpansionList extends State<ExpansionList> {
           );
         }
 
-        final contactsList = snapshot.data!.fold(
-          (failure) => <PresentationContact>[],
-          (success) => success.contacts.expand((contact) => contact.toPresentationContacts()),
-        ).toSet();
+        final contactsList = fetchContactsController.getContactsFromFetchStream(snapshot.data!);
 
         final contactsListSorted = contactsList.sorted(
           (a, b) => widget.newPrivateChatController.comparePresentationContacts(a, b));
@@ -111,24 +103,60 @@ class _ExpansionList extends State<ExpansionList> {
         final expansionList = [
           const SizedBox(height: 4,),
           _buildTitle(contactsListSorted.length),
-          if (isShow)
-            for (final contact in contactsListSorted)...[
-              InkWell(
-                onTap: () async {
-                  await showFutureLoadingDialog(
-                    context: context,
-                    future: () async {
-                      if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
-                        final roomId = await Matrix.of(context).client.startDirectChat(contact.matrixId!);
-                        VRouter.of(context).toSegments(['rooms', roomId]);
-                      }
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.newPrivateChatController.isShowContactsNotifier, 
+            builder: ((context, isShow, child) {
+              if (!isShow) {
+                return const SizedBox.shrink();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: contactsListSorted.length,
+                itemBuilder: (context, index) {
+                  final contact = contactsListSorted[index];
+                  return InkWell(
+                    onTap: () {
+                      widget.newPrivateChatController.goToChatScreen(contact: contact);
                     },
-                  ); 
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: ExpansionContactListTile(contact: contact),
+                  );
                 },
-                borderRadius: BorderRadius.circular(16.0),
-                child: ExpansionContactListTile(contact: contact,),
-              )
-            ]
+              );
+            }),
+          ),
+          ValueListenableBuilder(
+            valueListenable: searchContactsController.isSearchModeNotifier,
+            builder: (context, isSearchMode, child) {
+              if (isSearchMode) {
+                return const SizedBox.shrink();
+              }
+              return ValueListenableBuilder(
+                valueListenable: widget.newPrivateChatController.isShowContactsNotifier,
+                builder: (context, isShow, child) {
+                  if (!isShow) {
+                    return const SizedBox.shrink();
+                  }
+                  return ValueListenableBuilder(
+                    valueListenable: fetchContactsController.haveMoreCountactsNotifier,
+                    builder: (context, value, child) {
+                      if (value) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ); 
+                      }
+
+                      return const SizedBox.shrink();
+                    }
+                  );
+                }
+              );
+            }
+          ),
         ];
 
         return Column(
@@ -167,20 +195,23 @@ class _ExpansionList extends State<ExpansionList> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TwakeIconButton(
-                  paddingAll: 6.0,
-                  buttonDecoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  icon: isShow ? Icons.expand_less : Icons.expand_more,
-                  onPressed: () {
-                    setState(() {
-                      isShow = !isShow;
-                    });
-                  }, tooltip: isShow 
-                    ? L10n.of(context)!.shrink 
-                    : L10n.of(context)!.expand),
+                ValueListenableBuilder<bool>(
+                  valueListenable: widget.newPrivateChatController.isShowContactsNotifier,
+                  builder: (context, isShow, child) {
+                    return TwakeIconButton(
+                      paddingAll: 6.0,
+                      buttonDecoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      icon: isShow ? Icons.expand_less : Icons.expand_more,
+                      onPressed: () {
+                        widget.newPrivateChatController.toggleContactsList();
+                      }, tooltip: isShow 
+                        ? L10n.of(context)!.shrink 
+                        : L10n.of(context)!.expand);
+                  }
+                ),
               ],
             ),
           )
@@ -188,13 +219,24 @@ class _ExpansionList extends State<ExpansionList> {
       ),
     );
   }
+}
 
-  Widget _buildIconTextTileButton({
-    required BuildContext context,
-    required Function()? onPressed,
-    required IconData iconData,
-    required String text,
-  }) {
+class _IconTextTileButton extends StatelessWidget {
+  const _IconTextTileButton({
+    super.key,
+    required this.context,
+    required this.onPressed,
+    required this.iconData,
+    required this.text,
+  });
+
+  final BuildContext context;
+  final Function()? onPressed;
+  final IconData iconData;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(16.0),

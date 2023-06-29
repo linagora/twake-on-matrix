@@ -21,6 +21,7 @@ class NewPrivateChatView extends StatelessWidget {
         ),),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+        controller: controller.fetchContactsController.scrollController,
         child: ExpansionList(
           newPrivateChatController: controller,
         ),
