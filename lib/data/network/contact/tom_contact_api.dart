@@ -12,11 +12,13 @@ class TomContactAPI {
 
   TomContactAPI();
 
-  Future<LookupMxidResponse> searchContacts(ContactQuery query) async {
+  Future<LookupMxidResponse> searchContacts(ContactQuery query, {int? limit, int? offset}) async {
     final requestBody = LookupMxidRequest(
       scope: ['mail', 'uid', 'mobile'],
       fields: ['uid', 'mobile', 'mail'], 
       val: query.keyword,
+      limit: limit,
+      offset: offset
     );
     
     final response = await _client.post(
