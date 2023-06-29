@@ -5,6 +5,7 @@ import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.d
 import 'package:fluffychat/di/base_di.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/load_more_internal_contacts.dart';
 import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
@@ -36,6 +37,10 @@ class ContactDI extends BaseDI {
 
     get.registerFactory<FetchContactsInteractor>(
       () => FetchContactsInteractor(),
+    );
+
+    get.registerFactory<LoadMoreInternalContacts>(
+      () => LoadMoreInternalContacts(),
     );
     
     Logs().d('ContactDI::setUp() - done');
