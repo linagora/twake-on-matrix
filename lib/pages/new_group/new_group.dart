@@ -4,6 +4,8 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
+import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -23,15 +25,15 @@ class NewGroup extends StatefulWidget {
   NewGroupController createState() => NewGroupController();
 }
 
-class NewGroupController extends State<NewGroup> with ComparablePresentationContactMixin {
+class NewGroupController extends State<NewGroup> 
+  with ComparablePresentationContactMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
   final groupchatInfoScrollController = ScrollController();
 
-  final selectedContactsMapNotifier = ValueNotifier<Map<PresentationContact, bool>>({});
-  final haveSelectedContactsNotifier = ValueNotifier(false);
+  final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
   final isEnableEEEncryptionNotifier = ValueNotifier(true);
 
@@ -51,13 +53,8 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     listenSearchContacts();
     listenGroupNameChanged();
     fetchContactsController.fetchCurrentTomContacts();
-    groupchatInfoScrollController.addListener(() {
-      if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
-        groupchatInfoScrollController.jumpTo(
-          maxScrollOffsetAllowedInPixel, 
-        );
-      }
-    });
+    listenForGroupchatInfoScrollController();
+    fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
   }
 
   @override
@@ -69,9 +66,18 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     groupNameTextEditingController.dispose();
 
     selectedContactsMapNotifier.dispose();
-    haveSelectedContactsNotifier.dispose();
     isEnableEEEncryptionNotifier.dispose();
     haveGroupNameNotifier.dispose();
+  }
+
+  void listenForGroupchatInfoScrollController() {
+    groupchatInfoScrollController.addListener(() {
+      if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
+        groupchatInfoScrollController.jumpTo(
+          maxScrollOffsetAllowedInPixel, 
+        );
+      }
+    });
   }
 
   void listenContactsStartList() {
@@ -92,30 +98,14 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
     searchContactsController.onSearchKeywordChanged = (String text) {
       if (text.isEmpty) {
         fetchContactsController.fetchCurrentTomContacts();
+      } else {
+        fetchContactsController.haveMoreCountactsNotifier.value = false;
       }
     };
   }
 
-  Iterable<PresentationContact> get contactsList
-    => selectedContactsMapNotifier.value.keys;
-
-  void selectContact(PresentationContact contact) {
-    final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
-    newSelectedContactsMap[contact] = true;
-    selectedContactsMapNotifier.value = newSelectedContactsMap;
-    searchContactsController.clearSearchBar();
-
-    haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
-  }
-
-  void unselectContact(PresentationContact contact) {
-    final newSelectedContactsMap = Map<PresentationContact, bool>.from(selectedContactsMapNotifier.value);
-    newSelectedContactsMap.remove(contact);
-    selectedContactsMapNotifier.value = newSelectedContactsMap;
-    searchContactsController.clearSearchBar();
-
-    haveSelectedContactsNotifier.value = selectedContactsMapNotifier.value.isNotEmpty;
-  }
+  Iterable<PresentationContact> get contactsList 
+    => selectedContactsMapNotifier.contactsList;
 
   Set<PresentationContact> getAllContactsGroupChat() {
     final newContactsList = {
@@ -156,6 +146,10 @@ class NewGroupController extends State<NewGroup> with ComparablePresentationCont
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeIn,
     );
+  }
+
+  bool get isLoadMoreAction {
+    return fetchContactsController.isLoadMoreAction && searchContactsController.searchKeyword.isEmpty;
   }
 
   @override

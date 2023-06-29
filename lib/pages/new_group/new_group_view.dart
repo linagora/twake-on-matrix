@@ -29,8 +29,9 @@ class NewGroupView extends StatelessWidget {
           SelectedParticipantsList(newGroupController: controller,),
           Expanded(
             child: SingleChildScrollView(
+              controller: controller.fetchContactsController.scrollController,
               child: ValueListenableBuilder<bool>(
-                valueListenable: controller.haveSelectedContactsNotifier,
+                valueListenable: controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
                 builder: (context, haveSelectedContact, child) {
                   return Padding(
                     padding: EdgeInsets.only(top: haveSelectedContact ? 0.0 : 8.0,),
@@ -44,7 +45,7 @@ class NewGroupView extends StatelessWidget {
         ],
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: controller.haveSelectedContactsNotifier,
+        valueListenable: controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
         builder: (context, haveSelectedContacts, child) {
           if (!haveSelectedContacts) {
             return const SizedBox.shrink();
