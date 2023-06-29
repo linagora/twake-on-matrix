@@ -102,10 +102,7 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
-  flutter_matrix_html:
-    git:
-      url: git@github.com:linagora/flutter_matrix_html.git
-      ref: master
+  flutter_matrix_html: ^1.2.0
   overflow_view: ^0.3.1
   json_annotation: ^4.8.1
   contacts_service:
