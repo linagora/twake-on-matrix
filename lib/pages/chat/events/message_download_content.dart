@@ -1,5 +1,9 @@
+import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -23,61 +27,82 @@ class MessageDownloadContent extends StatelessWidget {
     final filename = event.filename;
     final filetype = event.fileType;
     final sizeString = event.sizeString;
+
+    Logs().i('filename: $filename, filetype: $filetype, sizeString: $sizeString, content: ${event.content}');
     return InkWell(
       onTap: () async {
         controller.onFileTapped(event: event);
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.file_download_outlined,
-                  color: textColor,
-                ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Text(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: ShapeDecoration(
+          color: LinagoraSysColors.material().surfaceTint.withOpacity(0.08),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: SvgPicture.asset(
+                event.getIcon(),
+                width: 36,
+                height: 36,
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Text(
                     filename,
-                    maxLines: 2,
+                    maxLines: 1,
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-            child: Row(
-              children: [
-                Text(
-                  filetype ?? defaultUnknownMimeType,
-                  style: TextStyle(
-                    color: textColor.withAlpha(150),
+                  Row(
+                    children: [
+                      if (sizeString != null)
+                        _TextInformationOfFile(value: sizeString),
+                      const _TextInformationOfFile(value: " · "),
+                      Flexible(
+                        child: _TextInformationOfFile(
+                         value: filetype ?? defaultUnknownMimeType,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const Spacer(),
-                if (sizeString != null)
-                  Text(
-                    sizeString,
-                    style: TextStyle(
-                      color: textColor.withAlpha(150),
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+
+class _TextInformationOfFile extends StatelessWidget {
+  final String value;
+  const _TextInformationOfFile({required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      value,
+      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+        color: LinagoraRefColors.material().neutral,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+

@@ -151,7 +151,7 @@ class Message extends StatelessWidget {
                                           ? Theme.of(context).colorScheme.primaryContainer
                                           : Theme.of(context).colorScheme.surface,
                                       ),
-                                      padding: noBubble || noPadding
+                                      padding: noBubble
                                           ? const EdgeInsets.symmetric(horizontal: 16.0)
                                           : EdgeInsets.only(
                                               left: 8 * AppConfig.bubbleSizeFactor,
@@ -200,7 +200,7 @@ class Message extends StatelessWidget {
                                                 children: [
                                                   Padding(
                                                     padding: EdgeInsets.only(
-                                                      bottom: timelineOverlayMessage ? 0 : 8,
+                                                      bottom: noPadding || timelineOverlayMessage ? 0 : 8,
                                                     ),
                                                     child: IntrinsicWidth(
                                                       child: Column(
@@ -265,8 +265,7 @@ class Message extends StatelessWidget {
                                                                 endOfBubbleWidget: Padding(
                                                                   padding: const EdgeInsets.only(left: 8.0, right: 4.0),
                                                                   child: MessageTime(
-                                                                    timelineOverlayMessage:
-                                                                        timelineOverlayMessage,
+                                                                    timelineOverlayMessage: timelineOverlayMessage,
                                                                     controller: controller,
                                                                     event: event,
                                                                     ownMessage: ownMessage,

@@ -175,7 +175,16 @@ class MessageContent extends StatelessWidget {
             }
             return MessageDownloadContent(event, textColor, controller: controller);
           case MessageTypes.File:
-            return MessageDownloadContent(event, textColor, controller: controller);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                MessageDownloadContent(event, textColor, controller: controller),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: endOfBubbleWidget,
+                )
+              ],
+            );
 
           case MessageTypes.Text:
           case MessageTypes.Notice:
