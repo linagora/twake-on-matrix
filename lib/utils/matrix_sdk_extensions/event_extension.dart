@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,11 @@ extension LocalizedBody on Event {
   }
 
   String get filename {
-    return content.tryGet<String>('filename') ?? body;
+    return (content.tryGet<String>('filename') ?? body).ellipsizeFileName;
+  }
+
+  String? get mimeType {
+    return content.tryGetMap<String, dynamic>('info')?.tryGet<String>('mimetype');
   }
 
   String? get fileType {
