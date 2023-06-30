@@ -18,6 +18,13 @@ class ImagePaths {
   static String get icEmptyGroupChat => _getImagePath('ic_empty_group_chat.svg');
   static String get icTwakeLogo => _getImagePath('ic_twake_logo.svg');
   static String get icPhotosSettingPermission => _getImagePath('ic_photos_setting.svg');
+  static String get icFileDocx => _getImagePath('ic_file_doc.svg');
+  static String get icFileZip => _getImagePath('ic_file_zip.svg');
+  static String get icFileXlsx => _getImagePath('ic_file_excel.svg');
+  static String get icFilePdf => _getImagePath('ic_file_pdf.svg');
+  static String get icFilePptx => _getImagePath('ic_file_ppt.svg');
+  static String get icFileFolder => _getImagePath('ic_file_folder.svg');
+  static String get icFileUnKnow => _getImagePath('ic_file_unknow.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
