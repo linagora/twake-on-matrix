@@ -1,5 +1,7 @@
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -20,6 +22,8 @@ extension MediaTypeExtension on Event {
 
   bool isPdfFile() => SupportedPreviewFileTypes.pdfMimeTypes.contains(mimeType);
 
+  bool isSupportedPreviewAnotherFile() => SupportedPreviewFileTypes.supportAnotherTypes.contains(mimeType);
+
   String getIcon() {
     Logs().d('AttachmentExtension::getIcon(): mediaType: $mimeType');
     if (mimeType?.isEmpty == true) {
@@ -37,5 +41,13 @@ extension MediaTypeExtension on Event {
       return ImagePaths.icFileZip;
     }
     return ImagePaths.icFileUnKnow;
+  }
+
+  String getFileType(BuildContext context) {
+    if (isSupportedPreviewAnotherFile()) {
+      return L10n.of(context)!.file.toUpperCase();
+    } else {
+      return fileType!;
+    }
   }
 }

@@ -13,9 +13,7 @@ class MessageDownloadContent extends StatelessWidget {
   final Event event;
   final Color textColor;
   final ChatController controller;
-
-  static const defaultUnknownMimeType = 'application/octet-stream';
-
+  
   const MessageDownloadContent(
     this.event,
     this.textColor,
@@ -73,7 +71,7 @@ class MessageDownloadContent extends StatelessWidget {
                       const _TextInformationOfFile(value: " · "),
                       Flexible(
                         child: _TextInformationOfFile(
-                         value: filetype ?? defaultUnknownMimeType,
+                         value: event.getFileType(context),
                         ),
                       ),
                     ],
