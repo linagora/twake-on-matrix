@@ -18,7 +18,8 @@ class SupportedPreviewFileTypes {
 
   static const pdfMimeTypes = [
     'application/pdf',
-    'application/rtf'];
+    'application/rtf'
+  ];
 
   static const xlsMimeTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -26,13 +27,15 @@ class SupportedPreviewFileTypes {
     'application/vnd.oasis.opendocument.spreadsheet-template',
     'application/vnd.oasis.opendocument.chart',
     'application/vnd.oasis.opendocument.formula',
-    'application/vnd.ms-excel'];
+    'application/vnd.ms-excel'
+  ];
 
   static const pptMimeTypes = [
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/vnd.oasis.opendocument.presentation',
     'application/vnd.oasis.opendocument.presentation-template',
-    'application/vnd.ms-powerpoint'];
+    'application/vnd.ms-powerpoint'
+  ];
 
   static const zipMimeTypes = [
     'application/x-tar',
@@ -118,4 +121,6 @@ class SupportedPreviewFileTypes {
     'audio/x-ms-wma',
     'audio/x-ms-wmv',
   ];
+
+  static const supportAnotherTypes = [ 'application/octet-stream'];
 }
