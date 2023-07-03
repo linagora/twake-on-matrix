@@ -41,27 +41,15 @@ class SeenByRow extends StatelessWidget {
             height: MessageTimeStyle.seenByRowIconSize,
           )
         : seenByUsers.isEmpty
-            ? SvgPicture.asset(
-                ImagePaths.icSendStatus,
-                colorFilter: ColorFilter.mode(
-                  timelineOverlayMessage
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.primary,
-                  BlendMode.srcIn,
-                ),
-                width: MessageTimeStyle.seenByRowIconSize,
-                height: MessageTimeStyle.seenByRowIconSize,
+            ? Icon(
+                Icons.done,
+                color: timelineOverlayMessage ? Colors.white : Theme.of(context).colorScheme.primary,
+                size: MessageTimeStyle.seenByRowIconSize,
               )
-            : SvgPicture.asset(
-                ImagePaths.icReadStatus,
-                colorFilter: ColorFilter.mode(
-                  timelineOverlayMessage
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.primary,
-                  BlendMode.srcIn,
-                ),
-                width: MessageTimeStyle.seenByRowIconSize,
-                height: MessageTimeStyle.seenByRowIconSize,
+            : Icon(
+                Icons.done_all,
+                color: timelineOverlayMessage ? Colors.white : Theme.of(context).colorScheme.primary,
+                size: MessageTimeStyle.seenByRowIconSize,
               );
     // return Container(
     //   width: double.infinity,

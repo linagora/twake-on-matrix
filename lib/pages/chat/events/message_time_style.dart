@@ -10,8 +10,8 @@ class MessageTimeStyle {
 
   static double get timelineLetterSpacing => 0.4;
 
-  static double get paddingTimeAndIcon => 4;
-  static double get seenByRowIconSize => 16.0;
+  static double get paddingTimeAndIcon => 8;
+  static double get seenByRowIconSize => 16;
 
   static TextStyle? textStyle(BuildContext context, bool timelineOverlayMessage) 
     => Theme.of(context).textTheme.bodySmall?.merge(
