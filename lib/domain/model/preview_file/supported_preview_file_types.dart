@@ -122,5 +122,39 @@ class SupportedPreviewFileTypes {
     'audio/x-ms-wmv',
   ];
 
-  static const supportAnotherTypes = [ 'application/octet-stream'];
+  static const supportAnotherTypes = ['application/octet-stream'];
+
+  static const docFileTypes = [
+    'docx',
+    'doc',
+    'docx',
+    'docm',
+    'dot',
+    'dotx',
+    'dotm'
+  ];
+
+  static const pdfFileTypes = [
+    'pdf'
+  ];
+
+  static const xlsFileTypes = [
+    'xls',
+    'xlsx',
+    'xslsm',
+    'xlt',
+    'xltx',
+    'xltm',
+  ];
+
+  static const pptFileTypes = [
+    'ppt',
+    'pptx',
+    'pps',
+    'ppsx',
+    'ppsm',
+    'pptm'
+  ];
+
+  static const zipFileTypes = ['zip'];
 }
