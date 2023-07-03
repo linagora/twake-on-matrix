@@ -120,7 +120,7 @@ class _ExpansionList extends State<ExpansionList> {
                       widget.newPrivateChatController.goToChatScreen(contact: contact);
                     },
                     borderRadius: BorderRadius.circular(16.0),
-                    child: ExpansionContactListTile(contact: contact),
+                    child: ExpansionContactListTile(contact: contact, isSearch: isShow),
                   );
                 },
               );
