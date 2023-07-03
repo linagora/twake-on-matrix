@@ -43,10 +43,13 @@ class NewPrivateChatController extends State<NewPrivateChat>
     listenContactsStartList();
     fetchContactsController.fetchCurrentTomContacts();
     fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    searchContactsController.onSearchKeywordChanged = (searchKey) {
+      disableLoadMoreInSearch();
+    };
   }
 
-  bool get isLoadMoreAction {
-    return fetchContactsController.isLoadMoreAction && searchContactsController.searchKeyword.isEmpty;
+  void disableLoadMoreInSearch() {
+    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
   }
 
   void listenContactsStartList() {

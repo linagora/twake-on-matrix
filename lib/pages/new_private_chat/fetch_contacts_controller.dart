@@ -38,6 +38,7 @@ class FetchContactsController with LoadMoreContactsMixin {
           _handleNoMoreContactsSuccess(currentContacts);
         } else {
           oldContactsList = currentContacts.toSet();
+          lastContactIndexNotifier.value = oldContactsList.length;
         }
         return oldContactsList;
       },
@@ -47,12 +48,14 @@ class FetchContactsController with LoadMoreContactsMixin {
   void _handleGetMoreContactsSuccess(Iterable<PresentationContact> currentContacts) {
     oldContactsList.addAll(currentContacts);
     haveMoreCountactsNotifier.value = currentContacts.isNotEmpty;
+    lastContactIndexNotifier.value = oldContactsList.length;
     isLoadMore = true;
   }
 
   void _handleNoMoreContactsSuccess(Iterable<PresentationContact> currentContacts) {
     haveMoreCountactsNotifier.value = false;
     oldContactsList.addAll(currentContacts);
+    lastContactIndexNotifier.value = oldContactsList.length;
     isLoadMore = false;
   }
 
