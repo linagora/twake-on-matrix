@@ -3,9 +3,12 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
+import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
 class ContactsSelectionList extends StatefulWidget {
@@ -22,9 +25,17 @@ class ContactsSelectionList extends StatefulWidget {
 }
 
 class _ContactsSelectionListState extends State<ContactsSelectionList> {
-  late final selectedContactsMapNotifier = widget.newGroupController.selectedContactsMapNotifier;
-  late final contactsList = widget.newGroupController.selectedContactsMapNotifier.contactsList; 
-  late final fetchContactsController = widget.newGroupController.fetchContactsController;
+  SelectedContactsMapChangeNotifier selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
+  List<PresentationContact> contactsList = [];
+  FetchContactsController? fetchContactsController = FetchContactsController();
+
+  @override
+  void initState() {
+    selectedContactsMapNotifier = widget.newGroupController.selectedContactsMapNotifier;
+    contactsList = widget.newGroupController.selectedContactsMapNotifier.contactsList.toList();
+    fetchContactsController = widget.newGroupController.fetchContactsController;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +47,6 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
         if (!snapshot.hasData) {
           return const LoadingContactWidget();
         }
-
-        final contactsList = fetchContactsController
-          .getContactsFromFetchStream(snapshot.data!)
-          .toList();
 
         contactsList.sort((a, b) => widget.newGroupController.comparePresentationContacts(a, b));
 
