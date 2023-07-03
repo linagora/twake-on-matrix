@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -41,10 +42,22 @@ class ChatEventList extends StatelessWidget {
         EventTypes.CallInvite,
       }.contains(e.type),
     )) {
-      return Center(
-        child: controller.room?.isDirectChat ?? true 
-          ? const DirectChatEmptyView()
-          : const GroupChatEmptyView(),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                controller: controller.scrollController,
+                physics: const ClampingScrollPhysics(),
+                child: controller.room?.isDirectChat ?? true
+                  ? const DirectChatEmptyView()
+                  : const GroupChatEmptyView(),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
