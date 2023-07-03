@@ -2,9 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
@@ -23,6 +21,7 @@ class ContactsTabBodyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: controller.fetchContactsController.scrollController,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: StreamBuilder<Either<Failure, GetContactsSuccess>>(
@@ -36,10 +35,7 @@ class ContactsTabBodyView extends StatelessWidget {
               return const EmptyContactBody();
             }
         
-            final contactsList = snapshot.data!.fold(
-              (left) => <PresentationContact>[],
-              (right) => right.contacts.expand((contact) => contact.toPresentationContacts()),
-            );
+            final contactsList = controller.fetchContactsController.getContactsFromFetchStream(snapshot.data!);
 
             final contactsListSorted = contactsList.sorted((a, b) => controller.comparePresentationContacts(a, b));
         
@@ -60,7 +56,31 @@ class ContactsTabBodyView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: contactsListSorted
                   .map<Widget>((contact) => ExpansionContactListTile(contact: contact))
-                  .toList(),
+                  .toList()..addAll([
+                    ValueListenableBuilder(
+                      valueListenable: controller.searchContactsController.isSearchModeNotifier,
+                      builder: (context, isSearchMode, child) {
+                        if (isSearchMode) {
+                          return const SizedBox.shrink();
+                        }
+                        return ValueListenableBuilder(
+                          valueListenable: controller.fetchContactsController.haveMoreCountactsNotifier,
+                          builder: (context, haveMoreContacts, child) {
+                            if (haveMoreContacts) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ); 
+                            }
+
+                            return const SizedBox.shrink();
+                          }
+                        );
+                      }
+                    ),
+                  ]),
               ),
             );
           },

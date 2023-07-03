@@ -1,5 +1,6 @@
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
+import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
@@ -18,7 +19,8 @@ class ContactsTab extends StatefulWidget {
 
 }
 
-class ContactsTabController extends State<ContactsTab> with ComparablePresentationContactMixin {
+class ContactsTabController extends State<ContactsTab> 
+  with ComparablePresentationContactMixin {
 
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
@@ -32,6 +34,14 @@ class ContactsTabController extends State<ContactsTab> with ComparablePresentati
     listenSearchContacts();
     super.initState();
     fetchContactsController.fetchCurrentTomContacts();
+    fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    searchContactsController.onSearchKeywordChanged = (searchKey) {
+      disableLoadMoreInSearch();
+    };
+  }
+
+  void disableLoadMoreInSearch() {
+    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
   }
 
   void listenContactsStartList() {
