@@ -13,12 +13,16 @@ mixin LoadMoreContactsMixin {
   Set<PresentationContact> oldContactsList = {};
   bool isLoadMore = true;
 
+  bool allowLoadMore = true;
+
   void listenForScrollChanged({required FetchContactsController fetchContactsController}) {
     scrollController.addListener(() {
-      if (isLoadMoreAction) {
-        fetchContactsController.loadMoreContacts(
-          offset: fetchContactsController.lastContactIndexNotifier.value
-        );
+      if(allowLoadMore) {
+        if (isLoadMoreAction) {
+          fetchContactsController.loadMoreContacts(
+            offset: fetchContactsController.lastContactIndexNotifier.value
+          );
+        }
       }
     });
   }

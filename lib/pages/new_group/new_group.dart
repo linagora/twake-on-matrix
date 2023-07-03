@@ -55,6 +55,13 @@ class NewGroupController extends State<NewGroup>
     fetchContactsController.fetchCurrentTomContacts();
     listenForGroupchatInfoScrollController();
     fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    searchContactsController.onSearchKeywordChanged = (searchKey) {
+      disableLoadMoreInSearch();
+    };
+  }
+
+  void disableLoadMoreInSearch() {
+    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
   }
 
   @override
@@ -146,10 +153,6 @@ class NewGroupController extends State<NewGroup>
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeIn,
     );
-  }
-
-  bool get isLoadMoreAction {
-    return fetchContactsController.isLoadMoreAction && searchContactsController.searchKeyword.isEmpty;
   }
 
   @override

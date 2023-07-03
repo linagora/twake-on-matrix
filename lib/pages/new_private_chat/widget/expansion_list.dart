@@ -140,8 +140,8 @@ class _ExpansionList extends State<ExpansionList> {
                   }
                   return ValueListenableBuilder(
                     valueListenable: fetchContactsController.haveMoreCountactsNotifier,
-                    builder: (context, value, child) {
-                      if (value) {
+                    builder: (context, haveMoreContacts, child) {
+                      if (haveMoreContacts) {
                         return const Padding(
                           padding: EdgeInsets.all(16.0),
                           child: Center(
