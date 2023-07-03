@@ -26,13 +26,11 @@ class ContactsSelectionList extends StatefulWidget {
 
 class _ContactsSelectionListState extends State<ContactsSelectionList> {
   SelectedContactsMapChangeNotifier selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
-  List<PresentationContact> contactsList = [];
   FetchContactsController? fetchContactsController = FetchContactsController();
 
   @override
   void initState() {
     selectedContactsMapNotifier = widget.newGroupController.selectedContactsMapNotifier;
-    contactsList = widget.newGroupController.selectedContactsMapNotifier.contactsList.toList();
     fetchContactsController = widget.newGroupController.fetchContactsController;
     super.initState();
   }
@@ -47,6 +45,10 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
         if (!snapshot.hasData) {
           return const LoadingContactWidget();
         }
+
+        final contactsList = fetchContactsController
+          .getContactsFromFetchStream(snapshot.data!)
+          .toList();
 
         contactsList.sort((a, b) => widget.newGroupController.comparePresentationContacts(a, b));
 
@@ -79,8 +81,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: ExpansionContactListTile(
-                              contact: contactsList[i]),
+                            child: ExpansionContactListTile(contact: contactsList[i]),
                           ),
                           ValueListenableBuilder<bool>(
                             valueListenable: contactNotifier,

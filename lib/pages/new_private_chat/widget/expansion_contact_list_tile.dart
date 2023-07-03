@@ -13,12 +13,10 @@ typedef OnExpansionListTileTap = void Function();
 
 class ExpansionContactListTile extends StatelessWidget {
   final PresentationContact contact;
-  final bool isSearch;
 
   const ExpansionContactListTile({
     super.key,
-    required this.contact,
-    this.isSearch = false
+    required this.contact
   });
 
   @override
@@ -106,9 +104,7 @@ class ExpansionContactListTile extends StatelessWidget {
   }
 
   Widget _buildDisplayName(BuildContext context, ProfileInformation? profile) {
-    if (isSearch && contact.displayName != null) {
-      return _displayName(context, contact.displayName!);
-    } else if (contact.displayName != null) {
+    if (contact.displayName != null) {
       return _displayName(context, contact.displayName!);
     } else if (profile != null) {
       return _displayName(context, profile.displayname!);
