@@ -10,6 +10,6 @@ class ChatAppBarTitleStyle {
   static Color get statusBorderColor => Colors.white;
   static double get statusBorderSize => 2;
 
-  static double get letterSpacingRoomName => 0.15;
+  static double get letterSpacingRoomName => 0.10;
   static double get letterSpacingStatusContent => 0.5;
 }
