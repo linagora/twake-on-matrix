@@ -120,7 +120,7 @@ class _ExpansionList extends State<ExpansionList> {
                       widget.newPrivateChatController.goToChatScreen(contact: contact);
                     },
                     borderRadius: BorderRadius.circular(16.0),
-                    child: ExpansionContactListTile(contact: contact, isSearch: isShow),
+                    child: ExpansionContactListTile(contact: contact),
                   );
                 },
               );
@@ -223,7 +223,6 @@ class _ExpansionList extends State<ExpansionList> {
 
 class _IconTextTileButton extends StatelessWidget {
   const _IconTextTileButton({
-    super.key,
     required this.context,
     required this.onPressed,
     required this.iconData,
