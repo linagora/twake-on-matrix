@@ -6,8 +6,6 @@ class ImagePaths {
   static String get icDone => _getImagePath('ic_done.svg');
   static String get icEmoji => _getImagePath('ic_emoji.svg');
   static String get icPhoneCall => _getImagePath('ic_phone_call.svg');
-  static String get icReadStatus => _getImagePath('ic_read_status.svg');
-  static String get icSendStatus => _getImagePath('ic_send_status.svg');
   static String get icSend => _getImagePath('ic_send.svg');
   static String get icSending => _getImagePath('ic_sending.svg');
   static String get icVideoCall => _getImagePath('ic_video_call.svg');

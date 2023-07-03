@@ -33,6 +33,7 @@ class TwakeCleanRichText extends StatelessWidget {
             onLinkTap: onLinkTap,
             themeData: Theme.of(context),
           ),
+          const WidgetSpan(child: SizedBox(width: 4)),
           WidgetSpan(child: childWidget)
         ],
       ),
