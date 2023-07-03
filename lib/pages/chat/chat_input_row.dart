@@ -280,6 +280,7 @@ Future<void> showImagesPickerBottomSheet({
     context: context,
     controller: controller.imagePickerController,
     backgroundImageCamera: const AssetImage("assets/verification.png"),
+    initialChildSize: 0.6,
     permissionStatus: permissionStatusPhotos,
     assetBackgroundColor: LinagoraSysColors.material().background,
     counterImageBuilder: (counterImage) {
@@ -414,7 +415,7 @@ Future<void> showImagesPickerBottomSheet({
                 )
               ],
             ),
-            const SizedBox(height: 8.0,),
+            const SizedBox(height: 8.0),
           ],
         ),
       ),
