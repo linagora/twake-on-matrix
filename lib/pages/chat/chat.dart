@@ -393,7 +393,6 @@ class ChatController extends State<Chat> {
     final sendFileInteractor = getIt.get<SendFileInteractor>();
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
       withData: true,
     );
     if (result == null && result?.files.isEmpty == true) return;
