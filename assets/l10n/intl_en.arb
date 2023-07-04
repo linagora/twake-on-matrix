@@ -2650,6 +2650,14 @@
     "location": "Location",
     "contact": "Contact",
     "file": "File",
+    "recent": "Recent",
+    "clear": "Clear",
+    "membersCount": "{count} Members",
+    "@membersCount": {
+      "placeholders": {
+        "count": {}
+      }
+    },
     "keyboard": "Keyboard",
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
     "changeGroupAvatar": "Change the group avatar",
