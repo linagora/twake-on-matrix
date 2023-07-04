@@ -203,7 +203,7 @@ class MessageContent extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                 child: HtmlMessage(
                   html: html,
-                  defaultTextStyle: TextStyle(
+                  defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: textColor,
                     fontSize: bigEmotes ? fontSize * 3 : fontSize,
                   ),
