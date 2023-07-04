@@ -2652,5 +2652,13 @@
     "documents": "Documents",
     "location": "Location",
     "contact": "Contact",
-    "file": "File"
+    "file": "File",
+    "recent": "Recent",
+    "clear": "Clear",
+    "membersCount": "{count} Members",
+    "@membersCount": {
+      "placeholders": {
+        "count": {}
+      }
+    }
 }
