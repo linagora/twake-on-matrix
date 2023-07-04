@@ -41,7 +41,7 @@ class ReplyContent extends StatelessWidget {
       }
       replyBody = HtmlMessage(
         html: html!,
-        defaultTextStyle: TextStyle(
+        defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Theme.of(context).colorScheme.onBackground,
           fontSize: fontSizeDisplayContent,
           overflow: TextOverflow.ellipsis,

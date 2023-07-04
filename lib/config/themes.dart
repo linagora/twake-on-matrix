@@ -1,4 +1,3 @@
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -24,20 +23,52 @@ abstract class FluffyThemes {
     fontFamilyFallback: ['Inter'],
   );
 
-  static var fallbackTextTheme = const TextTheme(
-    bodyLarge: fallbackTextStyle,
-    bodyMedium: fallbackTextStyle,
-    labelLarge: fallbackTextStyle,
-    bodySmall: fallbackTextStyle,
-    labelSmall: fallbackTextStyle,
-    displayLarge: fallbackTextStyle,
-    displayMedium: fallbackTextStyle,
-    displaySmall: fallbackTextStyle,
-    headlineMedium: fallbackTextStyle,
-    headlineSmall: fallbackTextStyle,
-    titleLarge: fallbackTextStyle,
-    titleMedium: fallbackTextStyle,
-    titleSmall: fallbackTextStyle,
+  static var fallbackTextTheme = TextTheme(
+    bodyLarge: fallbackTextStyle.copyWith(
+      fontSize: 17,
+    ),
+    bodyMedium: fallbackTextStyle.copyWith(
+      fontSize: 14,
+    ),
+    bodySmall: fallbackTextStyle.copyWith(
+      fontSize: 12,
+    ),
+    labelLarge: fallbackTextStyle.copyWith(
+      fontSize: 14,
+    ), 
+    labelMedium: fallbackTextStyle.copyWith(
+      fontSize: 12,
+    ),
+    labelSmall: fallbackTextStyle.copyWith(
+      fontSize: 11,
+    ),
+    displayLarge: fallbackTextStyle.copyWith(
+      fontSize: 57,
+    ),
+    displayMedium: fallbackTextStyle.copyWith(
+      fontSize: 45,
+    ),
+    displaySmall: fallbackTextStyle.copyWith(
+      fontSize: 36,
+    ),
+    headlineLarge: fallbackTextStyle.copyWith(
+      fontSize: 32,
+    ),
+    headlineMedium: fallbackTextStyle.copyWith(
+      fontSize: 28,
+    ),
+    headlineSmall: fallbackTextStyle.copyWith(
+      fontSize: 24,
+    ),
+    titleLarge: fallbackTextStyle.copyWith(
+      fontSize: 22,
+    ),
+    titleMedium: fallbackTextStyle.copyWith(
+      fontSize: 16,
+    ),
+    titleSmall: fallbackTextStyle.copyWith(
+      fontSize: 14,
+    ),
   );
 
   static const Duration animationDuration = Duration(milliseconds: 250);
@@ -48,11 +79,9 @@ abstract class FluffyThemes {
         visualDensity: VisualDensity.standard,
         useMaterial3: true,
         fontFamily: 'Inter',
-        textTheme: PlatformInfos.isDesktop || PlatformInfos.isWeb
-            ? brightness == Brightness.light
+        textTheme: brightness == Brightness.light
                 ? Typography.material2021().black.merge(fallbackTextTheme)
-                : Typography.material2021().white.merge(fallbackTextTheme)
-            : null,
+                : Typography.material2021().white.merge(fallbackTextTheme),
         snackBarTheme: const SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
         ),
