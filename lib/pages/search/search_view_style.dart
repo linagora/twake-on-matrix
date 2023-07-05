@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-class ChatSearchViewStyle {
-  static double get toolbarHeightChatSearch => 64.0;
+class SearchViewStyle {
+  static double get toolbarHeightSearch => 64.0;
   static double get toolbarHeightOfSliverAppBar => 44.0;
 
   static EdgeInsetsGeometry get paddingRecentChatsHeaders => const EdgeInsets.symmetric(horizontal: 16);
