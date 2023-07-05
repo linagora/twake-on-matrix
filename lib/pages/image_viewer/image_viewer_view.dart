@@ -67,6 +67,12 @@ class ImageViewerView extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    IconButton(
+                      icon: Icon(Icons.save_alt, color: LinagoraSysColors.material().onPrimary),
+                      onPressed: () => controller.saveFileAction(context),
+                      color: LinagoraSysColors.material().onPrimary,
+                      tooltip: L10n.of(context)!.saveFile,
+                    ),
                     if (PlatformInfos.isMobile)
                       Builder(
                         builder: (context) => IconButton(
