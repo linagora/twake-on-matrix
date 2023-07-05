@@ -1,9 +1,9 @@
+import 'package:fluffychat/pages/chat_list/bottom_tab_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:vrouter/vrouter.dart';
 import 'package:badges/badges.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_list/bottom_tab_bar.dart';  
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:vrouter/vrouter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 
@@ -20,19 +20,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 1;
 
-  void onDestinationSelected(int selected) {
-    setState(() {
-      selectedIndex = selected;
-      VRouter.of(context).to(BottomTabbar.fromIndex(selected).path);
-      if (selected == BottomTabbar.stories.tabIndex) {
-        Fluttertoast.showToast(
-          msg: "Stories is not ready yet!",
-          gravity: ToastGravity.BOTTOM,
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,13 +35,32 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 80,
               surfaceTintColor: Theme.of(context).colorScheme.surface,
               selectedIndex: BottomTabbar.fromPath(context.vRouter.path).tabIndex,
-              onDestinationSelected: onDestinationSelected,
+              onDestinationSelected: (selected) => onDestinationSelected(
+                context: context,
+                selected: selected,
+              ),
               destinations: getNavigationDestinations(context),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void onDestinationSelected({
+    required int selected, 
+    required BuildContext context
+  }) {
+    setState(() {
+      selectedIndex = selected;
+      VRouter.of(context).to(BottomTabbar.fromIndex(selected).path);
+      if (selected == BottomTabbar.stories.tabIndex) {
+        Fluttertoast.showToast(
+          msg: "Stories is not ready yet!",
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    });
   }
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
@@ -66,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
           label: L10n.of(context)!.contacts,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.chat),
-          label: L10n.of(context)!.chat,
+          icon: const Icon(Icons.chat_outlined),
+          label: L10n.of(context)!.chats,
         ),
         NavigationDestination(
           icon: const Icon(Icons.web_stories_outlined),

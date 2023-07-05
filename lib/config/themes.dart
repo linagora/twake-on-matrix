@@ -123,6 +123,7 @@ abstract class FluffyThemes {
           )
         ),
         appBarTheme: AppBarTheme(
+          scrolledUnderElevation: 0,
           titleSpacing: 0,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,

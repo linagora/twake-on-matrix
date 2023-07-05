@@ -171,8 +171,10 @@ class ChatView extends StatelessWidget {
                 appBar: AppBar(
                   toolbarHeight: 64,
                   surfaceTintColor: Colors.transparent,
-                  leadingWidth: 8 + 24 + 8,
-                  leading: controller.selectMode
+                  leadingWidth: FluffyThemes.isColumnMode(context) ? 16 : 40,
+                  leading: FluffyThemes.isColumnMode(context)
+                    ? const SizedBox(width: 16.0,)
+                    : controller.selectMode
                       ? TwakeIconButton(
                           icon: Icons.close,
                           onPressed: controller.clearSelectedEvents,

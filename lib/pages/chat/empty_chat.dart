@@ -4,8 +4,8 @@ import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_succe
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/empty_chat_view.dart';
-import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
-import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';

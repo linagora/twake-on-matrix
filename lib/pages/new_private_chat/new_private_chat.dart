@@ -7,7 +7,7 @@ import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
-import 'package:fluffychat/presentation/mixin/go_to_direct_chat_mixin.dart';
+import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';

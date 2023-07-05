@@ -5,7 +5,7 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/model/indexed_asset_entity.dart';
 import 'package:matrix/matrix.dart';
