@@ -1,53 +1,45 @@
-import 'package:fluffychat/pages/chat_search/chat_recent_item_widget.dart';
-import 'package:fluffychat/pages/chat_search/chat_search.dart';
-import 'package:fluffychat/pages/chat_search/chat_search_view_style.dart';
+import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
+import 'package:fluffychat/pages/search/recent_item_widget.dart';
+import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:vrouter/vrouter.dart';
 
-class ChatSearchView extends StatefulWidget {
-  final ChatSearchController chatSearchController;
-  const ChatSearchView(this.chatSearchController, {super.key});
+class SearchView extends StatefulWidget {
+  final SearchController searchController;
+  const SearchView(this.searchController, {super.key});
 
   @override
-  State<ChatSearchView> createState() => _ChatSearchViewState();
+  State<SearchView> createState() => _SearchViewState();
 }
 
-class _ChatSearchViewState extends State<ChatSearchView> {
+class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64.0),
-        child: _buildAppBarChatSearch(context)),
+        child: _buildAppBarSearch(context)),
       body: CustomScrollView(
         physics: const ClampingScrollPhysics(),
-        controller: widget.chatSearchController.customScrollController,
+        controller: widget.searchController.customScrollController,
         slivers: [
           SliverAppBar(
             flexibleSpace: FlexibleSpaceBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 100,
-                    color: Colors.red,
-                  ),
-                ],
-              ),
+              title: RecentContactsBannerWidget(searchController: widget.searchController),
               titlePadding: const EdgeInsetsDirectional.only(
                 start: 0.0,
               ),
             ),
-            toolbarHeight: 100,
+            toolbarHeight: 112,
             backgroundColor: Colors.transparent,
             automaticallyImplyLeading: false,
           ),
           SliverAppBar(
-            toolbarHeight: ChatSearchViewStyle.toolbarHeightOfSliverAppBar,
+            toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
             flexibleSpace:  FlexibleSpaceBar(
               title: _recentChatsHeaders(context),
               titlePadding: const EdgeInsetsDirectional.only(
@@ -78,18 +70,18 @@ class _ChatSearchViewState extends State<ChatSearchView> {
   }
 
   Widget _recentChatsWidget() {
-    final rooms = widget.chatSearchController.filteredRoomsForAll;
+    final rooms = widget.searchController.filteredRoomsForAll;
     if (rooms.isEmpty) {
       const SizedBox();
     } else {
       return ListView.builder(
-        padding: ChatSearchViewStyle.paddingRecentChats,
+        padding: SearchViewStyle.paddingRecentChats,
         shrinkWrap: true,
         physics: const ClampingScrollPhysics(),
-        controller: widget.chatSearchController.recentChatsController,
+        controller: widget.searchController.recentChatsController,
         itemCount: rooms.length,
         itemBuilder: (BuildContext context, int i) {
-          return ChatRecentItemWidget(
+          return RecentItemWidget(
             rooms[i],
             key: Key('chat_recent_${rooms[i].id}'),
             onTap: () {},
@@ -101,13 +93,13 @@ class _ChatSearchViewState extends State<ChatSearchView> {
   }
 
 
-  Widget _buildAppBarChatSearch(BuildContext context) {
+  Widget _buildAppBarSearch(BuildContext context) {
     return AppBar(
-      toolbarHeight: ChatSearchViewStyle.toolbarHeightChatSearch,
+      toolbarHeight: SearchViewStyle.toolbarHeightSearch,
       surfaceTintColor: Colors.transparent,
       leadingWidth: double.infinity,
       leading: Padding(
-        padding: ChatSearchViewStyle.paddingLeadingAppBar,
+        padding: SearchViewStyle.paddingLeadingAppBar,
         child: Row(
           children: [
             TwakeIconButton(
@@ -117,7 +109,7 @@ class _ChatSearchViewState extends State<ChatSearchView> {
                 VRouter.of(context).pop();
               },
               paddingAll: 8.0,
-              margin: ChatSearchViewStyle.marginIconBack,
+              margin: SearchViewStyle.marginIconBack,
             ),
             const SizedBox(width: 4.0),
             Expanded(
@@ -128,7 +120,7 @@ class _ChatSearchViewState extends State<ChatSearchView> {
                 enabled: false,
                 decoration: InputDecoration(
                   filled: true,
-                  contentPadding: ChatSearchViewStyle.contentPaddingAppBar,
+                  contentPadding: SearchViewStyle.contentPaddingAppBar,
                   fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
@@ -157,8 +149,8 @@ class _ChatSearchViewState extends State<ChatSearchView> {
   Widget _recentChatsHeaders(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: ChatSearchViewStyle.toolbarHeightOfSliverAppBar,
-      padding: ChatSearchViewStyle.paddingRecentChatsHeaders,
+      height: SearchViewStyle.toolbarHeightOfSliverAppBar,
+      padding: SearchViewStyle.paddingRecentChatsHeaders,
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
       child: Row(
         mainAxisSize: MainAxisSize.min,

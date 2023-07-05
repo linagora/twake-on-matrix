@@ -9,9 +9,17 @@ import 'package:fluffychat/domain/repository/contact_repository.dart';
 class FetchContactsInteractor {
   final contactRepository = getIt.get<ContactRepository>();
 
-  Stream<Either<Failure, GetNetworkContactSuccess>> execute() async* {
+  Stream<Either<Failure, GetNetworkContactSuccess>> execute({
+    int? limit,
+    int? offset,
+  }) async* {
     try {
-      final contacts = await contactRepository.searchContact(query: ContactQuery(keyword: ''));
+      final query = ContactQuery(keyword: '');
+      final contacts = await contactRepository.searchContact(
+        query: query,
+        limit: limit,
+        offset: offset,
+      );
       yield Right(GetNetworkContactSuccess(contacts: contacts.toSet()));
     } catch (e) {
       yield Left(GetNetworkContactFailed(exception: e));

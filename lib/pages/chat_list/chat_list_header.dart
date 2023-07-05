@@ -45,7 +45,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                         : SizedBox(
                             height: ChatListHeaderStyle.searchBarHeight,
                             child: InkWell(
-                              onTap: () => VRouter.of(context).to('/chatSearch'),
+                              onTap: () => VRouter.of(context).to('/search'),
                               child: TextField(
                                 controller: controller.searchChatController,
                                 textInputAction: TextInputAction.search,
