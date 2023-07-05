@@ -8,7 +8,6 @@ import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settin
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/home_screen.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
-import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
@@ -17,6 +16,7 @@ import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart'
 import 'package:fluffychat/pages/login/login.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
+import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
 import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
@@ -175,8 +175,8 @@ class AppRoutes {
                 ),
                 VWidgetWithDependency(
                     di: ContactDI(),
-                    path: '/chatSearch',
-                    widget: const ChatSearch(),
+                    path: '/search',
+                    widget: const Search(),
                     buildTransition: rightToLeftTransition,
                 ),
               ],
@@ -266,8 +266,8 @@ class AppRoutes {
                 ),
                 VWidgetWithDependency(
                     di: ContactDI(),
-                    path: '/chatSearch',
-                    widget: const ChatSearch(),
+                    path: '/search',
+                    widget: const Search(),
                     buildTransition: rightToLeftTransition
                 ),
               ],
