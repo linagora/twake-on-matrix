@@ -43,8 +43,12 @@ extension RoomStatusExtension on Room {
       }
       return L10n.of(context)!.onlineLongTimeAgo;
     }
+
+    final totalMembers = (summary.mInvitedMemberCount ?? 0) +
+      (summary.mJoinedMemberCount ?? 0);
+
     return L10n.of(context)!
-        .countParticipants(summary.mJoinedMemberCount.toString());
+        .countParticipants(totalMembers.toString());
   }
 
   String getLocalizedTypingText(BuildContext context) {
