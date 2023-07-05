@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
+import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
@@ -16,7 +17,7 @@ class ExpansionContactListTile extends StatelessWidget {
 
   const ExpansionContactListTile({
     super.key,
-    required this.contact
+    required this.contact,
   });
 
   @override
@@ -31,7 +32,7 @@ class ExpansionContactListTile extends StatelessWidget {
             children: [
               IgnorePointer(
                 child: Avatar(
-                  mxContent: snapshot.data?.avatarUrl,
+                  mxContent: snapshot.data?.avatarUrl, 
                   name: contact.displayName,
                 ),
               ),
@@ -49,7 +50,15 @@ class ExpansionContactListTile extends StatelessWidget {
                             child: Row(
                               children: [
                                 Flexible(
-                                  child: _buildDisplayName(context, snapshot.data),
+                                  child: BuildDisplayName(
+                                    profileDisplayName: snapshot.data?.displayname,
+                                    contactDisplayName: contact.displayName,
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 17.0,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    )
+                                  ),
                                 ),
                               ],
                             ),
@@ -61,7 +70,7 @@ class ExpansionContactListTile extends StatelessWidget {
                               textColor: Theme.of(context).colorScheme.primary,
                             )
                           ],
-                          const SizedBox(width: 8.0,),
+                          const SizedBox(width: 8.0),
                           if (contact.status != null)
                             ContactStatusWidget(status: contact.status!,),
                         ],
@@ -79,7 +88,7 @@ class ExpansionContactListTile extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           letterSpacing: 0.25,
                           color: LinagoraRefColors.material().neutral[30],
-                        ),)
+                        ))
                   ],
                 ),
               )
@@ -88,29 +97,6 @@ class ExpansionContactListTile extends StatelessWidget {
         },
       ),
     );
-  }
-
-  Widget _displayName(BuildContext context, String displayName) {
-    return Text(
-      displayName,
-      style: TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 17.0,
-        letterSpacing: -0.15,
-        color: Theme.of(context).colorScheme.onSurface,
-        overflow: TextOverflow.ellipsis,
-      )
-    );
-  }
-
-  Widget _buildDisplayName(BuildContext context, ProfileInformation? profile) {
-    if (contact.displayName != null) {
-      return _displayName(context, contact.displayName!);
-    } else if (profile != null) {
-      return _displayName(context, profile.displayname!);
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 
   Future<ProfileInformation?> getProfile(BuildContext context) async {

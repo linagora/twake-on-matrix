@@ -18,9 +18,12 @@ class FetchContactsController with LoadMoreContactsMixin {
   final _loadMoreInternalContacts = getIt.get<LoadMoreInternalContacts>();
   final streamController = StreamController<Either<Failure, GetContactsSuccess>>();  
 
-  void fetchCurrentTomContacts() {
+  void fetchCurrentTomContacts({
+    int? limit,
+    int? offset,
+  }) {
     _fetchContactsInteractor
-      .execute()
+      .execute(limit: limit, offset: offset)
       .listen((event) {
         streamController.add(event);
       });
