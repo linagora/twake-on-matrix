@@ -169,12 +169,19 @@ class ChatInputRow extends StatelessWidget {
                                   child: child,
                                 );
                               },
-                              child: TwakeIconButton(
-                                paddingAll: controller.inputText.isEmpty ? 5.0: 12,
-                                tooltip: "Emojis",
-                                onPressed: () {print;},
-                                icon: Icons.tag_faces,
-                              ),
+                              child: !controller.showEmojiPicker
+                                ? TwakeIconButton(
+                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
+                                    tooltip: L10n.of(context)!.emojis,
+                                    onPressed: () => controller.emojiPickerAction(),
+                                    icon: Icons.tag_faces,
+                                    )
+                                : TwakeIconButton(
+                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
+                                    tooltip: L10n.of(context)!.keyboard,
+                                    onPressed: () => controller.inputFocus.requestFocus(),
+                                    icon: Icons.keyboard,
+                                  ),
                             ),
                           ),
                         ),
