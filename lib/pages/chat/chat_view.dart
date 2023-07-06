@@ -269,58 +269,70 @@ class ChatView extends StatelessWidget {
                             if (controller.room!.canSendDefaultMessages &&
                                 controller.room!.membership == Membership.join)
                               Container(
-                                margin: EdgeInsets.only(
-                                  bottom: bottomSheetPadding,
-                                  left: bottomSheetPadding,
-                                  right: bottomSheetPadding,
-                                ),
                                 constraints: const BoxConstraints(
                                   maxWidth: FluffyThemes.columnWidth * 2.5,
                                 ),
                                 alignment: Alignment.center,
                                 child: controller.room?.isAbandonedDMRoom ==
                                         true
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.all(16),
-                                              foregroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .error,
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                          bottom: bottomSheetPadding,
+                                          left: bottomSheetPadding,
+                                          right: bottomSheetPadding,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            TextButton.icon(
+                                              style: TextButton.styleFrom(
+                                                padding: const EdgeInsets.all(16),
+                                                foregroundColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .error,
+                                              ),
+                                              icon: const Icon(
+                                                Icons.archive_outlined,
+                                              ),
+                                              onPressed: controller.leaveChat,
+                                              label: Text(
+                                                L10n.of(context)!.leave,
+                                              ),
                                             ),
-                                            icon: const Icon(
-                                              Icons.archive_outlined,
+                                            TextButton.icon(
+                                              style: TextButton.styleFrom(
+                                                padding: const EdgeInsets.all(16),
+                                              ),
+                                              icon: const Icon(
+                                                Icons.chat_outlined,
+                                              ),
+                                              onPressed: controller.recreateChat,
+                                              label: Text(
+                                                L10n.of(context)!.reopenChat,
+                                              ),
                                             ),
-                                            onPressed: controller.leaveChat,
-                                            label: Text(
-                                              L10n.of(context)!.leave,
-                                            ),
-                                          ),
-                                          TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.all(16),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.chat_outlined,
-                                            ),
-                                            onPressed: controller.recreateChat,
-                                            label: Text(
-                                              L10n.of(context)!.reopenChat,
-                                            ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       )
                                     : Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const ConnectionStatusHeader(),
-                                          ///Currently we can't support reactions
-                                          // ReactionsPicker(controller),
-                                          ReplyDisplay(controller),
-                                          ChatInputRow(controller),
+                                          ...[
+                                            const ConnectionStatusHeader(),
+                                            // Currently we can't support reactions
+                                            // ReactionsPicker(controller),
+                                            ReplyDisplay(controller),
+                                            ChatInputRow(controller),
+                                          ].map(
+                                            (widget) => Padding(
+                                              padding: EdgeInsets.only(
+                                                left: bottomSheetPadding,
+                                                right: bottomSheetPadding,
+                                              ),
+                                              child: widget,
+                                            ),
+                                          ),
+                                          SizedBox(height: bottomSheetPadding),
                                           ChatEmojiPicker(controller),
                                         ],
                                       ),

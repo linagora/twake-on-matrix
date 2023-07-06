@@ -2652,5 +2652,6 @@
     "documents": "Documents",
     "location": "Location",
     "contact": "Contact",
-    "file": "File"
+    "file": "File",
+    "keyboard": "Keyboard"
 }

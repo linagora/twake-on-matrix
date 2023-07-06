@@ -50,13 +50,16 @@ class TwakeIconButton extends StatelessWidget {
           message: tooltip,
           child: Padding(
             padding: EdgeInsets.all(paddingAll ?? 8.0),
-            child: icon != null 
+            child: icon != null
               ? Icon(
-                icon,
-                size: size,
-                fill: fill,
-                weight: weight)
-              : imagePath != null ? SvgPicture.asset(imagePath!) : null,
+                  icon,
+                  size: size,
+                  fill: fill,
+                  weight: weight,
+                )
+              : imagePath != null
+                  ? SvgPicture.asset(imagePath!)
+                  : null,
           ),
         ),
       ),
