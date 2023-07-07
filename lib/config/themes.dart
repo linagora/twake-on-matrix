@@ -25,49 +25,65 @@ abstract class FluffyThemes {
 
   static var fallbackTextTheme = TextTheme(
     bodyLarge: fallbackTextStyle.copyWith(
-      fontSize: 17,
+      fontWeight: FontWeight.w500,
+      letterSpacing: -0.15,
     ),
+
     bodyMedium: fallbackTextStyle.copyWith(
-      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.25,
     ),
+
     bodySmall: fallbackTextStyle.copyWith(
-      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.4,
     ),
+
     labelLarge: fallbackTextStyle.copyWith(
-      fontSize: 14,
-    ), 
-    labelMedium: fallbackTextStyle.copyWith(
-      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
     ),
+
     labelSmall: fallbackTextStyle.copyWith(
-      fontSize: 11,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.5,
     ),
+
     displayLarge: fallbackTextStyle.copyWith(
-      fontSize: 57,
+      fontWeight: FontWeight.w700,
     ),
+
     displayMedium: fallbackTextStyle.copyWith(
-      fontSize: 45,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
     ),
+
     displaySmall: fallbackTextStyle.copyWith(
-      fontSize: 36,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
     ),
-    headlineLarge: fallbackTextStyle.copyWith(
-      fontSize: 32,
-    ),
+
     headlineMedium: fallbackTextStyle.copyWith(
-      fontSize: 28,
+      fontWeight: FontWeight.w600,
     ),
+
     headlineSmall: fallbackTextStyle.copyWith(
-      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
     ),
+
     titleLarge: fallbackTextStyle.copyWith(
-      fontSize: 22,
+      fontWeight: FontWeight.w600,
     ),
+
     titleMedium: fallbackTextStyle.copyWith(
-      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.15,
     ),
+
     titleSmall: fallbackTextStyle.copyWith(
-      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
     ),
   );
 
@@ -80,8 +96,8 @@ abstract class FluffyThemes {
         useMaterial3: true,
         fontFamily: 'Inter',
         textTheme: brightness == Brightness.light
-                ? Typography.material2021().black.merge(fallbackTextTheme)
-                : Typography.material2021().white.merge(fallbackTextTheme),
+          ? Typography.material2021().black.merge(fallbackTextTheme)
+          : Typography.material2021().white.merge(fallbackTextTheme),
         snackBarTheme: const SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
         ),
@@ -316,10 +332,10 @@ abstract class FluffyThemes {
             : LinagoraSysColors.material().secondaryContainerDark,
         ),
         bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: brightness == Brightness.light 
+          backgroundColor: brightness == Brightness.light
             ? LinagoraSysColors.material().background
             : LinagoraSysColors.material().backgroundDark,
-          surfaceTintColor: brightness == Brightness.light 
+          surfaceTintColor: brightness == Brightness.light
             ? LinagoraSysColors.material().background
             : LinagoraSysColors.material().backgroundDark,
         )
