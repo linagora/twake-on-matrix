@@ -55,7 +55,12 @@ class ContactsTabBodyView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: contactsListSorted
-                  .map<Widget>((contact) => ExpansionContactListTile(contact: contact))
+                  .map<Widget>((contact) => InkWell(
+                    onTap: () {
+                      controller.goToChatScreen(contact);
+                    },
+                    child: ExpansionContactListTile(contact: contact)
+                  ))
                   .toList()..addAll([
                     ValueListenableBuilder(
                       valueListenable: controller.searchContactsController.isSearchModeNotifier,
