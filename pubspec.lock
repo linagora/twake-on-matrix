@@ -876,10 +876,11 @@ packages:
   flutter_matrix_html:
     dependency: "direct main"
     description:
-      name: flutter_matrix_html
-      sha256: "5084ea9fdd1ce32ad7c353d76ecd41b6da5727f50f9ee1052e2fc2acc3e3967b"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "feature/add-pill-builder"
+      resolved-ref: "790652f3ba5d63edc551a929e4b36dd7626fd6f3"
+      url: "git@github.com:sherlockvn/flutter_matrix_html.git"
+    source: git
     version: "1.2.0"
   flutter_native_splash:
     dependency: "direct dev"

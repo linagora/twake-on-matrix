@@ -37,7 +37,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_map: ^3.1.0
-#  flutter_matrix_html: ^1.1.0
   flutter_olm: ^1.2.0
   flutter_openssl_crypto: ^0.1.0
   flutter_ringtone_player: ^3.1.1
@@ -102,7 +101,10 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
-  flutter_matrix_html: ^1.2.0
+  flutter_matrix_html:
+    git:
+      url: git@github.com:sherlockvn/flutter_matrix_html.git
+      ref: feature/add-pill-builder
   overflow_view: ^0.3.1
   json_annotation: ^4.8.1
   contacts_service:
