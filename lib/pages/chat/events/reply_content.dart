@@ -1,3 +1,5 @@
+import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -11,10 +13,12 @@ class ReplyContent extends StatelessWidget {
   final Event replyEvent;
   final bool ownMessage;
   final Timeline? timeline;
+  final ChatController chatController;
 
   const ReplyContent(
     this.replyEvent, {
     this.ownMessage = false,
+    required this.chatController,
     Key? key,
     this.timeline,
   }) : super(key: key);
@@ -49,6 +53,8 @@ class ReplyContent extends StatelessWidget {
         maxLines: 1,
         room: displayEvent.room,
         emoteSize: fontSizeDisplayContent * 1.5,
+        event: timeline!.events.first,
+        chatController: chatController,
       );
     } else {
       replyBody = Text(
@@ -65,6 +71,7 @@ class ReplyContent extends StatelessWidget {
         ),
       );
     }
+    final user = displayEvent.getUser();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -81,12 +88,10 @@ class ReplyContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              FutureBuilder<User?>(
-                future: displayEvent.fetchSenderUser(),
-                builder: (context, snapshot) {
-                  return Text(
-                    '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
-                    maxLines: 1,
+              if (user != null)
+                Text(
+                  '${user.calcDisplayname()}:',
+                  maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -95,9 +100,25 @@ class ReplyContent extends StatelessWidget {
                           : Theme.of(context).colorScheme.primary,
                       fontSize: fontSizeDisplayName,
                     ),
-                  );
-                },
-              ),
+                ),
+              if (displayEvent.getUser() == null)
+                FutureBuilder<User?>(
+                  future: displayEvent.fetchSenderUser(),
+                  builder: (context, snapshot) {
+                    return Text(
+                      '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: ownMessage
+                            ? Theme.of(context).colorScheme.onPrimaryContainer
+                            : Theme.of(context).colorScheme.primary,
+                        fontSize: fontSizeDisplayName,
+                      ),
+                    );
+                  },
+                ),
               replyBody,
             ],
           ),

@@ -1,8 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/pill.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -15,14 +17,18 @@ class HtmlMessage extends StatelessWidget {
   final String html;
   final int? maxLines;
   final Room room;
+  final Event event;
   final TextStyle? defaultTextStyle;
   final TextStyle? linkStyle;
   final double? emoteSize;
   final Widget? bottomWidgetSpan;
+  final ChatController? chatController;
 
   const HtmlMessage({
     Key? key,
     required this.html,
+    this.chatController,
+    required this.event,
     this.maxLines,
     required this.room,
     this.defaultTextStyle,
@@ -163,6 +169,16 @@ class HtmlMessage extends StatelessWidget {
         }
         return {};
       },
-    );
+      pillBuilder: (identifier, url, onTap, getMxcUrl) {
+        if (chatController == null) {
+          return null;
+        }
+        return Pill(
+          identifier: identifier, 
+          chatController: chatController!,
+          url: url, 
+          onTap: onTap,
+        );
+      });    
   }
 }

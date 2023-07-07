@@ -250,6 +250,7 @@ class Message extends StatelessWidget {
                                                                         replyEvent,
                                                                         ownMessage: ownMessage,
                                                                         timeline: timeline,
+                                                                        chatController: controller,
                                                                       ),
                                                                     ),
                                                                   ),

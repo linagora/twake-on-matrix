@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
@@ -269,5 +270,9 @@ extension SendImage on Room {
       }
     }
     return txIdMapToImageFile;
+  }
+
+  User? getUser(mxId) {
+    return getParticipants().firstWhereOrNull((user) => user.id == mxId);
   }
 }
