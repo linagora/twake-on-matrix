@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 11 * * *'
+    - cron: "0 11 * * *"
 
 name: Build
 
@@ -9,8 +9,8 @@ env:
   FLUTTER_VERSION: 3.10.6
 
 jobs:
-  build_debug:
-    name: Build debug version
+  build_debug_mobile:
+    name: Build debug version for mobiles
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -72,7 +72,66 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: twake-on-matrix-dev
+          name: twake-on-matrix-dev-mobile
           path: |
             twake-on-matrix-debug.apk
             Runner.ipa
+
+  build_debug_desktop:
+    name: Build debug version for desktops
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            runner: macos-latest
+          - os: windows
+            runner: windows-latest
+          - os: linux
+            runner: ubuntu-latest
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          flutter pub global activate flutter_distributor
+        shell: bash
+
+      - name: Setup Fastlane (macOS only)
+        uses: ruby/setup-ruby@v1
+        if: matrix.os == 'macos'
+        with:
+          ruby-version: ruby
+          bundler-cache: true
+          working-directory: ${{ matrix.os }}
+
+      - name: Build
+        env:
+          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: ./scripts/build-${{ matrix.os }}-debug.sh
+        shell: bash
+
+      - name: Package
+        run: ./scripts/package-${{ matrix.os }}-debug.sh
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: twake-on-matrix-dev-${{ matrix.os }}
+          path: dist/

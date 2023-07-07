@@ -1,0 +1,21 @@
+display_name: Twake
+
+icon: assets/logo.png
+
+keywords:
+  - Chat
+  - Messaging
+  - Network
+  - Social
+
+generic_name: Twake
+
+categories:
+  - Network
+  - Chat
+  - InstantMessaging
+
+startup_notify: true
+
+include:
+  - libolm.so.3

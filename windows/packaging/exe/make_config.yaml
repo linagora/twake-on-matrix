@@ -1,0 +1,11 @@
+# The value of AppId uniquely identifies this application.
+# Do not use the same AppId value in installers for other applications.
+app_id: 9A8EB9D7-8230-4DB5-B149-18ADD8304B73
+publisher_name: Linagora
+publisher_url: https://github.com/linagora/twake-on-matrix
+display_name: Twake
+create_desktop_icon: true
+install_dir_name: "{autopf}/Twake"
+script_template: inno_setup.iss
+locales:
+  - en
