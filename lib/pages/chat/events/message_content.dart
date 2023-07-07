@@ -202,6 +202,7 @@ class MessageContent extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                 child: HtmlMessage(
+                  event: event,
                   html: html,
                   defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: textColor,
@@ -210,6 +211,7 @@ class MessageContent extends StatelessWidget {
                   linkStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                     fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                    decoration: TextDecoration.underline,
                     decorationColor: textColor.withAlpha(150),
                   ),
                   room: event.room,
@@ -219,8 +221,8 @@ class MessageContent extends StatelessWidget {
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
-                    child: endOfBubbleWidget,
-                  ),
+                    child: endOfBubbleWidget),
+                  chatController: controller,
                 ),
               );
             }

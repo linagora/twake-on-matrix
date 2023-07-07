@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -86,5 +87,9 @@ extension LocalizedBody on Event {
       return _getPlaceHolderMatrixFile(this); 
     }
     return null;
+  }
+
+  User? getUser() {
+    return room.getParticipants().firstWhereOrNull((user) => user.id == senderId);
   }
 }

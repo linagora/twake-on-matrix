@@ -34,6 +34,7 @@ class ReplyDisplay extends StatelessWidget {
                 ? ReplyContent(
                     controller.replyEvent!,
                     timeline: controller.timeline!,
+                    chatController: controller,
                   )
                 : _EditContent(
                     controller.editEvent?.getDisplayEvent(controller.timeline!),
