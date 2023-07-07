@@ -9,8 +9,8 @@ env:
 name: Release app
 
 jobs:
-  release:
-    name: Release on stores
+  release_mobile:
+    name: Release on mobile stores
     runs-on: ${{ matrix.runner }}
     environment: prod
 
@@ -83,3 +83,120 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         run: ../scripts/release-ios-testflight.sh
         working-directory: ${{ matrix.os }}
+
+  package_desktop:
+    name: Package app on desktops
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            runner: macos-latest
+          - os: windows
+            runner: windows-latest
+          - os: linux
+            runner: ubuntu-latest
+      fail-fast: false
+    environment: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          flutter pub global activate flutter_distributor
+        shell: bash
+
+      - name: Setup Fastlane (macOS only)
+        uses: ruby/setup-ruby@v1
+        if: matrix.os == 'macos'
+        with:
+          ruby-version: ruby
+          bundler-cache: true
+          working-directory: ${{ matrix.os }}
+
+      - name: Build
+        env:
+          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: ./scripts/build-${{ matrix.os }}.sh
+        shell: bash
+
+      - name: Package
+        run: ./scripts/package-${{ matrix.os }}.sh
+        shell: bash
+
+      - name: Prepare files for release
+        env:
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+        run: |
+          case "$RUNNER_OS" in
+            Linux)
+              cp dist/*/* "twake-$GITHUB_REF_NAME-linux-amd64.AppImage";;
+            macOS)
+              cp dist/*/* "twake-$GITHUB_REF_NAME-macos-amd64.dmg"
+              # Notarize the app
+              cd macos && bundle exec fastlane notarization
+              ;;
+            Windows)
+              cp dist/*/* "twake-$GITHUB_REF_NAME-windows-amd64.exe";;
+          esac
+        shell: bash
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: twake-release
+          path: twake-${{ github.ref_name }}*
+
+  release_desktop:
+    name: Release on desktops
+    runs-on: ubuntu-latest
+    needs:
+      - package_desktop
+    environment: prod
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: twake-release
+
+      - name: Calculate checksums
+        id: shasum
+        run: |
+          shasum -a 256 -b twake-$GITHUB_REF_NAME* > SHA256SUMS
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "checksum<<$EOF" >> $GITHUB_OUTPUT
+          echo "$(cat SHA256SUMS)" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            See [CHANGELOG.md](https://github.com/tk-nguyen/twake-on-matrix/blob/${{ github.ref_name }}/CHANGELOG.md) for full changelogs.
+
+            ### Checksums
+
+            ```
+            ${{ steps.shasum.outputs.checksum }}
+            ```
+          files: |
+            twake-${{ github.ref_name }}*
+            SHA256SUMS
