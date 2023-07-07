@@ -91,7 +91,7 @@ dependencies:
   # video_compress: ^3.1.1
   video_compress:
     git:
-      url: git@github.com:SpectoraSoftware/VideoCompress.git
+      url: https://github.com/SpectoraSoftware/VideoCompress.git
       ref: master
   video_player: ^2.2.18
   vrouter: ^1.2.0+21
@@ -101,15 +101,16 @@ dependencies:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
       ref: master
+  # To DO: Change to upstream when the PR is merged: https://github.com/Sorunome/flutter_matrix_html/pull/11
   flutter_matrix_html:
     git:
-      url: git@github.com:sherlockvn/flutter_matrix_html.git
+      url: https://github.com/sherlockvn/flutter_matrix_html.git
       ref: feature/add-pill-builder
   overflow_view: ^0.3.1
   json_annotation: ^4.8.1
   contacts_service:
     git:
-      url: git@github.com:linagora/flutter_contacts.git
+      url: https://github.com/linagora/flutter_contacts.git
       ref: master
   equatable: ^2.0.5
   get_it: ^7.2.0
