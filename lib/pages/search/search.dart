@@ -14,9 +14,12 @@ import 'package:fluffychat/pages/search/search_controller.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -31,9 +34,9 @@ class Search extends StatefulWidget {
 
 class SearchController extends State<Search>  with ComparablePresentationSearchMixin, LoadMoreSearchMixin {
 
-  static const int limitRecentChats = 3;
-  static const int limitContacts = 30;
-  static const int limitRecentContacts = 7;
+  static const int limitPrefetchedRecentChats = 3;
+  static const int limitSearchingPrefetchedRecentContacts = 30;
+  static const int limitPrefetchedRecentContacts = 7;
 
   bool isSearching = false;
   bool isSearchMode = false;
@@ -87,10 +90,11 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
 
   void _getContactAndRecentChat() {
     _searchContactsAndRecentChatInteractor.execute(
-      context: context,
+      rooms: Matrix.of(context).client.rooms,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
       keyword: '',
-      limitRecentChats: limitRecentChats,
-      limitContacts: limitContacts,
+      limitRecentChats: limitPrefetchedRecentChats,
+      limitContacts: limitSearchingPrefetchedRecentContacts,
     ).listen((event) {
       getContactAndRecentChatStream.add(event);
     });
@@ -122,7 +126,7 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
 
   void listenSearchContactAndRecentChat() {
     searchContactAndRecentChatController?.getContactAndRecentChatStream.stream.listen((event) {
-      Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
+      Logs().d('SearchController::getContactAndRecentChatStream() - event: $event');
       getContactAndRecentChatStream.add(event);
     });
   }
@@ -149,13 +153,17 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
   @override
   void initState() {
     searchContactAndRecentChatController = SearchContactAndRecentChatController(context);
-    searchContactAndRecentChatController?.init();
     isSearchModeNotifier = ValueNotifier(false);
     listenContactsStartList();
     listenSearchContactAndRecentChat();
     super.initState();
-    _fetchCurrentTomContacts(limit: limitRecentContacts);
-    _getContactAndRecentChat();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        searchContactAndRecentChatController?.init();
+        _fetchCurrentTomContacts(limit: limitPrefetchedRecentContacts);
+        _getContactAndRecentChat();
+      }
+    });
   }
 
   @override
