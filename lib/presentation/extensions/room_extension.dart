@@ -7,8 +7,13 @@ import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 
@@ -56,7 +61,7 @@ extension SendImage on Room {
       await handleImageFakeSync(fakeImageEvent);
       rethrow;
     }
-    
+
     final encryptedService = EncryptedService();
     final tempDir = await getTemporaryDirectory();
     final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
@@ -66,9 +71,9 @@ extension SendImage on Room {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
       await handleImageFakeSync(fakeImageEvent);
-      
+
       encryptedFileInfo = await encryptedService.encryptFile(
-        fileInfo: fileInfo, 
+        fileInfo: fileInfo,
         outputFile: tempEncryptedFile,
       );
       tempfileInfo = FileInfo(fileInfo.fileName, tempEncryptedFile.path, fileInfo.fileSize);
@@ -102,9 +107,9 @@ extension SendImage on Room {
 
     if (encryptedFileInfo != null) {
       encryptedFileInfo = EncryptedFileInfo(
-        key: encryptedFileInfo.key, 
-        version: encryptedFileInfo.version, 
-        initialVector: encryptedFileInfo.initialVector, 
+        key: encryptedFileInfo.key,
+        version: encryptedFileInfo.version,
+        initialVector: encryptedFileInfo.initialVector,
         hashes: encryptedFileInfo.hashes,
         url: uploadResp.toString(),
       );
@@ -146,7 +151,7 @@ extension SendImage on Room {
     // in order to have placeholder, this line must have,
     // otherwise the sending event will be removed from timeline
     sendingFilePlaceholders[txid] = MatrixFile(
-      name: fileInfo.fileName, 
+      name: fileInfo.fileName,
       filePath: fileInfo.filePath,
     );
     // Create a fake Event object as a placeholder for the uploading file:
@@ -219,5 +224,35 @@ extension SendImage on Room {
 
   User? getUser(mxId) {
     return getParticipants().firstWhereOrNull((user) => user.id == mxId);
+  }
+
+  bool isShowInChatList() {
+    return _isDirectChatHaveMessage() || _isGroupChat();
+  }
+
+  bool _isGroupChat() {
+    return !isDirectChat;
+  }
+
+  bool _isDirectChatHaveMessage() {
+    return isDirectChat && _isLastEventInRoomIsMessage();
+  }
+
+  bool _isLastEventInRoomIsMessage() {
+    return [
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+    ].contains(lastEvent?.type);
+  }
+
+  PresentationSearch toPresentationSearch(BuildContext context) {
+    return PresentationSearch(
+      displayName: getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+      roomSummary: summary,
+      directChatMatrixID: directChatMatrixID,
+      matrixId: id,
+      searchTypeEnum: SearchTypeEnum.recentChat
+    );
   }
 }
