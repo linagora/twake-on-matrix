@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_search.dart';
 
 extension PresentaionContactExtension on PresentationContact {
 
@@ -21,5 +21,14 @@ extension PresentaionContactExtension on PresentationContact {
     }
 
     return false;
+  }
+
+  PresentationSearch toPresentationSearch() {
+    return PresentationSearch(
+      email: email,
+      displayName: displayName,
+      directChatMatrixID: matrixId,
+      searchTypeEnum: SearchTypeEnum.contact,
+    );
   }
 }
