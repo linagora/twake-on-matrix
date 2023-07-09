@@ -4,7 +4,11 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
+import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -274,5 +278,35 @@ extension SendImage on Room {
 
   User? getUser(mxId) {
     return getParticipants().firstWhereOrNull((user) => user.id == mxId);
+  }
+
+  bool isShowInChatList() {
+    return _isDirectChatHaveMessage() || _isGroupChat();
+  }
+
+  bool _isGroupChat() {
+    return !isDirectChat;
+  }
+
+  bool _isDirectChatHaveMessage() {
+    return isDirectChat && _isLastEventInRoomIsMessage();
+  }
+
+  bool _isLastEventInRoomIsMessage() {
+    return [
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+    ].contains(lastEvent?.type);
+  }
+
+  PresentationSearch toPresentationSearch(BuildContext context) {
+    return PresentationSearch(
+      displayName: getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+      roomSummary: summary,
+      directChatMatrixID: directChatMatrixID,
+      matrixId: id,
+      searchTypeEnum: SearchTypeEnum.recentChat
+    );
   }
 }
