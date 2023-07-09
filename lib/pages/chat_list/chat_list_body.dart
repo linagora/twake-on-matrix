@@ -63,6 +63,7 @@ class ChatListViewBody extends StatelessWidget {
             );
           }
           if (controller.waitForFirstSync && client.prevBatch != null) {
+            controller.joinInviteDirectChats();
             final rooms = controller.filteredRoomsForAll;
             const displayStoriesHeader = false;
             if (rooms.isEmpty && !controller.isSearchMode) {

@@ -232,6 +232,17 @@ class ChatListController extends State<ChatList>
     });
   }
 
+  void joinInviteDirectChats() {
+    Future.wait(Matrix.of(context).client.rooms.map(joinRoom));
+  }
+
+  Future<void> joinRoom(Room room) async {
+    final isRoomInvited = !room.isArchived && room.membership == Membership.invite;
+    if (isRoomInvited && room.isDirectChat) {
+      await room.join();
+    }
+  }
+
   void onSearchEnter(String text) {
     if (text.isEmpty) {
       cancelSearch(unfocus: false);
