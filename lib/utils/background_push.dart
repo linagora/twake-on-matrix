@@ -145,9 +145,6 @@ class BackgroundPush {
     if (deviceAppId.length > 64) {
       deviceAppId = deviceAppId.substring(0, 64);
     }
-    if (!useDeviceSpecificAppId && PlatformInfos.isAndroid) {
-      appId += '.data_message';
-    }
     final thisAppId = useDeviceSpecificAppId ? deviceAppId : appId;
     if (gatewayUrl != null && token != null) {
       final currentPushers = pushers.where((pusher) => pusher.pushkey == token);
