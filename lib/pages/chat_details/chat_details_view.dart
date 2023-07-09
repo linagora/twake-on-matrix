@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -35,8 +36,7 @@ class ChatDetailsView extends StatelessWidget {
     }
 
     controller.members!.removeWhere((u) => u.membership == Membership.leave);
-    final actualMembersCount = (room.summary.mInvitedMemberCount ?? 0) +
-        (room.summary.mJoinedMemberCount ?? 0);
+    final actualMembersCount = room.summary.actualMembersCount;
     final canRequestMoreMembers =
         controller.members!.length < actualMembersCount;
     final iconColor = Theme.of(context).textTheme.bodyLarge!.color;

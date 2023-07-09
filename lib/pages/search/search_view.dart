@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -6,6 +9,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
 class SearchView extends StatefulWidget {
@@ -70,26 +74,44 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget _recentChatsWidget() {
-    final rooms = widget.searchController.filteredRoomsForAll;
-    if (rooms.isEmpty) {
-      const SizedBox();
-    } else {
-      return ListView.builder(
-        padding: SearchViewStyle.paddingRecentChats,
-        shrinkWrap: true,
-        physics: const ClampingScrollPhysics(),
-        controller: widget.searchController.recentChatsController,
-        itemCount: rooms.length,
-        itemBuilder: (BuildContext context, int i) {
-          return RecentItemWidget(
-            rooms[i],
-            key: Key('chat_recent_${rooms[i].id}'),
-            onTap: () {},
+    return StreamBuilder<Either<Failure, GetContactAndRecentChatSuccess>>(
+        stream: widget.searchController.contactsAndRecentChatStreamController.stream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+          }
+
+          if (snapshot.hasError || snapshot.data!.isLeft()) {
+            return const SizedBox();
+          }
+
+          final contactsList = widget.searchController.getContactsAndRecentChatStream(snapshot.data!);
+
+          if (widget.searchController.isSearchMode) {
+            contactsList.sort((pre, cur) => widget.searchController.comparePresentationSearch(pre, cur));
+          }
+
+          Logs().d("SearchView:_recentChatsWidget(): --- contactsListSorted $contactsList");
+
+          return ListView.builder(
+            padding: SearchViewStyle.paddingRecentChats,
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            controller: widget.searchController.recentChatsController,
+            itemCount: contactsList.length,
+            itemBuilder: (BuildContext context, int i) {
+              return RecentItemWidget(
+                searchController: widget.searchController,
+                presentationSearch: contactsList[i],
+                key: Key('chat_recent_${contactsList[i].matrixId}'),
+                onTap: () {
+                  widget.searchController.goToChatScreen(contactsList[i]);
+                },
+              );
+            },
           );
-        },
-      );
-    }
-    return const SizedBox();
+        }
+    );
   }
 
 
@@ -114,10 +136,9 @@ class _SearchViewState extends State<SearchView> {
             const SizedBox(width: 4.0),
             Expanded(
               child: TextField(
-                // controller: controller.searchChatController,
+                controller: widget.searchController.searchContactAndRecentChatController?.textEditingController,
                 textInputAction: TextInputAction.search,
-                onChanged: (value) {},
-                enabled: false,
+                enabled: true,
                 decoration: InputDecoration(
                   filled: true,
                   contentPadding: SearchViewStyle.contentPaddingAppBar,

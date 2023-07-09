@@ -6,6 +6,9 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
 import 'package:fluffychat/domain/usecase/search/search_interactor.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -23,16 +26,10 @@ class SearchContactAndRecentChatController {
   void Function(String)? onSearchKeywordChanged;
   late final isSearchModeNotifier = ValueNotifier(false);
 
-
-
   void init() {
     _initializeDebouncer();
     textEditingController.addListener(() {
-      if (textEditingController.text.isNotEmpty) {
-        isSearchModeNotifier.value = true;
-      } else {
-        isSearchModeNotifier.value = false;
-      }
+      isSearchModeNotifier.value  = textEditingController.text.isNotEmpty;
       onSearchBarChanged(textEditingController.text);
     });
   }
@@ -49,20 +46,26 @@ class SearchContactAndRecentChatController {
       if (onSearchKeywordChanged != null) {
         onSearchKeywordChanged!(textEditingController.text);
       }
-      fetchLookupContacts();
+      final enableSearch = searchKeyword.isNotEmpty && searchKeyword != '';
+      fetchLookupContacts(
+        enableSearch: enableSearch,
+        limitRecentChats: !enableSearch ? 3 : null
+      );
     });
   }
 
   void fetchLookupContacts({
     int? limitContacts,
     int? limitRecentChats,
+    bool enableSearch = false,
   }) {
     _searchContactsAndRecentChatInteractor.execute(
       keyword: searchKeyword,
-      context: context,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+      rooms: Matrix.of(context).client.rooms,
       limitContacts: limitContacts,
       limitRecentChats: limitRecentChats,
-      enableSearch: true,
+      enableSearch: enableSearch,
     ).listen((event) {
       getContactAndRecentChatStream.add(event);
     });

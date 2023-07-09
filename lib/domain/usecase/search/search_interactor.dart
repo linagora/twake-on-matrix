@@ -10,10 +10,6 @@ import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/room_list_extension.dart';
 import 'package:fluffychat/presentation/model/presentation_search.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 
 class SearchContactsAndRecentChatInteractor {
@@ -22,7 +18,8 @@ class SearchContactsAndRecentChatInteractor {
   SearchContactsAndRecentChatInteractor();
 
   Stream<Either<Failure, GetContactAndRecentChatSuccess>> execute({
-    required BuildContext context,
+    required List<Room> rooms,
+    required MatrixLocalizations matrixLocalizations,
     required String keyword,
     int? limitContacts,
     int? limitRecentChats,
@@ -30,38 +27,47 @@ class SearchContactsAndRecentChatInteractor {
   }) async* {
     try {
       if (enableSearch) {
-        final recentChat = await _searchRecentChat(context, keyword);
+        final recentChat = await _searchRecentChat(rooms: rooms, matrixLocalizations: matrixLocalizations, keyword: keyword);
         final contacts = await contactRepository.searchContact(query: ContactQuery(keyword: keyword), limit: limitContacts);
 
         final presentationSearches = _comparePresentationSearches(
-          recentChat.toPresentationSearchList(context),
-          contacts.expand((contact) => contact.toPresentationContacts()).toList().toPresentationSearchList()
+          recentChat.toPresentationSearchList(matrixLocalizations),
+          contacts.expand((contact) => contact.toPresentationContacts())
+            .toList()
+            .toPresentationSearchList()
         );
         yield Right(GetContactAndRecentChatSuccess(presentationSearches: presentationSearches));
       } else {
-        final rooms = await _getRecentChat(context, limitRecentChats: limitRecentChats);
-        yield Right(GetContactAndRecentChatSuccess(presentationSearches: rooms.toPresentationSearchList(context)));
+        final recentChat = await _getRecentChat(rooms: rooms, limitRecentChats: limitRecentChats);
+        yield Right(GetContactAndRecentChatSuccess(presentationSearches: recentChat.toPresentationSearchList(matrixLocalizations)));
       }
     } catch (e) {
       yield Left(GetContactAndRecentChatFailed(exception: e));
     }
   }
 
-  Future<List<Room>> _getRecentChat(BuildContext context, {int? limitRecentChats}) async {
-    return Matrix.of(context).client.rooms.where((room) => !room.isSpace && !room.isStoryRoom)
+  Future<List<Room>> _getRecentChat({
+    required List<Room> rooms,
+    int? limitRecentChats
+  }) async {
+    return rooms.where((room) => !room.isSpace && !room.isStoryRoom)
       .where((room) => room.isShowInChatList())
       .take(limitRecentChats ?? 0)
       .toList();
   }
 
-  Future<List<Room>> _searchRecentChat(BuildContext context, String keyword) async {
-    return Matrix.of(context).client.rooms.where((room) => !room.isSpace && !room.isStoryRoom)
-      .where((room) => room.isShowInChatList())
+  Future<List<Room>> _searchRecentChat({
+    required List<Room> rooms,
+    required MatrixLocalizations matrixLocalizations,
+    required String keyword,
+  }) async {
+    return rooms.where((room) => !room.isSpace && !room.isStoryRoom)
       .where((room) =>
-        room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!))
+        room.getLocalizedDisplayname(matrixLocalizations)
         .toLowerCase()
         .contains(keyword.toLowerCase())
-    ).toList();
+        && room.isShowInChatList()
+      ).toList();
   }
 
   List<PresentationSearch> _comparePresentationSearches(List<PresentationSearch> recentChat, List<PresentationSearch> contacts) {

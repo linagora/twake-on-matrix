@@ -8,8 +8,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/presentation/model/presentation_search.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -246,13 +244,13 @@ extension SendImage on Room {
     ].contains(lastEvent?.type);
   }
 
-  PresentationSearch toPresentationSearch(BuildContext context) {
+  PresentationSearch toPresentationSearch(MatrixLocalizations matrixLocalizations) {
     return PresentationSearch(
-      displayName: getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+      displayName: getLocalizedDisplayname(matrixLocalizations),
       roomSummary: summary,
       directChatMatrixID: directChatMatrixID,
       matrixId: id,
-      searchTypeEnum: SearchTypeEnum.recentChat
+      searchElementTypeEnum: SearchElementTypeEnum.recentChat
     );
   }
 }

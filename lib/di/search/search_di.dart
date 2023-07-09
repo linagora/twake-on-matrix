@@ -20,19 +20,19 @@ class SearchDI extends BaseDI {
   void setUp(GetIt get) {
     Logs().d('SearchDI::setUp()');
 
-    get.registerFactory<TomContactAPI>(() => TomContactAPI());
+    get.registerSingleton<TomContactAPI>(TomContactAPI());
 
-    get.registerFactory<TomContactsDatasource>(() => TomContactsDatasourceImpl());
+    get.registerSingleton<TomContactsDatasource>(TomContactsDatasourceImpl());
 
-    get.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
+    get.registerSingleton<ContactRepository>(TomContactRepositoryImpl());
 
-    get.registerFactory<LookupContactsInteractor>(() => LookupContactsInteractor());
+    get.registerSingleton<LookupContactsInteractor>(LookupContactsInteractor());
 
-    get.registerFactory<FetchContactsInteractor>(() => FetchContactsInteractor());
+    get.registerSingleton<FetchContactsInteractor>(FetchContactsInteractor());
 
-    get.registerFactory<LoadMoreInternalContacts>(() => LoadMoreInternalContacts());
+    get.registerSingleton<LoadMoreInternalContacts>(LoadMoreInternalContacts());
 
-    get.registerFactory<SearchContactsAndRecentChatInteractor>(() => SearchContactsAndRecentChatInteractor());
+    get.registerSingleton<SearchContactsAndRecentChatInteractor>(SearchContactsAndRecentChatInteractor());
 
     Logs().d('SearchDI::setUp() - done');
   }
