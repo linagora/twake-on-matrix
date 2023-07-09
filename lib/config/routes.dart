@@ -1,5 +1,6 @@
 import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
+import 'package:fluffychat/di/search/search_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -34,6 +35,7 @@ import 'package:fluffychat/widgets/layouts/loading_view.dart';
 import 'package:fluffychat/widgets/layouts/side_view_layout.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
+import 'package:fluffychat/widgets/vwidget_with_dependencies.dart';
 import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
@@ -173,11 +175,11 @@ class AppRoutes {
                     ),
                   ]
                 ),
-                VWidgetWithDependency(
-                    di: ContactDI(),
-                    path: '/search',
-                    widget: const Search(),
-                    buildTransition: rightToLeftTransition,
+                VWidgetWithDependencies(
+                  dies: [SearchDI()],
+                  path: '/search',
+                  widget: const Search(),
+                  buildTransition: rightToLeftTransition,
                 ),
               ],
             )
@@ -264,11 +266,11 @@ class AppRoutes {
                     ),
                   ],
                 ),
-                VWidgetWithDependency(
-                    di: ContactDI(),
-                    path: '/search',
-                    widget: const Search(),
-                    buildTransition: rightToLeftTransition
+                VWidgetWithDependencies(
+                  dies: [SearchDI()],
+                  path: '/search',
+                  widget: const Search(),
+                  buildTransition: rightToLeftTransition
                 ),
               ],
             ),
