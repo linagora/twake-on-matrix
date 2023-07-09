@@ -9,6 +9,7 @@ import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
+import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
@@ -132,6 +133,7 @@ class ChatListController extends State<ChatList>
     .client
     .rooms
     .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
+    .where((room) => room.isShowInChatList())
     .toList();
 
   bool isSearchMode = false;

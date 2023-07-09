@@ -4,7 +4,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_search.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +27,9 @@ class RecentContactsBannerWidget extends StatelessWidget {
           return const SizedBox();
         }
 
-        final contactsList = searchController.fetchContactsController.getContactsFromFetchStream(snapshot.data!);
+        final contactsList = searchController.getContactsFromFetchStream(snapshot.data!);
 
-        final contactsListSorted = contactsList.sorted((pre, next) => searchController.comparePresentationContacts(pre, next));
+        final contactsListSorted = contactsList.sorted((pre, next) => searchController.comparePresentationSearch(pre, next));
 
         if (contactsListSorted.isEmpty) {
           return const SizedBox();
@@ -42,7 +42,7 @@ class RecentContactsBannerWidget extends StatelessWidget {
           itemCount: contactsListSorted.length,
           itemBuilder: (context, index) {
             return ChatRecentContactItemWidget(
-              contact: contactsListSorted[index],
+              presentationSearch: contactsListSorted[index],
               searchController: searchController,
             );
           },
@@ -54,13 +54,13 @@ class RecentContactsBannerWidget extends StatelessWidget {
 
 class ChatRecentContactItemWidget extends StatelessWidget {
   final SearchController searchController;
-  final PresentationContact contact;
-  const ChatRecentContactItemWidget({super.key, required this.contact, required this.searchController});
+  final PresentationSearch presentationSearch;
+  const ChatRecentContactItemWidget({super.key, required this.presentationSearch, required this.searchController});
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ProfileInformation?>(
-      future: searchController.getProfile(context, contact),
+      future: searchController.getProfile(context, presentationSearch),
       builder: (context, snapshot) {
         return SizedBox(
           width: RecentContactsBannerWidgetStyle.chatRecentContactItemWidth,
@@ -71,14 +71,14 @@ class ChatRecentContactItemWidget extends StatelessWidget {
                 width: RecentContactsBannerWidgetStyle.avatarWidthSize,
                 child: Avatar(
                   mxContent: snapshot.data?.avatarUrl,
-                  name: contact.displayName,
+                  name: presentationSearch.displayName,
                 ),
               ),
               Padding(
                 padding: RecentContactsBannerWidgetStyle.chatRecentContactItemPadding,
                 child: BuildDisplayName(
                   profileDisplayName: snapshot.data?.displayname,
-                  contactDisplayName: contact.displayName
+                  contactDisplayName: presentationSearch.displayName
                 ),
               ),
             ],

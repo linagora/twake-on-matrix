@@ -28,7 +28,7 @@ extension PresentaionContactExtension on PresentationContact {
       email: email,
       displayName: displayName,
       directChatMatrixID: matrixId,
-      searchTypeEnum: SearchTypeEnum.contact,
+      searchElementTypeEnum: SearchElementTypeEnum.contact,
     );
   }
 }

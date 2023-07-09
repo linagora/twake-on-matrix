@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:matrix/matrix.dart';
 
-enum SearchTypeEnum {
+enum SearchElementTypeEnum {
   contact,
   recentChat,
 }
@@ -14,7 +14,7 @@ class PresentationSearch extends Equatable {
 
   final String? matrixId;
 
-  final SearchTypeEnum? searchTypeEnum;
+  final SearchElementTypeEnum? searchElementTypeEnum;
 
   final RoomSummary? roomSummary;
 
@@ -24,19 +24,19 @@ class PresentationSearch extends Equatable {
     this.email,
     this.displayName,
     this.matrixId,
-    this.searchTypeEnum,
+    this.searchElementTypeEnum,
     this.roomSummary,
     this.directChatMatrixID
   });
 
-  bool get isContact => searchTypeEnum == SearchTypeEnum.contact;
+  bool get isContact => searchElementTypeEnum == SearchElementTypeEnum.contact;
 
   @override
   List<Object?> get props => [
     email,
     displayName,
     matrixId,
-    searchTypeEnum,
+    searchElementTypeEnum,
     roomSummary,
     directChatMatrixID
   ];
