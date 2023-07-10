@@ -21,6 +21,7 @@ import 'verification_request_content.dart';
 
 class Message extends StatelessWidget {
   final Event event;
+  final Event? previousEvent;
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTab;
@@ -34,6 +35,7 @@ class Message extends StatelessWidget {
 
   const Message(
     this.event, {
+    this.previousEvent,
     this.nextEvent,
     this.longPressSelect = false,
     this.onSelect,
@@ -78,14 +80,6 @@ class Message extends StatelessWidget {
         final displayTime = event.type == EventTypes.RoomCreate ||
             nextEvent == null ||
             !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-        final sameSender = nextEvent != null &&
-                [
-                  EventTypes.Message,
-                  EventTypes.Sticker,
-                  EventTypes.Encrypted,
-                ].contains(nextEvent!.type)
-            ? nextEvent!.senderId == event.senderId && !displayTime
-            : false;
         final textColor = Theme.of(context).colorScheme.onBackground;
         final rowMainAxisAlignment =
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
@@ -107,7 +101,7 @@ class Message extends StatelessWidget {
         }.contains(event.messageType);
 
         final rowChildren = <Widget>[
-          _placeHolderWidget(sameSender, ownMessage, event),
+          _placeHolderWidget(isSameSender(previousEvent, event), ownMessage, event),
           Expanded(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -450,23 +444,9 @@ class Message extends StatelessWidget {
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
     if (controller.selectMode || event.room.isDirectChat) {
       return const SizedBox();
-    } else if (sameSender || ownMessage) {
-      return SizedBox(
-        width: MessageStyle.avatarSize,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Center(
-            child: SizedBox(
-              width: MessageStyle.errorStatusPlaceHolderWidth,
-              height: MessageStyle.errorStatusPlaceHolderHeight,
-              child: event.status == EventStatus.error
-                  ? const Icon(Icons.error, color: Colors.red)
-                  : null,
-            ),
-          ),
-        ),
-      );
-    } else {
+    }
+
+    if (sameSender && !ownMessage) {
       return FutureBuilder<User?>(
         future: event.fetchSenderUser(),
         builder: (context, snapshot) {
@@ -481,6 +461,22 @@ class Message extends StatelessWidget {
         },
       );
     }
+
+    return SizedBox(
+      width: MessageStyle.avatarSize,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 4.0),
+        child: Center(
+          child: SizedBox(
+            width: MessageStyle.errorStatusPlaceHolderWidth,
+            height: MessageStyle.errorStatusPlaceHolderHeight,
+            child: event.status == EventStatus.error
+                ? const Icon(Icons.error, color: Colors.red)
+                : null,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
@@ -515,6 +511,28 @@ class Message extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Check if the sender of the current event is the same as the previous event.
+  bool isSameSender(Event? previousEvent, Event currentEvent) {
+    // If the previous event is null, it is assumed that the message is the newest.
+    if (previousEvent == null) {
+      return true;
+    }
+
+    final isPreviousEventMessage = {
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.Redaction,
+    }.contains(previousEvent.type);
+
+    // Ignoring events that are not messages, stickers, encrypted or redaction.
+    if (!isPreviousEventMessage) {
+      return true;
+    }
+
+    return previousEvent.senderId != currentEvent.senderId;
   }
 }
 
