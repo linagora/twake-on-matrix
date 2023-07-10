@@ -448,7 +448,7 @@ class Message extends StatelessWidget {
   }
 
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
-    if (controller.selectMode) {
+    if (controller.selectMode || event.room.isDirectChat) {
       return const SizedBox();
     } else if (sameSender || ownMessage) {
       return SizedBox(
