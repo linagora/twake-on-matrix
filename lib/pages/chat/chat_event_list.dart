@@ -52,7 +52,9 @@ class ChatEventList extends StatelessWidget {
                 controller: controller.scrollController,
                 physics: const ClampingScrollPhysics(),
                 child: controller.room?.isDirectChat ?? true
-                  ? const DirectChatEmptyView()
+                  ? DirectChatEmptyView(
+                      onTap: () => controller.inputFocus.requestFocus(),
+                  )
                   : const GroupChatEmptyView(),
               ),
             ),
