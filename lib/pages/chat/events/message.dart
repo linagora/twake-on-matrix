@@ -390,57 +390,58 @@ class Message extends StatelessWidget {
           children: rowChildren,
         );
 
-        return Swipeable(
-          key: ValueKey(event.eventId),
-          background: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: Center(
-              child: Icon(Icons.reply_outlined),
-            ),
-          ),
-          direction: SwipeDirection.endToStart,
-          onSwipe: onSwipe,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: ownMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              if (displayTime)
-                Center(
-                  child: Material(
-                    color: displayTime
-                        ? Colors.transparent
-                        : Theme.of(context)
-                        .colorScheme
-                        .background
-                        .withOpacity(0.33),
-                    borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                      child: Text(
-                        event.originServerTs.localizedTime(context).toUpperCase(),
-                        style: MessageStyle.displayTime(context),
-                      ),
-                    ),
-                  ),
-                ),
-              GestureDetector(
-                onLongPress: () => controller.selectMode ? onSelect!(event) : null,
-                onTap: () => controller.selectMode ? onSelect!(event) : null,
-                child: Center(
+        return Column(
+          children: [
+            if (displayTime)
+              Center(
+                child: Material(
+                  color: displayTime
+                      ? Colors.transparent
+                      : Theme.of(context).colorScheme.background.withOpacity(0.33),
+                  borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+                  clipBehavior: Clip.antiAlias,
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      left: selected ? 0 : 8.0,
-                      right: selected ? 0 : ownMessage ? 8.0 : 16.0,
-                      top: selected ? 0 : 1.0,
-                      bottom: selected ? 0 : 1.0,
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    child: Text(
+                      event.originServerTs.localizedTime(context).toUpperCase(),
+                      style: MessageStyle.displayTime(context),
                     ),
-                    child: _messageSelectedWidget(context, row),
                   ),
                 ),
               ),
-            ],
-          ),
+            Swipeable(
+              key: ValueKey(event.eventId),
+              background: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                child: Center(
+                  child: Icon(Icons.reply_outlined),
+                ),
+              ),
+              direction: SwipeDirection.endToStart,
+              onSwipe: onSwipe,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: ownMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onLongPress: () => controller.selectMode ? onSelect!(event) : null,
+                    onTap: () => controller.selectMode ? onSelect!(event) : null,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: selected ? 0 : 8.0,
+                          right: selected ? 0 : ownMessage ? 8.0 : 16.0,
+                          top: selected ? 0 : 1.0,
+                          bottom: selected ? 0 : 1.0,
+                        ),
+                        child: _messageSelectedWidget(context, row),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
