@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/create_direct_chat/create_direct_chat_di.dart';
+import 'package:fluffychat/di/room/room_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -36,7 +37,6 @@ import 'package:fluffychat/widgets/layouts/side_view_layout.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/vwidget_with_dependencies.dart';
-import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -74,10 +74,10 @@ class AppRoutes {
                         widget: const ChatList(),
                         buildTransition: _bottomToTopTransition,
                       ),
-                      VWidgetWithDependency(
+                      VWidgetWithDependencies(
                         path: '/contactsTab',
                         widget: const ContactsTab(),
-                        di: ContactDI(),
+                        dIs: [ContactDI(), CreateNewRoomDI()],
                         buildTransition: _bottomToTopTransition,
                       ),
                       VWidget(
@@ -120,9 +120,9 @@ class AppRoutes {
                   stackedRoutes: _chatDetailsRoutes,
                   buildTransition: rightToLeftTransition,
                 ),
-                VWidgetWithDependency(
+                VWidgetWithDependencies(
                   path: '/rooms/:roomid',
-                  di: ChatScreenDi(),
+                  dIs: [ChatScreenDi(), CreateNewRoomDI()],
                   widget: const Chat(),
                   buildTransition: rightToLeftTransition,
                   stackedRoutes: [
@@ -162,8 +162,8 @@ class AppRoutes {
                     ),
                   ],
                 ),
-                VWidgetWithDependency(
-                  di: ContactDI(),
+                VWidgetWithDependencies(
+                  dIs: [ContactDI(), CreateNewRoomDI()],
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: rightToLeftTransition,
@@ -223,14 +223,14 @@ class AppRoutes {
                   buildTransition: _fadeTransition,
                   stackedRoutes: _chatDetailsRoutes,
                 ),
-                VWidgetWithDependency(
-                  di: ContactDI(),
+                VWidgetWithDependencies(
+                  dIs: [ContactDI(), CreateNewRoomDI()],
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,
                 ),
-                VWidgetWithDependency(
-                  di: ContactDI(),
+                VWidgetWithDependencies(
+                  dIs: [ContactDI()],
                   path: '/newgroup',
                   widget: const NewGroup(),
                   buildTransition: _fadeTransition,
