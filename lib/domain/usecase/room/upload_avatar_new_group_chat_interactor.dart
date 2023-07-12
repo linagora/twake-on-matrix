@@ -26,7 +26,7 @@ class UploadAvatarNewGroupChatInteractor {
         filename: fileName,
         contentType: contentType,
       );
-      yield Right(UploadAvatarNewGroupChatSuccess(uri: uri));
+      yield Right(UploadAvatarNewGroupChatSuccess(uri: uri, file: file));
     } catch (exception) {
       yield Left(UploadAvatarNewGroupChatFailed(exception: exception));
     }

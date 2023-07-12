@@ -6,12 +6,14 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
+
 extension NewGroupInfoController on NewGroupController {
 
   void listenGroupNameChanged() {
     groupNameTextEditingController.addListener(() {
       groupName = groupNameTextEditingController.text;
-      haveGroupNameNotifier.value = groupNameTextEditingController.text.isNotEmpty;
+      haveGroupNameNotifier.value =
+          groupNameTextEditingController.text.isNotEmpty;
     });
   }
 
@@ -35,8 +37,7 @@ extension NewGroupInfoController on NewGroupController {
   }
 
   Set<PresentationContact> getSelectedValidContacts(
-    Iterable<PresentationContact> contactsList,
-  ) {
+      Iterable<PresentationContact> contactsList,) {
     return contactsList
       .where((contact) => contact.matrixId != null && !contact.matrixId!.isCurrentMatrixId(context))
       .toSet();
