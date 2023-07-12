@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
@@ -9,8 +11,12 @@ class UploadAvatarNewGroupChatLoading extends Success {
 
 class UploadAvatarNewGroupChatSuccess extends Success {
   final Uri uri;
+  final Uint8List file;
 
-  const UploadAvatarNewGroupChatSuccess({required this.uri});
+  const UploadAvatarNewGroupChatSuccess({
+    required this.uri,
+    required this.file
+  });
 
   @override
   List<Object?> get props => [uri];

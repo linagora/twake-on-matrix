@@ -1,5 +1,7 @@
-import 'dart:io';
-
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/room/upload_avatar_new_group_chat_state.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
@@ -78,7 +80,9 @@ class NewGroupChatInfo extends StatelessWidget {
         },
         child: TwakeFloatingActionButton(
           icon: Icons.done,
-          onTap: () => newGroupController.moveToGroupChatScreen(),
+          onTap: () {
+            newGroupController.moveToGroupChatScreen();
+          },
         ),
       ),
     );
@@ -131,18 +135,51 @@ class NewGroupChatInfo extends StatelessWidget {
   }
 
   Widget _buildChangeProfileWidget(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: LinagoraRefColors.material().neutral[80],
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(Icons.camera_alt_outlined,
-          color: Theme.of(context).colorScheme.surface,
+    return ValueListenableBuilder<Either<Failure, Success>?>(
+      valueListenable: newGroupController.uploadAvatarNewGroupChatNotifier,
+      builder: (context, value, child) {
+        if (value == null) {
+          return child!;
+        } else {
+          return value.fold(
+            (failure) => child!,
+            (success) {
+              if (success is UploadAvatarNewGroupChatLoading) {
+                return const CircularProgressIndicator();
+              } else if (success is UploadAvatarNewGroupChatSuccess) {
+                return InkWell(
+                  onTap: () => newGroupController.saveAvatarAction(context),
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: MemoryImage(success.file),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return const SizedBox();
+              }
+            });
+        }
+      },
+      child: InkWell(
+        onTap: () => newGroupController.saveAvatarAction(context),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: LinagoraRefColors.material().neutral[80],
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Icon(Icons.camera_alt_outlined,
+            color: Theme.of(context).colorScheme.surface,
+          ),
         ),
       ),
     );
