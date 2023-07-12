@@ -5,7 +5,6 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
-import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -25,7 +24,7 @@ class NewGroup extends StatefulWidget {
   NewGroupController createState() => NewGroupController();
 }
 
-class NewGroupController extends State<NewGroup> 
+class NewGroupController extends State<NewGroup>
   with ComparablePresentationContactMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
@@ -35,12 +34,10 @@ class NewGroupController extends State<NewGroup>
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
-  final isEnableEEEncryptionNotifier = ValueNotifier(true);
 
   final groupNameFocusNode = FocusNode();
 
   String groupName = "";
-  bool isGroupPublic = false;
 
   static const maxScrollOffsetAllowedInPixel = 380.0;
 
@@ -73,7 +70,6 @@ class NewGroupController extends State<NewGroup>
     groupNameTextEditingController.dispose();
 
     selectedContactsMapNotifier.dispose();
-    isEnableEEEncryptionNotifier.dispose();
     haveGroupNameNotifier.dispose();
   }
 
@@ -81,7 +77,7 @@ class NewGroupController extends State<NewGroup>
     groupchatInfoScrollController.addListener(() {
       if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
         groupchatInfoScrollController.jumpTo(
-          maxScrollOffsetAllowedInPixel, 
+          maxScrollOffsetAllowedInPixel,
         );
       }
     });
@@ -131,7 +127,7 @@ class NewGroupController extends State<NewGroup>
       pageBuilder: (context, animation, secondaryAnimation) {
         return const SizedBox.shrink();
       },
-      context: context, 
+      context: context,
       useRootNavigator: false,
       barrierColor: Colors.white,
       transitionBuilder: (context, animation1, animation2, widget) {
@@ -149,7 +145,7 @@ class NewGroupController extends State<NewGroup>
 
   void autoScrollWhenExpandParticipants() {
     groupchatInfoScrollController.animateTo(
-      MediaQuery.of(context).size.height, 
+      MediaQuery.of(context).size.height,
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeIn,
     );

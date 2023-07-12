@@ -24,21 +24,14 @@ extension NewGroupInfoController on NewGroupController {
           invite: getSelectedValidContacts(contactsList)
             .map<String>((contact) => contact.matrixId!)
             .toList(),
-          enableEncryption: isEnableEEEncryptionNotifier.value,
-          preset: isGroupPublic 
-            ? CreateRoomPreset.publicChat
-            : CreateRoomPreset.privateChat,
+          enableEncryption: true,
+          preset: CreateRoomPreset.privateChat
         );
       }
     );
     if (roomId.result != null) {
       VRouter.of(context).toSegments(['rooms', roomId.result!]);
     }
-  }
-
-  void onGroupPrivacyChanged(bool switchValue) {
-    isGroupPublic = switchValue;
-    isEnableEEEncryptionNotifier.value = !switchValue;
   }
 
   Set<PresentationContact> getSelectedValidContacts(
