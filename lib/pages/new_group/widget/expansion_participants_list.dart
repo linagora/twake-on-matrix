@@ -23,7 +23,7 @@ class ExpansionParticipantsList extends StatefulWidget {
 }
 
 class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
-  bool isExpanded = false;
+  bool isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +55,11 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                     shape: BoxShape.circle,
                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   ),
-                  icon: isExpanded 
-                    ? Icons.expand_less 
-                    : Icons.expand_more, 
-                  tooltip: isExpanded 
-                    ? L10n.of(context)!.shrink 
+                  icon: isExpanded
+                    ? Icons.expand_less
+                    : Icons.expand_more,
+                  tooltip: isExpanded
+                    ? L10n.of(context)!.shrink
                     : L10n.of(context)!.expand,
                 ),
               ],
