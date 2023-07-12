@@ -4,7 +4,6 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
-import 'package:fluffychat/widgets/setting_tile.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +58,6 @@ class NewGroupChatInfo extends StatelessWidget {
                       const SizedBox(height: 32),
                       _buildGroupNameTextFieid(context),
                       const SizedBox(height: 16),
-                      _buildSettings(context),
                       Expanded(
                         child: ExpansionParticipantsList(
                           newGroupController: newGroupController,
@@ -177,38 +175,6 @@ class NewGroupChatInfo extends StatelessWidget {
           ),
           contentPadding: const EdgeInsets.all(16.0),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSettings(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        children: [
-          SettingTile(
-            key: UniqueKey(),
-            leadingIcon: Icons.back_hand_outlined,
-            settingTitle: L10n.of(context)!.makeThisGroupPublic,
-            settingDescription: L10n.of(context)!.groupPrivateDescription,
-            onSwitchButtonChanged: (valueChanged) 
-              => newGroupController.onGroupPrivacyChanged(valueChanged),
-            defaultSwitchValue: newGroupController.isGroupPublic,
-          ),
-          ValueListenableBuilder<bool>(
-            valueListenable: newGroupController.isEnableEEEncryptionNotifier,
-            builder: (context, value, child) {
-              return SettingTile(
-                key: UniqueKey(),
-                leadingIcon: Icons.lock_outline,
-                settingTitle: L10n.of(context)!.enableE2EEncryption,
-                onSwitchButtonChanged: ((valueChanged) => {}),
-                isEditable: false,
-                defaultSwitchValue: value,
-              );
-            },
-          )
-        ],
       ),
     );
   }
