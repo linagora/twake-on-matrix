@@ -89,4 +89,37 @@ extension StringCasingExtension on String {
     final String? firstValidLink = matches.firstWhere((link) => AnyLinkPreview.isValidLink(link!));
     return firstValidLink;
   }
+
+  // Removes markdowned links from a string based on the unformatted text
+  // Workaround for content['formatted_body'] which formats urls in a way that makes them unusable
+  String unMarkdownLinks(String unformattedText) {
+    final RegExp regex = RegExp(r'https:\/\/[^\s]+');
+
+    final Iterable<Match> formattedLinksMatches = regex.allMatches(this);
+    final Iterable<Match> unformattedLinksMatches = regex.allMatches(unformattedText);
+
+    if (formattedLinksMatches.isEmpty ||
+        unformattedLinksMatches.isEmpty ||
+        formattedLinksMatches.length != unformattedLinksMatches.length) {
+      return this;
+    }
+
+    var unMarkdownedText = this;
+
+    final Iterator<Match> formattedIterator = formattedLinksMatches.iterator;
+    final Iterator<Match> unformattedIterator = unformattedLinksMatches.iterator;
+
+    // Replace respectively all formatted links with unformatted links
+    while (formattedIterator.moveNext() && unformattedIterator.moveNext()) {
+      final Match formattedLinkMatch = formattedIterator.current;
+      final Match unformattedLinkMatch = unformattedIterator.current;
+
+      final String formattedLink = formattedLinkMatch.group(0)!;
+      final String unformattedLink = unformattedLinkMatch.group(0)!;
+
+      unMarkdownedText = unMarkdownedText.replaceFirst(formattedLink, unformattedLink);
+    }
+
+    return unMarkdownedText;
+  }
 }
