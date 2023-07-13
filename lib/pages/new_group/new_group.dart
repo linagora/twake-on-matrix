@@ -30,7 +30,6 @@ class NewGroupController extends State<NewGroup>
   final fetchContactsController = FetchContactsController();
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
-  final groupchatInfoScrollController = ScrollController();
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
@@ -50,7 +49,6 @@ class NewGroupController extends State<NewGroup>
     listenSearchContacts();
     listenGroupNameChanged();
     fetchContactsController.fetchCurrentTomContacts();
-    listenForGroupchatInfoScrollController();
     fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
     searchContactsController.onSearchKeywordChanged = (searchKey) {
       disableLoadMoreInSearch();
@@ -71,16 +69,6 @@ class NewGroupController extends State<NewGroup>
 
     selectedContactsMapNotifier.dispose();
     haveGroupNameNotifier.dispose();
-  }
-
-  void listenForGroupchatInfoScrollController() {
-    groupchatInfoScrollController.addListener(() {
-      if (groupchatInfoScrollController.offset > maxScrollOffsetAllowedInPixel) {
-        groupchatInfoScrollController.jumpTo(
-          maxScrollOffsetAllowedInPixel,
-        );
-      }
-    });
   }
 
   void listenContactsStartList() {
@@ -140,14 +128,6 @@ class NewGroupController extends State<NewGroup>
           )
         );
       },
-    );
-  }
-
-  void autoScrollWhenExpandParticipants() {
-    groupchatInfoScrollController.animateTo(
-      MediaQuery.of(context).size.height,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeIn,
     );
   }
 
