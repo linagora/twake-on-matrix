@@ -98,7 +98,7 @@ class ChatAppBarTitle extends StatelessWidget {
 
   StreamBuilder<ConnectivityResult> _buildStatusContent(BuildContext context, Room room) {
     final TextStyle? statusTextStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      fontSize: 13,
+      fontSize: 11,
       color: Theme.of(context).colorScheme.tertiary,
       letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
     );
