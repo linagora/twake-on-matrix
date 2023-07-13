@@ -2660,5 +2660,7 @@
        "placeholders": {
          "max": {}
        }
-    }
+    },
+    "continueProcess": "Continue",
+    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "You are uploading photos, do you want to cancel or continue?"
 }

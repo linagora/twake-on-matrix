@@ -1,10 +1,14 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/domain/app_state/room/upload_avatar_new_group_chat_state.dart';
+import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 
 extension NewGroupInfoController on NewGroupController {
@@ -18,22 +22,42 @@ extension NewGroupInfoController on NewGroupController {
   }
 
   void moveToGroupChatScreen() async {
-    final roomId = await showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        return await Matrix.of(context).client.createGroupChat(
+    Logs().d('NewGroupInfoController::moveToGroupChatScreen()');
+    if (numberSelectedImagesNotifier.value != 1) {
+      final client = Matrix.of(context).client;
+      createNewGroupChatAction(
+        matrixClient: client,
+        createNewGroupChatRequest: CreateNewGroupChatRequest(
           groupName: groupName,
           invite: getSelectedValidContacts(contactsList)
             .map<String>((contact) => contact.matrixId!)
             .toList(),
           enableEncryption: true,
-          preset: CreateRoomPreset.privateChat
-        );
-      }
-    );
-    if (roomId.result != null) {
-      VRouter.of(context).toSegments(['rooms', roomId.result!]);
+          urlAvatar: uriAvatar != null ? uriAvatar!.toString() : null,
+        ),
+      );
+    } else {
+      final result = await showDialog<bool?>(
+        context: context,
+        useRootNavigator: false,
+        builder: (c) => WarningDialog(
+          explainTextRequestWidget: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              text: L10n.of(context)!.youAreUploadingPhotosDoYouWantToCancelOrContinue,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          onAcceptButton: () => cancelUploadAvatar(),
+        ),
+      );
     }
+  }
+
+  void cancelUploadAvatar() {
+    uploadAvatarNewGroupChatNotifier.value = const Left(UploadContentFailed(exception: null));
+    removeAllImageSelected();
+    Navigator.pop(context);
   }
 
   Set<PresentationContact> getSelectedValidContacts(

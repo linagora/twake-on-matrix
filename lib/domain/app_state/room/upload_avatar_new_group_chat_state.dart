@@ -4,16 +4,16 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
 
-class UploadAvatarNewGroupChatLoading extends Success {
+class UploadContentLoading extends Success {
   @override
   List<Object?> get props => [];
 }
 
-class UploadAvatarNewGroupChatSuccess extends Success {
+class UploadContentSuccess extends Success {
   final Uri uri;
   final Uint8List file;
 
-  const UploadAvatarNewGroupChatSuccess({
+  const UploadContentSuccess({
     required this.uri,
     required this.file
   });
@@ -22,10 +22,10 @@ class UploadAvatarNewGroupChatSuccess extends Success {
   List<Object?> get props => [uri];
 }
 
-class UploadAvatarNewGroupChatFailed extends Failure {
+class UploadContentFailed extends Failure {
   final dynamic exception;
 
-  const UploadAvatarNewGroupChatFailed({required this.exception});
+  const UploadContentFailed({required this.exception});
 
   @override
   List<Object?> get props => [exception];

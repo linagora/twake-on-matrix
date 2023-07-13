@@ -14,7 +14,7 @@ class CreateNewRoomDI extends BaseDI {
 
     get.registerSingleton<CreateNewGroupChatInteractor>(CreateNewGroupChatInteractor());
 
-    get.registerSingleton<UploadAvatarNewGroupChatInteractor>(UploadAvatarNewGroupChatInteractor());
+    get.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
 
     Logs().d('CreateNewRoomDI::setUp() - done');
   }

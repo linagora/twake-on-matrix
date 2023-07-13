@@ -6,14 +6,14 @@ class CreateNewGroupChatRequest extends Equatable {
   final List<String>? invite;
   final bool? enableEncryption;
   final CreateRoomPreset createRoomPreset;
-  final String? uriAvatar;
+  final String? urlAvatar;
 
   const CreateNewGroupChatRequest({
     this.groupName,
     this.invite,
     this.enableEncryption,
     this.createRoomPreset = CreateRoomPreset.privateChat,
-    this.uriAvatar,
+    this.urlAvatar,
   });
 
   @override
@@ -22,6 +22,6 @@ class CreateNewGroupChatRequest extends Equatable {
     invite,
     enableEncryption,
     createRoomPreset,
-    uriAvatar,
+    urlAvatar,
   ];
 }
