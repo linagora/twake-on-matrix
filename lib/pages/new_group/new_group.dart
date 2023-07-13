@@ -326,8 +326,8 @@ class NewGroupController extends State<NewGroup>
         ),
         cameraWidget: UseCameraWidget(
           onPressed: permissionStatusCamera == PermissionStatus.granted
-              ? () => imagePickAction()
-              : () => PermissionHandlerService().goToSettingsForPermissionActions(),
+            ? () => imagePickAction()
+            : () => PermissionHandlerService().goToSettingsForPermissionActions(),
           backgroundImage: const AssetImage("assets/verification.png"),
         ),
       );
