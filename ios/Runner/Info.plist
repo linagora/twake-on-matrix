@@ -2,9 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>im.fluffychat.app</string>
+		<string>com.linagora.ios.twake</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -40,9 +42,19 @@
 				<string>matrix</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.492265884073-p6ssgrq23gkot2n5duiijl2t7b44777q</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -76,12 +88,12 @@
 	<string>Record voice message and share them with your contacts on Twake.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Share motions with your contacts in Twake.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string> Save photos/videos to device on Twake.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Open photos from your gallery and share them with your contacts on Twake.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Share data with your contacts in Twake.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string> Save photos/videos to device on Twake.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

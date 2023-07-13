@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:matrix/matrix.dart';
@@ -26,7 +27,7 @@ abstract class AppConfig {
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/How-to-use-end-to-end-encryption-in-FluffyChat';
-  static const String appId = 'im.fluffychat.FluffyChat';
+  static const String appId = 'com.linagora.ios.twake';
   static const String appOpenUrlScheme = 'twake.chat';
   static String _webBaseUrl = 'https://fluffychat.im/web';
   static String get webBaseUrl => _webBaseUrl;
@@ -54,7 +55,7 @@ abstract class AppConfig {
   static const String pushNotificationsChannelName = 'Twake push channel';
   static const String pushNotificationsChannelDescription =
       'Push notifications for Twake';
-  static const String pushNotificationsAppId = 'com.twake.twake';
+  static String get pushNotificationsAppId => Platform.isIOS ? 'com.linagora.ios.twake' : 'com.twake.twake';
   static const String pushNotificationsGatewayUrl =
       'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';
   static const String pushNotificationsPusherFormat = 'event_id_only';

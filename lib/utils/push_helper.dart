@@ -42,13 +42,13 @@ Future<void> pushHelper(
         iOS: DarwinInitializationSettings(),
       ),
       onDidReceiveNotificationResponse: onSelectNotification,
-      onDidReceiveBackgroundNotificationResponse: onSelectNotification,
+      // onDidReceiveBackgroundNotificationResponse: onSelectNotification,
     );
-
+    final id = await mapRoomIdToInt(activeRoomId ?? "");
     l10n ??= lookupL10n(const Locale('en'));
     flutterLocalNotificationsPlugin.show(
-      0,
-      l10n.newMessageInFluffyChat,
+      id,
+      l10n.newMessageInTwake,
       l10n.openAppToReadMessages,
       NotificationDetails(
         iOS: const DarwinNotificationDetails(),
@@ -83,7 +83,7 @@ Future<void> _tryPushHelper(
   if (!isBackgroundMessage &&
       activeRoomId == notification.roomId &&
       activeRoomId != null &&
-      client?.syncPresence == null) {
+      client.syncPresence == null) {
     Logs().v('Room is in foreground. Stop push helper here.');
     return;
   }
@@ -150,7 +150,7 @@ Future<void> _tryPushHelper(
 
   // Calculate the body
   final body = event.type == EventTypes.Encrypted
-      ? l10n.newMessageInFluffyChat
+      ? l10n.newMessageInTwake
       : await event.calcLocalizedBody(
           matrixLocals,
           plaintextBody: true,
@@ -179,12 +179,13 @@ Future<void> _tryPushHelper(
 
   final id = await mapRoomIdToInt(event.room.id);
 
+  Logs().v('Showing notification for body $body.');
   // Show notification
   final newMessage = Message(
     body,
     event.originServerTs,
     Person(
-      name: event.senderFromMemoryOrFallback.calcDisplayname(),
+      name: "THANG CHO QUANG !!!!!",
       icon: avatarFile == null
           ? null
           : BitmapFilePathAndroidIcon(avatarFile.path),
@@ -224,9 +225,7 @@ Future<void> _tryPushHelper(
 
   await flutterLocalNotificationsPlugin.show(
     id,
-    event.room.getLocalizedDisplayname(
-      MatrixLocals(l10n),
-    ),
+    "tHANG CHO QUANG IOSSSSSS !!!!!",
     body,
     platformChannelSpecifics,
     payload: event.roomId,

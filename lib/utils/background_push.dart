@@ -182,6 +182,7 @@ class BackgroundPush {
       }
     }
     if (setNewPusher) {
+      Logs().d('[Push] appId: $appId');
       try {
         await client.postPusher(
           Pusher(
@@ -193,6 +194,24 @@ class BackgroundPush {
             data: PusherData(
               url: Uri.parse(gatewayUrl!),
               format: AppConfig.pushNotificationsPusherFormat,
+              additionalProperties: {
+                "default_payload": {
+                  "apns": {
+                    "headers": {
+                      "apns-push-type": "alert",
+                      "apns-priority:": "10",
+                    },
+                    "payload": {
+                      "aps": {
+                        "alert": {
+                          "title": "New message",
+                          "body": "You have a new message"
+                        },
+                      }
+                    },
+                  },
+                }
+              }
             ),
             kind: 'http',
           ),

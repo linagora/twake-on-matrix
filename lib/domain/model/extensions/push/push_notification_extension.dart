@@ -15,6 +15,7 @@ class PushNotificationExtensions {
   }
 
   PushNotification fromOriginalJson(Map<String, dynamic> json) {
+    Logs().v("fromOriginalJson:content: ${json['content']}]}");
     return PushNotification(
       content: json['content'] is Map
           ? Map<String, dynamic>.from(json['content'])
