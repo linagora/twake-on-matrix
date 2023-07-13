@@ -29,47 +29,43 @@ class NewGroupChatInfo extends StatelessWidget {
       appBar: _buildAppBar(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          controller: newGroupController.groupchatInfoScrollController,
-          child: LayoutBuilder(
-            builder: (context, constraint) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: _buildChangeProfileWidget(context)),
-                      const SizedBox(height: 16.0),
-                      Text(L10n.of(context)!.addAPhoto,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+        child: LayoutBuilder(
+          builder: (context, constraint) {
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: _buildChangeProfileWidget(context)),
+                    const SizedBox(height: 16.0),
+                    Text(L10n.of(context)!.addAPhoto,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      Text(L10n.of(context)!.maxImageSize(5),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: LinagoraRefColors.material().neutral[40],
-                        )),
-                      const SizedBox(height: 32),
-                      _buildGroupNameTextFieid(context),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ExpansionParticipantsList(
-                          newGroupController: newGroupController,
-                          contactsList: contactsList,
-                        ),
+                    ),
+                    Text(L10n.of(context)!.maxImageSize(5),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[40],
+                      )),
+                    const SizedBox(height: 32),
+                    _buildGroupNameTextFieid(context),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ExpansionParticipantsList(
+                        newGroupController: newGroupController,
+                        contactsList: contactsList,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            }
-          ),
+              ),
+            );
+          }
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(

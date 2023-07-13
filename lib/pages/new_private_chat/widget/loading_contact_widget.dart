@@ -12,7 +12,7 @@ class LoadingContactWidget extends StatelessWidget {
           const SizedBox(height: 16.0,),
           const CircularProgressIndicator(),
           const SizedBox(height: 16.0,),
-          Text(L10n.of(context)!.loadingContacts, 
+          Text(L10n.of(context)!.loadingContacts,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.secondary,
             ),),

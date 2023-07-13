@@ -89,9 +89,6 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
   void toggleExpansionList() {
     setState(() {
       isExpanded = !isExpanded;
-      if (isExpanded) {
-        widget.newGroupController.autoScrollWhenExpandParticipants();
-      }
     });
   }
 }
