@@ -18,7 +18,7 @@ class CreateNewGroupChatInteractor {
       final addAvatarStateEvent = StateEvent(
           type: EventTypes.RoomAvatar,
           content: {
-            'url': createNewGroupChatRequest.uriAvatar,
+            'url': createNewGroupChatRequest.urlAvatar,
           },
           stateKey: ''
       );

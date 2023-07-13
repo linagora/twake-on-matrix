@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -144,9 +145,18 @@ class NewGroupChatInfo extends StatelessWidget {
           return value.fold(
             (failure) => child!,
             (success) {
-              if (success is UploadAvatarNewGroupChatLoading) {
-                return const CircularProgressIndicator();
-              } else if (success is UploadAvatarNewGroupChatSuccess) {
+              if (success is UploadContentLoading) {
+                return Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: LinagoraRefColors.material().neutral[80],
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                  child: const CupertinoActivityIndicator(radius: 10)
+                );
+              } else if (success is UploadContentSuccess) {
                 return InkWell(
                   onTap: () => newGroupController.saveAvatarAction(context),
                   child: Container(
