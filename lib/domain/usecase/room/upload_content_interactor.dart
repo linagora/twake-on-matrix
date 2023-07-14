@@ -2,7 +2,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/upload_avatar_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';

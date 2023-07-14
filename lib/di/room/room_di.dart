@@ -1,6 +1,6 @@
 import 'package:fluffychat/di/base_di.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
-import 'package:fluffychat/domain/usecase/room/upload_avatar_new_group_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 

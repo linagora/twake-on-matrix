@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/upload_avatar_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -79,11 +80,29 @@ class NewGroupChatInfo extends StatelessWidget {
           }
           return child!;
         },
-        child: TwakeFloatingActionButton(
-          icon: Icons.done,
-          onTap: () {
-            newGroupController.moveToGroupChatScreen();
+        child: ValueListenableBuilder<Either<Failure, Success>?>(
+          valueListenable: newGroupController.createRoomStateNotifier,
+          builder: (context, value, child) {
+            if (value == null) {
+              return child!;
+            } else {
+              return value.fold(
+                (failure) => child!,
+                (success) {
+                  if (success is CreateNewGroupChatLoading) {
+                    return const TwakeFloatingActionButton(
+                      customIcon: SizedBox(child: CircularProgressIndicator())
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                });
+            }
           },
+          child: TwakeFloatingActionButton(
+            icon: Icons.done,
+            onTap: () => newGroupController.moveToGroupChatScreen(),
+          ),
         ),
       ),
     );
