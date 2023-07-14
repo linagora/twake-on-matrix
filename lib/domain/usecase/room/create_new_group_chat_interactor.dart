@@ -16,11 +16,11 @@ class CreateNewGroupChatInteractor {
       yield Right(CreateNewGroupChatLoading());
 
       final addAvatarStateEvent = StateEvent(
-          type: EventTypes.RoomAvatar,
-          content: {
-            'url': createNewGroupChatRequest.urlAvatar,
-          },
-          stateKey: ''
+        type: EventTypes.RoomAvatar,
+        content: {
+          'url': createNewGroupChatRequest.urlAvatar,
+        },
+        stateKey: ''
       );
 
       final roomId = await matrixClient.createGroupChat(

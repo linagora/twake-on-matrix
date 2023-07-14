@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/app_state/room/upload_avatar_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
