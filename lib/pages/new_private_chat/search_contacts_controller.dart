@@ -18,18 +18,16 @@ class SearchContactsController {
   final TextEditingController textEditingController = TextEditingController();
   StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController = StreamController();
   void Function(String)? onSearchKeywordChanged;
-  late final isSearchModeNotifier = ValueNotifier(false);
+  ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
+  ValueNotifier<bool> isSearchBarShow = ValueNotifier(false);
+  final searchFocusNode = FocusNode();
 
   String searchKeyword = "";
 
   void init() {
+    fetchLookupContacts();
     _initializeDebouncer();
     textEditingController.addListener(() {
-      if (textEditingController.text.isNotEmpty) {
-        isSearchModeNotifier.value = true;
-      } else {
-        isSearchModeNotifier.value = false;
-      }
       onSearchBarChanged(textEditingController.text);
     });
   }
@@ -43,10 +41,13 @@ class SearchContactsController {
     _debouncer.values.listen((keyword) async {
       Logs().d("SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword");
       searchKeyword = keyword;
-      if (onSearchKeywordChanged != null) {
-        onSearchKeywordChanged!(textEditingController.text);
+      Logs().d("SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value} || searchFocusNode.hasFocus: ${searchFocusNode.hasFocus}");
+      if (isSearchModeNotifier.value && searchFocusNode.hasFocus) {
+        if (onSearchKeywordChanged != null) {
+          onSearchKeywordChanged!(textEditingController.text);
+        }
+        fetchLookupContacts();
       }
-      fetchLookupContacts();
     });
   }
 
@@ -63,11 +64,22 @@ class SearchContactsController {
   }
 
   void onCloseSearchTapped() {
+    isSearchBarShow.value = false;
+    searchFocusNode.unfocus();
+    isSearchModeNotifier.value = false;
     textEditingController.clear();
   }
 
   void clearSearchBar() {
+    searchFocusNode.unfocus();
+    isSearchModeNotifier.value = false;
     textEditingController.clear();
+  }
+
+  void openSearchBar() {
+    isSearchBarShow.value = true;
+    isSearchModeNotifier.value = true;
+    searchFocusNode.requestFocus();
   }
 
   void dispose() {

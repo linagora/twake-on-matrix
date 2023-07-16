@@ -18,9 +18,9 @@ class NewGroupView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: SearchContactAppBar(
+          focusNode: controller.searchContactsController.searchFocusNode,
           title: L10n.of(context)!.newGroupChat,
           searchContactsController: controller.searchContactsController,
-          onCloseSearchBar: () => controller.searchContactsController.onCloseSearchTapped(),
           hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
         ),
       ),

@@ -19,7 +19,7 @@ class UploadContentSuccess extends Success {
   });
 
   @override
-  List<Object?> get props => [uri];
+  List<Object?> get props => [uri, file];
 }
 
 class UploadContentFailed extends Failure {

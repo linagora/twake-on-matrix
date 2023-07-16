@@ -71,7 +71,6 @@ class NewGroupController extends State<NewGroup>
   void initState() {
     super.initState();
     searchContactsController.init();
-    onSearchKeywordChanged();
     listenContactsStartList();
     listenSearchContacts();
     listenGroupNameChanged();
@@ -115,14 +114,9 @@ class NewGroupController extends State<NewGroup>
     });
   }
 
-  void onSearchKeywordChanged() {
-    searchContactsController.onSearchKeywordChanged = (String text) {
-      if (text.isEmpty) {
-        fetchContactsController.fetchCurrentTomContacts();
-      } else {
-        fetchContactsController.haveMoreCountactsNotifier.value = false;
-      }
-    };
+  void onCloseSearchTapped() {
+    searchContactsController.onCloseSearchTapped();
+    fetchContactsController.haveMoreCountactsNotifier.value = false;
   }
 
   Iterable<PresentationContact> get contactsList 
