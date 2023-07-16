@@ -17,8 +17,7 @@ class NewPrivateChatView extends StatelessWidget {
         child: SearchContactAppBar(
           title: L10n.of(context)!.newChat,
           searchContactsController: controller.searchContactsController,
-          onCloseSearchBar: () => controller.searchContactsController.onCloseSearchTapped(),
-        ),),
+        )),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 8.0, right: 10.0),
         controller: controller.fetchContactsController.scrollController,
