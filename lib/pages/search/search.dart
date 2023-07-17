@@ -3,17 +3,14 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/domain/model/extensions/contact/presentation_contact_list_extension.dart';
-import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
+import 'package:fluffychat/domain/model/extensions/search/search_list_extension.dart';
 import 'package:fluffychat/domain/usecase/search/search_interactor.dart';
 import 'package:fluffychat/mixin/comparable_presentation_search_mixin.dart';
 import 'package:fluffychat/pages/search/search_controller.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
-import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -45,10 +42,7 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
   SearchContactAndRecentChatController? searchContactAndRecentChatController;
   final AutoScrollController recentChatsController = AutoScrollController();
   final ScrollController customScrollController = ScrollController();
-  final _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
   final _searchContactsAndRecentChatInteractor = getIt.get<SearchContactsAndRecentChatInteractor>();
-  final getContactStream = StreamController<Either<Failure, GetContactsSuccess>>();
-  final contactsStreamController = BehaviorSubject<Either<Failure, GetContactsSuccess>>();
   final getContactAndRecentChatStream = StreamController<Either<Failure, GetContactAndRecentChatSuccess>>();
   final contactsAndRecentChatStreamController = BehaviorSubject<Either<Failure, GetContactAndRecentChatSuccess>>();
 
@@ -68,23 +62,9 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
 
 
   void listenContactsStartList() {
-    getContactStream.stream.listen((event) {
-      Logs().d('SearchController::getContactStream() - event: $event');
-      contactsStreamController.add(event);
-    });
-
     getContactAndRecentChatStream.stream.listen((event) {
       Logs().d('SearchController::getContactAndRecentChatStream() - event: $event');
       contactsAndRecentChatStreamController.add(event);
-    });
-  }
-
-  void _fetchCurrentTomContacts({
-    int? limit,
-    int? offset,
-  }) {
-    _fetchContactsInteractor.execute(limit: limit, offset: offset).listen((event) {
-      getContactStream.add(event);
     });
   }
 
@@ -100,24 +80,44 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
     });
   }
 
-  List<PresentationSearch> getContactsFromFetchStream(Either<Failure, GetContactsSuccess> event) {
-    return event.fold<List<PresentationSearch>>(
-      (failure) => <PresentationSearch>[],
-      (success) {
-        final currentContacts = success.contacts.expand((contact) => contact.toPresentationContacts());
-        updateLastContactIndex(oldContactList.length);
-        oldContactList = currentContacts.toList().toPresentationSearchList();
-        lastContactIndexNotifier.value = oldContactList.length;
-        return oldContactList;
-      },
-    ).toList();
+  List<User> getContactsFromRecentChat() {
+    final recentRooms = Matrix.of(context).client.rooms;
+    final List<User> recentChatListPresentationSearch = [];
+
+    for (final room in recentRooms) {
+      final users = room.getParticipants()
+        .where((user) => user.membership.isInvite == true && user.displayName != null)
+        .toSet()
+        .toList();
+
+      for (final user in users) {
+        final isDuplicateUser = recentChatListPresentationSearch
+          .any((existingUser) => existingUser.displayName == user.displayName);
+
+        if (!isDuplicateUser) {
+          recentChatListPresentationSearch.add(user);
+        }
+
+        if (recentChatListPresentationSearch.length == limitPrefetchedRecentContacts) {
+          break; // Stop getting participants after 7 or more have been added
+        }
+      }
+
+      if (recentChatListPresentationSearch.length == limitPrefetchedRecentContacts) {
+        break; // Stop getting participants after 7 or more have been added
+      }
+    }
+
+    Logs().d('SearchController::getContactsFromRecentChat() - event: $recentChatListPresentationSearch');
+
+    return recentChatListPresentationSearch;
   }
 
   List<PresentationSearch> getContactsAndRecentChatStream(Either<Failure, GetContactAndRecentChatSuccess> event) {
     return event.fold<List<PresentationSearch>>(
       (failure) => <PresentationSearch>[],
       (success) {
-        final contactsAndRecentChat = success.presentationSearches;
+        final contactsAndRecentChat = success.search.toPresentationSearch();
         updateLastContactAndRecentChatIndex(contactsAndRecentChat.length);
         return contactsAndRecentChat;
       },
@@ -147,7 +147,16 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
         VRouter.of(context).toSegments(['rooms', presentationSearch.matrixId!]);
       }
     }
+  }
 
+  void goToChatScreenFormRecentChat(User user) async {
+    Logs().d('SearchController::getContactAndRecentChatStream() - event: $user');
+    final roomIdResult = await showFutureLoadingDialog(
+      context: context,
+      future: () => user.startDirectChat(),
+    );
+    if (roomIdResult.error != null) return;
+    VRouter.of(context).toSegments(['rooms', roomIdResult.result!]);
   }
 
   @override
@@ -160,7 +169,6 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchContactAndRecentChatController?.init();
-        _fetchCurrentTomContacts(limit: limitPrefetchedRecentContacts);
         _getContactAndRecentChat();
       }
     });
@@ -170,8 +178,6 @@ class SearchController extends State<Search>  with ComparablePresentationSearchM
   void dispose() {
     recentChatsController.dispose();
     customScrollController.dispose();
-    getContactStream.close();
-    contactsStreamController.close();
     getContactAndRecentChatStream.close();
     contactsAndRecentChatStreamController.close();
     searchContactAndRecentChatController?.dispose();

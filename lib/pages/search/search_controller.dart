@@ -15,16 +15,15 @@ import 'package:matrix/matrix.dart';
 class SearchContactAndRecentChatController {
   final BuildContext context;
   SearchContactAndRecentChatController(this.context);
-
+  static const int limitPrefetchedRecentChats = 3;
   static const debouncerIntervalInMilliseconds = 300;
-  String searchKeyword = "";
-
   final SearchContactsAndRecentChatInteractor _searchContactsAndRecentChatInteractor = getIt.get<SearchContactsAndRecentChatInteractor>();
-  Debouncer<String>? _debouncer;
   final TextEditingController textEditingController = TextEditingController();
   StreamController<Either<Failure, GetContactAndRecentChatSuccess>> getContactAndRecentChatStream = StreamController();
   void Function(String)? onSearchKeywordChanged;
-  late final isSearchModeNotifier = ValueNotifier(false);
+  Debouncer<String>? _debouncer;
+  String searchKeyword = "";
+  final isSearchModeNotifier = ValueNotifier(false);
 
   void init() {
     _initializeDebouncer();
@@ -49,7 +48,7 @@ class SearchContactAndRecentChatController {
       final enableSearch = searchKeyword.isNotEmpty && searchKeyword != '';
       fetchLookupContacts(
         enableSearch: enableSearch,
-        limitRecentChats: !enableSearch ? 3 : null
+        limitRecentChats: !enableSearch ? limitPrefetchedRecentChats : null
       );
     });
   }
@@ -65,7 +64,6 @@ class SearchContactAndRecentChatController {
       rooms: Matrix.of(context).client.rooms,
       limitContacts: limitContacts,
       limitRecentChats: limitRecentChats,
-      enableSearch: enableSearch,
     ).listen((event) {
       getContactAndRecentChatStream.add(event);
     });
