@@ -38,6 +38,7 @@ import 'package:fluffychat/widgets/layouts/side_view_layout.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/vwidget_with_dependencies.dart';
+import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
 
@@ -393,7 +394,7 @@ class AppRoutes {
       path: 'forward',
       widget: const Forward(),
       di: ForwardDI(),
-      buildTransition: _fadeTransition,
+      buildTransition: _leftToRightTransition,
     )
   ];
 

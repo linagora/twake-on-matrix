@@ -1,8 +1,12 @@
-
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/forward_item.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -20,7 +24,7 @@ class ForwardView extends StatefulWidget {
 }
 
 class _ForwardViewState extends State<ForwardView> {
-  bool isShowRecentlyChats = false;
+  bool isShowRecentlyChats = true;
   bool isSearchBarShow = false;
 
   void _toggleRecentlyChats() {
@@ -53,24 +57,49 @@ class _ForwardViewState extends State<ForwardView> {
 
   Widget _buildBottomBar() {
     if (widget.controller.selectedEvents.length == 1) {
-      return SizedBox(
-        height: ForwardViewStyle.bottomBarHeight,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 14),
-                child: TwakeIconButton(
-                  size: ForwardViewStyle.iconSendSize,
-                  onPressed: () => widget.controller.forwardAction(context),
-                  tooltip: L10n.of(context)!.send,
-                  imagePath: ImagePaths.icSend,
-                ),
+      return ValueListenableBuilder<Either<Failure, Success>?>(
+        valueListenable: widget.controller.forwardMessageNotifier,
+        builder: (context, forwardMessageNotifier, child) {
+          if (forwardMessageNotifier == null) {
+            return child!;
+          } else {
+            return forwardMessageNotifier.fold(
+              (failure) => child!,
+              (success) {
+                if (success is ForwardMessageLoading) {
+                  return SizedBox(
+                    height: ForwardViewStyle.bottomBarHeight,
+                    child: const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 14),
+                        child: TwakeFloatingActionButton(
+                          customIcon: SizedBox(child: CircularProgressIndicator())
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              }
+            );
+          }
+        },
+        child: SizedBox(
+          height: ForwardViewStyle.bottomBarHeight,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: TwakeIconButton(
+                size: ForwardViewStyle.iconSendSize,
+                onPressed: () => widget.controller.forwardAction(context),
+                tooltip: L10n.of(context)!.send,
+                imagePath: ImagePaths.icSend,
               ),
             ),
-          ],
+          ),
         ),
       );
     } else {
@@ -132,8 +161,8 @@ class _ForwardViewState extends State<ForwardView> {
       bottom: PreferredSize(
           preferredSize: const Size(double.infinity, 4),
           child: Container(
-              color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-              height: 1)),
+            color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
+            height: 1)),
     );
   }
 
