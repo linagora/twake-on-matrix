@@ -44,7 +44,7 @@ extension RoomStatusExtension on Room {
       return L10n.of(context)!.onlineLongTimeAgo;
     }
 
-    return L10n.of(context)!.countParticipants(
+    return L10n.of(context)!.countMembers(
       ((summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0)).toString());
   }
 

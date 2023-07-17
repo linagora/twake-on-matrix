@@ -1831,8 +1831,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} dalyviai",
-  "@countParticipants": {
+  "countMembers": "{count} dalyviai",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

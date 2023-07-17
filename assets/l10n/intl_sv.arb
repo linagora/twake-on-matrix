@@ -370,8 +370,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} deltagare",
-  "@countParticipants": {
+  "countMembers": "{count} deltagare",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

@@ -387,7 +387,7 @@ class ChatDetailsView extends StatelessWidget {
                           ListTile(
                             title: Text(
                               actualMembersCount > 1
-                                  ? L10n.of(context)!.countParticipants(
+                                  ? L10n.of(context)!.countMembers(
                                       actualMembersCount.toString(),
                                     )
                                   : L10n.of(context)!.emptyChat,

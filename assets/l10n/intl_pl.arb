@@ -473,8 +473,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} uczestników",
-  "@countParticipants": {
+  "countMembers": "{count} uczestników",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

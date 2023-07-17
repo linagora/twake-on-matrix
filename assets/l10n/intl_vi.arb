@@ -223,8 +223,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "countParticipants": "{count} thành viên",
-    "@countParticipants": {
+    "countMembers": "{count} thành viên",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

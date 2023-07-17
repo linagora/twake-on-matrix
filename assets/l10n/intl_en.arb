@@ -604,8 +604,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} members",
-    "@countParticipants": {
+    "countMembers": "{count} members",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

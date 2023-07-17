@@ -471,8 +471,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "countParticipants": "{count} anggota",
-  "@countParticipants": {
+  "countMembers": "{count} anggota",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

@@ -514,8 +514,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} participantes",
-    "@countParticipants": {
+    "countMembers": "{count} participantes",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

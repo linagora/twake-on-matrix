@@ -411,8 +411,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count}名の参加者",
-  "@countParticipants": {
+  "countMembers": "{count}名の参加者",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

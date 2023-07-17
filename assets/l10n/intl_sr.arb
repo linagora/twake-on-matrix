@@ -480,8 +480,8 @@
             "error": {}
         }
     },
-    "countParticipants": "учесника: {count}",
-    "@countParticipants": {
+    "countMembers": "учесника: {count}",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

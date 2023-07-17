@@ -403,8 +403,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count}個參與者",
-    "@countParticipants": {
+    "countMembers": "{count}個參與者",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

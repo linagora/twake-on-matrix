@@ -313,8 +313,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} منتسبا",
-    "@countParticipants": {
+    "countMembers": "{count} منتسبا",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}
