@@ -1,3 +1,10 @@
+import 'dart:async';
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
+import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
@@ -20,6 +27,12 @@ class Forward extends StatefulWidget {
 
 class ForwardController extends State<Forward> {
 
+  final _forwardMessageInteractor = getIt.get<ForwardMessageInteractor>();
+
+  final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
+
+  StreamSubscription? forwardMessageInteractorStreamSubscription;
+
   List<Room>? rooms;
 
   Timeline? timeline;
@@ -33,6 +46,18 @@ class ForwardController extends State<Forward> {
   bool get selectMode => selectedEvents.isNotEmpty;
 
   String? get activeChat => VRouter.of(context).pathParameters['roomid'];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    forwardListController.dispose();
+    forwardMessageInteractorStreamSubscription?.cancel();
+    super.dispose();
+  }
 
   void onSelectChat(String id) {
     if (selectedEvents.contains(id)) {
@@ -73,56 +98,53 @@ class ForwardController extends State<Forward> {
     .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
     .toList();
 
-
-  Future<void> _forwardMessage(Map<String, dynamic> message, Room room) async {
-    final shareFile = message.tryGet<MatrixFile>('file');
-    if (message.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' && shareFile != null) {
-      await showDialog(
-        context: context,
-        useRootNavigator: false,
-        builder: (c) => SendFileDialog(
-          files: [shareFile],
-          room: room)
-      );
-    } else {
-      await room.sendEvent(message);
-    }
+  void forwardAction(BuildContext context) async {
+    forwardMessageInteractorStreamSubscription = _forwardMessageInteractor.execute(
+      rooms: filteredRoomsForAll,
+      selectedEvents: selectedEvents,
+      matrixState: Matrix.of(context)
+    ).listen(
+      (event) => _handleForwardMessageOnData(context, event),
+      onDone: _handleForwardMessageOnDone,
+      onError: _handleForwardMessageOnError,
+    );
   }
 
-  void _forwardOneMessageAction(BuildContext context, Room room) async {
-    final message = Matrix.of(context).shareContent;
-    if (message != null) {
-      await _forwardMessage(message, room);
-      Matrix.of(context).shareContent = null;
-    }
-    VRouter.of(context).toSegments(['rooms', room.id]);
-  }
-
-  void _forwardMoreMessageAction(BuildContext context, Room room) async {
-    final messages = Matrix.of(context).shareContentList;
-    if (messages.isNotEmpty) {
-      for (final message in messages) {
-        if (message != null) {
-          await _forwardMessage(message, room);
-        } else {
-          continue;
+  void _handleForwardMessageOnData(BuildContext context, Either<Failure, Success> event) {
+    Logs().d('ForwardController::_handleForwardMessageOnData()');
+    forwardMessageNotifier.value = event;
+    event.fold(
+      (failure) {
+        Logs().e('ForwardController::_handleForwardMessageOnData() - failure: $failure');
+      },
+      (success) async {
+        Logs().d('ForwardController::_handleForwardMessageOnData() - success: $success');
+        switch (success.runtimeType) {
+          case ForwardMessageSuccess:
+            final dataOnSuccess = success as ForwardMessageSuccess;
+            VRouter.of(context).toSegments(['rooms', dataOnSuccess.room.id]);
+            break;
+          case ForwardMessageIsShareFileState:
+            final dataOnSuccess = success as ForwardMessageIsShareFileState;
+            await showDialog(
+              context: context,
+              useRootNavigator: false,
+              builder: (c) => SendFileDialog(
+                files: [dataOnSuccess.shareFile],
+                room: dataOnSuccess.room)
+            );
+            break;
         }
       }
-      Matrix.of(context).shareContentList.clear();
-    }
-    VRouter.of(context).toSegments(['rooms', room.id]);
+    );
   }
 
-  void forwardAction(BuildContext context) async {
-    final rooms = filteredRoomsForAll;
-    final room = rooms.firstWhere((element) => element.id == selectedEvents.first);
-    if (room.membership == Membership.join) {
-      if (Matrix.of(context).shareContentList.isEmpty && Matrix.of(context).shareContent != null) {
-        _forwardOneMessageAction(context, room);
-      } else {
-        _forwardMoreMessageAction(context, room);
-      }
-    }
+  void _handleForwardMessageOnDone() {
+    Logs().d('ForwardController::_handleForwardMessageOnDone()');
+  }
+
+  void _handleForwardMessageOnError(dynamic error, StackTrace? stackTrace) {
+    Logs().e('ForwardController::_handleForwardMessageOnError() - error: $error | stackTrace: $stackTrace');
   }
 
   @override

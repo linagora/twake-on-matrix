@@ -50,21 +50,28 @@ class TwakeFloatingActionButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: icon != null 
-              ? Icon(
-                icon,
-                size: size,
-                color: Theme.of(context).colorScheme.onPrimaryContainer)
-              : customIcon != null
-                ? SizedBox(
-                  width: 24.0,
-                  height: 24.0,
-                  child: customIcon)
-                : imagePath != null ? SvgPicture.asset(imagePath!) : null,
+            child: _buildBottomWidget(context)
           ),
         ),
       ),
     );
   }
 
+   Widget _buildBottomWidget(BuildContext context) {
+     if (icon != null) {
+       return Icon(
+         icon,
+         size: size,
+         color: Theme.of(context).colorScheme.onPrimaryContainer);
+     } else if (customIcon != null) {
+       return SizedBox(
+         width: 24.0,
+         height: 24.0,
+         child: customIcon);
+     } else if (imagePath != null) {
+       return SvgPicture.asset(imagePath!);
+     } else {
+       return const SizedBox();
+     }
+   }
 }

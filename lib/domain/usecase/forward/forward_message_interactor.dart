@@ -1,5 +1,3 @@
-
-
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -21,7 +19,7 @@ class ForwardMessageInteractor {
         if (matrixState.shareContentList.isEmpty && matrixState.shareContent != null) {
           yield* _forwardOneMessageAction(room: room, matrixState: matrixState);
         } else {
-          yield* _forwardMoreMessageAction(room: room, matrixState: matrixState);
+          yield* _forwardMultipleMessagesAction(room: room, matrixState: matrixState);
         }
       }
     } catch (exception) {
@@ -45,7 +43,7 @@ class ForwardMessageInteractor {
       final message = matrixState.shareContent;
       if (message != null) {
         yield* _forwardMessage(message, room);
-        matrixState.shareContent?.clear();
+        message.clear();
       }
       yield Right(ForwardMessageSuccess(room));
     } catch (exception) {
@@ -53,7 +51,7 @@ class ForwardMessageInteractor {
     }
   }
 
-  Stream<Either<Failure, Success>> _forwardMoreMessageAction({
+  Stream<Either<Failure, Success>> _forwardMultipleMessagesAction({
     required Room room,
     required MatrixState matrixState,
   }) async* {
@@ -69,7 +67,7 @@ class ForwardMessageInteractor {
             continue;
           }
         }
-        matrixState.shareContentList.clear();
+        messages.clear();
       }
       yield Right(ForwardMessageSuccess(room));
     } catch (exception) {
