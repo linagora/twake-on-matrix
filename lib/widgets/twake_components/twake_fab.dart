@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TwakeFloatingActionButton extends StatelessWidget {
-
   final Function()? onTap;
 
   final IconData? icon;
 
   final String? imagePath;
 
+  final double size;
+
   const TwakeFloatingActionButton({
-    super.key, 
-    this.onTap, 
-    this.icon, 
+    super.key,
+    this.onTap,
+    this.icon,
     this.imagePath,
+    this.size = 24.0,
   });
 
   @override
@@ -44,9 +46,15 @@ class TwakeFloatingActionButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: icon != null 
-              ? Icon(icon, color: Theme.of(context).colorScheme.onPrimaryContainer,)
-              : imagePath != null ? SvgPicture.asset(imagePath!) : null,
+            child: icon != null
+              ? Icon(
+                  icon,
+                  size: size,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                )
+              : imagePath != null
+                  ? SvgPicture.asset(imagePath!, width: size, height: size)
+                  : null,
           ),
         ),
       ),
