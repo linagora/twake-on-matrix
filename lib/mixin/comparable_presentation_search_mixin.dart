@@ -1,4 +1,5 @@
-import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/domain/model/search/search_model.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 
 class ComparablePresentationSearchMixin {
   int comparePresentationSearch(PresentationSearch searchResultOne, PresentationSearch searchResultTwo) {

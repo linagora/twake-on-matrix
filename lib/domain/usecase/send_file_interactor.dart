@@ -1,6 +1,6 @@
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_image_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 

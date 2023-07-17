@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
-import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -12,7 +12,7 @@ import 'package:photo_manager/photo_manager.dart';
 typedef TransactionId = String;
 
 typedef FakeImageEvent = SyncUpdate;
-extension SendImage on Room {
+extension SendImageExtension on Room {
 
   static const maxImagesCacheInRoom = 10;
 
@@ -295,15 +295,5 @@ extension SendImage on Room {
       EventTypes.Sticker,
       EventTypes.Encrypted,
     ].contains(lastEvent?.type);
-  }
-
-  PresentationSearch toPresentationSearch(MatrixLocalizations matrixLocalizations) {
-    return PresentationSearch(
-      displayName: getLocalizedDisplayname(matrixLocalizations),
-      roomSummary: summary,
-      directChatMatrixID: directChatMatrixID,
-      matrixId: id,
-      searchElementTypeEnum: SearchElementTypeEnum.recentChat
-    );
   }
 }

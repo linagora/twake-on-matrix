@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_image_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 

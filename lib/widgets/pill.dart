@@ -1,5 +1,5 @@
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_image_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';

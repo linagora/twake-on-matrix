@@ -1,5 +1,5 @@
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
-import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:flutter/material.dart';
 
 mixin LoadMoreSearchMixin {
