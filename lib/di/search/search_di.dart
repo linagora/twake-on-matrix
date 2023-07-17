@@ -5,7 +5,6 @@ import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.d
 import 'package:fluffychat/di/base_di.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
-import 'package:fluffychat/domain/usecase/load_more_internal_contacts.dart';
 import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_interactor.dart';
 import 'package:get_it/get_it.dart';
@@ -29,8 +28,6 @@ class SearchDI extends BaseDI {
     get.registerSingleton<LookupContactsInteractor>(LookupContactsInteractor());
 
     get.registerSingleton<FetchContactsInteractor>(FetchContactsInteractor());
-
-    get.registerSingleton<LoadMoreInternalContacts>(LoadMoreInternalContacts());
 
     get.registerSingleton<SearchContactsAndRecentChatInteractor>(SearchContactsAndRecentChatInteractor());
 

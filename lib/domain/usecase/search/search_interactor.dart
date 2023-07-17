@@ -4,12 +4,10 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/domain/model/extensions/contact/presentation_contact_list_extension.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/model/room/room_list_extension.dart';
+import 'package:fluffychat/domain/model/search/search_model.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
-import 'package:fluffychat/presentation/extensions/room_list_extension.dart';
-import 'package:fluffychat/presentation/model/presentation_search.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SearchContactsAndRecentChatInteractor {
@@ -23,26 +21,33 @@ class SearchContactsAndRecentChatInteractor {
     required String keyword,
     int? limitContacts,
     int? limitRecentChats,
-    bool enableSearch = false
   }) async* {
     try {
-      if (enableSearch) {
+      if (keyword.isNotEmpty) {
         final recentChat = await _searchRecentChat(rooms: rooms, matrixLocalizations: matrixLocalizations, keyword: keyword);
         final contacts = await contactRepository.searchContact(query: ContactQuery(keyword: keyword), limit: limitContacts);
 
         final presentationSearches = _comparePresentationSearches(
-          recentChat.toPresentationSearchList(matrixLocalizations),
-          contacts.expand((contact) => contact.toPresentationContacts())
+          recentChat.toSearchList(matrixLocalizations),
+          contacts.expand((contact) => contact.toSearch())
+            .where((contact) => _compareDisplayNameWithKeyword(contact, keyword))
             .toList()
-            .toPresentationSearchList()
         );
-        yield Right(GetContactAndRecentChatSuccess(presentationSearches: presentationSearches));
+        yield Right(GetContactAndRecentChatSuccess(search: presentationSearches));
       } else {
         final recentChat = await _getRecentChat(rooms: rooms, limitRecentChats: limitRecentChats);
-        yield Right(GetContactAndRecentChatSuccess(presentationSearches: recentChat.toPresentationSearchList(matrixLocalizations)));
+        yield Right(GetContactAndRecentChatSuccess(search: recentChat.toSearchList(matrixLocalizations)));
       }
     } catch (e) {
       yield Left(GetContactAndRecentChatFailed(exception: e));
+    }
+  }
+
+  bool _compareDisplayNameWithKeyword(SearchModel search, String keyword) {
+    if (search.displayName != null) {
+      return search.displayName!.toLowerCase().contains(keyword.toLowerCase());
+    } else {
+      return false;
     }
   }
 
@@ -50,7 +55,7 @@ class SearchContactsAndRecentChatInteractor {
     required List<Room> rooms,
     int? limitRecentChats
   }) async {
-    return rooms.where((room) => !room.isSpace && !room.isStoryRoom)
+    return rooms.where((room) => room.isNotSpaceAndStoryRoom())
       .where((room) => room.isShowInChatList())
       .take(limitRecentChats ?? 0)
       .toList();
@@ -61,16 +66,15 @@ class SearchContactsAndRecentChatInteractor {
     required MatrixLocalizations matrixLocalizations,
     required String keyword,
   }) async {
-    return rooms.where((room) => !room.isSpace && !room.isStoryRoom)
+    return rooms.where((room) => room.isNotSpaceAndStoryRoom())
       .where((room) =>
         room.getLocalizedDisplayname(matrixLocalizations)
-        .toLowerCase()
-        .contains(keyword.toLowerCase())
-        && room.isShowInChatList()
+          .toLowerCase()
+          .contains(keyword.toLowerCase())
       ).toList();
   }
 
-  List<PresentationSearch> _comparePresentationSearches(List<PresentationSearch> recentChat, List<PresentationSearch> contacts) {
+  List<SearchModel> _comparePresentationSearches(List<SearchModel> recentChat, List<SearchModel> contacts) {
     final isDuplicateElement = contacts.where((contact) {
       return recentChat.any((recentChat) => recentChat.directChatMatrixID == contact.directChatMatrixID);
     }).toList();
