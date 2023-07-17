@@ -64,9 +64,9 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
       title: Align(
         alignment: Alignment.centerLeft,
         child: ValueListenableBuilder(
-          valueListenable: widget.searchContactsController.isSearchBarShow,
-          builder: (context, isSearchBarShow, child) {
-            if (isSearchBarShow) {
+          valueListenable: widget.searchContactsController.isSearchModeNotifier,
+          builder: (context, isSearchModeNotifier, child) {
+            if (isSearchModeNotifier) {
               return Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: TextField(
@@ -98,9 +98,9 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
       ),
       actions: [
         ValueListenableBuilder(
-          valueListenable: widget.searchContactsController.isSearchBarShow,
-          builder: (context, isSearchBarShow, child) {
-            if (isSearchBarShow) {
+          valueListenable: widget.searchContactsController.isSearchModeNotifier,
+          builder: (context, isSearchModeNotifier, child) {
+            if (isSearchModeNotifier) {
               return TwakeIconButton(
                 onPressed: () => widget.searchContactsController.onCloseSearchTapped(),
                 tooltip: L10n.of(context)!.close,

@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -12,10 +10,7 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/permission_service.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' as linagora_design_flutter;
+import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
@@ -26,11 +21,9 @@ import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dar
 import 'package:fluffychat/widgets/matrix.dart';
 
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/pages/new_group/new_group_view.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:vrouter/vrouter.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
@@ -42,7 +35,7 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends State<NewGroup>
-  with ComparablePresentationContactMixin {
+  with ComparablePresentationContactMixin, ImagePickerMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
@@ -55,11 +48,6 @@ class NewGroupController extends State<NewGroup>
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
   final isEnableEEEncryptionNotifier = ValueNotifier(true);
-  final ImagePickerGridController imagePickerController = ImagePickerGridController();
-  final numberSelectedImagesNotifier = ValueNotifier<int>(0);
-
-  final int maxFileSizeDefaultInMB = 5 * 1024 * 1024;
-
   final groupNameFocusNode = FocusNode();
   StreamSubscription? uploadContentInteractorStreamSubscription;
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
@@ -119,13 +107,25 @@ class NewGroupController extends State<NewGroup>
     fetchContactsController.haveMoreCountactsNotifier.value = false;
   }
 
+  void selectedContact() {
+    searchContactsController.onSelectedContact();
+  }
+
+
+  Future<ServerConfig> getServerConfig() async {
+    final serverConfig = await Matrix.of(context).client.getConfig();
+    return serverConfig;
+  }
+
   Iterable<PresentationContact> get contactsList 
     => selectedContactsMapNotifier.contactsList;
 
-  Set<PresentationContact> getAllContactsGroupChat() {
+  Future<Set<PresentationContact>> getAllContactsGroupChat({bool isCustomDisplayName = true}) async {
+    final userId = Matrix.of(context).client.userID;
+    final profile = await Matrix.of(context).client.getProfileFromUserId(userId!);
     final newContactsList = {
       PresentationContact(
-        displayName: "You",
+        displayName: isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
         matrixId: Matrix.of(context).client.userID,
       )
     };
@@ -133,8 +133,22 @@ class NewGroupController extends State<NewGroup>
     return newContactsList;
   }
 
+  void _getDefaultGroupName(Set<PresentationContact> contactLis) async {
+    if (contactLis.length <= 3) {
+      final groupName = contactLis.map((contact) => contact.displayName).join(", ");
+      groupNameTextEditingController.text = groupName;
+      groupNameTextEditingController.selection = TextSelection.fromPosition(
+          TextPosition(offset: groupNameTextEditingController.text.length)
+      );
+      groupNameFocusNode.requestFocus();
+    } else {
+      groupNameTextEditingController.clear();
+    }
+  }
+
   void moveToNewGroupInfoScreen() async {
-    groupNameFocusNode.unfocus();
+    final contactList = await getAllContactsGroupChat();
+    _getDefaultGroupName(contactList);
     await showGeneralDialog(
       pageBuilder: (context, animation, secondaryAnimation) {
         return const SizedBox.shrink();
@@ -147,7 +161,7 @@ class NewGroupController extends State<NewGroup>
           animation1,
           animation2,
           NewGroupChatInfo(
-            contactsList: getAllContactsGroupChat(),
+            contactsList: contactList,
             newGroupController: this,
           )
         );
@@ -238,28 +252,6 @@ class NewGroupController extends State<NewGroup>
     VRouter.of(context).toSegments(['rooms', roomId]);
   }
 
-  Future<PermissionStatus>? _getCurrentPhotoPermission() {
-    return PermissionHandlerService().requestPermissionForPhotoActions();
-  }
-
-  Future<PermissionStatus>? _getCurrentCameraPermission() {
-    return PermissionHandlerService().requestPermissionForCameraActions();
-  }
-
-  void imagePickAction() async {
-    Navigator.pop(context);
-    final assetEntity = await CameraPicker.pickFromCamera(
-      context,
-      locale: window.locale,
-    );
-    if (assetEntity != null && assetEntity.type == AssetType.image) {
-      uploadAvatarNewGroupChat(
-        matrixClient: Matrix.of(context).client,
-        entity: imagePickerController.selectedAssets.first.asset
-      );
-    }
-  }
-
   void _registerListenerForSelectedImagesChanged() {
     imagePickerController.addListener(() {
       numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
@@ -276,60 +268,25 @@ class NewGroupController extends State<NewGroup>
     });
   }
 
-  void saveAvatarAction(BuildContext context) async {
-
-    final permissionStatusPhotos = await _getCurrentPhotoPermission();
-    final permissionStatusCamera = await _getCurrentCameraPermission();
-
-    if (permissionStatusCamera != null && permissionStatusPhotos != null) {
-      await linagora_design_flutter.ImagePicker.showImagesGridBottomSheet(
+  void showImagesPickerAction({
+    required BuildContext context,
+  }) async {
+    final currentPermissionPhotos = await getCurrentPhotoPermission();
+    final currentPermissionCamera = await getCurrentCameraPermission();
+    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+      showImagesPickerBottomSheet(
         context: context,
-        controller: imagePickerController,
-        backgroundImageCamera: const AssetImage("assets/verification.png"),
-        initialChildSize: 0.6,
-        permissionStatus: permissionStatusPhotos,
-        counterImageBuilder: (_) {
-          return Column(
-            children: [
-              const SizedBox(height: 16.0,),
-              Container(
-                height: 4.0,
-                width: 32,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          );
-        },
-        assetBackgroundColor: LinagoraSysColors.material().background,
-        goToSettingsWidget: Column(
-          children: [
-            SvgPicture.asset(ImagePaths.icPhotosSettingPermission,
-              width: 40,
-              height: 40,
-            ),
-            Text(L10n.of(context)!.tapToAllowAccessToYourGallery,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: LinagoraRefColors.material().neutral
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        cameraWidget: UseCameraWidget(
-          onPressed: permissionStatusCamera == PermissionStatus.granted
-            ? () => imagePickAction()
-            : () => PermissionHandlerService().goToSettingsForPermissionActions(),
-          backgroundImage: const AssetImage("assets/verification.png"),
-        ),
+        permissionStatusPhotos: currentPermissionPhotos,
+        permissionStatusCamera: currentPermissionCamera,
+        onItemAction: (_) {},
       );
     }
   }
 
+
+  @override
   void removeAllImageSelected() {
+    uploadContentInteractorStreamSubscription?.cancel();
     imagePickerController.clearAssetCounter();
     numberSelectedImagesNotifier.value = 0;
     Logs().d('NewGroupController::_removeAllImageSelected() - numberSelectedImagesNotifier.value  ${numberSelectedImagesNotifier.value}');

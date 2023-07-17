@@ -284,7 +284,7 @@ mixin ImagePickerMixin {
   }) async {
     Navigator.pop(context);
     if (room == null) {
-
+      return;
     }
     final assetEntity = await CameraPicker.pickFromCamera(
       context,

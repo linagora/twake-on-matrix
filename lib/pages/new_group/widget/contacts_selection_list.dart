@@ -89,7 +89,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                                 value: contactNotifier.value,
                                 onChanged: (newValue) {
                                   selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
-                                  widget.newGroupController.onCloseSearchTapped();
+                                  widget.newGroupController.selectedContact();
                                 },
                               );
                             }

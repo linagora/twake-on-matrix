@@ -1,7 +1,6 @@
 import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/create_direct_chat/create_direct_chat_di.dart';
-import 'package:fluffychat/di/room/room_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -77,7 +76,7 @@ class AppRoutes {
                       VWidgetWithDependencies(
                         path: '/contactsTab',
                         widget: const ContactsTab(),
-                        dIs: [ContactDI(), CreateNewRoomDI()],
+                        dIs: [ContactDI()],
                         buildTransition: _bottomToTopTransition,
                       ),
                       VWidget(
@@ -122,7 +121,7 @@ class AppRoutes {
                 ),
                 VWidgetWithDependencies(
                   path: '/rooms/:roomid',
-                  dIs: [ChatScreenDi(), CreateNewRoomDI()],
+                  dIs: [ChatScreenDi()],
                   widget: const Chat(),
                   buildTransition: rightToLeftTransition,
                   stackedRoutes: [
@@ -163,7 +162,7 @@ class AppRoutes {
                   ],
                 ),
                 VWidgetWithDependencies(
-                  dIs: [ContactDI(), CreateNewRoomDI()],
+                  dIs: [ContactDI()],
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: rightToLeftTransition,
@@ -224,7 +223,7 @@ class AppRoutes {
                   stackedRoutes: _chatDetailsRoutes,
                 ),
                 VWidgetWithDependencies(
-                  dIs: [ContactDI(), CreateNewRoomDI()],
+                  dIs: [ContactDI()],
                   path: '/newprivatechat',
                   widget: const NewPrivateChat(),
                   buildTransition: _fadeTransition,

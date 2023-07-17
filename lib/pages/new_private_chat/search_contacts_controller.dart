@@ -19,7 +19,6 @@ class SearchContactsController {
   StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController = StreamController();
   void Function(String)? onSearchKeywordChanged;
   ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
-  ValueNotifier<bool> isSearchBarShow = ValueNotifier(false);
   final searchFocusNode = FocusNode();
 
   String searchKeyword = "";
@@ -41,8 +40,8 @@ class SearchContactsController {
     _debouncer.values.listen((keyword) async {
       Logs().d("SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword");
       searchKeyword = keyword;
-      Logs().d("SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value} || searchFocusNode.hasFocus: ${searchFocusNode.hasFocus}");
-      if (isSearchModeNotifier.value && searchFocusNode.hasFocus) {
+      Logs().d("SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value}");
+      if (isSearchModeNotifier.value) {
         if (onSearchKeywordChanged != null) {
           onSearchKeywordChanged!(textEditingController.text);
         }
@@ -64,9 +63,11 @@ class SearchContactsController {
   }
 
   void onCloseSearchTapped() {
-    isSearchBarShow.value = false;
-    searchFocusNode.unfocus();
     isSearchModeNotifier.value = false;
+    textEditingController.clear();
+  }
+
+  void onSelectedContact() {
     textEditingController.clear();
   }
 
@@ -77,7 +78,6 @@ class SearchContactsController {
   }
 
   void openSearchBar() {
-    isSearchBarShow.value = true;
     isSearchModeNotifier.value = true;
     searchFocusNode.requestFocus();
   }

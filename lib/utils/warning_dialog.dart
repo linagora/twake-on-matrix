@@ -3,23 +3,23 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef OnAcceptButton = void Function()?;
 
-class WarningDialog extends StatefulWidget {
+class WarningDialogWidget extends StatefulWidget {
   
   final Widget explainTextRequestWidget;
   
   final OnAcceptButton onAcceptButton;
 
-  const WarningDialog({
+  const WarningDialogWidget({
     required this.explainTextRequestWidget,
     Key? key,
     this.onAcceptButton,
   }) : super(key: key);
 
   @override
-  State<WarningDialog> createState() => _WarningDialogState();
+  State<WarningDialogWidget> createState() => _WarningDialogWidgetState();
 }
 
-class _WarningDialogState extends State<WarningDialog> {
+class _WarningDialogWidgetState extends State<WarningDialogWidget> {
 
   @override
   void initState() {

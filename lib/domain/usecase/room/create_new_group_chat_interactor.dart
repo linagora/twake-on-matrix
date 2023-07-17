@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:fluffychat/domain/exception/can_not_create_new_group_chat_exception.dart';
+import 'package:fluffychat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:matrix/matrix.dart';
 
