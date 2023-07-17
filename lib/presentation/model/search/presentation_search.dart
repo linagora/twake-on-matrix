@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/domain/model/search/search_model.dart';
 import 'package:matrix/matrix.dart';
-
-enum SearchElementTypeEnum {
-  contact,
-  recentChat,
-}
 
 class PresentationSearch extends Equatable {
 

@@ -1,14 +1,14 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/presentation/model/presentation_search.dart';
+import 'package:fluffychat/domain/model/search/search_model.dart';
 
 class GetContactAndRecentChatSuccess extends Success {
-  final List<PresentationSearch> presentationSearches;
+  final List<SearchModel> search;
 
-  const GetContactAndRecentChatSuccess({required this.presentationSearches});
+  const GetContactAndRecentChatSuccess({required this.search});
 
   @override
-  List<Object?> get props => [presentationSearches];
+  List<Object?> get props => [search];
 }
 
 class GetContactAndRecentChatFailed extends Failure {
