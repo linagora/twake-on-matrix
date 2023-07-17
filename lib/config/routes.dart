@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/create_direct_chat/create_direct_chat_di.dart';
+import 'package:fluffychat/di/forward/forward_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -13,6 +14,7 @@ import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_sett
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
+import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
@@ -141,6 +143,12 @@ class AppRoutes {
                       stackedRoutes: _chatDetailsRoutes,
                       buildTransition: rightToLeftTransition,
                     ),
+                    VWidgetWithDependency(
+                      path: 'forward',
+                      widget: const Forward(),
+                      di: ForwardDI(),
+                      buildTransition: rightToLeftTransition,
+                    )
                   ],
                 ),
                 VWidget(
@@ -356,32 +364,38 @@ class AppRoutes {
       ];
 
   List<VRouteElement> get _chatDetailsRoutes => [
-        VWidget(
-          path: 'permissions',
-          widget: const ChatPermissionsSettings(),
-          buildTransition: _dynamicTransition,
-        ),
-        VWidget(
-          path: 'invite',
-          widget: const InvitationSelection(),
-          buildTransition: _dynamicTransition,
-        ),
-        VWidget(
-          path: 'multiple_emotes',
-          widget: const MultipleEmotesSettings(),
-          buildTransition: _dynamicTransition,
-        ),
-        VWidget(
-          path: 'emotes',
-          widget: const EmotesSettings(),
-          buildTransition: _dynamicTransition,
-        ),
-        VWidget(
-          path: 'emotes/:state_key',
-          widget: const EmotesSettings(),
-          buildTransition: _dynamicTransition,
-        ),
-      ];
+    VWidget(
+      path: 'permissions',
+      widget: const ChatPermissionsSettings(),
+      buildTransition: _dynamicTransition,
+    ),
+    VWidget(
+      path: 'invite',
+      widget: const InvitationSelection(),
+      buildTransition: _dynamicTransition,
+    ),
+    VWidget(
+      path: 'multiple_emotes',
+      widget: const MultipleEmotesSettings(),
+      buildTransition: _dynamicTransition,
+    ),
+    VWidget(
+      path: 'emotes',
+      widget: const EmotesSettings(),
+      buildTransition: _dynamicTransition,
+    ),
+    VWidget(
+      path: 'emotes/:state_key',
+      widget: const EmotesSettings(),
+      buildTransition: _dynamicTransition,
+    ),
+    VWidgetWithDependency(
+      path: 'forward',
+      widget: const Forward(),
+      di: ForwardDI(),
+      buildTransition: _fadeTransition,
+    )
+  ];
 
   List<VRouteElement> get _settingsRoutes => [
         VWidget(
