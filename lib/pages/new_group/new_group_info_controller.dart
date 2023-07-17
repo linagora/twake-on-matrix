@@ -3,13 +3,11 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
+import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/utils/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-
 
 extension NewGroupInfoController on NewGroupController {
 
@@ -37,27 +35,14 @@ extension NewGroupInfoController on NewGroupController {
         ),
       );
     } else {
-      final result = await showDialog<bool?>(
-        context: context,
-        useRootNavigator: false,
-        builder: (c) => WarningDialog(
-          explainTextRequestWidget: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              text: L10n.of(context)!.youAreUploadingPhotosDoYouWantToCancelOrContinue,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-          ),
-          onAcceptButton: () => cancelUploadAvatar(),
-        ),
-      );
+      WarningDialog.showWarningDialog(context,onAcceptButton: () => cancelUploadAvatar(context));
     }
   }
 
-  void cancelUploadAvatar() {
+  void cancelUploadAvatar(BuildContext context) {
     uploadAvatarNewGroupChatNotifier.value = const Left(UploadContentFailed(exception: null));
     removeAllImageSelected();
-    Navigator.pop(context);
+    WarningDialog.hideWarningDialog(context);
   }
 
   Set<PresentationContact> getSelectedValidContacts(

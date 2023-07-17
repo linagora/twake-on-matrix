@@ -7,6 +7,8 @@ import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,10 +54,20 @@ class NewGroupChatInfo extends StatelessWidget {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    Text(L10n.of(context)!.maxImageSize(5),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[40],
-                      )),
+                    FutureBuilder(
+                      future: newGroupController.getServerConfig(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final maxMediaSize = snapshot.data!.mUploadSize;
+                          return Text(L10n.of(context)!.maxImageSize(maxMediaSize!.bytesToMB()),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: LinagoraRefColors.material().neutral[40],
+                            ));
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }
+                    ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextFieid(context),
                     const SizedBox(height: 16),
@@ -177,17 +189,11 @@ class NewGroupChatInfo extends StatelessWidget {
                 );
               } else if (success is UploadContentSuccess) {
                 return InkWell(
-                  onTap: () => newGroupController.saveAvatarAction(context),
-                  child: Container(
+                  onTap: () => newGroupController.showImagesPickerAction(context: context),
+                  child: MxcImage(
                     width: 56,
                     height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: MemoryImage(success.file),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                    uri: success.uri,
                   ),
                 );
               } else {
@@ -197,7 +203,7 @@ class NewGroupChatInfo extends StatelessWidget {
         }
       },
       child: InkWell(
-        onTap: () => newGroupController.saveAvatarAction(context),
+        onTap: () => newGroupController.showImagesPickerAction(context: context),
         child: Container(
           width: 56,
           height: 56,

@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/domain/exception/room/can_not_upload_content_exception.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
@@ -28,9 +29,9 @@ class UploadContentInteractor {
           filename: matrixFile.name,
           contentType: matrixFile.mimeType,
         );
-        yield Right(UploadContentSuccess(uri: uri, file: matrixFile.bytes));
+        yield Right(UploadContentSuccess(uri: uri));
       } else {
-        yield const Left(UploadContentFailed(exception: null));
+        yield Left(UploadContentFailed(exception: CannotUploadContentException()));
       }
     } catch (exception) {
       yield Left(UploadContentFailed(exception: exception));

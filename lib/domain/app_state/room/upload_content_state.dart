@@ -11,15 +11,13 @@ class UploadContentLoading extends Success {
 
 class UploadContentSuccess extends Success {
   final Uri uri;
-  final Uint8List file;
 
   const UploadContentSuccess({
     required this.uri,
-    required this.file
   });
 
   @override
-  List<Object?> get props => [uri, file];
+  List<Object?> get props => [uri];
 }
 
 class UploadContentFailed extends Failure {
