@@ -13,7 +13,7 @@ class ChatListView extends StatelessWidget {
 
   const ChatListView({
     Key? key,
-    required this.controller, 
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -34,6 +34,7 @@ class ChatListView extends StatelessWidget {
           helpLabel: L10n.of(context)!.newChat,
           child: TwakeFloatingActionButton(
             icon: Icons.mode_edit_outline_outlined,
+            size: 18.0,
             onTap: () => VRouter.of(context).to('/newprivatechat'),
           ),
         )
