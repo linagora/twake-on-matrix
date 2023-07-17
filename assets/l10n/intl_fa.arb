@@ -729,8 +729,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "countParticipants": "{count} تا شرکت کننده",
-  "@countParticipants": {
+  "countMembers": "{count} تا شرکت کننده",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

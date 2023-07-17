@@ -306,8 +306,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} účastníkov",
-    "@countParticipants": {
+    "countMembers": "{count} účastníkov",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

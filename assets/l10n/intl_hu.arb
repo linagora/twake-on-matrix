@@ -323,8 +323,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} résztvevő",
-  "@countParticipants": {
+  "countMembers": "{count} résztvevő",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

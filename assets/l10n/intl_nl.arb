@@ -518,8 +518,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} personen",
-  "@countParticipants": {
+  "countMembers": "{count} personen",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

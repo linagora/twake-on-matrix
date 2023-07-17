@@ -458,8 +458,8 @@
         "type": "text",
         "description": "Usage hint for the command /unban"
     },
-    "countParticipants": "{count} משתתפים",
-    "@countParticipants": {
+    "countMembers": "{count} משתתפים",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

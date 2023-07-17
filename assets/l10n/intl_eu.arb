@@ -313,8 +313,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} partaide",
-  "@countParticipants": {
+  "countMembers": "{count} partaide",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

@@ -377,8 +377,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} deltagere",
-    "@countParticipants": {
+    "countMembers": "{count} deltagere",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

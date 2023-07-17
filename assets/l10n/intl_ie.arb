@@ -59,8 +59,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "countParticipants": "{count} participantes",
-    "@countParticipants": {
+    "countMembers": "{count} participantes",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

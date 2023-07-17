@@ -1086,8 +1086,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "countParticipants": "{count} osallistujaa",
-    "@countParticipants": {
+    "countMembers": "{count} osallistujaa",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

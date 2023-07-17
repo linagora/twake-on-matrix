@@ -313,8 +313,8 @@
       "error": {}
     }
   },
-  "countParticipants": "Учасників: {count}",
-  "@countParticipants": {
+  "countMembers": "Учасників: {count}",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

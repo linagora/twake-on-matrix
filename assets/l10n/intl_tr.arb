@@ -519,8 +519,8 @@
       "error": {}
     }
   },
-  "countParticipants": "{count} katılımcı",
-  "@countParticipants": {
+  "countMembers": "{count} katılımcı",
+  "@countMembers": {
     "type": "text",
     "placeholders": {
       "count": {}

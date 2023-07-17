@@ -408,8 +408,8 @@
             "error": {}
         }
     },
-    "countParticipants": "{count} partecipanti",
-    "@countParticipants": {
+    "countMembers": "{count} partecipanti",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}

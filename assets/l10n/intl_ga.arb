@@ -215,8 +215,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "countParticipants": "{count} rannpháirtithe",
-    "@countParticipants": {
+    "countMembers": "{count} rannpháirtithe",
+    "@countMembers": {
         "type": "text",
         "placeholders": {
             "count": {}
