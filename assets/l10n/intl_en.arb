@@ -2567,7 +2567,7 @@
         "placeholders": {}
     },
     "channels": "Channels",
-    "chatMessage": "Chat message",
+    "chatMessage": "New message",
     "welcomeToTwake": "Welcome to Twake, {user}",
     "@welcomeToTwake": {
         "placeholders": {
