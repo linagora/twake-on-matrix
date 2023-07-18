@@ -144,7 +144,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
               if (selectMode == SelectMode.select)
                 IconButton(
-                  icon: const Icon(Icons.delete_outlined),
+                  icon: const Icon(Icons.archive_outlined),
                   tooltip: L10n.of(context)!.archive,
                   onPressed: controller.archiveAction,
                 ),
