@@ -15,7 +15,7 @@ class TomContactAPI {
   Future<LookupMxidResponse> searchContacts(ContactQuery query, {int? limit, int? offset}) async {
     final requestBody = LookupMxidRequest(
       scope: ['mail', 'uid', 'mobile'],
-      fields: ['uid', 'mobile', 'mail'], 
+      fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],
       val: query.keyword,
       limit: limit,
       offset: offset

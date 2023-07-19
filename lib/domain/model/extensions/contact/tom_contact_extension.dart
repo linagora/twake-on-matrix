@@ -6,7 +6,7 @@ extension TomContactExtension on TomContact {
   Contact toContact(ContactStatus status) {
     return Contact(
       emails: mail != null ? {mail!} : {},
-      displayName: uid,
+      displayName: displayName ?? uid,
       phoneNumber: phoneNumber,
       matrixId: address,
       status: status,

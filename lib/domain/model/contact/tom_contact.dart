@@ -16,11 +16,21 @@ class TomContact with EquatableMixin {
 
   final String? address;
 
+  @JsonKey(name: "cn")
+  final String? cn;
+
+  @JsonKey(name: "displayName")
+  final String? rawDisplayName;
+
+  String? get displayName => rawDisplayName ?? cn;
+
   const TomContact(
     this.uid, {
     this.mail,
     this.phoneNumber,
     this.address,
+    this.cn,
+    this.rawDisplayName,
   });
 
   @override
