@@ -55,7 +55,7 @@ class ChatEventList extends StatelessWidget {
                   ? DirectChatEmptyView(
                       onTap: () => controller.inputFocus.requestFocus(),
                   )
-                  : const GroupChatEmptyView(),
+                  : GroupChatEmptyView(firstEvent: controller.timeline!.events.last),
               ),
             ),
           ),
