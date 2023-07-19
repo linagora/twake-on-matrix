@@ -15,7 +15,6 @@ import 'package:fluffychat/utils/network_connection_service.dart';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
