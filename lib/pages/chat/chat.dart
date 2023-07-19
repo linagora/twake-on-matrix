@@ -257,19 +257,8 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     setState(() {});
   }
 
-  bool isContactsLastPage() {
-    final previousPath = VRouter.of(context).previousPath;
-    return previousPath?.endsWith('newprivatechat') == true 
-      || previousPath?.endsWith('contactsTab') == true
-      || previousPath?.endsWith('emptyChat') == true;
-  }
-
   void backToPreviousPage() {
-    if (isContactsLastPage()) {
-      VRouter.of(context).historyBack();
-    } else {
-      VRouter.of(context).pop();
-    }
+    VRouter.of(context).pop();
   }
 
   Future<bool> getTimeline() async {

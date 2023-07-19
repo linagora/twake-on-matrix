@@ -5,7 +5,6 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/empty_chat.dart';
 import 'package:fluffychat/pages/chat/input_bar.dart';
@@ -68,172 +67,173 @@ class EmptyChatView extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08), 
               height: 1,)),
         ),
-        body: Column(
-          children: [
-            Expanded(child: Center(child: DirectChatEmptyView(
-              onTap: () => controller.inputFocus.requestFocus(),
-            ))),
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TwakeIconButton(
-                        tooltip: L10n.of(context)!.more,
-                        margin: const EdgeInsets.only(right: 4.0),
-                        icon: Icons.add_circle_outline,
-                        onPressed: () {
-                          controller.showImagesPickerBottomSheetAction(
-                            context: context,
-                            onItemAction: (action) => controller.onClickItemAction(
-                              action: action,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(child: Center(child: DirectChatEmptyView(
+                onTap: () => controller.inputFocus.requestFocus(),
+              ))),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TwakeIconButton(
+                          tooltip: L10n.of(context)!.more,
+                          margin: const EdgeInsets.only(right: 4.0),
+                          icon: Icons.add_circle_outline,
+                          onPressed: () {
+                            controller.showImagesPickerBottomSheetAction(
                               context: context,
-                            ),
-                            onSendTap: () => controller.sendImages(assets: controller.sortedSelectedAssets),
-                          );
-                        },
-                      ),
-                      Expanded(
-                          child: Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsetsDirectional.only(start: 12.0),
-                            margin: const EdgeInsetsDirectional.only(end: 8.0),
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(25)),
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: InputBar(
-                                    minLines: 1,
-                                    maxLines: 8,
-                                    autofocus: !PlatformInfos.isMobile,
-                                    keyboardType: TextInputType.multiline,
-                                    textInputAction: AppConfig.sendOnEnter
-                                        ? TextInputAction.send
-                                        : null,
-                                    onSubmitted: controller.onInputBarSubmitted,
-                                    focusNode: controller.inputFocus,
-                                    controller: controller.sendController,
-                                    decoration: InputDecoration(
-                                      hintText: L10n.of(context)!.chatMessage,
-                                      hintMaxLines: 1,
-                                      hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
-                                        Theme.of(context).inputDecorationTheme.hintStyle
-                                      ).copyWith(letterSpacing: -0.15)
-                                    ),
-                                    onChanged: controller.onInputBarChanged,
-                                  ),
-                                ),
-                                KeyBoardShortcuts(
-                                  keysToPress: {
-                                    LogicalKeyboardKey.altLeft,
-                                    LogicalKeyboardKey.keyE
-                                  },
-                                  onKeysPressed: controller.emojiPickerAction,
-                                  helpLabel: L10n.of(context)!.emojis,
-                                  child: InkWell(
-                                    onTap: controller.emojiPickerAction,
-                                    child: PageTransitionSwitcher(
-                                      transitionBuilder: (
-                                        Widget child,
-                                        Animation<double> primaryAnimation,
-                                        Animation<double> secondaryAnimation,
-                                      ) {
-                                        return SharedAxisTransition(
-                                          animation: primaryAnimation,
-                                          secondaryAnimation: secondaryAnimation,
-                                          transitionType: SharedAxisTransitionType.scaled,
-                                          fillColor: Colors.transparent,
-                                          child: child,
-                                        );
-                                      },
-                                      child: !controller.showEmojiPicker
-                                        ? TwakeIconButton(
-                                          paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                          tooltip: L10n.of(context)!.emojis,
-                                          onPressed: () => controller.emojiPickerAction(),
-                                          icon: Icons.tag_faces,
-                                        )
-                                        : TwakeIconButton(
-                                          paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                          tooltip: L10n.of(context)!.keyboard,
-                                          onPressed: () => controller.inputFocus.requestFocus(),
-                                          icon: Icons.keyboard,
-                                        ),
+                              onItemAction: (action) => controller.onClickItemAction(
+                                action: action,
+                                context: context,
+                              ),
+                              onSendTap: () => controller.sendImages(assets: controller.sortedSelectedAssets),
+                            );
+                          },
+                        ),
+                        Expanded(
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsetsDirectional.only(start: 12.0),
+                              margin: const EdgeInsetsDirectional.only(end: 8.0),
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(Radius.circular(25)),
+                                color: Theme.of(context).colorScheme.surface,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: InputBar(
+                                      minLines: 1,
+                                      maxLines: 8,
+                                      autofocus: !PlatformInfos.isMobile,
+                                      keyboardType: TextInputType.multiline,
+                                      textInputAction: AppConfig.sendOnEnter
+                                          ? TextInputAction.send
+                                          : null,
+                                      onSubmitted: controller.onInputBarSubmitted,
+                                      focusNode: controller.inputFocus,
+                                      controller: controller.sendController,
+                                      decoration: InputDecoration(
+                                        hintText: L10n.of(context)!.chatMessage,
+                                        hintMaxLines: 1,
+                                        hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
+                                          Theme.of(context).inputDecorationTheme.hintStyle
+                                        ).copyWith(letterSpacing: -0.15)
+                                      ),
+                                      onChanged: controller.onInputBarChanged,
                                     ),
                                   ),
-                                ),
-                                if (PlatformInfos.platformCanRecord &&
-                                  controller.inputText.isEmpty)
-                                  Container(
-                                    height: 56,
-                                    alignment: Alignment.center,
-                                    child: TwakeIconButton(
-                                      margin: const EdgeInsets.only(right: 7.0),
-                                      paddingAll: 5.0,
-                                      onPressed: () {},
-                                      tooltip: L10n.of(context)!.send,
-                                      icon: Icons.mic_none,
+                                  KeyBoardShortcuts(
+                                    keysToPress: {
+                                      LogicalKeyboardKey.altLeft,
+                                      LogicalKeyboardKey.keyE
+                                    },
+                                    onKeysPressed: controller.emojiPickerAction,
+                                    helpLabel: L10n.of(context)!.emojis,
+                                    child: InkWell(
+                                      onTap: controller.emojiPickerAction,
+                                      child: PageTransitionSwitcher(
+                                        transitionBuilder: (
+                                          Widget child,
+                                          Animation<double> primaryAnimation,
+                                          Animation<double> secondaryAnimation,
+                                        ) {
+                                          return SharedAxisTransition(
+                                            animation: primaryAnimation,
+                                            secondaryAnimation: secondaryAnimation,
+                                            transitionType: SharedAxisTransitionType.scaled,
+                                            fillColor: Colors.transparent,
+                                            child: child,
+                                          );
+                                        },
+                                        child: !controller.showEmojiPicker
+                                          ? TwakeIconButton(
+                                            paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
+                                            tooltip: L10n.of(context)!.emojis,
+                                            onPressed: () => controller.emojiPickerAction(),
+                                            icon: Icons.tag_faces,
+                                          )
+                                          : TwakeIconButton(
+                                            paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
+                                            tooltip: L10n.of(context)!.keyboard,
+                                            onPressed: () => controller.inputFocus.requestFocus(),
+                                            icon: Icons.keyboard,
+                                          ),
+                                      ),
                                     ),
                                   ),
-                              ],
+                                  if (PlatformInfos.platformCanRecord &&
+                                    controller.inputText.isEmpty)
+                                    Container(
+                                      height: 56,
+                                      alignment: Alignment.center,
+                                      child: TwakeIconButton(
+                                        margin: const EdgeInsets.only(right: 7.0),
+                                        paddingAll: 5.0,
+                                        onPressed: () {},
+                                        tooltip: L10n.of(context)!.send,
+                                        icon: Icons.mic_none,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        if (!PlatformInfos.isMobile || controller.inputText.isNotEmpty)
-                          Container(
-                            height: 56,
-                            alignment: Alignment.center,
-                            child: TwakeIconButton(
-                              size: ChatInputRowStyle.sendIconButtonSize,
-                              onPressed: controller.sendText,
-                              tooltip: L10n.of(context)!.send,
-                              imagePath: ImagePaths.icSend,
-                            ),
-                          )
-                    ],
+                          if (!PlatformInfos.isMobile || controller.inputText.isNotEmpty)
+                            Container(
+                              height: 56,
+                              alignment: Alignment.center,
+                              child: TwakeIconButton(
+                                size: ChatInputRowStyle.sendIconButtonSize,
+                                onPressed: controller.sendText,
+                                tooltip: L10n.of(context)!.send,
+                                imagePath: ImagePaths.icSend,
+                              ),
+                            )
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: FluffyThemes.columnWidth * 2.5,
+                  Container(
+                    constraints: const BoxConstraints(
+                      maxWidth: FluffyThemes.columnWidth * 2.5,
+                    ),
+                    alignment: Alignment.center,
+                    child: AnimatedContainer(
+                      duration: FluffyThemes.animationDuration,
+                      curve: FluffyThemes.animationCurve,
+                      width: MediaQuery.of(context).size.width,
+                      height: controller.showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
+                      child: controller.showEmojiPicker
+                          ? EmojiPicker(
+                              onEmojiSelected: controller.onEmojiBottomSheetSelected,
+                              onBackspacePressed: controller.emojiPickerBackspace,
+                              config: Config(
+                                backspaceColor: Theme.of(context).colorScheme.primary,
+                                bgColor: Theme.of(context).colorScheme.surface,
+                                indicatorColor: Theme.of(context).colorScheme.primary,
+                                iconColorSelected: Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : null,
+                    )
                   ),
-                  alignment: Alignment.center,
-                  child: AnimatedContainer(
-                    duration: FluffyThemes.animationDuration,
-                    curve: FluffyThemes.animationCurve,
-                    width: MediaQuery.of(context).size.width,
-                    height: controller.showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
-                    child: controller.showEmojiPicker
-                        ? EmojiPicker(
-                            onEmojiSelected: controller.onEmojiBottomSheetSelected,
-                            onBackspacePressed: controller.emojiPickerBackspace,
-                            config: Config(
-                              backspaceColor: Theme.of(context).colorScheme.primary,
-                              bgColor: Theme.of(context).colorScheme.surface,
-                              indicatorColor: Theme.of(context).colorScheme.primary,
-                              iconColorSelected: Theme.of(context).colorScheme.primary,
-                            ),
-                          )
-                        : null,
-                  )
-                ),
-              ],
-            )
-          ],
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
   List<Widget> _appBarActions(BuildContext context) {
-    return [
-    ];
+    return [];
   }
 }
 
