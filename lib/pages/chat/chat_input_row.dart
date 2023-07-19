@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -8,18 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -92,16 +86,15 @@ class ChatInputRow extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
                   onPressed: () async {
-                    final currentPermissionPhotos = await controller.getCurrentPhotoPermission();
-                    final currentPermissionCamera = await controller.getCurrentCameraPermission();
-                    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
-                      showImagesPickerBottomSheet(
-                        controller: controller,
+                    controller.showImagesPickerBottomSheetAction(
+                      context: context,
+                      onItemAction: (action) => controller.onClickItemAction(
+                        action: action, 
+                        room: controller.room, 
                         context: context,
-                        permissionStatusPhotos: currentPermissionPhotos,
-                        permissionStatusCamera: currentPermissionCamera,
-                      ).whenComplete(() => controller.removeAllImageSelected());
-                    }
+                      ),
+                      onSendTap: () => controller.sendImages(room: controller.room),
+                    );
                   },
                 ),
                 if (controller.matrix!.isMultiAccount &&
@@ -275,177 +268,4 @@ class _ChatAccountPicker extends StatelessWidget {
       ),
     );
   }
-}
-
-Future<void> showImagesPickerBottomSheet({
-  required BuildContext context,
-  required ChatController controller,
-  required PermissionStatus permissionStatusPhotos,
-  required PermissionStatus permissionStatusCamera,
-}) async {
-  return await ImagePicker.showImagesGridBottomSheet(
-    context: context,
-    controller: controller.imagePickerController,
-    backgroundImageCamera: const AssetImage("assets/verification.png"),
-    initialChildSize: 0.6,
-    permissionStatus: permissionStatusPhotos,
-    assetBackgroundColor: LinagoraSysColors.material().background,
-    counterImageBuilder: (counterImage) {
-      if (counterImage == 0) {
-        return const SizedBox.shrink();
-      }
-      return Padding(
-        padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 12.0, top: 16.0),
-        child: Row(
-          children: [
-            Text(L10n.of(context)!.photoSelectedCounter(counterImage),
-              style: Theme.of(context).textTheme.titleMedium,),
-            const Icon(Icons.chevron_right),
-            const Expanded(child: SizedBox.shrink()),
-            const Icon(Icons.more_vert),
-          ],
-        ),
-      );
-    },
-    expandedWidget: ValueListenableBuilder(
-      valueListenable: controller.numberSelectedImagesNotifier,
-      builder: (context, value, child) {
-        if (value == 0) {
-          return const SizedBox(height: 90);
-        }
-        return child!;
-      },
-      child: const SizedBox(height: 50),
-    ),
-    bottomWidget: ValueListenableBuilder(
-      valueListenable: controller.numberSelectedImagesNotifier,
-      builder: (context, value, child) {
-        if (value == 0) {
-          return Container(
-            // height: 64,
-            padding: const EdgeInsets.only(top: 8.0, bottom: 34.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: controller.listChatActions.map((action) {
-                return Expanded(
-                  child: ItemActionOnBottom(
-                    chatActions: action,
-                    onItemAction: (action) => controller.onClickItemAction(action),
-                  ),
-                );
-              }).toList()
-            ),
-          );
-        }
-        return child!;
-      },
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                Container(
-                  height: 64,
-                  padding: const EdgeInsets.only(right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          onTap: () => Fluttertoast.showToast(
-                            msg:  L10n.of(context)!.captionForImagesIsNotSupportYet,
-                            gravity: ToastGravity.CENTER,
-                          ),
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
-                            hintText: L10n.of(context)!.addACaption,
-                          ),
-                        ),
-                      ),
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          InkWell(
-                            borderRadius: const BorderRadius.all(Radius.circular(100)),
-                            onTap: () {
-                              controller.sendImages();
-                              Navigator.of(context).pop();
-                            },
-                            child: SvgPicture.asset(
-                              ImagePaths.icSend,
-                              width: 40,
-                              height: 40,
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Positioned(
-                  right: 12.0,
-                  bottom: 2.0,
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: ShapeDecoration(
-                      shape: CircleBorder(side: BorderSide(color: Theme.of(context).colorScheme.surface)),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    alignment: Alignment.center,
-                    child: ValueListenableBuilder(
-                      valueListenable: controller.numberSelectedImagesNotifier,
-                      builder: (context, value, child) {
-                        return Text("$value", style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.surface,
-                          letterSpacing: 0.1,
-                        ),);
-                      },
-                    ),
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(height: 8.0),
-          ],
-        ),
-      ),
-    ),
-    goToSettingsWidget: Column(
-      children: [
-        SvgPicture.asset(ImagePaths.icPhotosSettingPermission,
-          width: 40,
-          height: 40,
-        ),
-        Text(L10n.of(context)!.tapToAllowAccessToYourGallery,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: LinagoraRefColors.material().neutral
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    ),
-    cameraWidget: UseCameraWidget(
-      onPressed: permissionStatusCamera == PermissionStatus.granted
-        ? () => controller.imagePickAction()
-        : () => controller.goToSettings(),
-      backgroundImage: const AssetImage("assets/verification.png"),
-    ),
-  );
 }

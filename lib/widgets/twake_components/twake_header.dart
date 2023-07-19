@@ -20,15 +20,6 @@ class TwakeHeader extends StatelessWidget with ShowDialogMixin implements Prefer
         child: ClientChooserButton(controller),
       ),
       centerTitle: true,
-      actions: const [
-        Padding(
-          padding: EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Icon(
-            Icons.more_vert,
-            size: TwakeHeaderStyle.moreIconSize,
-          ),
-        ),
-      ],
     );
   }
 

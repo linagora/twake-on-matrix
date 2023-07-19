@@ -23,7 +23,7 @@ class ExpansionContactListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
-      child: FutureBuilder<ProfileInformation?>(
+      child: FutureBuilder<Profile?>(
         future: getProfile(context),
         builder: (context, snapshot) {
           return Row(
@@ -49,7 +49,7 @@ class ExpansionContactListTile extends StatelessWidget {
                             child: Row(
                               children: [
                                 Flexible(
-                                  child: _buildDisplayName(context, snapshot.data),
+                                  child: buildDisplayName(context, snapshot.data),
                                 ),
                               ],
                             ),
@@ -103,27 +103,27 @@ class ExpansionContactListTile extends StatelessWidget {
     );
   }
 
-  Widget _buildDisplayName(BuildContext context, ProfileInformation? profile) {
+  Widget buildDisplayName(BuildContext context, Profile? profile) {
     if (contact.displayName != null) {
       return _displayName(context, contact.displayName!);
     } else if (profile != null) {
-      return _displayName(context, profile.displayname!);
+      return _displayName(context, profile.displayName!);
     } else {
       return const SizedBox.shrink();
     }
   }
 
-  Future<ProfileInformation?> getProfile(BuildContext context) async {
+  Future<Profile?> getProfile(BuildContext context) async {
     final client = Matrix.of(context).client;
     if (contact.matrixId == null) {
       return Future.error(Exception("MatrixId is null"));
     }
     try {
-      final profile = await client.getUserProfile(contact.matrixId!);
-      Logs().d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
+      final profile = await client.getProfileFromUserId(contact.matrixId!);
+      Logs().d("ExpansionContactListTile()::getProfileFromUserId(): ${profile.avatarUrl}");
       return profile;
     } catch (e) {
-      return ProfileInformation(avatarUrl: null, displayname: contact.displayName);
+      return Profile(avatarUrl: null, displayName: contact.displayName, userId: contact.matrixId ?? '');
     }
   }
 }
