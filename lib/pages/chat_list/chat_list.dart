@@ -551,21 +551,21 @@ class ChatListController extends State<ChatList>
         if (await client.encryption?.keyManager.isCached() == false ||
             await client.encryption?.crossSigning.isCached() == false ||
             client.isUnknownSession && !mounted) {
-          final recoveryWords = await _getRecoveryWords();
-          if (recoveryWords != null) {
-            await TomBootstrapDialog(client: client, recoveryWords: recoveryWords)
-              .show(context);
-          } else {
-            Logs().d('ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap');
-            await BootstrapDialog(client: client).show(context);
-          }
+          Logs().d('ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap');
+          await BootstrapDialog(client: client).show(context);
+          // final recoveryWords = await _getRecoveryWords();
+          // if (recoveryWords != null) {
+          //   await TomBootstrapDialog(client: client, recoveryWords: recoveryWords).show(context);
+          // } else {
+          //
+          // }
         }
       } else {
-        Logs().d('ChatListController::_waitForFirstSync(): encryption is not enabled');
-        final recoveryWords = await _getRecoveryWords();
-        if (recoveryWords == null) {
-          await TomBootstrapDialog(client: client).show(context);
-        }
+        // Logs().d('ChatListController::_waitForFirstSync(): encryption is not enabled');
+        // final recoveryWords = await _getRecoveryWords();
+        // if (recoveryWords == null) {
+        //   await TomBootstrapDialog(client: client).show(context);
+        // }
       }
     }
     if (!mounted) return;

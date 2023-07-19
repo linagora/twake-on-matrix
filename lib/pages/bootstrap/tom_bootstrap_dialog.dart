@@ -33,7 +33,7 @@ class TomBootstrapDialog extends StatefulWidget {
 class TomBootstrapDialogState extends State<TomBootstrapDialog> {
 
   final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
-  late Bootstrap bootstrap;
+  Bootstrap? bootstrap;
   String? titleText;
 
   UploadRecoveryKeyState _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
@@ -42,121 +42,124 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
 
   @override
   void initState() {
-    _createBootstrap(widget.wipe);
     super.initState();
+    _createBootstrap(widget.wipe);
   }
 
   void _createBootstrap(bool wipe) async {
     _wipe = wipe;
     titleText = null;
     _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
-    bootstrap =
-        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      bootstrap = widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Logs().d('TomBootstrapDialogState::build(): BootstrapState = ${bootstrap.state}');
+    Logs().d('TomBootstrapDialogState::build(): BootstrapState = ${bootstrap?.state}');
     _wipe ??= widget.wipe;
     final buttons = <AdaptiveFlatButton>[];
     Widget body = const LinearProgressIndicator();
     titleText = L10n.of(context)!.loadingPleaseWait;
 
-    if (bootstrap.newSsssKey?.recoveryKey != null &&
+    if (bootstrap?.newSsssKey?.recoveryKey != null &&
         _uploadRecoveryKeyState == UploadRecoveryKeyState.initial) {
-      Logs().d('TomBootstrapDialogState::build(): start backup process with key ${bootstrap.newSsssKey!.recoveryKey}');
-      final key = bootstrap.newSsssKey!.recoveryKey;
+      Logs().d('TomBootstrapDialogState::build(): start backup process with key ${bootstrap?.newSsssKey!.recoveryKey}');
+      final key = bootstrap?.newSsssKey!.recoveryKey;
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _backUpInRecoveryVault(key),
       );
     } else {
-      switch (bootstrap.state) {
-        case BootstrapState.loading:
-          break;
-        case BootstrapState.askWipeSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.wipeSsss(_wipe!),
-          );
-          break;
-        case BootstrapState.askBadSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.ignoreBadSecrets(true),
-          );
-          break;
-        case BootstrapState.askUseExistingSsss:
-          _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.useExistingSsss(!_wipe!),
-          );
-          break;
-        case BootstrapState.askUnlockSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.unlockedSsss(),
-          );
-          break;
-        case BootstrapState.askNewSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.newSsss(),
-          );
-          break;
-        case BootstrapState.openExistingSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _unlockBackUp(),
-          );
-          break;
-        case BootstrapState.askWipeCrossSigning:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.wipeCrossSigning(_wipe!),
-          );
-          break;
-        case BootstrapState.askSetupCrossSigning:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.askSetupCrossSigning(
-              setupMasterKey: true,
-              setupSelfSigningKey: true,
-              setupUserSigningKey: true,
-            ),
-          );
-          break;
-        case BootstrapState.askWipeOnlineKeyBackup:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.wipeOnlineKeyBackup(_wipe!),
-          );
+      if (bootstrap != null) {
+        switch (bootstrap!.state) {
+          case BootstrapState.loading:
+            break;
+          case BootstrapState.askWipeSsss:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.wipeSsss(_wipe!),
+            );
+            break;
+          case BootstrapState.askBadSsss:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.ignoreBadSecrets(true),
+            );
+            break;
+          case BootstrapState.askUseExistingSsss:
+            _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.useExistingSsss(!_wipe!),
+            );
+            break;
+          case BootstrapState.askUnlockSsss:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.unlockedSsss(),
+            );
+            break;
+          case BootstrapState.askNewSsss:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.newSsss(),
+            );
+            break;
+          case BootstrapState.openExistingSsss:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _unlockBackUp(),
+            );
+            break;
+          case BootstrapState.askWipeCrossSigning:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.wipeCrossSigning(_wipe!),
+            );
+            break;
+          case BootstrapState.askSetupCrossSigning:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.askSetupCrossSigning(
+                setupMasterKey: true,
+                setupSelfSigningKey: true,
+                setupUserSigningKey: true,
+              ),
+            );
+            break;
+          case BootstrapState.askWipeOnlineKeyBackup:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.wipeOnlineKeyBackup(_wipe!),
+            );
 
-          break;
-        case BootstrapState.askSetupOnlineKeyBackup:
-          WidgetsBinding.instance.addPostFrameCallback(
-                (_) => bootstrap.askSetupOnlineKeyBackup(true),
-          );
-          break;
-        case BootstrapState.error:
-          titleText = L10n.of(context)!.oopsSomethingWentWrong;
-          body = const Icon(Icons.error_outline, color: Colors.red, size: 40);
-          buttons.add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.close,
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop<bool>(false),
-            ),
-          );
-          break;
-        case BootstrapState.done:
-          titleText = L10n.of(context)!.everythingReady;
-          body = Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset('assets/backup.png', fit: BoxFit.contain),
-              Text(L10n.of(context)!.yourChatBackupHasBeenSetUp),
-            ],
-          );
-          buttons.add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.close,
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop<bool>(false),
-            ),
-          );
-          break;
+            break;
+          case BootstrapState.askSetupOnlineKeyBackup:
+            WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => bootstrap?.askSetupOnlineKeyBackup(true),
+            );
+            break;
+          case BootstrapState.error:
+            titleText = L10n.of(context)!.oopsSomethingWentWrong;
+            body = const Icon(Icons.error_outline, color: Colors.red, size: 40);
+            buttons.add(
+              AdaptiveFlatButton(
+                label: L10n.of(context)!.close,
+                onPressed: () =>
+                    Navigator.of(context, rootNavigator: false).pop<bool>(false),
+              ),
+            );
+            break;
+          case BootstrapState.done:
+            titleText = L10n.of(context)!.everythingReady;
+            body = Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/backup.png', fit: BoxFit.contain),
+                Text(L10n.of(context)!.yourChatBackupHasBeenSetUp),
+              ],
+            );
+            buttons.add(
+              AdaptiveFlatButton(
+                label: L10n.of(context)!.close,
+                onPressed: () =>
+                    Navigator.of(context, rootNavigator: false).pop<bool>(false),
+              ),
+            );
+            break;
+        }
       }
     }
 
@@ -194,16 +197,16 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
       return;
     }
     try {
-      await bootstrap.newSsssKey!.unlock(
+      await bootstrap?.newSsssKey!.unlock(
         keyOrPassphrase: recoveryWords.words,
       );
       Logs().d('SSSS unlocked');
-      await bootstrap.client.encryption!.crossSigning
+      await bootstrap?.client.encryption!.crossSigning
           .selfSign(
         keyOrPassphrase: recoveryWords.words,
       );
       Logs().d('Successful elfsigned');
-      await bootstrap.openExistingSsss();
+      await bootstrap?.openExistingSsss();
     } catch (e, s) {
       Logs().w('Unable to unlock SSSS', e, s);
       setState(

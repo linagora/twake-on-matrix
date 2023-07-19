@@ -32,7 +32,6 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vrouter/vrouter.dart';
 
 import '../config/app_config.dart';
@@ -294,8 +293,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   Future<void> initConfig() async {
     try {
-      final configJsonString =
-          utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
+      final configJsonString = utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
       final configJson = json.decode(configJsonString);
       AppConfig.loadFromJson(configJson);
     } on FormatException catch (_) {
