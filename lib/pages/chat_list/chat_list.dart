@@ -135,7 +135,6 @@ class ChatListController extends State<ChatList>
     .client
     .rooms
     .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
-    .where(isShowInChatList)
     .toList();
 
   bool isSearchMode = false;
@@ -147,26 +146,6 @@ class ChatListController extends State<ChatList>
 
   bool isSearching = false;
   static const String _serverStoreNamespace = 'im.fluffychat.search.server';
-
-  bool isShowInChatList(Room room) {
-    return isDirectChatHaveMessage(room) || isGroupChat(room);
-  }
-
-  bool isGroupChat(Room room) {
-    return !room.isDirectChat;
-  }
-
-  bool isDirectChatHaveMessage(Room room) {
-    return room.isDirectChat && isLastEventInRoomIsMessage(room);
-  }
-
-  bool isLastEventInRoomIsMessage(Room room) {
-    return [
-      EventTypes.Message, 
-      EventTypes.Sticker, 
-      EventTypes.Encrypted,
-    ].contains(room.lastEvent?.type);
-  }
 
   void setServer() async {
     final newServer = await showTextInputDialog(
