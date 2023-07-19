@@ -7,7 +7,7 @@ import 'package:hive_flutter/adapters.dart';
 part 'tom_configurations_hive_obj.g.dart';
 
 @HiveType(typeId: HiveConstants.typeIdTomConfiguration)
-class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin{
+class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin {
   @HiveField(0)
   final ToMServerInformationHiveObj tomServerInformation;
 
@@ -24,6 +24,20 @@ class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin{
       tomServerInformation: ToMServerInformationHiveObj.fromToMServerInformation(toMConfigurations.tomServerInformation),
       identityServerUrl: toMConfigurations.identityServerInformation?.baseUrl.toString(),
     );
+  }
+
+  factory ToMConfigurationsHiveObj.fromJson(Map<String, dynamic> json) {
+    return ToMConfigurationsHiveObj(
+      tomServerInformation: ToMServerInformationHiveObj.fromJson(json['tomServerInformation']),
+      identityServerUrl: json['identityServerUrl'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tomServerInformation': tomServerInformation.toJson(),
+      'identityServerUrl': identityServerUrl,
+    };
   }
 
   @override
