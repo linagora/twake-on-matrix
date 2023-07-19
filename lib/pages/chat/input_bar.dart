@@ -16,7 +16,7 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'command_hints.dart';
 
 class InputBar extends StatelessWidget {
-  final Room room;
+  final Room? room;
   final int? minLines;
   final int? maxLines;
   final TextInputType? keyboardType;
@@ -30,7 +30,7 @@ class InputBar extends StatelessWidget {
   final bool readOnly;
 
   const InputBar({
-    required this.room,
+    this.room,
     this.minLines,
     this.maxLines,
     this.keyboardType,
@@ -57,9 +57,9 @@ class InputBar extends StatelessWidget {
     const maxResults = 30;
 
     final commandMatch = RegExp(r'^/(\w*)$').firstMatch(searchText);
-    if (commandMatch != null) {
+    if (commandMatch != null && room != null) {
       final commandSearch = commandMatch[1]!.toLowerCase();
-      for (final command in room.client.commands.keys) {
+      for (final command in room!.client.commands.keys) {
         if (command.contains(commandSearch)) {
           ret.add({
             'type': 'command',
@@ -72,10 +72,10 @@ class InputBar extends StatelessWidget {
     }
     final emojiMatch =
         RegExp(r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$').firstMatch(searchText);
-    if (emojiMatch != null) {
+    if (emojiMatch != null && room != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
-      final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+      final emotePacks = room!.getImagePacks(ImagePackUsage.emoticon);
       if (packSearch == null || packSearch.isEmpty) {
         for (final pack in emotePacks.entries) {
           for (final emote in pack.value.images.entries) {
@@ -153,9 +153,9 @@ class InputBar extends StatelessWidget {
       }
     }
     final userMatch = RegExp(r'(?:\s|^)@([-\w]+)$').firstMatch(searchText);
-    if (userMatch != null) {
+    if (userMatch != null && room != null) {
       final userSearch = userMatch[1]!.toLowerCase();
-      for (final user in room.getParticipants()) {
+      for (final user in room!.getParticipants()) {
         if ((user.displayName != null &&
                 (user.displayName!.toLowerCase().contains(userSearch) ||
                     slugify(user.displayName!.toLowerCase())
@@ -175,9 +175,9 @@ class InputBar extends StatelessWidget {
       }
     }
     final roomMatch = RegExp(r'(?:\s|^)#([-\w]+)$').firstMatch(searchText);
-    if (roomMatch != null) {
+    if (roomMatch != null && room != null) {
       final roomSearch = roomMatch[1]!.toLowerCase();
-      for (final r in room.client.rooms) {
+      for (final r in room!.client.rooms) {
         if (r.getState(EventTypes.RoomTombstone) != null) {
           continue; // we don't care about tombstoned rooms
         }
@@ -213,110 +213,6 @@ class InputBar extends StatelessWidget {
     return ret;
   }
 
-  Widget buildSuggestion(
-    BuildContext context,
-    Map<String, String?> suggestion,
-    Client? client,
-  ) {
-    const size = 30.0;
-    const padding = EdgeInsets.all(4.0);
-    if (suggestion['type'] == 'command') {
-      final command = suggestion['name']!;
-      final hint = commandHint(L10n.of(context)!, command);
-      return Tooltip(
-        message: hint,
-        waitDuration: const Duration(days: 1), // don't show on hover
-        child: Container(
-          padding: padding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '/$command',
-                style: const TextStyle(fontFamily: 'monospace'),
-              ),
-              Text(
-                hint,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (suggestion['type'] == 'emoji') {
-      final label = suggestion['label']!;
-      return Tooltip(
-        message: label,
-        waitDuration: const Duration(days: 1), // don't show on hover
-        child: Container(
-          padding: padding,
-          child: Text(label, style: const TextStyle(fontFamily: 'monospace')),
-        ),
-      );
-    }
-    if (suggestion['type'] == 'emote') {
-      return Container(
-        padding: padding,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            MxcImage(
-              uri: suggestion['mxc'] is String
-                  ? Uri.parse(suggestion['mxc'] ?? '')
-                  : null,
-              width: size,
-              height: size,
-            ),
-            const SizedBox(width: 6),
-            Text(suggestion['name']!),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Opacity(
-                  opacity: suggestion['pack_avatar_url'] != null ? 0.8 : 0.5,
-                  child: suggestion['pack_avatar_url'] != null
-                      ? Avatar(
-                          mxContent: Uri.tryParse(
-                            suggestion.tryGet<String>('pack_avatar_url') ?? '',
-                          ),
-                          name: suggestion.tryGet<String>('pack_display_name'),
-                          size: size * 0.9,
-                          client: client,
-                        )
-                      : Text(suggestion['pack_display_name']!),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
-      final url = Uri.parse(suggestion['avatar_url'] ?? '');
-      return Container(
-        padding: padding,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Avatar(
-              mxContent: url,
-              name: suggestion.tryGet<String>('displayname') ??
-                  suggestion.tryGet<String>('mxid'),
-              size: size,
-              client: client,
-            ),
-            const SizedBox(width: 6),
-            Text(suggestion['displayname'] ?? suggestion['mxid']!),
-          ],
-        ),
-      );
-    }
-    return Container();
-  }
-
   void insertSuggestion(_, Map<String, String?> suggestion) {
     final replaceText =
         controller!.text.substring(0, controller!.selection.baseOffset);
@@ -339,11 +235,11 @@ class InputBar extends StatelessWidget {
         (Match m) => insertText,
       );
     }
-    if (suggestion['type'] == 'emote') {
+    if (suggestion['type'] == 'emote' && room != null) {
       var isUnique = true;
       final insertEmote = suggestion['name'];
       final insertPack = suggestion['pack'];
-      final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+      final emotePacks = room!.getImagePacks(ImagePackUsage.emoticon);
       for (final pack in emotePacks.entries) {
         if (pack.key == insertPack) {
           continue;
@@ -439,12 +335,7 @@ class InputBar extends StatelessWidget {
             keyboardType: keyboardType!,
             textInputAction: textInputAction,
             autofocus: autofocus!,
-            style: TextStyle(
-              fontSize: 15,
-              color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            ),
+            style: InputBarStyle.getTypeAheadTextStyle(context),
             onSubmitted: (text) {
               // fix for library for now
               // it sets the types for the callback incorrectly
@@ -461,8 +352,8 @@ class InputBar extends StatelessWidget {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: getSuggestions,
-          itemBuilder: (c, s) =>
-              buildSuggestion(c, s, Matrix.of(context).client),
+          itemBuilder: (context, suggestion) =>
+              SuggestionTile(suggestion: suggestion, client: Matrix.of(context).client),
           onSuggestionSelected: (Map<String, String?> suggestion) =>
               insertSuggestion(context, suggestion),
           errorBuilder: (BuildContext context, Object? error) => Container(),
@@ -479,3 +370,123 @@ class InputBar extends StatelessWidget {
 class NewLineIntent extends Intent {}
 
 class SubmitLineIntent extends Intent {}
+
+class SuggestionTile extends StatelessWidget {
+  const SuggestionTile({
+    super.key,
+    required this.suggestion,
+    this.client,
+  });
+
+  final Map<String, String?> suggestion;
+  final Client? client;
+
+  @override
+  Widget build(BuildContext context) {
+    if (suggestion['type'] == 'command') {
+      final command = suggestion['name']!;
+      final hint = commandHint(L10n.of(context)!, command);
+      return Tooltip(
+        message: hint,
+        waitDuration: const Duration(days: 1), // don't show on hover
+        child: Container(
+          padding: const EdgeInsetsDirectional.all(4.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '/$command',
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+              Text(
+                hint,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (suggestion['type'] == 'emoji') {
+      final label = suggestion['label']!;
+      return Tooltip(
+        message: label,
+        waitDuration: const Duration(days: 1), // don't show on hover
+        child: Container(
+          padding: const EdgeInsetsDirectional.all(4.0),
+          child: Text(label, style: const TextStyle(fontFamily: 'monospace')),
+        ),
+      );
+    }
+    if (suggestion['type'] == 'emote') {
+      return Container(
+        padding: const EdgeInsetsDirectional.all(4.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            MxcImage(
+              uri: suggestion['mxc'] is String
+                  ? Uri.parse(suggestion['mxc'] ?? '')
+                  : null,
+              width: InputBarStyle.suggestionSize,
+              height: InputBarStyle.suggestionSize,
+            ),
+            const SizedBox(width: 6),
+            Text(suggestion['name']!),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Opacity(
+                  opacity: suggestion['pack_avatar_url'] != null ? 0.8 : 0.5,
+                  child: suggestion['pack_avatar_url'] != null
+                      ? Avatar(
+                          mxContent: Uri.tryParse(
+                            suggestion.tryGet<String>('pack_avatar_url') ?? '',
+                          ),
+                          name: suggestion.tryGet<String>('pack_display_name'),
+                          size: InputBarStyle.suggestionSize * 0.9,
+                          client: client,
+                        )
+                      : Text(suggestion['pack_display_name']!),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
+      final url = Uri.parse(suggestion['avatar_url'] ?? '');
+      return Container(
+        padding: const EdgeInsetsDirectional.all(4.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Avatar(
+              mxContent: url,
+              name: suggestion.tryGet<String>('displayname') ??
+                  suggestion.tryGet<String>('mxid'),
+              size: InputBarStyle.suggestionSize,
+              client: client,
+            ),
+            const SizedBox(width: 6),
+            Text(suggestion['displayname'] ?? suggestion['mxid']!),
+          ],
+        ),
+      );
+    }
+    return Container();
+  }
+}
+
+class InputBarStyle {
+  static const double suggestionSize = 30;
+  static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
+    fontSize: 15,
+    color: Theme.of(context).brightness == Brightness.light
+      ? Colors.black
+      : Colors.white,
+  );
+}

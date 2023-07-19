@@ -135,14 +135,11 @@ class ChatView extends StatelessWidget {
             icon: Icons.videocam_outlined,
             tooltip: L10n.of(context)!.placeCall,
             paddingAll: 6.0,
-            margin: EdgeInsets.symmetric(vertical: ChatViewStyle.paddingVerticalActionButtons),
-          ),
-          TwakeIconButton(
-            onPressed: () {print;},
-            icon: Icons.more_vert,
-            tooltip: "more",
-            paddingAll: 6.0,
-            margin: const EdgeInsets.only(right: 10.0),
+            margin: EdgeInsets.only(
+              top: ChatViewStyle.paddingVerticalActionButtons,
+              bottom: ChatViewStyle.paddingVerticalActionButtons,
+              right: 10.0,
+            ),
           ),
         // EncryptionButton(controller.room!),
         // ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
@@ -184,6 +181,7 @@ class ChatView extends StatelessWidget {
           controller.emojiPickerAction();
           redirector.stopRedirection();
         }
+        controller.backToPreviousPage();
       },
       child: GestureDetector(
         onTapDown: controller.setReadMarker,
@@ -205,9 +203,9 @@ class ChatView extends StatelessWidget {
                           tooltip: L10n.of(context)!.close,
                         )
                       : TwakeIconButton(
-                          tooltip: "Back",
+                          tooltip: L10n.of(context)!.back,
                           icon: Icons.arrow_back,
-                          onPressed: () => VRouter.of(context).pop(),
+                          onPressed: () => controller.backToPreviousPage(),
                           paddingAll: 8.0,
                           margin: const EdgeInsets.symmetric(vertical: 12.0),
                         ),

@@ -1,19 +1,14 @@
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
-import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/presentation/mixin/go_to_direct_chat_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:universal_html/html.dart';
-import 'package:vrouter/vrouter.dart';
 
 class ContactsTab extends StatefulWidget {
 
@@ -25,7 +20,7 @@ class ContactsTab extends StatefulWidget {
 }
 
 class ContactsTabController extends State<ContactsTab> 
-  with ComparablePresentationContactMixin {
+  with ComparablePresentationContactMixin, GoToDirectChatMixin {
 
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
@@ -61,18 +56,6 @@ class ContactsTabController extends State<ContactsTab>
       Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
       contactsStreamController.add(event);
     });
-  }
-
-  void goToChatScreen(PresentationContact contact) {
-    showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
-          final roomId = await Matrix.of(context).client.startDirectChat(contact.matrixId!);
-          VRouter.of(context).toSegments(['rooms', roomId]);
-        }
-      },
-    );
   }
 
   @override

@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
@@ -11,10 +8,9 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
+import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -30,7 +26,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -49,7 +44,6 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extensio
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -66,7 +60,7 @@ class Chat extends StatefulWidget {
   ChatController createState() => ChatController();
 }
 
-class ChatController extends State<Chat> {
+class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
 
   Room? room;
@@ -81,10 +75,6 @@ class ChatController extends State<Chat> {
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
-
-  final ImagePickerGridController imagePickerController = ImagePickerGridController();
-
-  final numberSelectedImagesNotifier = ValueNotifier<int>(0);
 
   FocusNode inputFocus = FocusNode();
 
@@ -253,24 +243,33 @@ class ChatController extends State<Chat> {
     }
   }
 
-  void _registerListenerForSelectedImagesChanged() {
-    imagePickerController.addListener(() {
-      numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
-    });
-  }
-
   @override
   void initState() {
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
-    _registerListenerForSelectedImagesChanged();
+    listenToSelectionInImagePicker();
     super.initState();
   }
 
   void updateView() {
     if (!mounted) return;
     setState(() {});
+  }
+
+  bool isContactsLastPage() {
+    final previousPath = VRouter.of(context).previousPath;
+    return previousPath?.endsWith('newprivatechat') == true 
+      || previousPath?.endsWith('contactsTab') == true
+      || previousPath?.endsWith('emptyChat') == true;
+  }
+
+  void backToPreviousPage() {
+    if (isContactsLastPage()) {
+      VRouter.of(context).historyBack();
+    } else {
+      VRouter.of(context).pop();
+    }
   }
 
   Future<bool> getTimeline() async {
@@ -389,64 +388,6 @@ class ChatController extends State<Chat> {
     });
   }
 
-  void sendFileAction() async {
-    final sendFileInteractor = getIt.get<SendFileInteractor>();
-    Navigator.pop(context);
-    final result = await FilePicker.platform.pickFiles(
-      withData: true,
-    );
-    if (result == null && result?.files.isEmpty == true) return;
-
-    sendFileInteractor.execute(room: room!, filePickerResult: result!);
-  }
-
-  void sendImage() {
-    final assetEntity = imagePickerController.selectedAssets.first;
-    final sendImageInteractor = getIt.get<SendImageInteractor>();
-    if (assetEntity.asset.type == AssetType.image) {
-      sendImageInteractor.execute(room: room!, entity: assetEntity.asset);
-      imagePickerController.clearAssetCounter();
-      numberSelectedImagesNotifier.value = 0;
-    }
-  }
-
-  Future<void> sendImages() async {
-    final selectedAssets = imagePickerController.sortedSelectedAssets;
-    final sendImagesInteractor = getIt.get<SendImagesInteractor>();
-    sendImagesInteractor.execute(
-      room: room!,
-      entities: selectedAssets
-        .map<AssetEntity>((entity) => entity.asset)
-        .toList()
-    );
-
-    imagePickerController.clearAssetCounter();
-    numberSelectedImagesNotifier.value = 0;
-  }
-
-  void openCameraAction() async {
-    // Make sure the textfield is unfocused before opening the camera
-    FocusScope.of(context).requestFocus(FocusNode());
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendFileDialog(
-        files: [
-          MatrixImageFile(
-            bytes: bytes,
-            name: file.path,
-          )
-        ],
-        room: room!,
-      ),
-    );
-  }
-
-
-
   void onFileTapped({required Event event}) async {
     final permissionHandler = PermissionHandlerService();
     final storagePermissionStatus = await permissionHandler.storagePermissionStatus;
@@ -488,7 +429,6 @@ class ChatController extends State<Chat> {
       case PermissionStatus.provisional:
         break;
     }
-
   }
 
 
@@ -1090,24 +1030,6 @@ class ChatController extends State<Chat> {
     FocusScope.of(context).requestFocus(inputFocus);
   }
 
-  void onAddPopupMenuButtonSelected(String choice) {
-    if (choice == 'file') {
-      sendFileAction();
-    }
-    if (choice == 'camera') {
-      openCameraAction();
-    }
-    if (choice == 'camera-video') {
-      openVideoCameraAction();
-    }
-    if (choice == 'sticker') {
-      sendStickerAction();
-    }
-    if (choice == 'location') {
-      sendLocationAction();
-    }
-  }
-
   unpinEvent(String eventId) async {
     final response = await showOkCancelAlertDialog(
       context: context,
@@ -1260,80 +1182,6 @@ class ChatController extends State<Chat> {
         replyEvent = null;
         editEvent = null;
       });
-
-  Future<PermissionStatus>? getCurrentPhotoPermission() {
-    return PermissionHandlerService().requestPermissionForPhotoActions();
-  }
-
-  Future<PermissionStatus>? getCurrentCameraPermission() {
-    return PermissionHandlerService().requestPermissionForCameraActions();
-  }
-
-  Future<void> goToSettings() async {
-    final result = await showDialog<bool?>(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => PermissionDialog(
-        permission: Permission.camera,
-        explainTextRequestPermission: RichText(
-          text: TextSpan(
-            text: '${L10n.of(context)!.tapToAllowAccessToYourCamera} ',
-            style: Theme.of(context).textTheme.titleSmall,
-            children: <TextSpan>[
-              TextSpan(text: '${L10n.of(context)!.twake}.', style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              )),
-            ],
-          ),
-        ),
-        icon: const Icon(Icons.camera_alt),
-        onAcceptButton: () => PermissionHandlerService().goToSettingsForPermissionActions(),
-      ),
-    );
-
-    if (result == true) {
-      Navigator.pop(context);
-    }
-  }
-
-  void imagePickAction() async {
-    Navigator.pop(context);
-    final assetEntity = await CameraPicker.pickFromCamera(
-      context,
-      locale: window.locale,
-    );
-    if (assetEntity != null && assetEntity.type == AssetType.image) {
-      final sendImageInteractor = getIt.get<SendImageInteractor>();
-      sendImageInteractor.execute(room: room!, entity: assetEntity);
-    }
-  }
-
-  void removeAllImageSelected() {
-    imagePickerController.clearAssetCounter();
-    numberSelectedImagesNotifier.value = 0;
-  }
-
-  List<ChatActions> get listChatActions => [
-    ChatActions.gallery,
-    ChatActions.documents,
-    ChatActions.location,
-    ChatActions.contact
-  ];
-
-
-  void onClickItemAction(ChatActions action) async {
-    switch (action) {
-      case ChatActions.gallery:
-        break;
-      case ChatActions.documents:
-        sendFileAction();
-        break;
-      case ChatActions.location:
-        break;
-      case ChatActions.contact:
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) => ChatView(this);
