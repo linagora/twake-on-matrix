@@ -2662,5 +2662,14 @@
        }
     },
     "continueProcess": "Continue",
-    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "You are uploading photos, do you want to cancel or continue?"
+    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "You are uploading photos, do you want to cancel or continue?",
+    "hasCreatedAGroupChat": "created a group chat “{groupName}”",
+    "@hasCreatedAGroupChat": {
+        "type": "text",
+        "placeholders": {
+            "groupName": {}
+        }
+    },
+    "today": "Today",
+    "yesterday": "Yesterday"
 }
