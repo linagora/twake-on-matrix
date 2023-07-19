@@ -79,7 +79,7 @@ class Message extends StatelessWidget {
         final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
         final displayTime = event.type == EventTypes.RoomCreate ||
             nextEvent == null ||
-            !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
+            !DateUtils.isSameDay(event.originServerTs, nextEvent!.originServerTs);
         final textColor = Theme.of(context).colorScheme.onBackground;
         final rowMainAxisAlignment =
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
@@ -397,7 +397,7 @@ class Message extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                     child: Text(
-                      event.originServerTs.localizedTime(context).toUpperCase(),
+                      event.originServerTs.relativeTime(context),
                       style: MessageStyle.displayTime(context),
                     ),
                   ),

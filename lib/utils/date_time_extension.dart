@@ -26,13 +26,6 @@ extension DateTimeExtension on DateTime {
   /// enaugh.
   static const minutesBetweenEnvironments = 5;
 
-  /// Checks if two DateTimes are close enough to belong to the same
-  /// environment.
-  bool sameEnvironment(DateTime prevTime) {
-    return millisecondsSinceEpoch - prevTime.millisecondsSinceEpoch <
-        1000 * 60 * minutesBetweenEnvironments;
-  }
-
   /// Returns a simple time String.
   /// TODO: Add localization
   String localizedTimeOfDay(BuildContext context) {
