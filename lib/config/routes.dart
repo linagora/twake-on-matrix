@@ -1,8 +1,10 @@
 import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
+import 'package:fluffychat/di/create_direct_chat/create_direct_chat_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/empty_chat.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
@@ -33,6 +35,7 @@ import 'package:fluffychat/widgets/layouts/loading_view.dart';
 import 'package:fluffychat/widgets/layouts/side_view_layout.dart';
 import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
+import 'package:fluffychat/widgets/vwidget_with_dependencies.dart';
 import 'package:fluffychat/widgets/vwidget_with_dependency.dart';
 import 'package:flutter/material.dart';
 import 'package:vrouter/vrouter.dart';
@@ -168,6 +171,12 @@ class AppRoutes {
                     VWidget(
                       path: '/newgroup',
                       widget: const NewGroup(),
+                      buildTransition: rightToLeftTransition,
+                    ),
+                    VWidgetWithDependencies(
+                      path: '/emptyChat',
+                      dIs: [ChatScreenDi(), CreateDirectChatDi()],
+                      widget: const EmptyChat(),
                       buildTransition: rightToLeftTransition,
                     ),
                   ]

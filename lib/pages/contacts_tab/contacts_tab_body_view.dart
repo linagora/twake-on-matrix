@@ -57,7 +57,7 @@ class ContactsTabBodyView extends StatelessWidget {
                 children: contactsListSorted
                   .map<Widget>((contact) => InkWell(
                     onTap: () {
-                      controller.goToChatScreen(contact);
+                      controller.goToChatScreen(context: context, contact: contact);
                     },
                     child: ExpansionContactListTile(contact: contact)
                   ))
