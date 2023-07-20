@@ -1,23 +1,21 @@
-import 'package:fluffychat/pages/chat/chat_loading_view.dart';
-import 'package:fluffychat/pages/chat/chat_view_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/material.dart';
-
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:matrix/matrix.dart';
+import 'package:vrouter/vrouter.dart';
+
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
@@ -121,28 +119,7 @@ class ChatView extends StatelessWidget {
       ];
     } else {
       return [
-        if (Matrix.of(context).voipPlugin != null &&
-            controller.room!.isDirectChat)
-          TwakeIconButton(
-            onPressed: controller.onPhoneButtonTap,
-            icon: Icons.call_outlined,
-            tooltip: L10n.of(context)!.placeCall,
-            paddingAll: 6.0,
-            margin: EdgeInsets.symmetric(vertical: ChatViewStyle.paddingVerticalActionButtons),
-          ),
-          TwakeIconButton(
-            onPressed: () {print;},
-            icon: Icons.videocam_outlined,
-            tooltip: L10n.of(context)!.placeCall,
-            paddingAll: 6.0,
-            margin: EdgeInsets.only(
-              top: ChatViewStyle.paddingVerticalActionButtons,
-              bottom: ChatViewStyle.paddingVerticalActionButtons,
-              right: 10.0,
-            ),
-          ),
-        // EncryptionButton(controller.room!),
-        // ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
+        const SizedBox.shrink()
       ];
     }
   }

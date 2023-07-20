@@ -1,19 +1,18 @@
+import 'package:animations/animations.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:animations/animations.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -178,19 +177,6 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (PlatformInfos.platformCanRecord &&
-                          controller.inputText.isEmpty)
-                          Container(
-                            height: 56,
-                            alignment: Alignment.center,
-                            child: TwakeIconButton(
-                              margin: const EdgeInsets.only(right: 7.0),
-                              paddingAll: 5.0,
-                              onPressed: controller.voiceMessageAction,
-                              tooltip: L10n.of(context)!.send,
-                              icon: Icons.mic_none,
-                            ),
-                          ),
                       ],
                     ),
                   ),
