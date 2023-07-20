@@ -481,7 +481,7 @@ class Message extends StatelessWidget {
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: selected ? 8 : 0, vertical: selected ? 4 : 0),
+      padding: EdgeInsets.symmetric(vertical: selected ? 1 : 0, horizontal: selected ? 8 : 0),
       color: selected
         ? LinagoraSysColors.material().secondaryContainer
         : Theme.of(context).primaryColor.withAlpha(0),
