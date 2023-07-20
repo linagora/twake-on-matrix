@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:intl/intl.dart';
 
 /// Provides extra functionality for formatting the time.
 extension DateTimeExtension on DateTime {
@@ -108,12 +109,23 @@ extension DateTimeExtension on DateTime {
   static String _z(int i) => i < 10 ? '0${i.toString()}' : i.toString();
 
   bool isToday() {
-    final now = DateTime.now();
-    return now.day == day && now.month == month && now.year == year;
+    return DateUtils.isSameDay(this, DateTime.now());
   }
 
   bool isYesterday() {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    return yesterday.day == day && yesterday.month == month && yesterday.year == year;
+    return DateUtils.isSameDay(this, yesterday);
+  }
+
+  String relativeTime(BuildContext context) {
+    if (isToday()) {
+      return L10n.of(context)!.today;
+    } else if (isYesterday()) {
+      return L10n.of(context)!.yesterday;
+    } else if (year == DateTime.now().year) {
+      return DateFormat("MMMM d").format(this);
+    } else {
+      return DateFormat("MMMM d, y").format(this);
+    }
   }
 }
