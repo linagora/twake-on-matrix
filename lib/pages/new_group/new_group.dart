@@ -47,7 +47,6 @@ class NewGroupController extends State<NewGroup>
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
-  final isEnableEEEncryptionNotifier = ValueNotifier(true);
   final groupNameFocusNode = FocusNode();
   StreamSubscription? uploadContentInteractorStreamSubscription;
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
