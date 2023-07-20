@@ -20,8 +20,6 @@ class SendImagesInteractor {
           shrinkImageMaxDimension: 1600,
           txid: txId,
         );
-
-        room.clearOlderImagesCacheInRoom();
       }
     } catch (error) {
       Logs().d("SendImageInteractor: execute(): $error");

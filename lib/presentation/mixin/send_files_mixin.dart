@@ -47,7 +47,7 @@ mixin SendFilesMixin on ImagePickerMixin {
     final sendFileInteractor = getIt.get<SendFileInteractor>();
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
-      withData: true,
+      withReadStream: true,
     );
     if (result == null && result?.files.isEmpty == true) return;
 

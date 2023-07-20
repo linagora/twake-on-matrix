@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -66,21 +68,27 @@ extension LocalizedBody on Event {
       ?.tryGet<int>('size')
       ?.sizeString;
 
-  Uint8List? _getPlaceHolderMatrixFile(Event event) {
+  String? _getPlaceHolderMatrixFile(Event event) {
     if (room.sendingFilePlaceholders.isNotEmpty) {
       if (status == EventStatus.synced || status == EventStatus.sent) {
         if (unsigned?.containsKey('transaction_id') == true) {
           final transactionId = unsigned!['transaction_id'];
-          return room.sendingFilePlaceholders[transactionId]?.bytes;
+          if (room.sendingFilePlaceholders[transactionId] == null) {
+            return null;
+          }
+          return utf8.decode(room.sendingFilePlaceholders[transactionId]!.bytes.toList());
         }
       }
     }
     return null;
   }
 
-  Uint8List? getSendingImageData() {
+  String? getFilePath() {
     if (status == EventStatus.sending) {
-      return room.sendingFilePlaceholders[eventId]?.bytes;
+      if (room.sendingFilePlaceholders[eventId] == null) {
+        return null;
+      }
+      return utf8.decode(room.sendingFilePlaceholders[eventId]!.bytes.toList());
     } else if (status == EventStatus.synced) {
       return _getPlaceHolderMatrixFile(this);
     } else if (status == EventStatus.sent) {

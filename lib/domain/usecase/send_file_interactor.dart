@@ -1,8 +1,13 @@
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/data/network/upload_file/file_info.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SendFileInteractor {
   Future<void> execute({
@@ -15,19 +20,21 @@ class SendFileInteractor {
     Map<String, dynamic>? extraContent,
   }) async {
     try {
-      final matrixFiles = filePickerResult.files.map((xFile) => MatrixFile(
-        bytes: xFile.bytes!,
-        name: xFile.name,
-      ).detectFileType).toList();
+      final fileInfos = filePickerResult.files.map((xFile) => FileInfo(
+        xFile.name,
+        xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
+        xFile.size,
+        readStream: xFile.readStream,
+      )).toList();
 
-      for (final matrixFile in matrixFiles) {
+      for (final fileInfo in fileInfos) {
         await room.sendImageFileEvent(
-          matrixFile,
+          fileInfo,
+          msgType: MessageTypes.File,
           txid: txId,
           editEventId: editEventId,
           inReplyTo: inReplyTo,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
-          extraContent: extraContent,
         );
       }
     } catch(error) {
