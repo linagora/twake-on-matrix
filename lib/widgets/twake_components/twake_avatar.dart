@@ -31,14 +31,17 @@ class TwakeAvatar extends StatelessWidget {
       fallbackLetters = name[0];
     }
 
-    final noPic =
-        mxContent == null || mxContent.toString().isEmpty || mxContent.toString() == 'null';
+    final noPic = mxContent == null ||
+        mxContent.toString().isEmpty ||
+        mxContent.toString() == 'null';
     final textWidget = Center(
       child: Text(
         fallbackLetters,
         style: TextStyle(
           color: noPic
-              ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)
+              ? (Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black)
               : null,
           fontSize: fontSize,
         ),
@@ -52,9 +55,13 @@ class TwakeAvatar extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          color: Theme.of(context).brightness == Brightness.dark ? const Color(0x222c2d2f) : Colors.transparent,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0x222c2d2f)
+              : Colors.transparent,
           border: Border.all(
-            color: Theme.of(context).brightness == Brightness.light ? const Color(0xeee4e4e4) : Colors.transparent,
+            color: Theme.of(context).brightness == Brightness.light
+                ? const Color(0xeee4e4e4)
+                : Colors.transparent,
             width: 1,
           ),
         ),

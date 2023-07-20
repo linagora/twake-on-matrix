@@ -49,10 +49,10 @@ class MessageReactions extends StatelessWidget {
     final reactionList = reactionMap.values.toList();
     reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
     return ReactionsList(
-      reactionList: reactionList, 
-      allReactionEvents: allReactionEvents, 
-      event: event, 
-      client: client);
+        reactionList: reactionList,
+        allReactionEvents: allReactionEvents,
+        event: event,
+        client: client);
   }
 }
 
@@ -86,8 +86,9 @@ class ReactionsList extends StatelessWidget {
             ),
             padding: const EdgeInsets.only(top: 1.0, bottom: 4.0),
             child: Icon(
-              Icons.more_horiz_rounded, 
-              size: MessageReactionsStyle.moreReactionIconSize,),
+              Icons.more_horiz_rounded,
+              size: MessageReactionsStyle.moreReactionIconSize,
+            ),
           ),
         );
       },
@@ -131,7 +132,8 @@ class ReactionsList extends StatelessWidget {
               child: CircularProgressIndicator.adaptive(strokeWidth: 1),
             ),
           ),
-      ],);
+      ],
+    );
   }
 }
 
@@ -198,17 +200,22 @@ class _Reaction extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           border: Border.all(color: MessageReactionsStyle.reactionBorderColor),
-          borderRadius: BorderRadius.circular(MessageReactionsStyle.reactionBorderRadius),
+          borderRadius:
+              BorderRadius.circular(MessageReactionsStyle.reactionBorderRadius),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             content,
-            const SizedBox(width: 4,),
-            Text('$count', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface
-            )),
+            const SizedBox(
+              width: 4,
+            ),
+            Text('$count',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Theme.of(context).colorScheme.onSurface)),
           ],
         ),
       ),

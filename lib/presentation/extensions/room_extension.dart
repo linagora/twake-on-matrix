@@ -11,8 +11,8 @@ import 'package:photo_manager/photo_manager.dart';
 typedef TransactionId = String;
 
 typedef FakeImageEvent = SyncUpdate;
-extension SendImage on Room {
 
+extension SendImage on Room {
   static const maxImagesCacheInRoom = 10;
 
   Future<String?> sendImageFileEvent(
@@ -38,7 +38,8 @@ extension SendImage on Room {
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      Logs().d('SendImage::sendImageFileEvent(): FileSized ${file.bytes.lengthInBytes} || maxMediaSize $maxMediaSize');
+      Logs().d(
+          'SendImage::sendImageFileEvent(): FileSized ${file.bytes.lengthInBytes} || maxMediaSize $maxMediaSize');
       if (maxMediaSize != null && maxMediaSize < file.bytes.lengthInBytes) {
         throw FileTooBigMatrixException(file.bytes.lengthInBytes, maxMediaSize);
       }
@@ -67,7 +68,8 @@ extension SendImage on Room {
       }
     }
 
-    MatrixFile? uploadThumbnail = thumbnail; // ignore: omit_local_variable_types
+    MatrixFile? uploadThumbnail =
+        thumbnail; // ignore: omit_local_variable_types
     EncryptedFile? encryptedFile;
     EncryptedFile? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
@@ -188,7 +190,8 @@ extension SendImage on Room {
     Map<String, dynamic>? extraContent,
   }) async {
     sendingFilePlaceholders[txid] = file;
-    sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
+    sendingFileThumbnails[txid] =
+        MatrixImageFile(bytes: file.bytes, name: file.name);
 
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEventEvent = SyncUpdate(
@@ -254,11 +257,14 @@ extension SendImage on Room {
     }
   }
 
-  Future<Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
+  Future<
+      Tuple2<Map<TransactionId, MatrixFile>,
+          Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
     required List<AssetEntity> entities,
   }) async {
     final imageCacheQueue = getIt.get<Queue>();
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>({}, {});
+    final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>,
+        Map<TransactionId, FakeImageEvent>>({}, {});
     for (final entity in entities) {
       final matrixFile = await entity.toMatrixFile();
       if (matrixFile != null) {

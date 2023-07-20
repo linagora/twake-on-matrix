@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/model/recovery_words_json.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
@@ -10,8 +9,9 @@ class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
 
   @override
   Future<RecoveryWords> getRecoveryWords() {
-    return _recoveryWordsAPI.getRecoveryWords()
-      .then((response) => response.toRecoveryWords());
+    return _recoveryWordsAPI
+        .getRecoveryWords()
+        .then((response) => response.toRecoveryWords());
   }
 
   @override

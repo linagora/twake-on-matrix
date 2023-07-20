@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 
-
 class ParticipantListItem extends StatelessWidget {
   final User user;
 

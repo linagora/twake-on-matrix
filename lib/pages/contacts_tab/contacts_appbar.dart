@@ -5,10 +5,10 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:vrouter/vrouter.dart';
 
 class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
-
   final ContactsTabController controller;
 
-  const ContactsAppBar(this.controller, {
+  const ContactsAppBar(
+    this.controller, {
     super.key,
   });
 
@@ -16,13 +16,13 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       surfaceTintColor: Theme.of(context).brightness == Brightness.light
-        ? Colors.white
-        : Colors.black,
+          ? Colors.white
+          : Colors.black,
       shadowColor: Colors.black.withOpacity(0.15),
       elevation: 4.0,
       backgroundColor: Theme.of(context).brightness == Brightness.light
-        ? Colors.white
-        : Colors.black,
+          ? Colors.white
+          : Colors.black,
       automaticallyImplyLeading: false,
       centerTitle: false,
       titleSpacing: 0,
@@ -30,15 +30,16 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icons.arrow_back,
         tooltip: L10n.of(context)!.back,
         margin: const EdgeInsets.only(
-          left: 8.0, 
+          left: 8.0,
           right: 4.0,
         ),
         onPressed: () => VRouter.of(context).to('/rooms'),
       ),
-      title: Text(L10n.of(context)!.contacts,
+      title: Text(
+        L10n.of(context)!.contacts,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
       ),
       actions: [
         TwakeIconButton(
@@ -52,16 +53,19 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
         preferredSize: const Size.fromHeight(64),
         child: Container(
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: Colors.black.withOpacity(0.15))),
+            border: Border(
+                bottom: BorderSide(color: Colors.black.withOpacity(0.15))),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: ValueListenableBuilder<bool>(
-            valueListenable: controller.searchContactsController.isSearchModeNotifier,
+            valueListenable:
+                controller.searchContactsController.isSearchModeNotifier,
             builder: (context, isSearchMode, child) {
               return SizedBox(
                 height: 48,
                 child: TextField(
-                  controller: controller.searchContactsController.textEditingController,
+                  controller:
+                      controller.searchContactsController.textEditingController,
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(0),
@@ -76,12 +80,14 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Icons.search_outlined,
                     ),
                     suffixIcon: isSearchMode
-                      ? TwakeIconButton(
-                        tooltip: "Clear",
-                        icon: Icons.close,
-                        onPressed: () => controller.searchContactsController.textEditingController.clear(),
-                      )
-                      : null,
+                        ? TwakeIconButton(
+                            tooltip: "Clear",
+                            icon: Icons.close,
+                            onPressed: () => controller
+                                .searchContactsController.textEditingController
+                                .clear(),
+                          )
+                        : null,
                   ),
                 ),
               );
@@ -91,8 +97,7 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-  
+
   @override
   Size get preferredSize => const Size.fromHeight(120);
-
 }

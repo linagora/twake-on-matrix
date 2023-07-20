@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
@@ -13,24 +12,24 @@ import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 class FetchContactsController with LoadMoreContactsMixin {
-
   final _fetchContactsInteractor = getIt.get<FetchContactsInteractor>();
   final _loadMoreInternalContacts = getIt.get<LoadMoreInternalContacts>();
-  final streamController = StreamController<Either<Failure, GetContactsSuccess>>();  
+  final streamController =
+      StreamController<Either<Failure, GetContactsSuccess>>();
 
   void fetchCurrentTomContacts() {
-    _fetchContactsInteractor
-      .execute()
-      .listen((event) {
-        streamController.add(event);
-      });
+    _fetchContactsInteractor.execute().listen((event) {
+      streamController.add(event);
+    });
   }
 
-  Set<PresentationContact> getContactsFromFetchStream(Either<Failure, GetContactsSuccess> event) {
+  Set<PresentationContact> getContactsFromFetchStream(
+      Either<Failure, GetContactsSuccess> event) {
     return event.fold<Set<PresentationContact>>(
       (failure) => <PresentationContact>{},
       (success) {
-        final currentContacts = success.contacts.expand((contact) => contact.toPresentationContacts());
+        final currentContacts = success.contacts
+            .expand((contact) => contact.toPresentationContacts());
         updateLastContactIndex(oldContactsList.length);
         if (success is GetMoreNetworkContactSuccess) {
           _handleGetMoreContactsSuccess(currentContacts);
@@ -45,14 +44,16 @@ class FetchContactsController with LoadMoreContactsMixin {
     ).toSet();
   }
 
-  void _handleGetMoreContactsSuccess(Iterable<PresentationContact> currentContacts) {
+  void _handleGetMoreContactsSuccess(
+      Iterable<PresentationContact> currentContacts) {
     oldContactsList.addAll(currentContacts);
     haveMoreCountactsNotifier.value = currentContacts.isNotEmpty;
     lastContactIndexNotifier.value = oldContactsList.length;
     isLoadMore = true;
   }
 
-  void _handleNoMoreContactsSuccess(Iterable<PresentationContact> currentContacts) {
+  void _handleNoMoreContactsSuccess(
+      Iterable<PresentationContact> currentContacts) {
     haveMoreCountactsNotifier.value = false;
     oldContactsList.addAll(currentContacts);
     lastContactIndexNotifier.value = oldContactsList.length;
@@ -62,11 +63,9 @@ class FetchContactsController with LoadMoreContactsMixin {
   void loadMoreContacts({required int offset}) {
     if (isLoadMore) {
       isLoadMore = false;
-      _loadMoreInternalContacts
-        .execute(offset: offset)
-        .listen((event) {
-          streamController.add(event);
-        });
+      _loadMoreInternalContacts.execute(offset: offset).listen((event) {
+        streamController.add(event);
+      });
     }
   }
 

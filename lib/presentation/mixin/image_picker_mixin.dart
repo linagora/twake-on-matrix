@@ -3,7 +3,8 @@ import 'dart:ui';
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' as linagora_image_picker;
+import 'package:linagora_design_flutter/images_picker/images_picker.dart'
+    as linagora_image_picker;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
@@ -25,21 +26,22 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 typedef OnSendTap = void Function()?;
 
 mixin ImagePickerMixin {
-
-  final ImagePickerGridController imagePickerController = ImagePickerGridController();
+  final ImagePickerGridController imagePickerController =
+      ImagePickerGridController();
 
   final numberSelectedImagesNotifier = ValueNotifier<int>(0);
 
   List<ChatActions> get listChatActions => [
-    ChatActions.gallery,
-    ChatActions.documents,
-    ChatActions.location,
-    ChatActions.contact
-  ];
+        ChatActions.gallery,
+        ChatActions.documents,
+        ChatActions.location,
+        ChatActions.contact
+      ];
 
   void listenToSelectionInImagePicker() {
     imagePickerController.addListener(() {
-      numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
+      numberSelectedImagesNotifier.value =
+          imagePickerController.selectedAssets.length;
     });
   }
 
@@ -94,11 +96,14 @@ mixin ImagePickerMixin {
           return const SizedBox.shrink();
         }
         return Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 12.0, top: 16.0),
+          padding: const EdgeInsets.only(
+              left: 8.0, right: 8.0, bottom: 12.0, top: 16.0),
           child: Row(
             children: [
-              Text(L10n.of(context)!.photoSelectedCounter(counterImage),
-                style: Theme.of(context).textTheme.titleMedium,),
+              Text(
+                L10n.of(context)!.photoSelectedCounter(counterImage),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const Icon(Icons.chevron_right),
               const Expanded(child: SizedBox.shrink()),
               const Icon(Icons.more_vert),
@@ -126,21 +131,23 @@ mixin ImagePickerMixin {
                 color: Colors.white,
                 border: Border(
                   top: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceTint
+                        .withOpacity(0.16),
                   ),
                 ),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: listChatActions.map((action) {
-                  return Expanded(
-                    child: ItemActionOnBottom(
-                      chatActions: action,
-                      onItemAction: (action) => onItemAction(action),
-                    ),
-                  );
-                }).toList()
-              ),
+                  mainAxisSize: MainAxisSize.max,
+                  children: listChatActions.map((action) {
+                    return Expanded(
+                      child: ItemActionOnBottom(
+                        chatActions: action,
+                        onItemAction: (action) => onItemAction(action),
+                      ),
+                    );
+                  }).toList()),
             );
           }
           return child!;
@@ -154,11 +161,15 @@ mixin ImagePickerMixin {
                 children: [
                   Container(
                     height: 64,
-                    padding: const EdgeInsets.only(right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
+                    padding: const EdgeInsets.only(
+                        right: 20.0, top: 8.0, bottom: 8.0, left: 4.0),
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceTint
+                              .withOpacity(0.16),
                         ),
                       ),
                     ),
@@ -167,11 +178,16 @@ mixin ImagePickerMixin {
                         Expanded(
                           child: TextFormField(
                             onTap: () => Fluttertoast.showToast(
-                              msg:  L10n.of(context)!.captionForImagesIsNotSupportYet,
+                              msg: L10n.of(context)!
+                                  .captionForImagesIsNotSupportYet,
                               gravity: ToastGravity.CENTER,
                             ),
                             decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.tag_faces, color: LinagoraRefColors.material().neutralVariant,),
+                              prefixIcon: Icon(
+                                Icons.tag_faces,
+                                color:
+                                    LinagoraRefColors.material().neutralVariant,
+                              ),
                               hintText: L10n.of(context)!.addACaption,
                             ),
                           ),
@@ -180,7 +196,8 @@ mixin ImagePickerMixin {
                           alignment: Alignment.bottomRight,
                           children: [
                             InkWell(
-                              borderRadius: const BorderRadius.all(Radius.circular(100)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(100)),
                               onTap: () {
                                 if (onSendTap != null) {
                                   onSendTap();
@@ -205,17 +222,25 @@ mixin ImagePickerMixin {
                       width: 24,
                       height: 24,
                       decoration: ShapeDecoration(
-                        shape: CircleBorder(side: BorderSide(color: Theme.of(context).colorScheme.surface)),
+                        shape: CircleBorder(
+                            side: BorderSide(
+                                color: Theme.of(context).colorScheme.surface)),
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       alignment: Alignment.center,
                       child: ValueListenableBuilder(
                         valueListenable: numberSelectedImagesNotifier,
                         builder: (context, value, child) {
-                          return Text("$value", style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.surface,
-                            letterSpacing: 0.1,
-                          ),);
+                          return Text(
+                            "$value",
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  letterSpacing: 0.1,
+                                ),
+                          );
                         },
                       ),
                     ),
@@ -229,22 +254,26 @@ mixin ImagePickerMixin {
       ),
       goToSettingsWidget: Column(
         children: [
-          SvgPicture.asset(ImagePaths.icPhotosSettingPermission,
+          SvgPicture.asset(
+            ImagePaths.icPhotosSettingPermission,
             width: 40,
             height: 40,
           ),
-          Text(L10n.of(context)!.tapToAllowAccessToYourGallery,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: LinagoraRefColors.material().neutral
-            ),
+          Text(
+            L10n.of(context)!.tapToAllowAccessToYourGallery,
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(color: LinagoraRefColors.material().neutral),
             textAlign: TextAlign.center,
           ),
         ],
       ),
       cameraWidget: UseCameraWidget(
         onPressed: permissionStatusCamera == PermissionStatus.granted
-          ? () => imagePickAction(context: context, room: room, locale: window.locale)
-          : () => goToSettings(context),
+            ? () => imagePickAction(
+                context: context, room: room, locale: window.locale)
+            : () => goToSettings(context),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
     );
@@ -261,14 +290,17 @@ mixin ImagePickerMixin {
             text: '${L10n.of(context)!.tapToAllowAccessToYourCamera} ',
             style: Theme.of(context).textTheme.titleSmall,
             children: <TextSpan>[
-              TextSpan(text: '${L10n.of(context)!.twake}.', style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                fontWeight: FontWeight.bold,
-              )),
+              TextSpan(
+                  text: '${L10n.of(context)!.twake}.',
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )),
             ],
           ),
         ),
         icon: const Icon(Icons.camera_alt),
-        onAcceptButton: () => PermissionHandlerService().goToSettingsForPermissionActions(),
+        onAcceptButton: () =>
+            PermissionHandlerService().goToSettingsForPermissionActions(),
       ),
     );
 
@@ -277,11 +309,10 @@ mixin ImagePickerMixin {
     }
   }
 
-  void imagePickAction({
-    required BuildContext context, 
-    Room? room, 
-    required Locale locale
-  }) async {
+  void imagePickAction(
+      {required BuildContext context,
+      Room? room,
+      required Locale locale}) async {
     Navigator.pop(context);
     if (room == null) {
       return;

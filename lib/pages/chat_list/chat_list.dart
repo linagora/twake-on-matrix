@@ -27,7 +27,6 @@ import 'package:uni_links/uni_links.dart';
 import 'package:vrouter/vrouter.dart';
 import 'package:async/async.dart';
 
-
 import '../../../utils/account_bundles.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import '../../utils/url_launcher.dart';
@@ -50,12 +49,7 @@ enum PopupMenuAction {
   archive,
 }
 
-enum ActiveFilter {
-  allChats,
-  groups,
-  messages,
-  spaces
-}
+enum ActiveFilter { allChats, groups, messages, spaces }
 
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
@@ -69,7 +63,10 @@ class ChatList extends StatefulWidget {
 }
 
 class ChatListController extends State<ChatList>
-    with TickerProviderStateMixin, RouteAware, ComparablePresentationContactMixin {
+    with
+        TickerProviderStateMixin,
+        RouteAware,
+        ComparablePresentationContactMixin {
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
@@ -132,10 +129,10 @@ class ChatListController extends State<ChatList>
   }
 
   List<Room> get filteredRoomsForAll => Matrix.of(context)
-    .client
-    .rooms
-    .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
-    .toList();
+      .client
+      .rooms
+      .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
+      .toList();
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -186,7 +183,8 @@ class ChatListController extends State<ChatList>
     try {
       roomSearchResult = await client.queryPublicRooms(
         server: searchServer,
-        filter: PublicRoomQueryFilter(genericSearchTerm: searchChatController.text),
+        filter:
+            PublicRoomQueryFilter(genericSearchTerm: searchChatController.text),
         limit: 20,
       );
       userSearchResult = await client.searchUserDirectory(
@@ -547,21 +545,25 @@ class ChatListController extends State<ChatList>
 
       // Display first login bootstrap if enabled
       if (client.encryption?.keyManager.enabled == true) {
-        Logs().d('ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled');
+        Logs().d(
+            'ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled');
         if (await client.encryption?.keyManager.isCached() == false ||
             await client.encryption?.crossSigning.isCached() == false ||
             client.isUnknownSession && !mounted) {
           final recoveryWords = await _getRecoveryWords();
           if (recoveryWords != null) {
-            await TomBootstrapDialog(client: client, recoveryWords: recoveryWords)
-              .show(context);
+            await TomBootstrapDialog(
+                    client: client, recoveryWords: recoveryWords)
+                .show(context);
           } else {
-            Logs().d('ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap');
+            Logs().d(
+                'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap');
             await BootstrapDialog(client: client).show(context);
           }
         }
       } else {
-        Logs().d('ChatListController::_waitForFirstSync(): encryption is not enabled');
+        Logs().d(
+            'ChatListController::_waitForFirstSync(): encryption is not enabled');
         final recoveryWords = await _getRecoveryWords();
         if (recoveryWords == null) {
           await TomBootstrapDialog(client: client).show(context);
@@ -691,12 +693,12 @@ class ChatListController extends State<ChatList>
   }
 
   Future<RecoveryWords?> _getRecoveryWords() async {
-    return await _getRecoveryWordsInteractor.execute()
-      .then((either) => either.fold(
-        (failure) => null,
-        (success) => success.words,
-      ),
-    );
+    return await _getRecoveryWordsInteractor.execute().then(
+          (either) => either.fold(
+            (failure) => null,
+            (success) => success.words,
+          ),
+        );
   }
 
   Future<void> dehydrate() =>

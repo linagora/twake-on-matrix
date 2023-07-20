@@ -12,19 +12,18 @@ class NewPrivateChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: SearchContactAppBar(
-          title: L10n.of(context)!.newChat,
-          searchContactsController: controller.searchContactsController,
-        )),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 8.0, right: 10.0),
-        controller: controller.fetchContactsController.scrollController,
-        child: ExpansionList(
-          newPrivateChatController: controller,
-        ),
-      )
-    );
+        appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: SearchContactAppBar(
+              title: L10n.of(context)!.newChat,
+              searchContactsController: controller.searchContactsController,
+            )),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+          controller: controller.fetchContactsController.scrollController,
+          child: ExpansionList(
+            newPrivateChatController: controller,
+          ),
+        ));
   }
 }

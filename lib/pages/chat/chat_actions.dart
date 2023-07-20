@@ -2,16 +2,11 @@ import 'package:fluffychat/pages/chat/chat_actions_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-enum ChatActions {
-  gallery,
-  documents,
-  location,
-  contact
-}
+enum ChatActions { gallery, documents, location, contact }
 
 extension ChatActionsExtension on ChatActions {
   String getTitle(BuildContext context) {
-    switch(this) {
+    switch (this) {
       case ChatActions.gallery:
         return L10n.of(context)!.gallery;
       case ChatActions.documents:
@@ -24,7 +19,7 @@ extension ChatActionsExtension on ChatActions {
   }
 
   IconData getIcon() {
-    switch(this) {
+    switch (this) {
       case ChatActions.gallery:
         return Icons.photo;
       case ChatActions.documents:
@@ -37,7 +32,7 @@ extension ChatActionsExtension on ChatActions {
   }
 
   Color getIconColor() {
-    switch(this) {
+    switch (this) {
       case ChatActions.gallery:
         return ChatActionsStyle.colorGalleryIcon;
       case ChatActions.documents:
@@ -50,7 +45,7 @@ extension ChatActionsExtension on ChatActions {
   }
 
   Color getBackgroundColor() {
-    switch(this) {
+    switch (this) {
       case ChatActions.gallery:
         return ChatActionsStyle.colorBackgroundGalleryBottom;
       case ChatActions.documents:

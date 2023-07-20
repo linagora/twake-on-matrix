@@ -6,14 +6,19 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:vrouter/vrouter.dart';
 
 mixin GoToDirectChatMixin {
-  void goToChatScreen({required BuildContext context, required PresentationContact contact}) async {
-    final directRoomId = Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+  void goToChatScreen(
+      {required BuildContext context,
+      required PresentationContact contact}) async {
+    final directRoomId =
+        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
     showFutureLoadingDialog(
       context: context,
       future: () async {
         if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
           if (directRoomId != null) {
-            final roomId = await Matrix.of(context).client.startDirectChat(contact.matrixId!);
+            final roomId = await Matrix.of(context)
+                .client
+                .startDirectChat(contact.matrixId!);
             VRouter.of(context).toSegments(['rooms', roomId]);
           }
         }
@@ -24,7 +29,8 @@ mixin GoToDirectChatMixin {
     }
   }
 
-  void goToEmptyChat({required BuildContext context, required PresentationContact contact}) {
+  void goToEmptyChat(
+      {required BuildContext context, required PresentationContact contact}) {
     if (contact.matrixId != Matrix.of(context).client.userID) {
       VRouter.of(context).to('/emptyChat', queryParameters: {
         PresentationContactConstant.receiverId: contact.matrixId ?? '',

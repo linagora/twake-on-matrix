@@ -10,7 +10,8 @@ class SendingImageWidget extends StatelessWidget {
   SendingImageWidget({
     super.key,
     required this.sendingImageData,
-    required this.event, this.onTapPreview,
+    required this.event,
+    this.onTapPreview,
   });
 
   final Uint8List sendingImageData;
@@ -24,20 +25,21 @@ class SendingImageWidget extends StatelessWidget {
   void _onTap(BuildContext context) async {
     if (onTapPreview != null) {
       await showGeneralDialog(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (_, animationOne, animationTwo) =>
-          ImageViewer(event, imageData: sendingImageData)
-      );
+          context: context,
+          useRootNavigator: false,
+          barrierDismissible: true,
+          barrierLabel:
+              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          transitionDuration: const Duration(milliseconds: 200),
+          pageBuilder: (_, animationOne, animationTwo) =>
+              ImageViewer(event, imageData: sendingImageData));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (event.status == EventStatus.sent || event.status == EventStatus.synced) {
+    if (event.status == EventStatus.sent ||
+        event.status == EventStatus.synced) {
       sendingFileProgressNotifier.value = 1;
     }
 
@@ -49,12 +51,13 @@ class SendingImageWidget extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             child!,
-            if (sendingFileProgressNotifier.value != 1)... [
+            if (sendingFileProgressNotifier.value != 1) ...[
               CircularProgressIndicator(
                 strokeWidth: 2,
                 color: LinagoraRefColors.material().primary[100],
               ),
-              Icon(Icons.close, color: LinagoraRefColors.material().primary[100]), 
+              Icon(Icons.close,
+                  color: LinagoraRefColors.material().primary[100]),
             ]
           ],
         );

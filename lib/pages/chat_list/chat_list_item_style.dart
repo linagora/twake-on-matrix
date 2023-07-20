@@ -6,7 +6,8 @@ class ChatListItemStyle {
   static double get readIconSize => 20;
   static double get mentionIconWidth => 20;
   static Color get readMessageColor => const Color(0xFF787579);
-  static double unreadBadgeSize(bool unread, bool hasNewMessages, bool hasNotifications) {
+  static double unreadBadgeSize(
+      bool unread, bool hasNewMessages, bool hasNotifications) {
     return unread || hasNewMessages
         ? hasNotifications
             ? 20.0
@@ -15,7 +16,8 @@ class ChatListItemStyle {
   }
 
   static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
-  static double notificationBadgeSize(bool unread, bool hasNewMessages, int notificationCount) {
+  static double notificationBadgeSize(
+      bool unread, bool hasNewMessages, int notificationCount) {
     return notificationCount == 0 && !unread && !hasNewMessages
         ? 0
         : (unreadBadgeSize(unread, hasNewMessages, notificationCount > 0) -

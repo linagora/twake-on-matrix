@@ -11,7 +11,8 @@ class FetchContactsInteractor {
 
   Stream<Either<Failure, GetNetworkContactSuccess>> execute() async* {
     try {
-      final contacts = await contactRepository.searchContact(query: ContactQuery(keyword: ''));
+      final contacts = await contactRepository.searchContact(
+          query: ContactQuery(keyword: ''));
       yield Right(GetNetworkContactSuccess(contacts: contacts.toSet()));
     } catch (e) {
       yield Left(GetNetworkContactFailed(exception: e));

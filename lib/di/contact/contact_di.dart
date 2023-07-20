@@ -11,7 +11,6 @@ import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
 class ContactDI extends BaseDI {
-
   @override
   String get scopeName => 'Contacts';
 
@@ -30,7 +29,7 @@ class ContactDI extends BaseDI {
     get.registerFactory<ContactRepository>(
       () => TomContactRepositoryImpl(),
     );
-    
+
     get.registerFactory<LookupContactsInteractor>(
       () => LookupContactsInteractor(),
     );
@@ -42,7 +41,7 @@ class ContactDI extends BaseDI {
     get.registerFactory<LoadMoreInternalContacts>(
       () => LoadMoreInternalContacts(),
     );
-    
+
     Logs().d('ContactDI::setUp() - done');
   }
 }

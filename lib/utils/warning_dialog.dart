@@ -4,9 +4,8 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 typedef OnAcceptButton = void Function()?;
 
 class WarningDialogWidget extends StatefulWidget {
-  
   final Widget explainTextRequestWidget;
-  
+
   final OnAcceptButton onAcceptButton;
 
   const WarningDialogWidget({
@@ -20,12 +19,11 @@ class WarningDialogWidget extends StatefulWidget {
 }
 
 class _WarningDialogWidgetState extends State<WarningDialogWidget> {
-
   @override
   void initState() {
     super.initState();
   }
-  
+
   @override
   dispose() {
     super.dispose();
@@ -55,16 +53,16 @@ class _WarningDialogWidgetState extends State<WarningDialogWidget> {
                   _WarningTextButton(
                     context: context,
                     text: L10n.of(context)!.continueProcess,
-                   onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                   _WarningTextButton(
-                    context: context,
-                    text: L10n.of(context)!.cancel,
-                    onPressed: () async {
-                      if (widget.onAcceptButton != null) {
+                      context: context,
+                      text: L10n.of(context)!.cancel,
+                      onPressed: () async {
+                        if (widget.onAcceptButton != null) {
                           widget.onAcceptButton!.call();
-                      }
-                    })
+                        }
+                      })
                 ],
               ),
             ),
@@ -91,14 +89,17 @@ class _WarningTextButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(100.0),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-            child: Text(text, style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary
+          borderRadius: BorderRadius.circular(100.0),
+          onTap: onPressed,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            child: Text(text,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.primary)),
           )),
-        )),
     );
   }
 }

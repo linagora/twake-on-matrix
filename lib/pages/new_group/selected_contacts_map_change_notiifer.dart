@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
 
@@ -6,8 +5,7 @@ class SelectedContactsMapChangeNotifier extends ChangeNotifier {
   final Map<PresentationContact, ValueNotifier<bool>> selectedContactsMap = {};
   final haveSelectedContactsNotifier = ValueNotifier(false);
 
-  Iterable<PresentationContact> get contactsList 
-    => selectedContactsMap.keys
+  Iterable<PresentationContact> get contactsList => selectedContactsMap.keys
       .where((contact) => selectedContactsMap[contact]?.value ?? false);
 
   void onContactTileTap({required PresentationContact contact}) {

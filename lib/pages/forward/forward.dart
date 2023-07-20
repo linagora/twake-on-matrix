@@ -70,7 +70,7 @@ class ForwardController extends State<Forward> {
       );
     }
     selectedEvents.sort(
-          (a, b) => a.compareTo(b),
+      (a, b) => a.compareTo(b),
     );
     Logs().d("onSelectChat: $selectedEvents");
   }
@@ -83,10 +83,10 @@ class ForwardController extends State<Forward> {
         return (room) => !room.isSpace && !room.isStoryRoom;
       case ActiveFilter.groups:
         return (room) =>
-        !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
+            !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
       case ActiveFilter.messages:
         return (room) =>
-        !room.isSpace && room.isDirectChat && !room.isStoryRoom;
+            !room.isSpace && room.isDirectChat && !room.isStoryRoom;
       case ActiveFilter.spaces:
         return (r) => r.isSpace;
     }

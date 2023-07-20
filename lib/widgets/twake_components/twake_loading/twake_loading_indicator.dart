@@ -18,7 +18,8 @@ class TwakeLoadingIndicator extends StatefulWidget {
   State<TwakeLoadingIndicator> createState() => _TwakeLoadingIndicatorState();
 }
 
-class _TwakeLoadingIndicatorState extends State<TwakeLoadingIndicator> with TickerProviderStateMixin {
+class _TwakeLoadingIndicatorState extends State<TwakeLoadingIndicator>
+    with TickerProviderStateMixin {
   late AnimationController _appearanceController;
 
   late AnimationController _repeatingController;

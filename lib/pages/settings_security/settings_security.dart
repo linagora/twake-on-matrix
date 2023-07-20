@@ -187,7 +187,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
           const Utf8Codec().encode(export),
         );
 
-        final exportFileName = 'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
+        final exportFileName =
+            'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
 
         return MatrixFile(bytes: exportBytes, name: exportFileName);
       },

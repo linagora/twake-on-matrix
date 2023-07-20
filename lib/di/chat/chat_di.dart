@@ -17,7 +17,8 @@ class ChatScreenDi extends BaseDI {
 
     get.registerSingleton<SendImageInteractor>(SendImageInteractor());
     get.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
-    get.registerSingleton<DownloadFileForPreviewInteractor>(DownloadFileForPreviewInteractor());
+    get.registerSingleton<DownloadFileForPreviewInteractor>(
+        DownloadFileForPreviewInteractor());
     get.registerSingleton<SendFileInteractor>(SendFileInteractor());
   }
 }

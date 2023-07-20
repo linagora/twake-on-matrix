@@ -50,23 +50,30 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                               decoration: InputDecoration(
                                 filled: true,
                                 contentPadding: const EdgeInsets.all(0),
-                                fillColor: Theme.of(context).colorScheme.surface,
+                                fillColor:
+                                    Theme.of(context).colorScheme.surface,
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(ChatListHeaderStyle.searchRadiusBorder),
+                                  borderRadius: BorderRadius.circular(
+                                      ChatListHeaderStyle.searchRadiusBorder),
                                 ),
                                 hintText: L10n.of(context)!.search,
-                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
                                 prefixIcon: controller.isSearchMode
                                     ? IconButton(
                                         tooltip: L10n.of(context)!.cancel,
                                         icon: const Icon(Icons.close_outlined),
                                         onPressed: controller.cancelSearch,
-                                        color: Theme.of(context).colorScheme.onBackground,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onBackground,
                                       )
                                     : Icon(
                                         Icons.search_outlined,
-                                        color: Theme.of(context).colorScheme.onBackground,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onBackground,
                                       ),
                                 suffixIcon: controller.isSearchMode
                                     ? controller.isSearching
@@ -77,7 +84,8 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                                             ),
                                             child: SizedBox.square(
                                               dimension: 20,
-                                              child: CircularProgressIndicator.adaptive(
+                                              child: CircularProgressIndicator
+                                                  .adaptive(
                                                 strokeWidth: 2,
                                               ),
                                             ),
@@ -85,11 +93,15 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                                         : TextButton(
                                             onPressed: controller.setServer,
                                             style: TextButton.styleFrom(
-                                              textStyle: const TextStyle(fontSize: 12),
+                                              textStyle:
+                                                  const TextStyle(fontSize: 12),
                                             ),
                                             child: Text(
                                               controller.searchServer ??
-                                                  Matrix.of(context).client.homeserver!.host,
+                                                  Matrix.of(context)
+                                                      .client
+                                                      .homeserver!
+                                                      .host,
                                               maxLines: 2,
                                             ),
                                           )

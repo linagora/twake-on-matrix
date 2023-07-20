@@ -186,13 +186,15 @@ class SettingsView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.help_outline_outlined),
               title: Text(L10n.of(context)!.help),
-              onTap: () => UrlLauncher(context, AppConfig.supportUrl).openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(context, AppConfig.supportUrl)
+                  .openUrlInAppBrowser(),
               trailing: const Icon(Icons.open_in_new_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.shield_sharp),
               title: Text(L10n.of(context)!.privacy),
-              onTap: () => UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(context, AppConfig.privacyUrl)
+                  .openUrlInAppBrowser(),
               trailing: const Icon(Icons.open_in_new_outlined),
             ),
             ListTile(

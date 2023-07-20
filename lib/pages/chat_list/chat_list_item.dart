@@ -72,7 +72,8 @@ class ChatListItem extends StatelessWidget {
       final shareContent = Matrix.of(context).shareContent;
       if (shareContent != null) {
         final shareFile = shareContent.tryGet<MatrixFile>('file');
-        if (shareContent.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' &&
+        if (shareContent.tryGet<String>('msgtype') ==
+                'chat.fluffy.shared_file' &&
             shareFile != null) {
           await showDialog(
             context: context,
@@ -122,9 +123,11 @@ class ChatListItem extends StatelessWidget {
     final isMuted = room.pushRuleState != PushRuleState.notify;
     final typingText = room.getLocalizedTypingText(context);
 
-    final ownLastMessage = room.lastEvent?.senderId == Matrix.of(context).client.userID;
+    final ownLastMessage =
+        room.lastEvent?.senderId == Matrix.of(context).client.userID;
     final unread = room.isUnread || room.membership == Membership.invite;
-    final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(unread, room.hasNewMessages, room.notificationCount > 0);
+    final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
+        unread, room.hasNewMessages, room.notificationCount > 0);
     final displayname = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
@@ -151,7 +154,8 @@ class ChatListItem extends StatelessWidget {
                   height: AvatarStyle.defaultSize,
                   child: Material(
                     color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
+                    borderRadius:
+                        BorderRadius.circular(AvatarStyle.defaultSize),
                     child: const Icon(Icons.check, color: Colors.white),
                   ),
                 )
@@ -174,11 +178,18 @@ class ChatListItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             softWrap: false,
-                            style: Theme.of(context).textTheme.titleMedium?.merge(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.merge(
                                   TextStyle(
                                     overflow: TextOverflow.ellipsis,
                                     letterSpacing: 0.15,
-                                    color: unread ? Theme.of(context).colorScheme.onSurfaceVariant : ChatListItemStyle.readMessageColor,
+                                    color: unread
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                        : ChatListItemStyle.readMessageColor,
                                   ),
                                 ),
                           ),
@@ -211,11 +222,13 @@ class ChatListItem extends StatelessWidget {
                 child: Text(
                   room.timeCreated.localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelSmall?.merge(
-                      TextStyle(
-                        letterSpacing: 0.5,
-                        color: unread ? Theme.of(context).colorScheme.onSurface : LinagoraRefColors.material().neutral[50],
+                        TextStyle(
+                          letterSpacing: 0.5,
+                          color: unread
+                              ? Theme.of(context).colorScheme.onSurface
+                              : LinagoraRefColors.material().neutral[50],
+                        ),
                       ),
-                  ),
                 ),
               )
             ],
@@ -226,7 +239,9 @@ class ChatListItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (typingText.isEmpty && ownLastMessage && room.lastEvent!.status.isSending) ...[
+                if (typingText.isEmpty &&
+                    ownLastMessage &&
+                    room.lastEvent!.status.isSending) ...[
                   const SizedBox(
                     width: 16,
                     height: 16,
@@ -236,18 +251,21 @@ class ChatListItem extends StatelessWidget {
                 ],
                 Expanded(
                   child: typingText.isNotEmpty
-                      ? Column(
-                        children: [
-                          Expanded(child: typingTextWidget(typingText, context)), 
+                      ? Column(children: [
+                          Expanded(
+                              child: typingTextWidget(typingText, context)),
                           const Spacer(),
                         ])
                       : (isGroup
                           ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Flexible(child: lastSenderWidget(isGroup, unread)),
+                                Flexible(
+                                    child: lastSenderWidget(isGroup, unread)),
                                 const SizedBox(height: 2),
-                                Flexible(child: textContentWidget(context, isGroup, unread))
+                                Flexible(
+                                    child: textContentWidget(
+                                        context, isGroup, unread))
                               ],
                             )
                           : textContentWidget(context, isGroup, unread)),
@@ -263,32 +281,44 @@ class ChatListItem extends StatelessWidget {
                       ) ??
                       Future.value(''),
                   builder: (context, snapshot) {
-                    if (snapshot.data == '' || snapshot.data == null || room.lastEvent == null) {
+                    if (snapshot.data == '' ||
+                        snapshot.data == null ||
+                        room.lastEvent == null) {
                       return const SizedBox.shrink();
                     }
 
-                    final isMentionned = snapshot.data!.getAllMentionedUserIdsFromMessage(room).contains(Matrix.of(context).client.userID);
+                    final isMentionned = snapshot.data!
+                        .getAllMentionedUserIdsFromMessage(room)
+                        .contains(Matrix.of(context).client.userID);
                     return AnimatedContainer(
                       duration: FluffyThemes.animationDuration,
                       curve: FluffyThemes.animationCurve,
                       padding: const EdgeInsets.only(bottom: 4),
                       height: ChatListItemStyle.mentionIconWidth,
-                      width: isMentionned && unread ? ChatListItemStyle.mentionIconWidth : 0,
+                      width: isMentionned && unread
+                          ? ChatListItemStyle.mentionIconWidth
+                          : 0,
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                        borderRadius:
+                            BorderRadius.circular(AppConfig.borderRadius),
                       ),
                       child: Center(
                         child: isMentionned && unread
                             ? Text(
-                                    '@',
-                                    style: TextStyle(
-                                      color: isMentionned
-                                          ? Theme.of(context).colorScheme.onPrimary
-                                          : Theme.of(context).colorScheme.onPrimaryContainer,
-                                      fontSize: Theme.of(context).textTheme.labelMedium?.fontSize,
-                                    ),
-                                  )
+                                '@',
+                                style: TextStyle(
+                                  color: isMentionned
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium
+                                      ?.fontSize,
+                                ),
+                              )
                             : Container(),
                       ),
                     );
@@ -300,9 +330,11 @@ class ChatListItem extends StatelessWidget {
                   curve: FluffyThemes.animationCurve,
                   padding: const EdgeInsets.symmetric(horizontal: 7),
                   height: unreadBadgeSize,
-                  width: ChatListItemStyle.notificationBadgeSize(unread, room.hasNewMessages, room.notificationCount),
+                  width: ChatListItemStyle.notificationBadgeSize(
+                      unread, room.hasNewMessages, room.notificationCount),
                   decoration: BoxDecoration(
-                    color: room.highlightCount > 0 || room.membership == Membership.invite
+                    color: room.highlightCount > 0 ||
+                            room.membership == Membership.invite
                         ? Theme.of(context).colorScheme.primary
                         : room.notificationCount > 0 || room.markedUnread
                             ? Theme.of(context).colorScheme.primary
@@ -313,13 +345,20 @@ class ChatListItem extends StatelessWidget {
                     child: room.notificationCount > 0
                         ? Text(
                             room.notificationCount.toString(),
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
                                   letterSpacing: -0.5,
                                   color: room.highlightCount > 0
                                       ? Theme.of(context).colorScheme.onPrimary
                                       : room.notificationCount > 0
-                                          ? Theme.of(context).colorScheme.onPrimary
-                                          : Theme.of(context).colorScheme.onPrimaryContainer,
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer,
                                 ),
                           )
                         : Container(),
@@ -334,7 +373,8 @@ class ChatListItem extends StatelessWidget {
     );
   }
 
-  FutureBuilder<String> textContentWidget(BuildContext context, bool isGroup, bool unread) {
+  FutureBuilder<String> textContentWidget(
+      BuildContext context, bool isGroup, bool unread) {
     return FutureBuilder<String>(
       future: room.lastEvent?.calcLocalizedBody(
             MatrixLocals(L10n.of(context)!),
@@ -361,11 +401,11 @@ class ChatListItem extends StatelessWidget {
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              letterSpacing: 0.4,
-              color: unread
-                  ? Theme.of(context).colorScheme.onSurface
-                  : LinagoraRefColors.material().neutral[50],
-          ),
+                letterSpacing: 0.4,
+                color: unread
+                    ? Theme.of(context).colorScheme.onSurface
+                    : LinagoraRefColors.material().neutral[50],
+              ),
         );
       },
     );

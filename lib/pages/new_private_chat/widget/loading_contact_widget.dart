@@ -9,16 +9,21 @@ class LoadingContactWidget extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          const SizedBox(height: 16.0,),
+          const SizedBox(
+            height: 16.0,
+          ),
           const CircularProgressIndicator(),
-          const SizedBox(height: 16.0,),
-          Text(L10n.of(context)!.loadingContacts,
+          const SizedBox(
+            height: 16.0,
+          ),
+          Text(
+            L10n.of(context)!.loadingContacts,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.secondary,
-            ),),
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+          ),
         ],
       ),
     );
   }
-
 }

@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'contact_status.dart';
 
 class Contact extends Equatable {
-
   final Set<String>? emails;
 
   final String? displayName;
@@ -21,7 +20,8 @@ class Contact extends Equatable {
     this.phoneNumber,
     this.status,
   });
-  
+
   @override
-  List<Object?> get props => [emails, displayName, matrixId, phoneNumber, status];
+  List<Object?> get props =>
+      [emails, displayName, matrixId, phoneNumber, status];
 }

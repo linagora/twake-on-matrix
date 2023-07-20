@@ -11,21 +11,18 @@ import 'package:matrix/matrix.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ContactsTab extends StatefulWidget {
-
   const ContactsTab({super.key});
 
   @override
   State<StatefulWidget> createState() => ContactsTabController();
-
 }
 
-class ContactsTabController extends State<ContactsTab> 
-  with ComparablePresentationContactMixin, GoToDirectChatMixin {
-
+class ContactsTabController extends State<ContactsTab>
+    with ComparablePresentationContactMixin, GoToDirectChatMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
-  final contactsStreamController = BehaviorSubject<Either<Failure, GetContactsSuccess>>();
-  
+  final contactsStreamController =
+      BehaviorSubject<Either<Failure, GetContactsSuccess>>();
 
   @override
   initState() {
@@ -34,14 +31,16 @@ class ContactsTabController extends State<ContactsTab>
     listenSearchContacts();
     super.initState();
     fetchContactsController.fetchCurrentTomContacts();
-    fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    fetchContactsController.listenForScrollChanged(
+        fetchContactsController: fetchContactsController);
     searchContactsController.onSearchKeywordChanged = (searchKey) {
       disableLoadMoreInSearch();
     };
   }
 
   void disableLoadMoreInSearch() {
-    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
+    fetchContactsController.allowLoadMore =
+        searchContactsController.searchKeyword.isEmpty;
   }
 
   void listenContactsStartList() {
@@ -53,7 +52,8 @@ class ContactsTabController extends State<ContactsTab>
 
   void listenSearchContacts() {
     searchContactsController.lookupStreamController.stream.listen((event) {
-      Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
+      Logs().d(
+          'NewPrivateChatController::_fetchRemoteContacts() - event: $event');
       contactsStreamController.add(event);
     });
   }
@@ -67,5 +67,6 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   @override
-  Widget build(BuildContext context) => ContactsTabView(contactsController: this);
+  Widget build(BuildContext context) =>
+      ContactsTabView(contactsController: this);
 }

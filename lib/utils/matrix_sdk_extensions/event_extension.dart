@@ -11,10 +11,10 @@ import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {
   Future<LoadingDialogResult<MatrixFile?>> getFile(BuildContext context) =>
-    showFutureLoadingDialog(
-      context: context,
-      future: downloadAndDecryptAttachment,
-    );
+      showFutureLoadingDialog(
+        context: context,
+        future: downloadAndDecryptAttachment,
+      );
 
   void saveFile(BuildContext context) async {
     final matrixFile = await getFile(context);
@@ -27,16 +27,18 @@ extension LocalizedBody on Event {
   }
 
   String? get mimeType {
-    return content.tryGetMap<String, dynamic>('info')?.tryGet<String>('mimetype');
+    return content
+        .tryGetMap<String, dynamic>('info')
+        ?.tryGet<String>('mimetype');
   }
 
   String? get fileType {
     return (filename.contains('.')
-      ? filename.split('.').last.toUpperCase()
-      : content
-          .tryGetMap<String, dynamic>('info')
-          ?.tryGet<String>('mimetype')
-          ?.toUpperCase());
+        ? filename.split('.').last.toUpperCase()
+        : content
+            .tryGetMap<String, dynamic>('info')
+            ?.tryGet<String>('mimetype')
+            ?.toUpperCase());
   }
 
   void shareFile(BuildContext context) async {
@@ -84,12 +86,14 @@ extension LocalizedBody on Event {
     } else if (status == EventStatus.synced) {
       return _getPlaceHolderMatrixFile(this);
     } else if (status == EventStatus.sent) {
-      return _getPlaceHolderMatrixFile(this); 
+      return _getPlaceHolderMatrixFile(this);
     }
     return null;
   }
 
   User? getUser() {
-    return room.getParticipants().firstWhereOrNull((user) => user.id == senderId);
+    return room
+        .getParticipants()
+        .firstWhereOrNull((user) => user.id == senderId);
   }
 }

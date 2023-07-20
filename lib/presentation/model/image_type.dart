@@ -1,4 +1,3 @@
-
 enum ImageType {
   heic(name: 'image/heic'),
   png(name: 'image/png'),

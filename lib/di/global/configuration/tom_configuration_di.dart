@@ -16,10 +16,12 @@ class ToMConfigurationDI extends BaseDI {
   }
 
   void _bindDataSource(GetIt get) {
-    get.registerFactory<ToMConfigurationsDatasource>(() => HiveToMConfigurationDatasource());
+    get.registerFactory<ToMConfigurationsDatasource>(
+        () => HiveToMConfigurationDatasource());
   }
 
   void _bindRepository(GetIt get) {
-    get.registerFactory<ToMConfigurationsRepository>(() => ToMConfigurationsRepositoryImpl());
+    get.registerFactory<ToMConfigurationsRepository>(
+        () => ToMConfigurationsRepositoryImpl());
   }
 }

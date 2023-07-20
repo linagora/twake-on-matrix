@@ -10,7 +10,8 @@ class ImageViewerView extends StatelessWidget {
   final ImageViewerController controller;
   final Uint8List? imageData;
 
-  const ImageViewerView(this.controller, {Key? key, this.imageData}) : super(key: key);
+  const ImageViewerView(this.controller, {Key? key, this.imageData})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,8 @@ class ImageViewerView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.close, color: LinagoraSysColors.material().onPrimary),
+                  icon: Icon(Icons.close,
+                      color: LinagoraSysColors.material().onPrimary),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -68,7 +70,8 @@ class ImageViewerView extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.save_alt, color: LinagoraSysColors.material().onPrimary),
+                      icon: Icon(Icons.save_alt,
+                          color: LinagoraSysColors.material().onPrimary),
                       onPressed: () => controller.saveFileAction(context),
                       color: LinagoraSysColors.material().onPrimary,
                       tooltip: L10n.of(context)!.saveFile,
@@ -76,14 +79,16 @@ class ImageViewerView extends StatelessWidget {
                     if (PlatformInfos.isMobile)
                       Builder(
                         builder: (context) => IconButton(
-                          onPressed: () => controller.shareFileAction(context),
-                          tooltip: L10n.of(context)!.share,
-                          color: LinagoraSysColors.material().onPrimary,
-                          icon: Icon(Icons.share, color: LinagoraSysColors.material().onPrimary)
-                        ),
+                            onPressed: () =>
+                                controller.shareFileAction(context),
+                            tooltip: L10n.of(context)!.share,
+                            color: LinagoraSysColors.material().onPrimary,
+                            icon: Icon(Icons.share,
+                                color: LinagoraSysColors.material().onPrimary)),
                       ),
                     IconButton(
-                      icon: Icon(Icons.shortcut, color: LinagoraSysColors.material().onPrimary),
+                      icon: Icon(Icons.shortcut,
+                          color: LinagoraSysColors.material().onPrimary),
                       onPressed: controller.forwardAction,
                       color: LinagoraSysColors.material().onPrimary,
                       tooltip: L10n.of(context)!.share,

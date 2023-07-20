@@ -12,14 +12,13 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'chat_list_body.dart';
 
 class ChatListBodyStream extends StatelessWidget {
-
   final ChatListController controller;
 
   const ChatListBodyStream({
     super.key,
     required this.controller,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
@@ -35,7 +34,7 @@ class ChatListBodyStream extends StatelessWidget {
               redirector.stopRedirection();
               return;
             }
-            return ;
+            return;
           },
           child: Row(
             children: [
@@ -114,5 +113,4 @@ class ChatListBodyStream extends StatelessWidget {
       },
     );
   }
-  
 }

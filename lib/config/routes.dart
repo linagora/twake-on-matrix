@@ -57,36 +57,36 @@ class AppRoutes {
         VRouter(
           routes: [
             VPopHandler(
-                onSystemPop: (vRedirector) async {
-                  if (vRedirector.previousVRouterData?.url != '/rooms') {
-                    vRedirector.to('/rooms');
-                  }
-                },
-                stackedRoutes: [
-                  VNester(
-                    key: const ValueKey("rooms"),
-                    path: '/rooms',
-                    widgetBuilder: (child) => HomeScreen(
-                      child: child,
+              onSystemPop: (vRedirector) async {
+                if (vRedirector.previousVRouterData?.url != '/rooms') {
+                  vRedirector.to('/rooms');
+                }
+              },
+              stackedRoutes: [
+                VNester(
+                  key: const ValueKey("rooms"),
+                  path: '/rooms',
+                  widgetBuilder: (child) => HomeScreen(
+                    child: child,
+                  ),
+                  buildTransition: _leftToRightTransition,
+                  nestedRoutes: [
+                    VWidget(
+                      path: null,
+                      widget: const ChatList(),
+                      buildTransition: _bottomToTopTransition,
                     ),
-                    buildTransition: _leftToRightTransition,
-                    nestedRoutes: [
-                      VWidget(
-                        path: null,
-                        widget: const ChatList(),
-                        buildTransition: _bottomToTopTransition,
-                      ),
-                      VWidgetWithDependencies(
-                        path: '/contactsTab',
-                        widget: const ContactsTab(),
-                        dIs: [ContactDI()],
-                        buildTransition: _bottomToTopTransition,
-                      ),
-                      VWidget(
-                        path: '/stories',
-                        widget: const Scaffold(),
-                        buildTransition: _bottomToTopTransition,
-                      ),
+                    VWidgetWithDependencies(
+                      path: '/contactsTab',
+                      widget: const ContactsTab(),
+                      dIs: [ContactDI()],
+                      buildTransition: _bottomToTopTransition,
+                    ),
+                    VWidget(
+                      path: '/stories',
+                      widget: const Scaffold(),
+                      buildTransition: _bottomToTopTransition,
+                    ),
                   ],
                 ),
               ],
@@ -171,24 +171,23 @@ class AppRoutes {
                   ],
                 ),
                 VWidgetWithDependencies(
-                  dIs: [ContactDI()],
-                  path: '/newprivatechat',
-                  widget: const NewPrivateChat(),
-                  buildTransition: rightToLeftTransition,
-                  stackedRoutes: [
-                    VWidget(
-                      path: '/newgroup',
-                      widget: const NewGroup(),
-                      buildTransition: rightToLeftTransition,
-                    ),
-                    VWidgetWithDependencies(
-                      path: '/emptyChat',
-                      dIs: [ChatScreenDi(), CreateDirectChatDi()],
-                      widget: const EmptyChat(),
-                      buildTransition: rightToLeftTransition,
-                    ),
-                  ]
-                ),
+                    dIs: [ContactDI()],
+                    path: '/newprivatechat',
+                    widget: const NewPrivateChat(),
+                    buildTransition: rightToLeftTransition,
+                    stackedRoutes: [
+                      VWidget(
+                        path: '/newgroup',
+                        widget: const NewGroup(),
+                        buildTransition: rightToLeftTransition,
+                      ),
+                      VWidgetWithDependencies(
+                        path: '/emptyChat',
+                        dIs: [ChatScreenDi(), CreateDirectChatDi()],
+                        widget: const EmptyChat(),
+                        buildTransition: rightToLeftTransition,
+                      ),
+                    ]),
               ],
             )
           ],
@@ -489,27 +488,32 @@ class AppRoutes {
 
   FadeTransition _fadeTransition(animation1, _, child) =>
       FadeTransition(opacity: animation1, child: child);
-  
+
   SlideTransition _bottomToTopTransition(animation, secondaryAnimation, child) {
-    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.bottomToTop);
+    return _buildSlideTransition(
+        animation, secondaryAnimation, child, SlideTransitionType.bottomToTop);
   }
 
   SlideTransition _topToBottomTransition(animation, secondaryAnimation, child) {
-    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.topToBottom);
+    return _buildSlideTransition(
+        animation, secondaryAnimation, child, SlideTransitionType.topToBottom);
   }
 
   SlideTransition _leftToRightTransition(animation, secondaryAnimation, child) {
-    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.leftToRight);
+    return _buildSlideTransition(
+        animation, secondaryAnimation, child, SlideTransitionType.leftToRight);
   }
 
-  static SlideTransition rightToLeftTransition(animation, secondaryAnimation, child) {
-    return _buildSlideTransition(animation, secondaryAnimation, child, SlideTransitionType.rightToLeft);
+  static SlideTransition rightToLeftTransition(
+      animation, secondaryAnimation, child) {
+    return _buildSlideTransition(
+        animation, secondaryAnimation, child, SlideTransitionType.rightToLeft);
   }
 
   static SlideTransition _buildSlideTransition(
-    Animation animation, 
-    Animation secondaryAnimation, 
-    Widget child, 
+    Animation animation,
+    Animation secondaryAnimation,
+    Widget child,
     SlideTransitionType type,
   ) {
     final begin = type.begin;

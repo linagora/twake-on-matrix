@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';

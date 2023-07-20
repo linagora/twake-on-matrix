@@ -37,21 +37,19 @@ class _ForwardViewState extends State<ForwardView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(ForwardViewStyle.preferredAppBarSize),
-        child: _buildAppBarForward(context)),
+          preferredSize: Size.fromHeight(ForwardViewStyle.preferredAppBarSize),
+          child: _buildAppBarForward(context)),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
         child: Column(
           children: [
             _recentlyChatsTitle(context),
-            if (isShowRecentlyChats)
-              _chatList(),
+            if (isShowRecentlyChats) _chatList(),
           ],
         ),
       ),
-      floatingActionButton: Align(
-        alignment: const Alignment(0.5, 1.1),
-        child: _buildBottomBar()),
+      floatingActionButton:
+          Align(alignment: const Alignment(0.5, 1.1), child: _buildBottomBar()),
     );
   }
 
@@ -126,29 +124,36 @@ class _ForwardViewState extends State<ForwardView> {
           ),
           const SizedBox(width: 8.0),
           isSearchBarShow
-            ? Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TextField(
-                  autofocus: true,
-                  maxLines: 1,
-                  buildCounter: (BuildContext context, {
-                    required int currentLength,
-                    required int? maxLength,
-                    required bool isFocused,
-                  }) => const SizedBox.shrink(),
-                  maxLength: 200,
-                  cursorHeight: 26,
-                  scrollPadding: const EdgeInsets.all(0),
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    hintText: "...",
-                    hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: LinagoraRefColors.material().neutral[60]),
-                  )))
-            : Text(
-              L10n.of(context)!.forwardTo,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName)),
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextField(
+                      autofocus: true,
+                      maxLines: 1,
+                      buildCounter: (
+                        BuildContext context, {
+                        required int currentLength,
+                        required int? maxLength,
+                        required bool isFocused,
+                      }) =>
+                          const SizedBox.shrink(),
+                      maxLength: 200,
+                      cursorHeight: 26,
+                      scrollPadding: const EdgeInsets.all(0),
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        hintText: "...",
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(
+                                color:
+                                    LinagoraRefColors.material().neutral[60]),
+                      )))
+              : Text(L10n.of(context)!.forwardTo,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      letterSpacing:
+                          ChatAppBarTitleStyle.letterSpacingRoomName)),
         ],
       ),
       actions: [
@@ -195,24 +200,30 @@ class _ForwardViewState extends State<ForwardView> {
     return Row(
       children: [
         Text(L10n.of(context)!.recentlyChats,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: LinagoraRefColors.material().neutral[40])
-        ),
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(color: LinagoraRefColors.material().neutral[40])),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TwakeIconButton(
-                paddingAll: 6.0,
-                buttonDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                icon: isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
-                onPressed: () => _toggleRecentlyChats(),
-                tooltip: isShowRecentlyChats
-                  ? L10n.of(context)!.shrink
-                  : L10n.of(context)!.expand),
+                  paddingAll: 6.0,
+                  buttonDecoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  icon: isShowRecentlyChats
+                      ? Icons.expand_less
+                      : Icons.expand_more,
+                  onPressed: () => _toggleRecentlyChats(),
+                  tooltip: isShowRecentlyChats
+                      ? L10n.of(context)!.shrink
+                      : L10n.of(context)!.expand),
             ],
           ),
         )

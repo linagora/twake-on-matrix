@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
@@ -15,7 +14,8 @@ import 'package:fluffychat/utils/network_connection_service.dart';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
+import 'package:linagora_design_flutter/images_picker/images_picker.dart'
+    hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -25,24 +25,28 @@ typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
 class EmptyChat extends StatefulWidget {
-
   const EmptyChat({super.key});
 
   @override
   State<StatefulWidget> createState() => EmptyChatController();
-  
 }
 
-class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFilesMixin {
+class EmptyChatController extends State<EmptyChat>
+    with ImagePickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
-  late PresentationContact? presentationContact = presentationContact = PresentationContact(
-    email: VRouter.of(context).queryParameters[PresentationContactConstant.email] ?? '',
-    displayName: VRouter.of(context).queryParameters[PresentationContactConstant.displayName],
-    matrixId: VRouter.of(context).queryParameters[PresentationContactConstant.receiverId]
-  );
+  late PresentationContact? presentationContact = presentationContact =
+      PresentationContact(
+          email: VRouter.of(context)
+                  .queryParameters[PresentationContactConstant.email] ??
+              '',
+          displayName: VRouter.of(context)
+              .queryParameters[PresentationContactConstant.displayName],
+          matrixId: VRouter.of(context)
+              .queryParameters[PresentationContactConstant.receiverId]);
 
-  final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
+  final NetworkConnectionService networkConnectionService =
+      getIt.get<NetworkConnectionService>();
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
@@ -100,11 +104,11 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
   TextEditingController sendController = TextEditingController();
 
   void setActiveClient(Client c) => setState(() {
-    Matrix.of(context).setActiveClient(c);
-  });
+        Matrix.of(context).setActiveClient(c);
+      });
 
   Future<void> sendText({
-    OnRoomCreatedSuccess onRoomCreatedSuccess, 
+    OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onCreateRoomFailed,
   }) async {
     scrollDown();
@@ -112,54 +116,52 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
       text: sendController.value.text,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
+
     _createRoom(
-      onRoomCreatedSuccess: (room) {
-        onRoomCreatedSuccess?.call(room);
-        room.sendTextEvent(
-          sendController.text,
-        );
-      },
-      onRoomCreatedFailed: onCreateRoomFailed
-    );
+        onRoomCreatedSuccess: (room) {
+          onRoomCreatedSuccess?.call(room);
+          room.sendTextEvent(
+            sendController.text,
+          );
+        },
+        onRoomCreatedFailed: onCreateRoomFailed);
   }
 
   Future<void> _createRoom({
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
-    createDirectChatInteractor.execute(
-      contactMxId: presentationContact!.matrixId!, 
-      client: Matrix.of(context).client
-    ).listen((event) {
-      event.fold(
-        (failure) {
-          onRoomCreatedFailed?.call();
-          Logs().d("_createRoom: $failure");
-          VRouter.of(context).pop();
-        },
-        (success) {
-          if (success is CreateDirectChatLoading) {
-            showDialog(
+    createDirectChatInteractor
+        .execute(
+            contactMxId: presentationContact!.matrixId!,
+            client: Matrix.of(context).client)
+        .listen((event) {
+      event.fold((failure) {
+        onRoomCreatedFailed?.call();
+        Logs().d("_createRoom: $failure");
+        VRouter.of(context).pop();
+      }, (success) {
+        if (success is CreateDirectChatLoading) {
+          showDialog(
               useRootNavigator: false,
-              context: context, builder: (context) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            });
-          } else if (success is CreateDirectChatSuccess) {
-            final room = Matrix.of(context).client.getRoomById(success.roomId);
-            if (room != null) {
-              VRouter.of(context).pop();
-              onRoomCreatedSuccess?.call(room);
-              VRouter.of(context).toSegments(
-                ['rooms', room.id],
-                isReplacement: true,
-              );
-            }
+              context: context,
+              builder: (context) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              });
+        } else if (success is CreateDirectChatSuccess) {
+          final room = Matrix.of(context).client.getRoomById(success.roomId);
+          if (room != null) {
+            VRouter.of(context).pop();
+            onRoomCreatedSuccess?.call(room);
+            VRouter.of(context).toSegments(
+              ['rooms', room.id],
+              isReplacement: true,
+            );
           }
         }
-      );
+      });
     });
   }
 
@@ -218,13 +220,10 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
   }
 
   void onInputBarSubmitted(_) {
-    sendText(
-      onCreateRoomFailed: () {
-        Fluttertoast.showToast(msg: 'Create room failed');
-        FocusScope.of(context).requestFocus(inputFocus);
-      }
-    );
-    
+    sendText(onCreateRoomFailed: () {
+      Fluttertoast.showToast(msg: 'Create room failed');
+      FocusScope.of(context).requestFocus(inputFocus);
+    });
   }
 
   void onInputBarChanged(String text) {

@@ -1,14 +1,12 @@
 import 'package:badges/badges.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_list/bottom_tab_bar.dart';  
+import 'package:fluffychat/pages/chat_list/bottom_tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:vrouter/vrouter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-
 class HomeScreen extends StatefulWidget {
-
   final Widget? child;
 
   const HomeScreen({super.key, this.child});
@@ -43,11 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            Container(height: 4.0, color: Theme.of(context).colorScheme.surface),
+            Container(
+                height: 4.0, color: Theme.of(context).colorScheme.surface),
             NavigationBar(
               height: 80,
               surfaceTintColor: Theme.of(context).colorScheme.surface,
-              selectedIndex: BottomTabbar.fromPath(context.vRouter.path).tabIndex,
+              selectedIndex:
+                  BottomTabbar.fromPath(context.vRouter.path).tabIndex,
               onDestinationSelected: onDestinationSelected,
               destinations: getNavigationDestinations(context),
             ),

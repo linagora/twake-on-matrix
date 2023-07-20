@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vrouter/vrouter.dart';
 
-
 class VWidgetWithDependency extends VGuard {
-
   final String? path;
 
   /// A name for the route which will allow you to easily navigate to it
@@ -79,11 +77,11 @@ class VWidgetWithDependency extends VGuard {
 
   @override
   Future<void> beforeLeave(VRedirector vRedirector,
-    void Function(Map<String, String> state) saveHistoryState) async {
-      super.beforeLeave(vRedirector, saveHistoryState);
-      await di.unbind();
-    }
-  
+      void Function(Map<String, String> state) saveHistoryState) async {
+    super.beforeLeave(vRedirector, saveHistoryState);
+    await di.unbind();
+  }
+
   @override
   void afterEnter(BuildContext context, String? from, String to) =>
       _afterEnter(context, from, to);
@@ -96,7 +94,6 @@ class VWidgetWithDependency extends VGuard {
   final void Function(BuildContext context, String? from, String to)
       _afterUpdate;
 
-  
   VWidgetWithDependency({
     required this.path,
     required this.widget,
@@ -115,30 +112,30 @@ class VWidgetWithDependency extends VGuard {
     this.reverseTransitionDuration,
     this.buildTransition,
     this.fullscreenDialog = false,
-  }): _beforeUpdate = beforeUpdate,
-      _afterEnter = afterEnter,
-      _afterUpdate = afterUpdate;
+  })  : _beforeUpdate = beforeUpdate,
+        _afterEnter = afterEnter,
+        _afterUpdate = afterUpdate;
 
   @override
   List<VRouteElement> buildRoutes() => [
-    VPath(
-      path: path,
-      aliases: aliases,
-      mustMatchStackedRoute: mustMatchStackedRoute,
-      stackedRoutes: [
-        VWidgetBase(
-          widget: widget,
-          key: key,
-          name: name,
-          stackedRoutes: stackedRoutes,
-          buildTransition: buildTransition,
-          transitionDuration: transitionDuration,
-          reverseTransitionDuration: reverseTransitionDuration,
-          fullscreenDialog: fullscreenDialog,
+        VPath(
+          path: path,
+          aliases: aliases,
+          mustMatchStackedRoute: mustMatchStackedRoute,
+          stackedRoutes: [
+            VWidgetBase(
+              widget: widget,
+              key: key,
+              name: name,
+              stackedRoutes: stackedRoutes,
+              buildTransition: buildTransition,
+              transitionDuration: transitionDuration,
+              reverseTransitionDuration: reverseTransitionDuration,
+              fullscreenDialog: fullscreenDialog,
+            ),
+          ],
         ),
-      ],
-    ),
-  ];
+      ];
 
   /// A boolean to indicate whether this can be a valid [VRouteElement] of the [VRoute] if no
   /// [VRouteElement] in its [stackedRoute] is matched

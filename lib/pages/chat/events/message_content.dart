@@ -37,17 +37,16 @@ class MessageContent extends StatelessWidget {
   final Function()? onTapSelectMode;
   final ChatController controller;
 
-  const MessageContent(
-    this.event, {
-    this.onInfoTab,
-    Key? key,
-    required this.controller,
-    required this.textColor,
-    required this.endOfBubbleWidget,
-    required this.backgroundColor,
-    this.onTapPreview,
-    this.onTapSelectMode
-  }) : super(key: key);
+  const MessageContent(this.event,
+      {this.onInfoTab,
+      Key? key,
+      required this.controller,
+      required this.textColor,
+      required this.endOfBubbleWidget,
+      required this.backgroundColor,
+      this.onTapPreview,
+      this.onTapSelectMode})
+      : super(key: key);
 
   void _verifyOrRequestKey(BuildContext context) async {
     final l10n = L10n.of(context)!;
@@ -168,17 +167,20 @@ class MessageContent extends StatelessWidget {
                 color: textColor,
               );
             }
-            return MessageDownloadContent(event, textColor, controller: controller);
+            return MessageDownloadContent(event, textColor,
+                controller: controller);
           case MessageTypes.Video:
             if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
               return EventVideoPlayer(event);
             }
-            return MessageDownloadContent(event, textColor, controller: controller);
+            return MessageDownloadContent(event, textColor,
+                controller: controller);
           case MessageTypes.File:
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                MessageDownloadContent(event, textColor, controller: controller),
+                MessageDownloadContent(event, textColor,
+                    controller: controller),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: endOfBubbleWidget,
@@ -204,10 +206,11 @@ class MessageContent extends StatelessWidget {
                 child: HtmlMessage(
                   event: event,
                   html: html,
-                  defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: textColor,
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                  ),
+                  defaultTextStyle:
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: textColor,
+                            fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                          ),
                   linkStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                     fontSize: bigEmotes ? fontSize * 3 : fontSize,
@@ -217,11 +220,11 @@ class MessageContent extends StatelessWidget {
                   room: event.room,
                   emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
                   bottomWidgetSpan: Visibility(
-                    visible: false,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: endOfBubbleWidget),
+                      visible: false,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: endOfBubbleWidget),
                   chatController: controller,
                 ),
               );
@@ -290,7 +293,7 @@ class MessageContent extends StatelessWidget {
                 },
               );
             }
-            
+
             final bigEmotes = event.onlyEmotes &&
                 event.numberEmotes > 0 &&
                 event.numberEmotes <= 10;
@@ -301,17 +304,18 @@ class MessageContent extends StatelessWidget {
               ),
               builder: (context, snapshot) {
                 final text = snapshot.data ??
-                  event.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)!),
-                    hideReply: true,
-                  );
+                    event.calcLocalizedBodyFallback(
+                      MatrixLocals(L10n.of(context)!),
+                      hideReply: true,
+                    );
 
                 return TwakeLinkText(
                   text: text,
                   textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontSize: fontSize,
                       color: Theme.of(context).colorScheme.onBackground,
-                      letterSpacing: MessageContentStyle.letterSpacingMessageContent),
+                      letterSpacing:
+                          MessageContentStyle.letterSpacingMessageContent),
                   linkStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                     fontSize: bigEmotes ? fontSize * 3 : fontSize,
@@ -392,4 +396,3 @@ class _ButtonContent extends StatelessWidget {
     );
   }
 }
-

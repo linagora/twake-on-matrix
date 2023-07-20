@@ -43,7 +43,8 @@ class FluffyChatAppState extends State<FluffyChatApp> {
   @override
   void initState() {
     super.initState();
-    _initialUrl = widget.clients.any((client) => client.isLogged()) ? '/rooms' : '/home';
+    _initialUrl =
+        widget.clients.any((client) => client.isLogged()) ? '/rooms' : '/home';
     networkConnectionService.onInit();
   }
 

@@ -128,19 +128,22 @@ class ChatView extends StatelessWidget {
             icon: Icons.call_outlined,
             tooltip: L10n.of(context)!.placeCall,
             paddingAll: 6.0,
-            margin: EdgeInsets.symmetric(vertical: ChatViewStyle.paddingVerticalActionButtons),
+            margin: EdgeInsets.symmetric(
+                vertical: ChatViewStyle.paddingVerticalActionButtons),
           ),
-          TwakeIconButton(
-            onPressed: () {print;},
-            icon: Icons.videocam_outlined,
-            tooltip: L10n.of(context)!.placeCall,
-            paddingAll: 6.0,
-            margin: EdgeInsets.only(
-              top: ChatViewStyle.paddingVerticalActionButtons,
-              bottom: ChatViewStyle.paddingVerticalActionButtons,
-              right: 10.0,
-            ),
+        TwakeIconButton(
+          onPressed: () {
+            print;
+          },
+          icon: Icons.videocam_outlined,
+          tooltip: L10n.of(context)!.placeCall,
+          paddingAll: 6.0,
+          margin: EdgeInsets.only(
+            top: ChatViewStyle.paddingVerticalActionButtons,
+            bottom: ChatViewStyle.paddingVerticalActionButtons,
+            right: 10.0,
           ),
+        ),
         // EncryptionButton(controller.room!),
         // ChatSettingsPopupMenu(controller.room!, !controller.room!.isDirectChat),
       ];
@@ -187,7 +190,8 @@ class ChatView extends StatelessWidget {
         onTapDown: controller.setReadMarker,
         behavior: HitTestBehavior.opaque,
         child: StreamBuilder(
-          stream: controller.room!.onUpdate.stream.rateLimit(const Duration(seconds: 1)),
+          stream: controller.room!.onUpdate.stream
+              .rateLimit(const Duration(seconds: 1)),
           builder: (context, snapshot) => FutureBuilder<bool>(
             future: controller.getTimeline(),
             builder: (BuildContext context, snapshot) {
@@ -213,10 +217,14 @@ class ChatView extends StatelessWidget {
                   title: ChatAppBarTitle(controller),
                   actions: _appBarActions(context),
                   bottom: PreferredSize(
-                    preferredSize: const Size(double.infinity, 4),
-                    child: Container(
-                      color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08), 
-                      height: 1,)),
+                      preferredSize: const Size(double.infinity, 4),
+                      child: Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceTint
+                            .withOpacity(0.08),
+                        height: 1,
+                      )),
                 ),
                 floatingActionButton: controller.showScrollDownButton &&
                         controller.selectedEvents.isEmpty
@@ -280,14 +288,17 @@ class ChatView extends StatelessWidget {
                                           right: bottomSheetPadding,
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
                                           children: [
                                             TextButton.icon(
                                               style: TextButton.styleFrom(
-                                                padding: const EdgeInsets.all(16),
-                                                foregroundColor: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                foregroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .error,
                                               ),
                                               icon: const Icon(
                                                 Icons.archive_outlined,
@@ -299,12 +310,14 @@ class ChatView extends StatelessWidget {
                                             ),
                                             TextButton.icon(
                                               style: TextButton.styleFrom(
-                                                padding: const EdgeInsets.all(16),
+                                                padding:
+                                                    const EdgeInsets.all(16),
                                               ),
                                               icon: const Icon(
                                                 Icons.chat_outlined,
                                               ),
-                                              onPressed: controller.recreateChat,
+                                              onPressed:
+                                                  controller.recreateChat,
                                               label: Text(
                                                 L10n.of(context)!.reopenChat,
                                               ),

@@ -18,7 +18,6 @@ class RecoveryWordsResponse with EquatableMixin {
 
   Map<String, dynamic> toJson() => _$RecoveryWordsResponseToJson(this);
 
-  
   @override
   List<Object?> get props => [words];
 }

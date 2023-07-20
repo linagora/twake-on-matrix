@@ -46,13 +46,12 @@ class MessageTime extends StatelessWidget {
           Text(
             DateFormat("HH:mm").format(event.originServerTs),
             style: Theme.of(context).textTheme.bodySmall?.merge(
-              TextStyle(
-                color: timelineOverlayMessage
-                ? Colors.white
-                : LinagoraRefColors.material().neutral[50],
-                letterSpacing: 0.4
-              ),
-            ),
+                  TextStyle(
+                      color: timelineOverlayMessage
+                          ? Colors.white
+                          : LinagoraRefColors.material().neutral[50],
+                      letterSpacing: 0.4),
+                ),
           ),
           if (ownMessage) ...[
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
@@ -68,5 +67,3 @@ class MessageTime extends StatelessWidget {
     );
   }
 }
-
-

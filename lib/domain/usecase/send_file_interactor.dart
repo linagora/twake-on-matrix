@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -15,10 +14,12 @@ class SendFileInteractor {
     Map<String, dynamic>? extraContent,
   }) async {
     try {
-      final matrixFiles = filePickerResult.files.map((xFile) => MatrixFile(
-        bytes: xFile.bytes!,
-        name: xFile.name,
-      ).detectFileType).toList();
+      final matrixFiles = filePickerResult.files
+          .map((xFile) => MatrixFile(
+                bytes: xFile.bytes!,
+                name: xFile.name,
+              ).detectFileType)
+          .toList();
 
       for (final matrixFile in matrixFiles) {
         await room.sendImageFileEvent(
@@ -30,7 +31,7 @@ class SendFileInteractor {
           extraContent: extraContent,
         );
       }
-    } catch(error) {
+    } catch (error) {
       Logs().d("SendFileInteractor: execute(): $error");
     }
   }

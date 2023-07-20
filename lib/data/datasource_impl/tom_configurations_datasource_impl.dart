@@ -11,15 +11,18 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
 
   @override
   Future<ToMConfigurations> getTomConfigurations(String clientName) async {
-    _hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
-    final cachedConfiguration = await _hiveCollectionToMDatabase.tomConfigurationsBox
-      .get(clientName);
+    _hiveCollectionToMDatabase =
+        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final cachedConfiguration =
+        await _hiveCollectionToMDatabase.tomConfigurationsBox.get(clientName);
     if (cachedConfiguration != null) {
       return ToMConfigurations(
-        tomServerInformation: cachedConfiguration.tomServerInformation.toToMServerInformation(),
+        tomServerInformation:
+            cachedConfiguration.tomServerInformation.toToMServerInformation(),
         identityServerInformation: cachedConfiguration.identityServerUrl != null
-          ? IdentityServerInformation(baseUrl: Uri.parse(cachedConfiguration.identityServerUrl!))
-          : null,
+            ? IdentityServerInformation(
+                baseUrl: Uri.parse(cachedConfiguration.identityServerUrl!))
+            : null,
       );
     } else {
       throw ToMConfigurationNotFound();
@@ -27,12 +30,13 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
   }
 
   @override
-  Future<void> saveTomConfigurations(String clientName, ToMConfigurations toMConfigurations) async {
-    _hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
+  Future<void> saveTomConfigurations(
+      String clientName, ToMConfigurations toMConfigurations) async {
+    _hiveCollectionToMDatabase =
+        await getIt.getAsync<HiveCollectionToMDatabase>();
     return _hiveCollectionToMDatabase.tomConfigurationsBox.put(
       clientName,
-      ToMConfigurationsHiveObj
-        .fromToMConfigurations(toMConfigurations),
+      ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations),
     );
   }
 }

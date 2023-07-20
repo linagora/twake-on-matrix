@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -25,7 +24,7 @@ class SendImageInteractor {
           shrinkImageMaxDimension: shrinkImageMaxDimension,
           extraContent: extraContent,
         );
-      } catch(error) {
+      } catch (error) {
         Logs().d("SendImageInteractor: execute(): $error");
       }
     }

@@ -6,7 +6,6 @@ part 'lookup_mxid_response.g.dart';
 
 @JsonSerializable()
 class LookupMxidResponse with EquatableMixin {
-
   @JsonKey(name: "matches")
   final Set<TomContact> contacts;
 
@@ -21,8 +20,8 @@ class LookupMxidResponse with EquatableMixin {
   @override
   List<Object?> get props => [contacts, inactiveContacts];
 
-  factory LookupMxidResponse.fromJson(Map<String, dynamic> json) 
-    => _$LookupMxidResponseFromJson(json);
+  factory LookupMxidResponse.fromJson(Map<String, dynamic> json) =>
+      _$LookupMxidResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$LookupMxidResponseToJson(this);
 }

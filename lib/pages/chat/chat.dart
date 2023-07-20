@@ -64,7 +64,8 @@ class Chat extends StatefulWidget {
 }
 
 class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
-  final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
+  final NetworkConnectionService networkConnectionService =
+      getIt.get<NetworkConnectionService>();
 
   Room? room;
 
@@ -382,21 +383,23 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
 
   void onFileTapped({required Event event}) async {
     final permissionHandler = PermissionHandlerService();
-    final storagePermissionStatus = await permissionHandler.storagePermissionStatus;
+    final storagePermissionStatus =
+        await permissionHandler.storagePermissionStatus;
     switch (storagePermissionStatus) {
       case PermissionStatus.denied:
         await showDialog(
-          useRootNavigator: false,
-          context: context,
-          builder: (context) {
-            return PermissionDialog(
-              permission: Permission.storage,
-              explainTextRequestPermission: Text(L10n.of(context)!.explainStoragePermission),
-              icon: const Icon(Icons.preview_outlined),
-            );
-          }
-        );
-        if (await permissionHandler.storagePermissionStatus == PermissionStatus.granted) {
+            useRootNavigator: false,
+            context: context,
+            builder: (context) {
+              return PermissionDialog(
+                permission: Permission.storage,
+                explainTextRequestPermission:
+                    Text(L10n.of(context)!.explainStoragePermission),
+                icon: const Icon(Icons.preview_outlined),
+              );
+            });
+        if (await permissionHandler.storagePermissionStatus ==
+            PermissionStatus.granted) {
           _handleDownloadFileForPreview(event: event);
         }
         break;
@@ -405,16 +408,16 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
         break;
       case PermissionStatus.permanentlyDenied:
         showDialog(
-          useRootNavigator: false,
-          context: context,
-          builder: (context) {
-            return PermissionDialog(
-              permission: Permission.storage,
-              explainTextRequestPermission: Text(L10n.of(context)!.explainGoToStorageSetting),
-              icon: const Icon(Icons.preview_outlined),
-            );
-          }
-        );
+            useRootNavigator: false,
+            context: context,
+            builder: (context) {
+              return PermissionDialog(
+                permission: Permission.storage,
+                explainTextRequestPermission:
+                    Text(L10n.of(context)!.explainGoToStorageSetting),
+                icon: const Icon(Icons.preview_outlined),
+              );
+            });
         break;
       case PermissionStatus.restricted:
       case PermissionStatus.limited:
@@ -423,49 +426,51 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     }
   }
 
-
   void _handleDownloadFileForPreview({required Event event}) async {
-    final downloadFileForPreviewInteractor = getIt.get<DownloadFileForPreviewInteractor>();
+    final downloadFileForPreviewInteractor =
+        getIt.get<DownloadFileForPreviewInteractor>();
     final tempDirPath = (await getTemporaryDirectory()).path;
-    downloadFileForPreviewInteractor.execute(
+    downloadFileForPreviewInteractor
+        .execute(
       event: event,
       tempDirPath: tempDirPath,
-    ).listen((event) {
-      event.fold(
-        (failure) {
-          if (failure is DownloadFileForPreviewFailure) {
-            Fluttertoast.showToast(msg: 'Error: ${failure.exception}');
-          }
-        },
-        (success) {
-          if (success is DownloadFileForPreviewSuccess) {
-            _openDownloadedFileForPreview(downloadFileForPreviewResponse: success.downloadFileForPreviewResponse);
-            Navigator.of(context).pop();
-          } else if (success is DownloadFileForPreviewLoading) {
-            showDialog(
+    )
+        .listen((event) {
+      event.fold((failure) {
+        if (failure is DownloadFileForPreviewFailure) {
+          Fluttertoast.showToast(msg: 'Error: ${failure.exception}');
+        }
+      }, (success) {
+        if (success is DownloadFileForPreviewSuccess) {
+          _openDownloadedFileForPreview(
+              downloadFileForPreviewResponse:
+                  success.downloadFileForPreviewResponse);
+          Navigator.of(context).pop();
+        } else if (success is DownloadFileForPreviewLoading) {
+          showDialog(
               context: context,
               useRootNavigator: false,
               builder: (BuildContext context) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
-              }
-            );
-          }
-        });
+              });
+        }
+      });
     });
   }
 
-  void _openDownloadedFileForPreview({
-    required DownloadFileForPreviewResponse downloadFileForPreviewResponse
-  }) async {
+  void _openDownloadedFileForPreview(
+      {required DownloadFileForPreviewResponse
+          downloadFileForPreviewResponse}) async {
     final mimeType = downloadFileForPreviewResponse.mimeType;
     final openResults = await OpenFile.open(
-      downloadFileForPreviewResponse.filePath,
-      type: mimeType,
-      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType]).value
-    );
-    Logs().d('ChatController:_openDownloadedFileForPreview(): ${openResults.message}');
+        downloadFileForPreviewResponse.filePath,
+        type: mimeType,
+        uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType])
+            .value);
+    Logs().d(
+        'ChatController:_openDownloadedFileForPreview(): ${openResults.message}');
 
     if (openResults.type != ResultType.done) {
       await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
@@ -739,11 +744,16 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
 
   void forwardEventsAction() async {
     if (selectedEvents.length == 1) {
-      Matrix.of(context).shareContent = selectedEvents.first.getDisplayEvent(timeline!).content;
-      Logs().d("forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}");
+      Matrix.of(context).shareContent =
+          selectedEvents.first.getDisplayEvent(timeline!).content;
+      Logs().d(
+          "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}");
     } else {
-      Matrix.of(context).shareContentList = selectedEvents.map((msg) => msg.getDisplayEvent(timeline!).content).toList();
-      Logs().d("forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}");
+      Matrix.of(context).shareContentList = selectedEvents
+          .map((msg) => msg.getDisplayEvent(timeline!).content)
+          .toList();
+      Logs().d(
+          "forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}");
     }
     setState(() => selectedEvents.clear());
     VRouter.of(context).toSegments(['rooms', room!.id, 'forward']);

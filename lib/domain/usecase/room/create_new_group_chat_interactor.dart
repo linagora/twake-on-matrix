@@ -7,34 +7,31 @@ import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart'
 import 'package:matrix/matrix.dart';
 
 class CreateNewGroupChatInteractor {
-
-  Stream<Either<Failure, Success>> execute({
-    required Client matrixClient,
-    required CreateNewGroupChatRequest createNewGroupChatRequest
-  }) async* {
+  Stream<Either<Failure, Success>> execute(
+      {required Client matrixClient,
+      required CreateNewGroupChatRequest createNewGroupChatRequest}) async* {
     try {
       yield Right(CreateNewGroupChatLoading());
 
       final addAvatarStateEvent = StateEvent(
-        type: EventTypes.RoomAvatar,
-        content: {
-          'url': createNewGroupChatRequest.urlAvatar,
-        },
-        stateKey: ''
-      );
+          type: EventTypes.RoomAvatar,
+          content: {
+            'url': createNewGroupChatRequest.urlAvatar,
+          },
+          stateKey: '');
 
       final roomId = await matrixClient.createGroupChat(
-        groupName: createNewGroupChatRequest.groupName,
-        invite: createNewGroupChatRequest.invite,
-        enableEncryption: createNewGroupChatRequest.enableEncryption,
-        preset: createNewGroupChatRequest.createRoomPreset,
-        initialState: [addAvatarStateEvent]
-      );
+          groupName: createNewGroupChatRequest.groupName,
+          invite: createNewGroupChatRequest.invite,
+          enableEncryption: createNewGroupChatRequest.enableEncryption,
+          preset: createNewGroupChatRequest.createRoomPreset,
+          initialState: [addAvatarStateEvent]);
 
       if (roomId.isNotEmpty) {
         yield Right(CreateNewGroupChatSuccess(roomId: roomId));
       } else {
-        yield Left(CreateNewGroupChatFailed(exception: CannotCreateNewGroupChatException()));
+        yield Left(CreateNewGroupChatFailed(
+            exception: CannotCreateNewGroupChatException()));
       }
     } catch (exception) {
       yield Left(CreateNewGroupChatFailed(exception: exception));

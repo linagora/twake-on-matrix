@@ -7,7 +7,8 @@ typedef OnItemAction = void Function(ChatActions);
 class ItemActionOnBottom extends StatelessWidget {
   final ChatActions chatActions;
   final OnItemAction onItemAction;
-  const ItemActionOnBottom({super.key, required this.chatActions, required this.onItemAction});
+  const ItemActionOnBottom(
+      {super.key, required this.chatActions, required this.onItemAction});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +32,11 @@ class ItemActionOnBottom extends StatelessWidget {
               color: chatActions.getIconColor(),
             ),
           ),
-          Text(chatActions.getTitle(context),
+          Text(
+            chatActions.getTitle(context),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: LinagoraSysColors.material().onBackground,
-            ),
+                  color: LinagoraSysColors.material().onBackground,
+                ),
           ),
         ],
       ),

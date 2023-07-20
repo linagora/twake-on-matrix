@@ -43,12 +43,16 @@ class SeenByRow extends StatelessWidget {
         : seenByUsers.isEmpty
             ? Icon(
                 Icons.done,
-                color: timelineOverlayMessage ? Colors.white : Theme.of(context).colorScheme.primary,
+                color: timelineOverlayMessage
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
                 size: MessageTimeStyle.seenByRowIconSize,
               )
             : Icon(
                 Icons.done_all,
-                color: timelineOverlayMessage ? Colors.white : Theme.of(context).colorScheme.primary,
+                color: timelineOverlayMessage
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
                 size: MessageTimeStyle.seenByRowIconSize,
               );
     // return Container(

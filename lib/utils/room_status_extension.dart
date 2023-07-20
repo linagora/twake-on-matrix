@@ -22,30 +22,34 @@ extension RoomStatusExtension on Room {
         final time = directChatPresence.lastActiveTimestamp!;
 
         if (DateTime.now().isBefore(time.add(const Duration(hours: 1)))) {
-          return L10n.of(context)!.onlineMinAgo(DateTime.now().difference(time).inMinutes);
+          return L10n.of(context)!
+              .onlineMinAgo(DateTime.now().difference(time).inMinutes);
         } else if (DateTime.now()
             .isBefore(time.add(const Duration(hours: 24)))) {
           final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!.onlineHourAgo(timeOffline.inHours,timeOffline.inMinutes - (timeOffline.inHours * 60));
-        } else if (DateTime.now()
-            .isBefore(time.add(const Duration(days: 7)))) {
+          return L10n.of(context)!.onlineHourAgo(timeOffline.inHours,
+              timeOffline.inMinutes - (timeOffline.inHours * 60));
+        } else if (DateTime.now().isBefore(time.add(const Duration(days: 7)))) {
           final timeOffline = DateTime.now().difference(time);
           return L10n.of(context)!.onlineDayAgo(timeOffline.inDays);
         } else if (DateTime.now()
             .isBefore(time.add(const Duration(days: 30)))) {
           final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!.onlineWeekAgo((timeOffline.inDays / 7).truncate());
+          return L10n.of(context)!
+              .onlineWeekAgo((timeOffline.inDays / 7).truncate());
         } else if (DateTime.now()
             .isBefore(time.add(const Duration(days: 365)))) {
           final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!.onlineMonthAgo((timeOffline.inDays / 30).truncate());
+          return L10n.of(context)!
+              .onlineMonthAgo((timeOffline.inDays / 30).truncate());
         }
       }
       return L10n.of(context)!.onlineLongTimeAgo;
     }
 
     return L10n.of(context)!.countMembers(
-      ((summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0)).toString());
+        ((summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0))
+            .toString());
   }
 
   String getLocalizedTypingText(BuildContext context) {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 typedef OnSwitchButtonChanged = void Function(bool valueChanged);
 
 class SwitchButton extends StatefulWidget {
-
   final OnSwitchButtonChanged onSwitchButtonChanged;
 
   final bool defaultSwitchValue;
@@ -31,5 +30,4 @@ class _SwitchButtonState extends State<SwitchButton> {
       },
     );
   }
-
 }

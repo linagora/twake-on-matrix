@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class NoContactsFound extends StatelessWidget {
-
   final String keyword;
 
   const NoContactsFound({super.key, required this.keyword});
@@ -14,11 +13,14 @@ class NoContactsFound extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(L10n.of(context)!.noResultForKeyword(keyword),
-            style: Theme.of(context).textTheme.titleLarge,),
-          const SizedBox(height: 8.0,),
-          Text.rich(
-            TextSpan(
+          Text(
+            L10n.of(context)!.noResultForKeyword(keyword),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(
+            height: 8.0,
+          ),
+          Text.rich(TextSpan(
               style: Theme.of(context).textTheme.bodyMedium,
               children: [
                 TextSpan(
@@ -30,17 +32,13 @@ class NoContactsFound extends StatelessWidget {
                     TextSpan(
                       text: L10n.of(context)!.searchResultNotFound5,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary
-                      ),
+                          color: Theme.of(context).colorScheme.primary),
                     )
                   ],
                 ),
-              ]
-            )
-          )
+              ]))
         ],
       ),
     );
   }
-
 }

@@ -14,7 +14,6 @@ import 'package:fluffychat/utils/size_string.dart';
 const String fileName = "/storage/emulated/0/Download";
 
 extension MatrixFileExtension on MatrixFile {
-
   void save(BuildContext context) async {
     if (PlatformInfos.isIOS) {
       return share(context);
@@ -23,10 +22,10 @@ extension MatrixFileExtension on MatrixFile {
     final downloadPath = PlatformInfos.isAndroid
         ? await getDownloadPathAndroid()
         : await FilePicker.platform.saveFile(
-      dialogTitle: L10n.of(context)!.saveFile,
-      fileName: name,
-      type: filePickerFileType,
-    );
+            dialogTitle: L10n.of(context)!.saveFile,
+            fileName: name,
+            type: filePickerFileType,
+          );
     if (downloadPath == null) return;
 
     final result = await showFutureLoadingDialog(
@@ -59,7 +58,7 @@ extension MatrixFileExtension on MatrixFile {
     await Share.shareXFiles(
       [XFile.fromData(bytes, name: name, mimeType: mimeType)],
       sharePositionOrigin:
-      box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+          box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
     return;
   }

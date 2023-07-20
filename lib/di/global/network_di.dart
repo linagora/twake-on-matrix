@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 class NetworkDI extends BaseDI {
-
   static const tomServerUrlInterceptorName = 'tomServerDynamicUrlInterceptor';
   static const tomServerDioName = 'tomServerDioName';
   static const tomDioClientName = 'tomServerDioClientName';
 
-  static const identityServerUrlInterceptorName = 'identityDynamicUrlInterceptor';
+  static const identityServerUrlInterceptorName =
+      'identityDynamicUrlInterceptor';
   static const identityServerDioName = 'identityServerName';
   static const identityDioClientName = 'identityServerDioClientName';
 
@@ -59,10 +59,12 @@ class NetworkDI extends BaseDI {
 
   void _bindDioForTomServer(GetIt get) {
     final dio = Dio(get.get<BaseOptions>());
-    dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: tomServerUrlInterceptorName));
+    dio.interceptors.add(get.get<DynamicUrlInterceptors>(
+        instanceName: tomServerUrlInterceptorName));
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
     if (kDebugMode) {
-      dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+      dio.interceptors
+          .add(LogInterceptor(requestBody: true, responseBody: true));
     }
     get.registerLazySingleton<Dio>(() => dio, instanceName: tomServerDioName);
     get.registerLazySingleton<DioClient>(
@@ -73,12 +75,15 @@ class NetworkDI extends BaseDI {
 
   void _bindDioForIdentityServer(GetIt get) {
     final dio = Dio(get.get<BaseOptions>());
-    dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: identityServerUrlInterceptorName));
+    dio.interceptors.add(get.get<DynamicUrlInterceptors>(
+        instanceName: identityServerUrlInterceptorName));
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
     if (kDebugMode) {
-      dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+      dio.interceptors
+          .add(LogInterceptor(requestBody: true, responseBody: true));
     }
-    get.registerLazySingleton<Dio>(() => dio, instanceName: identityServerDioName);
+    get.registerLazySingleton<Dio>(() => dio,
+        instanceName: identityServerDioName);
     get.registerLazySingleton<DioClient>(
       () => DioClient(get.get<Dio>(instanceName: identityServerDioName)),
       instanceName: identityDioClientName,

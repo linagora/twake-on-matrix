@@ -8,6 +8,7 @@ class CreateDirectChatDi extends BaseDI {
 
   @override
   void setUp(GetIt get) {
-    get.registerSingleton<CreateDirectChatInteractor>(CreateDirectChatInteractor());
+    get.registerSingleton<CreateDirectChatInteractor>(
+        CreateDirectChatInteractor());
   }
 }

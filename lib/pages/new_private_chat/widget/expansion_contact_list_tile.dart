@@ -14,10 +14,7 @@ typedef OnExpansionListTileTap = void Function();
 class ExpansionContactListTile extends StatelessWidget {
   final PresentationContact contact;
 
-  const ExpansionContactListTile({
-    super.key,
-    required this.contact
-  });
+  const ExpansionContactListTile({super.key, required this.contact});
 
   @override
   Widget build(BuildContext context) {
@@ -49,37 +46,46 @@ class ExpansionContactListTile extends StatelessWidget {
                             child: Row(
                               children: [
                                 Flexible(
-                                  child: buildDisplayName(context, snapshot.data),
+                                  child:
+                                      buildDisplayName(context, snapshot.data),
                                 ),
                               ],
                             ),
                           ),
-                          if (contact.matrixId != null && contact.matrixId!.isCurrentMatrixId(context)) ... [
+                          if (contact.matrixId != null &&
+                              contact.matrixId!.isCurrentMatrixId(context)) ...[
                             const SizedBox(width: 8.0),
                             TwakeChip(
                               text: L10n.of(context)!.owner,
                               textColor: Theme.of(context).colorScheme.primary,
                             )
                           ],
-                          const SizedBox(width: 8.0,),
+                          const SizedBox(
+                            width: 8.0,
+                          ),
                           if (contact.status != null)
-                            ContactStatusWidget(status: contact.status!,),
+                            ContactStatusWidget(
+                              status: contact.status!,
+                            ),
                         ],
                       ),
                     ),
                     if (contact.matrixId != null)
-                      Text(contact.matrixId!,
+                      Text(
+                        contact.matrixId!,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          letterSpacing: 0.1,
-                          color: LinagoraRefColors.material().neutral[30],
-                        ),
+                              letterSpacing: 0.1,
+                              color: LinagoraRefColors.material().neutral[30],
+                            ),
                       ),
                     if (contact.email != null)
-                      Text(contact.email!,
+                      Text(
+                        contact.email!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          letterSpacing: 0.25,
-                          color: LinagoraRefColors.material().neutral[30],
-                        ),)
+                              letterSpacing: 0.25,
+                              color: LinagoraRefColors.material().neutral[30],
+                            ),
+                      )
                   ],
                 ),
               )
@@ -91,16 +97,14 @@ class ExpansionContactListTile extends StatelessWidget {
   }
 
   Widget _displayName(BuildContext context, String displayName) {
-    return Text(
-      displayName,
-      style: TextStyle(
-        fontWeight: FontWeight.w700,
-        fontSize: 17.0,
-        letterSpacing: -0.15,
-        color: Theme.of(context).colorScheme.onSurface,
-        overflow: TextOverflow.ellipsis,
-      )
-    );
+    return Text(displayName,
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 17.0,
+          letterSpacing: -0.15,
+          color: Theme.of(context).colorScheme.onSurface,
+          overflow: TextOverflow.ellipsis,
+        ));
   }
 
   Widget buildDisplayName(BuildContext context, Profile? profile) {
@@ -120,10 +124,14 @@ class ExpansionContactListTile extends StatelessWidget {
     }
     try {
       final profile = await client.getProfileFromUserId(contact.matrixId!);
-      Logs().d("ExpansionContactListTile()::getProfileFromUserId(): ${profile.avatarUrl}");
+      Logs().d(
+          "ExpansionContactListTile()::getProfileFromUserId(): ${profile.avatarUrl}");
       return profile;
     } catch (e) {
-      return Profile(avatarUrl: null, displayName: contact.displayName, userId: contact.matrixId ?? '');
+      return Profile(
+          avatarUrl: null,
+          displayName: contact.displayName,
+          userId: contact.matrixId ?? '');
     }
   }
 }

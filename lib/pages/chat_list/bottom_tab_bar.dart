@@ -14,9 +14,9 @@ enum BottomTabbar {
         return BottomTabbar.contacts;
       case 1:
         return BottomTabbar.chats;
-      case 2: 
+      case 2:
         return BottomTabbar.stories;
-      default: 
+      default:
         return BottomTabbar.chats;
     }
   }

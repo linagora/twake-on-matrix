@@ -89,11 +89,12 @@ class ChatInputRow extends StatelessWidget {
                     controller.showImagesPickerBottomSheetAction(
                       context: context,
                       onItemAction: (action) => controller.onClickItemAction(
-                        action: action, 
-                        room: controller.room, 
+                        action: action,
+                        room: controller.room,
                         context: context,
                       ),
-                      onSendTap: () => controller.sendImages(room: controller.room),
+                      onSendTap: () =>
+                          controller.sendImages(room: controller.room),
                     );
                   },
                 ),
@@ -130,12 +131,15 @@ class ChatInputRow extends StatelessWidget {
                             focusNode: controller.inputFocus,
                             controller: controller.sendController,
                             decoration: InputDecoration(
-                              hintText: L10n.of(context)!.chatMessage,
-                              hintMaxLines: 1,
-                              hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
-                                Theme.of(context).inputDecorationTheme.hintStyle
-                              ).copyWith(letterSpacing: -0.15)
-                            ),
+                                hintText: L10n.of(context)!.chatMessage,
+                                hintMaxLines: 1,
+                                hintStyle: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.merge(Theme.of(context)
+                                        .inputDecorationTheme
+                                        .hintStyle)
+                                    .copyWith(letterSpacing: -0.15)),
                             onChanged: controller.onInputBarChanged,
                           ),
                         ),
@@ -157,29 +161,36 @@ class ChatInputRow extends StatelessWidget {
                                 return SharedAxisTransition(
                                   animation: primaryAnimation,
                                   secondaryAnimation: secondaryAnimation,
-                                  transitionType: SharedAxisTransitionType.scaled,
+                                  transitionType:
+                                      SharedAxisTransitionType.scaled,
                                   fillColor: Colors.transparent,
                                   child: child,
                                 );
                               },
                               child: !controller.showEmojiPicker
-                                ? TwakeIconButton(
-                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                    tooltip: L10n.of(context)!.emojis,
-                                    onPressed: () => controller.emojiPickerAction(),
-                                    icon: Icons.tag_faces,
+                                  ? TwakeIconButton(
+                                      paddingAll: controller.inputText.isEmpty
+                                          ? 5.0
+                                          : 12,
+                                      tooltip: L10n.of(context)!.emojis,
+                                      onPressed: () =>
+                                          controller.emojiPickerAction(),
+                                      icon: Icons.tag_faces,
                                     )
-                                : TwakeIconButton(
-                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                    tooltip: L10n.of(context)!.keyboard,
-                                    onPressed: () => controller.inputFocus.requestFocus(),
-                                    icon: Icons.keyboard,
-                                  ),
+                                  : TwakeIconButton(
+                                      paddingAll: controller.inputText.isEmpty
+                                          ? 5.0
+                                          : 12,
+                                      tooltip: L10n.of(context)!.keyboard,
+                                      onPressed: () =>
+                                          controller.inputFocus.requestFocus(),
+                                      icon: Icons.keyboard,
+                                    ),
                             ),
                           ),
                         ),
                         if (PlatformInfos.platformCanRecord &&
-                          controller.inputText.isEmpty)
+                            controller.inputText.isEmpty)
                           Container(
                             height: 56,
                             alignment: Alignment.center,

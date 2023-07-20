@@ -2,7 +2,6 @@ import 'package:fluffychat/widgets/switch_button.dart';
 import 'package:flutter/material.dart';
 
 class SettingTile extends StatelessWidget {
-
   final IconData leadingIcon;
 
   final String settingTitle;
@@ -16,7 +15,7 @@ class SettingTile extends StatelessWidget {
   final bool isEditable;
 
   const SettingTile({
-    super.key, 
+    super.key,
     required this.leadingIcon,
     required this.settingTitle,
     required this.onSwitchButtonChanged,
@@ -30,7 +29,7 @@ class SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left:8.0, bottom: 8.0, right: 4.0),
+      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, right: 4.0),
       child: Opacity(
         opacity: isEditable ? 1 : opacityForDisable,
         child: Row(
@@ -42,28 +41,37 @@ class SettingTile extends StatelessWidget {
                 leadingIcon,
               ),
             ),
-            const SizedBox(width: 8.0,),
+            const SizedBox(
+              width: 8.0,
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(settingTitle,
+                    child: Text(
+                      settingTitle,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        letterSpacing: 0.15,
-                      ),),
+                            letterSpacing: 0.15,
+                          ),
+                    ),
                   ),
                   const SizedBox(height: 4.0),
-                  if (settingDescription != null && settingDescription!.isNotEmpty)
-                    Text(settingDescription!,
+                  if (settingDescription != null &&
+                      settingDescription!.isNotEmpty)
+                    Text(
+                      settingDescription!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        letterSpacing: 0.4,
-                    ),),
+                            letterSpacing: 0.4,
+                          ),
+                    ),
                 ],
               ),
             ),
-            const SizedBox(width: 12,),
+            const SizedBox(
+              width: 12,
+            ),
             IgnorePointer(
               ignoring: !isEditable,
               child: SwitchButton(
@@ -76,5 +84,4 @@ class SettingTile extends StatelessWidget {
       ),
     );
   }
-
 }

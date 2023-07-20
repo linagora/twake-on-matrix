@@ -7,7 +7,7 @@ import 'package:hive_flutter/adapters.dart';
 part 'tom_configurations_hive_obj.g.dart';
 
 @HiveType(typeId: HiveConstants.typeIdTomConfiguration)
-class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin{
+class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin {
   @HiveField(0)
   final ToMServerInformationHiveObj tomServerInformation;
 
@@ -19,10 +19,14 @@ class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin{
     this.identityServerUrl,
   });
 
-  factory ToMConfigurationsHiveObj.fromToMConfigurations(ToMConfigurations toMConfigurations) {
+  factory ToMConfigurationsHiveObj.fromToMConfigurations(
+      ToMConfigurations toMConfigurations) {
     return ToMConfigurationsHiveObj(
-      tomServerInformation: ToMServerInformationHiveObj.fromToMServerInformation(toMConfigurations.tomServerInformation),
-      identityServerUrl: toMConfigurations.identityServerInformation?.baseUrl.toString(),
+      tomServerInformation:
+          ToMServerInformationHiveObj.fromToMServerInformation(
+              toMConfigurations.tomServerInformation),
+      identityServerUrl:
+          toMConfigurations.identityServerInformation?.baseUrl.toString(),
     );
   }
 

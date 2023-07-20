@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
@@ -15,13 +14,13 @@ mixin LoadMoreContactsMixin {
 
   bool allowLoadMore = true;
 
-  void listenForScrollChanged({required FetchContactsController fetchContactsController}) {
+  void listenForScrollChanged(
+      {required FetchContactsController fetchContactsController}) {
     scrollController.addListener(() {
-      if(allowLoadMore) {
+      if (allowLoadMore) {
         if (isLoadMoreAction) {
           fetchContactsController.loadMoreContacts(
-            offset: fetchContactsController.lastContactIndexNotifier.value
-          );
+              offset: fetchContactsController.lastContactIndexNotifier.value);
         }
       }
     });

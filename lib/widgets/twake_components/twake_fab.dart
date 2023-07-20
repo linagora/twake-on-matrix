@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TwakeFloatingActionButton extends StatelessWidget {
-
   final Function()? onTap;
 
   final IconData? icon;

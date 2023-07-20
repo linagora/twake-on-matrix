@@ -7,7 +7,6 @@ part 'tom_server_information_hive_obj.g.dart';
 
 @HiveType(typeId: HiveConstants.typeIdTomServerInformation)
 class ToMServerInformationHiveObj extends HiveObject with EquatableMixin {
-
   @HiveField(0)
   final String? baseUrl;
 
@@ -26,7 +25,8 @@ class ToMServerInformationHiveObj extends HiveObject with EquatableMixin {
     );
   }
 
-  factory ToMServerInformationHiveObj.fromToMServerInformation(ToMServerInformation toMServerInformation) {
+  factory ToMServerInformationHiveObj.fromToMServerInformation(
+      ToMServerInformation toMServerInformation) {
     return ToMServerInformationHiveObj(
       toMServerInformation.baseUrl?.toString(),
       toMServerInformation.serverName,

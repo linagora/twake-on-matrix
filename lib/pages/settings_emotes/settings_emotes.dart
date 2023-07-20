@@ -207,7 +207,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
     });
   }
 
-  void imagePickerAction(ValueNotifier<ImagePackImageContent?> controller) async {
+  void imagePickerAction(
+      ValueNotifier<ImagePackImageContent?> controller) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       withData: true,
@@ -228,10 +229,10 @@ class EmotesSettingsController extends State<EmotesSettings> {
     final uploadResp = await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).client.uploadContent(
-        file.bytes,
-        filename: file.name,
-        contentType: file.mimeType,
-      ),
+            file.bytes,
+            filename: file.name,
+            contentType: file.mimeType,
+          ),
     );
     if (uploadResp.error == null) {
       setState(() {

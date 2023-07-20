@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -23,22 +22,18 @@ class DownloadFileForPreviewInteractor {
     yield const Right(DownloadFileForPreviewLoading());
     try {
       final matrixFile = await event.downloadAndDecryptAttachment(
-        downloadCallback: downloadCallback,
-        getThumbnail: getThumbnail
-      );
+          downloadCallback: downloadCallback, getThumbnail: getThumbnail);
       final tempFile = File('$tempDirPath/${event.filename}');
       tempFile.createSync(recursive: true);
       tempFile.writeAsBytesSync(matrixFile.bytes);
-      Logs().d('DownloadFileForPreviewInteractor::execute(): ${tempFile.path}, mimeType: ${lookupMimeType(tempFile.path)}');
+      Logs().d(
+          'DownloadFileForPreviewInteractor::execute(): ${tempFile.path}, mimeType: ${lookupMimeType(tempFile.path)}');
       yield Right(DownloadFileForPreviewSuccess(
-        downloadFileForPreviewResponse: DownloadFileForPreviewResponse(
-          filePath: tempFile.path,
-          mimeType: lookupMimeType(tempFile.path)
-        )
-      ));
+          downloadFileForPreviewResponse: DownloadFileForPreviewResponse(
+              filePath: tempFile.path,
+              mimeType: lookupMimeType(tempFile.path))));
     } catch (e) {
       yield Left(DownloadFileForPreviewFailure(exception: e));
     }
-    
   }
 }

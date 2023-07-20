@@ -352,8 +352,8 @@ class InputBar extends StatelessWidget {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: getSuggestions,
-          itemBuilder: (context, suggestion) =>
-              SuggestionTile(suggestion: suggestion, client: Matrix.of(context).client),
+          itemBuilder: (context, suggestion) => SuggestionTile(
+              suggestion: suggestion, client: Matrix.of(context).client),
           onSuggestionSelected: (Map<String, String?> suggestion) =>
               insertSuggestion(context, suggestion),
           errorBuilder: (BuildContext context, Object? error) => Container(),
@@ -484,9 +484,9 @@ class SuggestionTile extends StatelessWidget {
 class InputBarStyle {
   static const double suggestionSize = 30;
   static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
-    fontSize: 15,
-    color: Theme.of(context).brightness == Brightness.light
-      ? Colors.black
-      : Colors.white,
-  );
+        fontSize: 15,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.black
+            : Colors.white,
+      );
 }

@@ -215,11 +215,11 @@ class UrlLauncher {
     if (url != null) {
       if (Platform.isAndroid) {
         await browser.open(
-          url: Uri.parse(url!),
-          options: ChromeSafariBrowserClassOptions(
-            android: AndroidChromeCustomTabsOptions(
-              shareState: CustomTabsShareState.SHARE_STATE_ON),
-            ios: IOSSafariOptions(barCollapsingEnabled: true)));
+            url: Uri.parse(url!),
+            options: ChromeSafariBrowserClassOptions(
+                android: AndroidChromeCustomTabsOptions(
+                    shareState: CustomTabsShareState.SHARE_STATE_ON),
+                ios: IOSSafariOptions(barCollapsingEnabled: true)));
       } else {
         launchUrlString(url!);
       }

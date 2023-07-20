@@ -92,19 +92,16 @@ class ClientChooserButton extends StatelessWidget {
               ],
             ),
           ),
-        ...matrix.accountBundles[bundle]!
-            .map(
-              (client) {
-                return PopupMenuItem(
-                  value: client,
-                  child: ProfileWidget(
-                    controller: controller, 
-                    bundle: bundle,
-                    client: client!,
-                  ),
-                );
-              } 
-            ).toList(),
+        ...matrix.accountBundles[bundle]!.map((client) {
+          return PopupMenuItem(
+            value: client,
+            child: ProfileWidget(
+              controller: controller,
+              bundle: bundle,
+              client: client!,
+            ),
+          );
+        }).toList(),
       ],
       // PopupMenuItem(
       //   value: SettingsAction.addAccount,
@@ -126,15 +123,13 @@ class ClientChooserButton extends StatelessWidget {
     int clientCount = 0;
     matrix.accountBundles.forEach((key, value) => clientCount += value.length);
     return FutureBuilder<Profile?>(
-      future: controller.fetchOwnProfile(client: matrix.client),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator.adaptive());
-        }
+        future: controller.fetchOwnProfile(client: matrix.client),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          }
 
-        return Stack(
-          alignment: Alignment.center,
-          children: [
+          return Stack(alignment: Alignment.center, children: [
             ...List.generate(
               clientCount,
               (index) => KeyBoardShortcuts(
@@ -176,7 +171,8 @@ class ClientChooserButton extends StatelessWidget {
                   children: [
                     Avatar(
                       mxContent: snapshot.data?.avatarUrl,
-                      name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
+                      name: snapshot.data?.displayName ??
+                          matrix.client.userID!.localpart,
                       size: ClientChooserButtonStyle.avatarSizeInAppBar,
                       fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
                     ),
@@ -188,10 +184,8 @@ class ClientChooserButton extends StatelessWidget {
                 ),
               ),
             ),
-          ]
-        );
-      } 
-    );
+          ]);
+        });
   }
 
   Set<LogicalKeyboardKey>? _buildKeyboardShortcut(int index) {
@@ -337,7 +331,6 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Profile?>(
@@ -350,16 +343,15 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           children: [
             Avatar(
               mxContent: snapshot.data?.avatarUrl,
-              name: snapshot.data?.displayName ??
-                  widget.client.userID!.localpart,
+              name:
+                  snapshot.data?.displayName ?? widget.client.userID!.localpart,
               size: 32,
               fontSize: 12,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                snapshot.data?.displayName ??
-                    widget.client.userID!.localpart!,
+                snapshot.data?.displayName ?? widget.client.userID!.localpart!,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -372,7 +364,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             //   ),
             // ),
           ],
-        ); 
+        );
       },
     );
   }

@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class EmptyContactBody extends StatelessWidget {
-  
   const EmptyContactBody({super.key});
 
   @override
@@ -15,25 +14,32 @@ class EmptyContactBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 100,),
+          const SizedBox(
+            height: 100,
+          ),
           SvgPicture.asset(ImagePaths.icSkeletons),
-          const SizedBox(height: 16.0,),
-          Text(L10n.of(context)!.soonThereHaveContacts, 
+          const SizedBox(
+            height: 16.0,
+          ),
+          Text(
+            L10n.of(context)!.soonThereHaveContacts,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8.0,),
-          Text(L10n.of(context)!.searchSuggestion, 
+          const SizedBox(
+            height: 8.0,
+          ),
+          Text(
+            L10n.of(context)!.searchSuggestion,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: LinagoraRefColors.material().neutral[40],
-            ),
+                  color: LinagoraRefColors.material().neutral[40],
+                ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-
 }

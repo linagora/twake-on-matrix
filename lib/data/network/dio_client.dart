@@ -14,14 +14,14 @@ class DioClient {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    return await _dio.get(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-        onReceiveProgress: onReceiveProgress)
-      .then((value) => value.data)
-      .catchError((error) => throw error);
+    return await _dio
+        .get(path,
+            queryParameters: queryParameters,
+            options: options,
+            cancelToken: cancelToken,
+            onReceiveProgress: onReceiveProgress)
+        .then((value) => value.data)
+        .catchError((error) => throw error);
   }
 
   Future<dynamic> post(
@@ -33,15 +33,16 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    return await _dio.post(path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-        onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress)
-      .then((value) => value.data)
-      .catchError((error) => throw error);
+    return await _dio
+        .post(path,
+            data: data,
+            queryParameters: queryParameters,
+            options: options,
+            cancelToken: cancelToken,
+            onSendProgress: onSendProgress,
+            onReceiveProgress: onReceiveProgress)
+        .then((value) => value.data)
+        .catchError((error) => throw error);
   }
 
   Future<dynamic> delete(
@@ -51,34 +52,32 @@ class DioClient {
     Options? options,
     CancelToken? cancelToken,
   }) async {
-    return await _dio.delete(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken)
-      .then((value) => value.data)
-      .catchError((error) => throw(error));
+    return await _dio
+        .delete(path,
+            data: data,
+            queryParameters: queryParameters,
+            options: options,
+            cancelToken: cancelToken)
+        .then((value) => value.data)
+        .catchError((error) => throw (error));
   }
 
-  Future<dynamic> put(
-    String path, {
-    data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress
-  }) async {
-    return await _dio.put(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-        onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress)
-      .then((value) => value.data)
-      .catchError((error) => throw(error));
+  Future<dynamic> put(String path,
+      {data,
+      Map<String, dynamic>? queryParameters,
+      Options? options,
+      CancelToken? cancelToken,
+      ProgressCallback? onSendProgress,
+      ProgressCallback? onReceiveProgress}) async {
+    return await _dio
+        .put(path,
+            data: data,
+            queryParameters: queryParameters,
+            options: options,
+            cancelToken: cancelToken,
+            onSendProgress: onSendProgress,
+            onReceiveProgress: onReceiveProgress)
+        .then((value) => value.data)
+        .catchError((error) => throw (error));
   }
 }

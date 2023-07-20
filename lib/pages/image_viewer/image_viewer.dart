@@ -18,7 +18,6 @@ class ImageViewer extends StatefulWidget {
 }
 
 class ImageViewerController extends State<ImageViewer> {
-
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(false);
 
   /// Forward this image to another room.
@@ -55,5 +54,6 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   @override
-  Widget build(BuildContext context) => ImageViewerView(this, imageData: widget.imageData);
+  Widget build(BuildContext context) =>
+      ImageViewerView(this, imageData: widget.imageData);
 }

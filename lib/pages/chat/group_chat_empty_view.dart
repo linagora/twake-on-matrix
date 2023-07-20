@@ -5,7 +5,6 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class GroupChatEmptyView extends StatelessWidget {
-
   const GroupChatEmptyView({super.key});
 
   @override
@@ -23,9 +22,13 @@ class GroupChatEmptyView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 2,),
+          const SizedBox(
+            height: 2,
+          ),
           SvgPicture.asset(ImagePaths.icEmptyGroupChat),
-          const SizedBox(height: 26.0,),
+          const SizedBox(
+            height: 26.0,
+          ),
           Text(
             L10n.of(context)!.youCreatedGroupChat,
             style: TextStyle(

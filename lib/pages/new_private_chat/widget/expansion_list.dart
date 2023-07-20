@@ -12,11 +12,10 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ExpansionList extends StatefulWidget {
-
   final NewPrivateChatController newPrivateChatController;
 
   const ExpansionList({
-    super.key, 
+    super.key,
     required this.newPrivateChatController,
   });
 
@@ -25,36 +24,37 @@ class ExpansionList extends StatefulWidget {
 }
 
 class _ExpansionList extends State<ExpansionList> {
-
   @override
   Widget build(BuildContext context) {
-    final searchContactsController = widget.newPrivateChatController.searchContactsController;
-    final fetchContactsController = widget.newPrivateChatController.fetchContactsController;
+    final searchContactsController =
+        widget.newPrivateChatController.searchContactsController;
+    final fetchContactsController =
+        widget.newPrivateChatController.fetchContactsController;
     return StreamBuilder<Either<Failure, GetContactsSuccess>>(
       stream: widget.newPrivateChatController.networkStreamController.stream,
-      builder: (context, AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
-
+      builder: (context,
+          AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot) {
         final newGroupButton = _IconTextTileButton(
-          context: context, 
-          onPressed: () => widget.newPrivateChatController.goToNewGroupChat(), 
-          iconData: Icons.supervisor_account_outlined, 
-          text: L10n.of(context)!.newGroupChat
-        );
+            context: context,
+            onPressed: () => widget.newPrivateChatController.goToNewGroupChat(),
+            iconData: Icons.supervisor_account_outlined,
+            text: L10n.of(context)!.newGroupChat);
 
         final getHelpsButton = _IconTextTileButton(
-          context: context, 
-          onPressed:() => {}, 
-          iconData: Icons.question_mark, 
-          text: L10n.of(context)!.getHelp
-        );
+            context: context,
+            onPressed: () => {},
+            iconData: Icons.question_mark,
+            text: L10n.of(context)!.getHelp);
 
         final moreListTile = Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-          child: Text(L10n.of(context)!.more,
+          child: Text(
+            L10n.of(context)!.more,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              letterSpacing: 0.1,
-              color: LinagoraRefColors.material().neutral[40],
-            ),),
+                  letterSpacing: 0.1,
+                  color: LinagoraRefColors.material().neutral[40],
+                ),
+          ),
         );
 
         if (!snapshot.hasData) {
@@ -72,7 +72,9 @@ class _ExpansionList extends State<ExpansionList> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12,),
+              const SizedBox(
+                height: 12,
+              ),
               NoContactsFound(keyword: searchContactsController.searchKeyword),
               moreListTile,
               newGroupButton,
@@ -81,16 +83,19 @@ class _ExpansionList extends State<ExpansionList> {
           );
         }
 
-        final contactsList = fetchContactsController.getContactsFromFetchStream(snapshot.data!);
+        final contactsList =
+            fetchContactsController.getContactsFromFetchStream(snapshot.data!);
 
-        final contactsListSorted = contactsList.sorted(
-          (a, b) => widget.newPrivateChatController.comparePresentationContacts(a, b));
+        final contactsListSorted = contactsList.sorted((a, b) =>
+            widget.newPrivateChatController.comparePresentationContacts(a, b));
 
         if (contactsListSorted.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 12,),
+              const SizedBox(
+                height: 12,
+              ),
               NoContactsFound(keyword: searchContactsController.searchKeyword),
               moreListTile,
               newGroupButton,
@@ -101,10 +106,13 @@ class _ExpansionList extends State<ExpansionList> {
 
         final isSearchEmpty = searchContactsController.searchKeyword.isEmpty;
         final expansionList = [
-          const SizedBox(height: 4,),
+          const SizedBox(
+            height: 4,
+          ),
           _buildTitle(contactsListSorted.length),
           ValueListenableBuilder<bool>(
-            valueListenable: widget.newPrivateChatController.isShowContactsNotifier, 
+            valueListenable:
+                widget.newPrivateChatController.isShowContactsNotifier,
             builder: ((context, isShow, child) {
               if (!isShow) {
                 return const SizedBox.shrink();
@@ -117,7 +125,8 @@ class _ExpansionList extends State<ExpansionList> {
                   final contact = contactsListSorted[index];
                   return InkWell(
                     onTap: () {
-                      widget.newPrivateChatController.goToChatScreen(context: context, contact: contact);
+                      widget.newPrivateChatController
+                          .goToChatScreen(context: context, contact: contact);
                     },
                     borderRadius: BorderRadius.circular(16.0),
                     child: ExpansionContactListTile(contact: contact),
@@ -127,57 +136,49 @@ class _ExpansionList extends State<ExpansionList> {
             }),
           ),
           ValueListenableBuilder(
-            valueListenable: searchContactsController.isSearchModeNotifier,
-            builder: (context, isSearchMode, child) {
-              if (isSearchMode) {
-                return const SizedBox.shrink();
-              }
-              return ValueListenableBuilder(
-                valueListenable: widget.newPrivateChatController.isShowContactsNotifier,
-                builder: (context, isShow, child) {
-                  if (!isShow) {
-                    return const SizedBox.shrink();
-                  }
-                  return ValueListenableBuilder(
-                    valueListenable: fetchContactsController.haveMoreCountactsNotifier,
-                    builder: (context, haveMoreContacts, child) {
-                      if (haveMoreContacts) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ); 
-                      }
-
-                      return const SizedBox.shrink();
-                    }
-                  );
+              valueListenable: searchContactsController.isSearchModeNotifier,
+              builder: (context, isSearchMode, child) {
+                if (isSearchMode) {
+                  return const SizedBox.shrink();
                 }
-              );
-            }
-          ),
+                return ValueListenableBuilder(
+                    valueListenable:
+                        widget.newPrivateChatController.isShowContactsNotifier,
+                    builder: (context, isShow, child) {
+                      if (!isShow) {
+                        return const SizedBox.shrink();
+                      }
+                      return ValueListenableBuilder(
+                          valueListenable:
+                              fetchContactsController.haveMoreCountactsNotifier,
+                          builder: (context, haveMoreContacts, child) {
+                            if (haveMoreContacts) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          });
+                    });
+              }),
         ];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isSearchEmpty)...[
-              newGroupButton,
-              for(final child in expansionList)...[
-                child
-              ],
-              getHelpsButton
-            ] else ...[
-              for(final child in expansionList)...[
-                child
-              ],
-              moreListTile,
-              newGroupButton,
-              getHelpsButton
-            ]
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (isSearchEmpty) ...[
+            newGroupButton,
+            for (final child in expansionList) ...[child],
+            getHelpsButton
+          ] else ...[
+            for (final child in expansionList) ...[child],
+            moreListTile,
+            newGroupButton,
+            getHelpsButton
           ]
-        );
+        ]);
       },
     );
   }
@@ -187,31 +188,38 @@ class _ExpansionList extends State<ExpansionList> {
       padding: const EdgeInsets.only(left: 8.0),
       child: Row(
         children: [
-          Text(L10n.of(context)!.countTwakeUsers(countContacts),
+          Text(
+            L10n.of(context)!.countTwakeUsers(countContacts),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: LinagoraRefColors.material().neutral[40],
-            ),),
+                  color: LinagoraRefColors.material().neutral[40],
+                ),
+          ),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ValueListenableBuilder<bool>(
-                  valueListenable: widget.newPrivateChatController.isShowContactsNotifier,
-                  builder: (context, isShow, child) {
-                    return TwakeIconButton(
-                      paddingAll: 6.0,
-                      buttonDecoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      icon: isShow ? Icons.expand_less : Icons.expand_more,
-                      onPressed: () {
-                        widget.newPrivateChatController.toggleContactsList();
-                      }, tooltip: isShow 
-                        ? L10n.of(context)!.shrink 
-                        : L10n.of(context)!.expand);
-                  }
-                ),
+                    valueListenable:
+                        widget.newPrivateChatController.isShowContactsNotifier,
+                    builder: (context, isShow, child) {
+                      return TwakeIconButton(
+                          paddingAll: 6.0,
+                          buttonDecoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          icon: isShow ? Icons.expand_less : Icons.expand_more,
+                          onPressed: () {
+                            widget.newPrivateChatController
+                                .toggleContactsList();
+                          },
+                          tooltip: isShow
+                              ? L10n.of(context)!.shrink
+                              : L10n.of(context)!.expand);
+                    }),
               ],
             ),
           )
@@ -249,12 +257,15 @@ class _IconTextTileButton extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
-                  child: Icon(iconData, color: Theme.of(context).colorScheme.primary),
+                  child: Icon(iconData,
+                      color: Theme.of(context).colorScheme.primary),
                 ),
-                Text(text, style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  letterSpacing: -0.15
-                ),)
+                Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      letterSpacing: -0.15),
+                )
               ],
             ),
           ),

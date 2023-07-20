@@ -25,16 +25,20 @@ class RecoveryWordsDI extends BaseDI {
   }
 
   void _bindDataSource(GetIt get) {
-    get.registerLazySingleton<RecoveryWordsDataSource>(() => RecoveryWordsDataSourceImpl(),
+    get.registerLazySingleton<RecoveryWordsDataSource>(
+      () => RecoveryWordsDataSourceImpl(),
     );
   }
 
   void _bindRepository(GetIt get) {
-    get.registerLazySingleton<RecoveryWordsRepository>(() => RecoveryWordsRepositoryImpl());
+    get.registerLazySingleton<RecoveryWordsRepository>(
+        () => RecoveryWordsRepositoryImpl());
   }
 
   void _bindInteractor(GetIt get) {
-    get.registerLazySingleton<GetRecoveryWordsInteractor>(() => GetRecoveryWordsInteractor());
-    get.registerLazySingleton<SaveRecoveryWordsInteractor>(() => SaveRecoveryWordsInteractor());
+    get.registerLazySingleton<GetRecoveryWordsInteractor>(
+        () => GetRecoveryWordsInteractor());
+    get.registerLazySingleton<SaveRecoveryWordsInteractor>(
+        () => SaveRecoveryWordsInteractor());
   }
 }
