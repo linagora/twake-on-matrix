@@ -245,7 +245,7 @@ mixin ImagePickerMixin {
       ),
       cameraWidget: UseCameraWidget(
         onPressed: permissionStatusCamera == PermissionStatus.granted
-          ? () => imagePickAction(context: context, room: room, locale: window.locale)
+          ? () => sendImageAction(context: context, room: room)
           : () => goToSettings(context),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
@@ -279,19 +279,21 @@ mixin ImagePickerMixin {
     }
   }
 
-  void imagePickAction({
+  Future<AssetEntity?> imagePickAction({
     required BuildContext context, 
-    Room? room, 
-    required Locale locale
   }) async {
     Navigator.pop(context);
-    final assetEntity = await CameraPicker.pickFromCamera(
+    return await CameraPicker.pickFromCamera(
       context,
-      locale: locale,
+      locale: window.locale,
     );
-    if (assetEntity != null && assetEntity.type == AssetType.image) {
+  }
+
+  void sendImageAction({required BuildContext context, Room? room}) async {
+    final assetEntity = await imagePickAction(context: context);
+    if (assetEntity != null && assetEntity.type == AssetType.image && room != null) {
       final sendImageInteractor = getIt.get<SendImageInteractor>();
-      sendImageInteractor.execute(room: room!, entity: assetEntity);
+      sendImageInteractor.execute(room: room, entity: assetEntity);
     }
   }
 
