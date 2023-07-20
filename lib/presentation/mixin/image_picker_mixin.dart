@@ -59,6 +59,7 @@ mixin ImagePickerMixin {
   void showImagesPickerBottomSheetAction({
     required BuildContext context,
     required OnItemAction onItemAction,
+    Room? room,
     OnSendTap onSendTap,
   }) async {
     final currentPermissionPhotos = await getCurrentPhotoPermission();
@@ -69,6 +70,7 @@ mixin ImagePickerMixin {
         permissionStatusPhotos: currentPermissionPhotos,
         permissionStatusCamera: currentPermissionCamera,
         onSendTap: onSendTap,
+        room: room,
         onItemAction: onItemAction,
       ).whenComplete(() => removeAllImageSelected());
     }
@@ -283,9 +285,6 @@ mixin ImagePickerMixin {
     required Locale locale
   }) async {
     Navigator.pop(context);
-    if (room == null) {
-      return;
-    }
     final assetEntity = await CameraPicker.pickFromCamera(
       context,
       locale: locale,
