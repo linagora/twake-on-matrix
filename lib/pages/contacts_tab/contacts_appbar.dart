@@ -40,14 +40,6 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
-      actions: [
-        TwakeIconButton(
-          icon: Icons.more_vert,
-          tooltip: L10n.of(context)!.more,
-          margin: const EdgeInsets.only(right: 16.0),
-          onPressed: () {},
-        )
-      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: Container(
