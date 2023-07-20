@@ -131,6 +131,7 @@ class ChatListViewBody extends StatelessWidget {
                         ),
                       ],
                       if (displayStoriesHeader)
+                        // ignore: dead_code
                         StoriesHeader(
                           key: const Key('stories_header'),
                           filter: controller.searchChatController.text,
@@ -250,6 +251,7 @@ class ChatListViewBody extends StatelessWidget {
 
   List<Widget> _buildPublicRooms(context, roomSearchResult) {
     if (roomSearchResult == null || roomSearchResult.chunk.isEmpty)
+      // ignore: curly_braces_in_flow_control_structures
       return [const SizedBox.shrink()];
 
     return [
@@ -291,8 +293,9 @@ class ChatListViewBody extends StatelessWidget {
   }
 
   List<Widget> _buildUsers(context, userSearchResult) {
-    if (userSearchResult == null || userSearchResult.results.isEmpty)
+    if (userSearchResult == null || userSearchResult.results.isEmpty) {
       return [const SizedBox.shrink()];
+    }
 
     return [
       SearchTitle(

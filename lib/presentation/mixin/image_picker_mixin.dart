@@ -323,7 +323,7 @@ mixin ImagePickerMixin {
     );
     if (assetEntity != null && assetEntity.type == AssetType.image) {
       final sendImageInteractor = getIt.get<SendImageInteractor>();
-      sendImageInteractor.execute(room: room!, entity: assetEntity);
+      sendImageInteractor.execute(room: room, entity: assetEntity);
     }
   }
 

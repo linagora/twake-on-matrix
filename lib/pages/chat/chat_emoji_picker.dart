@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'chat.dart';

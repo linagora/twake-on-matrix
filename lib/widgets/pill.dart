@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_matrix_html/text_parser.dart';
 import 'package:matrix/matrix.dart';
@@ -50,7 +51,7 @@ class Pill extends StatelessWidget {
                 backgroundImage:
                     CachedNetworkImageProvider(avatarUrl!.toString()),
               ),
-            Text(displayname, style: TextStyle(color: Colors.white)),
+            Text(displayname, style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -263,7 +264,7 @@ extension SendImage on Room {
     required List<AssetEntity> entities,
   }) async {
     final imageCacheQueue = getIt.get<Queue>();
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>,
+    const txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>,
         Map<TransactionId, FakeImageEvent>>({}, {});
     for (final entity in entities) {
       final matrixFile = await entity.toMatrixFile();

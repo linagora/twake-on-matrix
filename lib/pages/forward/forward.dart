@@ -26,7 +26,6 @@ class Forward extends StatefulWidget {
 }
 
 class ForwardController extends State<Forward> {
-
   final _forwardMessageInteractor = getIt.get<ForwardMessageInteractor>();
 
   final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
@@ -93,50 +92,49 @@ class ForwardController extends State<Forward> {
   }
 
   List<Room> get filteredRoomsForAll => Matrix.of(context)
-    .client
-    .rooms
-    .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
-    .toList();
+      .client
+      .rooms
+      .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
+      .toList();
 
   void forwardAction(BuildContext context) async {
-    forwardMessageInteractorStreamSubscription = _forwardMessageInteractor.execute(
-      rooms: filteredRoomsForAll,
-      selectedEvents: selectedEvents,
-      matrixState: Matrix.of(context)
-    ).listen(
-      (event) => _handleForwardMessageOnData(context, event),
-      onDone: _handleForwardMessageOnDone,
-      onError: _handleForwardMessageOnError,
-    );
+    forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
+        .execute(
+            rooms: filteredRoomsForAll,
+            selectedEvents: selectedEvents,
+            matrixState: Matrix.of(context))
+        .listen(
+          (event) => _handleForwardMessageOnData(context, event),
+          onDone: _handleForwardMessageOnDone,
+          onError: _handleForwardMessageOnError,
+        );
   }
 
-  void _handleForwardMessageOnData(BuildContext context, Either<Failure, Success> event) {
+  void _handleForwardMessageOnData(
+      BuildContext context, Either<Failure, Success> event) {
     Logs().d('ForwardController::_handleForwardMessageOnData()');
     forwardMessageNotifier.value = event;
-    event.fold(
-      (failure) {
-        Logs().e('ForwardController::_handleForwardMessageOnData() - failure: $failure');
-      },
-      (success) async {
-        Logs().d('ForwardController::_handleForwardMessageOnData() - success: $success');
-        switch (success.runtimeType) {
-          case ForwardMessageSuccess:
-            final dataOnSuccess = success as ForwardMessageSuccess;
-            VRouter.of(context).toSegments(['rooms', dataOnSuccess.room.id]);
-            break;
-          case ForwardMessageIsShareFileState:
-            final dataOnSuccess = success as ForwardMessageIsShareFileState;
-            await showDialog(
+    event.fold((failure) {
+      Logs().e(
+          'ForwardController::_handleForwardMessageOnData() - failure: $failure');
+    }, (success) async {
+      Logs().d(
+          'ForwardController::_handleForwardMessageOnData() - success: $success');
+      switch (success.runtimeType) {
+        case ForwardMessageSuccess:
+          final dataOnSuccess = success as ForwardMessageSuccess;
+          VRouter.of(context).toSegments(['rooms', dataOnSuccess.room.id]);
+          break;
+        case ForwardMessageIsShareFileState:
+          final dataOnSuccess = success as ForwardMessageIsShareFileState;
+          await showDialog(
               context: context,
               useRootNavigator: false,
               builder: (c) => SendFileDialog(
-                files: [dataOnSuccess.shareFile],
-                room: dataOnSuccess.room)
-            );
-            break;
-        }
+                  files: [dataOnSuccess.shareFile], room: dataOnSuccess.room));
+          break;
       }
-    );
+    });
   }
 
   void _handleForwardMessageOnDone() {
@@ -144,7 +142,8 @@ class ForwardController extends State<Forward> {
   }
 
   void _handleForwardMessageOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e('ForwardController::_handleForwardMessageOnError() - error: $error | stackTrace: $stackTrace');
+    Logs().e(
+        'ForwardController::_handleForwardMessageOnError() - error: $error | stackTrace: $stackTrace');
   }
 
   @override

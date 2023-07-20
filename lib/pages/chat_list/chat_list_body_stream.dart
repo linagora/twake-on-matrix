@@ -1,13 +1,8 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/pages/chat_list/navi_rail_item.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:vrouter/vrouter.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'chat_list_body.dart';
 
@@ -21,6 +16,7 @@ class ChatListBodyStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final client = Matrix.of(context).client;
 
     return StreamBuilder<Object?>(

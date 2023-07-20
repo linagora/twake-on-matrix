@@ -1,4 +1,3 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 extension PresentaionContactExtension on PresentationContact {

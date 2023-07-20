@@ -25,6 +25,7 @@ import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:vrouter/vrouter.dart';
+// ignore: depend_on_referenced_packages
 import 'package:async/async.dart';
 
 import '../../../utils/account_bundles.dart';

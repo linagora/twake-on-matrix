@@ -364,38 +364,38 @@ class AppRoutes {
       ];
 
   List<VRouteElement> get _chatDetailsRoutes => [
-    VWidget(
-      path: 'permissions',
-      widget: const ChatPermissionsSettings(),
-      buildTransition: _dynamicTransition,
-    ),
-    VWidget(
-      path: 'invite',
-      widget: const InvitationSelection(),
-      buildTransition: _dynamicTransition,
-    ),
-    VWidget(
-      path: 'multiple_emotes',
-      widget: const MultipleEmotesSettings(),
-      buildTransition: _dynamicTransition,
-    ),
-    VWidget(
-      path: 'emotes',
-      widget: const EmotesSettings(),
-      buildTransition: _dynamicTransition,
-    ),
-    VWidget(
-      path: 'emotes/:state_key',
-      widget: const EmotesSettings(),
-      buildTransition: _dynamicTransition,
-    ),
-    VWidgetWithDependency(
-      path: 'forward',
-      widget: const Forward(),
-      di: ForwardDI(),
-      buildTransition: _leftToRightTransition,
-    )
-  ];
+        VWidget(
+          path: 'permissions',
+          widget: const ChatPermissionsSettings(),
+          buildTransition: _dynamicTransition,
+        ),
+        VWidget(
+          path: 'invite',
+          widget: const InvitationSelection(),
+          buildTransition: _dynamicTransition,
+        ),
+        VWidget(
+          path: 'multiple_emotes',
+          widget: const MultipleEmotesSettings(),
+          buildTransition: _dynamicTransition,
+        ),
+        VWidget(
+          path: 'emotes',
+          widget: const EmotesSettings(),
+          buildTransition: _dynamicTransition,
+        ),
+        VWidget(
+          path: 'emotes/:state_key',
+          widget: const EmotesSettings(),
+          buildTransition: _dynamicTransition,
+        ),
+        VWidgetWithDependency(
+          path: 'forward',
+          widget: const Forward(),
+          di: ForwardDI(),
+          buildTransition: _leftToRightTransition,
+        )
+      ];
 
   List<VRouteElement> get _settingsRoutes => [
         VWidget(
@@ -494,6 +494,7 @@ class AppRoutes {
         animation, secondaryAnimation, child, SlideTransitionType.bottomToTop);
   }
 
+  // ignore: unused_element
   SlideTransition _topToBottomTransition(animation, secondaryAnimation, child) {
     return _buildSlideTransition(
         animation, secondaryAnimation, child, SlideTransitionType.topToBottom);

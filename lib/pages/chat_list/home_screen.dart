@@ -58,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
+    // ignore: unused_local_variable
     final badgePosition = BadgePosition.topEnd(top: -12, end: -8);
     return [
       if (AppConfig.separateChatTypes) ...[

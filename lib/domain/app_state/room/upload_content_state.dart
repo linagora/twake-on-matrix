@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';

@@ -8,10 +8,6 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';

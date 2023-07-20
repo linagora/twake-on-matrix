@@ -8,10 +8,8 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../config/themes.dart';
-import 'homeserver_app_bar.dart';
 import 'homeserver_picker.dart';
 
 class HomeserverPickerView extends StatelessWidget {
@@ -30,6 +28,7 @@ class HomeserverPickerView extends StatelessWidget {
           child: SvgPicture.asset(
             ImagePaths.icTwakeLogo,
             width: 100,
+            // ignore: deprecated_member_use
             color: Theme.of(context).colorScheme.onBackground,
           ),
         ),

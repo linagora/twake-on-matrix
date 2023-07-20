@@ -14,12 +14,15 @@ class ForwardMessageInteractor {
     try {
       yield Right(ForwardMessageLoading());
 
-      final room = rooms.firstWhere((element) => element.id == selectedEvents.first);
+      final room =
+          rooms.firstWhere((element) => element.id == selectedEvents.first);
       if (room.membership == Membership.join) {
-        if (matrixState.shareContentList.isEmpty && matrixState.shareContent != null) {
+        if (matrixState.shareContentList.isEmpty &&
+            matrixState.shareContent != null) {
           yield* _forwardOneMessageAction(room: room, matrixState: matrixState);
         } else {
-          yield* _forwardMultipleMessagesAction(room: room, matrixState: matrixState);
+          yield* _forwardMultipleMessagesAction(
+              room: room, matrixState: matrixState);
         }
       }
     } catch (exception) {
@@ -27,10 +30,13 @@ class ForwardMessageInteractor {
     }
   }
 
-  Stream<Either<Failure, Success>> _forwardMessage(Map<String, dynamic> message, Room room) async* {
+  Stream<Either<Failure, Success>> _forwardMessage(
+      Map<String, dynamic> message, Room room) async* {
     final shareFile = message.tryGet<MatrixFile>('file');
-    if (message.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' && shareFile != null) {
-      yield Right(ForwardMessageIsShareFileState(shareFile: shareFile, room: room));
+    if (message.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' &&
+        shareFile != null) {
+      yield Right(
+          ForwardMessageIsShareFileState(shareFile: shareFile, room: room));
     }
     await room.sendEvent(message);
   }

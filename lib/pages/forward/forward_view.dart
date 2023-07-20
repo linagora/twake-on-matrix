@@ -61,27 +61,24 @@ class _ForwardViewState extends State<ForwardView> {
           if (forwardMessageNotifier == null) {
             return child!;
           } else {
-            return forwardMessageNotifier.fold(
-              (failure) => child!,
-              (success) {
-                if (success is ForwardMessageLoading) {
-                  return SizedBox(
-                    height: ForwardViewStyle.bottomBarHeight,
-                    child: const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 14),
-                        child: TwakeFloatingActionButton(
-                          customIcon: SizedBox(child: CircularProgressIndicator())
-                        ),
-                      ),
+            return forwardMessageNotifier.fold((failure) => child!, (success) {
+              if (success is ForwardMessageLoading) {
+                return SizedBox(
+                  height: ForwardViewStyle.bottomBarHeight,
+                  child: const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 14),
+                      child: TwakeFloatingActionButton(
+                          customIcon:
+                              SizedBox(child: CircularProgressIndicator())),
                     ),
-                  );
-                } else {
-                  return const SizedBox();
-                }
+                  ),
+                );
+              } else {
+                return const SizedBox();
               }
-            );
+            });
           }
         },
         child: SizedBox(
@@ -166,8 +163,9 @@ class _ForwardViewState extends State<ForwardView> {
       bottom: PreferredSize(
           preferredSize: const Size(double.infinity, 4),
           child: Container(
-            color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-            height: 1)),
+              color:
+                  Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
+              height: 1)),
     );
   }
 

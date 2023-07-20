@@ -41,7 +41,8 @@ class SettingsStyleView extends StatelessWidget {
                           child: color == null
                               ? Material(
                                   elevation:
-                                      AppConfig.colorSchemeSeed?.value == null
+                                      // ignore: unnecessary_null_comparison
+                                      AppConfig.colorSchemeSeed.value == null
                                           ? 100
                                           : 0,
                                   shadowColor: AppConfig.colorSchemeSeed,

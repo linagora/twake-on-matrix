@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';

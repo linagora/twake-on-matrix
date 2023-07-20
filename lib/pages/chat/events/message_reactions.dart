@@ -65,6 +65,7 @@ class ReactionsList extends StatelessWidget {
     required this.client,
   }) : super(key: key);
 
+  // ignore: library_private_types_in_public_api
   final List<_ReactionEntry> reactionList;
   final Set<Event> allReactionEvents;
   final Event event;

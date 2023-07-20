@@ -28,10 +28,8 @@ class ForwardMessageIsShareFileState extends Success {
   final MatrixFile shareFile;
   final Room room;
 
-  const ForwardMessageIsShareFileState({
-    required this.shareFile,
-    required this.room
-  });
+  const ForwardMessageIsShareFileState(
+      {required this.shareFile, required this.room});
 
   @override
   List<Object?> get props => [shareFile, room];

@@ -16,6 +16,7 @@ class SendImageInteractor {
     final matrixFile = await entity.toMatrixFile();
     if (matrixFile != null) {
       try {
+        // ignore: unused_local_variable
         final mxcUri = await room.sendImageFileEvent(
           matrixFile,
           txid: txId,
