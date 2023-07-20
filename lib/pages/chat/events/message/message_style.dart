@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class MessageStyle {
   static final bubbleBorderRadius = BorderRadius.circular(20);
@@ -37,10 +38,10 @@ class MessageStyle {
   static int get replyIconFlexMobile => 2;
 
   static TextStyle? displayTime(BuildContext context) 
-    => Theme.of(context).textTheme.bodySmall?.merge(
+    => Theme.of(context).textTheme.bodyMedium?.merge(
       TextStyle(
-        color: Theme.of(context).colorScheme.onSurface,
-        letterSpacing: 0.4,
+        color: LinagoraRefColors.material().tertiary[20],
+        fontSize: 14,
       )
     );
 
