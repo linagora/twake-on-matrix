@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
@@ -9,11 +9,11 @@ import 'package:matrix/matrix.dart' hide Visibility;
 class SendingImageWidget extends StatelessWidget {
   SendingImageWidget({
     super.key,
-    required this.sendingImageData,
+    required this.filePath,
     required this.event, this.onTapPreview,
   });
 
-  final Uint8List sendingImageData;
+  final String filePath;
 
   final Event event;
 
@@ -24,14 +24,14 @@ class SendingImageWidget extends StatelessWidget {
   void _onTap(BuildContext context) async {
     if (onTapPreview != null) {
       await showGeneralDialog(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (_, animationOne, animationTwo) =>
-          ImageViewer(event, imageData: sendingImageData)
-      );
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: true,
+        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        transitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, animationOne, animationTwo) =>
+            ImageViewer(event, filePath: filePath)
+        );
     }
   }
 
@@ -63,8 +63,8 @@ class SendingImageWidget extends StatelessWidget {
         onTap: () => _onTap(context),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12.0),
-          child: Image.memory(
-            sendingImageData,
+          child: Image.file(
+            File(filePath),
             width: MessageContentStyle.imageBubbleWidth,
             height: MessageContentStyle.imageBubbleHeight,
             fit: BoxFit.cover,

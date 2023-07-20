@@ -10,7 +10,7 @@ class HomeserverEndpoint {
 }
 
 extension ServicePathHomeserver on ServicePath {
-  String generateTwakeIdentityEndpoint({
+  String generateHomeserverIdentityEndpoint({
     String rootPath = HomeserverEndpoint.homeserverRootPath,
     String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
   }) {

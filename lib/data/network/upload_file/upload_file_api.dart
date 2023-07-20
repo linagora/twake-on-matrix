@@ -21,7 +21,7 @@ class UploadFileAPI {
     dioHeaders[HttpHeaders.contentLengthHeader] = await File(fileInfo.filePath).length();
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
     final response = await _client.post(
-      HomeserverEndpoint.uploadMediaServicePath.generateTwakeIdentityEndpoint(),
+      HomeserverEndpoint.uploadMediaServicePath.generateHomeserverIdentityEndpoint(),
       data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
       queryParameters: {
         fileName: fileInfo.fileName,

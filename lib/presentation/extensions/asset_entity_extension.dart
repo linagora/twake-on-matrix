@@ -32,8 +32,4 @@ extension AssetEntityExtension on AssetEntity {
       file.lengthSync()
     );
   }
-
-  Future<bool> get isHEICImageFile async {
-    return await mimeTypeAsync == ImageType.heic.name;
-  }
 }

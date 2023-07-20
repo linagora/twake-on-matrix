@@ -131,11 +131,10 @@ class MessageContent extends StatelessWidget {
                 ),
               );
             }
-
-            final sendingImageData = event.getSendingImageData();
-            if (sendingImageData != null) {
+            final filePath = event.getFilePath();
+            if (filePath != null) {
               return SendingImageWidget(
-                sendingImageData: sendingImageData,
+                filePath: filePath,
                 event: event,
                 onTapPreview: onTapPreview,
               );
@@ -147,7 +146,6 @@ class MessageContent extends StatelessWidget {
               fit: BoxFit.cover,
               onTapSelectMode: onTapSelectMode,
               onTapPreview: onTapPreview,
-              imageData: sendingImageData,
               animated: true,
             );
           case MessageTypes.Sticker:
