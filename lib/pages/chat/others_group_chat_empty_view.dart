@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:intl/intl.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -67,14 +66,9 @@ class OthersGroupChatEmptyView extends StatelessWidget {
 
   Widget _getDateWidget(BuildContext context, Event firstEvent) {
     final eventDateTime = firstEvent.originServerTs;
-    final dateString = eventDateTime.isToday()
-      ? L10n.of(context)!.today
-      : eventDateTime.isYesterday()
-        ? L10n.of(context)!.yesterday
-        : DateFormat("dd MMM").format(eventDateTime);
 
     return Text(
-      dateString,
+      eventDateTime.relativeTime(context),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
         fontWeight: FontWeight.w500,
         fontSize: 12,
