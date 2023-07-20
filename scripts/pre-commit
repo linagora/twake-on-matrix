@@ -1,0 +1,16 @@
+#!/bin/bash
+# Run Dart analyze and check for errors
+if ! output=$(flutter analyze); then
+    echo "COMMIT REJECTED: Flutter analyze found the following errors:"
+    echo "$output"
+    exit 1
+fi
+
+if ! output=$(dart format lib); then
+    echo "COMMIT REJECTED: Dart format found the following errors:"
+    echo "$output"
+    exit 1
+fi
+
+# If we made it this far, the commit is allowed
+exit 0
