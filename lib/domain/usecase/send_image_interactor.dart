@@ -14,16 +14,15 @@ class SendImageInteractor {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
-    final matrixFile = await entity.toMatrixFile();
-    if (matrixFile != null) {
+    final fileInfo = await entity.toFileInfo();
+    if (fileInfo != null) {
       try {
         final mxcUri = await room.sendImageFileEvent(
-          matrixFile,
+          fileInfo,
           txid: txId,
           editEventId: editEventId,
           inReplyTo: inReplyTo,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
-          extraContent: extraContent,
         );
       } catch(error) {
         Logs().d("SendImageInteractor: execute(): $error");

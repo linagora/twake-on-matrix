@@ -2,8 +2,10 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
+import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -51,25 +53,25 @@ extension SendImage on Room {
     }
 
     MatrixFile uploadFile = file; // ignore: omit_local_variable_types
-    var thumbnail = sendingFileThumbnails[txid];
-    // computing the thumbnail in case we can
-    if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
-      file = await MatrixImageFile.shrink(
-        bytes: file.bytes,
-        name: file.name,
-        maxDimension: shrinkImageMaxDimension,
-        customImageResizer: client.customImageResizer,
-        nativeImplementations: client.nativeImplementations,
-      );
+    // var thumbnail = sendingFileThumbnails[txid];
+    // // computing the thumbnail in case we can
+    // if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
+    //   file = await MatrixImageFile.shrink(
+    //     bytes: file.bytes,
+    //     name: file.name,
+    //     maxDimension: shrinkImageMaxDimension,
+    //     customImageResizer: client.customImageResizer,
+    //     nativeImplementations: client.nativeImplementations,
+    //   );
 
-      if (thumbnail != null && file.size < thumbnail.size) {
-        thumbnail = null; // in this case, the thumbnail is not usefull
-      }
-    }
+    //   if (thumbnail != null && file.size < thumbnail.size) {
+    //     thumbnail = null; // in this case, the thumbnail is not usefull
+    //   }
+    // }
 
-    MatrixFile? uploadThumbnail = thumbnail; // ignore: omit_local_variable_types
+    // MatrixFile? uploadThumbnail = thumbnail; // ignore: omit_local_variable_types
     EncryptedFile? encryptedFile;
-    EncryptedFile? encryptedThumbnail;
+    // EncryptedFile? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
@@ -77,10 +79,10 @@ extension SendImage on Room {
       encryptedFile = await file.encrypt();
       uploadFile = encryptedFile.toMatrixFile();
 
-      if (thumbnail != null) {
-        encryptedThumbnail = await thumbnail.encrypt();
-        uploadThumbnail = encryptedThumbnail.toMatrixFile();
-      }
+      // if (thumbnail != null) {
+      //   encryptedThumbnail = await thumbnail.encrypt();
+      //   uploadThumbnail = encryptedThumbnail.toMatrixFile();
+      // }
     }
     Uri? uploadResp, thumbnailUploadResp;
 
@@ -88,21 +90,13 @@ extension SendImage on Room {
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
-    while (uploadResp == null ||
-        (uploadThumbnail != null && thumbnailUploadResp == null)) {
+    while (uploadResp == null) {
       try {
-        uploadResp = await client.uploadContent(
-          uploadFile.bytes,
-          filename: uploadFile.name,
-          contentType: uploadFile.mimeType,
-        );
-        thumbnailUploadResp = uploadThumbnail != null
-            ? await client.uploadContent(
-                uploadThumbnail.bytes,
-                filename: uploadThumbnail.name,
-                contentType: uploadThumbnail.mimeType,
-              )
-            : null;
+        final uploadFileApi = getIt.get<UploadFileAPI>();
+        final response = await uploadFileApi.uploadFile(fileInfo: file.toFileInfo());
+        if (response.contentUri != null) {
+          uploadResp = Uri.parse(response.contentUri!);
+        }
       } on MatrixException catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
@@ -110,15 +104,12 @@ extension SendImage on Room {
         Logs().v('Error: $e');
         rethrow;
       } catch (e) {
-        if (DateTime.now().isAfter(timeoutDate)) {
-          fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+        fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
               .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
-          await handleImageFakeSync(fakeImageEvent);
-          rethrow;
-        }
+        await handleImageFakeSync(fakeImageEvent);
         Logs().v('Error: $e');
         Logs().v('Send File into room failed. Try again...');
-        await Future.delayed(const Duration(seconds: 1));
+        return null;
       }
     }
 
@@ -145,28 +136,28 @@ extension SendImage on Room {
         },
       'info': {
         ...file.info,
-        if (thumbnail != null && encryptedThumbnail == null)
-          'thumbnail_url': thumbnailUploadResp.toString(),
-        if (thumbnail != null && encryptedThumbnail != null)
-          'thumbnail_file': {
-            'url': thumbnailUploadResp.toString(),
-            'mimetype': thumbnail.mimeType,
-            'v': 'v2',
-            'key': {
-              'alg': 'A256CTR',
-              'ext': true,
-              'k': encryptedThumbnail.k,
-              'key_ops': ['encrypt', 'decrypt'],
-              'kty': 'oct'
-            },
-            'iv': encryptedThumbnail.iv,
-            'hashes': {'sha256': encryptedThumbnail.sha256}
-          },
-        if (thumbnail != null) 'thumbnail_info': thumbnail.info,
-        if (thumbnail?.blurhash != null &&
-            file is MatrixImageFile &&
-            file.blurhash == null)
-          'xyz.amorgan.blurhash': thumbnail!.blurhash
+        // if (thumbnail != null && encryptedThumbnail == null)
+        //   'thumbnail_url': thumbnailUploadResp.toString(),
+        // if (thumbnail != null && encryptedThumbnail != null)
+        //   'thumbnail_file': {
+        //     'url': thumbnailUploadResp.toString(),
+        //     'mimetype': thumbnail.mimeType,
+        //     'v': 'v2',
+        //     'key': {
+        //       'alg': 'A256CTR',
+        //       'ext': true,
+        //       'k': encryptedThumbnail.k,
+        //       'key_ops': ['encrypt', 'decrypt'],
+        //       'kty': 'oct'
+        //     },
+        //     'iv': encryptedThumbnail.iv,
+        //     'hashes': {'sha256': encryptedThumbnail.sha256}
+        //   },
+        // if (thumbnail != null) 'thumbnail_info': thumbnail.info,
+        // if (thumbnail?.blurhash != null &&
+        //     file is MatrixImageFile &&
+        //     file.blurhash == null)
+        //   'xyz.amorgan.blurhash': thumbnail!.blurhash
       },
       if (extraContent != null) ...extraContent,
     };
@@ -240,24 +231,9 @@ extension SendImage on Room {
     }
   }
 
-  void clearOlderImagesCacheInRoom() {
-    final imageCacheQueue = getIt.get<Queue>();
-    // clear older image cache
-    while (imageCacheQueue.length >= maxImagesCacheInRoom) {
-      final txId = imageCacheQueue.removeFirst();
-      if (sendingFilePlaceholders.containsKey(txId)) {
-        sendingFilePlaceholders.remove(txId);
-      }
-      if (sendingFileThumbnails.containsKey(txId)) {
-        sendingFileThumbnails.remove(txId);
-      }
-    }
-  }
-
   Future<Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
     required List<AssetEntity> entities,
   }) async {
-    final imageCacheQueue = getIt.get<Queue>();
     final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>({}, {});
     for (final entity in entities) {
       final matrixFile = await entity.toMatrixFile();
@@ -266,7 +242,6 @@ extension SendImage on Room {
         final fakeImageEvent = await sendFakeImageEvent(matrixFile, txid: txid);
         txIdMapToImageFile.value1[txid] = matrixFile;
         txIdMapToImageFile.value2[txid] = fakeImageEvent;
-        imageCacheQueue.add(txid);
       }
     }
     return txIdMapToImageFile;
