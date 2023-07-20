@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
@@ -28,6 +27,7 @@ import 'package:fluffychat/domain/model/extensions/push/push_notification_extens
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -41,17 +41,18 @@ import 'famedlysdk_store.dart';
 import 'platform_infos.dart';
 
 class NoTokenException implements Exception {
-  String get cause => 'Cannot get firebase token';
+  String get cause => 'Cannot get push token';
 }
 
 class BackgroundPush {
   static BackgroundPush? _instance;
+  static const apnChannel = MethodChannel('twake_apn');
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Client client;
   BuildContext? context;
   GlobalKey<VRouterState>? router;
-  String? _fcmToken;
+  String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
   Store? _store;
@@ -64,7 +65,7 @@ class BackgroundPush {
 
   final pendingTests = <String, Completer<void>>{};
 
-  final dynamic firebase = FcmSharedIsolate();
+  final dynamic fcmSharedIsolate = FcmSharedIsolate();
 
   DateTime? lastReceivedPush;
 
@@ -74,20 +75,18 @@ class BackgroundPush {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
-    firebase?.setListeners(
-      onMessage: (message) {
-        Logs().d('BackgroundPush::onMessage(): $message');
-        final notification = _parseMessagePayload(message);
-        pushHelper(
-          notification,
-          client: client,
-          l10n: l10n,
-          activeRoomId: router?.currentState?.pathParameters['roomid'],
-          onSelectNotification: goToRoom,
-        );
-        Logs().d('BackgroundPush::onMessage(): finished pushHelper');
-      },
-    );
+    fcmSharedIsolate?.setListeners(onMessage: (message) {
+      Logs().d('BackgroundPush::onMessage(): $message');
+      final notification = _parseMessagePayload(message);
+      pushHelper(
+        notification,
+        client: client,
+        l10n: l10n,
+        activeRoomId: router?.currentState?.pathParameters['roomid'],
+        onSelectNotification: goToRoom,
+      );
+      Logs().d('BackgroundPush::onMessage(): finished pushHelper');
+    });
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: _newUpEndpoint,
@@ -126,9 +125,6 @@ class BackgroundPush {
     Set<String?>? oldTokens,
     bool useDeviceSpecificAppId = false,
   }) async {
-    if (PlatformInfos.isIOS) {
-      await firebase?.requestPermission();
-    }
     final clientName = PlatformInfos.clientName;
     oldTokens ??= <String>{};
     final pushers = await (client.getPushers().catchError((e) {
@@ -138,7 +134,7 @@ class BackgroundPush {
         [];
     var setNewPusher = false;
     // Just the plain app id, we add the .data_message suffix later
-    var appId = AppConfig.pushNotificationsAppId;
+    final appId = AppConfig.pushNotificationsAppId;
     // we need the deviceAppId to remove potential legacy UP pusher
     var deviceAppId = '$appId.${client.deviceID}';
     // appId may only be up to 64 chars as per spec
@@ -191,9 +187,22 @@ class BackgroundPush {
             deviceDisplayName: client.deviceName!,
             lang: 'en',
             data: PusherData(
-              url: Uri.parse(gatewayUrl!),
-              format: AppConfig.pushNotificationsPusherFormat,
-            ),
+                url: Uri.parse(gatewayUrl!),
+                format: AppConfig.pushNotificationsPusherFormat,
+                additionalProperties: PlatformInfos.isIOS
+                    ? {
+                        "default_payload": {
+                          "aps": {
+                            "mutable-content": 1,
+                            "content-available": 1,
+                            "alert": {
+                              "loc-key": "SINGLE_UNREAD",
+                              "loc-args": []
+                            }
+                          }
+                        }
+                      }
+                    : {}),
             kind: 'http',
           ),
           append: false,
@@ -222,7 +231,7 @@ class BackgroundPush {
         (await UnifiedPush.getDistributors()).isNotEmpty) {
       await setupUp();
     } else {
-      await setupFirebase();
+      await setupPushGateway();
     }
 
     // ignore: unawaited_futures
@@ -262,13 +271,19 @@ class BackgroundPush {
     });
   }
 
-  Future<void> setupFirebase() async {
-    Logs().v('Setup firebase');
-    if (_fcmToken?.isEmpty ?? true) {
+  Future<void> setupPushGateway() async {
+    Logs().v('Setup Push Gateway');
+    if (_pushToken?.isEmpty ?? true) {
       try {
-        _fcmToken = await firebase?.getToken();
-        Logs().d('BackgroundPush::setupFirebase(): $_fcmToken');
-        if (_fcmToken == null) throw ('PushToken is null');
+        if (PlatformInfos.isIOS) {
+          // Request iOS permission before getting the token
+          await fcmSharedIsolate?.requestPermission();
+        }
+        _pushToken = await (Platform.isIOS
+            ? apnChannel.invokeMethod("getToken")
+            : fcmSharedIsolate?.getToken());
+        Logs().d('BackgroundPush::pushToken: $_pushToken');
+        if (_pushToken == null) throw ('PushToken is null');
       } catch (e, s) {
         Logs().w('[Push] cannot get token', e, e is String ? null : s);
         await _noFcmWarning();
@@ -277,7 +292,7 @@ class BackgroundPush {
     }
     await setupPusher(
       gatewayUrl: AppConfig.pushNotificationsGatewayUrl,
-      token: _fcmToken,
+      token: _pushToken,
     );
   }
 
@@ -338,7 +353,7 @@ class BackgroundPush {
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
     final oldTokens = <String?>{};
     try {
-      final fcmToken = await firebase?.getToken();
+      final fcmToken = await fcmSharedIsolate?.getToken();
       oldTokens.add(fcmToken);
     } catch (_) {}
     await setupPusher(
