@@ -485,6 +485,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       _setUpIdentityServer(identityServer);
     }
     setUpAuthorization(client);
+    if (client.homeserver != null) {
+      _setUpHomeServer(client.homeserver!);
+    }
   }
 
   void setUpToMServicesInLogin(Client client) {
@@ -493,8 +496,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       _setUpToMServer(tomServer);
     }
     final identityServer = loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
+    final homeServer = loginHomeserverSummary?.discoveryInformation?.mHomeserver;
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
+    }
+    if (homeServer != null) {
+      _setUpHomeServer(homeServer.baseUrl);
     }
     _storeToMConfiguration(client, tomServer, identityServer);
     setUpAuthorization(client);
@@ -513,6 +520,14 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       Logs().d('MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}');
       tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
     }
+  }
+
+  void _setUpHomeServer(Uri homeServerUri) {
+    final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    );
+    Logs().d('MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}');
+    homeServerUrlInterceptor.changeBaseUrl(homeServerUri.toString());
   }
 
   void _setUpIdentityServer(IdentityServerInformation identityServer) {

@@ -18,6 +18,10 @@ class NetworkDI extends BaseDI {
   static const identityServerDioName = 'identityServerName';
   static const identityDioClientName = 'identityServerDioClientName';
 
+  static const homeServerUrlInterceptorName = 'homeDynamicUrlInterceptor';
+  static const homeServerDioName = 'homeServerName';
+  static const homeDioClientName = 'homeServerDioClientName';
+
   static const acceptHeaderDefault = 'application/json';
   static const contentTypeHeaderDefault = 'application/json';
 
@@ -48,6 +52,11 @@ class NetworkDI extends BaseDI {
     );
 
     get.registerLazySingleton(
+      () => DynamicUrlInterceptors(),
+      instanceName: homeServerUrlInterceptorName,
+    );
+
+    get.registerLazySingleton(
       () => AuthorizationInterceptor(),
     );
   }
@@ -55,6 +64,7 @@ class NetworkDI extends BaseDI {
   void _bindDio(GetIt get) {
     _bindDioForTomServer(get);
     _bindDioForIdentityServer(get);
+    _bindDioForHomeServer(get);
   }
 
   void _bindDioForTomServer(GetIt get) {
@@ -82,6 +92,20 @@ class NetworkDI extends BaseDI {
     get.registerLazySingleton<DioClient>(
       () => DioClient(get.get<Dio>(instanceName: identityServerDioName)),
       instanceName: identityDioClientName,
+    );
+  }
+
+  void _bindDioForHomeServer(GetIt get) {
+    final dio = Dio(get.get<BaseOptions>());
+    dio.interceptors.add(get.get<DynamicUrlInterceptors>(instanceName: homeServerUrlInterceptorName));
+    dio.interceptors.add(get.get<AuthorizationInterceptor>());
+    if (kDebugMode) {
+      dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    }
+    get.registerLazySingleton<Dio>(() => dio, instanceName: homeServerDioName);
+    get.registerLazySingleton<DioClient>(
+      () => DioClient(get.get<Dio>(instanceName: homeServerDioName)),
+      instanceName: homeDioClientName,
     );
   }
 
