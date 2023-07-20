@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/data/network/upload_file/file_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -80,4 +82,8 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   String get sizeString => size.sizeString;
+
+  FileInfo toFileInfo() {
+    return FileInfo(name, utf8.decode(bytes.toList()), size);
+  }
 }
