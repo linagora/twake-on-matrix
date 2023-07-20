@@ -86,6 +86,7 @@ class ChatInputRow extends StatelessWidget {
                   icon: Icons.add_circle_outline,
                   onPressed: () async {
                     controller.showImagesPickerBottomSheetAction(
+                      room: controller.room,
                       context: context,
                       onItemAction: (action) => controller.onClickItemAction(
                         action: action, 
