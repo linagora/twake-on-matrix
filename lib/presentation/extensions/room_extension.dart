@@ -179,7 +179,7 @@ extension SendImage on Room {
     Map<String, dynamic>? extraContent,
   }) async {
     sendingFilePlaceholders[txid] = file;
-    sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
+    // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
 
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEventEvent = SyncUpdate(

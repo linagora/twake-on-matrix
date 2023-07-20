@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/base_di.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
@@ -13,8 +14,7 @@ class ChatScreenDi extends BaseDI {
 
   @override
   void setUp(GetIt get) {
-    get.registerSingleton<Queue>(Queue());
-
+    get.registerSingleton(UploadFileAPI());
     get.registerSingleton<SendImageInteractor>(SendImageInteractor());
     get.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
     get.registerSingleton<DownloadFileForPreviewInteractor>(DownloadFileForPreviewInteractor());

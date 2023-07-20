@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -9,8 +10,9 @@ import 'image_viewer.dart';
 class ImageViewerView extends StatelessWidget {
   final ImageViewerController controller;
   final Uint8List? imageData;
+  final String? filePath;
 
-  const ImageViewerView(this.controller, {Key? key, this.imageData}) : super(key: key);
+  const ImageViewerView(this.controller, {Key? key, this.imageData, this.filePath}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,14 @@ class ImageViewerView extends StatelessWidget {
               child: Center(
                 child: Hero(
                   tag: controller.widget.event.eventId,
-                  child: MxcImage(
+                  child: filePath != null
+                  ? Image.file(
+                      File(filePath!),
+                      fit: BoxFit.contain, 
+                      filterQuality: 
+                      FilterQuality.none,
+                    )
+                  : MxcImage(
                     event: controller.widget.event,
                     fit: BoxFit.contain,
                     isThumbnail: false,

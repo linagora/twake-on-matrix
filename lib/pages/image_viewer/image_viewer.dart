@@ -10,8 +10,9 @@ import 'package:fluffychat/widgets/matrix.dart';
 class ImageViewer extends StatefulWidget {
   final Event event;
   final Uint8List? imageData;
+  final String? filePath;
 
-  const ImageViewer(this.event, {Key? key, this.imageData}) : super(key: key);
+  const ImageViewer(this.event, {Key? key, this.imageData, this.filePath}) : super(key: key);
 
   @override
   ImageViewerController createState() => ImageViewerController();
@@ -55,5 +56,9 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   @override
-  Widget build(BuildContext context) => ImageViewerView(this, imageData: widget.imageData);
+  Widget build(BuildContext context) => ImageViewerView(
+    this, 
+    imageData: widget.imageData,
+    filePath: widget.filePath,
+  );
 }
