@@ -1,3 +1,12 @@
+# Twake
+## Setup
+
+### Add commit hook to format and code analyze
+```
+  bash scrips/config-pre-commit.sh
+```
+
+# Fluffy
 ![](https://i.imgur.com/wi7RlVt.png)
 
 <p align="center">
