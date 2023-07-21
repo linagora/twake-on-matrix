@@ -47,22 +47,18 @@ let apnTokenKey = "apnToken"
     }
     
     override func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-      withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+                                         willPresent notification: UNNotification,
+                                         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         twakeApnChannel?.invokeMethod("willPresent", arguments: userInfo)
-        switch UIApplication.shared.applicationState {
-        case .active:
-            // Do not show notification when app in foreground
-            return completionHandler([])
-        default:
-            return completionHandler([.alert, .badge, .sound])
-        }
+        let isRemoteNotification = userInfo["aps"] != nil
+        // Hide remote noti when in foreground, decrypted noti will show by dart
+        completionHandler(isRemoteNotification ? [] : [.alert, .badge, .sound])
     }
 
     override func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                didReceive response: UNNotificationResponse,
-                                withCompletionHandler completionHandler: @escaping () -> Void) {
+                                         didReceive response: UNNotificationResponse,
+                                         withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         twakeApnChannel?.invokeMethod("didReceive", arguments: userInfo)
         completionHandler()
