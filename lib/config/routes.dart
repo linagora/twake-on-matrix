@@ -2,6 +2,7 @@ import 'package:fluffychat/di/chat/chat_di.dart';
 import 'package:fluffychat/di/contact/contact_di.dart';
 import 'package:fluffychat/di/create_direct_chat/create_direct_chat_di.dart';
 import 'package:fluffychat/di/forward/forward_di.dart';
+import 'package:fluffychat/di/room/room_di.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -176,14 +177,15 @@ class AppRoutes {
                   widget: const NewPrivateChat(),
                   buildTransition: rightToLeftTransition,
                   stackedRoutes: [
-                    VWidget(
+                    VWidgetWithDependencies(
                       path: '/newgroup',
+                      dIs: [CreateNewRoomDI(), ChatScreenDi()],
                       widget: const NewGroup(),
                       buildTransition: rightToLeftTransition,
                     ),
                     VWidgetWithDependencies(
                       path: '/emptyChat',
-                      dIs: [ChatScreenDi(), CreateDirectChatDi()],
+                      dIs: [ChatScreenDi(), CreateDirectChatDI()],
                       widget: const EmptyChat(),
                       buildTransition: rightToLeftTransition,
                     ),
