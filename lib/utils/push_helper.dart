@@ -83,7 +83,7 @@ Future<void> _tryPushHelper(
   if (!isBackgroundMessage &&
       activeRoomId == notification.roomId &&
       activeRoomId != null &&
-      client?.syncPresence == null) {
+      client.syncPresence == null) {
     Logs().v('Room is in foreground. Stop push helper here.');
     return;
   }
