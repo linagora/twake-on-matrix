@@ -68,7 +68,10 @@ class SearchContactsController {
   }
 
   void onSelectedContact() {
-    textEditingController.clear();
+    textEditingController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: textEditingController.text.length
+    );
   }
 
   void clearSearchBar() {
