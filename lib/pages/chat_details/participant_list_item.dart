@@ -39,7 +39,13 @@ class ParticipantListItem extends StatelessWidget {
         ),
         title: Row(
           children: <Widget>[
-            Text(user.calcDisplayname()),
+            Flexible(
+              child: Text(
+                user.calcDisplayname(),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
             if (permissionBatch.isNotEmpty)
               Container(
                 padding: const EdgeInsets.symmetric(
