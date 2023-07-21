@@ -91,9 +91,7 @@ class BackgroundPush {
         if (call.method == 'willPresent') {
           onReceiveNotification(call.arguments);
         } else if (call.method == 'didReceive') {
-          onReceiveNotification(call.arguments);
-          // Go to room because user selected the notification
-          goToRoom(call.arguments['room_id']);
+          iOSUserSelectedNoti(call.arguments);
         }
       });
       getIosInitialNoti();
@@ -304,12 +302,17 @@ class BackgroundPush {
       final noti = await apnChannel.invokeMethod('getInitialNoti');
       Logs().v('[Push] Got initial notification: $noti');
       if (noti != null) {
-        onReceiveNotification(noti);
-        goToRoom(noti['room_id']);
+        iOSUserSelectedNoti(noti);
       }
     } catch (e, s) {
       Logs().e('[Push] Failed to get initial notification', e, s);
     }
+  }
+
+  void iOSUserSelectedNoti(dynamic noti) {
+    // roomId is payload if noti is local
+    final roomId = noti['room_id'] ?? noti['payload'];
+    goToRoom(roomId);
   }
 
   void onReceiveNotification(dynamic message) {
