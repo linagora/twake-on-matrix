@@ -61,11 +61,7 @@ class ContactsTabController extends State<ContactsTab>
 
   void _listenFocusTextEditing() {
     searchContactsController.searchFocusNode.addListener(() {
-      if (searchContactsController.searchFocusNode.hasFocus) {
-        searchContactsController.isSearchModeNotifier.value = true;
-      } else {
-        searchContactsController.isSearchModeNotifier.value = false;
-      }
+      searchContactsController.isSearchModeNotifier.value = searchContactsController.searchFocusNode.hasFocus;
     });
   }
 

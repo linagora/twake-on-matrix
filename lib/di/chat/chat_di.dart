@@ -9,7 +9,7 @@ import 'package:get_it/get_it.dart';
 
 class ChatScreenDi extends BaseDI {
   @override
-  String get scopeName => "Send image";
+  String get scopeName => "Chat";
 
   @override
   void setUp(GetIt get) {
