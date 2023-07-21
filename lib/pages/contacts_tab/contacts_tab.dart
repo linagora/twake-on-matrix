@@ -30,6 +30,7 @@ class ContactsTabController extends State<ContactsTab>
   @override
   initState() {
     searchContactsController.init();
+    _listenFocusTextEditing();
     listenContactsStartList();
     listenSearchContacts();
     super.initState();
@@ -55,6 +56,16 @@ class ContactsTabController extends State<ContactsTab>
     searchContactsController.lookupStreamController.stream.listen((event) {
       Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
       contactsStreamController.add(event);
+    });
+  }
+
+  void _listenFocusTextEditing() {
+    searchContactsController.searchFocusNode.addListener(() {
+      if (searchContactsController.searchFocusNode.hasFocus) {
+        searchContactsController.isSearchModeNotifier.value = true;
+      } else {
+        searchContactsController.isSearchModeNotifier.value = false;
+      }
     });
   }
 
