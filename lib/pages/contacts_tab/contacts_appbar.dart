@@ -53,6 +53,7 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
               return SizedBox(
                 height: 48,
                 child: TextField(
+                  focusNode: controller.searchContactsController.searchFocusNode,
                   controller: controller.searchContactsController.textEditingController,
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
@@ -71,7 +72,7 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
                       ? TwakeIconButton(
                         tooltip: "Clear",
                         icon: Icons.close,
-                        onPressed: () => controller.searchContactsController.textEditingController.clear(),
+                        onPressed: () => controller.searchContactsController.clearSearchBar(),
                       )
                       : null,
                   ),

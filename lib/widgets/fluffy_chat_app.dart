@@ -76,7 +76,7 @@ class FluffyChatAppState extends State<FluffyChatApp> {
             debugShowCheckedModeBanner: false,
             themeMode: themeMode,
             theme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
-            darkTheme: FluffyThemes.buildTheme(Brightness.dark, primaryColor),
+            darkTheme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
             scrollBehavior: CustomScrollBehavior(),
             logs: kReleaseMode ? VLogs.none : VLogs.info,
             localizationsDelegates: L10n.localizationsDelegates,
