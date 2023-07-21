@@ -146,7 +146,7 @@ class NewGroupController extends State<NewGroup>
   }
 
   void moveToNewGroupInfoScreen() async {
-    final contactList = await getAllContactsGroupChat();
+    final contactList = await getAllContactsGroupChat(isCustomDisplayName: false);
     _getDefaultGroupName(contactList);
     await showGeneralDialog(
       pageBuilder: (context, animation, secondaryAnimation) {
