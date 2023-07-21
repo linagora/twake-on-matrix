@@ -158,7 +158,6 @@ class ChatView extends StatelessWidget {
           controller.emojiPickerAction();
           redirector.stopRedirection();
         }
-        controller.backToPreviousPage();
       },
       child: GestureDetector(
         onTapDown: controller.setReadMarker,
