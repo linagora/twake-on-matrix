@@ -6,11 +6,14 @@ let apnTokenKey = "apnToken"
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
   var twakeApnChannel: FlutterMethodChannel?
+  var initialNotiInfo: Any?
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    self.twakeApnChannel = createApnChannel()
+    twakeApnChannel = createApnChannel()
+    initialNotiInfo = launchOptions?[.remoteNotification]
+    
     GeneratedPluginRegistrant.register(with: self)
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self
@@ -23,12 +26,17 @@ let apnTokenKey = "apnToken"
         let twakeApnChannel = FlutterMethodChannel(
             name: "twake_apn",
             binaryMessenger: controller.binaryMessenger)
-        twakeApnChannel.setMethodCallHandler({
-          (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-            if call.method == "getToken" {
+        twakeApnChannel.setMethodCallHandler { [weak self ] call, result in
+            switch call.method {
+            case "getToken":
                 result(UserDefaults.standard.string(forKey: apnTokenKey))
+            case "getInitialNoti":
+                result(self?.initialNotiInfo)
+                self?.initialNotiInfo = nil
+            default:
+                break
             }
-        })
+        }
         return twakeApnChannel
     }
     

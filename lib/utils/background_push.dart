@@ -96,6 +96,7 @@ class BackgroundPush {
           goToRoom(call.arguments['room_id']);
         }
       });
+      getIosInitialNoti();
     }
   }
 
@@ -296,6 +297,19 @@ class BackgroundPush {
       gatewayUrl: AppConfig.pushNotificationsGatewayUrl,
       token: _pushToken,
     );
+  }
+
+  Future<void> getIosInitialNoti() async {
+    try {
+      final noti = await apnChannel.invokeMethod('getInitialNoti');
+      Logs().v('[Push] Got initial notification: $noti');
+      if (noti != null) {
+        onReceiveNotification(noti);
+        goToRoom(noti['room_id']);
+      }
+    } catch (e, s) {
+      Logs().e('[Push] Failed to get initial notification', e, s);
+    }
   }
 
   void onReceiveNotification(dynamic message) {
