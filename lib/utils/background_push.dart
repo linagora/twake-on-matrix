@@ -75,18 +75,6 @@ class BackgroundPush {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
-    fcmSharedIsolate?.setListeners(onMessage: (message) {
-      Logs().d('BackgroundPush::onMessage(): $message');
-      final notification = _parseMessagePayload(message);
-      pushHelper(
-        notification,
-        client: client,
-        l10n: l10n,
-        activeRoomId: router?.currentState?.pathParameters['roomid'],
-        onSelectNotification: goToRoom,
-      );
-      Logs().d('BackgroundPush::onMessage(): finished pushHelper');
-    });
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: _newUpEndpoint,
@@ -94,6 +82,20 @@ class BackgroundPush {
         onUnregistered: _upUnregistered,
         onMessage: _onUpMessage,
       );
+      fcmSharedIsolate?.setListeners(onMessage: (message) {
+        onReceiveNotification(message);
+      });
+    } else if (Platform.isIOS) {
+      apnChannel.setMethodCallHandler((call) async {
+        Logs().v('[Push] Received APN call: $call');
+        if (call.method == 'willPresent') {
+          onReceiveNotification(call.arguments);
+        } else if (call.method == 'didReceive') {
+          onReceiveNotification(call.arguments);
+          // Go to room because user selected the notification
+          goToRoom(call.arguments['room_id']);
+        }
+      });
     }
   }
 
@@ -245,7 +247,7 @@ class BackgroundPush {
         return;
       }
       _wentToRoomOnStartup = true;
-      goToRoom(details.notificationResponse);
+      onSelectNotification(details.notificationResponse);
     });
   }
 
@@ -296,9 +298,25 @@ class BackgroundPush {
     );
   }
 
-  Future<void> goToRoom(NotificationResponse? response) async {
+  void onReceiveNotification(dynamic message) {
+    Logs().d('BackgroundPush::onMessage(): $message');
+    final notification = _parseMessagePayload(message);
+    pushHelper(
+      notification,
+      client: client,
+      l10n: l10n,
+      activeRoomId: router?.currentState?.pathParameters['roomid'],
+      onSelectNotification: onSelectNotification,
+    );
+    Logs().d('BackgroundPush::onMessage(): finished pushHelper');
+  }
+
+  Future<void> onSelectNotification(NotificationResponse? response) {
+    return goToRoom(response?.payload);
+  }
+
+  Future<void> goToRoom(String? roomId) async {
     try {
-      final roomId = response?.payload;
       Logs().v('[Push] Attempting to go to room $roomId...');
       if (router == null || roomId == null) {
         return;
