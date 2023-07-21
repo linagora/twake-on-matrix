@@ -152,12 +152,12 @@ class SettingsView extends StatelessWidget {
                 onChanged: controller.firstRunBootstrapAction,
               ),
             const Divider(thickness: 1),
-            ListTile(
-              leading: const Icon(Icons.format_paint_outlined),
-              title: Text(L10n.of(context)!.changeTheme),
-              onTap: () => VRouter.of(context).to('/settings/style'),
-              trailing: const Icon(Icons.chevron_right_outlined),
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.format_paint_outlined),
+            //   title: Text(L10n.of(context)!.changeTheme),
+            //   onTap: () => VRouter.of(context).to('/settings/style'),
+            //   trailing: const Icon(Icons.chevron_right_outlined),
+            // ),
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
               title: Text(L10n.of(context)!.notifications),
