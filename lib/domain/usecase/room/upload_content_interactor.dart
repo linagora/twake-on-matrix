@@ -31,10 +31,10 @@ class UploadContentInteractor {
         );
         yield Right(UploadContentSuccess(uri: uri));
       } else {
-        yield Left(UploadContentFailed(exception: CannotUploadContentException()));
+        yield Left(UploadContentFailed(CannotUploadContentException()));
       }
     } catch (exception) {
-      yield Left(UploadContentFailed(exception: exception));
+      yield Left(UploadContentFailed(exception));
     }
   }
 }

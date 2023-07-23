@@ -1,6 +1,7 @@
 
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_network_contact_failed.dart';
 import 'package:fluffychat/domain/app_state/contact/get_network_contact_success.dart';
@@ -12,7 +13,7 @@ class LookupContactsInteractor {
 
   LookupContactsInteractor();
 
-  Stream<Either<Failure, GetNetworkContactSuccess>> execute({
+  Stream<Either<Failure, Success>> execute({
     required ContactQuery query,
   }) async* {
     try {
