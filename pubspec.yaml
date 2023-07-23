@@ -1,7 +1,7 @@
 name: fluffychat
 description: The open digital workplace.
 publish_to: none
-version: 2.1.5+2330
+version: 2.1.6+2330
 
 environment:
   sdk: ">=2.19.0 <3.0.0"
