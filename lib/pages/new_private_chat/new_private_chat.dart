@@ -1,8 +1,4 @@
-import 'dart:async';
-
-import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/base/base_controller.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
@@ -21,12 +17,9 @@ class NewPrivateChat extends StatefulWidget {
 }
 
 class NewPrivateChatController extends State<NewPrivateChat> 
-  with ComparablePresentationContactMixin, GoToDirectChatMixin {
-
+  with ComparablePresentationContactMixin, GoToDirectChatMixin, BaseController {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
-  final networkStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
-  
   final isShowContactsNotifier = ValueNotifier(true);
   
   @override
@@ -54,14 +47,14 @@ class NewPrivateChatController extends State<NewPrivateChat>
   void listenContactsStartList() {
     fetchContactsController.streamController.stream.listen((event) {
       Logs().d('NewPrivateChatController::fetchContacts() - event: $event');
-      networkStreamController.add(event);
+      streamController.add(event);
     });
   }
 
   void listenSearchContacts() {
     searchContactsController.lookupStreamController.stream.listen((event) {
       Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
-      networkStreamController.add(event);
+      streamController.add(event);
     });
   }
 
@@ -77,7 +70,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
   @override
   void dispose() {
     super.dispose();
-    networkStreamController.close();
+    streamController.close();
     searchContactsController.dispose();
     fetchContactsController.dispose();
   }
