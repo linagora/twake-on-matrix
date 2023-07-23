@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
@@ -20,16 +18,11 @@ class UploadContentSuccess extends Success {
   List<Object?> get props => [uri];
 }
 
-class UploadContentFailed extends Failure {
-  final dynamic exception;
-
-  const UploadContentFailed({required this.exception});
-
-  @override
-  List<Object?> get props => [exception];
+class UploadContentFailed extends FeatureFailure {
+  const UploadContentFailed(dynamic exception) : super(exception: exception);
 }
 
-class FileTooBigMatrix extends Failure {
+class FileTooBigMatrix extends FeatureFailure {
   final FileTooBigMatrixException fileTooBigMatrixException;
 
   const FileTooBigMatrix(this.fileTooBigMatrixException);
