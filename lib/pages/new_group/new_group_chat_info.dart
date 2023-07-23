@@ -93,24 +93,20 @@ class NewGroupChatInfo extends StatelessWidget {
           }
           return child!;
         },
-        child: ValueListenableBuilder<Either<Failure, Success>?>(
+        child: ValueListenableBuilder<Either<Failure, Success>>(
           valueListenable: newGroupController.viewState,
           builder: (context, value, child) {
-            if (value == null) {
-              return child!;
-            } else {
-              return value.fold(
-                (failure) => child!,
-                (success) {
-                  if (success is CreateNewGroupChatLoading) {
-                    return const TwakeFloatingActionButton(
-                      customIcon: SizedBox(child: CircularProgressIndicator())
-                    );
-                  } else {
-                    return child!;
-                  }
-                });
-            }
+            return value.fold(
+              (failure) => child!,
+              (success) {
+                if (success is CreateNewGroupChatLoading) {
+                  return const TwakeFloatingActionButton(
+                    customIcon: SizedBox(child: CircularProgressIndicator())
+                  );
+                } else {
+                  return child!;
+                }
+              });
           },
           child: TwakeFloatingActionButton(
             icon: Icons.done,
@@ -168,40 +164,37 @@ class NewGroupChatInfo extends StatelessWidget {
   }
 
   Widget _buildChangeProfileWidget(BuildContext context) {
-    return ValueListenableBuilder<Either<Failure, Success>?>(
+    return ValueListenableBuilder<Either<Failure, Success>>(
       valueListenable: newGroupController.viewState,
       builder: (context, value, child) {
-        if (value == null) {
-          return child!;
-        } else {
-          return value.fold(
-            (failure) => child!,
-            (success) {
-              if (success is UploadContentLoading) {
-                return Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: LinagoraRefColors.material().neutral[80],
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                  child: const CupertinoActivityIndicator(radius: 10)
-                );
-              } else if (success is UploadContentSuccess) {
-                return InkWell(
-                  onTap: () => newGroupController.showImagesPickerAction(context: context),
-                  child: MxcImage(
-                    width: 56,
-                    height: 56,
-                    uri: success.uri,
-                  ),
-                );
-              } else {
-                return child!;
-              }
-            });
-        }
+        return value.fold(
+          (failure) => child!,
+          (success) {
+            if (success is UploadContentLoading) {
+              return Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: LinagoraRefColors.material().neutral[80],
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const CupertinoActivityIndicator(radius: 10)
+              );
+            } else if (success is UploadContentSuccess || success is CreateNewGroupChatLoading) {
+              return InkWell(
+                onTap: () => newGroupController.showImagesPickerAction(context: context),
+                child: MxcImage(
+                  width: 56,
+                  height: 56,
+                  uri: newGroupController.uriAvatar,
+                ),
+              );
+            } else {
+              return child!;
+            }
+          },
+        );
       },
       child: InkWell(
         onTap: () => newGroupController.showImagesPickerAction(context: context),

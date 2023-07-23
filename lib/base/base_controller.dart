@@ -7,7 +7,7 @@ import 'package:matrix/matrix.dart';
 
 mixin BaseController {
 
-  final viewState = ValueNotifier<Either<Failure, Success>?>(null);
+  final viewState = ValueNotifier<Either<Failure, Success>>(Right(UIState.idle));
 
   final streamController = StreamController<Either<Failure, Success>>();
 
