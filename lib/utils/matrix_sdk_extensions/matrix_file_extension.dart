@@ -11,8 +11,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 
-const String fileName = "/storage/emulated/0/Download";
-
 extension MatrixFileExtension on MatrixFile {
 
   void save(BuildContext context) async {
@@ -38,16 +36,13 @@ extension MatrixFileExtension on MatrixFile {
     Logs().d("MatrixFileExtension()::save()::result.error: ${result.error}");
   }
 
-  Future<String> getDownloadPathAndroid() async {
+  Future<String?> getDownloadPathAndroid() async {
     final directory = await getDownloadDirectoryAndroid();
+    if (directory == null) return null;
     return '${directory.path}/$name';
   }
 
-  Future<Directory> getDownloadDirectoryAndroid() async {
-    final defaultDownloadDirectory = Directory(fileName);
-    if (await defaultDownloadDirectory.exists()) {
-      return defaultDownloadDirectory;
-    }
+  Future<Directory?> getDownloadDirectoryAndroid() async {
     return await getApplicationDocumentsDirectory();
   }
 
