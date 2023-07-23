@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class ExpansionParticipantsList extends StatefulWidget {
+class ExpansionParticipantsList extends StatelessWidget {
 
   final Set<PresentationContact> contactsList;
 
@@ -19,20 +19,13 @@ class ExpansionParticipantsList extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => _ExpansionParticipantsListState();
-}
-
-class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
-  bool isExpanded = true;
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
           borderRadius: BorderRadius.circular(16.0),
-          onTap: () => toggleExpansionList(),
+          onTap: () => newGroupController.toggleExpansionList(),
           child: Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 2.0),
             child: Row(
@@ -41,54 +34,73 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   height: 44,
                   child: Row(
                     children: [
-                      Text(L10n.of(context)!.participantsCount(widget.contactsList.length),
+                      Text(L10n.of(context)!.participantsCount(contactsList.length),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: LinagoraRefColors.material().neutral[40],
-                        ),),
+                        )),
                     ],
                   ),
                 ),
                 const Expanded(child: SizedBox.shrink()),
-                TwakeIconButton(
-                  paddingAll: 6,
-                  buttonDecoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                  ),
-                  icon: isExpanded
-                    ? Icons.expand_less
-                    : Icons.expand_more,
-                  tooltip: isExpanded
-                    ? L10n.of(context)!.shrink
-                    : L10n.of(context)!.expand,
+                ValueListenableBuilder(
+                  valueListenable: newGroupController.isExpandedParticipants,
+                  builder: (context, isExpanded, child) {
+                    if (isExpanded) {
+                      return _iconExpanded(context);
+                    } else {
+                      return _iconNotExpand(context);
+                    }
+                  }
                 ),
               ],
             ),
           ),
         ),
-        isExpanded
-        ? Expanded(
-          child: SingleChildScrollView(
-            key: const ValueKey("participants list"),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: widget.contactsList
-                .map(
-                  (contact) => ExpansionContactListTile(
-                    contact: contact,
-                  ),)
-                .toList(),
-            ),
-          ),
+        ValueListenableBuilder(
+          valueListenable: newGroupController.isExpandedParticipants,
+          builder: (context, isExpanded, child) {
+            if (isExpanded) {
+              return Expanded(
+                child: SingleChildScrollView(
+                  key: const ValueKey("participants list"),
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: contactsList
+                      .map((contact) => ExpansionContactListTile(contact: contact))
+                      .toList(),
+                  ),
+                ),
+              );
+            } else {
+              return const Offstage();
+            }
+          }
         )
-        : const Offstage(),
       ],
     );
   }
 
-  void toggleExpansionList() {
-    setState(() {
-      isExpanded = !isExpanded;
-    });
+  Widget _iconExpanded(BuildContext context) {
+    return TwakeIconButton(
+      paddingAll: 6,
+      buttonDecoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+      ),
+      icon: Icons.expand_less,
+      tooltip: L10n.of(context)!.shrink,
+    );
+  }
+
+  Widget _iconNotExpand(BuildContext context) {
+    return TwakeIconButton(
+      paddingAll: 6,
+      buttonDecoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+      ),
+      icon: Icons.expand_more,
+      tooltip: L10n.of(context)!.expand,
+    );
   }
 }

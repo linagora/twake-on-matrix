@@ -43,6 +43,7 @@ class NewGroupController extends State<NewGroup>
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
+  final isExpandedParticipants = ValueNotifier(true);
   final groupNameFocusNode = FocusNode();
 
   String groupName = "";
@@ -132,6 +133,7 @@ class NewGroupController extends State<NewGroup>
   }
 
   void moveToNewGroupInfoScreen() async {
+    FocusScope.of(context).unfocus();
     final contactList = await getAllContactsGroupChat(isCustomDisplayName: false);
     _getDefaultGroupName(contactList);
     await showGeneralDialog(
@@ -235,6 +237,9 @@ class NewGroupController extends State<NewGroup>
     }
   }
 
+  void toggleExpansionList() {
+    isExpandedParticipants.value = !isExpandedParticipants.value;
+  }
 
   @override
   void removeAllImageSelected() {
