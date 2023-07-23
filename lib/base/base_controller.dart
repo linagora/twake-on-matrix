@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -13,11 +11,11 @@ mixin BaseController {
 
   final streamController = StreamController<Either<Failure, Success>>();
 
-  StreamSubscription? streamSub;
+  StreamSubscription? streamSubscriptionController;
 
   void consumeState(Stream<Either<Failure, Success>> newStateStream) async {
     Logs().d('BaseController::consumeState(): newStateStream: $newStateStream');
-    streamSub = newStateStream.listen(onData, onError: onError, onDone: onDone);
+    streamSubscriptionController = newStateStream.listen(onData, onError: onError, onDone: onDone);
   }
 
   void clearState() {
