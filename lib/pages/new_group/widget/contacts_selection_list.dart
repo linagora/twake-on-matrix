@@ -1,7 +1,6 @@
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
@@ -36,96 +35,94 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Either<Failure, GetContactsSuccess>>(
-      stream: widget.newGroupController.contactStreamController.stream,
+    return StreamBuilder<Either<Failure, Success>>(
+      stream: widget.newGroupController.streamController.stream,
       builder: (context, snapshot) {
         final searchKeyword = widget.newGroupController.searchContactsController.searchKeyword;
         final fetchContactsController = widget.newGroupController.fetchContactsController;
-        if (!snapshot.hasData) {
+
+        if (snapshot.data != null) {
+          return snapshot.data!.fold(
+            (failure) => const SizedBox.shrink(),
+            (success) {
+              final contactsList = fetchContactsController
+                .getContactsFromFetchStream(snapshot.data!)
+                .toList();
+
+              if (searchKeyword.isNotEmpty && contactsList.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: NoContactsFound(keyword: widget.newGroupController.searchContactsController.searchKeyword),
+                );
+              }
+              return Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: contactsList.length,
+                    itemBuilder: (context, i) {
+                      final contactNotifier = selectedContactsMapNotifier.getNotifierAtContact(contactsList[i]);
+                      return InkWell(
+                        key: ValueKey(contactsList[i].matrixId),
+                        onTap: () {
+                          selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
+                        },
+                        borderRadius: BorderRadius.circular(16.0),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0, right: 16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: ExpansionContactListTile(contact: contactsList[i]),
+                                ),
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: contactNotifier,
+                                  builder: (context, isCurrentSelected, child) {
+                                    return Checkbox(
+                                      value: contactNotifier.value,
+                                      onChanged: (newValue) {
+                                        selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
+                                        widget.newGroupController.selectedContact();
+                                      },
+                                    );
+                                  }
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: widget.newGroupController.searchContactsController.isSearchModeNotifier,
+                    builder: (context, isSearchMode, child) {
+                      if (isSearchMode) {
+                        return const SizedBox.shrink();
+                      }
+                      return ValueListenableBuilder(
+                        valueListenable: fetchContactsController.haveMoreCountactsNotifier,
+                        builder: (context, value, child) {
+                          if (value) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Center(child: CircularProgressIndicator()));
+                          }
+                        return const SizedBox.shrink();
+                      });
+                    }
+                  )
+                ],
+              );
+            }
+          );
+        } else {
           return const LoadingContactWidget();
         }
-
-        final contactsList = fetchContactsController
-          .getContactsFromFetchStream(snapshot.data!)
-          .toList();
-
-        contactsList.sort((a, b) => widget.newGroupController.comparePresentationContacts(a, b));
-
-        if (searchKeyword.isNotEmpty && contactsList.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: NoContactsFound(keyword: widget.newGroupController.searchContactsController.searchKeyword),
-          );
-        }
-        
-        return Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: contactsList.length,
-              itemBuilder: (context, i) {
-                final contactNotifier = selectedContactsMapNotifier.getNotifierAtContact(contactsList[i]);
-                return InkWell(
-                  key: ValueKey(contactsList[i].matrixId),
-                  onTap: () {
-                    selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
-                  },
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, right: 16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ExpansionContactListTile(contact: contactsList[i]),
-                          ),
-                          ValueListenableBuilder<bool>(
-                            valueListenable: contactNotifier,
-                            builder: (context, isCurrentSelected, child) {
-                              return Checkbox(
-                                value: contactNotifier.value,
-                                onChanged: (newValue) {
-                                  selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
-                                  widget.newGroupController.selectedContact();
-                                },
-                              );
-                            }
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: widget.newGroupController.searchContactsController.isSearchModeNotifier,
-              builder: (context, isSearchMode, child) {
-                if (isSearchMode) {
-                  return const SizedBox.shrink();
-                }
-                return ValueListenableBuilder(
-                  valueListenable: fetchContactsController.haveMoreCountactsNotifier,
-                  builder: (context, value, child) {
-                    if (value) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ); 
-                    }
-
-                    return const SizedBox.shrink();
-                  }
-                );
-              }
-            )
-          ],
-        );
       },
     );
   }

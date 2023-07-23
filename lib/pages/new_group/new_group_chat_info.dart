@@ -93,7 +93,7 @@ class NewGroupChatInfo extends StatelessWidget {
           return child!;
         },
         child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: newGroupController.createRoomStateNotifier,
+          valueListenable: newGroupController.viewState,
           builder: (context, value, child) {
             if (value == null) {
               return child!;
@@ -106,7 +106,7 @@ class NewGroupChatInfo extends StatelessWidget {
                       customIcon: SizedBox(child: CircularProgressIndicator())
                     );
                   } else {
-                    return const SizedBox();
+                    return child!;
                   }
                 });
             }
@@ -168,7 +168,7 @@ class NewGroupChatInfo extends StatelessWidget {
 
   Widget _buildChangeProfileWidget(BuildContext context) {
     return ValueListenableBuilder<Either<Failure, Success>?>(
-      valueListenable: newGroupController.uploadAvatarNewGroupChatNotifier,
+      valueListenable: newGroupController.viewState,
       builder: (context, value, child) {
         if (value == null) {
           return child!;
@@ -197,7 +197,7 @@ class NewGroupChatInfo extends StatelessWidget {
                   ),
                 );
               } else {
-                return const SizedBox();
+                return child!;
               }
             });
         }

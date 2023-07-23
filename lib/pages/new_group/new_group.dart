@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/base/base_controller.dart';
 import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
@@ -35,21 +34,16 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends State<NewGroup>
-  with ComparablePresentationContactMixin, ImagePickerMixin {
+  with ComparablePresentationContactMixin, ImagePickerMixin, BaseController {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor = getIt.get<CreateNewGroupChatInteractor>();
-  final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
-  final uploadAvatarNewGroupChatNotifier = ValueNotifier<Either<Failure, Success>?>(null);
-  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>?>(null);
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
   final groupNameFocusNode = FocusNode();
-  StreamSubscription? uploadContentInteractorStreamSubscription;
-  StreamSubscription? createNewGroupChatInteractorStreamSubscription;
 
   String groupName = "";
   Uri? uriAvatar;
@@ -76,47 +70,39 @@ class NewGroupController extends State<NewGroup>
   @override
   void dispose() {
     super.dispose();
-    contactStreamController.close();
     searchContactsController.dispose();
     fetchContactsController.dispose();
     groupNameTextEditingController.dispose();
     imagePickerController.dispose();
     selectedContactsMapNotifier.dispose();
     haveGroupNameNotifier.dispose();
-    uploadContentInteractorStreamSubscription?.cancel();
-    createNewGroupChatInteractorStreamSubscription?.cancel();
+    streamController.close();
   }
 
   void listenContactsStartList() {
     fetchContactsController.streamController.stream.listen((event) {
       Logs().d('NewGroupController::fetchContacts() - event: $event');
-      contactStreamController.add(event);
+      streamController.add(event);
     });
   }
 
   void listenSearchContacts() {
     searchContactsController.lookupStreamController.stream.listen((event) {
       Logs().d('NewGroupController::_fetchRemoteContacts() - event: $event');
-      contactStreamController.add(event);
+      streamController.add(event);
     });
-  }
-
-  void onCloseSearchTapped() {
-    searchContactsController.onCloseSearchTapped();
-    fetchContactsController.haveMoreCountactsNotifier.value = false;
   }
 
   void selectedContact() {
     searchContactsController.onSelectedContact();
   }
 
-
   Future<ServerConfig> getServerConfig() async {
     final serverConfig = await Matrix.of(context).client.getConfig();
     return serverConfig;
   }
 
-  Iterable<PresentationContact> get contactsList 
+  Iterable<PresentationContact> get contactsList
     => selectedContactsMapNotifier.contactsList;
 
   Future<Set<PresentationContact>> getAllContactsGroupChat({bool isCustomDisplayName = true}) async {
@@ -172,79 +158,46 @@ class NewGroupController extends State<NewGroup>
     required Client matrixClient,
     required AssetEntity entity,
   }) {
-    uploadContentInteractorStreamSubscription = uploadContentInteractor.execute(
+    consumeState(uploadContentInteractor.execute(
       matrixClient: matrixClient,
       entity: entity,
-    ).listen(
-      (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
-      onDone: _handleUploadAvatarNewGroupChatOnDone,
-      onError: _handleUploadAvatarNewGroupChatOnError
-    );
+    ));
   }
 
   void createNewGroupChatAction({
     required Client matrixClient,
     required CreateNewGroupChatRequest createNewGroupChatRequest,
   }) {
-    createNewGroupChatInteractorStreamSubscription = createNewGroupChatInteractor.execute(
+    consumeState(createNewGroupChatInteractor.execute(
       matrixClient: matrixClient,
       createNewGroupChatRequest: createNewGroupChatRequest,
-    ).listen(
-      (event) => _handleCreateNewGroupChatChatOnData(context, event),
-      onDone: _handleCreateNewGroupChatOnDone,
-      onError: _handleCreateNewGroupChatOnError
-    );
+    ));
   }
 
-  void _handleUploadAvatarNewGroupChatOnData(BuildContext context, Either<Failure, Success> event) {
-    Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData()');
-    uploadAvatarNewGroupChatNotifier.value = event;
-    event.fold(
-      (failure) {
-        Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure');
-        removeAllImageSelected();
-      },
-      (success) {
-        Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success');
-        if (success is UploadContentSuccess) {
-          uriAvatar = success.uri;
-          removeAllImageSelected();
-        }
-      },
-    );
+  @override
+  void onDone() {
+    Logs().d('NewGroupController::OnDone() - done');
+    super.onDone();
   }
 
-  void _handleUploadAvatarNewGroupChatOnDone() {
-    Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnDone() - done');
+  @override
+  void handleSuccessViewState(Success success) {
+    super.handleSuccessViewState(success);
+    if (success is UploadContentSuccess) {
+      uriAvatar = success.uri;
+      removeAllImageSelected();
+    } else if (success is CreateNewGroupChatSuccess) {
+      removeAllImageSelected();
+      _goToRoom(context, success.roomId);
+    }
   }
 
-  void _handleUploadAvatarNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace');
-  }
-
-  void _handleCreateNewGroupChatChatOnData(BuildContext context, Either<Failure, Success> event) {
-    Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData()');
-    createRoomStateNotifier.value = event;
-    event.fold(
-      (failure) {
-        Logs().e('NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure');
-      },
-      (success) {
-        Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success');
-        if (success is CreateNewGroupChatSuccess) {
-          removeAllImageSelected();
-          _goToRoom(context, success.roomId);
-        }
-      },
-    );
-  }
-
-  void _handleCreateNewGroupChatOnDone() {
-    Logs().d('NewGroupController::_handleCreateNewGroupChatOnDone() - done');
-  }
-
-  void _handleCreateNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace');
+  @override
+  void handleFailureViewState(Failure failure) {
+    super.handleFailureViewState(failure);
+    if (failure is UploadContentFailed) {
+      removeAllImageSelected();
+    }
   }
 
   void _goToRoom(BuildContext context, String roomId) {
@@ -285,7 +238,7 @@ class NewGroupController extends State<NewGroup>
 
   @override
   void removeAllImageSelected() {
-    uploadContentInteractorStreamSubscription?.cancel();
+    streamSubscriptionController?.cancel();
     imagePickerController.clearAssetCounter();
     numberSelectedImagesNotifier.value = 0;
     Logs().d('NewGroupController::_removeAllImageSelected() - numberSelectedImagesNotifier.value  ${numberSelectedImagesNotifier.value}');
