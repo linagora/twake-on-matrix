@@ -40,7 +40,8 @@ extension NewGroupInfoController on NewGroupController {
   }
 
   void cancelUploadAvatar(BuildContext context) {
-    uploadAvatarNewGroupChatNotifier.value = const Left(UploadContentFailed(exception: null));
+    streamSubscriptionController?.cancel();
+    viewState.value = const Left(UploadContentFailed(null));
     removeAllImageSelected();
     WarningDialog.hideWarningDialog(context);
   }
