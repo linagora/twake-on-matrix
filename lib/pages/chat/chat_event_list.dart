@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
+import 'package:fluffychat/pages/chat/chat_date_chip.dart';
 import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
-import 'package:flutter/gestures.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -14,6 +16,7 @@ import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:sticky_headers/sticky_headers/widget.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -52,16 +55,22 @@ class ChatEventList extends StatelessWidget {
                 controller: controller.scrollController,
                 physics: const ClampingScrollPhysics(),
                 child: controller.room?.isDirectChat ?? true
-                  ? DirectChatEmptyView(
-                      onTap: () => controller.inputFocus.requestFocus(),
-                  )
-                  : GroupChatEmptyView(firstEvent: controller.timeline!.events.last),
+                    ? DirectChatEmptyView(
+                        onTap: () => controller.inputFocus.requestFocus(),
+                      )
+                    : GroupChatEmptyView(firstEvent: controller.timeline!.events.last),
               ),
             ),
           ),
         ],
       );
     }
+
+    final Map<DateTime, List<Event>> groupedEvents =
+        groupBy(controller.timeline!.events.where((e) => e.isVisibleInGui), (Event event) {
+      return DateTime(
+          event.originServerTs.year, event.originServerTs.month, event.originServerTs.day);
+    });
 
     return ListView.custom(
       padding: EdgeInsets.only(
@@ -76,13 +85,13 @@ class ChatEventList extends StatelessWidget {
           ? ScrollViewKeyboardDismissBehavior.onDrag
           : ScrollViewKeyboardDismissBehavior.manual,
       childrenDelegate: SliverChildBuilderDelegate(
-        (BuildContext context, int i) {
+        (BuildContext context, int groupEventsIndex) {
           // Footer to display typing indicator and read receipts:
-          if (i == 0) {
+          if (groupEventsIndex == 0) {
             return const SizedBox.shrink();
           }
           // Request history button or progress indicator:
-          if (i == controller.timeline!.events.length + 1) {
+          if (groupEventsIndex == groupedEvents.keys.length - 2) {
             if (controller.timeline!.isRequestingHistory) {
               return const Center(
                 child: CircularProgressIndicator.adaptive(strokeWidth: 2),
@@ -101,50 +110,63 @@ class ChatEventList extends StatelessWidget {
             }
             return Container();
           }
-
-          // The message at this index:
-          final currentEventIndex = i - 1;
-          final event = controller.timeline!.events[currentEventIndex];
-          final previousEvent = currentEventIndex > 0 ? controller.timeline!.events[currentEventIndex - 1] : null;
-          final nextEvent = i < controller.timeline!.events.length
-              ? controller.timeline!.events[currentEventIndex + 1]
-              : null;
-          return AutoScrollTag(
-            key: ValueKey(event.eventId),
-            index: currentEventIndex,
-            controller: controller.scrollController,
-            child: event.isVisibleInGui
-                ? Message(
-                    event,
-                    onSwipe: (direction) =>
-                        controller.replyAction(replyTo: event),
-                    onInfoTab: controller.showEventInfo,
-                    onAvatarTab: (Event event) => showAdaptiveBottomSheet(
-                      context: context,
-                      builder: (c) => UserBottomSheet(
-                        user: event.senderFromMemoryOrFallback,
-                        outerContext: context,
-                        onMention: () => controller.sendController.text +=
-                            '${event.senderFromMemoryOrFallback.mention} ',
-                      ),
-                    ),
-                    onSelect: controller.onSelectMessage,
-                    scrollToEventId: (String eventId) =>
-                        controller.scrollToEventId(eventId),
-                    longPressSelect: controller.selectedEvents.isEmpty,
-                    selected: controller.selectedEvents
-                        .any((e) => e.eventId == event.eventId),
-                    timeline: controller.timeline!,
-                    previousEvent: previousEvent,
-                    nextEvent: nextEvent,
-                    controller: controller,
-                  )
-                : Container(),
+          final DateTime dateHeader = groupedEvents.keys.elementAt(groupEventsIndex);
+          return StickyHeaderBuilder(
+              controller: controller.scrollController,
+              builder: (BuildContext context, double stuckAmount) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ChatDateChip(content: dateHeader.relativeTime(context)),
+                );
+              },
+              content: ListView.builder(
+                padding: EdgeInsets.zero,
+                reverse: true,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, eventIndex) {
+                final currentEventIndex = eventIndex;
+                final event = groupedEvents[dateHeader]![currentEventIndex];
+                final previousEvent = currentEventIndex > 0
+                    ? groupedEvents[dateHeader]![currentEventIndex - 1]
+                    : null;
+                return AutoScrollTag(
+                  key: ValueKey(event.eventId),
+                  index: currentEventIndex,
+                  controller: controller.scrollController,
+                  child: event.isVisibleInGui
+                      ? Message(
+                          event,
+                          onSwipe: (direction) => controller.replyAction(replyTo: event),
+                          onInfoTab: controller.showEventInfo,
+                          onAvatarTab: (Event event) => showAdaptiveBottomSheet(
+                            context: context,
+                            builder: (c) => UserBottomSheet(
+                              user: event.senderFromMemoryOrFallback,
+                              outerContext: context,
+                              onMention: () => controller.sendController.text +=
+                                  '${event.senderFromMemoryOrFallback.mention} ',
+                            ),
+                          ),
+                          onSelect: controller.onSelectMessage,
+                          scrollToEventId: (String eventId) => controller.scrollToEventId(eventId),
+                          longPressSelect: controller.selectedEvents.isEmpty,
+                          selected: controller.selectedEvents.any((e) => e.eventId == event.eventId),
+                          timeline: controller.timeline!,
+                          previousEvent: previousEvent,
+                          controller: controller,
+                        )
+                      : const SizedBox.shrink(),
+                );
+              },
+              itemCount: groupedEvents[dateHeader]!.length,
+              findChildIndexCallback: (key) =>
+                  controller.findChildIndexCallback(key, thisEventsKeyMap),
+            )
           );
         },
-        childCount: controller.timeline!.events.length + 2,
-        findChildIndexCallback: (key) =>
-            controller.findChildIndexCallback(key, thisEventsKeyMap),
+        childCount: groupedEvents.length,
+        findChildIndexCallback: (key) => controller.findChildIndexCallback(key, thisEventsKeyMap),
       ),
     );
   }
