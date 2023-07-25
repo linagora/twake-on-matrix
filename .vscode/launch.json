@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "twake-on-matrix",
+        "request": "launch",
+        "type": "dart"
+      },
+      {
+        "name": "twake-on-matrix (attach)",
+        "type": "dart",
+        "request": "attach"
+      },
+      {
+        "name": "twake-on-matrix (release mode)",
+        "request": "launch",
+        "type": "dart",
+        "flutterMode": "release"
+      }
+    ]
+}
