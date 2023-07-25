@@ -1,6 +1,3 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
-import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
@@ -23,24 +20,26 @@ extension NewGroupInfoController on NewGroupController {
     Logs().d('NewGroupInfoController::moveToGroupChatScreen()');
     if (numberSelectedImagesNotifier.value != 1) {
       final client = Matrix.of(context).client;
-      createNewGroupChatAction(
-        matrixClient: client,
-        createNewGroupChatRequest: CreateNewGroupChatRequest(
-          groupName: groupName,
-          invite: getSelectedValidContacts(contactsList)
-            .map<String>((contact) => contact.matrixId!)
-            .toList(),
-          enableEncryption: true,
-          urlAvatar: uriAvatar != null ? uriAvatar!.toString() : null,
-        ),
-      );
+      // FIXME: When upload
+      // createNewGroupChatAction(
+      //   matrixClient: client,
+      //   createNewGroupChatRequest: CreateNewGroupChatRequest(
+      //     groupName: groupName,
+      //     invite: getSelectedValidContacts(contactsList)
+      //       .map<String>((contact) => contact.matrixId!)
+      //       .toList(),
+      //     enableEncryption: true,
+      //     urlAvatar: uriAvatar != null ? uriAvatar!.toString() : null,
+      //   ),
+      // );
     } else {
       WarningDialog.showWarningDialog(context,onAcceptButton: () => cancelUploadAvatar(context));
     }
   }
 
   void cancelUploadAvatar(BuildContext context) {
-    uploadAvatarNewGroupChatNotifier.value = const Left(UploadContentFailed(exception: null));
+    // FIXME: Dont understand it
+    // uploadAvatarNewGroupChatNotifier.value = const Left(UploadContentFailed(exception: null));
     removeAllImageSelected();
     WarningDialog.hideWarningDialog(context);
   }

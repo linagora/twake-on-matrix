@@ -2,19 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 
 class NewGroupChatInfo extends StatelessWidget {
@@ -167,42 +165,7 @@ class NewGroupChatInfo extends StatelessWidget {
   }
 
   Widget _buildChangeProfileWidget(BuildContext context) {
-    return ValueListenableBuilder<Either<Failure, Success>?>(
-      valueListenable: newGroupController.uploadAvatarNewGroupChatNotifier,
-      builder: (context, value, child) {
-        if (value == null) {
-          return child!;
-        } else {
-          return value.fold(
-            (failure) => child!,
-            (success) {
-              if (success is UploadContentLoading) {
-                return Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: LinagoraRefColors.material().neutral[80],
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                  child: const CupertinoActivityIndicator(radius: 10)
-                );
-              } else if (success is UploadContentSuccess) {
-                return InkWell(
-                  onTap: () => newGroupController.showImagesPickerAction(context: context),
-                  child: MxcImage(
-                    width: 56,
-                    height: 56,
-                    uri: success.uri,
-                  ),
-                );
-              } else {
-                return const SizedBox();
-              }
-            });
-        }
-      },
-      child: InkWell(
+    return InkWell(
         onTap: () => newGroupController.showImagesPickerAction(context: context),
         child: Container(
           width: 56,
@@ -212,12 +175,41 @@ class NewGroupChatInfo extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: Icon(Icons.camera_alt_outlined,
-            color: Theme.of(context).colorScheme.surface,
+          child: ValueListenableBuilder(
+            valueListenable: newGroupController.avatarNotifier,
+            builder: (context, value, child) {
+              if (value == null) {
+                return child!;
+              }
+              return ClipOval(
+                child: SizedBox.fromSize(
+                  size: const Size.fromRadius(28),
+                  child: AssetEntityImage(
+                    value,
+                    thumbnailSize: const ThumbnailSize(56, 56),
+                    fit: BoxFit.cover,
+                    loadingBuilder:(context, child, loadingProgress) {
+                      if (loadingProgress != null && loadingProgress.cumulativeBytesLoaded != loadingProgress.expectedTotalBytes) {
+                        return const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        ); 
+                      }
+                      return child;
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(Icons.error_outline),
+                      );
+                    },
+                  ),
+                ));
+            },
+            child: Icon(
+              Icons.camera_alt_outlined,
+              color: Theme.of(context).colorScheme.surface,
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildGroupNameTextFieid(BuildContext context) {
