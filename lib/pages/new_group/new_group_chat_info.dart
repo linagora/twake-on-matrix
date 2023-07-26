@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
@@ -99,7 +100,8 @@ class NewGroupChatInfo extends StatelessWidget {
               return value.fold(
                 (failure) => child!,
                 (success) {
-                  if (success is CreateNewGroupChatLoading) {
+                  if (success is CreateNewGroupChatLoading || 
+                      success is UploadContentLoading) {
                     return const TwakeFloatingActionButton(
                       customIcon: SizedBox(child: CircularProgressIndicator())
                     );
