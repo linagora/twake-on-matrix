@@ -7,25 +7,33 @@ import 'package:matrix/matrix.dart';
 
 class RecentContactsBannerWidget extends StatelessWidget {
   final SearchController searchController;
-  const RecentContactsBannerWidget({super.key, required this.searchController});
+  final List<User> contactsList;
+  const RecentContactsBannerWidget({
+    super.key,
+    required this.searchController,
+    required this.contactsList,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final contactsList = searchController.getContactsFromRecentChat();
     if (contactsList.isEmpty) {
       return const SizedBox.shrink();
     } else {
-      return ListView.builder(
-        shrinkWrap: true,
-        physics: const ClampingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        itemCount: contactsList.length,
-        itemBuilder: (context, index) {
-          return ChatRecentContactItemWidget(
-            user: contactsList[index],
-            searchController: searchController,
-          );
-        },
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ListView.builder(
+          padding: RecentContactsBannerWidgetStyle.chatRecentContactHorizontalPadding,
+          shrinkWrap: true,
+          physics: const ClampingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          itemCount: contactsList.length,
+          itemBuilder: (context, index) {
+            return ChatRecentContactItemWidget(
+              user: contactsList[index],
+              searchController: searchController,
+            );
+          },
+        ),
       );
     }
   }

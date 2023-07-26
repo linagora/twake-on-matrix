@@ -21,6 +21,15 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
+
+  List<User>? contactsList;
+
+  @override
+  void initState() {
+    contactsList = widget.searchController.getContactsFromRecentChat();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,13 +40,15 @@ class _SearchViewState extends State<SearchView> {
         physics: const ClampingScrollPhysics(),
         controller: widget.searchController.customScrollController,
         slivers: [
-          SliverAppBar(
-            flexibleSpace: FlexibleSpaceBar(
-              title: RecentContactsBannerWidget(searchController: widget.searchController),
-              titlePadding: const EdgeInsetsDirectional.only(
-                start: 0.0,
+          if (contactsList != null && contactsList!.isNotEmpty)
+            SliverAppBar(
+              flexibleSpace: FlexibleSpaceBar(
+                title: RecentContactsBannerWidget(
+                  searchController: widget.searchController,
+                  contactsList: contactsList!,
+                ),
+                titlePadding: const EdgeInsetsDirectional.only(start: 0.0),
               ),
-            ),
             toolbarHeight: 112,
             backgroundColor: Colors.transparent,
             automaticallyImplyLeading: false,
