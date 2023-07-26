@@ -1,8 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
@@ -94,27 +92,16 @@ class NewGroupChatInfo extends StatelessWidget {
         child: ValueListenableBuilder<Either<Failure, Success>?>(
           valueListenable: newGroupController.createRoomStateNotifier,
           builder: (context, value, child) {
-            if (value == null) {
-              return child!;
-            } else {
-              return value.fold(
-                (failure) => child!,
-                (success) {
-                  if (success is CreateNewGroupChatLoading || 
-                      success is UploadContentLoading) {
-                    return const TwakeFloatingActionButton(
-                      customIcon: SizedBox(child: CircularProgressIndicator())
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                });
+            if (newGroupController.isCreatingRoom) {
+              return const TwakeFloatingActionButton(
+                customIcon: SizedBox(child: CircularProgressIndicator())
+              );
             }
+            return TwakeFloatingActionButton(
+              icon: Icons.done,
+              onTap: () => newGroupController.moveToGroupChatScreen(),
+            );
           },
-          child: TwakeFloatingActionButton(
-            icon: Icons.done,
-            onTap: () => newGroupController.moveToGroupChatScreen(),
-          ),
         ),
       ),
     );
@@ -169,6 +156,7 @@ class NewGroupChatInfo extends StatelessWidget {
   Widget _buildChangeProfileWidget(BuildContext context) {
     return InkWell(
         onTap: () => newGroupController.showImagesPickerAction(context: context),
+        customBorder: const CircleBorder(),
         child: Container(
           width: 56,
           height: 56,
@@ -217,26 +205,32 @@ class NewGroupChatInfo extends StatelessWidget {
   Widget _buildGroupNameTextFieid(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: TextField(
-        controller: newGroupController.groupNameTextEditingController,
-        focusNode: newGroupController.groupNameFocusNode,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.shadow),
-          ),
-          labelText: L10n.of(context)!.widgetName,
-          labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontSize: 16,
-            letterSpacing: 0.4,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          hintText: L10n.of(context)!.enterGroupName,
-          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            letterSpacing: -0.15,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          contentPadding: const EdgeInsets.all(16.0),
-        ),
+      child: ValueListenableBuilder(
+        valueListenable: newGroupController.createRoomStateNotifier,
+        builder: (context, value, child) {
+          return TextField(
+            controller: newGroupController.groupNameTextEditingController,
+            focusNode: newGroupController.groupNameFocusNode,
+            enabled: !newGroupController.isCreatingRoom,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.shadow),
+              ),
+              labelText: L10n.of(context)!.widgetName,
+              labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 16,
+                letterSpacing: 0.4,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              hintText: L10n.of(context)!.enterGroupName,
+              hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                letterSpacing: -0.15,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              contentPadding: const EdgeInsets.all(16.0),
+            ),
+          );
+        }
       ),
     );
   }

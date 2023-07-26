@@ -1,6 +1,11 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 
+class CreateNewGroupInitial extends Success {
+  @override
+  List<Object?> get props => [];
+}
+
 class CreateNewGroupChatLoading extends Success {
   @override
   List<Object?> get props => [];

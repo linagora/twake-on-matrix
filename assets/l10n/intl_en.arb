@@ -2662,7 +2662,7 @@
        }
     },
     "continueProcess": "Continue",
-    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "You are uploading photos, do you want to cancel or continue?",
+    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Image upload error! Do you still want to continue creating groups?",
     "hasCreatedAGroupChat": "created a group chat “{groupName}”",
     "@hasCreatedAGroupChat": {
         "type": "text",
