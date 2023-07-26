@@ -30,13 +30,6 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
-    // create a map of eventId --> index to greatly improve performance of
-    // ListView's findChildIndexCallback
-    final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < controller.timeline!.events.length; i++) {
-      thisEventsKeyMap[controller.timeline!.events[i].eventId] = i;
-    }
-
     if (!controller.timeline!.events.any(
       (e) => {
         EventTypes.Message,
@@ -67,107 +60,106 @@ class ChatEventList extends StatelessWidget {
     }
 
     final Map<DateTime, List<Event>> groupedEvents =
-        groupBy(controller.timeline!.events.where((e) => e.isVisibleInGui), (Event event) {
+        groupBy(controller.timeline!.events.where((e) => e.isVisibleInGui).toList(), (Event event) {
       return DateTime(
           event.originServerTs.year, event.originServerTs.month, event.originServerTs.day);
     });
 
     return ListView.custom(
-      padding: EdgeInsets.only(
-        top: 16,
-        bottom: 8.0,
-        left: horizontalPadding,
-        right: horizontalPadding,
-      ),
-      reverse: true,
-      controller: controller.scrollController,
-      keyboardDismissBehavior: PlatformInfos.isIOS
-          ? ScrollViewKeyboardDismissBehavior.onDrag
-          : ScrollViewKeyboardDismissBehavior.manual,
-      childrenDelegate: SliverChildBuilderDelegate(
-        (BuildContext context, int groupEventsIndex) {
-          // Footer to display typing indicator and read receipts:
-          if (groupEventsIndex == 0) {
-            return const SizedBox.shrink();
-          }
-          // Request history button or progress indicator:
-          if (groupEventsIndex == groupedEvents.keys.length - 2) {
-            if (controller.timeline!.isRequestingHistory) {
-              return const Center(
-                child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-              );
+        padding: EdgeInsets.only(
+          top: 16,
+          bottom: 8.0,
+          left: horizontalPadding,
+          right: horizontalPadding,
+        ),
+        reverse: true,
+        controller: controller.scrollController,
+        keyboardDismissBehavior: PlatformInfos.isIOS
+            ? ScrollViewKeyboardDismissBehavior.onDrag
+            : ScrollViewKeyboardDismissBehavior.manual,
+        childrenDelegate: SliverChildBuilderDelegate(
+          (BuildContext context, int groupEventsIndex) {
+            // Footer to display typing indicator and read receipts:
+            if (groupEventsIndex == 0) {
+              return const SizedBox.shrink();
             }
-            if (controller.canLoadMore) {
-              Center(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  ),
-                  onPressed: controller.requestHistory,
-                  child: Text(L10n.of(context)!.loadMore),
-                ),
-              );
+            // Request history button or progress indicator:
+            if (groupEventsIndex == groupedEvents.keys.length - 1) {
+              if (controller.timeline!.isRequestingHistory) {
+                return const Center(
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                );
+              }
+              return Container();
             }
-            return Container();
-          }
-          final DateTime dateHeader = groupedEvents.keys.elementAt(groupEventsIndex);
-          return StickyHeaderBuilder(
-              controller: controller.scrollController,
-              builder: (BuildContext context, double stuckAmount) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ChatDateChip(content: dateHeader.relativeTime(context)),
-                );
-              },
-              content: ListView.builder(
-                padding: EdgeInsets.zero,
-                reverse: true,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, eventIndex) {
-                final currentEventIndex = eventIndex;
-                final event = groupedEvents[dateHeader]![currentEventIndex];
-                final previousEvent = currentEventIndex > 0
-                    ? groupedEvents[dateHeader]![currentEventIndex - 1]
-                    : null;
-                return AutoScrollTag(
-                  key: ValueKey(event.eventId),
-                  index: currentEventIndex,
-                  controller: controller.scrollController,
-                  child: event.isVisibleInGui
-                      ? Message(
-                          event,
-                          onSwipe: (direction) => controller.replyAction(replyTo: event),
-                          onInfoTab: controller.showEventInfo,
-                          onAvatarTab: (Event event) => showAdaptiveBottomSheet(
-                            context: context,
-                            builder: (c) => UserBottomSheet(
-                              user: event.senderFromMemoryOrFallback,
-                              outerContext: context,
-                              onMention: () => controller.sendController.text +=
-                                  '${event.senderFromMemoryOrFallback.mention} ',
-                            ),
-                          ),
-                          onSelect: controller.onSelectMessage,
-                          scrollToEventId: (String eventId) => controller.scrollToEventId(eventId),
-                          longPressSelect: controller.selectedEvents.isEmpty,
-                          selected: controller.selectedEvents.any((e) => e.eventId == event.eventId),
-                          timeline: controller.timeline!,
-                          previousEvent: previousEvent,
-                          controller: controller,
-                        )
-                      : const SizedBox.shrink(),
-                );
-              },
-              itemCount: groupedEvents[dateHeader]!.length,
-              findChildIndexCallback: (key) =>
-                  controller.findChildIndexCallback(key, thisEventsKeyMap),
-            )
-          );
-        },
-        childCount: groupedEvents.length,
-        findChildIndexCallback: (key) => controller.findChildIndexCallback(key, thisEventsKeyMap),
-      ),
-    );
+
+            final DateTime dateHeader = groupedEvents.keys.elementAt(groupEventsIndex - 1);
+
+            // create a map of eventId --> index to greatly improve performance of
+            // ListView's findChildIndexCallback
+            final thisEventsKeyMap = <String, int>{};
+            for (var i = 0; i < groupedEvents[dateHeader]!.length; i++) {
+              thisEventsKeyMap[groupedEvents[dateHeader]![i].eventId] = i;
+            }
+
+            return StickyHeaderBuilder(
+                controller: controller.scrollController,
+                builder: (BuildContext context, double stuckAmount) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ChatDateChip(content: dateHeader.relativeTime(context)),
+                  );
+                },
+                content: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    reverse: true,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, eventIndex) {
+                      final currentEventIndex = eventIndex;
+                      final event = groupedEvents[dateHeader]![currentEventIndex];
+                      final previousEvent = currentEventIndex > 0
+                          ? groupedEvents[dateHeader]![currentEventIndex - 1]
+                          : null;
+                      return AutoScrollTag(
+                          key: ValueKey(event.eventId),
+                          index: currentEventIndex,
+                          controller: controller.scrollController,
+                          child: event.isVisibleInGui
+                              ? Message(
+                                  event,
+                                  onSwipe: (direction) => controller.replyAction(replyTo: event),
+                                  onInfoTab: controller.showEventInfo,
+                                  onAvatarTab: (Event event) => showAdaptiveBottomSheet(
+                                    context: context,
+                                    builder: (c) => UserBottomSheet(
+                                      user: event.senderFromMemoryOrFallback,
+                                      outerContext: context,
+                                      onMention: () => controller.sendController.text +=
+                                          '${event.senderFromMemoryOrFallback.mention} ',
+                                    ),
+                                  ),
+                                  onSelect: controller.onSelectMessage,
+                                  scrollToEventId: (String eventId) =>
+                                      controller.scrollToEventId(eventId),
+                                  longPressSelect: controller.selectedEvents.isEmpty,
+                                  selected: controller.selectedEvents
+                                      .any((e) => e.eventId == event.eventId),
+                                  timeline: controller.timeline!,
+                                  previousEvent: previousEvent,
+                                  controller: controller,
+                                )
+                              : const SizedBox.shrink());
+                    },
+                    itemCount: groupedEvents[dateHeader]!.length,
+                    findChildIndexCallback: (key) =>
+                        controller.findChildIndexCallback(key, thisEventsKeyMap)));
+          },
+          childCount: groupedEvents.length,
+          findChildIndexCallback: (key) {
+            final index = groupedEvents.keys.toList().indexOf(key as DateTime);
+            return index == -1 ? null : index + 1;
+          },
+        ));
   }
 }

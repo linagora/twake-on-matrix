@@ -1012,6 +1012,24 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     return index + 1;
   }
 
+  // int? findGroupChildIndexCallback(Key key, Map<DateTime, List<String>> thisGroupsEventKeyMap) {
+  //   // this method is called very often. As such, it has to be optimized for speed.
+  //   if (key is! ValueKey) {
+  //     return null;
+  //   }
+  //   final eventIdList = key.value;
+  //   if (eventIdList is! List<String>) {
+  //     return null;
+  //   }
+  //   // first fetch the last index the event was at
+  //   final index = thisGroupsEventKeyMap.keys.firstWhereOrNull((key) => thisGroupsEventKeyMap[key] == eventIdList);
+  //   if (index == null) {
+  //     return null;
+  //   }
+  //   // we need to +1 as 0 is the typing thing at the bottom
+  //   return thisGroupsEventKeyMap.keys.toList().indexOf(index.key) + 1;
+  // }
+
   void onInputBarSubmitted(_) {
     send();
     FocusScope.of(context).requestFocus(inputFocus);
