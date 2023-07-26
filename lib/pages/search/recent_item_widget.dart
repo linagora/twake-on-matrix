@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/search/recent_item_widget_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -58,11 +59,8 @@ class RecentItemWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        presentationSearch.displayName ?? "",
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        softWrap: false,
+                      HighlightText(
+                        text: presentationSearch.displayName ?? "",
                         style: Theme.of(context).textTheme.titleMedium?.merge(
                           TextStyle(
                             overflow: TextOverflow.ellipsis,
@@ -70,6 +68,7 @@ class RecentItemWidget extends StatelessWidget {
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        searchWord: searchController.searchContactAndRecentChatController?.searchKeyword,
                       ),
                       _buildInformationWidget(context),
                     ],
@@ -85,13 +84,15 @@ class RecentItemWidget extends StatelessWidget {
   }
 
   Widget _buildInformationWidget(BuildContext context) {
+    final String searchKeyword = searchController.searchContactAndRecentChatController?.searchKeyword ?? "";
+
     if (presentationSearch.isContact) {
-      return _ContactInformation(presentationSearch: presentationSearch);
+      return _ContactInformation(presentationSearch: presentationSearch, searchKeyword: searchKeyword);
     } else {
       if (presentationSearch.directChatMatrixID == null) {
         return _GroupChatInformation(presentationSearch: presentationSearch);
       } else {
-        return _DirectChatInformation(presentationSearch: presentationSearch);
+        return _DirectChatInformation(presentationSearch: presentationSearch, searchKeyword: searchKeyword);
       }
     }
   }
@@ -123,15 +124,14 @@ class _GroupChatInformation extends StatelessWidget {
 
 class _DirectChatInformation extends StatelessWidget {
   final PresentationSearch presentationSearch;
-  const _DirectChatInformation({required this.presentationSearch});
+  final String? searchKeyword;
+
+  const _DirectChatInformation({required this.presentationSearch, this.searchKeyword});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      presentationSearch.roomSummary?.mHeroes?.first ?? "",
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      softWrap: false,
+    return HighlightText(
+      text: presentationSearch.roomSummary?.mHeroes?.first ?? "",
       style: Theme.of(context).textTheme.bodyMedium?.merge(
         TextStyle(
           overflow: TextOverflow.ellipsis,
@@ -139,13 +139,16 @@ class _DirectChatInformation extends StatelessWidget {
           color: LinagoraRefColors.material().tertiary[30],
         ),
       ),
+      searchWord: searchKeyword,
     );
   }
 }
 
 class _ContactInformation extends StatelessWidget {
   final PresentationSearch presentationSearch;
-  const _ContactInformation({required this.presentationSearch});
+  final String? searchKeyword;
+
+  const _ContactInformation({required this.presentationSearch, this.searchKeyword});
 
   @override
   Widget build(BuildContext context) {
@@ -167,19 +170,17 @@ class _ContactInformation extends StatelessWidget {
           ),
         ),
         if (presentationSearch.directChatMatrixID != null)
-          Text(
-          presentationSearch.directChatMatrixID ?? "",
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          softWrap: false,
-          style: Theme.of(context).textTheme.bodyMedium?.merge(
-            TextStyle(
-              overflow: TextOverflow.ellipsis,
-              letterSpacing: 0.15,
-              color: LinagoraRefColors.material().tertiary[30],
+          HighlightText(
+            text: presentationSearch.directChatMatrixID ?? "",
+            style: Theme.of(context).textTheme.bodyMedium?.merge(
+              TextStyle(
+                overflow: TextOverflow.ellipsis,
+                letterSpacing: 0.15,
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
             ),
+            searchWord: searchKeyword,
           ),
-        ),
       ],
     );
   }
