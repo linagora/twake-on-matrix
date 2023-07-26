@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -18,6 +19,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
+import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 import 'package:flutter/material.dart';
@@ -43,7 +45,7 @@ class NewGroupController extends State<NewGroup>
   final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
   final avatarNotifier = ValueNotifier<AssetEntity?>(null);
-  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>?>(null);
+  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
@@ -168,17 +170,18 @@ class NewGroupController extends State<NewGroup>
     );
   }
 
-  void createNewGroup({ required String? uriAvatar }) {
+  void createNewGroup({String? urlAvatar}) {
     final client = Matrix.of(context).client;
     createNewGroupChatAction(
       matrixClient: client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
         groupName: groupName,
         invite: getSelectedValidContacts(contactsList)
-            .map<String>((contact) => contact.matrixId!)
-            .toList(),
+          .map((contact) => contact.matrixId)
+          .whereNotNull()
+          .toList(),
         enableEncryption: true,
-        urlAvatar: uriAvatar
+        urlAvatar: urlAvatar
       ),
     );
   }
@@ -217,12 +220,16 @@ class NewGroupController extends State<NewGroup>
     event.fold(
       (failure) {
         Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure');
+        WarningDialog.showWarningDialog(context, onAcceptButton: () {
+          WarningDialog.hideWarningDialog(context);
+          createNewGroup();
+        });
       },
       (success) {
         Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success');
         if (success is UploadContentSuccess) {
-          final uriAvatar = success.uri.toString();
-          createNewGroup(uriAvatar: uriAvatar);
+          final urlAvatar = success.uri.toString();
+          createNewGroup(urlAvatar: urlAvatar);
         }
       },
     );
@@ -282,12 +289,7 @@ class NewGroupController extends State<NewGroup>
   void showImagesPickerAction({
     required BuildContext context,
   }) async {
-    final isLoading = createRoomStateNotifier.value?.fold(
-      (l) => false, 
-      (r) => r is UploadContentLoading || r is CreateNewGroupChatLoading
-    );
-    if (isLoading == true) {
-      // Disable if already uploading
+    if (isCreatingRoom) {
       return;
     }
     final currentPermissionPhotos = await getCurrentPhotoPermission();
@@ -302,6 +304,12 @@ class NewGroupController extends State<NewGroup>
     }
   }
 
+  bool get isCreatingRoom {
+    return createRoomStateNotifier.value.fold(
+      (failure) => false, 
+      (success) => success is UploadContentLoading || success is CreateNewGroupChatLoading
+    ) ?? false;
+  }
 
   @override
   void removeAllImageSelected() {

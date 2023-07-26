@@ -16,13 +16,14 @@ extension NewGroupInfoController on NewGroupController {
 
   void moveToGroupChatScreen() async {
     Logs().d('NewGroupInfoController::moveToGroupChatScreen()');
+    groupNameFocusNode.unfocus();
     final client = Matrix.of(context).client;
     if (avatarNotifier.value != null) {
       uploadAvatarNewGroupChat(
         matrixClient: client, 
         entity: avatarNotifier.value!);
     } else {
-      createNewGroup(uriAvatar: null);
+      createNewGroup();
     }
   }
 
