@@ -73,7 +73,7 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
 
   void setFloating(bool floating) {
     if (_isAnimating()) return;
-    dismissKeyboard(context);
+    dismissKeyboard();
     setState(() {
       _floating = floating;
     });
@@ -82,7 +82,7 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
 
   void stopFloating() {
     if (_isAnimating()) return;
-    dismissKeyboard(context);
+    dismissKeyboard();
     _toggleFloatingAnimationController.reverse().whenCompleteOrCancel(() {
       if (mounted) {
         setState(() {

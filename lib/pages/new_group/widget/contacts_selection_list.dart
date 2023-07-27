@@ -69,7 +69,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                 return InkWell(
                   key: ValueKey(contactsList[i].matrixId),
                   onTap: () {
-                    selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
+                    selectedContactsMapNotifier.onContactTileTap(context, contactsList[i]);
                   },
                   borderRadius: BorderRadius.circular(16.0),
                   child: SizedBox(
@@ -88,7 +88,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                               return Checkbox(
                                 value: contactNotifier.value,
                                 onChanged: (newValue) {
-                                  selectedContactsMapNotifier.onContactTileTap(contact: contactsList[i]);
+                                  selectedContactsMapNotifier.onContactTileTap(context, contactsList[i]);
                                   widget.newGroupController.selectedContact();
                                 },
                               );
