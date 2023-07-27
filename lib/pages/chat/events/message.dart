@@ -22,7 +22,6 @@ import 'verification_request_content.dart';
 class Message extends StatelessWidget {
   final Event event;
   final Event? previousEvent;
-  final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTab;
   final void Function(Event)? onInfoTab;
@@ -36,7 +35,6 @@ class Message extends StatelessWidget {
   const Message(
     this.event, {
     this.previousEvent,
-    this.nextEvent,
     this.longPressSelect = false,
     this.onSelect,
     this.onInfoTab,
@@ -77,9 +75,6 @@ class Message extends StatelessWidget {
         final client = Matrix.of(context).client;
         final ownMessage = event.senderId == client.userID;
         final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
-        final displayTime = event.type == EventTypes.RoomCreate ||
-            nextEvent == null ||
-            !DateUtils.isSameDay(event.originServerTs, nextEvent!.originServerTs);
         final textColor = Theme.of(context).colorScheme.onBackground;
         final rowMainAxisAlignment =
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
@@ -386,23 +381,6 @@ class Message extends StatelessWidget {
 
         return Column(
           children: [
-            if (displayTime)
-              Center(
-                child: Material(
-                  color: displayTime
-                      ? Colors.transparent
-                      : Theme.of(context).colorScheme.background.withOpacity(0.33),
-                  borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Text(
-                      event.originServerTs.relativeTime(context),
-                      style: MessageStyle.displayTime(context),
-                    ),
-                  ),
-                ),
-              ),
             Swipeable(
               key: ValueKey(event.eventId),
               background: const Padding(

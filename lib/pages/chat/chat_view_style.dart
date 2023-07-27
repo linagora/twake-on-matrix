@@ -1,3 +1,3 @@
 class ChatViewStyle {
-  static double get paddingVerticalActionButtons => 8.0;
+  static double get toolbarHeight => 64.0;
 }
