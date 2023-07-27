@@ -8,10 +8,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
 import '../../config/themes.dart';
-import 'homeserver_app_bar.dart';
 import 'homeserver_picker.dart';
 
 class HomeserverPickerView extends StatelessWidget {
@@ -74,7 +71,7 @@ class HomeserverPickerView extends StatelessWidget {
                     letterSpacing: 0.25,
                     color: Theme.of(context).colorScheme.outline,
                   ),
-                  textAlign: TextAlign.center,),
+                  textAlign: TextAlign.center),
               ),
             Container(
               padding: const EdgeInsets.all(16),
@@ -97,15 +94,7 @@ class HomeserverPickerView extends StatelessWidget {
                       onPressed: () => controller.loginButtonPressed(),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: controller.state == HomeserverState.ssoLoginServer
-                        ? [
-                          _getLabelLoginButton(context)
-                        ]
-                        : [
-                          const Icon(Icons.start_outlined),
-                          const SizedBox(width: 8.0),
-                          _getLabelLoginButton(context),
-                        ],
+                        children: [_getLabelLoginButton(context)]
                       ),
                     ),
                   ),
@@ -129,14 +118,13 @@ class HomeserverPickerView extends StatelessWidget {
     );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
-      case HomeserverState.enterServerName:
-        return Text(L10n.of(context)!.letsStart, style: textStyle,);
+        return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
       case HomeserverState.loading:
         return const Expanded(child: LinearProgressIndicator());
       case HomeserverState.ssoLoginServer:
         return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
       case HomeserverState.wrongServerName:
-        return Text(L10n.of(context)!.letsStart, style: textStyle,);
+        return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
     }
   }
 }
@@ -180,9 +168,6 @@ class HomeserverTextField extends StatelessWidget {
               ? Theme.of(context).colorScheme.onSurface
               : Theme.of(context).colorScheme.error,
           ),
-          suffixIcon: controller.state == HomeserverState.ssoLoginServer
-            ? Icon(Icons.done, color: Theme.of(context).colorScheme.primary,)
-            : null,
           hintText: L10n.of(context)!.enterYourHomeserver,
           contentPadding: const EdgeInsets.all(16.0),
         ),

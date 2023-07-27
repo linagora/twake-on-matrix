@@ -34,7 +34,7 @@ class HomeserverPicker extends StatefulWidget {
 
 class HomeserverPickerController extends State<HomeserverPicker> with ConnectPageMixin {
   
-  HomeserverState state = HomeserverState.enterServerName;
+  HomeserverState state = HomeserverState.ssoLoginServer;
   final TextEditingController homeserverController = TextEditingController(
     text: AppConfig.defaultHomeserver,
   );
@@ -138,8 +138,7 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
     });
 
     try {
-      homeserverController.text =
-          homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
+      homeserverController.text = homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
       var homeserver = Uri.parse(homeserverController.text);
       if (homeserver.scheme.isEmpty) {
         homeserver = Uri.https(homeserverController.text, '');
@@ -158,14 +157,24 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
       }
 
-      if (!ssoSupported && matrix.loginRegistrationSupported == false) {
-        // Server does not support SSO or registration. We can skip to login page:
-        VRouter.of(context).to('login');
-      } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
+      if (ssoSupported && matrix.loginRegistrationSupported == false) {
         setState(() {
           state = HomeserverState.ssoLoginServer;
           FocusManager.instance.primaryFocus?.unfocus();
         });
+        Map<String, dynamic>? rawLoginTypes;
+        await Matrix.of(context)
+          .getLoginClient()
+          .request(
+            RequestType.GET,
+            '/client/r0/login',
+          )
+          .then((loginTypes) => rawLoginTypes = loginTypes);
+        final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
+
+        if (supportsSso(context) && identitiesProvider?.length == 1) {
+          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
+        }
       } else {
         state = HomeserverState.otherLoginMethod;
         VRouter.of(context).to('connect');
@@ -178,27 +187,8 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
 
   void loginButtonPressed() async {
     switch (state) {
-      case HomeserverState.enterServerName:
-        await checkHomeserverAction();
-        break;
-      case HomeserverState.loading:
-        break;
       case HomeserverState.ssoLoginServer:
         await checkHomeserverAction();
-        Map<String, dynamic>? rawLoginTypes;
-        await Matrix.of(context)
-          .getLoginClient()
-          .request(
-            RequestType.GET,
-            '/client/r0/login',
-          )
-          .then((loginTypes) => rawLoginTypes = loginTypes,
-          );
-        final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
-
-        if (supportsSso(context) && identitiesProvider?.length == 1) {
-          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
-        }
         break;
       case HomeserverState.wrongServerName:
         await checkHomeserverAction();
