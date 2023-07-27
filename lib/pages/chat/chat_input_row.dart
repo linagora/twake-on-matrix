@@ -163,18 +163,26 @@ class ChatInputRow extends StatelessWidget {
                                 );
                               },
                               child: !controller.showEmojiPicker
-                                ? TwakeIconButton(
-                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                    tooltip: L10n.of(context)!.emojis,
-                                    onPressed: () => controller.emojiPickerAction(),
-                                    icon: Icons.tag_faces,
-                                    )
-                                : TwakeIconButton(
-                                    paddingAll: controller.inputText.isEmpty ? 5.0 : 12,
-                                    tooltip: L10n.of(context)!.keyboard,
-                                    onPressed: () => controller.inputFocus.requestFocus(),
-                                    icon: Icons.keyboard,
-                                  ),
+                                  ? ValueListenableBuilder(
+                                      valueListenable: controller.inputText,
+                                      builder: (context, value, child) {
+                                        return TwakeIconButton(
+                                          paddingAll: value.isEmpty ? 5.0 : 12,
+                                          tooltip: L10n.of(context)!.emojis,
+                                          onPressed: () => controller.emojiPickerAction(),
+                                          icon: Icons.tag_faces,
+                                        );
+                                      })
+                                  : ValueListenableBuilder(
+                                      valueListenable: controller.inputText,
+                                      builder: (context, value, child) {
+                                        return TwakeIconButton(
+                                          paddingAll: value.isEmpty ? 5.0 : 12,
+                                          tooltip: L10n.of(context)!.keyboard,
+                                          onPressed: () => controller.inputFocus.requestFocus(),
+                                          icon: Icons.keyboard,
+                                        );
+                                      }),
                             ),
                           ),
                         ),
@@ -182,8 +190,15 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (!PlatformInfos.isMobile || controller.inputText.isNotEmpty)
-                  Container(
+                ValueListenableBuilder(
+                  valueListenable: controller.inputText,
+                  builder: (context, value, child) {
+                    if (!PlatformInfos.isMobile || value.isNotEmpty) {
+                      return child!;
+                    } 
+                    return const SizedBox();
+                  },
+                  child: Container(
                     height: 56,
                     alignment: Alignment.center,
                     child: TwakeIconButton(
@@ -193,6 +208,7 @@ class ChatInputRow extends StatelessWidget {
                       imagePath: ImagePaths.icSend,
                     ),
                   ),
+                ),
               ],
       ),
     );
