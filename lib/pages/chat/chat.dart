@@ -8,10 +8,6 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -148,7 +144,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
 
   final int _loadHistoryCount = 100;
 
-  String inputText = '';
+  final inputText = ValueNotifier('');
 
   String pendingText = '';
 
@@ -242,7 +238,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     final draft = prefs.getString('draft_$roomId');
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
-      setState(() => inputText = draft);
+      inputText.value = draft;
     }
   }
 
@@ -372,8 +368,8 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       selection: const TextSelection.collapsed(offset: 0),
     );
 
+    inputText.value = pendingText;
     setState(() {
-      inputText = pendingText;
       replyEvent = null;
       editEvent = null;
       pendingText = '';
@@ -933,7 +929,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     setState(() {
       pendingText = sendController.text;
       editEvent = selectedEvents.first;
-      inputText = sendController.text =
+      inputText.value = sendController.text =
           editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 withSenderNamePrefix: false,
@@ -1070,8 +1066,8 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
         if ((prefix.isNotEmpty) &&
             text.toLowerCase() == '${prefix.toLowerCase()} ') {
           setSendingClient(client);
+          inputText.value = '';
           setState(() {
-            inputText = '';
             sendController.text = '';
           });
           return;
@@ -1093,7 +1089,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       room!
           .setTyping(true, timeout: const Duration(seconds: 30).inMilliseconds);
     }
-    setState(() => inputText = text);
+    inputText.value = text;
   }
 
   bool get isArchived =>
@@ -1163,7 +1159,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
 
   void cancelReplyEventAction() => setState(() {
         if (editEvent != null) {
-          inputText = sendController.text = pendingText;
+          inputText.value = sendController.text = pendingText;
           pendingText = '';
         }
         replyEvent = null;
