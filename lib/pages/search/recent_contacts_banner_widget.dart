@@ -5,10 +5,10 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class RecentContactsBannerWidget extends StatelessWidget {
+class PreSearchRecentContactsContainer extends StatelessWidget {
   final SearchController searchController;
   final List<User> contactsList;
-  const RecentContactsBannerWidget({
+  const PreSearchRecentContactsContainer({
     super.key,
     required this.searchController,
     required this.contactsList,
@@ -28,7 +28,7 @@ class RecentContactsBannerWidget extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemCount: contactsList.length,
           itemBuilder: (context, index) {
-            return ChatRecentContactItemWidget(
+            return PreSearchRecentContactWidget(
               user: contactsList[index],
               searchController: searchController,
             );
@@ -39,10 +39,10 @@ class RecentContactsBannerWidget extends StatelessWidget {
   }
 }
 
-class ChatRecentContactItemWidget extends StatelessWidget {
+class PreSearchRecentContactWidget extends StatelessWidget {
   final SearchController searchController;
   final User user;
-  const ChatRecentContactItemWidget({super.key, required this.user, required this.searchController});
+  const PreSearchRecentContactWidget({super.key, required this.user, required this.searchController});
 
   @override
   Widget build(BuildContext context) {

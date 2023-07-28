@@ -1,9 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/search/recent_item_widget_style.dart';
-import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/presentation/extensions/search/presentation_search_extensions.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -12,18 +13,19 @@ import 'package:matrix/matrix.dart';
 
 class RecentItemWidget extends StatelessWidget {
   final PresentationSearch presentationSearch;
-  final SearchController searchController;
+  final String highlightKeyword;
   final void Function()? onTap;
 
   const RecentItemWidget({
     required this.presentationSearch,
-    required this.searchController,
+    required this.highlightKeyword,
     this.onTap,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final client = Matrix.of(context).client;
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
@@ -45,7 +47,7 @@ class RecentItemWidget extends StatelessWidget {
                 SizedBox(
                   width: RecentItemStyle.avatarSize,
                   child: FutureBuilder<ProfileInformation?>(
-                    future: searchController.getProfile(context, presentationSearch),
+                    future: presentationSearch.getProfile(client),
                     builder: (context, snapshot) {
                       return Avatar(
                         mxContent: snapshot.data?.avatarUrl,
@@ -68,7 +70,7 @@ class RecentItemWidget extends StatelessWidget {
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        searchWord: searchController.searchContactAndRecentChatController?.searchKeyword,
+                        searchWord: highlightKeyword,
                       ),
                       _buildInformationWidget(context),
                     ],
@@ -84,15 +86,13 @@ class RecentItemWidget extends StatelessWidget {
   }
 
   Widget _buildInformationWidget(BuildContext context) {
-    final String searchKeyword = searchController.searchContactAndRecentChatController?.searchKeyword ?? "";
-
     if (presentationSearch.isContact) {
-      return _ContactInformation(presentationSearch: presentationSearch, searchKeyword: searchKeyword);
+      return _ContactInformation(presentationSearch: presentationSearch, searchKeyword: highlightKeyword);
     } else {
       if (presentationSearch.directChatMatrixID == null) {
         return _GroupChatInformation(presentationSearch: presentationSearch);
       } else {
-        return _DirectChatInformation(presentationSearch: presentationSearch, searchKeyword: searchKeyword);
+        return _DirectChatInformation(presentationSearch: presentationSearch, searchKeyword: highlightKeyword);
       }
     }
   }
