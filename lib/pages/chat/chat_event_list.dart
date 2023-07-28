@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/chat_chip_button.dart';
 import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/widgets/sticky_header/sticky_header.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -15,7 +16,6 @@ import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:sticky_headers/sticky_headers.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
