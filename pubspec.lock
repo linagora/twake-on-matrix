@@ -2167,14 +2167,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.0"
-  sticky_headers:
-    dependency: "direct main"
-    description:
-      name: sticky_headers
-      sha256: e932bf2afbfd6587779cd445a9a252ba1c610db9ba33942b6d902d738dd205ca
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
   stream_channel:
     dependency: transitive
     description:
