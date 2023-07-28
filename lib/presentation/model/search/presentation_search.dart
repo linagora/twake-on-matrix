@@ -36,4 +36,6 @@ class PresentationSearch extends Equatable {
     roomSummary,
     directChatMatrixID
   ];
+
+  
 }
