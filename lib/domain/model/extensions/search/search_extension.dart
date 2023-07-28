@@ -12,4 +12,8 @@ extension SearchExtension on SearchModel {
       directChatMatrixID: directChatMatrixID
     );
   }
+    
+  bool searchDisplayName(String keyword) {
+    return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
+  }
 }
