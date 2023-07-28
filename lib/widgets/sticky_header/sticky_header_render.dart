@@ -1,3 +1,7 @@
+// Copyright 2018 Simon Lightfoot. All rights reserved.
+// Use of this source code is governed by a the MIT license that can be
+// found in the LICENSE file.
+
 import 'dart:math' show min, max;
 
 import 'package:flutter/material.dart';
@@ -7,7 +11,7 @@ import 'package:flutter/widgets.dart';
 /// Called every layout to provide the amount of stickyness a header is in.
 /// This lets the widgets animate their content and provide feedback.
 ///
-typedef RenderStickyHeaderCallback = void Function(double stuckAmount);
+typedef void RenderStickyHeaderCallback(double stuckAmount);
 
 /// RenderObject for StickyHeader widget.
 ///
@@ -27,7 +31,7 @@ class RenderStickyHeader extends RenderBox
   RenderStickyHeader({
     required ScrollPosition scrollPosition,
     RenderStickyHeaderCallback? callback,
-    bool overlapHeaders = false,
+    bool overlapHeaders: false,
     RenderBox? header,
     RenderBox? content,
   })  : _scrollPosition = scrollPosition,
@@ -85,7 +89,7 @@ class RenderStickyHeader extends RenderBox
   RenderBox get _contentBox => firstChild!;
 
   // Put header at its original position
-  void putHeaderAboveContent() {
+  void resetHeaderPosition() {
     final headerParentData = _headerBox.parentData as MultiChildLayoutParentData;
     headerParentData.offset = const Offset(0.0, 0.0);
   }
@@ -119,18 +123,12 @@ class RenderStickyHeader extends RenderBox
     // determine by how much the header should be stuck to the top
     final double stuckOffset = determineStuckOffset();
 
-    switch (_scrollPosition.userScrollDirection) {
-      case ScrollDirection.forward:
-        final double maxOffset = height - headerHeight;
-        final headerParentData = _headerBox.parentData as MultiChildLayoutParentData;
-        headerParentData.offset = Offset(0.0, max(0.0, min(-stuckOffset, maxOffset)));
-        break;
-      case ScrollDirection.reverse:
-        putHeaderAboveContent();
-        break;
-      case ScrollDirection.idle:
-        putHeaderAboveContent();
-        break;
+    if (_scrollPosition.userScrollDirection == ScrollDirection.idle) {
+      resetHeaderPosition();
+    } else {
+      final double maxOffset = height - headerHeight;
+      final headerParentData = _headerBox.parentData as MultiChildLayoutParentData;
+      headerParentData.offset = Offset(0.0, max(0.0, min(-stuckOffset, maxOffset)));
     }
 
     // report to widget how much the header is stuck.
