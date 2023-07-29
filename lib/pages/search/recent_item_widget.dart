@@ -131,7 +131,7 @@ class _DirectChatInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HighlightText(
-      text: presentationSearch.roomSummary?.mHeroes?.first ?? "",
+      text: presentationSearch.directChatMatrixID ?? "",
       style: Theme.of(context).textTheme.bodyMedium?.merge(
         TextStyle(
           overflow: TextOverflow.ellipsis,
