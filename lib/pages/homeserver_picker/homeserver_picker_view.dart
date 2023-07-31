@@ -118,13 +118,12 @@ class HomeserverPickerView extends StatelessWidget {
     );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
-        return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
+        return Text(L10n.of(context)!.loginWithSSO, style: textStyle);
       case HomeserverState.loading:
         return const Expanded(child: LinearProgressIndicator());
       case HomeserverState.ssoLoginServer:
-        return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
       case HomeserverState.wrongServerName:
-        return Text(L10n.of(context)!.loginWithSSO, style: textStyle,);
+        return Text(L10n.of(context)!.loginWithSSO, style: textStyle);
     }
   }
 }
