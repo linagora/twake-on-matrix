@@ -7,15 +7,15 @@ class ComparablePresentationContactMixin {
     final buffer2 = StringBuffer();
     
     buffer1.writeAll([
-      contact1.displayName ?? "",
       contact1.matrixId ?? "",
+      contact1.displayName ?? "",
       contact1.email ?? "",
       contact1.status ?? "",
     ]);
 
     buffer2.writeAll([
-      contact2.displayName ?? "",
       contact2.matrixId ?? "",
+      contact2.displayName ?? "",
       contact2.email ?? "",
       contact2.status ?? "",
     ]);
