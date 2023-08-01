@@ -45,8 +45,8 @@ class SearchContactsController {
         if (onSearchKeywordChanged != null) {
           onSearchKeywordChanged!(textEditingController.text);
         }
-        fetchLookupContacts();
       }
+      fetchLookupContacts();
     });
   }
 
