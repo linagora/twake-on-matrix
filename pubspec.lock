@@ -117,10 +117,10 @@ packages:
     dependency: "direct main"
     description:
       name: blurhash_dart
-      sha256: d18fa567dce8bc897d31e14e084d2b1a4306e6bfde30a0e72ebf5f5ff549ced9
+      sha256: "43955b6c2e30a7d440028d1af0fa185852f3534b795cc6eb81fbf397b464409f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.2.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -309,10 +309,10 @@ packages:
     dependency: transitive
     description:
       name: cli_util
-      sha256: "66f86e916d285c1a93d3b79587d94bd71984a66aac4ff74e524cfa7877f1395c"
+      sha256: b8db3080e59b2503ca9e7922c3df2072cf13992354d5e944074ffa836fba43b7
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5"
+    version: "0.4.0"
   clock:
     dependency: transitive
     description:
@@ -438,10 +438,10 @@ packages:
     dependency: transitive
     description:
       name: dart_webrtc
-      sha256: a34e59ac1559cac954e48c9fe156164992163d2f4b7e75d5b0e927ee2f1e4922
+      sha256: "8949301071ac7c3fb8f78ef7dffc48652db16f2ec63d84078b608f2ca27cca38"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.16"
+    version: "1.0.17"
   dartz:
     dependency: "direct main"
     description:
@@ -816,10 +816,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_launcher_icons
-      sha256: ce0e501cfc258907842238e4ca605e74b7fd1cdf04b3b43e86c43f3e40a1592c
+      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
       url: "https://pub.dev"
     source: hosted
-    version: "0.11.0"
+    version: "0.13.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -886,10 +886,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_native_splash
-      sha256: "6777a3abb974021a39b5fdd2d46a03ca390e03903b6351f21d10e7ecc969f12d"
+      sha256: af665ef80a213a9ed502845a3d7a61b9acca4100ee7e9f067a7440bc3acd6730
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.16"
+    version: "2.2.19"
   flutter_olm:
     dependency: "direct main"
     description:
@@ -1008,12 +1008,11 @@ packages:
   flutter_webrtc:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: ae4bc544a02a52ca0ee8eb86b7db0bd313f5c306
-      url: "https://github.com/flutter-webrtc/flutter-webrtc.git"
-    source: git
-    version: "0.9.25"
+      name: flutter_webrtc
+      sha256: "4a3194900981ac7a2aa1e68a37903d8910cc3459c7a1ab68ad0407310cea1642"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.34"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -1191,10 +1190,10 @@ packages:
     dependency: "direct main"
     description:
       name: image
-      sha256: "8e9d133755c3e84c73288363e6343157c383a0c6c56fc51afcc5d4d7180306d6"
+      sha256: a72242c9a0ffb65d03de1b7113bc4e189686fc07c7147b8b41811d0dd0e0d9bf
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "4.0.17"
   image_picker:
     dependency: "direct main"
     description:
@@ -1429,19 +1428,20 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      name: matrix
-      sha256: "8c07fa7b558d28891ea2609542295e4bb3e8360545540b434abaf055dde3a59c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.18.0"
+      path: "."
+      ref: improve-matrix-file
+      resolved-ref: "849379b83417af0babc9caab12e5842b025656f5"
+      url: "https://github.com/linagora/matrix-dart-sdk.git"
+    source: git
+    version: "0.20.5"
   matrix_api_lite:
     dependency: transitive
     description:
       name: matrix_api_lite
-      sha256: "7c1af53ccdcaf69db1372f607cba48f4ac360595c9bc9e1420768adb2f1c3814"
+      sha256: e5304b33b16d60863533836717be808845bf94cd0e3a339ef146d9321e6b59b7
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.10"
+    version: "1.7.1"
   matrix_homeserver_recommendations:
     dependency: "direct main"
     description:
@@ -1502,10 +1502,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: e3de4d9f52543ad6e4b0f534991e1303cbd379d24be28dd241ac60bd9439a201
+      sha256: "927c207656dc92eaf3d005c734d259c4ede440052a7281f9e1cc8966ffdbf1c7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.7.0"
+    version: "3.16.0"
   native_imaging:
     dependency: "direct main"
     description:
@@ -2645,10 +2645,10 @@ packages:
     dependency: "direct main"
     description:
       name: webrtc_interface
-      sha256: "5fdd616bc2937194402298f3024e81c74f68f44f6d73de31aaea69ee7d156b12"
+      sha256: "0ac4693f921c81005edefd2f43b9fe84b0ed54481474fe1ee16b789b0c84a77c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.12"
+    version: "1.0.13"
   wechat_camera_picker:
     dependency: "direct main"
     description:

@@ -68,33 +68,9 @@ extension LocalizedBody on Event {
       ?.tryGet<int>('size')
       ?.sizeString;
 
-  String? _getPlaceHolderMatrixFile(Event event) {
-    if (room.sendingFilePlaceholders.isNotEmpty) {
-      if (status == EventStatus.synced || status == EventStatus.sent) {
-        if (unsigned?.containsKey('transaction_id') == true) {
-          final transactionId = unsigned!['transaction_id'];
-          if (room.sendingFilePlaceholders[transactionId] == null) {
-            return null;
-          }
-          return utf8.decode(room.sendingFilePlaceholders[transactionId]!.bytes.toList());
-        }
-      }
-    }
-    return null;
-  }
-
   String? getFilePath() {
-    if (status == EventStatus.sending) {
-      if (room.sendingFilePlaceholders[eventId] == null) {
-        return null;
-      }
-      return utf8.decode(room.sendingFilePlaceholders[eventId]!.bytes.toList());
-    } else if (status == EventStatus.synced) {
-      return _getPlaceHolderMatrixFile(this);
-    } else if (status == EventStatus.sent) {
-      return _getPlaceHolderMatrixFile(this); 
-    }
-    return null;
+    final txId = unsigned?['transaction_id'] ?? eventId;
+    return room.sendingFilePlaceholders[txId]?.filePath;
   }
 
   User? getUser() {

@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:fluffychat/data/model/upload_file_json.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/data/network/upload_file/file_info.dart';
+import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -24,7 +24,7 @@ class UploadFileAPI {
       HomeserverEndpoint.uploadMediaServicePath.generateHomeserverIdentityEndpoint(),
       data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
       queryParameters: {
-        fileName: fileInfo.fileName,
+        'fileName': fileInfo.fileName,
       },
       options: Options(headers: dioHeaders)
     ).onError((error, stackTrace) => throw Exception(error));
