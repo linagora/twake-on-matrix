@@ -157,11 +157,10 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
       }
 
-      if (ssoSupported && matrix.loginRegistrationSupported == false) {
-        setState(() {
-          state = HomeserverState.ssoLoginServer;
-          FocusManager.instance.primaryFocus?.unfocus();
-        });
+      if (!ssoSupported && matrix.loginRegistrationSupported == false) {
+        // Server does not support SSO or registration. We can skip to login page:
+        VRouter.of(context).to('login');
+      } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await Matrix.of(context)
           .getLoginClient()
@@ -175,6 +174,9 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
         if (supportsSso(context) && identitiesProvider?.length == 1) {
           ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
         }
+        state = HomeserverState.ssoLoginServer;
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() {});
       } else {
         state = HomeserverState.otherLoginMethod;
         VRouter.of(context).to('connect');
