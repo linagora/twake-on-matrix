@@ -1,13 +1,11 @@
+import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
-
-import 'package:fluffychat/config/routes.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import '../config/app_config.dart';
@@ -18,7 +16,7 @@ class FluffyChatApp extends StatefulWidget {
   final Widget? testWidget;
   final List<Client> clients;
   final Map<String, String>? queryParameters;
-  static GlobalKey<VRouterState> routerKey = GlobalKey<VRouterState>();
+  static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
   const FluffyChatApp({
     Key? key,
     this.testWidget,
@@ -36,14 +34,12 @@ class FluffyChatApp extends StatefulWidget {
 }
 
 class FluffyChatAppState extends State<FluffyChatApp> {
-  bool? columnMode;
-  String? _initialUrl;
   final networkConnectionService = getIt.get<NetworkConnectionService>();
+  final GoRouter router = TwakeRoutes().router;
 
   @override
   void initState() {
     super.initState();
-    _initialUrl = widget.clients.any((client) => client.isLogged()) ? '/rooms' : '/home';
     networkConnectionService.onInit();
   }
 
@@ -56,41 +52,25 @@ class FluffyChatAppState extends State<FluffyChatApp> {
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      builder: (context, themeMode, primaryColor) => LayoutBuilder(
-        builder: (context, constraints) {
-          final isColumnMode =
-              FluffyThemes.isColumnModeByWidth(constraints.maxWidth);
-          if (isColumnMode != columnMode) {
-            Logs().v('Set Column Mode = $isColumnMode');
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                _initialUrl = FluffyChatApp.routerKey.currentState?.url;
-                columnMode = isColumnMode;
-                FluffyChatApp.routerKey = GlobalKey<VRouterState>();
-              });
-            });
-          }
-          return VRouter(
-            key: FluffyChatApp.routerKey,
-            title: AppConfig.applicationName,
-            debugShowCheckedModeBanner: false,
-            themeMode: themeMode,
-            theme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
-            darkTheme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
-            scrollBehavior: CustomScrollBehavior(),
-            logs: kReleaseMode ? VLogs.none : VLogs.info,
-            localizationsDelegates: L10n.localizationsDelegates,
-            supportedLocales: L10n.supportedLocales,
-            initialUrl: _initialUrl ?? '/',
-            routes: AppRoutes(columnMode ?? false).routes,
-            builder: (context, child) => Matrix(
-              context: context,
-              router: FluffyChatApp.routerKey,
-              clients: widget.clients,
-              child: child,
-            ),
-          );
-        },
+      builder: (context, themeMode, primaryColor) => MaterialApp.router(
+        restorationScopeId: 'Twake',
+        useInheritedMediaQuery: true,
+        title: AppConfig.applicationName,
+        debugShowCheckedModeBanner: false,
+        themeMode: themeMode,
+        theme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
+        darkTheme: FluffyThemes.buildTheme(Brightness.light, primaryColor),
+        scrollBehavior: CustomScrollBehavior(),
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        routeInformationProvider: router.routeInformationProvider,
+        routeInformationParser: router.routeInformationParser,
+        routerDelegate: router.routerDelegate,
+        builder: (context, child) => Matrix(
+          context: context,
+          clients: widget.clients,
+          child: child,
+        ),
       ),
     );
   }

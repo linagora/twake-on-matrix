@@ -5,9 +5,9 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
-
 import 'utils/background_push.dart';
 import 'widgets/fluffy_chat_app.dart';
 import 'widgets/lock_screen.dart';
@@ -17,7 +17,7 @@ void main() async {
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
   // widget bindings are initialized already.
   WidgetsFlutterBinding.ensureInitialized();
-
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
 
