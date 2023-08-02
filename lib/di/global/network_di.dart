@@ -108,7 +108,4 @@ class NetworkDI extends BaseDI {
       instanceName: homeDioClientName,
     );
   }
-
-  @override
-  String get scopeName => 'networkScope';
 }

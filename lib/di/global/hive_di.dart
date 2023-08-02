@@ -4,9 +4,6 @@ import 'package:get_it/get_it.dart';
 
 class HiveDI extends BaseDI {
   @override
-  String get scopeName => 'Hive for ToM';
-
-  @override
   void setUp(GetIt get) {
     get.registerLazySingletonAsync<HiveCollectionToMDatabase>(
       () => HiveCollectionToMDatabase.databaseBuilder(),

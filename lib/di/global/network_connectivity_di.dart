@@ -17,7 +17,4 @@ class NetworkConnectivityDI extends BaseDI {
       () => NetworkConnectionService(get.get<Connectivity>()),
     );
   }
-
-  @override
-  String get scopeName => 'networkConnectivityScope';
 }
