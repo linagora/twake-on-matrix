@@ -1,14 +1,16 @@
-import 'dart:collection';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
+import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
-import 'package:matrix/src/utils/file_send_request_credentials.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:matrix/src/utils/file_send_request_credentials.dart';
 
 typedef TransactionId = String;
 
@@ -18,7 +20,8 @@ extension SendImage on Room {
   static const maxImagesCacheInRoom = 10;
 
   Future<String?> sendImageFileEvent(
-    MatrixFile file, {
+    FileInfo fileInfo, {
+    String msgType = MessageTypes.Image,
     SyncUpdate? fakeImageEvent,
     String? txid,
     Event? inReplyTo,
@@ -26,10 +29,12 @@ extension SendImage on Room {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
+    FileInfo tempfileInfo = fileInfo;
     txid ??= client.generateUniqueTransactionId();
     fakeImageEvent ??= await sendFakeImageEvent(
-      file,
+      fileInfo,
       txid: txid,
+      messageType: msgType,
       inReplyTo: inReplyTo,
       editEventId: editEventId,
       shrinkImageMaxDimension: shrinkImageMaxDimension,
@@ -40,9 +45,9 @@ extension SendImage on Room {
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      Logs().d('SendImage::sendImageFileEvent(): FileSized ${file.bytes.lengthInBytes} || maxMediaSize $maxMediaSize');
-      if (maxMediaSize != null && maxMediaSize < file.bytes.lengthInBytes) {
-        throw FileTooBigMatrixException(file.bytes.lengthInBytes, maxMediaSize);
+      Logs().d('SendImage::sendImageFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize');
+      if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
+        throw FileTooBigMatrixException(fileInfo.fileSize, maxMediaSize);
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
@@ -61,19 +66,21 @@ extension SendImage on Room {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
       await handleImageFakeSync(fakeImageEvent);
-      encryptedFile = await file.encrypt();
-      uploadFile = encryptedFile.toMatrixFile();
+      
+      encryptedFileInfo = await encryptedService.encryptFile(
+        fileInfo: fileInfo, 
+        outputFile: tempEncryptedFile,
+      );
+      tempfileInfo = FileInfo(fileInfo.fileName, tempEncryptedFile.path, fileInfo.fileSize);
     }
-    Uri? uploadResp, thumbnailUploadResp;
-
-    final timeoutDate = DateTime.now();
+    Uri? uploadResp;
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
     while (uploadResp == null) {
       try {
         final uploadFileApi = getIt.get<UploadFileAPI>();
-        final response = await uploadFileApi.uploadFile(fileInfo: file.toFileInfo());
+        final response = await uploadFileApi.uploadFile(fileInfo: tempfileInfo);
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
@@ -81,63 +88,39 @@ extension SendImage on Room {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
-        Logs().v('Error: $e');
+        Logs().e('Error: $e');
         rethrow;
       } catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
               .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
-        Logs().v('Error: $e');
-        Logs().v('Send File into room failed. Try again...');
+        Logs().e('Error: $e');
+        Logs().e('Send File into room failed. Try again...');
         return null;
       }
     }
 
+    if (encryptedFileInfo != null) {
+      encryptedFileInfo = EncryptedFileInfo(
+        key: encryptedFileInfo.key, 
+        version: encryptedFileInfo.version, 
+        initialVector: encryptedFileInfo.initialVector, 
+        hashes: encryptedFileInfo.hashes,
+        url: uploadResp.toString(),
+      );
+      Logs().d('RoomExtension::EncryptedFileInfo: $encryptedFileInfo');
+    }
+
     // Send event
     final content = <String, dynamic>{
-      'msgtype': file.msgType,
-      'body': file.name,
-      'filename': file.name,
-      if (encryptedFile == null) 'url': uploadResp.toString(),
-      if (encryptedFile != null)
-        'file': {
-          'url': uploadResp.toString(),
-          'mimetype': file.mimeType,
-          'v': 'v2',
-          'key': {
-            'alg': 'A256CTR',
-            'ext': true,
-            'k': encryptedFile.k,
-            'key_ops': ['encrypt', 'decrypt'],
-            'kty': 'oct'
-          },
-          'iv': encryptedFile.iv,
-          'hashes': {'sha256': encryptedFile.sha256}
-        },
+      'msgtype': msgType,
+      'body': fileInfo.fileName,
+      'filename': fileInfo.fileName,
+      'url': uploadResp.toString(),
+      if (encryptedFileInfo != null)
+        'file': encryptedFileInfo.toJson(),
       'info': {
-        ...file.info,
-        // if (thumbnail != null && encryptedThumbnail == null)
-        //   'thumbnail_url': thumbnailUploadResp.toString(),
-        // if (thumbnail != null && encryptedThumbnail != null)
-        //   'thumbnail_file': {
-        //     'url': thumbnailUploadResp.toString(),
-        //     'mimetype': thumbnail.mimeType,
-        //     'v': 'v2',
-        //     'key': {
-        //       'alg': 'A256CTR',
-        //       'ext': true,
-        //       'k': encryptedThumbnail.k,
-        //       'key_ops': ['encrypt', 'decrypt'],
-        //       'kty': 'oct'
-        //     },
-        //     'iv': encryptedThumbnail.iv,
-        //     'hashes': {'sha256': encryptedThumbnail.sha256}
-        //   },
-        // if (thumbnail != null) 'thumbnail_info': thumbnail.info,
-        // if (thumbnail?.blurhash != null &&
-        //     file is MatrixImageFile &&
-        //     file.blurhash == null)
-        //   'xyz.amorgan.blurhash': thumbnail!.blurhash
+        ...fileInfo.metadata,
       },
       if (extraContent != null) ...extraContent,
     };
@@ -147,22 +130,27 @@ extension SendImage on Room {
       inReplyTo: inReplyTo,
       editEventId: editEventId,
     );
+    await tempEncryptedFile.delete();
     return eventId;
   }
 
   Future<SyncUpdate> sendFakeImageEvent(
-    MatrixFile file, {
+    FileInfo fileInfo, {
+    String messageType = MessageTypes.Image,
     required String txid,
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
-    sendingFilePlaceholders[txid] = file;
-    // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
-
+    // in order to have placeholder, this line must have,
+    // otherwise the sending event will be removed from timeline
+    sendingFilePlaceholders[txid] = MatrixFile(
+      name: fileInfo.fileName, 
+      filePath: fileInfo.filePath,
+    );
     // Create a fake Event object as a placeholder for the uploading file:
-    final fakeImageEventEvent = SyncUpdate(
+    final fakeImageEvent = SyncUpdate(
       nextBatch: '',
       rooms: RoomsUpdate(
         join: {
@@ -171,9 +159,9 @@ extension SendImage on Room {
               events: [
                 MatrixEvent(
                   content: {
-                    'msgtype': file.msgType,
-                    'body': file.name,
-                    'filename': file.name,
+                    'msgtype': messageType,
+                    'body': fileInfo.fileName,
+                    'filename': fileInfo.fileName,
                   },
                   type: EventTypes.Message,
                   eventId: txid,
@@ -196,8 +184,8 @@ extension SendImage on Room {
         },
       ),
     );
-    await handleImageFakeSync(fakeImageEventEvent);
-    return fakeImageEventEvent;
+    await handleImageFakeSync(fakeImageEvent);
+    return fakeImageEvent;
   }
 
   Future<void> handleImageFakeSync(SyncUpdate fakeImageEvent,
@@ -211,16 +199,18 @@ extension SendImage on Room {
     }
   }
 
-  Future<Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
+  Future<Tuple2<Map<TransactionId, FileInfo>, Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
     required List<AssetEntity> entities,
   }) async {
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>, Map<TransactionId, FakeImageEvent>>({}, {});
+    // ignore: prefer_const_constructors
+    final txIdMapToImageFile = Tuple2<Map<TransactionId, FileInfo>, Map<TransactionId, FakeImageEvent>>({}, {});
     for (final entity in entities) {
-      final matrixFile = await entity.toMatrixFile();
-      if (matrixFile != null) {
+      final fileInfo = await entity.toFileInfo();
+
+      if (fileInfo != null) {
         final txid = client.generateUniqueTransactionId();
-        final fakeImageEvent = await sendFakeImageEvent(matrixFile, txid: txid);
-        txIdMapToImageFile.value1[txid] = matrixFile;
+        final fakeImageEvent = await sendFakeImageEvent(fileInfo, txid: txid);
+        txIdMapToImageFile.value1[txid] = fileInfo;
         txIdMapToImageFile.value2[txid] = fakeImageEvent;
       }
     }

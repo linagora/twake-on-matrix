@@ -18,14 +18,14 @@ class UploadContentInteractor {
       final matrixFile = await entity.toMatrixFile();
       final mediaConfig = await matrixClient.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      if (matrixFile != null) {
-        final fileSize = matrixFile.bytes.length;
+      if (matrixFile != null && matrixFile.bytes != null) {
+        final fileSize = matrixFile.bytes!.length;
         Logs().d('SendImage::sendImageFileEvent(): FileSized $fileSize || maxMediaSize $maxMediaSize');
         if (maxMediaSize != null && maxMediaSize < fileSize) {
           yield Left(FileTooBigMatrix(FileTooBigMatrixException(fileSize, maxMediaSize)));
         }
         final uri = await matrixClient.uploadContent(
-          matrixFile.bytes,
+          matrixFile.bytes!,
           filename: matrixFile.name,
           contentType: matrixFile.mimeType,
         );

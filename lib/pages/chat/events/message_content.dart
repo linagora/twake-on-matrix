@@ -135,7 +135,6 @@ class MessageContent extends StatelessWidget {
               );
             }
             final filePath = event.getFilePath();
-            debugPrint('filePath: $filePath');
             if (filePath != null) {
               return SendingImageWidget(
                 filePath: filePath,

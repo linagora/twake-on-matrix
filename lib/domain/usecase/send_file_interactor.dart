@@ -1,11 +1,5 @@
-
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/data/network/upload_file/file_info.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 

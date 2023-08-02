@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:fluffychat/data/network/upload_file/file_info.dart';
-import 'package:fluffychat/presentation/model/image_type.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -27,7 +25,7 @@ extension AssetEntityExtension on AssetEntity {
       return null;
     }
     return FileInfo(
-      fileName,
+      file.path.split('/').last,
       file.path,
       file.lengthSync()
     );
