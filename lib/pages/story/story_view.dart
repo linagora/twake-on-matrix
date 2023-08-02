@@ -236,7 +236,7 @@ class StoryView extends StatelessWidget {
                           ? null
                           : Alignment.center,
                       child: Image.memory(
-                        matrixFile.bytes,
+                        matrixFile.bytes!,
                         fit: controller.storyThemeData.fit,
                       ),
                     );

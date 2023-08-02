@@ -31,7 +31,7 @@ class SendFileDialogState extends State<SendFileDialog> {
   Future<void> _send() async {
     for (var file in widget.files) {
       MatrixImageFile? thumbnail;
-      if (file is MatrixVideoFile && file.bytes.length > minSizeToCompress) {
+      if (file is MatrixVideoFile && (file.bytes?.length ?? 0) > minSizeToCompress) {
         await showFutureLoadingDialog(
           context: context,
           future: () async {
@@ -41,18 +41,18 @@ class SendFileDialogState extends State<SendFileDialog> {
         );
       }
       final scaffoldMessenger = ScaffoldMessenger.of(context);
-      widget.room
-          .sendFileEvent(
-        file,
-        thumbnail: thumbnail,
-        shrinkImageMaxDimension: origImage ? null : 1600,
-      )
-          .catchError((e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text((e as Object).toLocalizedString(context))),
-        );
-        return null;
-      });
+      // widget.room
+      //     .sendFileEvent(
+      //   file,
+      //   thumbnail: thumbnail,
+      //   shrinkImageMaxDimension: origImage ? null : 1600,
+      // )
+      //     .catchError((e) {
+      //   scaffoldMessenger.showSnackBar(
+      //     SnackBar(content: Text((e as Object).toLocalizedString(context))),
+      //   );
+      //   return null;
+      // });
     }
     Navigator.of(context, rootNavigator: false).pop();
 
@@ -65,7 +65,7 @@ class SendFileDialogState extends State<SendFileDialog> {
     final bool allFilesAreImages =
         widget.files.every((file) => file is MatrixImageFile);
     final sizeString = widget.files
-        .fold<double>(0, (p, file) => p + file.bytes.length)
+        .fold<double>(0, (p, file) => p + (file.bytes?.length ?? 0))
         .sizeString;
     final fileName = widget.files.length == 1
         ? widget.files.single.name
@@ -85,7 +85,7 @@ class SendFileDialogState extends State<SendFileDialog> {
         children: <Widget>[
           Flexible(
             child: Image.memory(
-              widget.files.first.bytes,
+              widget.files.first.bytes!,
               fit: BoxFit.contain,
             ),
           ),

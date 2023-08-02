@@ -182,14 +182,16 @@ class InputBar extends StatelessWidget {
           continue; // we don't care about tombstoned rooms
         }
         final state = r.getState(EventTypes.RoomCanonicalAlias);
+        final alias = state?.content['alias'];
+        final altAlias = state?.content['alt_aliases'];
         if ((state != null &&
-                ((state.content['alias'] is String &&
-                        state.content['alias']
-                            .split(':')[0]
-                            .toLowerCase()
-                            .contains(roomSearch)) ||
-                    (state.content['alt_aliases'] is List &&
-                        state.content['alt_aliases'].any(
+                ((alias is String &&
+                        alias
+                          .split(':')[0]
+                          .toLowerCase()
+                          .contains(roomSearch)) ||
+                    (altAlias is List &&
+                        altAlias.any(
                           (l) =>
                               l is String &&
                               l

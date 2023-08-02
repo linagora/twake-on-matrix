@@ -72,7 +72,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
           widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-        await file.writeAsBytes(matrixFile.bytes);
+        if (matrixFile.bytes == null) {
+          return ;
+        }
+        await file.writeAsBytes(matrixFile.bytes!);
       }
 
       setState(() {
@@ -278,12 +281,12 @@ class MatrixFileAudioSource extends StreamAudioSource {
   @override
   Future<StreamAudioResponse> request([int? start, int? end]) async {
     start ??= 0;
-    end ??= file.bytes.length;
+    end ??= file.bytes?.length ?? 0;
     return StreamAudioResponse(
-      sourceLength: file.bytes.length,
+      sourceLength: file.bytes?.length,
       contentLength: end - start,
       offset: start,
-      stream: Stream.value(file.bytes.sublist(start, end)),
+      stream: Stream.value(file.bytes?.sublist(start, end) ?? []),
       contentType: file.mimeType,
     );
   }

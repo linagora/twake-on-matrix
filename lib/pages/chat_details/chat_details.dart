@@ -83,7 +83,7 @@ class ChatDetailsController extends State<ChatDetails> {
             RequestType.GET,
             '/client/unstable/org.matrix.msc2432/rooms/${Uri.encodeComponent(room.id)}/aliases',
           )
-          .then((response) => List<String>.from(response['aliases'])),
+          .then((response) => List<String>.from(response['aliases'] as List)),
     );
     // Switch to the stable api once it is implemented.
 

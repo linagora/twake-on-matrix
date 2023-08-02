@@ -73,7 +73,7 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
 
   void updateRoomAction(Capabilities capabilities) async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;
-    final String roomVersion =
+    final Object roomVersion =
         room.getState(EventTypes.RoomCreate)!.content['room_version'] ?? '1';
     final newVersion = await showConfirmationDialog<String>(
       context: context,

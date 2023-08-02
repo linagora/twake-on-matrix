@@ -5,7 +5,7 @@ import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -51,38 +51,18 @@ extension SendImage on Room {
       await handleImageFakeSync(fakeImageEvent);
       rethrow;
     }
-
-    MatrixFile uploadFile = file; // ignore: omit_local_variable_types
-    // var thumbnail = sendingFileThumbnails[txid];
-    // // computing the thumbnail in case we can
-    // if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
-    //   file = await MatrixImageFile.shrink(
-    //     bytes: file.bytes,
-    //     name: file.name,
-    //     maxDimension: shrinkImageMaxDimension,
-    //     customImageResizer: client.customImageResizer,
-    //     nativeImplementations: client.nativeImplementations,
-    //   );
-
-    //   if (thumbnail != null && file.size < thumbnail.size) {
-    //     thumbnail = null; // in this case, the thumbnail is not usefull
-    //   }
-    // }
-
-    // MatrixFile? uploadThumbnail = thumbnail; // ignore: omit_local_variable_types
-    EncryptedFile? encryptedFile;
-    // EncryptedFile? encryptedThumbnail;
+    
+    final encryptedService = EncryptedService();
+    final tempDir = await getTemporaryDirectory();
+    final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
+    final tempEncryptedFile = await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}').create();
+    EncryptedFileInfo? encryptedFileInfo;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
       await handleImageFakeSync(fakeImageEvent);
       encryptedFile = await file.encrypt();
       uploadFile = encryptedFile.toMatrixFile();
-
-      // if (thumbnail != null) {
-      //   encryptedThumbnail = await thumbnail.encrypt();
-      //   uploadThumbnail = encryptedThumbnail.toMatrixFile();
-      // }
     }
     Uri? uploadResp, thumbnailUploadResp;
 

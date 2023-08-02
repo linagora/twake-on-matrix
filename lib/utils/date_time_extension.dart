@@ -128,4 +128,8 @@ extension DateTimeExtension on DateTime {
       return DateFormat("MMMM d, y").format(this);
     }
   }
+
+  String getFormattedCurrentDateTime() {
+    return millisecondsSinceEpoch.toString();
+  }
 }

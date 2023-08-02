@@ -13,7 +13,7 @@ extension AssetEntityExtension on AssetEntity {
     final file = await loadFile();
     if (file != null) {
       return MatrixImageFile(
-        bytes: Uint8List.fromList(utf8.encode(file.path)), 
+        bytes: file.readAsBytesSync(), 
         name: title ?? await titleAsync,
         mimeType: await mimeTypeAsync,
       );

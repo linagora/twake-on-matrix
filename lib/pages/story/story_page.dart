@@ -212,7 +212,10 @@ class StoryPageController extends State<StoryPage> {
       final fileName =
           event.content.tryGet<String>('filename') ?? 'unknown_story_video.mp4';
       final file = File('${tmpDirectory.path}/$fileName');
-      await file.writeAsBytes(matrixFile.bytes);
+      if (matrixFile.bytes == null) {
+        return null;
+      }
+      await file.writeAsBytes(matrixFile.bytes!);
       if (!mounted) return null;
       final videoPlayerController =
           _videoPlayerController = VideoPlayerController.file(file);
@@ -481,7 +484,7 @@ class StoryPageController extends State<StoryPage> {
       return;
     }
     if (!currentSeenByUsers.any((u) => u.id == u.room.client.userID)) {
-      timeline!.setReadMarker(currentEvent.eventId);
+      timeline!.setReadMarker(eventId: currentEvent.eventId);
     }
   }
 

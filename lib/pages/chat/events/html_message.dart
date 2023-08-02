@@ -140,11 +140,12 @@ class HtmlMessage extends StatelessWidget {
           // we have an alias pill
           for (final r in room.client.rooms) {
             final state = r.getState('m.room.canonical_alias');
+            final altAliases = state?.content['alt_aliases'];
             if (state != null &&
                 ((state.content['alias'] is String &&
                         state.content['alias'] == identifier) ||
-                    (state.content['alt_aliases'] is List &&
-                        state.content['alt_aliases'].contains(identifier)))) {
+                    (altAliases is List &&
+                        altAliases.contains(identifier)))) {
               // we have a room!
               return {
                 'displayname':
