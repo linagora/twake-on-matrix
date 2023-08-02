@@ -1,11 +1,8 @@
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
@@ -27,8 +24,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close_outlined),
-            onPressed: () =>
-                VRouter.of(context).toSegments(['rooms', controller.roomId!]),
+            onPressed: () => context.pop('rooms/${controller.roomId!}'),
           ),
           title: Text(L10n.of(context)!.endToEndEncryption),
           actions: [

@@ -27,10 +27,14 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
 
   @override
   Future<void> saveTomConfigurations(String clientName, ToMConfigurations toMConfigurations) async {
-    final hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
-    return hiveCollectionToMDatabase.tomConfigurationsBox.put(
-      clientName,
-      ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations).toJson(),
-    );
+    try {
+      final hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
+      return hiveCollectionToMDatabase.tomConfigurationsBox.put(
+        clientName,
+        ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations).toJson(),
+      );
+    } catch (e) {
+      Logs().d('Error saving ToM configurations: $e');
+    }
   }
 }

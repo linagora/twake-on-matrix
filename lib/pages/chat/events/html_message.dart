@@ -94,7 +94,7 @@ class HtmlMessage extends StatelessWidget {
             .toString();
       },
       onImageTap: (String mxc) => showDialog(
-        context: Matrix.of(context).navigatorContext,
+        context: Matrix.of(context).navigatorContext ?? context,
         useRootNavigator: false,
         builder: (_) => ImageViewer(
           Event(

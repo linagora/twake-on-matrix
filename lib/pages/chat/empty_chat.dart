@@ -1,11 +1,11 @@
-
+import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/empty_chat_view.dart';
-import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
-import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
@@ -15,18 +15,18 @@ import 'package:fluffychat/utils/network_connection_service.dart';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
 class EmptyChat extends StatefulWidget {
-
-  const EmptyChat({super.key});
+  final GoRouterState state;
+  const EmptyChat({super.key, required this.state});
 
   @override
   State<StatefulWidget> createState() => EmptyChatController();
@@ -36,11 +36,7 @@ class EmptyChat extends StatefulWidget {
 class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
-  late PresentationContact? presentationContact = presentationContact = PresentationContact(
-    email: VRouter.of(context).queryParameters[PresentationContactConstant.email] ?? '',
-    displayName: VRouter.of(context).queryParameters[PresentationContactConstant.displayName],
-    matrixId: VRouter.of(context).queryParameters[PresentationContactConstant.receiverId]
-  );
+  PresentationContact? presentationContact;
 
   final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
 
@@ -82,6 +78,12 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
 
   @override
   void initState() {
+    final extra = widget.state.extra! as Map<String, String>;
+    presentationContact = PresentationContact(
+      matrixId: extra[PresentationContactConstant.receiverId],
+      email: extra[PresentationContactConstant.email],
+      displayName: extra[PresentationContactConstant.displayName],
+    );
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     listenToSelectionInImagePicker();
@@ -136,7 +138,7 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
         (failure) {
           onRoomCreatedFailed?.call();
           Logs().d("_createRoom: $failure");
-          VRouter.of(context).pop();
+          context.pop();
         },
         (success) {
           if (success is CreateDirectChatLoading) {
@@ -150,17 +152,21 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
           } else if (success is CreateDirectChatSuccess) {
             final room = Matrix.of(context).client.getRoomById(success.roomId);
             if (room != null) {
-              VRouter.of(context).pop();
               onRoomCreatedSuccess?.call(room);
-              VRouter.of(context).toSegments(
-                ['rooms', room.id],
-                isReplacement: true,
-              );
+              context.pop();
+              context.go('${goShellBranch()}/${room.id}/');
             }
           }
         }
       );
     });
+  }
+
+  String goShellBranch() {
+    final currentShellBranch = GoRouterState.of(context).fullPath;
+    Logs().d('EmptyChat()::goShellBranch() currentShellBranch: $currentShellBranch');
+    return TwakeRoutes.shellBranch
+      .firstWhere((branch) => currentShellBranch?.startsWith('$branch/') == true);
   }
 
   void emojiPickerAction() {

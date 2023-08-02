@@ -29,6 +29,7 @@ import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecases/save_recovery_words_interactor.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
@@ -56,6 +57,7 @@ class GetItInitializer {
     NetworkDI().bind();
     HiveDI().bind();
     NetworkConnectivityDI().bind();
+    getIt.registerSingleton(ResponsiveUtils());
   }
 
   void bidingQueue() {

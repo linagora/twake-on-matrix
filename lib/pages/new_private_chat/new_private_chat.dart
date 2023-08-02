@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
@@ -7,11 +6,14 @@ import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
-import 'package:fluffychat/presentation/mixin/go_to_direct_chat_mixin.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 class NewPrivateChat extends StatefulWidget {
   const NewPrivateChat({Key? key}) : super(key: key);
@@ -21,7 +23,7 @@ class NewPrivateChat extends StatefulWidget {
 }
 
 class NewPrivateChatController extends State<NewPrivateChat> 
-  with ComparablePresentationContactMixin, GoToDirectChatMixin {
+  with ComparablePresentationContactMixin {
 
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
@@ -71,7 +73,36 @@ class NewPrivateChatController extends State<NewPrivateChat>
   }
 
   void goToNewGroupChat() {
-    VRouter.of(context).to('/newgroup');
+    context.push('/rooms/newprivatechat/newgroup');
+  }
+
+  void goToChatScreen({required BuildContext context, required PresentationContact contact}) async {
+    final directRoomId = Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+    showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
+          if (directRoomId != null) {
+            final roomId = await Matrix.of(context).client.startDirectChat(contact.matrixId!);
+            context.push('/rooms/$roomId');
+          }
+        }
+      },
+    );
+    if (directRoomId == null) {
+      goToEmptyChat(context: context, contact: contact);
+    }
+  }
+
+  void goToEmptyChat({required BuildContext context, required PresentationContact contact}) {
+    if (contact.matrixId != Matrix.of(context).client.userID) {
+      context.go('/rooms/newprivatechat/emptyChat', extra: {
+        PresentationContactConstant.receiverId: contact.matrixId ?? '',
+        PresentationContactConstant.email: contact.email ?? '',
+        PresentationContactConstant.displayName: contact.displayName ?? '',
+        PresentationContactConstant.status: contact.status.toString(),
+      });
+    }
   }
 
   @override

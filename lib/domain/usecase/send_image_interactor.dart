@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/presentation/extensions/room_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -17,7 +16,7 @@ class SendImageInteractor {
     final fileInfo = await entity.toFileInfo();
     if (fileInfo != null) {
       try {
-        final mxcUri = await room.sendImageFileEvent(
+        await room.sendImageFileEvent(
           fileInfo,
           txid: txId,
           editEventId: editEventId,

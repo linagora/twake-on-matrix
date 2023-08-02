@@ -1,17 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/data/hive/dto/tom_server_information_hive_obj.dart';
-import 'package:fluffychat/data/hive/hive_constants.dart';
 import 'package:fluffychat/domain/model/tom_configurations.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'tom_configurations_hive_obj.g.dart';
 
-@HiveType(typeId: HiveConstants.typeIdTomConfiguration)
-class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin {
-  @HiveField(0)
+@JsonSerializable(explicitToJson: true)
+class ToMConfigurationsHiveObj with EquatableMixin {
+
   final ToMServerInformationHiveObj tomServerInformation;
 
-  @HiveField(1)
   final String? identityServerUrl;
 
   ToMConfigurationsHiveObj({
@@ -26,19 +24,10 @@ class ToMConfigurationsHiveObj extends HiveObject with EquatableMixin {
     );
   }
 
-  factory ToMConfigurationsHiveObj.fromJson(Map<String, dynamic> json) {
-    return ToMConfigurationsHiveObj(
-      tomServerInformation: ToMServerInformationHiveObj.fromJson(json['tomServerInformation']),
-      identityServerUrl: json['identityServerUrl'],
-    );
-  }
+  factory ToMConfigurationsHiveObj.fromJson(Map<String, dynamic> json) =>
+    _$ToMConfigurationsHiveObjFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'tomServerInformation': tomServerInformation.toJson(),
-      'identityServerUrl': identityServerUrl,
-    };
-  }
+  Map<String, dynamic> toJson() => _$ToMConfigurationsHiveObjToJson(this);
 
   @override
   List<Object?> get props => [tomServerInformation, identityServerUrl];

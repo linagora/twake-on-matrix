@@ -1,8 +1,8 @@
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:vrouter/vrouter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 
@@ -56,7 +56,7 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
       titleSpacing: 0,
       leading: TwakeIconButton(
         icon: Icons.arrow_back,
-        onPressed: () => VRouter.of(context).pop(),
+        onPressed: () => context.pop(),
         tooltip: L10n.of(context)!.back,
         paddingAll: 8.0,
         margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),

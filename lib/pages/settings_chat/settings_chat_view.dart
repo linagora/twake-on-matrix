@@ -2,8 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:vrouter/vrouter.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -29,7 +28,7 @@ class SettingsChatView extends StatelessWidget {
             children: [
               ListTile(
                 title: Text(L10n.of(context)!.emoteSettings),
-                onTap: () => VRouter.of(context).to('emotes'),
+                onTap: () =>  context.go('/emotes'),
                 trailing: const Icon(Icons.chevron_right_outlined),
                 leading: const Icon(Icons.emoji_emotions_outlined),
               ),

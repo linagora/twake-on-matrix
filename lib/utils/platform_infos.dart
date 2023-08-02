@@ -1,13 +1,10 @@
 import 'dart:io';
-
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:vrouter/vrouter.dart';
-
 import '../config/app_config.dart';
 
 abstract class PlatformInfos {
@@ -58,7 +55,7 @@ abstract class PlatformInfos {
           child: const Text(AppConfig.emojiFontName),
         ),
         OutlinedButton(
-          onPressed: () => VRouter.of(context).to('logs'),
+          onPressed: () => context.go('logs'),
           child: const Text('Logs'),
         ),
       ],

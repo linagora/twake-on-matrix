@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/permission_list_tile.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
@@ -19,12 +18,11 @@ class ChatPermissionsSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: VRouter.of(context).path.startsWith('/spaces/')
+        leading: GoRouterState.of(context).path?.startsWith('/spaces/') == true
             ? null
             : IconButton(
                 icon: const Icon(Icons.close_outlined),
-                onPressed: () => VRouter.of(context)
-                    .toSegments(['rooms', controller.roomId!]),
+                onPressed: () => context.go('/rooms/${controller.roomId!}'),
               ),
         title: Text(L10n.of(context)!.editChatPermissions),
       ),

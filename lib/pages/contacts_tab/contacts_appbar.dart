@@ -2,7 +2,6 @@ import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:vrouter/vrouter.dart';
 
 class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
@@ -26,18 +25,12 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       centerTitle: false,
       titleSpacing: 0,
-      leading: TwakeIconButton(
-        icon: Icons.arrow_back,
-        tooltip: L10n.of(context)!.back,
-        margin: const EdgeInsets.only(
-          left: 8.0, 
-          right: 4.0,
-        ),
-        onPressed: () => VRouter.of(context).to('/rooms'),
-      ),
-      title: Text(L10n.of(context)!.contacts,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
+      title: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 16.0),
+        child: Text(L10n.of(context)!.contacts,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ),
       bottom: PreferredSize(
