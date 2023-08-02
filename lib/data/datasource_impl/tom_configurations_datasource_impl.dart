@@ -7,18 +7,17 @@ import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
-  late HiveCollectionToMDatabase _hiveCollectionToMDatabase;
 
   @override
   Future<ToMConfigurations> getTomConfigurations(String clientName) async {
-    _hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
-    final cachedConfiguration = await _hiveCollectionToMDatabase.tomConfigurationsBox
-      .get(clientName);
+    final hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
+    final cachedConfiguration = await hiveCollectionToMDatabase.tomConfigurationsBox.get(clientName);
     if (cachedConfiguration != null) {
+      final toMConfigurationsHiveObj = ToMConfigurationsHiveObj.fromJson(copyMap(cachedConfiguration));
       return ToMConfigurations(
-        tomServerInformation: cachedConfiguration.tomServerInformation.toToMServerInformation(),
-        identityServerInformation: cachedConfiguration.identityServerUrl != null
-          ? IdentityServerInformation(baseUrl: Uri.parse(cachedConfiguration.identityServerUrl!))
+        tomServerInformation: toMConfigurationsHiveObj.tomServerInformation.toToMServerInformation(),
+        identityServerInformation: toMConfigurationsHiveObj.identityServerUrl != null
+          ? IdentityServerInformation(baseUrl: Uri.parse(toMConfigurationsHiveObj.identityServerUrl!))
           : null,
       );
     } else {
@@ -28,11 +27,10 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
 
   @override
   Future<void> saveTomConfigurations(String clientName, ToMConfigurations toMConfigurations) async {
-    _hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
-    return _hiveCollectionToMDatabase.tomConfigurationsBox.put(
+    final hiveCollectionToMDatabase = await getIt.getAsync<HiveCollectionToMDatabase>();
+    return hiveCollectionToMDatabase.tomConfigurationsBox.put(
       clientName,
-      ToMConfigurationsHiveObj
-        .fromToMConfigurations(toMConfigurations),
+      ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations).toJson(),
     );
   }
 }

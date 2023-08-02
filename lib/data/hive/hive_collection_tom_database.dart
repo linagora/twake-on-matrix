@@ -11,6 +11,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html;
 
 class HiveCollectionToMDatabase {
   final String name;
@@ -20,7 +21,7 @@ class HiveCollectionToMDatabase {
   late BoxCollection _collection;
 
   String get _tomConfigurationsBoxName => 'tom_configurations_box';
-  late CollectionBox<ToMConfigurationsHiveObj> tomConfigurationsBox;
+  late CollectionBox<Map> tomConfigurationsBox;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -29,7 +30,11 @@ class HiveCollectionToMDatabase {
     HiveAesCipher? hiverCipher;
     try {
       // Workaround for secure storage is calling Platform.operatingSystem on web
-      if (kIsWeb) throw MissingPluginException();
+      if (kIsWeb) {
+        // ignore: unawaited_futures
+        html.window.navigator.storage?.persist();
+        throw MissingPluginException();
+      }
 
       const secureStorage = FlutterSecureStorage();
       final containsEncryptionKey =

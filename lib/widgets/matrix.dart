@@ -25,6 +25,7 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
@@ -32,8 +33,6 @@ import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vrouter/vrouter.dart';
 
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
@@ -48,8 +47,6 @@ import 'local_notifications_extension.dart';
 class Matrix extends StatefulWidget {
   final Widget? child;
 
-  final GlobalKey<VRouterState>? router;
-
   final BuildContext context;
 
   final List<Client> clients;
@@ -58,7 +55,6 @@ class Matrix extends StatefulWidget {
 
   const Matrix({
     this.child,
-    required this.router,
     required this.context,
     required this.clients,
     this.queryParameters,
@@ -77,8 +73,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
-  late BuildContext navigatorContext;
-
+  BuildContext? navigatorContext;
   HomeserverSummary? loginHomeserverSummary;
   XFile? loginAvatar;
   String? loginUsername;
@@ -187,7 +182,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
         _loginClientCandidate = null;
-        widget.router!.currentState!.to('/rooms');
+        navigatorContext?.go('/rooms');
       });
     return candidate;
   }
@@ -263,8 +258,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   bool webHasFocus = true;
 
-  String? get activeRoomId =>
-      VRouter.of(navigatorContext).pathParameters['roomid'];
+  String? get activeRoomId => GoRouterState.of(context).pathParameters['roomid'];
 
   final linuxNotifications =
       PlatformInfos.isLinux ? NotificationsClient() : null;
@@ -274,6 +268,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    navigatorContext = context;
     initMatrix();
     if (PlatformInfos.isWeb) {
       initConfig().then((_) => initSettings());
@@ -333,13 +328,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         if (!hidPopup &&
             {KeyVerificationState.done, KeyVerificationState.error}
                 .contains(request.state)) {
-          Navigator.of(navigatorContext).pop('dialog');
+          Navigator.of(navigatorContext!).pop('dialog');
         }
         hidPopup = true;
       };
       request.onUpdate = null;
       hidPopup = true;
-      await KeyVerificationDialog(request: request).show(navigatorContext);
+      await KeyVerificationDialog(request: request).show(navigatorContext!);
     });
     onLoginStateChanged[name] ??= c.onLoginStateChanged.stream.listen((state) {
       final loggedInWithMultipleClients = widget.clients.length > 1;
@@ -354,17 +349,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         );
 
         if (state != LoginState.loggedIn) {
-          widget.router?.currentState?.to(
-            '/rooms',
-            queryParameters: widget.router?.currentState?.queryParameters ?? {},
-          );
+          navigatorContext?.go('/rooms');
         }
       } else {
         setUpToMServicesInLogin(c);
-        widget.router?.currentState?.to(
-          state == LoginState.loggedIn ? '/rooms' : '/home',
-          queryParameters: widget.router?.currentState?.queryParameters ?? {},
-        );
+        if (state == LoginState.loggedIn) {
+          navigatorContext?.go('/rooms');
+        }
       }
     });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
@@ -431,7 +422,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       backgroundPush = BackgroundPush(
         client,
         context,
-        widget.router,
         onFcmError: (errorMsg, {Uri? link}) async {
           final result = await showOkCancelAlertDialog(
             barrierDismissible: true,
