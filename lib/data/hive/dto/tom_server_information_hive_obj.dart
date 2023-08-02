@@ -16,6 +16,21 @@ class ToMServerInformationHiveObj extends HiveObject with EquatableMixin {
 
   ToMServerInformationHiveObj(this.baseUrl, this.serverName);
 
+  factory ToMServerInformationHiveObj.fromJson(Map<String, dynamic> json) {
+    return ToMServerInformationHiveObj(
+      json['baseUrl'],
+      json['serverName'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'baseUrl': baseUrl,
+      'serverName': serverName,
+    };
+  }
+
+
   @override
   List<Object?> get props => [baseUrl, serverName];
 
