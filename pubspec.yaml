@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   adaptive_dialog: ^1.8.0+1
+  flutter_adaptive_scaffold: ^0.1.4
   animations: ^2.0.7
   badges: ^2.0.3
   blurhash_dart: ^1.1.0
@@ -96,7 +97,7 @@ dependencies:
       url: git@github.com:SpectoraSoftware/VideoCompress.git
       ref: master
   video_player: ^2.2.18
-  vrouter: ^1.2.0+21
+  go_router: 10.0.0
   wakelock: ^0.6.2
   webrtc_interface: ^1.0.10
   linagora_design_flutter:
