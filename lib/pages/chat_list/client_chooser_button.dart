@@ -5,9 +5,9 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 import '../../utils/fluffy_share.dart';
 import 'chat_list.dart';
@@ -224,10 +224,10 @@ class ClientChooserButton extends StatelessWidget {
             cancelLabel: L10n.of(context)!.cancel,
           );
           if (consent != OkCancelResult.ok) return;
-          VRouter.of(context).to('/settings/addaccount');
+          context.go('/settings/addaccount');
           break;
         case SettingsAction.newStory:
-          VRouter.of(context).to('/stories/create');
+          context.go('/stories/create');
           break;
         case SettingsAction.invite:
           FluffyShare.share(
@@ -239,10 +239,10 @@ class ClientChooserButton extends StatelessWidget {
           );
           break;
         case SettingsAction.settings:
-          VRouter.of(context).to('/settings');
+          context.push('/settings');
           break;
         case SettingsAction.archive:
-          VRouter.of(context).to('/archive');
+          context.push('/archive');
           break;
         default:
           break;

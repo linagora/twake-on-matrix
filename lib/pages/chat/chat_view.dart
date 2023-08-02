@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
@@ -149,190 +148,189 @@ class ChatView extends StatelessWidget {
     }
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
 
-    return VWidgetGuard(
-      onSystemPop: (redirector) async {
-        if (controller.selectedEvents.isNotEmpty) {
-          controller.clearSelectedEvents();
-          redirector.stopRedirection();
-        } else if (controller.showEmojiPicker) {
-          controller.emojiPickerAction();
-          redirector.stopRedirection();
-        }
-      },
-      child: GestureDetector(
-        onTapDown: controller.setReadMarker,
-        behavior: HitTestBehavior.opaque,
-        child: StreamBuilder(
-          stream: controller.room!.onUpdate.stream.rateLimit(const Duration(seconds: 1)),
-          builder: (context, snapshot) => FutureBuilder<bool>(
-            future: controller.getTimeline(),
-            builder: (BuildContext context, snapshot) {
-              return Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: 64,
-                  surfaceTintColor: Colors.transparent,
-                  leadingWidth: 8 + 24 + 8,
-                  leading: controller.selectMode
-                      ? TwakeIconButton(
-                          icon: Icons.close,
-                          onPressed: controller.clearSelectedEvents,
-                          tooltip: L10n.of(context)!.close,
-                        )
-                      : TwakeIconButton(
-                          tooltip: L10n.of(context)!.back,
-                          icon: Icons.arrow_back,
-                          onPressed: () => controller.backToPreviousPage(),
-                          paddingAll: 8.0,
-                          margin: const EdgeInsets.symmetric(vertical: 12.0),
-                        ),
-                  titleSpacing: 0,
-                  title: ChatAppBarTitle(controller),
-                  actions: _appBarActions(context),
-                  bottom: PreferredSize(
-                    preferredSize: const Size(double.infinity, 4),
-                    child: Container(
-                      color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08), 
-                      height: 1,)),
-                ),
-                floatingActionButton: controller.showScrollDownButton &&
-                        controller.selectedEvents.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(bottom: 56.0),
-                        child: FloatingActionButton(
-                          onPressed: controller.scrollDown,
-                          mini: true,
-                          child: const Icon(Icons.arrow_downward_outlined),
-                        ),
-                      )
-                    : null,
-                body: DropTarget(
-                  onDragDone: controller.onDragDone,
-                  onDragEntered: controller.onDragEntered,
-                  onDragExited: controller.onDragExited,
-                  child: Stack(
-                    children: <Widget>[
-                      if (Matrix.of(context).wallpaper != null)
-                        Image.file(
-                          Matrix.of(context).wallpaper!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.medium,
-                        ),
-                      SafeArea(
-                        child: Column(
-                          children: <Widget>[
-                            TombstoneDisplay(controller),
-                            PinnedEvents(controller),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: controller.clearSingleSelectedEvent,
-                                child: Builder(
-                                  builder: (context) {
-                                    if (controller.timeline == null) {
-                                      return const ChatLoadingView();
-                                    }
-
-                                    return ChatEventList(
-                                      controller: controller,
-                                    );
-                                  },
-                                ),
+    return GestureDetector(
+      onTapDown: controller.setReadMarker,
+      behavior: HitTestBehavior.opaque,
+      child: StreamBuilder(
+        stream: controller.room!.onUpdate.stream.rateLimit(const Duration(seconds: 1)),
+        builder: (context, snapshot) => FutureBuilder<bool>(
+          future: controller.getTimeline(),
+          builder: (BuildContext context, snapshot) {
+            return Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: controller.responsive.isMobile(context) ? true : false,
+                toolbarHeight: 64,
+                surfaceTintColor: Colors.transparent,
+                leadingWidth: 8 + 24 + 8,
+                leading: _buildLeading(context),
+                titleSpacing: 0,
+                title: ChatAppBarTitle(controller),
+                actions: _appBarActions(context),
+                bottom: PreferredSize(
+                  preferredSize: const Size(double.infinity, 4),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
+                    height: 1,)),
+              ),
+              floatingActionButton: controller.showScrollDownButton &&
+                      controller.selectedEvents.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 56.0),
+                      child: FloatingActionButton(
+                        onPressed: controller.scrollDown,
+                        mini: true,
+                        child: const Icon(Icons.arrow_downward_outlined),
+                      ),
+                    )
+                  : null,
+              body: DropTarget(
+                onDragDone: controller.onDragDone,
+                onDragEntered: controller.onDragEntered,
+                onDragExited: controller.onDragExited,
+                child: Stack(
+                  children: <Widget>[
+                    if (Matrix.of(context).wallpaper != null)
+                      Image.file(
+                        Matrix.of(context).wallpaper!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                    SafeArea(
+                      child: Column(
+                        children: <Widget>[
+                          TombstoneDisplay(controller),
+                          PinnedEvents(controller),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: controller.clearSingleSelectedEvent,
+                              child: Builder(
+                                builder: (context) {
+                                  if (controller.timeline == null) {
+                                    return const ChatLoadingView();
+                                  }
+                                  return ChatEventList(
+                                    controller: controller,
+                                  );
+                                },
                               ),
                             ),
-                            if (controller.room!.canSendDefaultMessages &&
-                                controller.room!.membership == Membership.join)
-                              Container(
-                                constraints: const BoxConstraints(
-                                  maxWidth: FluffyThemes.columnWidth * 2.5,
-                                ),
-                                alignment: Alignment.center,
-                                child: controller.room?.isAbandonedDMRoom ==
-                                        true
-                                    ? Padding(
-                                        padding: EdgeInsets.only(
-                                          bottom: bottomSheetPadding,
-                                          left: bottomSheetPadding,
-                                          right: bottomSheetPadding,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            TextButton.icon(
-                                              style: TextButton.styleFrom(
-                                                padding: const EdgeInsets.all(16),
-                                                foregroundColor: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
-                                              ),
-                                              icon: const Icon(
-                                                Icons.archive_outlined,
-                                              ),
-                                              onPressed: controller.leaveChat,
-                                              label: Text(
-                                                L10n.of(context)!.leave,
-                                              ),
-                                            ),
-                                            TextButton.icon(
-                                              style: TextButton.styleFrom(
-                                                padding: const EdgeInsets.all(16),
-                                              ),
-                                              icon: const Icon(
-                                                Icons.chat_outlined,
-                                              ),
-                                              onPressed: controller.recreateChat,
-                                              label: Text(
-                                                L10n.of(context)!.reopenChat,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    : Column(
-                                        mainAxisSize: MainAxisSize.min,
+                          ),
+                          if (controller.room!.canSendDefaultMessages &&
+                              controller.room!.membership == Membership.join)
+                            Container(
+                              constraints: const BoxConstraints(
+                                maxWidth: FluffyThemes.columnWidth * 2.5,
+                              ),
+                              alignment: Alignment.center,
+                              child: controller.room?.isAbandonedDMRoom ==
+                                      true
+                                  ? Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: bottomSheetPadding,
+                                        left: bottomSheetPadding,
+                                        right: bottomSheetPadding,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          ...[
-                                            const ConnectionStatusHeader(),
-                                            // Currently we can't support reactions
-                                            // ReactionsPicker(controller),
-                                            ReplyDisplay(controller),
-                                            ChatInputRow(controller),
-                                          ].map(
-                                            (widget) => Padding(
-                                              padding: EdgeInsets.only(
-                                                left: bottomSheetPadding,
-                                                right: bottomSheetPadding,
-                                              ),
-                                              child: widget,
+                                          TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              padding: const EdgeInsets.all(16),
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
+                                            ),
+                                            icon: const Icon(
+                                              Icons.archive_outlined,
+                                            ),
+                                            onPressed: controller.leaveChat,
+                                            label: Text(
+                                              L10n.of(context)!.leave,
                                             ),
                                           ),
-                                          SizedBox(height: bottomSheetPadding),
-                                          ChatEmojiPicker(controller),
+                                          TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              padding: const EdgeInsets.all(16),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.chat_outlined,
+                                            ),
+                                            onPressed: controller.recreateChat,
+                                            label: Text(
+                                              L10n.of(context)!.reopenChat,
+                                            ),
+                                          ),
                                         ],
                                       ),
-                              ),
-                          ],
+                                    )
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ...[
+                                          const ConnectionStatusHeader(),
+                                          // Currently we can't support reactions
+                                          // ReactionsPicker(controller),
+                                          ReplyDisplay(controller),
+                                          ChatInputRow(controller),
+                                        ].map(
+                                          (widget) => Padding(
+                                            padding: EdgeInsets.only(
+                                              left: bottomSheetPadding,
+                                              right: bottomSheetPadding,
+                                            ),
+                                            child: widget,
+                                          ),
+                                        ),
+                                        SizedBox(height: bottomSheetPadding),
+                                        ChatEmojiPicker(controller),
+                                      ],
+                                    ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (controller.dragging)
+                      Container(
+                        color: Theme.of(context)
+                            .scaffoldBackgroundColor
+                            .withOpacity(0.9),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.upload_outlined,
+                          size: 100,
                         ),
                       ),
-                      if (controller.dragging)
-                        Container(
-                          color: Theme.of(context)
-                              .scaffoldBackgroundColor
-                              .withOpacity(0.9),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.upload_outlined,
-                            size: 100,
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
+  }
+
+  Widget? _buildLeading(BuildContext context) {
+    if (controller.responsive.isMobile(context)) {
+      if (controller.selectMode) {
+        return TwakeIconButton(
+          icon: Icons.close,
+          onPressed: controller.clearSelectedEvents,
+          tooltip: L10n.of(context)!.close,
+        );
+      } else {
+        return TwakeIconButton(
+          tooltip: L10n.of(context)!.back,
+          icon: Icons.arrow_back,
+          onPressed: () => controller.backToPreviousPage(),
+          paddingAll: 8.0,
+          margin: const EdgeInsets.symmetric(vertical: 12.0),
+        );
+      }
+    } else {
+      return null;
+    }
   }
 }

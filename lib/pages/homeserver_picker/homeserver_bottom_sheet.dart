@@ -2,7 +2,6 @@ import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeserverBottomSheet extends StatelessWidget {
   final HomeserverBenchmarkResult homeserver;

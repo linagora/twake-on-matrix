@@ -12,8 +12,8 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:vrouter/vrouter.dart';
 
 class ForwardView extends StatefulWidget {
   final ForwardController controller;
@@ -119,7 +119,7 @@ class _ForwardViewState extends State<ForwardView> {
             icon: Icons.arrow_back,
             onPressed: () {
               Matrix.of(context).shareContent = null;
-              VRouter.of(context).pop();
+              context.pop();
             },
             paddingAll: 8.0,
             margin: const EdgeInsets.symmetric(vertical: 12.0),

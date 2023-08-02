@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
@@ -10,16 +11,13 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/widgets/matrix.dart';
 
 class Forward extends StatefulWidget {
-  final Widget? sideView;
-
-  const Forward({Key? key, this.sideView}) : super(key: key);
+  const Forward({Key? key}) : super(key: key);
 
   @override
   ForwardController createState() => ForwardController();
@@ -37,15 +35,13 @@ class ForwardController extends State<Forward> {
 
   Timeline? timeline;
 
-  String? get roomId => context.vRouter.pathParameters['roomid'];
+  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
   final AutoScrollController forwardListController = AutoScrollController();
 
   List<String> selectedEvents = [];
 
   bool get selectMode => selectedEvents.isNotEmpty;
-
-  String? get activeChat => VRouter.of(context).pathParameters['roomid'];
 
   @override
   void initState() {
@@ -122,7 +118,7 @@ class ForwardController extends State<Forward> {
         switch (success.runtimeType) {
           case ForwardMessageSuccess:
             final dataOnSuccess = success as ForwardMessageSuccess;
-            VRouter.of(context).toSegments(['rooms', dataOnSuccess.room.id]);
+            context.go('${goShellBranch()}/${dataOnSuccess.room.id}');
             break;
           case ForwardMessageIsShareFileState:
             final dataOnSuccess = success as ForwardMessageIsShareFileState;
@@ -137,6 +133,13 @@ class ForwardController extends State<Forward> {
         }
       }
     );
+  }
+
+  String goShellBranch() {
+    final currentShellBranch = GoRouterState.of(context).fullPath;
+    Logs().d('Forward()::goShellBranch() currentShellBranch: $currentShellBranch');
+    return TwakeRoutes.shellBranch
+        .firstWhere((branch) => currentShellBranch?.startsWith('$branch/') == true);
   }
 
   void _handleForwardMessageOnDone() {

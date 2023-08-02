@@ -28,7 +28,6 @@ import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_stories/settings_stories.dart';
 import 'package:fluffychat/pages/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_up/signup.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_shell.dart';
 import 'package:fluffychat/widgets/layouts/empty_page.dart';
 import 'package:fluffychat/widgets/log_view.dart';
@@ -42,7 +41,12 @@ class TwakeRoutes {
   final _navChatNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Chat');
   final _navContactsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Contacts');
   final _navStoriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Stories');
-  final responsive = ResponsiveUtils();
+
+  static const List<String> shellBranch = [
+    '/rooms',
+    '/contacts',
+    '/stories',
+  ];
 
   GoRouter get router => GoRouter(
     initialLocation: '/',
@@ -117,7 +121,6 @@ class TwakeRoutes {
                           secondaryBody: EmptyChat(
                             key: state.pageKey,
                             state: state,
-                            formPath: '/contacts'
                           ),
                         ),
                       );
@@ -150,7 +153,7 @@ class TwakeRoutes {
                       GoRoute(
                         path: 'forward',
                         builder: (context, state) {
-                          return const Forward(fromPath: '/contacts');
+                          return const Forward();
                         },
                       ),
                     ],
@@ -158,7 +161,6 @@ class TwakeRoutes {
                 ],
               ),
             ],
-            // diScope: (context) => [ContactDI()],
           ),
           StatefulShellBranch(
             initialLocation: '/rooms',
@@ -195,7 +197,7 @@ class TwakeRoutes {
                           pageBuilder: (context, state) => NoTransitionPage(
                             child: AdaptiveScaffoldRoute(
                               body: const ChatList(),
-                              secondaryBody: EmptyChat(state: state, formPath: '/rooms'),
+                              secondaryBody: EmptyChat(state: state),
                             ),
                           ),
                         ),
@@ -228,7 +230,7 @@ class TwakeRoutes {
                         GoRoute(
                           path: 'forward',
                           builder: (context, state) {
-                            return const Forward(fromPath: '/rooms');
+                            return const Forward();
                           },
                         ),
                       ],
@@ -321,7 +323,7 @@ class TwakeRoutes {
     GoRoute(
       path: 'forward',
       builder: (context, state) {
-        return const Forward(fromPath: '/chatDetails',);
+        return const Forward();
       }
     )
   ];

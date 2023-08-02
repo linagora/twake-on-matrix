@@ -1,4 +1,3 @@
-import 'package:fluffychat/di/abstract_di.dart';
 import 'package:fluffychat/di/base_di.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +10,6 @@ mixin ShowDialogMixin {
     OnFinishedBind? onFinishedBind,
   }) {
     di.bind(onFinishedBind: onFinishedBind);
-    showGeneralDialog(context: context, pageBuilder: pageBuilder)
-      .whenComplete(() async => di.unbind());
-
+    showGeneralDialog(context: context, pageBuilder: pageBuilder);
   }
 }

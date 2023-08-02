@@ -30,10 +30,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
-import 'package:vrouter/vrouter.dart';
 
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
@@ -51,7 +51,7 @@ class BackgroundPush {
       FlutterLocalNotificationsPlugin();
   Client client;
   BuildContext? context;
-  GlobalKey<VRouterState>? router;
+  GlobalKey<NavigatorState>? router;
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
@@ -106,13 +106,13 @@ class BackgroundPush {
   factory BackgroundPush(
     Client client,
     BuildContext context,
-    GlobalKey<VRouterState>? router, {
-    final void Function(String errorMsg, {Uri? link})? onFcmError,
-  }) {
+    {
+    final void Function(String errorMsg, {Uri? link})? onFcmError
+    }
+  ) {
     final instance = BackgroundPush.clientOnly(client);
     instance.context = context;
     // ignore: prefer_initializing_formals
-    instance.router = router;
     // ignore: prefer_initializing_formals
     instance.onFcmError = onFcmError;
     return instance;
@@ -322,7 +322,9 @@ class BackgroundPush {
       notification,
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState?.pathParameters['roomid'],
+      activeRoomId: router?.currentState != null
+        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
+        : null,
       onSelectNotification: onSelectNotification,
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
@@ -346,7 +348,7 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      router!.currentState!.toSegments([isStory ? 'stories' : 'rooms', roomId]);
+      router!.currentState!.context.go(isStory ? 'stories' : '/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
@@ -426,7 +428,9 @@ class BackgroundPush {
       PushNotification.fromJson(data),
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState?.pathParameters['roomid'],
+      activeRoomId: router?.currentState != null
+        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
+        : null,
     );
   }
 

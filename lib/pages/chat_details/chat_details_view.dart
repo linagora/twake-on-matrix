@@ -1,11 +1,9 @@
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_link_text/link_text.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item.dart';
@@ -53,10 +51,9 @@ class ChatDetailsView extends StatelessWidget {
                 leading: IconButton(
                   icon: const Icon(Icons.close_outlined),
                   onPressed: () =>
-                      VRouter.of(context).path.startsWith('/spaces/')
-                          ? VRouter.of(context).pop()
-                          : VRouter.of(context)
-                              .toSegments(['rooms', controller.roomId!]),
+                    GoRouterState.of(context).path?.startsWith('/spaces/') == true
+                      ? context.pop()
+                      : context.go('/rooms/${controller.roomId!}'),
                 ),
                 elevation: Theme.of(context).appBarTheme.elevation,
                 expandedHeight: 300.0,
@@ -379,8 +376,7 @@ class ChatDetailsView extends StatelessWidget {
                                   Icons.edit_attributes_outlined,
                                 ),
                               ),
-                              onTap: () =>
-                                  VRouter.of(context).to('permissions'),
+                              onTap: () => context.go('/permissions'),
                             ),
                           ],
                           const Divider(height: 1),
@@ -407,7 +403,7 @@ class ChatDetailsView extends StatelessWidget {
                                     radius: AvatarStyle.defaultSize / 2,
                                     child: const Icon(Icons.add_outlined),
                                   ),
-                                  onTap: () => VRouter.of(context).to('invite'),
+                                  onTap: () => context.go('/invite'),
                                 )
                               : Container(),
                         ],

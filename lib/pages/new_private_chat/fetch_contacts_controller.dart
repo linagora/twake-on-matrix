@@ -9,7 +9,7 @@ import 'package:fluffychat/domain/app_state/contact/get_network_contact_success.
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/load_more_internal_contacts.dart';
-import 'package:fluffychat/presentation/mixin/load_more_contacts_mixin.dart';
+import 'package:fluffychat/presentation/mixins/load_more_contacts_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 class FetchContactsController with LoadMoreContactsMixin {

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_link_text/link_text.dart';
-import 'package:vrouter/vrouter.dart';
 
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -44,7 +44,7 @@ class PublicRoomBottomSheet extends StatelessWidget {
       }
       // don't open the room if the joined room is a space
       if (!client.getRoomById(result.result!)!.isSpace) {
-        VRouter.of(context).toSegments(['rooms', result.result!]);
+        context.go('/rooms/${result.result!}');
       }
       Navigator.of(context, rootNavigator: false).pop();
       return;

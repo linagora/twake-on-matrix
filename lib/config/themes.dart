@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:vrouter/vrouter.dart';
 
 import 'app_config.dart';
 
@@ -16,7 +16,7 @@ abstract class FluffyThemes {
       isColumnModeByWidth(MediaQuery.of(context).size.width);
 
   static bool getDisplayNavigationRail(BuildContext context) =>
-      !VRouter.of(context).path.startsWith('/settings');
+      !(GoRouterState.of(context).path?.startsWith('/settings') == true);
 
   static const fallbackTextStyle = TextStyle(
     fontFamily: 'Inter',
@@ -123,6 +123,7 @@ abstract class FluffyThemes {
           )
         ),
         appBarTheme: AppBarTheme(
+          scrolledUnderElevation: 0,
           titleSpacing: 0,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,

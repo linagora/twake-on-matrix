@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/utils/client_manager.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes_view.dart';
@@ -20,10 +19,10 @@ class EmotesSettings extends StatefulWidget {
 }
 
 class EmotesSettingsController extends State<EmotesSettings> {
-  String? get roomId => VRouter.of(context).pathParameters['roomid'];
+  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
   Room? get room =>
       roomId != null ? Matrix.of(context).client.getRoomById(roomId!) : null;
-  String? get stateKey => VRouter.of(context).pathParameters['state_key'];
+  String? get stateKey => GoRouterState.of(context).pathParameters['state_key'];
 
   bool showSave = false;
   TextEditingController newImageCodeController = TextEditingController();

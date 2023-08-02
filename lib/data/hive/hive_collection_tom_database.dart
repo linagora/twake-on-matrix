@@ -1,9 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:fluffychat/data/hive/dto/tom_configurations_hive_obj.dart';
-import 'package:fluffychat/data/hive/dto/tom_server_information_hive_obj.dart';
-import 'package:fluffychat/data/hive/hive_constants.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +7,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html;
 
 class HiveCollectionToMDatabase {
   final String name;
@@ -32,7 +27,6 @@ class HiveCollectionToMDatabase {
       // Workaround for secure storage is calling Platform.operatingSystem on web
       if (kIsWeb) {
         // ignore: unawaited_futures
-        html.window.navigator.storage?.persist();
         throw MissingPluginException();
       }
 
@@ -72,7 +66,6 @@ class HiveCollectionToMDatabase {
       key: hiverCipher,
     );
     try {
-      registerAdapters();
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
@@ -109,17 +102,6 @@ class HiveCollectionToMDatabase {
       path = directory.path;
     }
     return path!;
-  }
-
-  static registerAdapters() {
-    registerCacheAdapter<ToMConfigurationsHiveObj>(
-      ToMConfigurationsHiveObjAdapter(),
-      HiveConstants.typeIdTomConfiguration,
-    );
-    registerCacheAdapter<ToMServerInformationHiveObj>(
-      ToMServerInformationHiveObjAdapter(),
-      HiveConstants.typeIdTomServerInformation,
-    );
   }
 
   static registerCacheAdapter<T>(TypeAdapter<T> typeAdapter, int typeId) {

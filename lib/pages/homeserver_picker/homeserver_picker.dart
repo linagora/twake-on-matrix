@@ -10,11 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
-import 'package:vrouter/vrouter.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_bottom_sheet.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
@@ -159,7 +158,7 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
 
       if (!ssoSupported && matrix.loginRegistrationSupported == false) {
         // Server does not support SSO or registration. We can skip to login page:
-        VRouter.of(context).to('login');
+        context.go('/login');
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await Matrix.of(context)
@@ -179,7 +178,7 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
         setState(() {});
       } else {
         state = HomeserverState.otherLoginMethod;
-        VRouter.of(context).to('connect');
+        context.go('/connect');
       }
     } catch (e) {
       state = HomeserverState.wrongServerName;

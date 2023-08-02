@@ -9,9 +9,9 @@ import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 import '../../config/themes.dart';
 import '../../widgets/avatar/avatar.dart';
@@ -64,7 +64,7 @@ class ChatListItem extends StatelessWidget {
     }
 
     if (room.membership == Membership.leave) {
-      VRouter.of(context).toSegments(['archive', room.id]);
+      context.go('/archive/${room.id}');
     }
 
     if (room.membership == Membership.join) {
@@ -87,8 +87,7 @@ class ChatListItem extends StatelessWidget {
         }
         Matrix.of(context).shareContent = null;
       }
-
-      VRouter.of(context).toSegments(['rooms', room.id]);
+      context.go('/rooms/${room.id}');
     }
   }
 

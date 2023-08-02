@@ -1,34 +1,22 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/data/hive/hive_constants.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
-import 'package:hive/hive.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'tom_server_information_hive_obj.g.dart';
 
-@HiveType(typeId: HiveConstants.typeIdTomServerInformation)
-class ToMServerInformationHiveObj extends HiveObject with EquatableMixin {
+@JsonSerializable(explicitToJson: true)
+class ToMServerInformationHiveObj with EquatableMixin {
 
-  @HiveField(0)
   final String? baseUrl;
 
-  @HiveField(1)
   final String? serverName;
 
   ToMServerInformationHiveObj(this.baseUrl, this.serverName);
 
-  factory ToMServerInformationHiveObj.fromJson(Map<String, dynamic> json) {
-    return ToMServerInformationHiveObj(
-      json['baseUrl'],
-      json['serverName'],
-    );
-  }
+  factory ToMServerInformationHiveObj.fromJson(Map<String, dynamic> json) =>
+    _$ToMServerInformationHiveObjFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'baseUrl': baseUrl,
-      'serverName': serverName,
-    };
-  }
+  Map<String, dynamic> toJson() => _$ToMServerInformationHiveObjToJson(this);
 
 
   @override

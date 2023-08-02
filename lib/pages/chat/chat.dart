@@ -8,11 +8,12 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
-import 'package:fluffychat/presentation/mixin/image_picker_mixin.dart';
-import 'package:fluffychat/presentation/mixin/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
@@ -33,7 +35,6 @@ import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vrouter/vrouter.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
@@ -62,6 +63,8 @@ class Chat extends StatefulWidget {
 class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
 
+  final responsive = getIt.get<ResponsiveUtils>();
+
   Room? room;
 
   Client? sendingClient;
@@ -70,7 +73,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
 
   MatrixState? matrix;
 
-  String? get roomId => context.vRouter.pathParameters['roomid'];
+  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
@@ -175,7 +178,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     );
     final roomId = success.result;
     if (roomId == null) return;
-    VRouter.of(context).toSegments(['rooms', roomId]);
+    context.go('/rooms/$roomId');
   }
 
   void leaveChat() async {
@@ -190,7 +193,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       future: room.leave,
     );
     if (success.error != null) return;
-    VRouter.of(context).to('/rooms');
+    context.go('/rooms');
   }
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
@@ -257,7 +260,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   }
 
   void backToPreviousPage() {
-    VRouter.of(context).pop();
+   context.pop();
   }
 
   Future<bool> getTimeline() async {
@@ -275,7 +278,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       // "load more" button is visible on the screen
       SchedulerBinding.instance.addPostFrameCallback((_) async {
         if (mounted) {
-          final event = VRouter.of(context).queryParameters['event'];
+          final event = GoRouterState.of(context).pathParameters['event'];
           if (event != null) {
             scrollToEventId(event);
           }
@@ -742,7 +745,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       Logs().d("forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}");
     }
     setState(() => selectedEvents.clear());
-    VRouter.of(context).toSegments(['rooms', room!.id, 'forward']);
+    context.go('/rooms/${room!.id}/forward');
   }
 
   void sendAgainAction() {
@@ -856,7 +859,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       future: room!.forget,
     );
     if (result.error != null) return;
-    VRouter.of(context).to('/archive');
+    context.go('/archive');
   }
 
   void typeEmoji(Emoji? emoji) {
@@ -972,7 +975,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       future: room!.leave,
     );
     if (result.error == null) {
-      VRouter.of(context).toSegments(['rooms', result.result!]);
+      context.go('/rooms/${result.result}');
     }
   }
 
@@ -1170,7 +1173,9 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       });
 
   @override
-  Widget build(BuildContext context) => ChatView(this);
+  Widget build(BuildContext context) {
+    return ChatView(this, key: widget.key);
+  }
 }
 
 enum EmojiPickerType { reaction, keyboard }

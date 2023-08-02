@@ -15,6 +15,4 @@ class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
   Future<void> saveTomConfigurations(String clientName, ToMConfigurations toMConfigurations) {
     return tomConfigurationsDatasource.saveTomConfigurations(clientName, toMConfigurations);
   }
-
-
 }
