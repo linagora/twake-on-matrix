@@ -164,33 +164,33 @@ class AddStoryController extends State<AddStoryPage> {
         if (video != null) {
           video = await video.resizeVideo();
           final thumbnail = await video.getVideoThumbnail();
-          await storiesRoom.sendFileEvent(
-            video,
-            extraContent: {
-              'body': controller.text,
-              StoryThemeData.contentKey: StoryThemeData(
-                fit: fit,
-                alignmentX: alignmentX,
-                alignmentY: alignmentY,
-              ).toJson(),
-            },
-            thumbnail: thumbnail,
-          );
+          // await storiesRoom.sendFileEvent(
+          //   video,
+          //   extraContent: {
+          //     'body': controller.text,
+          //     StoryThemeData.contentKey: StoryThemeData(
+          //       fit: fit,
+          //       alignmentX: alignmentX,
+          //       alignmentY: alignmentY,
+          //     ).toJson(),
+          //   },
+          //   thumbnail: thumbnail,
+          // );
           return;
         }
         final image = this.image;
         if (image != null) {
-          await storiesRoom.sendFileEvent(
-            image,
-            extraContent: {
-              'body': controller.text,
-              StoryThemeData.contentKey: StoryThemeData(
-                fit: fit,
-                alignmentX: alignmentX,
-                alignmentY: alignmentY,
-              ).toJson(),
-            },
-          );
+          // await storiesRoom.sendFileEvent(
+          //   image,
+          //   extraContent: {
+          //     'body': controller.text,
+          //     StoryThemeData.contentKey: StoryThemeData(
+          //       fit: fit,
+          //       alignmentX: alignmentX,
+          //       alignmentY: alignmentY,
+          //     ).toJson(),
+          //   },
+          // );
           return;
         }
         await storiesRoom.sendEvent(<String, dynamic>{

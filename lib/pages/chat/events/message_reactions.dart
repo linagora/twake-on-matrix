@@ -99,11 +99,14 @@ class ReactionsList extends StatelessWidget {
                 count: r.count,
                 reacted: r.reacted,
                 onTap: () {
+                  
                   if (r.reacted) {
                     final evt = allReactionEvents.firstWhereOrNull(
-                      (e) =>
-                          e.senderId == e.room.client.userID &&
-                          e.content['m.relates_to']['key'] == r.key,
+                      (e) {
+                        final relatedTo = e.content['m.relates_to'];
+                        return e.senderId == e.room.client.userID &&
+                          relatedTo is Map && relatedTo['key'] == r.key;
+                      }   
                     );
                     if (evt != null) {
                       showFutureLoadingDialog(

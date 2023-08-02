@@ -536,30 +536,30 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       bytes: audioFile.readAsBytesSync(),
       name: audioFile.path,
     );
-    await room!.sendFileEvent(
-      file,
-      inReplyTo: replyEvent,
-      extraContent: {
-        'info': {
-          ...file.info,
-          'duration': result.duration,
-        },
-        'org.matrix.msc3245.voice': {},
-        'org.matrix.msc1767.audio': {
-          'duration': result.duration,
-          'waveform': result.waveform,
-        },
-      },
-    ).catchError((e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            (e as Object).toLocalizedString(context),
-          ),
-        ),
-      );
-      return null;
-    });
+    // await room!.sendFileEvent(
+    //   file,
+    //   inReplyTo: replyEvent,
+    //   extraContent: {
+    //     'info': {
+    //       ...file.info,
+    //       'duration': result.duration,
+    //     },
+    //     'org.matrix.msc3245.voice': {},
+    //     'org.matrix.msc1767.audio': {
+    //       'duration': result.duration,
+    //       'waveform': result.waveform,
+    //     },
+    //   },
+    // ).catchError((e) {
+    //   scaffoldMessenger.showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         (e as Object).toLocalizedString(context),
+    //       ),
+    //     ),
+    //   );
+    //   return null;
+    // });
     setState(() {
       replyEvent = null;
     });
@@ -748,13 +748,13 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   void sendAgainAction() {
     final event = selectedEvents.first;
     if (event.status.isError) {
-      event.sendAgain();
+      // event.sendAgain();
     }
     final allEditEvents = event
         .aggregatedEvents(timeline!, RelationshipTypes.edit)
         .where((e) => e.status.isError);
     for (final e in allEditEvents) {
-      e.sendAgain();
+      // e.sendAgain();
     }
     setState(() => selectedEvents.clear());
   }
@@ -843,7 +843,10 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     if (emoji == null) return;
     // make sure we don't send the same emoji twice
     if (_allReactionEvents
-        .any((e) => e.content['m.relates_to']['key'] == emoji.emoji)) return;
+        .any((e) {
+          final relatedTo = e.content['m.relates_to'];
+          return relatedTo is Map && relatedTo.containsKey('key') && relatedTo['key'] == emoji.emoji;
+        })) return;
     return sendEmojiAction(emoji.emoji);
   }
 

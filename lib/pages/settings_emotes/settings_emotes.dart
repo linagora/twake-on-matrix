@@ -149,14 +149,23 @@ class EmotesSettingsController extends State<EmotesSettings> {
     });
   }
 
-  bool isGloballyActive(Client? client) =>
-      room != null &&
-      client!.accountData['im.ponies.emote_rooms']?.content is Map &&
-      client.accountData['im.ponies.emote_rooms']!.content['rooms'] is Map &&
-      client.accountData['im.ponies.emote_rooms']!.content['rooms'][room!.id]
-          is Map &&
-      client.accountData['im.ponies.emote_rooms']!.content['rooms'][room!.id]
-          [stateKey ?? ''] is Map;
+  bool isGloballyActive(Client? client) {
+    final emoteRoom = client!.accountData['im.ponies.emote_rooms'];
+    if (emoteRoom == null || emoteRoom.content['rooms'] == null) {
+      return false;
+    }
+
+    final contentRooms = emoteRoom.content['rooms'];
+
+    if (contentRooms == null || room == null || contentRooms is! Map) {
+      return false;
+    }
+    
+    return room != null &&
+        contentRooms[room!.id] is Map &&
+        contentRooms[room!.id][stateKey ?? ''] is Map;
+  }
+      
 
   bool get readonly =>
       room == null ? false : !(room!.canSendEvent('im.ponies.room_emotes'));
@@ -213,7 +222,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       withData: true,
     );
     final pickedFile = result?.files.firstOrNull;
-    if (pickedFile == null) return;
+    if (pickedFile == null || pickedFile.bytes == null) return;
     var file = MatrixImageFile(
       bytes: pickedFile.bytes!,
       name: pickedFile.name,
@@ -228,7 +237,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     final uploadResp = await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).client.uploadContent(
-        file.bytes,
+        file.bytes!,
         filename: file.name,
         contentType: file.mimeType,
       ),

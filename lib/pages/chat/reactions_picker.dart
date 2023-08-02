@@ -52,7 +52,11 @@ class ReactionsPicker extends StatelessWidget {
 
             for (final event in allReactionEvents) {
               try {
-                emojis.remove(event.content['m.relates_to']['key']);
+                final relateTo = event.content['m.relates_to'];
+                if (relateTo == null || relateTo is! Map) {
+                  continue;
+                }
+                emojis.remove(relateTo['key']);
               } catch (_) {}
             }
             return Row(

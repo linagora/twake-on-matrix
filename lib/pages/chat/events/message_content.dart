@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -132,6 +135,7 @@ class MessageContent extends StatelessWidget {
               );
             }
             final filePath = event.getFilePath();
+            debugPrint('filePath: $filePath');
             if (filePath != null) {
               return SendingImageWidget(
                 filePath: filePath,

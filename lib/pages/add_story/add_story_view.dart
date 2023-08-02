@@ -82,10 +82,10 @@ class AddStoryView extends StatelessWidget {
                 vertical: 80.0,
               ),
               decoration: BoxDecoration(
-                image: controller.image == null
+                image: controller.image == null || controller.image!.bytes == null
                     ? null
                     : DecorationImage(
-                        image: MemoryImage(controller.image!.bytes),
+                        image: MemoryImage(controller.image!.bytes!),
                         fit: controller.fit,
                         opacity: 0.75,
                       ),

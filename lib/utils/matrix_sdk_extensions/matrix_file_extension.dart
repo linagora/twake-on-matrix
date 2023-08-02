@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/data/network/upload_file/file_info.dart';
@@ -31,7 +33,7 @@ extension MatrixFileExtension on MatrixFile {
 
     final result = await showFutureLoadingDialog(
       context: context,
-      future: () => File(downloadPath).writeAsBytes(bytes),
+      future: () => File(downloadPath).writeAsBytes(bytes ?? Uint8List(0)),
     );
     if (result.error != null) return;
 
@@ -52,9 +54,11 @@ extension MatrixFileExtension on MatrixFile {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
     final box = context.findRenderObject() as RenderBox?;
-
+    if (bytes == null) {
+      return ;
+    }
     await Share.shareXFiles(
-      [XFile.fromData(bytes, name: name, mimeType: mimeType)],
+      [XFile.fromData(bytes!, name: name, mimeType: mimeType)],
       sharePositionOrigin:
       box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
@@ -69,21 +73,20 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   MatrixFile get detectFileType {
+    if (bytes == null) {
+      return this;
+    }
     if (msgType == MessageTypes.Image) {
-      return MatrixImageFile(bytes: bytes, name: name);
+      return MatrixImageFile(bytes: bytes!, name: name);
     }
     if (msgType == MessageTypes.Video) {
-      return MatrixVideoFile(bytes: bytes, name: name);
+      return MatrixVideoFile(bytes: bytes!, name: name);
     }
     if (msgType == MessageTypes.Audio) {
-      return MatrixAudioFile(bytes: bytes, name: name);
+      return MatrixAudioFile(bytes: bytes!, name: name);
     }
     return this;
   }
 
   String get sizeString => size.sizeString;
-
-  FileInfo toFileInfo() {
-    return FileInfo(name, utf8.decode(bytes.toList()), size);
-  }
 }

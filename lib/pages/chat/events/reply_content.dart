@@ -39,7 +39,7 @@ class ReplyContent extends StatelessWidget {
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
-      String? html = displayEvent.content['formatted_body'];
+      String? html = (displayEvent.content['formatted_body'] as String?);
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';
       }
