@@ -7,6 +7,7 @@ import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
+import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
@@ -50,7 +51,7 @@ class GetItInitializer {
     bindingDatasource();
     bindingDatasourceImpl();
     bindingRepositories();
-    binndingInteractor();
+    bindingInteractor();
   }
 
   void bindingGlobal() {
@@ -67,6 +68,7 @@ class GetItInitializer {
   void bindingAPI() {
     getIt.registerLazySingleton<RecoveryWordsAPI>(() => RecoveryWordsAPI());
     getIt.registerFactory<TomContactAPI>(() => TomContactAPI());
+    getIt.registerSingleton<UploadFileAPI>(UploadFileAPI());
   }
 
   void bindingDatasource() {
@@ -85,7 +87,7 @@ class GetItInitializer {
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
   }
 
-  void binndingInteractor() {
+  void bindingInteractor() {
     getIt.registerLazySingleton<GetRecoveryWordsInteractor>(() => GetRecoveryWordsInteractor());
     getIt.registerLazySingleton<SaveRecoveryWordsInteractor>(() => SaveRecoveryWordsInteractor());
     getIt.registerFactory<LookupContactsInteractor>(() => LookupContactsInteractor());
