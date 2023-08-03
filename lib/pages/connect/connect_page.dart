@@ -81,7 +81,7 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
         loading = false;
       });
       Matrix.of(context).loginUsername = usernameController.text;
-      context.go('/signup');
+      context.push('/signup');
     } catch (e, s) {
       Logs().d('Sign up failed', e, s);
       setState(() {
@@ -91,7 +91,7 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
     }
   }
 
-  void login() => context.go('/login');
+  void login() => context.push('/login');
 
   Map<String, dynamic>? rawLoginTypes;
 

@@ -1446,7 +1446,7 @@ packages:
     description:
       path: "."
       ref: improve-matrix-file
-      resolved-ref: "536ea4b2fc983e2433824780716060519b2b69c4"
+      resolved-ref: b8762469be46d3ec6ee782ccdc035a597202c2f4
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.20.5"
