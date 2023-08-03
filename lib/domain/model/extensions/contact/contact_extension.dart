@@ -28,6 +28,7 @@ extension ContactExtension on Contact {
       email: email,
       displayName: displayName,
       matrixId: matrixId,
+      searchElementTypeEnum: SearchElementTypeEnum.contact,
     )).toSet() ?? {};
 
     if (emails == null || emails!.isEmpty) {
@@ -35,6 +36,7 @@ extension ContactExtension on Contact {
         email: null,
         displayName: displayName,
         matrixId: matrixId,
+        searchElementTypeEnum: SearchElementTypeEnum.contact,
       ));
     }
 

@@ -18,7 +18,7 @@ extension RoomListExtension on List<Room> {
     ).toList();
     final chatModels = validRooms.toSearchList(matrixLocalizations);
     if (keyword.isNotEmpty) {
-      chatModels.removeWhere((chat) => !chat.searchDisplayName(keyword));
+      chatModels.removeWhere((chat) => !chat.isDisplayNameContains(keyword));
     }
     if (limit != null) {
       return chatModels.take(limit).toList();

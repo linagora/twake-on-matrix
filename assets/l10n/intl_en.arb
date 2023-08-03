@@ -2654,6 +2654,7 @@
     "contact": "Contact",
     "file": "File",
     "recent": "Recent",
+    "chatsAndContacts": "Chats and Contacts",
     "clear": "Clear",
     "membersCount": "{count} Members",
     "@membersCount": {

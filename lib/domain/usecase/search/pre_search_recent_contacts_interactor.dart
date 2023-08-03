@@ -21,7 +21,7 @@ class PreSearchRecentContactsInteractor {
 
         for (final user in users) {
           final isDuplicateUser = result
-            .any((existingUser) => existingUser.displayName == user.displayName);
+            .any((existingUser) => existingUser.id == user.id);
 
           if (!isDuplicateUser) {
             result.add(user);
