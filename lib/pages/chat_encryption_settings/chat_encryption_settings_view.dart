@@ -24,7 +24,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close_outlined),
-            onPressed: () => context.pop('rooms/${controller.roomId!}'),
+            onPressed: () => context.go('rooms/${controller.roomId!}'),
           ),
           title: Text(L10n.of(context)!.endToEndEncryption),
           actions: [

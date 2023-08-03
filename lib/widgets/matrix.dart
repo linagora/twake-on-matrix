@@ -529,13 +529,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   }
 
   void _storeToMConfiguration(Client client, ToMServerInformation? tomServerInformation, IdentityServerInformation? identityServerInformation) {
-    if (tomServerInformation != null) {
-      final configuration = ToMConfigurations(
-        tomServerInformation: tomServerInformation,
-        identityServerInformation: identityServerInformation,
-      );
-      final ToMConfigurationsRepository configurationRepository = getIt.get<ToMConfigurationsRepository>();
-      configurationRepository.saveTomConfigurations(client.clientName, configuration);
+    try {
+      if (tomServerInformation != null) {
+        final configuration = ToMConfigurations(
+          tomServerInformation: tomServerInformation,
+          identityServerInformation: identityServerInformation,
+        );
+        final ToMConfigurationsRepository configurationRepository = getIt.get<ToMConfigurationsRepository>();
+        configurationRepository.saveTomConfigurations(client.clientName, configuration);
+      }
+    } catch (e) {
+      Logs().e('Matrix::_storeToMConfiguration: error - $e');
     }
   }
 
