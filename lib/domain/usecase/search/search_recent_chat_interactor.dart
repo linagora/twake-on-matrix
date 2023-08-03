@@ -11,7 +11,7 @@ class SearchRecentChatInteractor {
     required List<Room> rooms,
     required MatrixLocalizations matrixLocalizations,
     required String keyword,
-    int? limit, // Dat: why we need limit here?
+    int? limit,
   }) async* {
     try {
       final recentChat = rooms.searchRecentChat(
