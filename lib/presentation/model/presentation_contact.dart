@@ -17,6 +17,13 @@ class PresentationContact extends Equatable {
     this.matrixId,
     this.status,
   });
+
+  PresentationContact get presentationContactEmpty => const PresentationContact(
+    email: '',
+    displayName: '',
+    matrixId: '',
+    status: ContactStatus.inactive,
+  );
   
   @override
   List<Object?> get props => [email, displayName, matrixId, status];

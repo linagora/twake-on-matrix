@@ -78,12 +78,17 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
 
   @override
   void initState() {
-    final extra = widget.state.extra! as Map<String, String>;
-    presentationContact = PresentationContact(
-      matrixId: extra[PresentationContactConstant.receiverId],
-      email: extra[PresentationContactConstant.email],
-      displayName: extra[PresentationContactConstant.displayName],
-    );
+    final extra = widget.state.extra as Map<String, String>;
+    if (extra != {}) {
+      presentationContact = PresentationContact(
+        matrixId: extra[PresentationContactConstant.receiverId],
+        email: extra[PresentationContactConstant.email],
+        displayName: extra[PresentationContactConstant.displayName],
+      );
+    } else {
+      presentationContact = const PresentationContact().presentationContactEmpty;
+    }
+
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     listenToSelectionInImagePicker();

@@ -44,48 +44,48 @@ class GetItInitializer {
   GetItInitializer._internal();
 
   void setUp() {
-    bidingGlobal();
-    bidingQueue();
-    bidingAPI();
-    bidingDatasource();
-    bidingDatasourceImpl();
-    bidingRepositories();
-    bindingInteractor();
+    bindingGlobal();
+    bindingQueue();
+    bindingAPI();
+    bindingDatasource();
+    bindingDatasourceImpl();
+    bindingRepositories();
+    binndingInteractor();
   }
 
-  void bidingGlobal() {
+  void bindingGlobal() {
     NetworkDI().bind();
     HiveDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
   }
 
-  void bidingQueue() {
+  void bindingQueue() {
     getIt.registerSingleton<Queue>(Queue());
   }
 
-  void bidingAPI() {
+  void bindingAPI() {
     getIt.registerLazySingleton<RecoveryWordsAPI>(() => RecoveryWordsAPI());
     getIt.registerFactory<TomContactAPI>(() => TomContactAPI());
   }
 
-  void bidingDatasource() {
+  void bindingDatasource() {
     getIt.registerFactory<ToMConfigurationsDatasource>(() => HiveToMConfigurationDatasource());
 
   }
 
-  void bidingDatasourceImpl() {
+  void bindingDatasourceImpl() {
     getIt.registerLazySingleton<RecoveryWordsDataSource>(() => RecoveryWordsDataSourceImpl());
     getIt.registerFactory<TomContactsDatasource>(() => TomContactsDatasourceImpl());
   }
 
-  void bidingRepositories() {
+  void bindingRepositories() {
     getIt.registerFactory<ToMConfigurationsRepository>(() => ToMConfigurationsRepositoryImpl());
     getIt.registerLazySingleton<RecoveryWordsRepository>(() => RecoveryWordsRepositoryImpl());
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
   }
 
-  void bindingInteractor() {
+  void binndingInteractor() {
     getIt.registerLazySingleton<GetRecoveryWordsInteractor>(() => GetRecoveryWordsInteractor());
     getIt.registerLazySingleton<SaveRecoveryWordsInteractor>(() => SaveRecoveryWordsInteractor());
     getIt.registerFactory<LookupContactsInteractor>(() => LookupContactsInteractor());
