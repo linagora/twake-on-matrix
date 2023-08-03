@@ -158,7 +158,7 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
 
       if (!ssoSupported && matrix.loginRegistrationSupported == false) {
         // Server does not support SSO or registration. We can skip to login page:
-        context.go('/login');
+        context.push('/login');
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await Matrix.of(context)
@@ -178,7 +178,7 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
         setState(() {});
       } else {
         state = HomeserverState.otherLoginMethod;
-        context.go('/connect');
+        context.push('/connect');
       }
     } catch (e) {
       state = HomeserverState.wrongServerName;

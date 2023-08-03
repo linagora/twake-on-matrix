@@ -66,26 +66,24 @@ class TwakeRoutes {
         },
       ),
       GoRoute(
+        path: '/login',
+        builder: (context, state) => const Login(),
+      ),
+      GoRoute(
+        path: '/connect',
+        builder: (context, state) => const ConnectPage(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupPage(),
+      ),
+      GoRoute(
         path: '/home',
         builder: (context, state) => const HomeserverPicker(),
         routes: [
           GoRoute(
             path: 'login',
             builder: (context, state) => const Login(),
-          ),
-          GoRoute(
-            path: 'connect',
-            builder: (context, state) => const ConnectPage(),
-            routes: [
-              GoRoute(
-                path: 'login',
-                builder: (context, state) => const Login(),
-              ),
-              GoRoute(
-                path: 'signup',
-                builder: (context, state) => const SignupPage(),
-              ),
-            ],
           ),
           GoRoute(
             path: 'logs',
