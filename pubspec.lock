@@ -1430,8 +1430,8 @@ packages:
     description:
       path: "."
       ref: improve-matrix-file
-      resolved-ref: "849379b83417af0babc9caab12e5842b025656f5"
-      url: "https://github.com/linagora/matrix-dart-sdk.git"
+      resolved-ref: "536ea4b2fc983e2433824780716060519b2b69c4"
+      url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.20.5"
   matrix_api_lite:

@@ -62,7 +62,7 @@ dependencies:
   latlong2: ^0.8.1
   matrix:
     git: 
-      url: https://github.com/linagora/matrix-dart-sdk.git
+      url: git@github.com:linagora/matrix-dart-sdk.git
       ref: improve-matrix-file
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^1.0.2
