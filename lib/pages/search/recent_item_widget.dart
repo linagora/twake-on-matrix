@@ -155,23 +155,21 @@ class _ContactInformation extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (presentationSearch.email != null)
-          Text(
-          presentationSearch.email ?? "",
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          softWrap: false,
-          style: Theme.of(context).textTheme.bodyMedium?.merge(
-            TextStyle(
-              overflow: TextOverflow.ellipsis,
-              letterSpacing: 0.15,
-              color: LinagoraRefColors.material().tertiary[30],
-            ),
-          ),
-        ),
-        if (presentationSearch.directChatMatrixID != null)
+        if (presentationSearch.matrixId != null)
           HighlightText(
-            text: presentationSearch.directChatMatrixID ?? "",
+            text: presentationSearch.matrixId ?? "",
+            style: Theme.of(context).textTheme.bodyMedium?.merge(
+              TextStyle(
+                overflow: TextOverflow.ellipsis,
+                letterSpacing: 0.15,
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
+            ),
+            searchWord: searchKeyword,
+          ),
+        if (presentationSearch.email != null)
+          HighlightText(
+            text: presentationSearch.email ?? "",
             style: Theme.of(context).textTheme.bodyMedium?.merge(
               TextStyle(
                 overflow: TextOverflow.ellipsis,

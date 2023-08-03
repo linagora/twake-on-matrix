@@ -3,6 +3,7 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/mixin/comparable_presentation_search_mixin.dart';
@@ -31,7 +32,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
   static const int limitPrefetchedRecentContacts = 5;
 
   SearchContactsAndChatsController? searchContactAndRecentChatController;
-  final _preSearchRecentContactsInteractor = PreSearchRecentContactsInteractor();
+  final _preSearchRecentContactsInteractor = getIt.get<PreSearchRecentContactsInteractor>();
   final preSearchRecentContactsNotifier = ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
   final TextEditingController textEditingController = TextEditingController();
@@ -50,8 +51,8 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
       showFutureLoadingDialog(
         context: context,
         future: () async {
-          if (presentationSearch.directChatMatrixID != null && presentationSearch.directChatMatrixID!.isNotEmpty) {
-            final roomId = await Matrix.of(context).client.startDirectChat(presentationSearch.directChatMatrixID!);
+          if (presentationSearch.matrixId != null) {
+            final roomId = await Matrix.of(context).client.startDirectChat(presentationSearch.matrixId!);
             VRouter.of(context).toSegments(['rooms', roomId]);
           }
         },
@@ -91,7 +92,9 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   void onSearchBarChanged(String keyword) {
     searchContactAndRecentChatController?.onSearchBarChanged(keyword);
-    mainScrollController.jumpTo(0);
+    if (mainScrollController.hasClients) {
+      mainScrollController.jumpTo(0);
+    }
   }
 
   void onCloseSearchTapped() {
