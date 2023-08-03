@@ -13,7 +13,7 @@ extension SearchExtension on SearchModel {
     );
   }
     
-  bool searchDisplayName(String keyword) {
+  bool isDisplayNameContains(String keyword) {
     return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
   }
 }

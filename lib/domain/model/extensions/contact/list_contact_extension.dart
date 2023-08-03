@@ -8,7 +8,7 @@ extension ListContactExtenstion on List<Contact> {
     List<SearchModel> toSearchesFilteredRecent(String keyword, List<SearchModel> recentChat) {
       final recentChatIds = recentChat.map((recentChat) => recentChat.directChatMatrixID).toList();
       return expand((contact) => contact.toSearch())
-        .where((search) => search.searchDisplayName(keyword))
+        .where((search) => search.isDisplayNameContains(keyword))
         .whereNot((element) => recentChatIds.contains(element.directChatMatrixID)).toList();
   }
 }

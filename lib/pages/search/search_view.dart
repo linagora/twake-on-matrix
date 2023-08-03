@@ -1,9 +1,9 @@
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
-import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search_state.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -198,9 +198,14 @@ class _SearchViewState extends State<SearchView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(L10n.of(context)!.recent,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraRefColors.material().neutral[40])
+            child: ValueListenableBuilder(
+              valueListenable: widget.searchController.textEditingController,
+              builder: (context, value, child) {
+                return Text(value.text.isEmpty ? L10n.of(context)!.recent : L10n.of(context)!.chatsAndContacts,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: LinagoraRefColors.material().neutral[40])
+                );
+              }
             ),
           )
         ],

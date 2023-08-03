@@ -16,7 +16,7 @@ class SearchContactsInteractor {
     required MatrixLocalizations matrixLocalizations,
     required String keyword,
     required int offset,
-    int limit = 20,
+    required int limit,
   }) async* {
     try {
       final contacts = await contactRepository.searchContact(

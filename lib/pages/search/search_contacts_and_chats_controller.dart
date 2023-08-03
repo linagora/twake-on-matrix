@@ -1,5 +1,3 @@
-
-
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
@@ -8,12 +6,13 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
 import 'package:fluffychat/domain/usecase/search/search_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search_state.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-
 
 class SearchContactsAndChatsController {
   
@@ -22,9 +21,12 @@ class SearchContactsAndChatsController {
   SearchContactsAndChatsController(this.context);
 
   static const int limitPrefetchedRecentChats = 3;
+  static const limitContactsPerPage = 20;
   static const debouncerIntervalInMilliseconds = 300;
+  static const minimumItemsListDisplay = 20;
   final SearchRecentChatInteractor _searchRecentChatInteractor = getIt.get<SearchRecentChatInteractor>();
   final SearchContactsInteractor _searchContactsInteractor = getIt.get<SearchContactsInteractor>();
+  bool _isLoadingMore = false;
 
   final recentAndContactsNotifier = ValueNotifier<Either<Failure, Success>>(const Right(GetContactAndRecentChatInitial()));
   Debouncer<String>? _debouncer;
@@ -69,13 +71,16 @@ class SearchContactsAndChatsController {
     ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: false));
   }
 
-  void mapPreSearchChatToPresentation(Either<Failure, GetContactAndRecentChatSuccess> event, {required bool isLoadMore}) {
+  void mapPreSearchChatToPresentation(Either<Failure, Success> event, {required bool isLoadMore}) {
+    Logs().d("SearchContactsAndChatsController::mapPreSearchChatToPresentation");
     final oldPresentation = isLoadMore 
       ? recentAndContactsNotifier.value.fold(
           (failure) => null, 
           (success) => success is GetContactAndRecentChatPresentation ? success : null) 
       : null;
-    final newEvent = event.map((success) => success.toPresentation(oldPresentation: oldPresentation));
+    final newEvent = event.map((success) => success is GetContactAndRecentChatSuccess 
+      ? success.toPresentation(oldPresentation: oldPresentation) 
+      : success);
     recentAndContactsNotifier.value = newEvent;
     checkListNotEnoughToDisplay();
   }
@@ -88,7 +93,7 @@ class SearchContactsAndChatsController {
       (success) {
         if (!(success is GetContactAndRecentChatPresentation 
           && success.shouldLoadMoreContacts
-          && success.searchResult.length <= 10
+          && success.searchResult.length <= minimumItemsListDisplay
         )) {
           return;
         }
@@ -102,14 +107,22 @@ class SearchContactsAndChatsController {
       return;
     },
     (success) {
-      if (!(success is GetContactAndRecentChatPresentation && success.shouldLoadMoreContacts)) {
+      if (!(success is GetContactAndRecentChatPresentation 
+        && success.shouldLoadMoreContacts 
+        && !_isLoadingMore)) {
         return;
       }
+      Logs().d("SearchContactsAndChatsController::loadMoreContacts: keyword: ${success.keyword}, offset: ${success.contactsOffset}");
+      _isLoadingMore = true;
       _searchContactsInteractor.execute(
         keyword: success.keyword,
         matrixLocalizations: matrixLocalizations,
-        offset: success.contactsOffset
-      ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: true));
+        offset: success.contactsOffset,
+        limit: limitContactsPerPage
+      ).listen((event) => {
+        _isLoadingMore = false,
+        mapPreSearchChatToPresentation(event, isLoadMore: true)
+      });
     }
   );
 
