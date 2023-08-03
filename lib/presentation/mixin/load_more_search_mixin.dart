@@ -3,12 +3,12 @@ import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:flutter/material.dart';
 
 mixin LoadMoreSearchMixin {
-  final searchContactAndRecentChatScrollController = ScrollController();
+  final mainScrollController = ScrollController();
 
   void listenForScrollChanged({required SearchContactsAndChatsController? controller}) {
-    searchContactAndRecentChatScrollController.addListener(() {
-      if (searchContactAndRecentChatScrollController.shouldLoadMore) {
-        // controller?.loadMoreContacts(); //FIXME
+    mainScrollController.addListener(() {
+      if (mainScrollController.shouldLoadMore) {
+        controller?.loadMoreContacts();
       }
     });
   }
