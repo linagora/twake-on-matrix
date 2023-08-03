@@ -67,12 +67,18 @@ class AppScaffoldShell extends StatelessWidget {
               key: bottomNavigationKey,
               builder: (_) {
                 return Container(
+                  height: ResponsiveUtils.heightBottomNavigation,
                   color: Theme.of(context).colorScheme.surface,
-                  child: NavigationBar(
-                    height: ResponsiveUtils.heightBottomNavigation,
-                    selectedIndex: navigationShell.currentIndex,
-                    destinations: getNavigationDestinations(context),
-                    onDestinationSelected: onNavigationEvent,
+                  child: ListView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      NavigationBar(
+                        height: ResponsiveUtils.heightBottomNavigation,
+                        selectedIndex: navigationShell.currentIndex,
+                        destinations: getNavigationDestinations(context),
+                        onDestinationSelected: onNavigationEvent,
+                      ),
+                    ],
                   ),
                 );
               },
