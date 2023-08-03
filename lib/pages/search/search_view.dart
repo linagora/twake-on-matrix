@@ -1,6 +1,5 @@
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
-import 'package:fluffychat/domain/model/extensions/search/search_list_extension.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -33,32 +32,41 @@ class _SearchViewState extends State<SearchView> {
         child: _buildAppBarSearch(context)),
       body: CustomScrollView(
         physics: const ClampingScrollPhysics(),
-        controller: widget.searchController.recentChatsController,
+        controller: widget.searchController.mainScrollController,
         slivers: [
           ValueListenableBuilder(
             valueListenable: widget.searchController.preSearchRecentContactsNotifier,
-            builder: (context, value, child) => value.fold(
-              (failure) => const SliverToBoxAdapter(child: SizedBox()), 
+            builder: (context, value, emptyChild) => value.fold(
+              (failure) => emptyChild!, 
               (success) {
                 switch(success.runtimeType) {
                   case PreSearchRecentContactsSuccess: 
                     final data = success as PreSearchRecentContactsSuccess;
-                    return SliverAppBar(
-                      flexibleSpace: FlexibleSpaceBar(
-                        title: PreSearchRecentContactsContainer(
-                          searchController: widget.searchController,
-                          contactsList: data.users,
-                        ),
-                        titlePadding: const EdgeInsetsDirectional.only(start: 0.0),
-                      ),
-                      toolbarHeight: 112,
-                      backgroundColor: Colors.transparent,
-                      automaticallyImplyLeading: false
+                    return ValueListenableBuilder(
+                      valueListenable: widget.searchController.textEditingController,
+                      builder: (context, textEditingValue, child) {
+                        if (textEditingValue.text.isNotEmpty) {
+                          return emptyChild!;
+                        }
+                        return SliverAppBar(
+                          flexibleSpace: FlexibleSpaceBar(
+                            title: PreSearchRecentContactsContainer(
+                              searchController: widget.searchController,
+                              contactsList: data.users,
+                            ),
+                            titlePadding: const EdgeInsetsDirectional.only(start: 0.0),
+                          ),
+                          toolbarHeight: 112,
+                          backgroundColor: Colors.transparent,
+                          automaticallyImplyLeading: false
+                        );
+                      }
                     );
-                  default: return const SliverToBoxAdapter(child: SizedBox());
+                  default: return emptyChild!;
                 }
               }
-            )
+            ),
+            child: const SliverToBoxAdapter(),
           ),
           SliverAppBar(
             toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
@@ -94,37 +102,34 @@ class _SearchViewState extends State<SearchView> {
   Widget _recentChatsWidget() {
     return ValueListenableBuilder(
       valueListenable: widget.searchController.searchContactAndRecentChatController!.recentAndContactsNotifier,
-      builder: (context, value, child) => value.fold(
-        (failure) => const SizedBox(), 
+      builder: (context, value, emptyChild) => value.fold(
+        (failure) => emptyChild!, 
         (success) {
-          switch(success.runtimeType) {
-            case GetContactAndRecentChatSuccess:
-            final data = success as GetContactAndRecentChatSuccess;
-            final contactsList = data.searchResult.toPresentationSearch();
-              return ListView.builder(
-                padding: SearchViewStyle.paddingRecentChats,
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
-                controller: widget.searchController.searchContactAndRecentChatScrollController,
-                itemCount: contactsList.length + (true ? 1 : 0),   // FIXME: fix LOAD MORE nhe Minh
-                itemBuilder: (context, index) {
-                  // if (i >= contactsList.length) {
-                  //   return const Center(child: CircularProgressIndicator());
-                  // }
-                  return RecentItemWidget(
-                    highlightKeyword: data.keyword,
-                    presentationSearch: contactsList[index],
-                    key: Key('chat_recent_${contactsList[index].matrixId}'),
-                    onTap: () {
-                      widget.searchController.goToChatScreen(contactsList[index]);
-                    },
-                  );
+          if (success is! GetContactAndRecentChatPresentation) {
+            return emptyChild!;
+          }
+          return ListView.builder(
+            padding: SearchViewStyle.paddingRecentChats,
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            itemCount: success.searchResult.length + (success.shouldLoadMoreContacts ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= success.searchResult.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return RecentItemWidget(
+                highlightKeyword: success.keyword,
+                presentationSearch: success.searchResult[index],
+                key: Key('chat_recent_${success.searchResult[index].matrixId}'),
+                onTap: () {
+                  widget.searchController.goToChatScreen(success.searchResult[index]);
                 },
               );
-            default: return const SizedBox();
-          }
+            },
+          );
         }
-      )
+      ),
+      child: const SizedBox(),
     );
   }
 

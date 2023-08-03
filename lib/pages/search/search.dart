@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:vrouter/vrouter.dart';
 
 class Search extends StatefulWidget {
@@ -32,7 +31,6 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
   static const int limitPrefetchedRecentContacts = 5;
 
   SearchContactsAndChatsController? searchContactAndRecentChatController;
-  final AutoScrollController recentChatsController = AutoScrollController();
   final _preSearchRecentContactsInteractor = PreSearchRecentContactsInteractor();
   final preSearchRecentContactsNotifier = ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
@@ -93,6 +91,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   void onSearchBarChanged(String keyword) {
     searchContactAndRecentChatController?.onSearchBarChanged(keyword);
+    mainScrollController.jumpTo(0);
   }
 
   void onCloseSearchTapped() {
@@ -105,8 +104,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   @override
   void dispose() {
-    recentChatsController.dispose();
-    searchContactAndRecentChatScrollController.dispose();
+    mainScrollController.dispose();
     searchContactAndRecentChatController?.dispose();
     super.dispose();
   }

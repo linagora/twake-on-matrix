@@ -55,37 +55,63 @@ class SearchContactsAndChatsController {
       matrixLocalizations: matrixLocalizations,
       rooms: rooms,
       limit: limitPrefetchedRecentChats
-    ).listen((event) {
-      recentAndContactsNotifier.value = event;
-    });
+    ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: false));
   }
 
   void searchChats({required String keyword}) {
+    if (keyword.isEmpty) {
+      return fetchPreSearchChat();
+    }
     _searchRecentChatInteractor.execute(
       keyword: keyword,
       matrixLocalizations: matrixLocalizations,
       rooms: rooms,
-    ).listen((event) {
-      recentAndContactsNotifier.value = event;
-    });
+    ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: false));
   }
 
-  void loadMoreContacts(String keyword) {
-    if (!shouldLoadMoreContacts) {
+  void mapPreSearchChatToPresentation(Either<Failure, GetContactAndRecentChatSuccess> event, {required bool isLoadMore}) {
+    final oldPresentation = isLoadMore 
+      ? recentAndContactsNotifier.value.fold(
+          (failure) => null, 
+          (success) => success is GetContactAndRecentChatPresentation ? success : null) 
+      : null;
+    final newEvent = event.map((success) => success.toPresentation(oldPresentation: oldPresentation));
+    recentAndContactsNotifier.value = newEvent;
+    checkListNotEnoughToDisplay();
+  }
+
+  void checkListNotEnoughToDisplay() {
+    recentAndContactsNotifier.value.fold(
+      (failure) {
+        return;
+      },
+      (success) {
+        if (!(success is GetContactAndRecentChatPresentation 
+          && success.shouldLoadMoreContacts
+          && success.searchResult.length <= 10
+        )) {
+          return;
+        }
+        loadMoreContacts();
+      }
+    );
+  }
+
+  void loadMoreContacts() => recentAndContactsNotifier.value.fold(
+    (failure) {
       return;
+    },
+    (success) {
+      if (!(success is GetContactAndRecentChatPresentation && success.shouldLoadMoreContacts)) {
+        return;
+      }
+      _searchContactsInteractor.execute(
+        keyword: success.keyword,
+        matrixLocalizations: matrixLocalizations,
+        offset: success.contactsOffset
+      ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: true));
     }
-    _searchContactsInteractor.execute(
-      keyword: keyword,
-      matrixLocalizations: MatrixLocals(L10n.of(context)!),
-      offset: 0
-    ).listen((event) {
-      recentAndContactsNotifier.value = event;
-    });
-  }
-
-  bool get shouldLoadMoreContacts {
-    return false;
-  }
+  );
 
   void onSearchBarChanged(String keyword) {
     _debouncer?.value = keyword;
