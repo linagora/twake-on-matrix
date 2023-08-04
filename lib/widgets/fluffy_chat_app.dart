@@ -69,6 +69,7 @@ class FluffyChatAppState extends State<FluffyChatApp> {
         builder: (context, child) => Matrix(
           context: context,
           clients: widget.clients,
+          router: router,
           child: child,
         ),
       ),

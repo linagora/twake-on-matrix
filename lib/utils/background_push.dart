@@ -24,6 +24,7 @@ import 'dart:ui';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/utils/extension/go_router_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,8 @@ class BackgroundPush {
       FlutterLocalNotificationsPlugin();
   Client client;
   BuildContext? context;
-  GlobalKey<NavigatorState>? router;
+  GoRouter? router;
+  String? get activeRoomId => router?.currentPathParameters['roomid'];
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
@@ -106,14 +108,14 @@ class BackgroundPush {
   factory BackgroundPush(
     Client client,
     BuildContext context,
+    GoRouter router,
     {
     final void Function(String errorMsg, {Uri? link})? onFcmError
     }
   ) {
     final instance = BackgroundPush.clientOnly(client);
     instance.context = context;
-    // ignore: prefer_initializing_formals
-    // ignore: prefer_initializing_formals
+    instance.router = router;
     instance.onFcmError = onFcmError;
     return instance;
   }
@@ -242,7 +244,7 @@ class BackgroundPush {
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup ||
-          router == null) {
+          context == null) {
         return;
       }
       _wentToRoomOnStartup = true;
@@ -322,9 +324,7 @@ class BackgroundPush {
       notification,
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState != null
-        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
-        : null,
+      activeRoomId: activeRoomId,
       onSelectNotification: onSelectNotification,
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
@@ -337,7 +337,7 @@ class BackgroundPush {
   Future<void> goToRoom(String? roomId) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
-      if (router == null || roomId == null) {
+      if (context == null || roomId == null) {
         return;
       }
       await client.roomsLoading;
@@ -348,7 +348,7 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      router!.currentState!.context.go(isStory ? 'stories' : '/rooms/$roomId');
+      context!.go(isStory ? 'stories' : '/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
@@ -428,9 +428,7 @@ class BackgroundPush {
       PushNotification.fromJson(data),
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState != null
-        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
-        : null,
+      activeRoomId: activeRoomId,
     );
   }
 
