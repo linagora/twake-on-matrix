@@ -1,11 +1,12 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
+import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:vrouter/vrouter.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
   final ChatListController controller;
@@ -45,7 +46,11 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                         : SizedBox(
                             height: ChatListHeaderStyle.searchBarHeight,
                             child: InkWell(
-                              onTap: () => VRouter.of(context).to('/search'),
+                              onTap: () {
+                                StatefulNavigationShell.of(context).goBranch(
+                                  AdaptiveDestinationEnum.search.index
+                                );
+                              },
                               child: TextField(
                                 controller: controller.searchChatController,
                                 textInputAction: TextInputAction.search,

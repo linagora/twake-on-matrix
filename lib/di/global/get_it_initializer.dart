@@ -25,6 +25,9 @@ import 'package:fluffychat/domain/usecase/load_more_internal_contacts.dart';
 import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
+import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/search/search_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
@@ -101,5 +104,8 @@ class GetItInitializer {
     getIt.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
     getIt.registerSingleton<CreateDirectChatInteractor>(CreateDirectChatInteractor());
     getIt.registerSingleton<ForwardMessageInteractor>(ForwardMessageInteractor());
+    getIt.registerSingleton<PreSearchRecentContactsInteractor>(PreSearchRecentContactsInteractor());
+    getIt.registerSingleton<SearchRecentChatInteractor>(SearchRecentChatInteractor());
+    getIt.registerSingleton<SearchContactsInteractor>(SearchContactsInteractor());
   }
 }

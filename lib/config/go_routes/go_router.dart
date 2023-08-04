@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
@@ -38,14 +39,16 @@ import 'package:matrix/matrix.dart';
 
 class TwakeRoutes {
   final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-  final _navChatNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Chat');
+  final _navRoomsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rooms');
   final _navContactsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Contacts');
   final _navStoriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Stories');
+  final _navSearchNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Search');
 
   static const List<String> shellBranch = [
     '/rooms',
     '/contacts',
     '/stories',
+    '/search',
   ];
 
   GoRouter get router => GoRouter(
@@ -96,185 +99,10 @@ class TwakeRoutes {
           return AppScaffoldShell(navigationShell: navigationShell);
         },
         branches: <StatefulShellBranch>[
-          StatefulShellBranch(
-            initialLocation: '/contacts',
-            navigatorKey: _navContactsNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/contacts',
-                pageBuilder: (context, state) {
-                  return const NoTransitionPage(
-                    child: AdaptiveScaffoldRoute(
-                      body: ContactsTab(),
-                    )
-                  );
-                },
-                routes: [
-                  GoRoute(
-                    path: 'emptyChat',
-                    pageBuilder: (context, state) {
-                      return NoTransitionPage(
-                        child: AdaptiveScaffoldRoute(
-                          body: const ContactsTab(),
-                          secondaryBody: EmptyChat(
-                            key: state.pageKey,
-                            state: state,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: ':roomid',
-                    pageBuilder: (context, state) => NoTransitionPage(
-                      child: AdaptiveScaffoldRoute(
-                        body: const ContactsTab(),
-                        secondaryBody: Chat(
-                          key: ValueKey(state.pathParameters['roomid'] ?? ""),
-                        ),
-                      ),
-                    ),
-                    routes: [
-                      GoRoute(
-                        path: 'encryption',
-                        builder: (context, state) => const ChatEncryptionSettings(),
-                      ),
-                      GoRoute(
-                        path: 'invite',
-                        builder: (context, state) => const InvitationSelection(),
-                      ),
-                      GoRoute(
-                        path: 'details',
-                        builder: (context, state) => const ChatDetails(),
-                        routes: _chatDetailsRoutes,
-                      ),
-                      GoRoute(
-                        path: 'forward',
-                        builder: (context, state) {
-                          return const Forward();
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            initialLocation: '/rooms',
-            navigatorKey: _navChatNavigatorKey,
-            routes: [
-              GoRoute(
-                  path: '/rooms',
-                  pageBuilder: (context, state) {
-                    return const NoTransitionPage(
-                      child: AdaptiveScaffoldRoute(body: ChatList())
-                    );
-                  },
-                  routes: [
-                    GoRoute(
-                      path: 'newprivatechat',
-                      pageBuilder: (context, state) => const NoTransitionPage(
-                        child: AdaptiveScaffoldRoute(
-                          body: ChatList(),
-                          secondaryBody: NewPrivateChat(),
-                        ),
-                      ),
-                      routes: [
-                        GoRoute(
-                          path: 'newgroup',
-                          pageBuilder: (context, state) => const NoTransitionPage(
-                            child: AdaptiveScaffoldRoute(
-                              body: ChatList(),
-                              secondaryBody: NewGroup(),
-                            ),
-                          ),
-                        ),
-                        GoRoute(
-                          path: 'emptyChat',
-                          pageBuilder: (context, state) => NoTransitionPage(
-                            child: AdaptiveScaffoldRoute(
-                              body: const ChatList(),
-                              secondaryBody: EmptyChat(state: state),
-                            ),
-                          ),
-                        ),
-                      ]
-                    ),
-                    GoRoute(
-                      path: ':roomid',
-                      pageBuilder: (context, state) => NoTransitionPage(
-                        child: AdaptiveScaffoldRoute(
-                          body: const ChatList(),
-                          secondaryBody: Chat(
-                            key: ValueKey(state.pathParameters['roomid'] ?? ""),
-                          ),
-                        ),
-                      ),
-                      routes: [
-                        GoRoute(
-                          path: 'encryption',
-                          builder: (context, state) => const ChatEncryptionSettings(),
-                        ),
-                        GoRoute(
-                          path: 'invite',
-                          builder: (context, state) => const InvitationSelection(),
-                        ),
-                        GoRoute(
-                          path: 'details',
-                          builder: (context, state) => const ChatDetails(),
-                          routes: _chatDetailsRoutes,
-                        ),
-                        GoRoute(
-                          path: 'forward',
-                          builder: (context, state) {
-                            return const Forward();
-                          },
-                        ),
-                      ],
-                    ),
-                  ]
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            initialLocation: '/stories',
-            navigatorKey: _navStoriesNavigatorKey,
-            routes: [
-              ShellRoute(
-                pageBuilder: (context, state, widget) {
-                  return  NoTransitionPage(child: AdaptiveScaffoldRoute(
-                    body: Container(),
-                    secondaryBody: widget,
-                  ));
-                },
-                routes: [
-                  GoRoute(
-                    path: '/stories',
-                    builder: (context, state) {
-                      return const EmptyPage();
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'create',
-                        builder: (context, state) => const AddStoryPage(),
-                      ),
-                      GoRoute(
-                        path: ':roomid',
-                        builder: (context, state) => const StoryPage(),
-                        routes: [
-                          GoRoute(
-                            path: 'share',
-                            builder: (context, state) => const AddStoryPage(),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _contactsShellBranch,
+          _roomsShellBranch,
+          _storiesShellBranch,
+          _searchShellBranch
         ],
       ),
       GoRoute(
@@ -295,6 +123,187 @@ class TwakeRoutes {
         ],
       ),
     ]
+  );
+
+  StatefulShellBranch get _roomsShellBranch => StatefulShellBranch(
+    initialLocation: '/rooms',
+    navigatorKey: _navRoomsNavigatorKey,
+    routes: [
+      GoRoute(
+        path: '/rooms',
+        pageBuilder: (context, state) {
+          return const NoTransitionPage(
+              child: AdaptiveScaffoldRoute(body: ChatList())
+          );
+        },
+        routes: [
+          GoRoute(
+              path: 'newprivatechat',
+              pageBuilder: (context, state) => const NoTransitionPage(
+                child: AdaptiveScaffoldRoute(
+                  body: ChatList(),
+                  secondaryBody: NewPrivateChat(),
+                ),
+              ),
+              routes: [
+                GoRoute(
+                  path: 'newgroup',
+                  pageBuilder: (context, state) => const NoTransitionPage(
+                    child: AdaptiveScaffoldRoute(
+                      body: ChatList(),
+                      secondaryBody: NewGroup(),
+                    ),
+                  ),
+                ),
+                _draftChatRoute(body: const ChatList()),
+              ]
+          ),
+          _roomIdRoute(body: const ChatList()),
+        ]
+      ),
+    ],
+  );
+
+  StatefulShellBranch get _contactsShellBranch => StatefulShellBranch(
+    initialLocation: '/contacts',
+    navigatorKey: _navContactsNavigatorKey,
+    routes: [
+      GoRoute(
+        path: '/contacts',
+        pageBuilder: (context, state) {
+          return const NoTransitionPage(
+            child: AdaptiveScaffoldRoute(
+              body: ContactsTab(),
+            )
+          );
+        },
+        routes: [
+          GoRoute(
+            path: 'emptyChat',
+            pageBuilder: (context, state) {
+              return NoTransitionPage(
+                child: AdaptiveScaffoldRoute(
+                  body: const ContactsTab(),
+                  secondaryBody: EmptyChat(
+                    key: state.pageKey,
+                    state: state,
+                  ),
+                ),
+              );
+            },
+          ),
+          _roomIdRoute(body: const ContactsTab()),
+        ],
+      ),
+    ],
+  );
+  StatefulShellBranch get _storiesShellBranch => StatefulShellBranch(
+    initialLocation: '/stories',
+    navigatorKey: _navStoriesNavigatorKey,
+    routes: [
+      ShellRoute(
+        pageBuilder: (context, state, widget) {
+          return  NoTransitionPage(child: AdaptiveScaffoldRoute(
+            body: Container(),
+            secondaryBody: widget,
+          ));
+        },
+        routes: [
+          GoRoute(
+            path: '/stories',
+            builder: (context, state) {
+              return const EmptyPage();
+            },
+            routes: [
+              GoRoute(
+                path: 'create',
+                builder: (context, state) => const AddStoryPage(),
+              ),
+              GoRoute(
+                path: ':roomid',
+                builder: (context, state) => const StoryPage(),
+                routes: [
+                  GoRoute(
+                    path: 'share',
+                    builder: (context, state) => const AddStoryPage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  StatefulShellBranch get _searchShellBranch => StatefulShellBranch(
+    initialLocation: '/search',
+    navigatorKey: _navSearchNavigatorKey,
+    routes: [
+      GoRoute(
+        path: '/search',
+        pageBuilder: (context, state) {
+          return const NoTransitionPage(
+            child: AdaptiveScaffoldRoute(body: Search())
+          );
+        },
+        routes: [
+          _draftChatRoute(body: const Search()),
+          _roomIdRoute(body: const Search()),
+        ]
+      ),
+    ],
+  );
+
+  GoRoute _draftChatRoute({
+    String? path,
+    required Widget body
+  }) => GoRoute(
+    path: path ?? 'emptyChat',
+    pageBuilder: (context, state) {
+      return NoTransitionPage(
+        child: AdaptiveScaffoldRoute(
+          body: body,
+          secondaryBody: EmptyChat(
+            key: state.pageKey,
+            state: state,
+          ),
+        ),
+      );
+    },
+  );
+
+  GoRoute _roomIdRoute({required Widget body}) => GoRoute(
+    path: ':roomid',
+    pageBuilder: (context, state) => NoTransitionPage(
+      child: AdaptiveScaffoldRoute(
+        body: body,
+        secondaryBody: Chat(
+          key: ValueKey(state.pathParameters['roomid'] ?? ""),
+        ),
+      ),
+    ),
+    routes: [
+      GoRoute(
+        path: 'encryption',
+        builder: (context, state) => const ChatEncryptionSettings(),
+      ),
+      GoRoute(
+        path: 'invite',
+        builder: (context, state) => const InvitationSelection(),
+      ),
+      GoRoute(
+        path: 'details',
+        builder: (context, state) => const ChatDetails(),
+        routes: _chatDetailsRoutes,
+      ),
+      GoRoute(
+        path: 'forward',
+        builder: (context, state) {
+          return const Forward();
+        },
+      ),
+    ],
   );
 
   List<RouteBase> get _chatDetailsRoutes => [

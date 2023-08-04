@@ -1,5 +1,6 @@
 enum AdaptiveDestinationEnum {
   contacts,
-  chat,
-  stories
+  rooms,
+  stories,
+  search;
 }

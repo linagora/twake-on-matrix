@@ -25,7 +25,7 @@ class RecentItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
+
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
@@ -39,45 +39,7 @@ class RecentItemWidget extends StatelessWidget {
           ),
           child: ListTile(
             contentPadding: EdgeInsets.zero,
-            title:  Row(
-              crossAxisAlignment: presentationSearch.isContact
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: RecentItemStyle.avatarSize,
-                  child: FutureBuilder<ProfileInformation?>(
-                    future: presentationSearch.getProfile(client),
-                    builder: (context, snapshot) {
-                      return Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
-                        name: presentationSearch.displayName,
-                      );
-                    }
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      HighlightText(
-                        text: presentationSearch.displayName ?? "",
-                        style: Theme.of(context).textTheme.titleMedium?.merge(
-                          TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            letterSpacing: 0.15,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        searchWord: highlightKeyword,
-                      ),
-                      _buildInformationWidget(context),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            title: _buildInformationWidget(context),
             onTap: onTap,
           ),
         ),
@@ -86,25 +48,32 @@ class RecentItemWidget extends StatelessWidget {
   }
 
   Widget _buildInformationWidget(BuildContext context) {
-    if (presentationSearch.isContact) {
-      return _ContactInformation(presentationSearch: presentationSearch, searchKeyword: highlightKeyword);
+    if (presentationSearch is ContactPresentationSearch) {
+      return _ContactInformation(
+        contactPresentationSearch: presentationSearch as ContactPresentationSearch,
+        searchKeyword: highlightKeyword
+      );
     } else {
-      if (presentationSearch.directChatMatrixID == null) {
-        return _GroupChatInformation(presentationSearch: presentationSearch);
+      final recentChatPresentationSearch = presentationSearch as RecentChatPresentationSearch;
+      if (recentChatPresentationSearch.directChatMatrixID == null) {
+        return _GroupChatInformation(recentChatPresentationSearch: recentChatPresentationSearch);
       } else {
-        return _DirectChatInformation(presentationSearch: presentationSearch, searchKeyword: highlightKeyword);
+        return _DirectChatInformation(
+          recentChatPresentationSearch: recentChatPresentationSearch,
+          searchKeyword: highlightKeyword
+        );
       }
     }
   }
 }
 
 class _GroupChatInformation extends StatelessWidget {
-  final PresentationSearch presentationSearch;
-  const _GroupChatInformation({required this.presentationSearch});
+  final RecentChatPresentationSearch recentChatPresentationSearch;
+  const _GroupChatInformation({required this.recentChatPresentationSearch});
 
   @override
   Widget build(BuildContext context) {
-    final actualMembersCount = presentationSearch.roomSummary?.actualMembersCount ?? 0;
+    final actualMembersCount = recentChatPresentationSearch.roomSummary?.actualMembersCount ?? 0;
     return Text(
       L10n.of(context)!.membersCount(actualMembersCount),
       overflow: TextOverflow.ellipsis,
@@ -123,62 +92,130 @@ class _GroupChatInformation extends StatelessWidget {
 
 
 class _DirectChatInformation extends StatelessWidget {
-  final PresentationSearch presentationSearch;
+  final RecentChatPresentationSearch recentChatPresentationSearch;
   final String? searchKeyword;
 
-  const _DirectChatInformation({required this.presentationSearch, this.searchKeyword});
+  const _DirectChatInformation({required this.recentChatPresentationSearch, this.searchKeyword});
 
   @override
   Widget build(BuildContext context) {
-    return HighlightText(
-      text: presentationSearch.directChatMatrixID ?? "",
-      style: Theme.of(context).textTheme.bodyMedium?.merge(
-        TextStyle(
-          overflow: TextOverflow.ellipsis,
-          letterSpacing: 0.15,
-          color: LinagoraRefColors.material().tertiary[30],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ///FIXME
+        SizedBox(
+          width: RecentItemStyle.avatarSize,
+          child: Avatar(
+            name: recentChatPresentationSearch.displayName,
+          ),
         ),
-      ),
-      searchWord: searchKeyword,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HighlightText(
+                text: recentChatPresentationSearch.displayName ?? "",
+                style: Theme.of(context).textTheme.titleMedium?.merge(
+                  TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    letterSpacing: 0.15,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                searchWord: searchKeyword,
+              ),
+              HighlightText(
+                text: recentChatPresentationSearch.directChatMatrixID ?? "",
+                style: Theme.of(context).textTheme.bodyMedium?.merge(
+                  TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    letterSpacing: 0.15,
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
+                ),
+                searchWord: searchKeyword,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _ContactInformation extends StatelessWidget {
-  final PresentationSearch presentationSearch;
+  final ContactPresentationSearch contactPresentationSearch;
   final String? searchKeyword;
 
-  const _ContactInformation({required this.presentationSearch, this.searchKeyword});
+  const _ContactInformation({required this.contactPresentationSearch, this.searchKeyword});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final client = Matrix.of(context).client;
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (presentationSearch.matrixId != null)
-          HighlightText(
-            text: presentationSearch.matrixId ?? "",
-            style: Theme.of(context).textTheme.bodyMedium?.merge(
-              TextStyle(
-                overflow: TextOverflow.ellipsis,
-                letterSpacing: 0.15,
-                color: LinagoraRefColors.material().tertiary[30],
-              ),
-            ),
-            searchWord: searchKeyword,
+        SizedBox(
+          width: RecentItemStyle.avatarSize,
+          child: FutureBuilder<ProfileInformation?>(
+              future: contactPresentationSearch.getProfile(client),
+              builder: (context, snapshot) {
+                return Avatar(
+                  mxContent: snapshot.data?.avatarUrl,
+                  name: contactPresentationSearch.displayName,
+                );
+              }
           ),
-        if (presentationSearch.email != null)
-          HighlightText(
-            text: presentationSearch.email ?? "",
-            style: Theme.of(context).textTheme.bodyMedium?.merge(
-              TextStyle(
-                overflow: TextOverflow.ellipsis,
-                letterSpacing: 0.15,
-                color: LinagoraRefColors.material().tertiary[30],
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HighlightText(
+                text: contactPresentationSearch.displayName ?? "",
+                style: Theme.of(context).textTheme.titleMedium?.merge(
+                  TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    letterSpacing: 0.15,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                searchWord: searchKeyword,
               ),
-            ),
-            searchWord: searchKeyword,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (contactPresentationSearch.matrixId != null)
+                    HighlightText(
+                      text: contactPresentationSearch.matrixId ?? "",
+                      style: Theme.of(context).textTheme.bodyMedium?.merge(
+                        TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          letterSpacing: 0.15,
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                      ),
+                      searchWord: searchKeyword,
+                    ),
+                  if (contactPresentationSearch.email != null)
+                    HighlightText(
+                      text: contactPresentationSearch.email ?? "",
+                      style: Theme.of(context).textTheme.bodyMedium?.merge(
+                        TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          letterSpacing: 0.15,
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                      ),
+                      searchWord: searchKeyword,
+                    ),
+                ],
+              ),
+            ],
           ),
+        ),
       ],
     );
   }
