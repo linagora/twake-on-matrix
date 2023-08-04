@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -387,21 +388,8 @@ class Message extends StatelessWidget {
         return Column(
           children: [
             if (displayTime)
-              Center(
-                child: Material(
-                  color: displayTime
-                      ? Colors.transparent
-                      : Theme.of(context).colorScheme.background.withOpacity(0.33),
-                  borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-                  clipBehavior: Clip.antiAlias,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                    child: Text(
-                      event.originServerTs.localizedTime(context).toUpperCase(),
-                      style: MessageStyle.displayTime(context),
-                    ),
-                  ),
-                ),
+              StickyTimestampWidget(
+                content: event.originServerTs.relativeTime(context),
               ),
             Swipeable(
               key: ValueKey(event.eventId),
