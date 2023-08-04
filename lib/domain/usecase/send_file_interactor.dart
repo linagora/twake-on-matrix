@@ -1,5 +1,5 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/presentation/extensions/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 

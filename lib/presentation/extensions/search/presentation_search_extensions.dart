@@ -1,7 +1,7 @@
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:matrix/matrix.dart';
 
-extension PresentationSearchExtensions on PresentationSearch {
+extension PresentationSearchExtensions on ContactPresentationSearch {
     Future<ProfileInformation?> getProfile(Client client) async {
     if (matrixId == null) {
       return Future.error(Exception("MatrixId is null"));

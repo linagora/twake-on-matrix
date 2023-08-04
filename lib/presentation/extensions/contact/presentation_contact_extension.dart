@@ -1,5 +1,5 @@
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 
 extension PresentaionContactExtension on PresentationContact {
 
@@ -21,5 +21,28 @@ extension PresentaionContactExtension on PresentationContact {
     }
 
     return false;
+  }
+}
+
+extension ContactExtensionInPresentation on Contact {
+  Set<PresentationContact> toPresentationContacts() {
+    final listContacts = emails?.map((email) =>
+        PresentationContact(
+          email: email,
+          displayName: displayName,
+          matrixId: matrixId,
+          status: status,
+        )).toSet() ?? {};
+
+    if (emails == null || emails!.isEmpty) {
+      listContacts.add(PresentationContact(
+        email: null,
+        displayName: displayName,
+        matrixId: matrixId,
+        status: status,
+      ));
+    }
+
+    return listContacts;
   }
 }
