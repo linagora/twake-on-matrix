@@ -1,8 +1,7 @@
-
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
@@ -10,13 +9,15 @@ import 'package:fluffychat/mixin/comparable_presentation_search_mixin.dart';
 import 'package:fluffychat/pages/search/search_contacts_and_chats_controller.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:vrouter/vrouter.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -46,21 +47,46 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
     });
   }
 
-  void goToChatScreen(PresentationSearch presentationSearch) {
-    if (presentationSearch.isContact) {
+  void onSearchItemTap(PresentationSearch presentationSearch) async {
+    if (presentationSearch is ContactPresentationSearch) {
+      onContactTap(presentationSearch);
+    } else if (presentationSearch is RecentChatPresentationSearch) {
+      onRecentChatTap(presentationSearch);
+    }
+  }
+
+  void onContactTap(ContactPresentationSearch contactPresentationSearch) {
+    final roomId = Matrix.of(context).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
+    if (roomId == null) {
+      goToDraftChat(context: context, contactPresentationSearch: contactPresentationSearch);
+    } else {
       showFutureLoadingDialog(
         context: context,
         future: () async {
-          if (presentationSearch.matrixId != null) {
-            final roomId = await Matrix.of(context).client.startDirectChat(presentationSearch.matrixId!);
-            VRouter.of(context).toSegments(['rooms', roomId]);
+          if (contactPresentationSearch.matrixId != null && contactPresentationSearch.matrixId!.isNotEmpty) {
+            context.go('/search/$roomId');
           }
         },
       );
-    } else {
-      if (presentationSearch.matrixId != null) {
-        VRouter.of(context).toSegments(['rooms', presentationSearch.matrixId!]);
-      }
+    }
+  }
+
+  void onRecentChatTap(RecentChatPresentationSearch recentChatPresentationSearch) {
+    Logs().d('SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}');
+    context.go('/search/${recentChatPresentationSearch.id}');
+  }
+
+  void goToDraftChat({
+    required BuildContext context,
+    required ContactPresentationSearch contactPresentationSearch
+  }) {
+    if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
+      context.go('/search/emptyChat', extra: {
+        PresentationContactConstant.receiverId: contactPresentationSearch.matrixId ?? '',
+        PresentationContactConstant.email: contactPresentationSearch.email ?? '',
+        PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',
+        PresentationContactConstant.status: '',
+      });
     }
   }
 
@@ -71,7 +97,14 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;
-    VRouter.of(context).toSegments(['rooms', roomIdResult.result!]);
+    context.go('/search/${roomIdResult.result!}');
+  }
+
+  void goToRoomsShellBranch() {
+    textEditingController.clear();
+    StatefulNavigationShell.of(context).goBranch(
+      AdaptiveDestinationEnum.rooms.index,
+    );
   }
 
   @override

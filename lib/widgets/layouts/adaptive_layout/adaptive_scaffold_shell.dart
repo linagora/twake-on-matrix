@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
@@ -35,29 +36,37 @@ class AppScaffoldShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      body: AdaptiveLayout(
-        body: SlotLayout(
-          config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(begin: 0): SlotLayout.from(
-              key: shellKey,
-              builder: (_) => navigationShell,
-            ),
-          },
-        ),
-        primaryNavigation: SlotLayout(
-          config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth): SlotLayout.from(
-              key: drawerKey,
-              builder: (_) {
-                return  AdaptiveScaffold.standardNavigationRail(
-                  selectedIndex: navigationShell.currentIndex,
-                  destinations: getNavigationDestinations(context).map((_) =>  AdaptiveScaffold.toRailDestination(_)).toList(),
-                  onDestinationSelected: onNavigationEvent,
-                  labelType: NavigationRailLabelType.all,
-                );
-              },
-            )
-          },
+      body: WillPopScope(
+        onWillPop: () async {
+          if (navigationShell.currentIndex != roomsShellIndex) {
+            navigationShell.goBranch(AdaptiveDestinationEnum.rooms.index);
+          }
+          return true;
+        },
+        child: AdaptiveLayout(
+          body: SlotLayout(
+            config: <Breakpoint, SlotLayoutConfig>{
+              const WidthPlatformBreakpoint(begin: 0): SlotLayout.from(
+                key: shellKey,
+                builder: (_) => navigationShell,
+              ),
+            },
+          ),
+          primaryNavigation: SlotLayout(
+            config: <Breakpoint, SlotLayoutConfig>{
+              const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth): SlotLayout.from(
+                key: drawerKey,
+                builder: (_) {
+                  return  AdaptiveScaffold.standardNavigationRail(
+                    selectedIndex: _selectIndexPrimaryNavigation(),
+                    destinations: getNavigationDestinations(context).map((_) =>  AdaptiveScaffold.toRailDestination(_)).toList(),
+                    onDestinationSelected: onNavigationEvent,
+                    labelType: NavigationRailLabelType.all,
+                  );
+                },
+              )
+            },
+          ),
         ),
       ),
       bottomNavigationBar: bottomNavigationAvailable(context)
@@ -86,6 +95,14 @@ class AppScaffoldShell extends StatelessWidget {
           })
         : null,
     );
+  }
+
+  int _selectIndexPrimaryNavigation() {
+    if (navigationShell.currentIndex > 2) {
+      return AdaptiveDestinationEnum.rooms.index;
+    } else {
+      return navigationShell.currentIndex;
+    }
   }
 
   void onNavigationEvent(int index) {

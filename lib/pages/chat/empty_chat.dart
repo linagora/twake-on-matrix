@@ -168,7 +168,7 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
   }
 
   String goShellBranch() {
-    final currentShellBranch = GoRouterState.of(context).fullPath;
+    final currentShellBranch = widget.state.fullPath;
     Logs().d('EmptyChat()::goShellBranch() currentShellBranch: $currentShellBranch');
     return TwakeRoutes.shellBranch
       .firstWhere((branch) => currentShellBranch?.startsWith('$branch/') == true);

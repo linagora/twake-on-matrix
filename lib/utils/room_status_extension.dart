@@ -48,7 +48,7 @@ extension RoomStatusExtension on Room {
       (summary.mJoinedMemberCount ?? 0);
 
     return L10n.of(context)!
-        .countParticipants(totalMembers.toString());
+      .membersCount(totalMembers.toString());
   }
 
   String getLocalizedTypingText(BuildContext context) {
