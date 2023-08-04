@@ -1,16 +1,13 @@
-
-import 'package:fluffychat/domain/model/search/search_model.dart';
+import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension RoomExtension on Room {
-  SearchModel toSearch(MatrixLocalizations matrixLocalizations) {
-    return SearchModel(
+  RecentChatSearchModel toRecentChatSearchModel(MatrixLocalizations matrixLocalizations) {
+    return RecentChatSearchModel(
+      id,
       displayName: getLocalizedDisplayname(matrixLocalizations),
       roomSummary: summary,
-      directChatMatrixID: directChatMatrixID,
-      matrixId: id,
-      searchElementTypeEnum: SearchElementTypeEnum.recentChat
     );
   }
 
