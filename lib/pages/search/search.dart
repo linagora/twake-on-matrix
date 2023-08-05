@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
@@ -81,7 +80,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
     required ContactPresentationSearch contactPresentationSearch
   }) {
     if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
-      context.go('/search/emptyChat', extra: {
+      context.go('/search/draftChat', extra: {
         PresentationContactConstant.receiverId: contactPresentationSearch.matrixId ?? '',
         PresentationContactConstant.email: contactPresentationSearch.email ?? '',
         PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',

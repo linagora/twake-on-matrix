@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -51,7 +51,7 @@ class ChatEventList extends StatelessWidget {
                 controller: controller.scrollController,
                 physics: const ClampingScrollPhysics(),
                 child: controller.room?.isDirectChat ?? true
-                  ? DirectChatEmptyView(
+                  ? DirectDraftChatView(
                       onTap: () => controller.inputFocus.requestFocus(),
                   )
                   : GroupChatEmptyView(firstEvent: controller.timeline!.events.last),

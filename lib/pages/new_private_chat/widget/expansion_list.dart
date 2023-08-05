@@ -117,7 +117,7 @@ class _ExpansionList extends State<ExpansionList> {
                   final contact = contactsListSorted[index];
                   return InkWell(
                     onTap: () {
-                      widget.newPrivateChatController.goToChatScreen(context: context, contact: contact);
+                      widget.newPrivateChatController.onContactAction(context: context, contact: contact);
                     },
                     borderRadius: BorderRadius.circular(16.0),
                     child: ExpansionContactListTile(contact: contact),
