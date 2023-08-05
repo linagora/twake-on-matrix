@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:flutter/material.dart';
 
 
@@ -57,7 +58,15 @@ class ContactsTabBodyView extends StatelessWidget {
                 children: contactsListSorted
                   .map<Widget>((contact) => InkWell(
                     onTap: () {
-                      controller.goToChatScreen(context: context, contact: contact);
+                      controller.onContactTap(
+                        context: context,
+                        path: 'contacts',
+                        contactPresentationSearch: ContactPresentationSearch(
+                          contact.matrixId,
+                          contact.email,
+                          displayName: contact.displayName,
+                        ),
+                      );
                     },
                     child: ExpansionContactListTile(contact: contact)
                   ))

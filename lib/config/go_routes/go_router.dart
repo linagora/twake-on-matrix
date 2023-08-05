@@ -1,8 +1,8 @@
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/empty_chat.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
@@ -179,12 +179,12 @@ class TwakeRoutes {
         },
         routes: [
           GoRoute(
-            path: 'emptyChat',
+            path: 'draftChat',
             pageBuilder: (context, state) {
               return NoTransitionPage(
                 child: AdaptiveScaffoldRoute(
                   body: const ContactsTab(),
-                  secondaryBody: EmptyChat(
+                  secondaryBody: DraftChat(
                     key: state.pageKey,
                     state: state,
                   ),
@@ -259,12 +259,12 @@ class TwakeRoutes {
     String? path,
     required Widget body
   }) => GoRoute(
-    path: path ?? 'emptyChat',
+    path: path ?? 'draftChat',
     pageBuilder: (context, state) {
       return NoTransitionPage(
         child: AdaptiveScaffoldRoute(
           body: body,
-          secondaryBody: EmptyChat(
+          secondaryBody: DraftChat(
             key: state.pageKey,
             state: state,
           ),

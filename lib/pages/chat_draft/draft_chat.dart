@@ -3,7 +3,7 @@ import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loadi
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/empty_chat_view.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
@@ -24,16 +24,16 @@ import 'package:fluffychat/widgets/matrix.dart';
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
-class EmptyChat extends StatefulWidget {
+class DraftChat extends StatefulWidget {
   final GoRouterState state;
-  const EmptyChat({super.key, required this.state});
+  const DraftChat({super.key, required this.state});
 
   @override
-  State<StatefulWidget> createState() => EmptyChatController();
+  State<StatefulWidget> createState() => DraftChatController();
   
 }
 
-class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFilesMixin {
+class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   PresentationContact? presentationContact;
@@ -169,7 +169,7 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
 
   String goShellBranch() {
     final currentShellBranch = widget.state.fullPath;
-    Logs().d('EmptyChat()::goShellBranch() currentShellBranch: $currentShellBranch');
+    Logs().d('DraftChat()::goShellBranch() currentShellBranch: $currentShellBranch');
     return TwakeRoutes.shellBranch
       .firstWhere((branch) => currentShellBranch?.startsWith('$branch/') == true);
   }
@@ -243,5 +243,5 @@ class EmptyChatController extends State<EmptyChat> with ImagePickerMixin, SendFi
   }
 
   @override
-  Widget build(BuildContext context) => EmptyChatView(this);
+  Widget build(BuildContext context) => DraftChatView(this);
 }

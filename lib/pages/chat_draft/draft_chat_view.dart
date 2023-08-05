@@ -5,9 +5,9 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat/direct_chat_empty_view.dart';
-import 'package:fluffychat/pages/chat/empty_chat.dart';
 import 'package:fluffychat/pages/chat/input_bar.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -22,10 +22,10 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 
 
-class EmptyChatView extends StatelessWidget {
-  const EmptyChatView(this.controller ,{super.key});
+class DraftChatView extends StatelessWidget {
+  const DraftChatView(this.controller ,{super.key});
 
-  final EmptyChatController controller;
+  final DraftChatController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,7 @@ class EmptyChatView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(child: Center(child: DirectChatEmptyView(
+            Expanded(child: Center(child: DirectDraftChatView(
               onTap: () => controller.inputFocus.requestFocus(),
             ))),
             Column(
