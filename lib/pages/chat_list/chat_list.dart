@@ -133,7 +133,6 @@ class ChatListController extends State<ChatList>
     .client
     .rooms
     .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
-    .where((room) => room.isShowInChatList())
     .toList();
 
   bool isSearchMode = false;

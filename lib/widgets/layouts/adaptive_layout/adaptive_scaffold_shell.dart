@@ -98,11 +98,7 @@ class AppScaffoldShell extends StatelessWidget {
   }
 
   int _selectIndexPrimaryNavigation() {
-    if (navigationShell.currentIndex > 2) {
-      return AdaptiveDestinationEnum.rooms.index;
-    } else {
-      return navigationShell.currentIndex;
-    }
+    return navigationShell.currentIndex;
   }
 
   void onNavigationEvent(int index) {

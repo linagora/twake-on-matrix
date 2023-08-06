@@ -22,7 +22,13 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(
-          onPressed: context.pop,
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.push('/rooms');
+            }
+          },
         ),
         title: Text(L10n.of(context)!.settings),
         actions: [
