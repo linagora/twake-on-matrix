@@ -22,7 +22,7 @@ class SendFileInteractor {
       )).toList();
 
       for (final fileInfo in fileInfos) {
-        await room.sendImageFileEvent(
+        await room.sendFileEvent(
           fileInfo,
           msgType: MessageTypes.File,
           txid: txId,

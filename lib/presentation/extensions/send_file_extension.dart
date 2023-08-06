@@ -19,7 +19,7 @@ extension SendFileExtension on Room {
 
   static const maxImagesCacheInRoom = 10;
 
-  Future<String?> sendImageFileEvent(
+  Future<String?> sendFileEvent(
     FileInfo fileInfo, {
     String msgType = MessageTypes.Image,
     SyncUpdate? fakeImageEvent,
@@ -45,7 +45,7 @@ extension SendFileExtension on Room {
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      Logs().d('SendImage::sendImageFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize');
+      Logs().d('SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize');
       if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
         throw FileTooBigMatrixException(fileInfo.fileSize, maxMediaSize);
       }
@@ -219,25 +219,5 @@ extension SendFileExtension on Room {
 
   User? getUser(mxId) {
     return getParticipants().firstWhereOrNull((user) => user.id == mxId);
-  }
-
-  bool isShowInChatList() {
-    return _isDirectChatHaveMessage() || _isGroupChat();
-  }
-
-  bool _isGroupChat() {
-    return !isDirectChat;
-  }
-
-  bool _isDirectChatHaveMessage() {
-    return isDirectChat && _isLastEventInRoomIsMessage();
-  }
-
-  bool _isLastEventInRoomIsMessage() {
-    return [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-    ].contains(lastEvent?.type);
   }
 }

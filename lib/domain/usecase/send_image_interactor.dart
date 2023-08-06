@@ -16,7 +16,7 @@ class SendImageInteractor {
     final fileInfo = await entity.toFileInfo();
     if (fileInfo != null) {
       try {
-        await room.sendImageFileEvent(
+        await room.sendFileEvent(
           fileInfo,
           txid: txId,
           editEventId: editEventId,

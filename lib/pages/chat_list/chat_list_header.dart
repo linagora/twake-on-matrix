@@ -1,7 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
@@ -47,9 +46,7 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                             height: ChatListHeaderStyle.searchBarHeight,
                             child: InkWell(
                               onTap: () {
-                                StatefulNavigationShell.of(context).goBranch(
-                                  AdaptiveDestinationEnum.search.index
-                                );
+                                context.push('/rooms/search');
                               },
                               child: TextField(
                                 controller: controller.searchChatController,

@@ -10,7 +10,6 @@ import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -72,7 +71,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   void onRecentChatTap(RecentChatPresentationSearch recentChatPresentationSearch) {
     Logs().d('SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}');
-    context.go('/search/${recentChatPresentationSearch.id}');
+    context.go('/rooms/search/${recentChatPresentationSearch.id}');
   }
 
   void goToDraftChat({
@@ -80,7 +79,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
     required ContactPresentationSearch contactPresentationSearch
   }) {
     if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
-      context.go('/search/draftChat', extra: {
+      context.go('/rooms/search/draftChat', extra: {
         PresentationContactConstant.receiverId: contactPresentationSearch.matrixId ?? '',
         PresentationContactConstant.email: contactPresentationSearch.email ?? '',
         PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',
@@ -96,14 +95,12 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;
-    context.go('/search/${roomIdResult.result!}');
+    context.go('/rooms/search/${roomIdResult.result!}');
   }
 
   void goToRoomsShellBranch() {
     textEditingController.clear();
-    StatefulNavigationShell.of(context).goBranch(
-      AdaptiveDestinationEnum.rooms.index,
-    );
+    context.pop();
   }
 
   @override

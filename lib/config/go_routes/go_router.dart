@@ -42,13 +42,11 @@ class TwakeRoutes {
   final _navRoomsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rooms');
   final _navContactsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Contacts');
   final _navStoriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Stories');
-  final _navSearchNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Search');
 
   static const List<String> shellBranch = [
     '/rooms',
     '/contacts',
     '/stories',
-    '/search',
   ];
 
   GoRouter get router => GoRouter(
@@ -102,7 +100,6 @@ class TwakeRoutes {
           _contactsShellBranch,
           _roomsShellBranch,
           _storiesShellBranch,
-          _searchShellBranch
         ],
       ),
       GoRoute(
@@ -137,6 +134,14 @@ class TwakeRoutes {
           );
         },
         routes: [
+          GoRoute(
+              path: 'search',
+              builder: (context, state) => const AdaptiveScaffoldRoute(body: Search()),
+              routes: [
+                _draftChatRoute(body: const Search()),
+                _roomIdRoute(body: const Search()),
+              ]
+          ),
           GoRoute(
               path: 'newprivatechat',
               pageBuilder: (context, state) => const NoTransitionPage(
@@ -232,25 +237,6 @@ class TwakeRoutes {
             ],
           ),
         ],
-      ),
-    ],
-  );
-
-  StatefulShellBranch get _searchShellBranch => StatefulShellBranch(
-    initialLocation: '/search',
-    navigatorKey: _navSearchNavigatorKey,
-    routes: [
-      GoRoute(
-        path: '/search',
-        pageBuilder: (context, state) {
-          return const NoTransitionPage(
-            child: AdaptiveScaffoldRoute(body: Search())
-          );
-        },
-        routes: [
-          _draftChatRoute(body: const Search()),
-          _roomIdRoute(body: const Search()),
-        ]
       ),
     ],
   );
