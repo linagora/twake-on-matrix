@@ -422,6 +422,8 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
       case PermissionStatus.limited:
       case PermissionStatus.provisional:
         break;
+      default:
+        break;
     }
   }
 

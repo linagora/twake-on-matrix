@@ -28,8 +28,8 @@ class ImageViewerView extends StatelessWidget {
       body: Stack(
         children: [
           GestureDetector(
-            onTap: () {},
-            onDoubleTap: () => controller.toggleAppbarPreview(),
+            onTap: controller.toggleAppbarPreview,
+            onDoubleTap: controller.toggleAppbarPreview,
             child: InteractiveViewer(
               minScale: 1.0,
               maxScale: 10.0,
