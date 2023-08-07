@@ -50,8 +50,7 @@ class BackgroundPush {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Client client;
-  BuildContext? context;
-  GlobalKey<NavigatorState>? router;
+  GoRouter? router;
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
@@ -59,7 +58,7 @@ class BackgroundPush {
   Store get store => _store ??= Store();
   Future<void> loadLocale() async {
     // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
-    l10n ??= (context != null ? L10n.of(context!) : null) ??
+    l10n ??= (currentContext != null ? L10n.of(currentContext!) : null) ??
         (await L10n.delegate.load(window.locale));
   }
 
@@ -71,7 +70,7 @@ class BackgroundPush {
 
   bool upAction = false;
 
-  BackgroundPush._(this.client) {
+  BackgroundPush._(this.client, this.router) {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
@@ -98,20 +97,20 @@ class BackgroundPush {
     }
   }
 
-  factory BackgroundPush.clientOnly(Client client) {
-    _instance ??= BackgroundPush._(client);
+  factory BackgroundPush.clientOnly(Client client, {GoRouter? router}) {
+    _instance ??= BackgroundPush._(client, router);
     return _instance!;
   }
 
   factory BackgroundPush(
     Client client,
-    BuildContext context,
+    GoRouter? router,
     {
     final void Function(String errorMsg, {Uri? link})? onFcmError
     }
   ) {
-    final instance = BackgroundPush.clientOnly(client);
-    instance.context = context;
+    final instance = BackgroundPush.clientOnly(client, router: router);
+    instance.router = router;
     // ignore: prefer_initializing_formals
     // ignore: prefer_initializing_formals
     instance.onFcmError = onFcmError;
@@ -220,7 +219,7 @@ class BackgroundPush {
     Logs().d("SetupPush");
     if (client.onLoginStateChanged.value != LoginState.loggedIn ||
         !PlatformInfos.isMobile ||
-        context == null) {
+        currentContext == null) {
       return;
     }
     // Do not setup unifiedpush if this has been initialized by
@@ -251,7 +250,7 @@ class BackgroundPush {
   }
 
   Future<void> _noFcmWarning() async {
-    if (context == null) {
+    if (currentContext == null) {
       return;
     }
     if (await store.getItemBool(SettingKeys.showNoGoogle, true) == true) {
@@ -316,15 +315,13 @@ class BackgroundPush {
   }
 
   void onReceiveNotification(dynamic message) {
-    Logs().d('BackgroundPush::onMessage(): $message');
+    Logs().d('BackgroundPush::onReceiveNotification(): Message $message - roomId $roomId');
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState != null
-        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
-        : null,
+      activeRoomId: roomId,
       onSelectNotification: onSelectNotification,
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
@@ -348,14 +345,16 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      router!.currentState!.context.go(isStory ? 'stories' : '/rooms/$roomId');
+      if (router != null) {
+        currentContext?.go('/rooms/$roomId');
+      }
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
   }
 
   Future<void> setupUp() async {
-    await UnifiedPush.registerAppWithDialog(context!);
+    await UnifiedPush.registerAppWithDialog(currentContext!);
   }
 
   Future<void> _newUpEndpoint(String newEndpoint, String i) async {
@@ -428,9 +427,7 @@ class BackgroundPush {
       PushNotification.fromJson(data),
       client: client,
       l10n: l10n,
-      activeRoomId: router?.currentState != null
-        ? GoRouterState.of(router!.currentState!.context).pathParameters['roomid']
-        : null,
+      activeRoomId: roomId,
     );
   }
 
@@ -544,6 +541,14 @@ class BackgroundPush {
       _clearingPushLock = false;
     }
   }
+
+  String? get roomId {
+    final lastMatch = router?.routerDelegate.currentConfiguration.last;
+    final matchList = lastMatch is ImperativeRouteMatch ? lastMatch.matches : router?.routerDelegate.currentConfiguration;
+    return matchList != null ? matchList.pathParameters['roomid'] : '';
+  }
+
+  BuildContext? get currentContext => router?.routerDelegate.navigatorKey.currentState?.context;
 
   PushNotification _parseMessagePayload(dynamic message) {
     Logs().d('BackgroundPush::_parseMessagePayload()');
