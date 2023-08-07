@@ -66,7 +66,7 @@ dependencies:
       url: git@github.com:linagora/matrix-dart-sdk.git
       ref: improve-matrix-file
   matrix_homeserver_recommendations: ^0.3.0
-  matrix_link_text: ^1.0.2
+  matrix_link_text: ^2.0.0
   native_imaging: ^0.1.0
   package_info_plus: ^4.0.0
   path_provider: ^2.0.15
@@ -106,8 +106,8 @@ dependencies:
       ref: master
   flutter_matrix_html:
     git:
-      url: git@github.com:sherlockvn/flutter_matrix_html.git
-      ref: feature/add-pill-builder
+      url: https://github.com/linagora/flutter_matrix_html.git
+      ref: tw-416-support-3_10_6
   overflow_view: ^0.3.1
   json_annotation: ^4.8.1
   contacts_service:
@@ -247,6 +247,9 @@ dependency_overrides:
       url: https://github.com/chandrabezzo/wakelock.git
       ref: main
       path: wakelock_windows/
+
+  # Support dart 3.0
+  flutter_math_fork: ^0.7.1
 
 cider:
   link_template:

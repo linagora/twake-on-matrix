@@ -8,7 +8,6 @@ import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class UploadFileAPI {

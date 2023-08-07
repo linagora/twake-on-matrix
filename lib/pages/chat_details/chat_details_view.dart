@@ -51,9 +51,10 @@ class ChatDetailsView extends StatelessWidget {
                 leading: IconButton(
                   icon: const Icon(Icons.close_outlined),
                   onPressed: () =>
-                    GoRouterState.of(context).path?.startsWith('/spaces/') == true
-                      ? context.pop()
-                      : context.go('/rooms/${controller.roomId!}'),
+                      GoRouterState.of(context).path?.startsWith('/spaces/') ==
+                              true
+                          ? context.pop()
+                          : context.go('/rooms/${controller.roomId!}'),
                 ),
                 elevation: Theme.of(context).appBarTheme.elevation,
                 expandedHeight: 300.0,
@@ -140,7 +141,8 @@ class ChatDetailsView extends StatelessWidget {
                                       .color,
                                 ),
                                 onLinkTap: (url) =>
-                                    UrlLauncher(context, url).launchUrl(),
+                                    UrlLauncher(context, url.toString())
+                                        .launchUrl(),
                               ),
                             ),
                           const SizedBox(height: 8),

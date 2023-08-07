@@ -151,7 +151,8 @@ class PublicRoomBottomSheet extends StatelessWidget {
                         fontSize: 14,
                         color: Theme.of(context).textTheme.bodyMedium!.color,
                       ),
-                      onLinkTap: (url) => UrlLauncher(context, url).launchUrl(),
+                      onLinkTap: (url) =>
+                          UrlLauncher(context, url.toString()).launchUrl(),
                     ),
                   ),
               ],
