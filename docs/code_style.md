@@ -4,7 +4,6 @@ FluffyChat tries to be as minimal as possible even in the code style. We try to 
 
 ### Directory Structure:
 
-
 - /lib
   - /config
     - app_config.dart
@@ -24,7 +23,6 @@ FluffyChat tries to be as minimal as possible even in the code style. We try to 
     - /layouts
     - ...Custom widgets created for this project
   - main.dart
-
 
 Most of the business model is in the Famedly Matrix Dart SDK. We try to not keep a model inside of the source code but extend it under `/utils`.
 
@@ -101,6 +99,7 @@ Views should just contain code which describes the view. All other parameters or
 All file names must be lower_snake_case. All views must have a `View` suffix and all controller must have a `Controller` suffix. Widgets may have a controller too but they should pass the callbacks back to the view where possible. Calling one line methods directly in the view is only recommended if there is no need to pass a parameter.
 
 To perform an action on state initialization we use the initState method:
+
 ```dart
 @override
   void initState() {
@@ -110,6 +109,7 @@ To perform an action on state initialization we use the initState method:
 ```
 
 And the dispose method to perform an action on disposing:
+
 ```dart
 @override
   void dispose() {
@@ -119,6 +119,7 @@ And the dispose method to perform an action on disposing:
 ```
 
 To run code after the widget was created first we use the WidgetBindings in the initState:
+
 ```dart
 @override
   void initState() {
@@ -131,7 +132,7 @@ To run code after the widget was created first we use the WidgetBindings in the 
 
 ### Formatting
 
-We do not allow code with wrong formatting. Please run `flutter format lib` if your IDE doesn't do this automatically.
+We do not allow code with wrong formatting. Please run `dart format lib` if your IDE doesn't do this automatically.
 
 ### Code Analyzis
 
