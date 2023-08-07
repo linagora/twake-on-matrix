@@ -50,7 +50,7 @@ class BackgroundPush {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Client client;
-  GoRouter? router;
+  GlobalKey<NavigatorState>? globalRouteKey;
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
@@ -70,7 +70,7 @@ class BackgroundPush {
 
   bool upAction = false;
 
-  BackgroundPush._(this.client, this.router) {
+  BackgroundPush._(this.client, this.globalRouteKey) {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
@@ -97,20 +97,20 @@ class BackgroundPush {
     }
   }
 
-  factory BackgroundPush.clientOnly(Client client, {GoRouter? router}) {
-    _instance ??= BackgroundPush._(client, router);
+  factory BackgroundPush.clientOnly(Client client, {GlobalKey<NavigatorState>? globalRouteKey}) {
+    _instance ??= BackgroundPush._(client, globalRouteKey);
     return _instance!;
   }
 
   factory BackgroundPush(
     Client client,
-    GoRouter? router,
+    GlobalKey<NavigatorState>? globalRouteKey,
     {
     final void Function(String errorMsg, {Uri? link})? onFcmError
     }
   ) {
-    final instance = BackgroundPush.clientOnly(client, router: router);
-    instance.router = router;
+    final instance = BackgroundPush.clientOnly(client, globalRouteKey: globalRouteKey);
+    instance.globalRouteKey = globalRouteKey;
     // ignore: prefer_initializing_formals
     // ignore: prefer_initializing_formals
     instance.onFcmError = onFcmError;
@@ -241,7 +241,7 @@ class BackgroundPush {
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup ||
-          router == null) {
+          currentContext == null) {
         return;
       }
       _wentToRoomOnStartup = true;
@@ -334,7 +334,7 @@ class BackgroundPush {
   Future<void> goToRoom(String? roomId) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
-      if (router == null || roomId == null) {
+      if (currentContext == null || roomId == null) {
         return;
       }
       await client.roomsLoading;
@@ -345,9 +345,7 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      if (router != null) {
-        currentContext?.go('/rooms/$roomId');
-      }
+      currentContext?.go('/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
@@ -543,12 +541,12 @@ class BackgroundPush {
   }
 
   String? get roomId {
-    final lastMatch = router?.routerDelegate.currentConfiguration.last;
-    final matchList = lastMatch is ImperativeRouteMatch ? lastMatch.matches : router?.routerDelegate.currentConfiguration;
-    return matchList != null ? matchList.pathParameters['roomid'] : '';
+    return currentContext != null
+      ? GoRouterState.of(currentContext!).pathParameters['roomid']
+      : '';
   }
 
-  BuildContext? get currentContext => router?.routerDelegate.navigatorKey.currentState?.context;
+  BuildContext? get currentContext => globalRouteKey?.currentState?.context;
 
   PushNotification _parseMessagePayload(dynamic message) {
     Logs().d('BackgroundPush::_parseMessagePayload()');
