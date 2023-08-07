@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 

@@ -128,7 +128,7 @@ class PinnedEvents extends StatelessWidget {
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           onLinkTap: (url) =>
-                              UrlLauncher(context, url).launchUrl(),
+                              UrlLauncher(context, url.toString()).launchUrl(),
                         );
                       },
                     ),

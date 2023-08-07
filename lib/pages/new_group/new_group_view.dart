@@ -1,7 +1,6 @@
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/search_contact_appbar.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 
