@@ -49,7 +49,7 @@ class Pill extends StatelessWidget {
                 radius: avatarSize / 2,
                 backgroundImage: CachedNetworkImageProvider(avatarUrl!.toString()),
               ),
-            Text(displayname, style: TextStyle(color: Colors.white)),
+            Text(displayname, style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),
