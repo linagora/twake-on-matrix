@@ -29,26 +29,12 @@ class ChatView extends StatelessWidget {
   List<Widget> _appBarActions(BuildContext context) {
     if (controller.selectMode) {
       return [
-        if (controller.canEditSelectedEvents)
-          TwakeIconButton(
-            icon: Icons.edit_outlined,
-            tooltip: L10n.of(context)!.edit,
-            onPressed: controller.editSelectedEventAction,
-          ),
+        // FIXME: 7Aug2023: Need user story for edit message
         TwakeIconButton(
           icon: Icons.copy_outlined,
           tooltip: L10n.of(context)!.copy,
           onPressed: controller.copyEventsAction,
         ),
-        if (controller.canSaveSelectedEvent)
-          // Use builder context to correctly position the share dialog on iPad
-          Builder(
-            builder: (context) => TwakeIconButton(
-              icon: Icons.adaptive.share,
-              tooltip: L10n.of(context)!.share,
-              onPressed: () => controller.saveSelectedEvent(context),
-            ),
-          ),
         if (controller.canRedactSelectedEvents)
           TwakeIconButton(
             icon: Icons.delete_outlined,
