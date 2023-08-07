@@ -4,7 +4,7 @@ on:
 name: Tests
 
 env:
-  FLUTTER_VERSION: 3.7.6
+  FLUTTER_VERSION: 3.10.6
 
 jobs:
   code_analyze:
