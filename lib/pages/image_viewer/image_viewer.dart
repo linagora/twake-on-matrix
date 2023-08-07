@@ -1,26 +1,31 @@
 import 'dart:typed_data';
+
 import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 class ImageViewer extends StatefulWidget {
   final Event event;
   final Uint8List? imageData;
   final String? filePath;
 
-  const ImageViewer(this.event, {Key? key, this.imageData, this.filePath})
-      : super(key: key);
+  const ImageViewer(
+    this.event, {
+    Key? key,
+    this.imageData,
+    this.filePath,
+  }) : super(key: key);
 
   @override
   ImageViewerController createState() => ImageViewerController();
 }
 
 class ImageViewerController extends State<ImageViewer> {
-  final ValueNotifier<bool> showAppbarPreview = ValueNotifier(false);
+  final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
 
   /// Forward this image to another room.
   void forwardAction() async {
