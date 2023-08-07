@@ -1,14 +1,10 @@
 import 'dart:ui';
 
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart'
-    as linagora_image_picker;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -16,11 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart'
+    as linagora_image_picker;
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:linagora_design_flutter/images_picker/use_camera_widget.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 typedef OnSendTap = void Function()?;
@@ -110,9 +109,7 @@ mixin ImagePickerMixin {
                 L10n.of(context)!.photoSelectedCounter(counterImage),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const Icon(Icons.chevron_right),
               const Expanded(child: SizedBox.shrink()),
-              const Icon(Icons.more_vert),
             ],
           ),
         );
@@ -274,9 +271,10 @@ mixin ImagePickerMixin {
           ),
           Text(
             L10n.of(context)!.tapToAllowAccessToYourGallery,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: LinagoraRefColors.material().neutral,
-                ),
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(color: LinagoraRefColors.material().neutral),
             textAlign: TextAlign.center,
           ),
         ],
