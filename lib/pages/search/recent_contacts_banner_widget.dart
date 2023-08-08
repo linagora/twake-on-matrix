@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/search/recent_contacts_banner_widget_style.dart
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:matrix/matrix.dart';
 
 class PreSearchRecentContactsContainer extends StatelessWidget {
