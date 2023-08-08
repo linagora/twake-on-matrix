@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:async/async.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
+import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
@@ -24,7 +26,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
-import 'package:async/async.dart';
+
 import '../../../utils/account_bundles.dart';
 import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import '../../utils/url_launcher.dart';
@@ -101,15 +103,12 @@ class ChatListController extends State<ChatList>
   void setActiveSpace(String? spaceId) {
     setState(() {
       activeSpaceId = spaceId;
-      activeFilter = ActiveFilter.spaces;
     });
   }
 
   ActiveFilter activeFilter = AppConfig.separateChatTypes
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
-
-  final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
     switch (activeFilter) {
@@ -129,7 +128,7 @@ class ChatListController extends State<ChatList>
   List<Room> get filteredRoomsForAll => Matrix.of(context)
       .client
       .rooms
-      .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
+      .where(getRoomFilterByActiveFilter(activeFilter))
       .toList();
 
   bool isSearchMode = false;
@@ -181,8 +180,9 @@ class ChatListController extends State<ChatList>
     try {
       roomSearchResult = await client.queryPublicRooms(
         server: searchServer,
-        filter:
-            PublicRoomQueryFilter(genericSearchTerm: searchChatController.text),
+        filter: PublicRoomQueryFilter(
+          genericSearchTerm: searchChatController.text,
+        ),
         limit: 20,
       );
       userSearchResult = await client.searchUserDirectory(
