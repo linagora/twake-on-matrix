@@ -20,9 +20,12 @@ Date: 2023-08-08
 2. Can't get current `BuildContext`
 ```
 * Reason: 
-- Cannot anymore use router.location to determine where am I in the application and there are certain scenarios 
-where I cannot provide a context to GoRouterState.of(context).location, deep link or firebase messages that 
-will pop or push some other routes from or to the navigation stack depending on the current location and state.
+1. We rely on the location to verify if a roomid exists, but the BackgroundPush class lacks a context. 
+Consequently, obtaining the current location based on context is not possible within this class.
+
+2. When a notification is received in the foreground, background, or terminated states, and the user taps on the notification, the app opens. 
+However, it doesn't navigate to the correct screen according to the roomid, resulting in the error message "No GoRouter found in context". 
+This is because the current context cannot be accessed within that class at that point in time.
 ```
 
 ## Decision
@@ -50,6 +53,5 @@ BuildContext? get currentContext => router?.routerDelegate.navigatorKey.currentS
 ```
 
 ## Consequences
-
-1. User click on Notification, it not go to correct screen and no action
-2. Block func click on Notification
+1. Can check current location for `roomid` exists.
+2. User click on notification (foreground, background, or terminated states), navigator to correct screen according to `roomid`
