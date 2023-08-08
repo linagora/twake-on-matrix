@@ -893,8 +893,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: tw-416-support-3_10_6
-      resolved-ref: "9f23f0bde90e5bb1b884f0604ca31defe9523396"
+      ref: master
+      resolved-ref: "7558bcd91e825fc6e55b2012d7afa52daa02e0c2"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1485,11 +1485,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: improve-matrix-file
-      resolved-ref: "01144ab3a0b7fd88970c35e9d572ed7f3f5ccf74"
+      ref: twake-supported
+      resolved-ref: af2a3083dfc49effbaaf7cd394c5b2fd3934f319
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
-    version: "0.20.5"
+    version: "0.22.2"
   matrix_api_lite:
     dependency: transitive
     description:
