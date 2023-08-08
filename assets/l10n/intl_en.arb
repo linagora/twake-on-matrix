@@ -2680,5 +2680,6 @@
         }
     },
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "adminPanel": "Admin Panel"
 }
