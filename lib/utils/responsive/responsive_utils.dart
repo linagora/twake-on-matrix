@@ -98,6 +98,4 @@ class ResponsiveUtils {
         isDesktop(context));
     }
   }
-
-  static bool isMatchedMobileWidth(double width) => width < minTabletWidth;
 }
