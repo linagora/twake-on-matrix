@@ -43,7 +43,7 @@ abstract class AppConfig {
   static bool hideUnknownEvents = true;
   static bool hideUnimportantStateEvents = true;
   static bool showDirectChatsInSpaces = true;
-  static bool separateChatTypes = true;
+  static bool separateChatTypes = false;
   static bool autoplayImages = true;
   static bool sendOnEnter = false;
   static bool experimentalVoip = false;
