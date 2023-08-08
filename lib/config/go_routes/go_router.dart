@@ -94,7 +94,7 @@ class TwakeRoutes {
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return AppScaffoldShell(navigationShell: navigationShell);
+          return AdaptiveScaffoldShell(navigationShell: navigationShell);
         },
         branches: <StatefulShellBranch>[
           _contactsShellBranch,

@@ -1,8 +1,10 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class TwakeHeader extends StatelessWidget with ShowDialogMixin implements PreferredSizeWidget {
   final ChatListController controller;
@@ -11,15 +13,32 @@ class TwakeHeader extends StatelessWidget with ShowDialogMixin implements Prefer
 
   @override
   Widget build(BuildContext context) {
+
+    final isWebWidth = ResponsiveUtils().isDesktop(context);
+
     return AppBar(
       toolbarHeight: TwakeHeaderStyle.toolbarHeight,
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,
-      leading: SizedBox(
-        width: 0,
-        child: ClientChooserButton(controller),
-      ),
-      centerTitle: true,
+      leading: !isWebWidth
+          ? SizedBox(
+              width: 0,
+              child: ClientChooserButton(controller),
+            )
+          : null,
+      titleSpacing: 0,
+      title: isWebWidth
+          ? Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16.0),
+              child: Text(
+                L10n.of(context)!.chat,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            )
+          : null,
+      centerTitle: false,
     );
   }
 
