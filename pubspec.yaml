@@ -248,9 +248,6 @@ dependency_overrides:
       ref: main
       path: wakelock_windows/
 
-  # Support dart 3.0
-  flutter_math_fork: ^0.7.1
-
 cider:
   link_template:
     tag: https://github.com/linagora/twake-on-matrix/releases/tag/%tag% # initial release link template
