@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
@@ -6,8 +5,8 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_she
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 
 class AppScaffoldShellView extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -134,24 +133,18 @@ class AppScaffoldShellView extends StatelessWidget {
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return [
-      if (AppConfig.separateChatTypes) ...[
-        NavigationDestination(
-          icon: const Icon(Icons.contacts_outlined),
-          label: L10n.of(context)!.contacts,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.chat),
-          label: L10n.of(context)!.chat,
-        ),
-        NavigationDestination(
-          icon: const Icon(Icons.web_stories_outlined),
-          label: L10n.of(context)!.stories,
-        ),
-      ] else
-        NavigationDestination(
-          icon: const Icon(Icons.chat_outlined),
-          label: L10n.of(context)!.chats,
-        ),
+      NavigationDestination(
+        icon: const Icon(Icons.contacts_outlined),
+        label: L10n.of(context)!.contacts,
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.chat),
+        label: L10n.of(context)!.chat,
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.web_stories_outlined),
+        label: L10n.of(context)!.stories,
+      ),
     ];
   }
 }

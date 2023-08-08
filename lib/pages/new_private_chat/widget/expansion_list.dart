@@ -201,7 +201,7 @@ class _ExpansionList extends State<ExpansionList> {
       child: Row(
         children: [
           Text(
-            L10n.of(context)!.countTwakeUsers(countContacts),
+            L10n.of(context)!.twakeUsers,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: LinagoraRefColors.material().neutral[40],
                 ),

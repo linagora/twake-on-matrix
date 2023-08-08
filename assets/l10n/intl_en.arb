@@ -2580,12 +2580,7 @@
     "inactive": "Not-activated",
     "newGroupChat": "New Group Chat",
     "getHelp": "Get help",
-    "countTwakeUsers": "Twake users ({count})",
-    "@countTwakeUsers": {
-        "placeholders": {
-            "count": {}
-        }
-    },
+    "twakeUsers": "Twake users",
     "expand": "Expand",
     "shrink": "Shrink",
     "noResultForKeyword": "No results for \"{keyword}\"",
