@@ -17,6 +17,7 @@ analyzer:
   exclude:
     - lib/generated_plugin_registrant.dart
     - lib/l10n/*.dart
+    - '**.g.dart'
 
 dart_code_metrics:
   metrics:
