@@ -9,8 +9,6 @@ import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
-// ignore: implementation_imports
-import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 typedef TransactionId = String;
@@ -178,12 +176,12 @@ extension SendFileExtension on Room {
                   unsigned: {
                     messageSendingStatusKey: EventStatus.sending.intValue,
                     'transaction_id': txid,
-                    ...FileSendRequestCredentials(
-                      inReplyTo: inReplyTo?.eventId,
-                      editEventId: editEventId,
-                      shrinkImageMaxDimension: shrinkImageMaxDimension,
-                      extraContent: extraContent,
-                    ).toJson(),
+                    if (inReplyTo?.eventId != null)
+                      'in_reply_to': inReplyTo?.eventId,
+                    if (editEventId != null) 'edit_event_id': editEventId,
+                    if (shrinkImageMaxDimension != null)
+                      'shrink_image_max_dimension': shrinkImageMaxDimension,
+                    if (extraContent != null) 'extra_content': extraContent,
                   },
                 ),
               ],
