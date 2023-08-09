@@ -51,7 +51,9 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
       final networkUri = _networkUri;
       if (kIsWeb && networkUri != null && _chewieManager == null) {
         _chewieManager ??= ChewieController(
-          videoPlayerController: VideoPlayerController.network(networkUri),
+          videoPlayerController: VideoPlayerController.networkUrl(
+            Uri.tryParse(networkUri) ?? Uri(),
+          ),
           autoPlay: true,
           autoInitialize: true,
         );

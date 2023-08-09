@@ -129,6 +129,8 @@ dependencies:
   open_file: ^3.3.2
   mime: ^1.0.4
   any_link_preview: ^3.0.0
+  async: ^2.11.0
+  cached_network_image: ^3.2.3
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3

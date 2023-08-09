@@ -380,6 +380,7 @@ class _Emoji extends StatelessWidget {
       sasEmoji[emoji.number]['translated_descriptions'],
     );
     translations['en'] = emoji.name;
+    // ignore: deprecated_member_use
     for (final locale in window.locales) {
       final wantLocaleParts = locale.toString().split('_');
       final wantLanguage = wantLocaleParts.removeAt(0);

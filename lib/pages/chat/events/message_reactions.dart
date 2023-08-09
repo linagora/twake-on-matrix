@@ -24,7 +24,7 @@ class MessageReactions extends StatelessWidget {
   Widget build(BuildContext context) {
     final allReactionEvents =
         event.aggregatedEvents(timeline, RelationshipTypes.reaction);
-    final reactionMap = <String, _ReactionEntry>{};
+    final reactionMap = <String, ReactionEntry>{};
     final client = Matrix.of(context).client;
 
     for (final e in allReactionEvents) {
@@ -33,7 +33,7 @@ class MessageReactions extends StatelessWidget {
           ?.tryGet<String>('key');
       if (key != null) {
         if (!reactionMap.containsKey(key)) {
-          reactionMap[key] = _ReactionEntry(
+          reactionMap[key] = ReactionEntry(
             key: key,
             count: 0,
             reacted: false,
@@ -66,7 +66,7 @@ class ReactionsList extends StatelessWidget {
     required this.client,
   }) : super(key: key);
 
-  final List<_ReactionEntry> reactionList;
+  final List<ReactionEntry> reactionList;
   final Set<Event> allReactionEvents;
   final Event event;
   final Client client;
@@ -226,13 +226,13 @@ class _Reaction extends StatelessWidget {
   }
 }
 
-class _ReactionEntry {
+class ReactionEntry {
   String? key;
   int count;
   bool reacted;
   List<User>? reactors;
 
-  _ReactionEntry({
+  ReactionEntry({
     this.key,
     required this.count,
     required this.reacted,
@@ -242,7 +242,7 @@ class _ReactionEntry {
 
 class _AdaptableReactorsDialog extends StatelessWidget {
   final Client? client;
-  final _ReactionEntry? reactionEntry;
+  final ReactionEntry? reactionEntry;
 
   const _AdaptableReactorsDialog({
     Key? key,

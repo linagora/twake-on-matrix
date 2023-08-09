@@ -59,6 +59,7 @@ class BackgroundPush {
   Future<void> loadLocale() async {
     // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
     l10n ??= (currentContext != null ? L10n.of(currentContext!) : null) ??
+        // ignore: deprecated_member_use
         (await L10n.delegate.load(window.locale));
   }
 
