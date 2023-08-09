@@ -25,6 +25,7 @@ class ContactStatusWidget extends StatelessWidget {
         children: [
           SvgPicture.asset(
             ImagePaths.icStatus,
+            // ignore: deprecated_member_use
             color: status == ContactStatus.active ? activeColor : inactiveColor,
           ),
           status == ContactStatus.active

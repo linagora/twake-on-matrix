@@ -145,6 +145,7 @@ Future<void> _tryPushHelper(
     return;
   }
 
+  // ignore: deprecated_member_use
   l10n ??= await L10n.delegate.load(window.locale);
   final matrixLocals = MatrixLocals(l10n);
 

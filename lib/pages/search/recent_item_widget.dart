@@ -108,7 +108,7 @@ class _DirectChatInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ///FIXME
+        // FIXME: ABc
         SizedBox(
           width: RecentItemStyle.avatarSize,
           child: Avatar(

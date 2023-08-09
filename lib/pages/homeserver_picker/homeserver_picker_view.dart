@@ -27,7 +27,10 @@ class HomeserverPickerView extends StatelessWidget {
           child: SvgPicture.asset(
             ImagePaths.icTwakeLogo,
             width: 100,
-            color: Theme.of(context).colorScheme.onBackground,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.onBackground,
+              BlendMode.srcIn,
+            ),
           ),
         ),
       ),

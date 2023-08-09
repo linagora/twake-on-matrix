@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/file_send_request_credentials.dart';
 import 'package:photo_manager/photo_manager.dart';
 

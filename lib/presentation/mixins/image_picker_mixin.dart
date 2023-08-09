@@ -327,6 +327,7 @@ mixin ImagePickerMixin {
     Navigator.pop(context);
     return await CameraPicker.pickFromCamera(
       context,
+      // ignore: deprecated_member_use
       locale: window.locale,
     );
   }
