@@ -68,9 +68,9 @@ extension LocalizedBody on Event {
       ?.tryGet<int>('size')
       ?.sizeString;
 
-  String? getFilePath() {
+  MatrixFile? getMatrixFile() {
     final txId = unsigned?['transaction_id'] ?? eventId;
-    return room.sendingFilePlaceholders[txId]?.filePath;
+    return room.sendingFilePlaceholders[txId];
   }
 
   User? getUser() {

@@ -5,6 +5,7 @@ import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/model/indexed_asset_entity.dart';
 import 'package:matrix/matrix.dart';
@@ -33,8 +34,11 @@ mixin SendFilesMixin on ImagePickerMixin {
     final sendImagesInteractor = getIt.get<SendImagesInteractor>();
     await sendImagesInteractor.execute(
       room: room,
-      entities:
-          selectedAssets.map<AssetEntity>((entity) => entity.asset).toList(),
+      entities: selectedAssets
+        .map<FileAssetEntity>((entity) {
+          return FileAssetEntity.createAssetEntity(entity.asset);
+        })
+        .toList(),
     );
 
     removeAllImageSelected();
