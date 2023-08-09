@@ -40,16 +40,14 @@ This is because the current context cannot be accessed within that class at that
 
 ```
 String? get roomId {
-  return currentContext != null
-    ? GoRouterState.of(currentContext!).pathParameters['roomid']
-    : '';
+    return routerDelegate?.currentConfiguration.pathParameters['roomid'];
 }
 ```
 
 3. Func get current `BuildContext` with `GlobalKey<NavigatorState>` from `GoRouterDelegate` inside `GoRouter` class
 
 ```
-BuildContext? get currentContext => router?.routerDelegate.navigatorKey.currentState?.context;
+BuildContext? get currentContext => routerDelegate?.navigatorKey.currentContext;
 ```
 
 ## Consequences
