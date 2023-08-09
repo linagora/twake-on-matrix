@@ -255,6 +255,13 @@ class TwakeRoutes {
   }) =>
       GoRoute(
         path: path ?? 'draftChat',
+        redirect: (context, state) {
+          if (state.extra is! Map<String, String>) {
+            return '${state.fullPath?.replaceAll('draftChat', '')}';
+          } else {
+            return path;
+          }
+        },
         pageBuilder: (context, state) {
           return NoTransitionPage(
             child: AdaptiveScaffoldRoute(
