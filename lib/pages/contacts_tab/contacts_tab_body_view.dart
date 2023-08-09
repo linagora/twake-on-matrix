@@ -60,14 +60,16 @@ class ContactsTabBodyView extends StatelessWidget {
                 children: contactsListSorted
                     .map<Widget>(
                       (contact) => InkWell(
-                          onTap: () {
-                            controller.onContactTap(
-                              context: context,
-                              path: 'contacts',
-                              contact: contact,
-                            );
-                          },
-                          child: ExpansionContactListTile(contact: contact)),
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          controller.onContactTap(
+                            context: context,
+                            path: 'contacts',
+                            contact: contact,
+                          );
+                        },
+                        child: ExpansionContactListTile(contact: contact),
+                      ),
                     )
                     .toList()
                   ..addAll([
