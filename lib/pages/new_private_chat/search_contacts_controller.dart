@@ -13,10 +13,12 @@ import 'package:matrix/matrix.dart';
 class SearchContactsController {
   static const debouncerIntervalInMilliseconds = 300;
 
-  final LookupContactsInteractor _lookupNetworkContactsInteractor = getIt.get<LookupContactsInteractor>();
+  final LookupContactsInteractor _lookupNetworkContactsInteractor =
+      getIt.get<LookupContactsInteractor>();
   late final Debouncer<String> _debouncer;
   final TextEditingController textEditingController = TextEditingController();
-  StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController = StreamController();
+  StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController =
+      StreamController();
   void Function(String)? onSearchKeywordChanged;
   ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
   final searchFocusNode = FocusNode();
@@ -33,14 +35,18 @@ class SearchContactsController {
 
   void _initializeDebouncer() {
     _debouncer = Debouncer(
-      const Duration(milliseconds: debouncerIntervalInMilliseconds), 
+      const Duration(milliseconds: debouncerIntervalInMilliseconds),
       initialValue: '',
     );
 
     _debouncer.values.listen((keyword) async {
-      Logs().d("SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword");
+      Logs().d(
+        "SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword",
+      );
       searchKeyword = keyword;
-      Logs().d("SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value}");
+      Logs().d(
+        "SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value}",
+      );
       if (isSearchModeNotifier.value) {
         if (onSearchKeywordChanged != null) {
           onSearchKeywordChanged!(textEditingController.text);
@@ -52,9 +58,10 @@ class SearchContactsController {
 
   void fetchLookupContacts() {
     _lookupNetworkContactsInteractor
-      .execute(query: ContactQuery(keyword: searchKeyword)).listen((event) {
-        lookupStreamController.add(event);
-      });
+        .execute(query: ContactQuery(keyword: searchKeyword))
+        .listen((event) {
+      lookupStreamController.add(event);
+    });
   }
 
   void onSearchBarChanged(String keyword) {
@@ -69,8 +76,8 @@ class SearchContactsController {
 
   void onSelectedContact() {
     textEditingController.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: textEditingController.text.length,
+      baseOffset: 0,
+      extentOffset: textEditingController.text.length,
     );
   }
 

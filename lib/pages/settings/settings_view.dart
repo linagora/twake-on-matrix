@@ -170,32 +170,34 @@ class SettingsView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.devices_outlined),
               title: Text(L10n.of(context)!.devices),
-              onTap: () =>  context.go('/settings/devices'),
+              onTap: () => context.go('/settings/devices'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.chat_bubble_outline_outlined),
               title: Text(L10n.of(context)!.chat),
-              onTap: () =>  context.go('/settings/chat'),
+              onTap: () => context.go('/settings/chat'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.shield_outlined),
               title: Text(L10n.of(context)!.security),
-              onTap: () =>  context.go('/settings/security'),
+              onTap: () => context.go('/settings/security'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             const Divider(thickness: 1),
             ListTile(
               leading: const Icon(Icons.help_outline_outlined),
               title: Text(L10n.of(context)!.help),
-              onTap: () => UrlLauncher(context, AppConfig.supportUrl).openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(context, AppConfig.supportUrl)
+                  .openUrlInAppBrowser(),
               trailing: const Icon(Icons.open_in_new_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.shield_sharp),
               title: Text(L10n.of(context)!.privacy),
-              onTap: () => UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(context, AppConfig.privacyUrl)
+                  .openUrlInAppBrowser(),
               trailing: const Icon(Icons.open_in_new_outlined),
             ),
             ListTile(

@@ -4,7 +4,8 @@ import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 
 class RecoveryWordsRepositoryImpl implements RecoveryWordsRepository {
-  final RecoveryWordsDataSource recoveryWordsDataSource = getIt.get<RecoveryWordsDataSource>();
+  final RecoveryWordsDataSource recoveryWordsDataSource =
+      getIt.get<RecoveryWordsDataSource>();
 
   @override
   Future<RecoveryWords> getRecoveryWords() {

@@ -26,7 +26,7 @@ extension ContextExtensionss on BuildContext {
   /// if you for example want 46% of the height, then you reduce it by 56%.
   double heightTransformer({double dividedBy = 1, double reducedBy = 0.0}) {
     return (mediaQuerySize.height -
-        ((mediaQuerySize.height / 100) * reducedBy)) /
+            ((mediaQuerySize.height / 100) * reducedBy)) /
         dividedBy;
   }
 

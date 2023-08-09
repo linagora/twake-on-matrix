@@ -14,12 +14,16 @@ class SendFileInteractor {
     Map<String, dynamic>? extraContent,
   }) async {
     try {
-      final fileInfos = filePickerResult.files.map((xFile) => FileInfo(
-        xFile.name,
-        xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
-        xFile.size,
-        readStream: xFile.readStream,
-      ),).toList();
+      final fileInfos = filePickerResult.files
+          .map(
+            (xFile) => FileInfo(
+              xFile.name,
+              xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
+              xFile.size,
+              readStream: xFile.readStream,
+            ),
+          )
+          .toList();
 
       for (final fileInfo in fileInfos) {
         await room.sendFileEvent(
@@ -31,7 +35,7 @@ class SendFileInteractor {
           shrinkImageMaxDimension: shrinkImageMaxDimension,
         );
       }
-    } catch(error) {
+    } catch (error) {
       Logs().d("SendFileInteractor: execute(): $error");
     }
   }

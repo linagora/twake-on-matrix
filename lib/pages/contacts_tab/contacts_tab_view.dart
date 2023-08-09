@@ -4,7 +4,6 @@ import 'package:fluffychat/pages/contacts_tab/contacts_tab_body_view.dart';
 import 'package:flutter/material.dart';
 
 class ContactsTabView extends StatelessWidget {
-
   final ContactsTabController contactsController;
 
   const ContactsTabView({super.key, required this.contactsController});
@@ -16,5 +15,4 @@ class ContactsTabView extends StatelessWidget {
       body: ContactsTabBodyView(contactsController),
     );
   }
-
 }

@@ -24,7 +24,8 @@ class Pill extends StatelessWidget {
   build(BuildContext context) {
     final user = chatController.room?.getUser(identifier);
     final displayname = user?.displayName ?? identifier;
-    final avatarUrl = user?.avatarUrl?.getDownloadLink(Matrix.of(context).client);
+    final avatarUrl =
+        user?.avatarUrl?.getDownloadLink(Matrix.of(context).client);
     final avatarSize = DefaultTextStyle.of(context).style.fontSize ?? 14.0;
     final padding = avatarSize / 20;
     return InkWell(
@@ -37,8 +38,7 @@ class Pill extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: Colors.grey[800],
-          borderRadius:
-              BorderRadius.all(Radius.circular(avatarSize + padding)),
+          borderRadius: BorderRadius.all(Radius.circular(avatarSize + padding)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,7 +47,8 @@ class Pill extends StatelessWidget {
             if (avatarUrl?.toString().isNotEmpty == true)
               CircleAvatar(
                 radius: avatarSize / 2,
-                backgroundImage: CachedNetworkImageProvider(avatarUrl!.toString()),
+                backgroundImage:
+                    CachedNetworkImageProvider(avatarUrl!.toString()),
               ),
             Text(displayname, style: const TextStyle(color: Colors.white)),
           ],

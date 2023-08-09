@@ -49,7 +49,6 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       margin: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationMargin,
       width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
@@ -70,27 +69,30 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
                 padding: AdaptiveScaffoldPrimaryNavigationStyle.dividerPadding,
                 child: Divider(
                   height: AdaptiveScaffoldPrimaryNavigationStyle.dividerSize,
-                  color: AdaptiveScaffoldPrimaryNavigationStyle.separatorLightColor,
+                  color: AdaptiveScaffoldPrimaryNavigationStyle
+                      .separatorLightColor,
                 ),
               ),
               FutureBuilder<Profile?>(
                 future: controller.fetchOwnProfile(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator.adaptive());
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
                   }
 
                   return PopupMenuButton<Object>(
                     padding: EdgeInsets.zero,
-                    onSelected: (object) => controller.clientSelected(object, context),
+                    onSelected: (object) =>
+                        controller.clientSelected(object, context),
                     itemBuilder: _bundleMenuItems,
                     child: Avatar(
                       mxContent: snapshot.data?.avatarUrl,
                       name: snapshot.data?.displayName ??
                           Matrix.of(context).client.userID!.localpart,
                       size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
-                      fontSize: ClientChooserButtonStyle
-                          .avatarFontSizeInAppBar,
+                      fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
                     ),
                   );
                 },

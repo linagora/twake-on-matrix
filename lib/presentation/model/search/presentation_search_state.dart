@@ -15,5 +15,6 @@ class GetContactAndRecentChatPresentation extends Success {
   });
 
   @override
-  List<Object?> get props => [searchResult, contactsOffset, shouldLoadMoreContacts, keyword];
+  List<Object?> get props =>
+      [searchResult, contactsOffset, shouldLoadMoreContacts, keyword];
 }

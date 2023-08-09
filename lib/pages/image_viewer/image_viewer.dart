@@ -12,14 +12,14 @@ class ImageViewer extends StatefulWidget {
   final Uint8List? imageData;
   final String? filePath;
 
-  const ImageViewer(this.event, {Key? key, this.imageData, this.filePath}) : super(key: key);
+  const ImageViewer(this.event, {Key? key, this.imageData, this.filePath})
+      : super(key: key);
 
   @override
   ImageViewerController createState() => ImageViewerController();
 }
 
 class ImageViewerController extends State<ImageViewer> {
-
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(false);
 
   /// Forward this image to another room.
@@ -57,8 +57,8 @@ class ImageViewerController extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) => ImageViewerView(
-    this, 
-    imageData: widget.imageData,
-    filePath: widget.filePath,
-  );
+        this,
+        imageData: widget.imageData,
+        filePath: widget.filePath,
+      );
 }

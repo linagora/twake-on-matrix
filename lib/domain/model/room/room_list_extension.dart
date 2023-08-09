@@ -4,14 +4,19 @@ import 'package:matrix/matrix.dart';
 
 extension RoomListExtension on List<Room> {
   List<RecentChatSearchModel> searchRecentChat({
-    required MatrixLocalizations matrixLocalizations, 
+    required MatrixLocalizations matrixLocalizations,
     required String keyword,
     int? limit,
   }) {
-    return where((room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList())
-      .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
-      .where((model) => model.displayName != null && model.displayName!.contains(keyword))
-      .take(limit ?? length)
-      .toList();
+    return where(
+      (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
+    )
+        .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
+        .where(
+          (model) =>
+              model.displayName != null && model.displayName!.contains(keyword),
+        )
+        .take(limit ?? length)
+        .toList();
   }
 }

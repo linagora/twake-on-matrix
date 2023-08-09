@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 typedef OnAcceptButton = void Function()?;
 
 class PermissionDialog extends StatefulWidget {
-
   final Permission permission;
 
   final Widget explainTextRequestPermission;
@@ -26,9 +25,8 @@ class PermissionDialog extends StatefulWidget {
   State<PermissionDialog> createState() => _PermissionDialogState();
 }
 
-class _PermissionDialogState extends State<PermissionDialog> 
-  with WidgetsBindingObserver {
-
+class _PermissionDialogState extends State<PermissionDialog>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -37,7 +35,8 @@ class _PermissionDialogState extends State<PermissionDialog>
 
   @override
   didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.resumed && !(await widget.permission.isDenied)) {
+    if (state == AppLifecycleState.resumed &&
+        !(await widget.permission.isDenied)) {
       Navigator.of(context).pop();
     }
   }
@@ -64,11 +63,15 @@ class _PermissionDialogState extends State<PermissionDialog>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.icon != null)...[
-                const SizedBox(height: 24.0,),
+              if (widget.icon != null) ...[
+                const SizedBox(
+                  height: 24.0,
+                ),
                 widget.icon!,
               ],
-              const SizedBox(height: 16.0,),
+              const SizedBox(
+                height: 16.0,
+              ),
               widget.explainTextRequestPermission,
               const SizedBox(height: 24.0),
               Expanded(
@@ -77,11 +80,13 @@ class _PermissionDialogState extends State<PermissionDialog>
                   children: [
                     _PermissionTextButton(
                       context: context,
-                      text: L10n.of(context)!.deny, onPressed: () async {
+                      text: L10n.of(context)!.deny,
+                      onPressed: () async {
                         Navigator.of(context).pop();
-                      },),
+                      },
+                    ),
                     _PermissionTextButton(
-                      context: context, 
+                      context: context,
                       text: L10n.of(context)!.allow,
                       onPressed: () async {
                         if (widget.onAcceptButton != null) {
@@ -89,7 +94,8 @@ class _PermissionDialogState extends State<PermissionDialog>
                         } else {
                           await widget.permission.request();
                         }
-                      },)
+                      },
+                    )
                   ],
                 ),
               ),
@@ -118,13 +124,17 @@ class _PermissionTextButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(100.0),
-        onTap: onPressed, 
+        onTap: onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-          child: Text(text, style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-          ),),
-        ),),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+          ),
+        ),
+      ),
     );
   }
 }

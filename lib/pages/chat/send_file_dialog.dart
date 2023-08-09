@@ -31,7 +31,8 @@ class SendFileDialogState extends State<SendFileDialog> {
     for (var file in widget.files) {
       // ignore: unused_local_variable
       MatrixImageFile? thumbnail;
-      if (file is MatrixVideoFile && (file.bytes?.length ?? 0) > minSizeToCompress) {
+      if (file is MatrixVideoFile &&
+          (file.bytes?.length ?? 0) > minSizeToCompress) {
         await showFutureLoadingDialog(
           context: context,
           future: () async {

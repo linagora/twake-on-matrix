@@ -64,8 +64,9 @@ class HtmlMessage extends StatelessWidget {
       data: renderHtml,
       defaultTextStyle: defaultTextStyle,
       emoteSize: emoteSize,
-      inlineSpanEnd: bottomWidgetSpan != null 
-        ? WidgetSpan(child: bottomWidgetSpan!) : null,
+      inlineSpanEnd: bottomWidgetSpan != null
+          ? WidgetSpan(child: bottomWidgetSpan!)
+          : null,
       linkStyle: linkStyle ??
           themeData.textTheme.bodyMedium!.copyWith(
             color: themeData.colorScheme.secondary,
@@ -144,8 +145,7 @@ class HtmlMessage extends StatelessWidget {
             if (state != null &&
                 ((state.content['alias'] is String &&
                         state.content['alias'] == identifier) ||
-                    (altAliases is List &&
-                        altAliases.contains(identifier)))) {
+                    (altAliases is List && altAliases.contains(identifier)))) {
               // we have a room!
               return {
                 'displayname':
@@ -175,11 +175,12 @@ class HtmlMessage extends StatelessWidget {
           return null;
         }
         return Pill(
-          identifier: identifier, 
+          identifier: identifier,
           chatController: chatController!,
-          url: url, 
+          url: url,
           onTap: onTap,
         );
-      },);    
+      },
+    );
   }
 }

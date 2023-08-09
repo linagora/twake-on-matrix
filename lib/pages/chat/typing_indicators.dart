@@ -24,7 +24,8 @@ class TypingIndicators extends StatelessWidget {
       child: AnimatedContainer(
         constraints:
             const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
-        height: typingUsers.isEmpty ? 0 : AvatarStyle.defaultSize + bottomPadding,
+        height:
+            typingUsers.isEmpty ? 0 : AvatarStyle.defaultSize + bottomPadding,
         duration: FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         alignment: controller.timeline!.events.isNotEmpty &&

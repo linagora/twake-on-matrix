@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -20,9 +19,15 @@ class UploadContentInteractor {
       final maxMediaSize = mediaConfig.mUploadSize;
       if (matrixFile != null && matrixFile.bytes != null) {
         final fileSize = matrixFile.bytes!.length;
-        Logs().d('SendImage::sendImageFileEvent(): FileSized $fileSize || maxMediaSize $maxMediaSize');
+        Logs().d(
+          'SendImage::sendImageFileEvent(): FileSized $fileSize || maxMediaSize $maxMediaSize',
+        );
         if (maxMediaSize != null && maxMediaSize < fileSize) {
-          yield Left(FileTooBigMatrix(FileTooBigMatrixException(fileSize, maxMediaSize)));
+          yield Left(
+            FileTooBigMatrix(
+              FileTooBigMatrixException(fileSize, maxMediaSize),
+            ),
+          );
         }
         final uri = await matrixClient.uploadContent(
           matrixFile.bytes!,
@@ -31,7 +36,9 @@ class UploadContentInteractor {
         );
         yield Right(UploadContentSuccess(uri: uri));
       } else {
-        yield Left(UploadContentFailed(exception: CannotUploadContentException()));
+        yield Left(
+          UploadContentFailed(exception: CannotUploadContentException()),
+        );
       }
     } catch (exception) {
       yield Left(UploadContentFailed(exception: exception));

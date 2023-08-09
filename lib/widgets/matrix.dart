@@ -177,7 +177,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           .where((l) => l == LoginState.loggedIn)
           .first
           .then((_) {
-            Logs().d('MatrixState::getLoginClient() Login successful');
+        Logs().d('MatrixState::getLoginClient() Login successful');
         if (!widget.clients.contains(_loginClientCandidate)) {
           widget.clients.add(_loginClientCandidate!);
         }
@@ -261,7 +261,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   bool webHasFocus = true;
 
-  String? get activeRoomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get activeRoomId =>
+      GoRouterState.of(context).pathParameters['roomid'];
 
   final linuxNotifications =
       PlatformInfos.isLinux ? NotificationsClient() : null;
@@ -458,10 +459,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   void _retrieveLocalToMConfiguration() async {
     try {
-      final tomConfigurationRepository = getIt
-        .get<ToMConfigurationsRepository>();
+      final tomConfigurationRepository =
+          getIt.get<ToMConfigurationsRepository>();
       final toMConfigurations = await tomConfigurationRepository
-        .getTomConfigurations(client.clientName);
+          .getTomConfigurations(client.clientName);
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -471,7 +472,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
   }
 
-  void setUpToMServices(ToMServerInformation tomServer, IdentityServerInformation? identityServer) {
+  void setUpToMServices(
+    ToMServerInformation tomServer,
+    IdentityServerInformation? identityServer,
+  ) {
     Logs().d('MatrixState::setUpToMServices: $tomServer, $identityServer');
     _setUpToMServer(tomServer);
     if (identityServer != null) {
@@ -488,8 +492,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (tomServer != null) {
       _setUpToMServer(tomServer);
     }
-    final identityServer = loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
-    final homeServer = loginHomeserverSummary?.discoveryInformation?.mHomeserver;
+    final identityServer =
+        loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
+    final homeServer =
+        loginHomeserverSummary?.discoveryInformation?.mHomeserver;
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -510,7 +516,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
         instanceName: NetworkDI.tomServerUrlInterceptorName,
       );
-      Logs().d('MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}');
+      Logs().d(
+        'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
+      );
       tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
     }
   }
@@ -519,7 +527,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
-    Logs().d('MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}');
+    Logs().d(
+      'MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}',
+    );
     homeServerUrlInterceptor.changeBaseUrl(homeServerUri.toString());
   }
 
@@ -527,19 +537,30 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
-    Logs().d('MatrixState::_setUpIdentityServer: ${identityServerUrlInterceptor.hashCode}');
-    identityServerUrlInterceptor.changeBaseUrl(identityServer.baseUrl.toString());
+    Logs().d(
+      'MatrixState::_setUpIdentityServer: ${identityServerUrlInterceptor.hashCode}',
+    );
+    identityServerUrlInterceptor
+        .changeBaseUrl(identityServer.baseUrl.toString());
   }
 
-  void _storeToMConfiguration(Client client, ToMServerInformation? tomServerInformation, IdentityServerInformation? identityServerInformation) {
+  void _storeToMConfiguration(
+    Client client,
+    ToMServerInformation? tomServerInformation,
+    IdentityServerInformation? identityServerInformation,
+  ) {
     try {
       if (tomServerInformation != null) {
         final configuration = ToMConfigurations(
           tomServerInformation: tomServerInformation,
           identityServerInformation: identityServerInformation,
         );
-        final ToMConfigurationsRepository configurationRepository = getIt.get<ToMConfigurationsRepository>();
-        configurationRepository.saveTomConfigurations(client.clientName, configuration);
+        final ToMConfigurationsRepository configurationRepository =
+            getIt.get<ToMConfigurationsRepository>();
+        configurationRepository.saveTomConfigurations(
+          client.clientName,
+          configuration,
+        );
       }
     } catch (e) {
       Logs().e('Matrix::_storeToMConfiguration: error - $e');

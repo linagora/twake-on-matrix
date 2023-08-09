@@ -13,23 +13,28 @@ class LoadMoreInternalContacts {
   static const int limitInternalContacts = 30;
 
   Stream<Either<Failure, GetContactsSuccess>> execute({
-    int limit = limitInternalContacts, 
+    int limit = limitInternalContacts,
     int? offset = 0,
   }) async* {
     try {
-      final contacts = await _contactRepository
-        .loadMoreContact(
-          query: ContactQuery(keyword: ''),
-          limit: limit,
-          offset: offset,
-        );
+      final contacts = await _contactRepository.loadMoreContact(
+        query: ContactQuery(keyword: ''),
+        limit: limit,
+        offset: offset,
+      );
 
       if (contacts.isEmpty || contacts.length < limit) {
         yield Right(NoMoreContactSuccess(contacts: contacts.toSet()));
         return;
       }
 
-      yield Right(GetMoreNetworkContactSuccess(contacts: contacts.toSet(), limit: limit, offset: offset));
+      yield Right(
+        GetMoreNetworkContactSuccess(
+          contacts: contacts.toSet(),
+          limit: limit,
+          offset: offset,
+        ),
+      );
     } catch (e) {
       yield Left(GetNetworkContactFailed(exception: e));
     }

@@ -73,7 +73,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
         if (matrixFile.bytes == null) {
-          return ;
+          return;
         }
         await file.writeAsBytes(matrixFile.bytes!);
       }

@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
@@ -20,30 +19,29 @@ mixin SendFilesMixin on ImagePickerMixin {
     }
   }
 
-  Future<void> sendImages({Room? room, List<IndexedAssetEntity>? assets}) async {
+  Future<void> sendImages({
+    Room? room,
+    List<IndexedAssetEntity>? assets,
+  }) async {
     if (room == null) {
-      return ;
+      return;
     }
     final selectedAssets = assets ?? imagePickerController.sortedSelectedAssets;
     final sendImagesInteractor = getIt.get<SendImagesInteractor>();
     await sendImagesInteractor.execute(
       room: room,
-      entities: selectedAssets
-        .map<AssetEntity>((entity) => entity.asset)
-        .toList(),
+      entities:
+          selectedAssets.map<AssetEntity>((entity) => entity.asset).toList(),
     );
 
     removeAllImageSelected();
   }
 
   void sendFileAction(
-    BuildContext context, 
-    {
-      Room? room,
-    }) async {
-    if (room == null) {
-
-    }
+    BuildContext context, {
+    Room? room,
+  }) async {
+    if (room == null) {}
     final sendFileInteractor = getIt.get<SendFileInteractor>();
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(

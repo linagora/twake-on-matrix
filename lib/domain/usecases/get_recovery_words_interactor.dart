@@ -7,11 +7,14 @@ import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class GetRecoveryWordsInteractor {
-  final RecoveryWordsRepository _recoveryWordsRepository = getIt.get<RecoveryWordsRepository>();
+  final RecoveryWordsRepository _recoveryWordsRepository =
+      getIt.get<RecoveryWordsRepository>();
 
-  Future<Either<GetRecoveryWordsFailed, GetRecoveryWordsSuccess>> execute() async {
+  Future<Either<GetRecoveryWordsFailed, GetRecoveryWordsSuccess>>
+      execute() async {
     try {
-      final RecoveryWords response = await _recoveryWordsRepository.getRecoveryWords();
+      final RecoveryWords response =
+          await _recoveryWordsRepository.getRecoveryWords();
       return Right(GetRecoveryWordsSuccess(words: response));
     } catch (e) {
       Logs().e('GetRecoveryWordsInteractor::execute(): $e');

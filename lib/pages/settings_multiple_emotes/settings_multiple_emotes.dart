@@ -11,7 +11,6 @@ class MultipleEmotesSettings extends StatefulWidget {
 }
 
 class MultipleEmotesSettingsController extends State<MultipleEmotesSettings> {
-
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
   @override

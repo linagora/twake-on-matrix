@@ -3,7 +3,6 @@ import 'package:fluffychat/widgets/avatar/avatar_with_bottom_icon_widget.dart';
 import 'package:flutter/material.dart';
 
 class SelectedParticipantsList extends StatefulWidget {
-
   final NewGroupController newGroupController;
 
   const SelectedParticipantsList({
@@ -18,7 +17,8 @@ class SelectedParticipantsList extends StatefulWidget {
 class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
   @override
   Widget build(BuildContext context) {
-    final contactsNotifier = widget.newGroupController.selectedContactsMapNotifier;
+    final contactsNotifier =
+        widget.newGroupController.selectedContactsMapNotifier;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -31,32 +31,36 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
           animation: contactsNotifier,
           builder: (BuildContext context, Widget? child) {
             Widget selectedContactsListWidget;
-            
+
             if (contactsNotifier.contactsList.isEmpty) {
-              selectedContactsListWidget = SizedBox(width: MediaQuery.of(context).size.width,);
+              selectedContactsListWidget = SizedBox(
+                width: MediaQuery.of(context).size.width,
+              );
             } else {
               selectedContactsListWidget = Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: contactsNotifier.contactsList
-                    .map((contact) => Tooltip(
-                      message: '${contact.displayName}',
-                      preferBelow: false,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12.0),
-                        onTap: () => contactsNotifier.unselectContact(contact),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: AvatarWithBottomIconWidget(
-                            presentationContact: contact,
-                            icon: Icons.close,
+                      .map(
+                        (contact) => Tooltip(
+                          message: '${contact.displayName}',
+                          preferBelow: false,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12.0),
+                            onTap: () =>
+                                contactsNotifier.unselectContact(contact),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: AvatarWithBottomIconWidget(
+                                presentationContact: contact,
+                                icon: Icons.close,
+                              ),
                             ),
+                          ),
                         ),
-                      ),
-                    ),
-                    )
-                    .toList(),
+                      )
+                      .toList(),
                 ),
               );
             }
@@ -69,7 +73,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                 child: selectedContactsListWidget,
               );
             }
-          
+
             return selectedContactsListWidget;
           },
         ),

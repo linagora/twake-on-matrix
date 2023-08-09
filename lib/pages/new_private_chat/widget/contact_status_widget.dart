@@ -6,7 +6,6 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ContactStatusWidget extends StatelessWidget {
-
   final ContactStatus status;
 
   ContactStatusWidget({
@@ -26,23 +25,23 @@ class ContactStatusWidget extends StatelessWidget {
         children: [
           SvgPicture.asset(
             ImagePaths.icStatus,
-            color: status == ContactStatus.active
-              ? activeColor
-              : inactiveColor,
+            color: status == ContactStatus.active ? activeColor : inactiveColor,
           ),
-          status == ContactStatus.active 
-            ? Text(" ${L10n.of(context)!.active}",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: activeColor,
-              ),)
-            : Text(" ${L10n.of(context)!.inactive}",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: inactiveColor,
-              ),
-            ),
+          status == ContactStatus.active
+              ? Text(
+                  " ${L10n.of(context)!.active}",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: activeColor,
+                      ),
+                )
+              : Text(
+                  " ${L10n.of(context)!.inactive}",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: inactiveColor,
+                      ),
+                ),
         ],
       ),
     );
   }
-
 }

@@ -11,5 +11,6 @@ abstract class BaseDI {
 
     onFinishedBind?.call();
   }
+
   void setUp(GetIt get);
 }

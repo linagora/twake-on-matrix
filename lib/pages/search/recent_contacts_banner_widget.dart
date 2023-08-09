@@ -22,7 +22,8 @@ class PreSearchRecentContactsContainer extends StatelessWidget {
       return Align(
         alignment: Alignment.centerLeft,
         child: ListView.builder(
-          padding: RecentContactsBannerWidgetStyle.chatRecentContactHorizontalPadding,
+          padding: RecentContactsBannerWidgetStyle
+              .chatRecentContactHorizontalPadding,
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
           scrollDirection: Axis.horizontal,
@@ -42,7 +43,11 @@ class PreSearchRecentContactsContainer extends StatelessWidget {
 class PreSearchRecentContactWidget extends StatelessWidget {
   final SearchController searchController;
   final User user;
-  const PreSearchRecentContactWidget({super.key, required this.user, required this.searchController});
+  const PreSearchRecentContactWidget({
+    super.key,
+    required this.user,
+    required this.searchController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +69,8 @@ class PreSearchRecentContactWidget extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: RecentContactsBannerWidgetStyle.chatRecentContactItemPadding,
+              padding:
+                  RecentContactsBannerWidgetStyle.chatRecentContactItemPadding,
               child: BuildDisplayName(
                 profileDisplayName: user.displayName ?? "",
               ),
@@ -75,4 +81,3 @@ class PreSearchRecentContactWidget extends StatelessWidget {
     );
   }
 }
-

@@ -13,7 +13,9 @@ class ChatEmojiPicker extends StatelessWidget {
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
       width: MediaQuery.of(context).size.width,
-      height: controller.showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
+      height: controller.showEmojiPicker
+          ? MediaQuery.of(context).size.height / 3
+          : 0,
       child: controller.showEmojiPicker
           ? EmojiPicker(
               onEmojiSelected: controller.onEmojiSelected,

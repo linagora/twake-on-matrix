@@ -151,7 +151,9 @@ class UrlLauncher {
         }
         // we have the room, so....just open it
         if (event != null) {
-          context.go('/rooms/${room.id}', extra: {'event': event},
+          context.go(
+            '/rooms/${room.id}',
+            extra: {'event': event},
           );
         } else {
           context.go('/rooms/${room.id}');
@@ -212,8 +214,11 @@ class UrlLauncher {
           url: Uri.parse(url!),
           options: ChromeSafariBrowserClassOptions(
             android: AndroidChromeCustomTabsOptions(
-              shareState: CustomTabsShareState.SHARE_STATE_ON,),
-            ios: IOSSafariOptions(barCollapsingEnabled: true),),);
+              shareState: CustomTabsShareState.SHARE_STATE_ON,
+            ),
+            ios: IOSSafariOptions(barCollapsingEnabled: true),
+          ),
+        );
       } else {
         launchUrlString(url!);
       }

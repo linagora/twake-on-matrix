@@ -47,11 +47,13 @@ abstract class PlatformInfos {
       children: [
         Text('Version: $version'),
         OutlinedButton(
-          onPressed: () => UrlLauncher(context, AppConfig.sourceCodeUrl).openUrlInAppBrowser(),
+          onPressed: () => UrlLauncher(context, AppConfig.sourceCodeUrl)
+              .openUrlInAppBrowser(),
           child: Text(L10n.of(context)!.sourceCode),
         ),
         OutlinedButton(
-          onPressed: () => UrlLauncher(context, AppConfig.emojiFontUrl).openUrlInAppBrowser(),
+          onPressed: () => UrlLauncher(context, AppConfig.emojiFontUrl)
+              .openUrlInAppBrowser(),
           child: const Text(AppConfig.emojiFontName),
         ),
         OutlinedButton(

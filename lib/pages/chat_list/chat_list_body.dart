@@ -55,7 +55,8 @@ class ChatListViewBody extends StatelessWidget {
             .where((s) => s.hasRoomUpdate)
             .rateLimit(const Duration(seconds: 1)),
         builder: (context, _) {
-          if (controller.activeFilter == ActiveFilter.spaces && !controller.isSearchMode) {
+          if (controller.activeFilter == ActiveFilter.spaces &&
+              !controller.isSearchMode) {
             return SpaceView(
               controller,
               scrollController: controller.scrollController,
@@ -74,7 +75,9 @@ class ChatListViewBody extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SvgPicture.asset(ImagePaths.icSkeletons,),
+                      SvgPicture.asset(
+                        ImagePaths.icSkeletons,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -82,7 +85,8 @@ class ChatListViewBody extends StatelessWidget {
                     // ignore: unnecessary_cast
                     future: controller.fetchOwnProfile(client: client),
                     builder: (context, snapshotProfile) {
-                      if (snapshotProfile.connectionState != ConnectionState.done) {
+                      if (snapshotProfile.connectionState !=
+                          ConnectionState.done) {
                         return const SizedBox();
                       }
                       final name = snapshotProfile.data?.displayName ?? '👋';
@@ -90,14 +94,15 @@ class ChatListViewBody extends StatelessWidget {
                         children: [
                           Text(
                             L10n.of(context)!.welcomeToTwake(name),
-                            style: Theme
-                              .of(context)
-                              .textTheme
-                              .titleLarge,
+                            style: Theme.of(context).textTheme.titleLarge,
                             textAlign: TextAlign.center,
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 32, right: 32, top: 8),
+                            padding: const EdgeInsets.only(
+                              left: 32,
+                              right: 32,
+                              top: 8,
+                            ),
                             child: Text(
                               L10n.of(context)!.startNewChatMessage,
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -248,7 +253,9 @@ class ChatListViewBody extends StatelessWidget {
   }
 
   List<Widget> _buildPublicRooms(context, roomSearchResult) {
-    if (roomSearchResult == null || roomSearchResult.chunk.isEmpty) return [const SizedBox.shrink()];
+    if (roomSearchResult == null || roomSearchResult.chunk.isEmpty) {
+      return [const SizedBox.shrink()];
+    }
 
     return [
       SearchTitle(
@@ -258,7 +265,9 @@ class ChatListViewBody extends StatelessWidget {
       AnimatedContainer(
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
-        height: roomSearchResult == null || roomSearchResult.chunk.isEmpty ? 0 : 106,
+        height: roomSearchResult == null || roomSearchResult.chunk.isEmpty
+            ? 0
+            : 106,
         duration: FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         child: roomSearchResult == null
@@ -287,7 +296,9 @@ class ChatListViewBody extends StatelessWidget {
   }
 
   List<Widget> _buildUsers(context, userSearchResult) {
-    if (userSearchResult == null || userSearchResult.results.isEmpty) return [const SizedBox.shrink()];
+    if (userSearchResult == null || userSearchResult.results.isEmpty) {
+      return [const SizedBox.shrink()];
+    }
 
     return [
       SearchTitle(
@@ -297,7 +308,9 @@ class ChatListViewBody extends StatelessWidget {
       AnimatedContainer(
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
-        height: userSearchResult == null || userSearchResult.results.isEmpty ? 0 : 106,
+        height: userSearchResult == null || userSearchResult.results.isEmpty
+            ? 0
+            : 106,
         duration: FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         child: userSearchResult == null

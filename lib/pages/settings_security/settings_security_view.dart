@@ -25,13 +25,13 @@ class SettingsSecurityView extends StatelessWidget {
                 leading: const Icon(Icons.camera_outlined),
                 trailing: const Icon(Icons.chevron_right_outlined),
                 title: Text(L10n.of(context)!.whoCanSeeMyStories),
-                onTap: () =>  context.go('/stories'),
+                onTap: () => context.go('/stories'),
               ),
               ListTile(
                 leading: const Icon(Icons.block_outlined),
                 trailing: const Icon(Icons.chevron_right_outlined),
                 title: Text(L10n.of(context)!.ignoredUsers),
-                onTap: () =>  context.go('/ignorelist'),
+                onTap: () => context.go('/ignorelist'),
               ),
               ListTile(
                 leading: const Icon(Icons.password_outlined),
@@ -45,7 +45,7 @@ class SettingsSecurityView extends StatelessWidget {
                 leading: const Icon(Icons.mail_outlined),
                 trailing: const Icon(Icons.chevron_right_outlined),
                 title: Text(L10n.of(context)!.passwordRecovery),
-                onTap: () =>  context.go('/3pid'),
+                onTap: () => context.go('/3pid'),
               ),
               if (Matrix.of(context).client.encryption != null) ...{
                 const Divider(thickness: 1),

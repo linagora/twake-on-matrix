@@ -18,7 +18,8 @@ class ToMServerInformation with EquatableMixin {
     this.serverName,
   });
 
-  factory ToMServerInformation.fromJson(Map<String, dynamic> json) => _$ToMServerInformationFromJson(json);
+  factory ToMServerInformation.fromJson(Map<String, dynamic> json) =>
+      _$ToMServerInformationFromJson(json);
 
   Map<String, dynamic> toJson() => _$ToMServerInformationToJson(this);
 

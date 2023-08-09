@@ -7,7 +7,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ExpansionParticipantsList extends StatefulWidget {
-
   final Set<PresentationContact> contactsList;
 
   final NewGroupController newGroupController;
@@ -41,10 +40,13 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   height: 44,
                   child: Row(
                     children: [
-                      Text(L10n.of(context)!.participantsCount(widget.contactsList.length),
+                      Text(
+                        L10n.of(context)!
+                            .participantsCount(widget.contactsList.length),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: LinagoraRefColors.material().neutral[40],
-                        ),),
+                              color: LinagoraRefColors.material().neutral[40],
+                            ),
+                      ),
                     ],
                   ),
                 ),
@@ -53,35 +55,37 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   paddingAll: 6,
                   buttonDecoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.12),
                   ),
-                  icon: isExpanded
-                    ? Icons.expand_less
-                    : Icons.expand_more,
+                  icon: isExpanded ? Icons.expand_less : Icons.expand_more,
                   tooltip: isExpanded
-                    ? L10n.of(context)!.shrink
-                    : L10n.of(context)!.expand,
+                      ? L10n.of(context)!.shrink
+                      : L10n.of(context)!.expand,
                 ),
               ],
             ),
           ),
         ),
         isExpanded
-        ? Expanded(
-          child: SingleChildScrollView(
-            key: const ValueKey("participants list"),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: widget.contactsList
-                .map(
-                  (contact) => ExpansionContactListTile(
-                    contact: contact,
-                  ),)
-                .toList(),
-            ),
-          ),
-        )
-        : const Offstage(),
+            ? Expanded(
+                child: SingleChildScrollView(
+                  key: const ValueKey("participants list"),
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: widget.contactsList
+                        .map(
+                          (contact) => ExpansionContactListTile(
+                            contact: contact,
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              )
+            : const Offstage(),
       ],
     );
   }

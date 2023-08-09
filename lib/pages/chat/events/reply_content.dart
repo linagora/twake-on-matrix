@@ -46,10 +46,10 @@ class ReplyContent extends StatelessWidget {
       replyBody = HtmlMessage(
         html: html!,
         defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onBackground,
-          fontSize: fontSizeDisplayContent,
-          overflow: TextOverflow.ellipsis,
-        ),
+              color: Theme.of(context).colorScheme.onBackground,
+              fontSize: fontSizeDisplayContent,
+              overflow: TextOverflow.ellipsis,
+            ),
         maxLines: 1,
         room: displayEvent.room,
         emoteSize: fontSizeDisplayContent * 1.5,
@@ -92,14 +92,14 @@ class ReplyContent extends StatelessWidget {
                 Text(
                   '${user.calcDisplayname()}:',
                   maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: ownMessage
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Theme.of(context).colorScheme.primary,
-                      fontSize: fontSizeDisplayName,
-                    ),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ownMessage
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.primary,
+                    fontSize: fontSizeDisplayName,
+                  ),
                 ),
               if (displayEvent.getUser() == null)
                 FutureBuilder<User?>(

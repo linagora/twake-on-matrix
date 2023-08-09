@@ -11,5 +11,4 @@ class MessageReactionsStyle {
 
   static double get renderKeyFontSize => 15;
   static Color get borderColor => Colors.white;
-  
 }

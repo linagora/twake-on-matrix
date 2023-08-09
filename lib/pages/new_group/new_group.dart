@@ -36,15 +36,18 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends State<NewGroup>
-  with ComparablePresentationContactMixin, ImagePickerMixin {
+    with ComparablePresentationContactMixin, ImagePickerMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
-  final createNewGroupChatInteractor = getIt.get<CreateNewGroupChatInteractor>();
-  final contactStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
+  final createNewGroupChatInteractor =
+      getIt.get<CreateNewGroupChatInteractor>();
+  final contactStreamController =
+      StreamController<Either<Failure, GetContactsSuccess>>();
   final groupNameTextEditingController = TextEditingController();
   final avatarNotifier = ValueNotifier<AssetEntity?>(null);
-  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
+  final createRoomStateNotifier =
+      ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
 
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
@@ -63,14 +66,17 @@ class NewGroupController extends State<NewGroup>
     listenGroupNameChanged();
     _registerListenerForSelectedImagesChanged();
     fetchContactsController.fetchCurrentTomContacts();
-    fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    fetchContactsController.listenForScrollChanged(
+      fetchContactsController: fetchContactsController,
+    );
     searchContactsController.onSearchKeywordChanged = (searchKey) {
       disableLoadMoreInSearch();
     };
   }
 
   void disableLoadMoreInSearch() {
-    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
+    fetchContactsController.allowLoadMore =
+        searchContactsController.searchKeyword.isEmpty;
   }
 
   @override
@@ -110,21 +116,24 @@ class NewGroupController extends State<NewGroup>
     searchContactsController.onSelectedContact();
   }
 
-
   Future<ServerConfig> getServerConfig() async {
     final serverConfig = await Matrix.of(context).client.getConfig();
     return serverConfig;
   }
 
-  Iterable<PresentationContact> get contactsList 
-    => selectedContactsMapNotifier.contactsList;
+  Iterable<PresentationContact> get contactsList =>
+      selectedContactsMapNotifier.contactsList;
 
-  Future<Set<PresentationContact>> getAllContactsGroupChat({bool isCustomDisplayName = true}) async {
+  Future<Set<PresentationContact>> getAllContactsGroupChat({
+    bool isCustomDisplayName = true,
+  }) async {
     final userId = Matrix.of(context).client.userID;
-    final profile = await Matrix.of(context).client.getProfileFromUserId(userId!);
+    final profile =
+        await Matrix.of(context).client.getProfileFromUserId(userId!);
     final newContactsList = {
       PresentationContact(
-        displayName: isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
+        displayName:
+            isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
         matrixId: Matrix.of(context).client.userID,
       )
     };
@@ -134,10 +143,11 @@ class NewGroupController extends State<NewGroup>
 
   void _getDefaultGroupName(Set<PresentationContact> contactLis) async {
     if (contactLis.length <= 3) {
-      final groupName = contactLis.map((contact) => contact.displayName).join(", ");
+      final groupName =
+          contactLis.map((contact) => contact.displayName).join(", ");
       groupNameTextEditingController.text = groupName;
       groupNameTextEditingController.selection = TextSelection.fromPosition(
-          TextPosition(offset: groupNameTextEditingController.text.length),
+        TextPosition(offset: groupNameTextEditingController.text.length),
       );
       groupNameFocusNode.requestFocus();
     } else {
@@ -146,7 +156,8 @@ class NewGroupController extends State<NewGroup>
   }
 
   void moveToNewGroupInfoScreen() async {
-    final contactList = await getAllContactsGroupChat(isCustomDisplayName: false);
+    final contactList =
+        await getAllContactsGroupChat(isCustomDisplayName: false);
     _getDefaultGroupName(contactList);
     await showGeneralDialog(
       pageBuilder: (context, animation, secondaryAnimation) {
@@ -171,9 +182,9 @@ class NewGroupController extends State<NewGroup>
       createNewGroupChatRequest: CreateNewGroupChatRequest(
         groupName: groupName,
         invite: getSelectedValidContacts(contactsList)
-          .map((contact) => contact.matrixId)
-          .whereNotNull()
-          .toList(),
+            .map((contact) => contact.matrixId)
+            .whereNotNull()
+            .toList(),
         enableEncryption: true,
         urlAvatar: urlAvatar,
       ),
@@ -184,43 +195,58 @@ class NewGroupController extends State<NewGroup>
     required Client matrixClient,
     required AssetEntity entity,
   }) {
-    uploadContentInteractorStreamSubscription = uploadContentInteractor.execute(
-      matrixClient: matrixClient,
-      entity: entity,
-    ).listen(
-      (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
-      onDone: _handleUploadAvatarNewGroupChatOnDone,
-      onError: _handleUploadAvatarNewGroupChatOnError,
-    );
+    uploadContentInteractorStreamSubscription = uploadContentInteractor
+        .execute(
+          matrixClient: matrixClient,
+          entity: entity,
+        )
+        .listen(
+          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
+          onDone: _handleUploadAvatarNewGroupChatOnDone,
+          onError: _handleUploadAvatarNewGroupChatOnError,
+        );
   }
 
   void createNewGroupChatAction({
     required Client matrixClient,
     required CreateNewGroupChatRequest createNewGroupChatRequest,
   }) {
-    createNewGroupChatInteractorStreamSubscription = createNewGroupChatInteractor.execute(
-      matrixClient: matrixClient,
-      createNewGroupChatRequest: createNewGroupChatRequest,
-    ).listen(
-      (event) => _handleCreateNewGroupChatChatOnData(context, event),
-      onDone: _handleCreateNewGroupChatOnDone,
-      onError: _handleCreateNewGroupChatOnError,
-    );
+    createNewGroupChatInteractorStreamSubscription =
+        createNewGroupChatInteractor
+            .execute(
+              matrixClient: matrixClient,
+              createNewGroupChatRequest: createNewGroupChatRequest,
+            )
+            .listen(
+              (event) => _handleCreateNewGroupChatChatOnData(context, event),
+              onDone: _handleCreateNewGroupChatOnDone,
+              onError: _handleCreateNewGroupChatOnError,
+            );
   }
 
-  void _handleUploadAvatarNewGroupChatOnData(BuildContext context, Either<Failure, Success> event) {
+  void _handleUploadAvatarNewGroupChatOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
     Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData()');
     createRoomStateNotifier.value = event;
     event.fold(
       (failure) {
-        Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure');
-        WarningDialog.showWarningDialog(context, onAcceptButton: () {
-          WarningDialog.hideWarningDialog(context);
-          createNewGroup();
-        },);
+        Logs().e(
+          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure',
+        );
+        WarningDialog.showWarningDialog(
+          context,
+          onAcceptButton: () {
+            WarningDialog.hideWarningDialog(context);
+            createNewGroup();
+          },
+        );
       },
       (success) {
-        Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success');
+        Logs().d(
+          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success',
+        );
         if (success is UploadContentSuccess) {
           final urlAvatar = success.uri.toString();
           createNewGroup(urlAvatar: urlAvatar);
@@ -230,22 +256,36 @@ class NewGroupController extends State<NewGroup>
   }
 
   void _handleUploadAvatarNewGroupChatOnDone() {
-    Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnDone() - done');
+    Logs().d(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnDone() - done',
+    );
   }
 
-  void _handleUploadAvatarNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace');
+  void _handleUploadAvatarNewGroupChatOnError(
+    dynamic error,
+    StackTrace? stackTrace,
+  ) {
+    Logs().e(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
+    );
   }
 
-  void _handleCreateNewGroupChatChatOnData(BuildContext context, Either<Failure, Success> event) {
+  void _handleCreateNewGroupChatChatOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
     Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData()');
     createRoomStateNotifier.value = event;
     event.fold(
       (failure) {
-        Logs().e('NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure');
+        Logs().e(
+          'NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure',
+        );
       },
       (success) {
-        Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success');
+        Logs().d(
+          'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
+        );
         if (success is CreateNewGroupChatSuccess) {
           removeAllImageSelected();
           _goToRoom(context, success.roomId);
@@ -259,7 +299,9 @@ class NewGroupController extends State<NewGroup>
   }
 
   void _handleCreateNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e('NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace');
+    Logs().e(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
+    );
   }
 
   void _goToRoom(BuildContext context, String roomId) {
@@ -268,7 +310,8 @@ class NewGroupController extends State<NewGroup>
 
   void _registerListenerForSelectedImagesChanged() {
     imagePickerController.addListener(() {
-      numberSelectedImagesNotifier.value = imagePickerController.selectedAssets.length;
+      numberSelectedImagesNotifier.value =
+          imagePickerController.selectedAssets.length;
     });
 
     numberSelectedImagesNotifier.addListener(() {
@@ -300,9 +343,12 @@ class NewGroupController extends State<NewGroup>
 
   bool get isCreatingRoom {
     return createRoomStateNotifier.value.fold(
-      (failure) => false, 
-      (success) => success is UploadContentLoading || success is CreateNewGroupChatLoading,
-    ) ?? false;
+          (failure) => false,
+          (success) =>
+              success is UploadContentLoading ||
+              success is CreateNewGroupChatLoading,
+        ) ??
+        false;
   }
 
   @override
@@ -310,7 +356,9 @@ class NewGroupController extends State<NewGroup>
     uploadContentInteractorStreamSubscription?.cancel();
     imagePickerController.clearAssetCounter();
     numberSelectedImagesNotifier.value = 0;
-    Logs().d('NewGroupController::_removeAllImageSelected() - numberSelectedImagesNotifier.value  ${numberSelectedImagesNotifier.value}');
+    Logs().d(
+      'NewGroupController::_removeAllImageSelected() - numberSelectedImagesNotifier.value  ${numberSelectedImagesNotifier.value}',
+    );
   }
 
   @override

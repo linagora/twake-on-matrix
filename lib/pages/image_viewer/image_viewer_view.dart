@@ -12,7 +12,12 @@ class ImageViewerView extends StatelessWidget {
   final Uint8List? imageData;
   final String? filePath;
 
-  const ImageViewerView(this.controller, {Key? key, this.imageData, this.filePath}) : super(key: key);
+  const ImageViewerView(
+    this.controller, {
+    Key? key,
+    this.imageData,
+    this.filePath,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,20 +36,19 @@ class ImageViewerView extends StatelessWidget {
                 child: Hero(
                   tag: controller.widget.event.eventId,
                   child: filePath != null
-                  ? Image.file(
-                      File(filePath!),
-                      fit: BoxFit.contain, 
-                      filterQuality: 
-                      FilterQuality.none,
-                    )
-                  : MxcImage(
-                    event: controller.widget.event,
-                    fit: BoxFit.contain,
-                    isThumbnail: false,
-                    animated: false,
-                    imageData: imageData,
-                    isPreview: true,
-                  ),
+                      ? Image.file(
+                          File(filePath!),
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.none,
+                        )
+                      : MxcImage(
+                          event: controller.widget.event,
+                          fit: BoxFit.contain,
+                          isThumbnail: false,
+                          animated: false,
+                          imageData: imageData,
+                          isPreview: true,
+                        ),
                 ),
               ),
             ),
@@ -67,7 +71,10 @@ class ImageViewerView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.close, color: LinagoraSysColors.material().onPrimary),
+                  icon: Icon(
+                    Icons.close,
+                    color: LinagoraSysColors.material().onPrimary,
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -77,7 +84,10 @@ class ImageViewerView extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.save_alt, color: LinagoraSysColors.material().onPrimary),
+                      icon: Icon(
+                        Icons.save_alt,
+                        color: LinagoraSysColors.material().onPrimary,
+                      ),
                       onPressed: () => controller.saveFileAction(context),
                       color: LinagoraSysColors.material().onPrimary,
                       tooltip: L10n.of(context)!.saveFile,
@@ -88,11 +98,17 @@ class ImageViewerView extends StatelessWidget {
                           onPressed: () => controller.shareFileAction(context),
                           tooltip: L10n.of(context)!.share,
                           color: LinagoraSysColors.material().onPrimary,
-                          icon: Icon(Icons.share, color: LinagoraSysColors.material().onPrimary),
+                          icon: Icon(
+                            Icons.share,
+                            color: LinagoraSysColors.material().onPrimary,
+                          ),
                         ),
                       ),
                     IconButton(
-                      icon: Icon(Icons.shortcut, color: LinagoraSysColors.material().onPrimary),
+                      icon: Icon(
+                        Icons.shortcut,
+                        color: LinagoraSysColors.material().onPrimary,
+                      ),
                       onPressed: controller.forwardAction,
                       color: LinagoraSysColors.material().onPrimary,
                       tooltip: L10n.of(context)!.share,

@@ -7,17 +7,20 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-class AdaptiveScaffoldAppBar extends StatelessWidget implements PreferredSizeWidget {
+class AdaptiveScaffoldAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const AdaptiveScaffoldAppBar({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(AdaptiveScaffoldAppBarStyle.toolbarHeight);
+  Size get preferredSize =>
+      const Size.fromHeight(AdaptiveScaffoldAppBarStyle.toolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
-        const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth): SlotLayout.from(
+        const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth):
+            SlotLayout.from(
           key: AdaptiveScaffoldAppBarStyle.adaptiveAppBarKey,
           builder: (_) {
             return AppBar(
@@ -46,7 +49,8 @@ class _LeadingAppBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SvgPicture.asset(ImagePaths.icTwakeImageLogo,
+        SvgPicture.asset(
+          ImagePaths.icTwakeImageLogo,
           width: AdaptiveScaffoldAppBarStyle.sizeIcTwakeImageLogo,
           height: AdaptiveScaffoldAppBarStyle.sizeIcTwakeImageLogo,
         ),
@@ -63,4 +67,3 @@ class _LeadingAppBarWidget extends StatelessWidget {
     );
   }
 }
-

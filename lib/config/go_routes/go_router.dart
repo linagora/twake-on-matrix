@@ -38,10 +38,13 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class TwakeRoutes {
-  final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
   final _navRoomsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rooms');
-  final _navContactsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Contacts');
-  final _navStoriesNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'Stories');
+  final _navContactsNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'Contacts');
+  final _navStoriesNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'Stories');
 
   static const List<String> shellBranch = [
     '/rooms',
@@ -50,345 +53,351 @@ class TwakeRoutes {
   ];
 
   GoRouter get router => GoRouter(
-    initialLocation: '/',
-    navigatorKey: _rootNavigatorKey,
-    debugLogDiagnostics: true,
-    routes: [
-      GoRoute(
-        path: '/',
-        redirect: (context , state) {
-          final hasLogIn = Matrix.of(context).widget.clients
-            .any((client) => client.onLoginStateChanged.value == LoginState.loggedIn);
-          if (hasLogIn) {
-            return '/rooms';
-          } else {
-            return '/home';
-          }
-        },
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const Login(),
-      ),
-      GoRoute(
-        path: '/connect',
-        builder: (context, state) => const ConnectPage(),
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupPage(),
-      ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeserverPicker(),
+        initialLocation: '/',
+        navigatorKey: _rootNavigatorKey,
+        debugLogDiagnostics: true,
         routes: [
           GoRoute(
-            path: 'login',
+            path: '/',
+            redirect: (context, state) {
+              final hasLogIn = Matrix.of(context).widget.clients.any(
+                    (client) =>
+                        client.onLoginStateChanged.value == LoginState.loggedIn,
+                  );
+              if (hasLogIn) {
+                return '/rooms';
+              } else {
+                return '/home';
+              }
+            },
+          ),
+          GoRoute(
+            path: '/login',
             builder: (context, state) => const Login(),
           ),
           GoRoute(
-            path: 'logs',
-            builder: (context, state) => const LogViewer(),
+            path: '/connect',
+            builder: (context, state) => const ConnectPage(),
           ),
-        ],
-      ),
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return AdaptiveScaffoldShell(navigationShell: navigationShell);
-        },
-        branches: <StatefulShellBranch>[
-          _contactsShellBranch,
-          _roomsShellBranch,
-          _storiesShellBranch,
-        ],
-      ),
-      GoRoute(
-        path: '/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const Settings(),
-        routes: _settingsRoutes,
-      ),
-      GoRoute(
-        path: '/archive',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const Archive(),
-        routes: [
           GoRoute(
-            path: ':roomid',
-            builder: (context, state) => const Chat(),
+            path: '/signup',
+            builder: (context, state) => const SignupPage(),
+          ),
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomeserverPicker(),
+            routes: [
+              GoRoute(
+                path: 'login',
+                builder: (context, state) => const Login(),
+              ),
+              GoRoute(
+                path: 'logs',
+                builder: (context, state) => const LogViewer(),
+              ),
+            ],
+          ),
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) {
+              return AdaptiveScaffoldShell(navigationShell: navigationShell);
+            },
+            branches: <StatefulShellBranch>[
+              _contactsShellBranch,
+              _roomsShellBranch,
+              _storiesShellBranch,
+            ],
+          ),
+          GoRoute(
+            path: '/settings',
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const Settings(),
+            routes: _settingsRoutes,
+          ),
+          GoRoute(
+            path: '/archive',
+            parentNavigatorKey: _rootNavigatorKey,
+            builder: (context, state) => const Archive(),
+            routes: [
+              GoRoute(
+                path: ':roomid',
+                builder: (context, state) => const Chat(),
+              ),
+            ],
           ),
         ],
-      ),
-    ],
-  );
+      );
 
   StatefulShellBranch get _roomsShellBranch => StatefulShellBranch(
-    initialLocation: '/rooms',
-    navigatorKey: _navRoomsNavigatorKey,
-    routes: [
-      GoRoute(
-        path: '/rooms',
-        pageBuilder: (context, state) {
-          return const NoTransitionPage(
-              child: AdaptiveScaffoldRoute(body: ChatList()),
-          );
-        },
+        initialLocation: '/rooms',
+        navigatorKey: _navRoomsNavigatorKey,
         routes: [
           GoRoute(
-              path: 'search',
-              builder: (context, state) => const AdaptiveScaffoldRoute(body: Search()),
-              routes: [
-                _draftChatRoute(body: const Search()),
-                _roomIdRoute(body: const Search()),
-              ],
-          ),
-          GoRoute(
-              path: 'newprivatechat',
-              pageBuilder: (context, state) => const NoTransitionPage(
-                child: AdaptiveScaffoldRoute(
-                  body: ChatList(),
-                  secondaryBody: NewPrivateChat(),
-                ),
-              ),
-              routes: [
-                GoRoute(
-                  path: 'newgroup',
-                  pageBuilder: (context, state) => const NoTransitionPage(
-                    child: AdaptiveScaffoldRoute(
-                      body: ChatList(),
-                      secondaryBody: NewGroup(),
-                    ),
-                  ),
-                ),
-                _draftChatRoute(body: const ChatList()),
-              ],
-          ),
-          _roomIdRoute(body: const ChatList()),
-        ],
-      ),
-    ],
-  );
-
-  StatefulShellBranch get _contactsShellBranch => StatefulShellBranch(
-    initialLocation: '/contacts',
-    navigatorKey: _navContactsNavigatorKey,
-    routes: [
-      GoRoute(
-        path: '/contacts',
-        pageBuilder: (context, state) {
-          return const NoTransitionPage(
-            child: AdaptiveScaffoldRoute(
-              body: ContactsTab(),
-            ),
-          );
-        },
-        routes: [
-          GoRoute(
-            path: 'draftChat',
+            path: '/rooms',
             pageBuilder: (context, state) {
-              return NoTransitionPage(
-                child: AdaptiveScaffoldRoute(
-                  body: const ContactsTab(),
-                  secondaryBody: DraftChat(
-                    key: state.pageKey,
-                    state: state,
-                  ),
-                ),
+              return const NoTransitionPage(
+                child: AdaptiveScaffoldRoute(body: ChatList()),
               );
-            },
-          ),
-          _roomIdRoute(body: const ContactsTab()),
-        ],
-      ),
-    ],
-  );
-  StatefulShellBranch get _storiesShellBranch => StatefulShellBranch(
-    initialLocation: '/stories',
-    navigatorKey: _navStoriesNavigatorKey,
-    routes: [
-      ShellRoute(
-        pageBuilder: (context, state, widget) {
-          return  NoTransitionPage(child: AdaptiveScaffoldRoute(
-            body: Container(),
-            secondaryBody: widget,
-          ),);
-        },
-        routes: [
-          GoRoute(
-            path: '/stories',
-            builder: (context, state) {
-              return const EmptyPage();
             },
             routes: [
               GoRoute(
-                path: 'create',
-                builder: (context, state) => const AddStoryPage(),
+                path: 'search',
+                builder: (context, state) =>
+                    const AdaptiveScaffoldRoute(body: Search()),
+                routes: [
+                  _draftChatRoute(body: const Search()),
+                  _roomIdRoute(body: const Search()),
+                ],
               ),
               GoRoute(
-                path: ':roomid',
-                builder: (context, state) => const StoryPage(),
+                path: 'newprivatechat',
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: AdaptiveScaffoldRoute(
+                    body: ChatList(),
+                    secondaryBody: NewPrivateChat(),
+                  ),
+                ),
                 routes: [
                   GoRoute(
-                    path: 'share',
+                    path: 'newgroup',
+                    pageBuilder: (context, state) => const NoTransitionPage(
+                      child: AdaptiveScaffoldRoute(
+                        body: ChatList(),
+                        secondaryBody: NewGroup(),
+                      ),
+                    ),
+                  ),
+                  _draftChatRoute(body: const ChatList()),
+                ],
+              ),
+              _roomIdRoute(body: const ChatList()),
+            ],
+          ),
+        ],
+      );
+
+  StatefulShellBranch get _contactsShellBranch => StatefulShellBranch(
+        initialLocation: '/contacts',
+        navigatorKey: _navContactsNavigatorKey,
+        routes: [
+          GoRoute(
+            path: '/contacts',
+            pageBuilder: (context, state) {
+              return const NoTransitionPage(
+                child: AdaptiveScaffoldRoute(
+                  body: ContactsTab(),
+                ),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: 'draftChat',
+                pageBuilder: (context, state) {
+                  return NoTransitionPage(
+                    child: AdaptiveScaffoldRoute(
+                      body: const ContactsTab(),
+                      secondaryBody: DraftChat(
+                        key: state.pageKey,
+                        state: state,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              _roomIdRoute(body: const ContactsTab()),
+            ],
+          ),
+        ],
+      );
+  StatefulShellBranch get _storiesShellBranch => StatefulShellBranch(
+        initialLocation: '/stories',
+        navigatorKey: _navStoriesNavigatorKey,
+        routes: [
+          ShellRoute(
+            pageBuilder: (context, state, widget) {
+              return NoTransitionPage(
+                child: AdaptiveScaffoldRoute(
+                  body: Container(),
+                  secondaryBody: widget,
+                ),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: '/stories',
+                builder: (context, state) {
+                  return const EmptyPage();
+                },
+                routes: [
+                  GoRoute(
+                    path: 'create',
                     builder: (context, state) => const AddStoryPage(),
+                  ),
+                  GoRoute(
+                    path: ':roomid',
+                    builder: (context, state) => const StoryPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'share',
+                        builder: (context, state) => const AddStoryPage(),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
         ],
-      ),
-    ],
-  );
+      );
 
   GoRoute _draftChatRoute({
     String? path,
     required Widget body,
-  }) => GoRoute(
-    path: path ?? 'draftChat',
-    pageBuilder: (context, state) {
-      return NoTransitionPage(
-        child: AdaptiveScaffoldRoute(
-          body: body,
-          secondaryBody: DraftChat(
-            key: state.pageKey,
-            state: state,
-          ),
-        ),
+  }) =>
+      GoRoute(
+        path: path ?? 'draftChat',
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            child: AdaptiveScaffoldRoute(
+              body: body,
+              secondaryBody: DraftChat(
+                key: state.pageKey,
+                state: state,
+              ),
+            ),
+          );
+        },
       );
-    },
-  );
 
   GoRoute _roomIdRoute({required Widget body}) => GoRoute(
-    path: ':roomid',
-    pageBuilder: (context, state) => NoTransitionPage(
-      child: AdaptiveScaffoldRoute(
-        body: body,
-        secondaryBody: Chat(
-          key: ValueKey(state.pathParameters['roomid'] ?? ""),
+        path: ':roomid',
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: AdaptiveScaffoldRoute(
+            body: body,
+            secondaryBody: Chat(
+              key: ValueKey(state.pathParameters['roomid'] ?? ""),
+            ),
+          ),
         ),
-      ),
-    ),
-    routes: [
-      GoRoute(
-        path: 'encryption',
-        builder: (context, state) => const ChatEncryptionSettings(),
-      ),
-      GoRoute(
-        path: 'invite',
-        builder: (context, state) => const InvitationSelection(),
-      ),
-      GoRoute(
-        path: 'details',
-        builder: (context, state) => const ChatDetails(),
-        routes: _chatDetailsRoutes,
-      ),
-      GoRoute(
-        path: 'forward',
-        builder: (context, state) {
-          return const Forward();
-        },
-      ),
-    ],
-  );
+        routes: [
+          GoRoute(
+            path: 'encryption',
+            builder: (context, state) => const ChatEncryptionSettings(),
+          ),
+          GoRoute(
+            path: 'invite',
+            builder: (context, state) => const InvitationSelection(),
+          ),
+          GoRoute(
+            path: 'details',
+            builder: (context, state) => const ChatDetails(),
+            routes: _chatDetailsRoutes,
+          ),
+          GoRoute(
+            path: 'forward',
+            builder: (context, state) {
+              return const Forward();
+            },
+          ),
+        ],
+      );
 
   List<RouteBase> get _chatDetailsRoutes => [
-    GoRoute(
-      path: 'permissions',
-      builder: (context, state) => const ChatPermissionsSettings(),
-    ),
-    GoRoute(
-      path: 'invite',
-      builder: (context, state) => const InvitationSelection(),
-    ),
-    GoRoute(
-      path: 'multiple_emotes',
-      builder: (context, state) => const MultipleEmotesSettings(),
-    ),
-    GoRoute(
-      path: 'emotes',
-      builder: (context, state) => const EmotesSettings(),
-    ),
-    GoRoute(
-      path: 'emotes/:state_key',
-      builder: (context, state) => const EmotesSettings(),
-    ),
-    GoRoute(
-      path: 'forward',
-      builder: (context, state) {
-        return const Forward();
-      },
-    )
-  ];
-
-  List<RouteBase> get _settingsRoutes => [
-    GoRoute(
-      path: 'notifications',
-      builder: (context, state) => const SettingsNotifications(),
-    ),
-    GoRoute(
-      path: 'style',
-      builder: (context, state) => const SettingsStyle(),
-    ),
-    GoRoute(
-      path: 'devices',
-      builder: (context, state) => const DevicesSettings(),
-    ),
-    GoRoute(
-      path: 'chat',
-      builder: (context, state) => const SettingsChat(),
-      routes: [
+        GoRoute(
+          path: 'permissions',
+          builder: (context, state) => const ChatPermissionsSettings(),
+        ),
+        GoRoute(
+          path: 'invite',
+          builder: (context, state) => const InvitationSelection(),
+        ),
+        GoRoute(
+          path: 'multiple_emotes',
+          builder: (context, state) => const MultipleEmotesSettings(),
+        ),
         GoRoute(
           path: 'emotes',
           builder: (context, state) => const EmotesSettings(),
         ),
-      ],
-    ),
-    GoRoute(
-      path: 'addaccount',
-      builder: (context, state) => const HomeserverPicker(),
-      routes: [
         GoRoute(
-          path: 'login',
-          builder: (context, state) => const Login(),
+          path: 'emotes/:state_key',
+          builder: (context, state) => const EmotesSettings(),
         ),
         GoRoute(
-          path: 'connect',
-          builder: (context, state) => const ConnectPage(),
+          path: 'forward',
+          builder: (context, state) {
+            return const Forward();
+          },
+        )
+      ];
+
+  List<RouteBase> get _settingsRoutes => [
+        GoRoute(
+          path: 'notifications',
+          builder: (context, state) => const SettingsNotifications(),
+        ),
+        GoRoute(
+          path: 'style',
+          builder: (context, state) => const SettingsStyle(),
+        ),
+        GoRoute(
+          path: 'devices',
+          builder: (context, state) => const DevicesSettings(),
+        ),
+        GoRoute(
+          path: 'chat',
+          builder: (context, state) => const SettingsChat(),
+          routes: [
+            GoRoute(
+              path: 'emotes',
+              builder: (context, state) => const EmotesSettings(),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'addaccount',
+          builder: (context, state) => const HomeserverPicker(),
           routes: [
             GoRoute(
               path: 'login',
               builder: (context, state) => const Login(),
             ),
             GoRoute(
-              path: 'signup',
-              builder: (context, state) => const SignupPage(),
+              path: 'connect',
+              builder: (context, state) => const ConnectPage(),
+              routes: [
+                GoRoute(
+                  path: 'login',
+                  builder: (context, state) => const Login(),
+                ),
+                GoRoute(
+                  path: 'signup',
+                  builder: (context, state) => const SignupPage(),
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-    GoRoute(
-      path: 'security',
-      builder: (context, state) => const SettingsSecurity(),
-      routes: [
         GoRoute(
-          path: 'stories',
-          builder: (context, state) => const SettingsStories(),
+          path: 'security',
+          builder: (context, state) => const SettingsSecurity(),
+          routes: [
+            GoRoute(
+              path: 'stories',
+              builder: (context, state) => const SettingsStories(),
+            ),
+            GoRoute(
+              path: 'ignorelist',
+              builder: (context, state) => const SettingsIgnoreList(),
+            ),
+            GoRoute(
+              path: '3pid',
+              builder: (context, state) => const Settings3Pid(),
+            ),
+          ],
         ),
         GoRoute(
-          path: 'ignorelist',
-          builder: (context, state) => const SettingsIgnoreList(),
+          path: 'logs',
+          builder: (context, state) => const LogViewer(),
         ),
-        GoRoute(
-          path: '3pid',
-          builder: (context, state) => const Settings3Pid(),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: 'logs',
-      builder: (context, state) => const LogViewer(),
-    ),
-  ];
+      ];
 }

@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 
 class PresentationContact extends Equatable {
-
   final String? email;
 
   final String? displayName;
@@ -19,12 +18,12 @@ class PresentationContact extends Equatable {
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
-    email: '',
-    displayName: '',
-    matrixId: '',
-    status: ContactStatus.inactive,
-  );
-  
+        email: '',
+        displayName: '',
+        matrixId: '',
+        status: ContactStatus.inactive,
+      );
+
   @override
   List<Object?> get props => [email, displayName, matrixId, status];
 }

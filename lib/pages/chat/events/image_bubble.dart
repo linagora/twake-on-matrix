@@ -44,12 +44,12 @@ class ImageBubble extends StatelessWidget {
       );
     }
     final String blurHashString =
-      event.infoMap['xyz.amorgan.blurhash'] is String
-        ? event.infoMap['xyz.amorgan.blurhash']
-        : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+        event.infoMap['xyz.amorgan.blurhash'] is String
+            ? event.infoMap['xyz.amorgan.blurhash']
+            : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     final ratio = event.infoMap['w'] is int && event.infoMap['h'] is int
-      ? event.infoMap['w'] / event.infoMap['h']
-      : 1.0;
+        ? event.infoMap['w'] / event.infoMap['h']
+        : 1.0;
     var width = 32;
     var height = 32;
     if (ratio > 1.0) {
@@ -80,11 +80,11 @@ class ImageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           constraints: maxSize
-            ? BoxConstraints(
-              maxWidth: width,
-              maxHeight: height,
-            )
-            : null,
+              ? BoxConstraints(
+                  maxWidth: width,
+                  maxHeight: height,
+                )
+              : null,
           child: MxcImage(
             rounded: true,
             event: event,

@@ -24,7 +24,8 @@ class HomeserverPickerView extends StatelessWidget {
         centerTitle: true,
         title: Padding(
           padding: const EdgeInsets.only(top: 40, bottom: 16.0),
-          child: SvgPicture.asset(ImagePaths.icTwakeLogo,
+          child: SvgPicture.asset(
+            ImagePaths.icTwakeLogo,
             width: 100,
             color: Theme.of(context).colorScheme.onBackground,
           ),
@@ -34,7 +35,6 @@ class HomeserverPickerView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            
             // display a prominent banner to import session for TOR browser
             // users. This feature is just some UX sugar as TOR users are
             // usually forced to logout as TOR browser is non-persistent
@@ -60,18 +60,23 @@ class HomeserverPickerView extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: HomeserverTextField(controller: controller, benchmarkResults: benchmarkResults),
+              child: HomeserverTextField(
+                controller: controller,
+                benchmarkResults: benchmarkResults,
+              ),
             ),
             const SizedBox(height: 4.0),
             if (controller.state == HomeserverState.wrongServerName)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(L10n.of(context)!.serverNameWrongExplain,
+                child: Text(
+                  L10n.of(context)!.serverNameWrongExplain,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    letterSpacing: 0.25,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                  textAlign: TextAlign.center,),
+                        letterSpacing: 0.25,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             Container(
               padding: const EdgeInsets.all(16),
@@ -86,8 +91,7 @@ class HomeserverPickerView extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         maximumSize: const Size.fromHeight(40),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor:
                             Theme.of(context).colorScheme.onPrimary,
                       ),
@@ -99,7 +103,8 @@ class HomeserverPickerView extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
+                    onPressed: () => UrlLauncher(context, AppConfig.privacyUrl)
+                        .openUrlInAppBrowser(),
                     child: Text(L10n.of(context)!.privacy),
                   ),
                 ],
@@ -113,9 +118,9 @@ class HomeserverPickerView extends StatelessWidget {
 
   Widget _getLabelLoginButton(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-      color: Theme.of(context).colorScheme.onPrimary,
-      letterSpacing: 0.1,
-    );
+          color: Theme.of(context).colorScheme.onPrimary,
+          letterSpacing: 0.1,
+        );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
         return Text(L10n.of(context)!.loginWithSSO, style: textStyle);
@@ -148,30 +153,31 @@ class HomeserverTextField extends StatelessWidget {
         controller: controller.homeserverController,
         decoration: InputDecoration(
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+            borderSide:
+                BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
-          focusedBorder: controller.state == HomeserverState.wrongServerName 
-            ? OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.error,
-                width: 2.0,
-              ),
-            )
-            : null,
-          labelText: controller.state != HomeserverState.wrongServerName 
-            ? L10n.of(context)!.homeserver
-            : L10n.of(context)!.wrongServerName,
+          focusedBorder: controller.state == HomeserverState.wrongServerName
+              ? OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.error,
+                    width: 2.0,
+                  ),
+                )
+              : null,
+          labelText: controller.state != HomeserverState.wrongServerName
+              ? L10n.of(context)!.homeserver
+              : L10n.of(context)!.wrongServerName,
           labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-            letterSpacing: 0.4,
-            color: controller.state != HomeserverState.wrongServerName
-              ? Theme.of(context).colorScheme.onSurface
-              : Theme.of(context).colorScheme.error,
-          ),
+                letterSpacing: 0.4,
+                color: controller.state != HomeserverState.wrongServerName
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.error,
+              ),
           hintText: L10n.of(context)!.enterYourHomeserver,
           contentPadding: const EdgeInsets.all(16.0),
         ),
-      ), 
-      itemBuilder: (BuildContext context, HomeserverBenchmarkResult server) {  
+      ),
+      itemBuilder: (BuildContext context, HomeserverBenchmarkResult server) {
         return ListTile(
           trailing: IconButton(
             icon: const Icon(
@@ -187,8 +193,7 @@ class HomeserverTextField extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            server.homeserver.description ??
-                '',
+            server.homeserver.description ?? '',
             style: TextStyle(
               color: Colors.grey.shade700,
             ),
@@ -197,14 +202,14 @@ class HomeserverTextField extends StatelessWidget {
       },
       suggestionsBoxDecoration: const SuggestionsBoxDecoration(
         constraints: BoxConstraints(maxHeight: 200),
-        borderRadius: BorderRadius.all(Radius.circular(16)),),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
       debounceDuration: const Duration(milliseconds: 300),
       direction: AxisDirection.up,
-
-      onSuggestionSelected: (HomeserverBenchmarkResult suggestion) { 
+      onSuggestionSelected: (HomeserverBenchmarkResult suggestion) {
         controller.setServer(suggestion.homeserver.baseUrl.host);
       },
-      suggestionsCallback: (String searchTerm) async {  
+      suggestionsCallback: (String searchTerm) async {
         if (benchmarkResults == null) {
           controller.loadHomeserverList();
         }

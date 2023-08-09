@@ -31,8 +31,8 @@ class HomeserverPicker extends StatefulWidget {
   HomeserverPickerController createState() => HomeserverPickerController();
 }
 
-class HomeserverPickerController extends State<HomeserverPicker> with ConnectPageMixin {
-  
+class HomeserverPickerController extends State<HomeserverPicker>
+    with ConnectPageMixin {
   HomeserverState state = HomeserverState.ssoLoginServer;
   final TextEditingController homeserverController = TextEditingController(
     text: AppConfig.defaultHomeserver,
@@ -89,15 +89,14 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
       });
 
   List<HomeserverBenchmarkResult> filteredHomeservers(String searchTerm) {
-
     return benchmarkResults!
-      .where(
-        (element) =>
-            element.homeserver.baseUrl.host.contains(searchTerm) ||
-            (element.homeserver.description?.contains(searchTerm) ?? false),
-      )
-      .toList();
-  } 
+        .where(
+          (element) =>
+              element.homeserver.baseUrl.host.contains(searchTerm) ||
+              (element.homeserver.description?.contains(searchTerm) ?? false),
+        )
+        .toList();
+  }
 
   void loadHomeserverList() async {
     try {
@@ -137,7 +136,8 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
     });
 
     try {
-      homeserverController.text = homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
+      homeserverController.text =
+          homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
       var homeserver = Uri.parse(homeserverController.text);
       if (homeserver.scheme.isEmpty) {
         homeserver = Uri.https(homeserverController.text, '');
@@ -162,13 +162,14 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await Matrix.of(context)
-          .getLoginClient()
-          .request(
-            RequestType.GET,
-            '/client/r0/login',
-          )
-          .then((loginTypes) => rawLoginTypes = loginTypes);
-        final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
+            .getLoginClient()
+            .request(
+              RequestType.GET,
+              '/client/r0/login',
+            )
+            .then((loginTypes) => rawLoginTypes = loginTypes);
+        final identitiesProvider =
+            identityProviders(rawLoginTypes: rawLoginTypes);
 
         if (supportsSso(context) && identitiesProvider?.length == 1) {
           ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
@@ -194,13 +195,12 @@ class HomeserverPickerController extends State<HomeserverPicker> with ConnectPag
       case HomeserverState.wrongServerName:
         await checkHomeserverAction();
         break;
-      default: 
+      default:
         await checkHomeserverAction();
         break;
     }
     setState(() {});
   }
-  
 
   @override
   void dispose() {

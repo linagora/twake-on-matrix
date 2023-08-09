@@ -4,7 +4,6 @@ import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class PresentationSearch extends Equatable {
-
   final String? displayName;
 
   String get id;
@@ -18,20 +17,17 @@ abstract class PresentationSearch extends Equatable {
 }
 
 class ContactPresentationSearch extends PresentationSearch {
-
   final String? matrixId;
 
   final String? email;
 
   const ContactPresentationSearch(
-      this.matrixId,
-      this.email,
-      {
-        String? displayName,
-      }
-      ) : super(
-    displayName: displayName,
-  );
+    this.matrixId,
+    this.email, {
+    String? displayName,
+  }) : super(
+          displayName: displayName,
+        );
 
   @override
   String get id => matrixId ?? email ?? '';
@@ -41,20 +37,17 @@ class ContactPresentationSearch extends PresentationSearch {
 }
 
 class RecentChatPresentationSearch extends PresentationSearch {
-
   final String? directChatMatrixID;
 
   final RoomSummary? roomSummary;
 
   const RecentChatPresentationSearch(
-      this.directChatMatrixID,
-      {
-        this.roomSummary,
-        String? displayName,
-      }
-      ) : super(
-    displayName: displayName,
-  );
+    this.directChatMatrixID, {
+    this.roomSummary,
+    String? displayName,
+  }) : super(
+          displayName: displayName,
+        );
 
   @override
   String get id => directChatMatrixID ?? '';

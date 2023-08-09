@@ -14,13 +14,11 @@ class ForwardItem extends StatelessWidget {
   final void Function()? onTap;
 
   const ForwardItem(
-    this.room,
-    {
-      this.selected = false,
-      this.onTap,
-      Key? key,
-    }
-  ) : super(key: key);
+    this.room, {
+    this.selected = false,
+    this.onTap,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +63,10 @@ class ForwardItem extends StatelessWidget {
                             child: Icon(
                               Icons.check_circle,
                               size: ForwardItemStyle.selectedIconSize,
-                              color: LinagoraSysColors.material().primary,),),),
+                              color: LinagoraSysColors.material().primary,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -77,12 +78,14 @@ class ForwardItem extends StatelessWidget {
                     maxLines: 1,
                     softWrap: false,
                     style: Theme.of(context).textTheme.titleMedium?.merge(
-                      TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        letterSpacing: 0.15,
-                        color: unread ? Theme.of(context).colorScheme.onSurfaceVariant : ChatListItemStyle.readMessageColor,
-                      ),
-                    ),
+                          TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            letterSpacing: 0.15,
+                            color: unread
+                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                : ChatListItemStyle.readMessageColor,
+                          ),
+                        ),
                   ),
                 ),
               ],

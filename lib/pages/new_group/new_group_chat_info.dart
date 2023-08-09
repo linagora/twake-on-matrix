@@ -13,9 +13,7 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-
 class NewGroupChatInfo extends StatelessWidget {
-
   final Set<PresentationContact> contactsList;
 
   final NewGroupController newGroupController;
@@ -36,7 +34,8 @@ class NewGroupChatInfo extends StatelessWidget {
           builder: (context, constraint) {
             return ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom,
+                maxHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).viewInsets.bottom,
               ),
               child: IntrinsicHeight(
                 child: Column(
@@ -44,22 +43,31 @@ class NewGroupChatInfo extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
-                      child: _buildChangeProfileWidget(context),),
+                      child: _buildChangeProfileWidget(context),
+                    ),
                     const SizedBox(height: 16.0),
-                    Text(L10n.of(context)!.addAPhoto,
+                    Text(
+                      L10n.of(context)!.addAPhoto,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                     ),
                     FutureBuilder(
                       future: newGroupController.getServerConfig(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final maxMediaSize = snapshot.data!.mUploadSize;
-                          return Text(L10n.of(context)!.maxImageSize(maxMediaSize!.bytesToMB()),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),);
+                          return Text(
+                            L10n.of(context)!
+                                .maxImageSize(maxMediaSize!.bytesToMB()),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      LinagoraRefColors.material().neutral[40],
+                                ),
+                          );
                         } else {
                           return const SizedBox.shrink();
                         }
@@ -82,7 +90,7 @@ class NewGroupChatInfo extends StatelessWidget {
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: newGroupController.haveGroupNameNotifier, 
+        valueListenable: newGroupController.haveGroupNameNotifier,
         builder: (context, value, child) {
           if (!value) {
             return const SizedBox.shrink();
@@ -133,7 +141,9 @@ class NewGroupChatInfo extends StatelessWidget {
           preferredSize: const Size.fromHeight(1),
           child: Container(
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.black.withOpacity(0.15))),
+              border: Border(
+                bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
@@ -148,58 +158,63 @@ class NewGroupChatInfo extends StatelessWidget {
                 ),
               ],
             ),
-          ),),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildChangeProfileWidget(BuildContext context) {
     return InkWell(
-        onTap: () => newGroupController.showImagesPickerAction(context: context),
-        customBorder: const CircleBorder(),
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: LinagoraRefColors.material().neutral[80],
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: ValueListenableBuilder(
-            valueListenable: newGroupController.avatarNotifier,
-            builder: (context, value, child) {
-              if (value == null) {
-                return child!;
-              }
-              return ClipOval(
-                child: SizedBox.fromSize(
-                  size: const Size.fromRadius(28),
-                  child: AssetEntityImage(
-                    value,
-                    thumbnailSize: const ThumbnailSize(56, 56),
-                    fit: BoxFit.cover,
-                    loadingBuilder:(context, child, loadingProgress) {
-                      if (loadingProgress != null && loadingProgress.cumulativeBytesLoaded != loadingProgress.expectedTotalBytes) {
-                        return const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ); 
-                      }
-                      return child;
-                    },
-                    errorBuilder: (context, error, stackTrace) {
+      onTap: () => newGroupController.showImagesPickerAction(context: context),
+      customBorder: const CircleBorder(),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: LinagoraRefColors.material().neutral[80],
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: ValueListenableBuilder(
+          valueListenable: newGroupController.avatarNotifier,
+          builder: (context, value, child) {
+            if (value == null) {
+              return child!;
+            }
+            return ClipOval(
+              child: SizedBox.fromSize(
+                size: const Size.fromRadius(28),
+                child: AssetEntityImage(
+                  value,
+                  thumbnailSize: const ThumbnailSize(56, 56),
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress != null &&
+                        loadingProgress.cumulativeBytesLoaded !=
+                            loadingProgress.expectedTotalBytes) {
                       return const Center(
-                        child: Icon(Icons.error_outline),
+                        child: CircularProgressIndicator.adaptive(),
                       );
-                    },
-                  ),
-                ),);
-            },
-            child: Icon(
-              Icons.camera_alt_outlined,
-              color: Theme.of(context).colorScheme.surface,
-            ),
+                    }
+                    return child;
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(Icons.error_outline),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+          child: Icon(
+            Icons.camera_alt_outlined,
+            color: Theme.of(context).colorScheme.surface,
           ),
-        ),);
+        ),
+      ),
+    );
   }
 
   Widget _buildGroupNameTextFieid(BuildContext context) {
@@ -214,19 +229,20 @@ class NewGroupChatInfo extends StatelessWidget {
             enabled: !newGroupController.isCreatingRoom,
             decoration: InputDecoration(
               border: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.shadow),
+                borderSide:
+                    BorderSide(color: Theme.of(context).colorScheme.shadow),
               ),
               labelText: L10n.of(context)!.widgetName,
               labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 16,
-                letterSpacing: 0.4,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontSize: 16,
+                    letterSpacing: 0.4,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
               hintText: L10n.of(context)!.enterGroupName,
               hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                letterSpacing: -0.15,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    letterSpacing: -0.15,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
               contentPadding: const EdgeInsets.all(16.0),
             ),
           );

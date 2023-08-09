@@ -89,11 +89,12 @@ class ChatInputRow extends StatelessWidget {
                       room: controller.room,
                       context: context,
                       onItemAction: (action) => controller.onClickItemAction(
-                        action: action, 
-                        room: controller.room, 
+                        action: action,
+                        room: controller.room,
                         context: context,
                       ),
-                      onSendTap: () => controller.sendImages(room: controller.room),
+                      onSendTap: () =>
+                          controller.sendImages(room: controller.room),
                     );
                   },
                 ),
@@ -132,9 +133,15 @@ class ChatInputRow extends StatelessWidget {
                             decoration: InputDecoration(
                               hintText: L10n.of(context)!.chatMessage,
                               hintMaxLines: 1,
-                              hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
-                                Theme.of(context).inputDecorationTheme.hintStyle,
-                              ).copyWith(letterSpacing: -0.15),
+                              hintStyle: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.merge(
+                                    Theme.of(context)
+                                        .inputDecorationTheme
+                                        .hintStyle,
+                                  )
+                                  .copyWith(letterSpacing: -0.15),
                             ),
                             onChanged: controller.onInputBarChanged,
                           ),
@@ -157,7 +164,8 @@ class ChatInputRow extends StatelessWidget {
                                 return SharedAxisTransition(
                                   animation: primaryAnimation,
                                   secondaryAnimation: secondaryAnimation,
-                                  transitionType: SharedAxisTransitionType.scaled,
+                                  transitionType:
+                                      SharedAxisTransitionType.scaled,
                                   fillColor: Colors.transparent,
                                   child: child,
                                 );
@@ -169,20 +177,24 @@ class ChatInputRow extends StatelessWidget {
                                         return TwakeIconButton(
                                           paddingAll: value.isEmpty ? 5.0 : 12,
                                           tooltip: L10n.of(context)!.emojis,
-                                          onPressed: () => controller.emojiPickerAction(),
+                                          onPressed: () =>
+                                              controller.emojiPickerAction(),
                                           icon: Icons.tag_faces,
                                         );
-                                      },)
+                                      },
+                                    )
                                   : ValueListenableBuilder(
                                       valueListenable: controller.inputText,
                                       builder: (context, value, child) {
                                         return TwakeIconButton(
                                           paddingAll: value.isEmpty ? 5.0 : 12,
                                           tooltip: L10n.of(context)!.keyboard,
-                                          onPressed: () => controller.inputFocus.requestFocus(),
+                                          onPressed: () => controller.inputFocus
+                                              .requestFocus(),
                                           icon: Icons.keyboard,
                                         );
-                                      },),
+                                      },
+                                    ),
                             ),
                           ),
                         ),
@@ -195,7 +207,7 @@ class ChatInputRow extends StatelessWidget {
                   builder: (context, value, child) {
                     if (!PlatformInfos.isMobile || value.isNotEmpty) {
                       return child!;
-                    } 
+                    }
                     return const SizedBox();
                   },
                   child: Container(

@@ -7,7 +7,6 @@ part 'tom_configurations_hive_obj.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class ToMConfigurationsHiveObj with EquatableMixin {
-
   final ToMServerInformationHiveObj tomServerInformation;
 
   final String? identityServerUrl;
@@ -17,15 +16,21 @@ class ToMConfigurationsHiveObj with EquatableMixin {
     this.identityServerUrl,
   });
 
-  factory ToMConfigurationsHiveObj.fromToMConfigurations(ToMConfigurations toMConfigurations) {
+  factory ToMConfigurationsHiveObj.fromToMConfigurations(
+    ToMConfigurations toMConfigurations,
+  ) {
     return ToMConfigurationsHiveObj(
-      tomServerInformation: ToMServerInformationHiveObj.fromToMServerInformation(toMConfigurations.tomServerInformation),
-      identityServerUrl: toMConfigurations.identityServerInformation?.baseUrl.toString(),
+      tomServerInformation:
+          ToMServerInformationHiveObj.fromToMServerInformation(
+        toMConfigurations.tomServerInformation,
+      ),
+      identityServerUrl:
+          toMConfigurations.identityServerInformation?.baseUrl.toString(),
     );
   }
 
   factory ToMConfigurationsHiveObj.fromJson(Map<String, dynamic> json) =>
-    _$ToMConfigurationsHiveObjFromJson(json);
+      _$ToMConfigurationsHiveObjFromJson(json);
 
   Map<String, dynamic> toJson() => _$ToMConfigurationsHiveObjToJson(this);
 

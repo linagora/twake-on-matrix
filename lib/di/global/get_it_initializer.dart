@@ -75,37 +75,70 @@ class GetItInitializer {
   }
 
   void bindingDatasource() {
-    getIt.registerFactory<ToMConfigurationsDatasource>(() => HiveToMConfigurationDatasource());
-
+    getIt.registerFactory<ToMConfigurationsDatasource>(
+      () => HiveToMConfigurationDatasource(),
+    );
   }
 
   void bindingDatasourceImpl() {
-    getIt.registerLazySingleton<RecoveryWordsDataSource>(() => RecoveryWordsDataSourceImpl());
-    getIt.registerFactory<TomContactsDatasource>(() => TomContactsDatasourceImpl());
+    getIt.registerLazySingleton<RecoveryWordsDataSource>(
+      () => RecoveryWordsDataSourceImpl(),
+    );
+    getIt.registerFactory<TomContactsDatasource>(
+      () => TomContactsDatasourceImpl(),
+    );
   }
 
   void bindingRepositories() {
-    getIt.registerFactory<ToMConfigurationsRepository>(() => ToMConfigurationsRepositoryImpl());
-    getIt.registerLazySingleton<RecoveryWordsRepository>(() => RecoveryWordsRepositoryImpl());
+    getIt.registerFactory<ToMConfigurationsRepository>(
+      () => ToMConfigurationsRepositoryImpl(),
+    );
+    getIt.registerLazySingleton<RecoveryWordsRepository>(
+      () => RecoveryWordsRepositoryImpl(),
+    );
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
   }
 
   void bindingInteractor() {
-    getIt.registerLazySingleton<GetRecoveryWordsInteractor>(() => GetRecoveryWordsInteractor());
-    getIt.registerLazySingleton<SaveRecoveryWordsInteractor>(() => SaveRecoveryWordsInteractor());
-    getIt.registerFactory<LookupContactsInteractor>(() => LookupContactsInteractor());
-    getIt.registerFactory<FetchContactsInteractor>(() => FetchContactsInteractor());
-    getIt.registerFactory<LoadMoreInternalContacts>(() => LoadMoreInternalContacts());
+    getIt.registerLazySingleton<GetRecoveryWordsInteractor>(
+      () => GetRecoveryWordsInteractor(),
+    );
+    getIt.registerLazySingleton<SaveRecoveryWordsInteractor>(
+      () => SaveRecoveryWordsInteractor(),
+    );
+    getIt.registerFactory<LookupContactsInteractor>(
+      () => LookupContactsInteractor(),
+    );
+    getIt.registerFactory<FetchContactsInteractor>(
+      () => FetchContactsInteractor(),
+    );
+    getIt.registerFactory<LoadMoreInternalContacts>(
+      () => LoadMoreInternalContacts(),
+    );
     getIt.registerSingleton<SendImageInteractor>(SendImageInteractor());
     getIt.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
-    getIt.registerSingleton<DownloadFileForPreviewInteractor>(DownloadFileForPreviewInteractor());
+    getIt.registerSingleton<DownloadFileForPreviewInteractor>(
+      DownloadFileForPreviewInteractor(),
+    );
     getIt.registerSingleton<SendFileInteractor>(SendFileInteractor());
-    getIt.registerSingleton<CreateNewGroupChatInteractor>(CreateNewGroupChatInteractor());
+    getIt.registerSingleton<CreateNewGroupChatInteractor>(
+      CreateNewGroupChatInteractor(),
+    );
     getIt.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
-    getIt.registerSingleton<CreateDirectChatInteractor>(CreateDirectChatInteractor());
-    getIt.registerSingleton<ForwardMessageInteractor>(ForwardMessageInteractor());
-    getIt.registerSingleton<PreSearchRecentContactsInteractor>(PreSearchRecentContactsInteractor());
-    getIt.registerSingleton<SearchRecentChatInteractor>(SearchRecentChatInteractor());
-    getIt.registerSingleton<SearchContactsInteractor>(SearchContactsInteractor());
+    getIt.registerSingleton<CreateDirectChatInteractor>(
+      CreateDirectChatInteractor(),
+    );
+    getIt.registerSingleton<ForwardMessageInteractor>(
+      ForwardMessageInteractor(),
+    );
+    getIt.registerSingleton<PreSearchRecentContactsInteractor>(
+      PreSearchRecentContactsInteractor(),
+    );
+    getIt.registerSingleton<SearchRecentChatInteractor>(
+      SearchRecentChatInteractor(),
+    );
+    getIt.registerSingleton<SearchContactsInteractor>(
+      SearchContactsInteractor(),
+    );
   }
 }

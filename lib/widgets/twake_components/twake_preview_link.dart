@@ -23,11 +23,11 @@ class TwakePreviewLink extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: 0.15,
               fontWeight: FontWeight.w500,
-        ),
+            ),
         bodyStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: LinagoraRefColors.material().neutral[50],
               fontWeight: FontWeight.w400,
-        ),
+            ),
         removeElevation: true,
         bodyMaxLines: 4,
         borderRadius: 12,

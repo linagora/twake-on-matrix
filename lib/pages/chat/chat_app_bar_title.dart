@@ -35,10 +35,11 @@ class ChatAppBarTitle extends StatelessWidget {
           ? () => showAdaptiveBottomSheet(
                 context: context,
                 builder: (c) => UserBottomSheet(
-                  user: room.unsafeGetUserFromMemoryOrFallback(directChatMatrixID),
+                  user: room
+                      .unsafeGetUserFromMemoryOrFallback(directChatMatrixID),
                   outerContext: context,
                   onMention: () => controller.sendController.text +=
-                    '${room.unsafeGetUserFromMemoryOrFallback(directChatMatrixID).mention} ',
+                      '${room.unsafeGetUserFromMemoryOrFallback(directChatMatrixID).mention} ',
                 ),
               )
           : controller.isArchived
@@ -72,13 +73,16 @@ class ChatAppBarTitle extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+                    room.getLocalizedDisplayname(
+                      MatrixLocals(L10n.of(context)!),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurface,
+                          letterSpacing:
+                              ChatAppBarTitleStyle.letterSpacingRoomName,
+                        ),
                   ),
                   _buildStatusContent(context, room),
                 ],
@@ -90,12 +94,16 @@ class ChatAppBarTitle extends StatelessWidget {
     );
   }
 
-  StreamBuilder<ConnectivityResult> _buildStatusContent(BuildContext context, Room room) {
-    final TextStyle? statusTextStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      fontSize: 11,
-      color: Theme.of(context).colorScheme.tertiary,
-      letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-    );
+  StreamBuilder<ConnectivityResult> _buildStatusContent(
+    BuildContext context,
+    Room room,
+  ) {
+    final TextStyle? statusTextStyle =
+        Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.tertiary,
+              letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+            );
 
     return StreamBuilder<ConnectivityResult>(
       stream: controller.networkConnectionService.getStreamInstance(),
@@ -134,9 +142,10 @@ class ChatAppBarTitle extends StatelessWidget {
                 child: Transform.translate(
                   offset: const Offset(0, -2),
                   child: LottieBuilder.asset(
-                    'assets/typing-indicator.zip', fit: BoxFit.fitWidth,
+                    'assets/typing-indicator.zip',
+                    fit: BoxFit.fitWidth,
                     width: 32,
-                    ),
+                  ),
                 ),
               ),
             ],

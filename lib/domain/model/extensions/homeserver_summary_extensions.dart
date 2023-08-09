@@ -6,7 +6,8 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }
-    final tomServerJson = discoveryInformation?.additionalProperties[ToMServerInformation.tomServerKey];
+    final tomServerJson = discoveryInformation
+        ?.additionalProperties[ToMServerInformation.tomServerKey];
     if (tomServerJson == null) {
       return null;
     }

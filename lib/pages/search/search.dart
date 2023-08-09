@@ -24,23 +24,27 @@ class Search extends StatefulWidget {
   State<Search> createState() => SearchController();
 }
 
-class SearchController extends State<Search> with ComparablePresentationSearchMixin, LoadMoreSearchMixin {
-
+class SearchController extends State<Search>
+    with ComparablePresentationSearchMixin, LoadMoreSearchMixin {
   static const int limitPrefetchedRecentChats = 3;
   static const int limitSearchingPrefetchedRecentContacts = 30;
   static const int limitPrefetchedRecentContacts = 5;
 
   SearchContactsAndChatsController? searchContactAndRecentChatController;
-  final _preSearchRecentContactsInteractor = getIt.get<PreSearchRecentContactsInteractor>();
-  final preSearchRecentContactsNotifier = ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
+  final _preSearchRecentContactsInteractor =
+      getIt.get<PreSearchRecentContactsInteractor>();
+  final preSearchRecentContactsNotifier =
+      ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
   final TextEditingController textEditingController = TextEditingController();
 
   void fetchPreSearchRecentContacts() {
-    _preSearchRecentContactsInteractor.execute(
+    _preSearchRecentContactsInteractor
+        .execute(
       recentRooms: Matrix.of(context).client.rooms,
       limit: limitPrefetchedRecentContacts,
-    ).listen((value) {
+    )
+        .listen((value) {
       preSearchRecentContactsNotifier.value = value;
     });
   }
@@ -54,14 +58,20 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
   }
 
   void onContactTap(ContactPresentationSearch contactPresentationSearch) {
-    final roomId = Matrix.of(context).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
+    final roomId = Matrix.of(context)
+        .client
+        .getDirectChatFromUserId(contactPresentationSearch.matrixId!);
     if (roomId == null) {
-      goToDraftChat(context: context, contactPresentationSearch: contactPresentationSearch);
+      goToDraftChat(
+        context: context,
+        contactPresentationSearch: contactPresentationSearch,
+      );
     } else {
       showFutureLoadingDialog(
         context: context,
         future: () async {
-          if (contactPresentationSearch.matrixId != null && contactPresentationSearch.matrixId!.isNotEmpty) {
+          if (contactPresentationSearch.matrixId != null &&
+              contactPresentationSearch.matrixId!.isNotEmpty) {
             context.go('/search/$roomId');
           }
         },
@@ -69,8 +79,12 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
     }
   }
 
-  void onRecentChatTap(RecentChatPresentationSearch recentChatPresentationSearch) {
-    Logs().d('SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}');
+  void onRecentChatTap(
+    RecentChatPresentationSearch recentChatPresentationSearch,
+  ) {
+    Logs().d(
+      'SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}',
+    );
     context.go('/rooms/search/${recentChatPresentationSearch.id}');
   }
 
@@ -78,18 +92,26 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
     required BuildContext context,
     required ContactPresentationSearch contactPresentationSearch,
   }) {
-    if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
-      context.go('/rooms/search/draftChat', extra: {
-        PresentationContactConstant.receiverId: contactPresentationSearch.matrixId ?? '',
-        PresentationContactConstant.email: contactPresentationSearch.email ?? '',
-        PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',
-        PresentationContactConstant.status: '',
-      },);
+    if (contactPresentationSearch.matrixId !=
+        Matrix.of(context).client.userID) {
+      context.go(
+        '/rooms/search/draftChat',
+        extra: {
+          PresentationContactConstant.receiverId:
+              contactPresentationSearch.matrixId ?? '',
+          PresentationContactConstant.email:
+              contactPresentationSearch.email ?? '',
+          PresentationContactConstant.displayName:
+              contactPresentationSearch.displayName ?? '',
+          PresentationContactConstant.status: '',
+        },
+      );
     }
   }
 
   void goToChatScreenFormRecentChat(User user) async {
-    Logs().d('SearchController::getContactAndRecentChatStream() - event: $user');
+    Logs()
+        .d('SearchController::getContactAndRecentChatStream() - event: $user');
     final roomIdResult = await showFutureLoadingDialog(
       context: context,
       future: () => user.startDirectChat(),
@@ -105,12 +127,15 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   @override
   void initState() {
-    searchContactAndRecentChatController = SearchContactsAndChatsController(context);
+    searchContactAndRecentChatController =
+        SearchContactsAndChatsController(context);
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchContactAndRecentChatController?.init();
-        listenForScrollChanged(controller: searchContactAndRecentChatController);
+        listenForScrollChanged(
+          controller: searchContactAndRecentChatController,
+        );
         fetchPreSearchRecentContacts();
         textEditingController.addListener(() {
           onSearchBarChanged(textEditingController.text);

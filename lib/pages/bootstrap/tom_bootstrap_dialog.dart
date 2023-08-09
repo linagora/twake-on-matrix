@@ -20,23 +20,23 @@ class TomBootstrapDialog extends StatefulWidget {
   }) : super(key: key);
 
   Future<bool?> show(BuildContext context) => showDialog(
-    context: context,
-    builder: (context) => this,
-    barrierDismissible: true,
-    useRootNavigator: false,
-  );
+        context: context,
+        builder: (context) => this,
+        barrierDismissible: true,
+        useRootNavigator: false,
+      );
 
   @override
   TomBootstrapDialogState createState() => TomBootstrapDialogState();
 }
 
 class TomBootstrapDialogState extends State<TomBootstrapDialog> {
-
   final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
   Bootstrap? bootstrap;
   String? titleText;
 
-  UploadRecoveryKeyState _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
+  UploadRecoveryKeyState _uploadRecoveryKeyState =
+      UploadRecoveryKeyState.initial;
 
   bool? _wipe;
 
@@ -51,13 +51,16 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
     titleText = null;
     _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      bootstrap = widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+      bootstrap =
+          widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    Logs().d('TomBootstrapDialogState::build(): BootstrapState = ${bootstrap?.state}');
+    Logs().d(
+      'TomBootstrapDialogState::build(): BootstrapState = ${bootstrap?.state}',
+    );
     _wipe ??= widget.wipe;
     final buttons = <AdaptiveFlatButton>[];
     Widget body = const LinearProgressIndicator();
@@ -65,7 +68,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
 
     if (bootstrap?.newSsssKey?.recoveryKey != null &&
         _uploadRecoveryKeyState == UploadRecoveryKeyState.initial) {
-      Logs().d('TomBootstrapDialogState::build(): start backup process with key ${bootstrap?.newSsssKey!.recoveryKey}');
+      Logs().d(
+        'TomBootstrapDialogState::build(): start backup process with key ${bootstrap?.newSsssKey!.recoveryKey}',
+      );
       final key = bootstrap?.newSsssKey!.recoveryKey;
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _backUpInRecoveryVault(key),
@@ -77,43 +82,43 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             break;
           case BootstrapState.askWipeSsss:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.wipeSsss(_wipe!),
+              (_) => bootstrap?.wipeSsss(_wipe!),
             );
             break;
           case BootstrapState.askBadSsss:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.ignoreBadSecrets(true),
+              (_) => bootstrap?.ignoreBadSecrets(true),
             );
             break;
           case BootstrapState.askUseExistingSsss:
             _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.useExistingSsss(!_wipe!),
+              (_) => bootstrap?.useExistingSsss(!_wipe!),
             );
             break;
           case BootstrapState.askUnlockSsss:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.unlockedSsss(),
+              (_) => bootstrap?.unlockedSsss(),
             );
             break;
           case BootstrapState.askNewSsss:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.newSsss(),
+              (_) => bootstrap?.newSsss(),
             );
             break;
           case BootstrapState.openExistingSsss:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _unlockBackUp(),
+              (_) => _unlockBackUp(),
             );
             break;
           case BootstrapState.askWipeCrossSigning:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.wipeCrossSigning(_wipe!),
+              (_) => bootstrap?.wipeCrossSigning(_wipe!),
             );
             break;
           case BootstrapState.askSetupCrossSigning:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.askSetupCrossSigning(
+              (_) => bootstrap?.askSetupCrossSigning(
                 setupMasterKey: true,
                 setupSelfSigningKey: true,
                 setupUserSigningKey: true,
@@ -122,13 +127,13 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             break;
           case BootstrapState.askWipeOnlineKeyBackup:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.wipeOnlineKeyBackup(_wipe!),
+              (_) => bootstrap?.wipeOnlineKeyBackup(_wipe!),
             );
 
             break;
           case BootstrapState.askSetupOnlineKeyBackup:
             WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => bootstrap?.askSetupOnlineKeyBackup(true),
+              (_) => bootstrap?.askSetupOnlineKeyBackup(true),
             );
             break;
           case BootstrapState.error:
@@ -137,8 +142,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             buttons.add(
               AdaptiveFlatButton(
                 label: L10n.of(context)!.close,
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: false).pop<bool>(false),
+                onPressed: () => Navigator.of(context, rootNavigator: false)
+                    .pop<bool>(false),
               ),
             );
             break;
@@ -154,8 +159,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             buttons.add(
               AdaptiveFlatButton(
                 label: L10n.of(context)!.close,
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: false).pop<bool>(false),
+                onPressed: () => Navigator.of(context, rootNavigator: false)
+                    .pop<bool>(false),
               ),
             );
             break;
@@ -174,20 +179,27 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
   Future<void> _backUpInRecoveryVault(String? key) async {
     if (key == null) {
       setState(() {
-        Logs().d('TomBootstrapDialogState::_backUpInRecoveryVault(): key null, upload failed');
+        Logs().d(
+          'TomBootstrapDialogState::_backUpInRecoveryVault(): key null, upload failed',
+        );
         _uploadRecoveryKeyState = UploadRecoveryKeyState.error;
       });
     }
-    await _saveRecoveryWordsInteractor.execute(key!)
-      .then((either) => either
-        .fold(
-          (failure) {
-            Logs().d('TomBootstrapDialogState::_backUpInRecoveryVault(): upload recoveryWords failed');
-            setState(() => _uploadRecoveryKeyState = UploadRecoveryKeyState.error);
-          },
-          (success) => setState(() => _uploadRecoveryKeyState = UploadRecoveryKeyState.uploaded),
-        ),
-      );
+    await _saveRecoveryWordsInteractor.execute(key!).then(
+          (either) => either.fold(
+            (failure) {
+              Logs().d(
+                'TomBootstrapDialogState::_backUpInRecoveryVault(): upload recoveryWords failed',
+              );
+              setState(
+                () => _uploadRecoveryKeyState = UploadRecoveryKeyState.error,
+              );
+            },
+            (success) => setState(
+              () => _uploadRecoveryKeyState = UploadRecoveryKeyState.uploaded,
+            ),
+          ),
+        );
   }
 
   Future<void> _unlockBackUp() async {
@@ -201,8 +213,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
         keyOrPassphrase: recoveryWords.words,
       );
       Logs().d('SSSS unlocked');
-      await bootstrap?.client.encryption!.crossSigning
-          .selfSign(
+      await bootstrap?.client.encryption!.crossSigning.selfSign(
         keyOrPassphrase: recoveryWords.words,
       );
       Logs().d('Successful elfsigned');

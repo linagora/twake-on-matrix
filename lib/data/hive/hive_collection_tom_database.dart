@@ -31,8 +31,10 @@ class HiveCollectionToMDatabase {
       }
 
       const secureStorage = FlutterSecureStorage();
-      final containsEncryptionKey =
-          await secureStorage.read(key: FlutterHiveCollectionsDatabase.cipherStorageKey) != null;
+      final containsEncryptionKey = await secureStorage.read(
+            key: FlutterHiveCollectionsDatabase.cipherStorageKey,
+          ) !=
+          null;
       if (!containsEncryptionKey) {
         // do not try to create a buggy secure storage for new Linux users
         if (Platform.isLinux) throw MissingPluginException();
@@ -44,7 +46,9 @@ class HiveCollectionToMDatabase {
       }
 
       // workaround for if we just wrote to the key and it still doesn't exist
-      final rawEncryptionKey = await secureStorage.read(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
+      final rawEncryptionKey = await secureStorage.read(
+        key: FlutterHiveCollectionsDatabase.cipherStorageKey,
+      );
       if (rawEncryptionKey == null) throw MissingPluginException();
 
       hiverCipher = HiveAesCipher(base64Url.decode(rawEncryptionKey));
@@ -69,7 +73,8 @@ class HiveCollectionToMDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
-      const FlutterSecureStorage().delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
+      const FlutterSecureStorage()
+          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
       await db.clear().catchError((_) {});
       await Hive.deleteFromDisk();
       rethrow;
@@ -113,9 +118,7 @@ class HiveCollectionToMDatabase {
   Future<void> open() async {
     _collection = await BoxCollection.open(
       name,
-      {
-        _tomConfigurationsBoxName
-      },
+      {_tomConfigurationsBoxName},
       path: path,
       key: key,
     );

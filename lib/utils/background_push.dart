@@ -81,9 +81,11 @@ class BackgroundPush {
         onUnregistered: _upUnregistered,
         onMessage: _onUpMessage,
       );
-      fcmSharedIsolate?.setListeners(onMessage: (message) {
-        onReceiveNotification(message);
-      },);
+      fcmSharedIsolate?.setListeners(
+        onMessage: (message) {
+          onReceiveNotification(message);
+        },
+      );
     } else if (Platform.isIOS) {
       apnChannel.setMethodCallHandler((call) async {
         Logs().v('[Push] Received APN call: $call');
@@ -97,19 +99,21 @@ class BackgroundPush {
     }
   }
 
-  factory BackgroundPush.clientOnly(Client client, {GlobalKey<NavigatorState>? globalRouteKey}) {
+  factory BackgroundPush.clientOnly(
+    Client client, {
+    GlobalKey<NavigatorState>? globalRouteKey,
+  }) {
     _instance ??= BackgroundPush._(client, globalRouteKey);
     return _instance!;
   }
 
   factory BackgroundPush(
     Client client,
-    GlobalKey<NavigatorState>? globalRouteKey,
-    {
+    GlobalKey<NavigatorState>? globalRouteKey, {
     final void Function(String errorMsg, {Uri? link})? onFcmError,
-    }
-  ) {
-    final instance = BackgroundPush.clientOnly(client, globalRouteKey: globalRouteKey);
+  }) {
+    final instance =
+        BackgroundPush.clientOnly(client, globalRouteKey: globalRouteKey);
     instance.globalRouteKey = globalRouteKey;
     // ignore: prefer_initializing_formals
     // ignore: prefer_initializing_formals
@@ -187,22 +191,20 @@ class BackgroundPush {
             deviceDisplayName: client.deviceName!,
             lang: 'en',
             data: PusherData(
-                url: Uri.parse(gatewayUrl!),
-                format: AppConfig.pushNotificationsPusherFormat,
-                additionalProperties: PlatformInfos.isIOS
-                    ? {
-                        "default_payload": {
-                          "aps": {
-                            "mutable-content": 1,
-                            "content-available": 1,
-                            "alert": {
-                              "loc-key": "SINGLE_UNREAD",
-                              "loc-args": []
-                            }
-                          }
+              url: Uri.parse(gatewayUrl!),
+              format: AppConfig.pushNotificationsPusherFormat,
+              additionalProperties: PlatformInfos.isIOS
+                  ? {
+                      "default_payload": {
+                        "aps": {
+                          "mutable-content": 1,
+                          "content-available": 1,
+                          "alert": {"loc-key": "SINGLE_UNREAD", "loc-args": []}
                         }
                       }
-                    : {},),
+                    }
+                  : {},
+            ),
             kind: 'http',
           ),
           append: false,
@@ -315,7 +317,9 @@ class BackgroundPush {
   }
 
   void onReceiveNotification(dynamic message) {
-    Logs().d('BackgroundPush::onReceiveNotification(): Message $message - roomId $roomId');
+    Logs().d(
+      'BackgroundPush::onReceiveNotification(): Message $message - roomId $roomId',
+    );
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
@@ -543,8 +547,8 @@ class BackgroundPush {
 
   String? get roomId {
     return currentContext != null
-      ? GoRouterState.of(currentContext!).pathParameters['roomid']
-      : '';
+        ? GoRouterState.of(currentContext!).pathParameters['roomid']
+        : '';
   }
 
   BuildContext? get currentContext => globalRouteKey?.currentState?.context;

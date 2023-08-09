@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -10,10 +9,9 @@ import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:fluffychat/config/app_config.dart';
 
-
 mixin ConnectPageMixin {
   bool supportsFlow({
-    required BuildContext context, 
+    required BuildContext context,
     required String flowType,
   }) =>
       Matrix.of(context)
@@ -28,8 +26,8 @@ mixin ConnectPageMixin {
           PlatformInfos.isMacOS) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
-  bool supportsLogin(BuildContext context) 
-    => supportsFlow(context: context, flowType: 'm.login.password');
+  bool supportsLogin(BuildContext context) =>
+      supportsFlow(context: context, flowType: 'm.login.password');
 
   String _getRedirectUrlScheme(String redirectUrl) {
     return Uri.parse(redirectUrl).scheme;
@@ -37,23 +35,25 @@ mixin ConnectPageMixin {
 
   String _getAuthenticateUrl({
     required BuildContext context,
-    required String id, 
+    required String id,
     required String redirectUrl,
   }) {
-    final homeserver = Matrix.of(context).getLoginClient().homeserver?.toString();
-    final ssoRedirectUri = '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
+    final homeserver =
+        Matrix.of(context).getLoginClient().homeserver?.toString();
+    final ssoRedirectUri =
+        '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
   }
 
   void ssoLoginAction({
-    required BuildContext context, 
+    required BuildContext context,
     required String id,
   }) async {
     final redirectUrl = kIsWeb
-      ? '${html.window.origin!}/web/auth.html'
-      : '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
-    final url =_getAuthenticateUrl(
+        ? '${html.window.origin!}/web/auth.html'
+        : '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
+    final url = _getAuthenticateUrl(
       context: context,
       id: id,
       redirectUrl: redirectUrl,
@@ -76,7 +76,9 @@ mixin ConnectPageMixin {
     );
   }
 
-  List<IdentityProvider>? identityProviders({Map<String, dynamic>? rawLoginTypes}) {
+  List<IdentityProvider>? identityProviders({
+    Map<String, dynamic>? rawLoginTypes,
+  }) {
     final loginTypes = rawLoginTypes;
     if (loginTypes == null) return null;
     final rawProviders = loginTypes.tryGetList('flows')!.singleWhere(

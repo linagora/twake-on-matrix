@@ -10,7 +10,8 @@ class TwakeFabStyle {
   static const BorderRadiusGeometry notificationBubbleBorderRadius =
       BorderRadius.all(Radius.circular(12));
   static const Color notificationBubbleBorderColorLightTheme = Colors.white;
-  static const Color notificationBubbleBorderColorDarkTheme = Color.fromARGB(239, 36, 36, 36);
+  static const Color notificationBubbleBorderColorDarkTheme =
+      Color.fromARGB(239, 36, 36, 36);
   static BoxBorder notificationBubbleBorder(BuildContext context) {
     return Border.all(
       color: Theme.of(context).brightness == Brightness.light

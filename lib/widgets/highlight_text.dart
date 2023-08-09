@@ -49,9 +49,12 @@ class HighlightText extends StatelessWidget {
 
   TextSpan buildHighlightSpan(String content) {
     if (highlightStyle == null) {
-      return TextSpan(text: content, style: style!.copyWith(
-        color: Colors.amber[900],
-      ),);
+      return TextSpan(
+        text: content,
+        style: style!.copyWith(
+          color: Colors.amber[900],
+        ),
+      );
     }
 
     return TextSpan(text: content, style: highlightStyle);
