@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:dartz/dartz.dart' hide id;
 import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
 import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
+import 'package:fluffychat/presentation/fake_sending_file_info.dart';
+import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 typedef TransactionId = String;
+
+typedef MessageType = String;
 
 typedef FakeImageEvent = SyncUpdate;
 
@@ -30,7 +31,7 @@ extension SendFileExtension on Room {
   }) async {
     FileInfo tempfileInfo = fileInfo;
     txid ??= client.generateUniqueTransactionId();
-    fakeImageEvent ??= await sendFakeImageEvent(
+    fakeImageEvent ??= await sendFakeImagePickerFileEvent(
       fileInfo,
       txid: txid,
       messageType: msgType,
@@ -140,7 +141,7 @@ extension SendFileExtension on Room {
     return eventId;
   }
 
-  Future<SyncUpdate> sendFakeImageEvent(
+  Future<SyncUpdate> sendFakeImagePickerFileEvent(
     FileInfo fileInfo, {
     String messageType = MessageTypes.Image,
     required String txid,
@@ -149,12 +150,6 @@ extension SendFileExtension on Room {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
-    // in order to have placeholder, this line must have,
-    // otherwise the sending event will be removed from timeline
-    sendingFilePlaceholders[txid] = MatrixFile(
-      name: fileInfo.fileName,
-      filePath: fileInfo.filePath,
-    );
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEvent = SyncUpdate(
       nextBatch: '',
@@ -207,22 +202,42 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<
-      Tuple2<Map<TransactionId, FileInfo>,
-          Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
-    required List<AssetEntity> entities,
+  Future<void> _storePlaceholderFile({
+    required String txid,
+    required FileAssetEntity assetEntity,
   }) async {
-    // ignore: prefer_const_constructors
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, FileInfo>,
-        Map<TransactionId, FakeImageEvent>>({}, {});
+    // in order to have placeholder, this line must have,
+    // otherwise the sending event will be removed from timeline
+    final matrixFile = await assetEntity.toMatrixFile();
+    if (matrixFile != null) {
+      sendingFilePlaceholders[txid] = matrixFile;
+    }
+  }
+
+  Future<Map<TransactionId, FakeSendingFileInfo>> sendPlaceholdersForImagePickerFiles({
+    required List<FileAssetEntity> entities,
+  }) async {
+    final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
       final fileInfo = await entity.toFileInfo();
-
       if (fileInfo != null) {
         final txid = client.generateUniqueTransactionId();
-        final fakeImageEvent = await sendFakeImageEvent(fileInfo, txid: txid);
-        txIdMapToImageFile.value1[txid] = fileInfo;
-        txIdMapToImageFile.value2[txid] = fakeImageEvent;
+
+        await _storePlaceholderFile(
+          txid: txid,
+          assetEntity: entity,
+        );
+
+        final fakeImageEvent = await sendFakeImagePickerFileEvent(
+          fileInfo, 
+          txid: txid, 
+          messageType: entity.messageType,
+        );
+        txIdMapToImageFile[txid] = FakeSendingFileInfo(
+          fileInfo: fileInfo, 
+          fakeImageEvent: fakeImageEvent, 
+          messageType: entity.messageType,
+        );
       }
     }
     return txIdMapToImageFile;

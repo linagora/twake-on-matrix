@@ -1,12 +1,11 @@
-import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 class SendImageInteractor {
   Future<void> execute({
     required Room room,
-    required AssetEntity entity,
+    required FileAssetEntity entity,
     String? txId,
     Event? inReplyTo,
     String? editEventId,

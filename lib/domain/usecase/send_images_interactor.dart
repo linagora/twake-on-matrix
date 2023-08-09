@@ -1,21 +1,27 @@
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 class SendImagesInteractor {
   Future<void> execute({
     required Room room,
-    required List<AssetEntity> entities,
+    required List<FileAssetEntity> entities,
   }) async {
     try {
-      final txIdMapToImageInfo = await room.sendPlaceholdersForImages(
+      final txIdMapToFileInfo = await room.sendPlaceholdersForImagePickerFiles(
         entities: entities,
       );
 
-      for (final txId in txIdMapToImageInfo.value1.keys) {
+      for (final txId in txIdMapToFileInfo.keys) {
+        final fakeSendingFileInfo = txIdMapToFileInfo[txId];
+        if (fakeSendingFileInfo == null) {
+          continue;
+        }
+        
         await room.sendFileEvent(
-          txIdMapToImageInfo.value1[txId]!,
-          fakeImageEvent: txIdMapToImageInfo.value2[txId],
+          fakeSendingFileInfo.fileInfo,
+          msgType: fakeSendingFileInfo.messageType,
+          fakeImageEvent: fakeSendingFileInfo.fakeImageEvent,
           shrinkImageMaxDimension: 1600,
           txid: txId,
         );
