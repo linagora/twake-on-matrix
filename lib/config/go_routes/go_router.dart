@@ -189,20 +189,7 @@ class TwakeRoutes {
               );
             },
             routes: [
-              GoRoute(
-                path: 'draftChat',
-                pageBuilder: (context, state) {
-                  return NoTransitionPage(
-                    child: AdaptiveScaffoldRoute(
-                      body: const ContactsTab(),
-                      secondaryBody: DraftChat(
-                        key: state.pageKey,
-                        state: state,
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _draftChatRoute(body: const ContactsTab()),
               _roomIdRoute(body: const ContactsTab()),
             ],
           ),
