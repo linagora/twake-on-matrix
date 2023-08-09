@@ -4,8 +4,6 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_app
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class AdaptiveScaffoldAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -47,23 +45,10 @@ class _LeadingAppBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SvgPicture.asset(
-          ImagePaths.icTwakeImageLogo,
-          width: AdaptiveScaffoldAppBarStyle.sizeIcTwakeImageLogo,
-          height: AdaptiveScaffoldAppBarStyle.sizeIcTwakeImageLogo,
-        ),
-        const SizedBox(width: 10),
-        Text(
-          L10n.of(context)!.twake,
-          style: TextStyle(
-            fontSize: 40,
-            fontWeight: FontWeight.w600,
-            color: LinagoraRefColors.material().primary[0],
-          ),
-        ),
-      ],
+    return SvgPicture.asset(ImagePaths.icTwakeImageLogo,
+      width: AdaptiveScaffoldAppBarStyle.sizeWidthIcTwakeImageLogo,
+      height: AdaptiveScaffoldAppBarStyle.sizeHeightIcTwakeImageLogo,
     );
   }
 }
+
