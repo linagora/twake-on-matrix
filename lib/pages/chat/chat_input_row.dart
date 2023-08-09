@@ -155,6 +155,7 @@ class ChatInputRow extends StatelessWidget {
                           helpLabel: L10n.of(context)!.emojis,
                           child: InkWell(
                             onTap: controller.emojiPickerAction,
+                            hoverColor: Colors.transparent,
                             child: PageTransitionSwitcher(
                               transitionBuilder: (
                                 Widget child,
