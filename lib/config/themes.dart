@@ -278,29 +278,31 @@ abstract class FluffyThemes {
             },
           ),
           thumbColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
-              return brightness == Brightness.light
-                  ? LinagoraSysColors.material().onPrimary
-                  : LinagoraSysColors.material().onPrimaryDark;
-            } else {
-              return brightness == Brightness.light
-                  ? LinagoraSysColors.material().outline
-                  : LinagoraSysColors.material().outlineDark;
-            }
-          }),
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return brightness == Brightness.light
+                    ? LinagoraSysColors.material().onPrimary
+                    : LinagoraSysColors.material().onPrimaryDark;
+              } else {
+                return brightness == Brightness.light
+                    ? LinagoraSysColors.material().outline
+                    : LinagoraSysColors.material().outlineDark;
+              }
+            },
+          ),
           trackColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
-              return brightness == Brightness.light
-                  ? LinagoraSysColors.material().primary
-                  : LinagoraSysColors.material().primaryDark;
-            } else {
-              return brightness == Brightness.light
-                  ? LinagoraSysColors.material().surface
-                  : LinagoraSysColors.material().surfaceDark;
-            }
-          }),
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return brightness == Brightness.light
+                    ? LinagoraSysColors.material().primary
+                    : LinagoraSysColors.material().primaryDark;
+              } else {
+                return brightness == Brightness.light
+                    ? LinagoraSysColors.material().surface
+                    : LinagoraSysColors.material().surfaceDark;
+              }
+            },
+          ),
         ),
         navigationBarTheme: NavigationBarThemeData(
           height: 64,
