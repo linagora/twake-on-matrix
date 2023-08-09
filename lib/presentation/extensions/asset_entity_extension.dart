@@ -13,16 +13,4 @@ extension AssetEntityExtension on AssetEntity {
     }
     return null;
   }
-
-  Future<FileInfo?> toFileInfo() async {
-    final file = await loadFile();
-    if (file == null) {
-      return null;
-    }
-    return FileInfo(
-      file.path.split('/').last,
-      file.path,
-      file.lengthSync(),
-    );
-  }
 }
