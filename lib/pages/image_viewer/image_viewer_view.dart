@@ -88,7 +88,7 @@ class ImageViewerView extends StatelessWidget {
                           onPressed: () => controller.shareFileAction(context),
                           tooltip: L10n.of(context)!.share,
                           color: LinagoraSysColors.material().onPrimary,
-                          icon: Icon(Icons.share, color: LinagoraSysColors.material().onPrimary)
+                          icon: Icon(Icons.share, color: LinagoraSysColors.material().onPrimary),
                         ),
                       ),
                     IconButton(

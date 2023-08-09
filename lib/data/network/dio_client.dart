@@ -19,7 +19,7 @@ class DioClient {
         queryParameters: queryParameters,
         options: options,
         cancelToken: cancelToken,
-        onReceiveProgress: onReceiveProgress)
+        onReceiveProgress: onReceiveProgress,)
       .then((value) => value.data)
       .catchError((error) => throw error);
   }
@@ -39,7 +39,7 @@ class DioClient {
         options: options,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress)
+        onReceiveProgress: onReceiveProgress,)
       .then((value) => value.data)
       .catchError((error) => throw error);
   }
@@ -56,7 +56,7 @@ class DioClient {
         data: data,
         queryParameters: queryParameters,
         options: options,
-        cancelToken: cancelToken)
+        cancelToken: cancelToken,)
       .then((value) => value.data)
       .catchError((error) => throw(error));
   }
@@ -68,7 +68,7 @@ class DioClient {
     Options? options,
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress
+    ProgressCallback? onReceiveProgress,
   }) async {
     return await _dio.put(
         path,
@@ -77,7 +77,7 @@ class DioClient {
         options: options,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress)
+        onReceiveProgress: onReceiveProgress,)
       .then((value) => value.data)
       .catchError((error) => throw(error));
   }

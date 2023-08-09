@@ -57,7 +57,7 @@ class ExpansionContactListTile extends StatelessWidget {
                                       fontWeight: FontWeight.w700,
                                       fontSize: 17.0,
                                       color: Theme.of(context).colorScheme.onSurface,
-                                    )
+                                    ),
                                   ),
                                 ),
                               ],
@@ -88,7 +88,7 @@ class ExpansionContactListTile extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           letterSpacing: 0.25,
                           color: LinagoraRefColors.material().neutral[30],
-                        ))
+                        ),)
                   ],
                 ),
               )

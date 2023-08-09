@@ -189,7 +189,7 @@ extension SendFileExtension on Room {
   }
 
   Future<void> handleImageFakeSync(SyncUpdate fakeImageEvent,
-      {Direction? direction}) async {
+      {Direction? direction,}) async {
     if (client.database != null) {
       await client.database?.transaction(() async {
         await client.handleSync(fakeImageEvent, direction: direction);

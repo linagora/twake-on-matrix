@@ -29,6 +29,7 @@ class SendFileDialogState extends State<SendFileDialog> {
 
   Future<void> _send() async {
     for (var file in widget.files) {
+      // ignore: unused_local_variable
       MatrixImageFile? thumbnail;
       if (file is MatrixVideoFile && (file.bytes?.length ?? 0) > minSizeToCompress) {
         await showFutureLoadingDialog(
@@ -39,6 +40,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           },
         );
       }
+      // ignore: unused_local_variable
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       // widget.room
       //     .sendFileEvent(

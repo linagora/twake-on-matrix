@@ -58,14 +58,14 @@ class DraftChatView extends StatelessWidget {
             preferredSize: const Size(double.infinity, 4),
             child: Container(
               color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-              height: 1,)),
+              height: 1,),),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(child: Center(child: DirectDraftChatView(
               onTap: () => controller.inputFocus.requestFocus(),
-            ))),
+            ),),),
             Column(
               children: [
                 Padding(
@@ -116,8 +116,8 @@ class DraftChatView extends StatelessWidget {
                                       hintText: L10n.of(context)!.chatMessage,
                                       hintMaxLines: 1,
                                       hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
-                                          Theme.of(context).inputDecorationTheme.hintStyle
-                                      ).copyWith(letterSpacing: -0.15)
+                                          Theme.of(context).inputDecorationTheme.hintStyle,
+                                      ).copyWith(letterSpacing: -0.15),
                                   ),
                                   onChanged: controller.onInputBarChanged,
                                 ),
@@ -214,7 +214,7 @@ class DraftChatView extends StatelessWidget {
                         ),
                       )
                           : null,
-                    )
+                    ),
                 ),
               ],
             )
@@ -278,7 +278,7 @@ class _EmptyChatTitle extends StatelessWidget {
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );

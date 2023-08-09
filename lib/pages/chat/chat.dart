@@ -393,7 +393,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
               explainTextRequestPermission: Text(L10n.of(context)!.explainStoragePermission),
               icon: const Icon(Icons.preview_outlined),
             );
-          }
+          },
         );
         if (await permissionHandler.storagePermissionStatus == PermissionStatus.granted) {
           _handleDownloadFileForPreview(event: event);
@@ -412,7 +412,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
               explainTextRequestPermission: Text(L10n.of(context)!.explainGoToStorageSetting),
               icon: const Icon(Icons.preview_outlined),
             );
-          }
+          },
         );
         break;
       case PermissionStatus.restricted:
@@ -448,7 +448,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
-              }
+              },
             );
           }
         });
@@ -456,13 +456,13 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   }
 
   void _openDownloadedFileForPreview({
-    required DownloadFileForPreviewResponse downloadFileForPreviewResponse
+    required DownloadFileForPreviewResponse downloadFileForPreviewResponse,
   }) async {
     final mimeType = downloadFileForPreviewResponse.mimeType;
     final openResults = await OpenFile.open(
       downloadFileForPreviewResponse.filePath,
       type: mimeType,
-      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType]).value
+      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType]).value,
     );
     Logs().d('ChatController:_openDownloadedFileForPreview(): ${openResults.message}');
 
@@ -512,6 +512,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
   }
 
   void voiceMessageAction() async {
+    // ignore: unused_local_variable
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (PlatformInfos.isAndroid) {
       final info = await DeviceInfoPlugin().androidInfo;
@@ -535,6 +536,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     );
     if (result == null) return;
     final audioFile = File(result.path);
+    // ignore: unused_local_variable
     final file = MatrixAudioFile(
       bytes: audioFile.readAsBytesSync(),
       name: audioFile.path,
@@ -756,6 +758,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     final allEditEvents = event
         .aggregatedEvents(timeline!, RelationshipTypes.edit)
         .where((e) => e.status.isError);
+    // ignore: unused_local_variable
     for (final e in allEditEvents) {
       // e.sendAgain();
     }

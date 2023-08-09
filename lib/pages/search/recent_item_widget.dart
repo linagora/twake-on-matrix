@@ -51,7 +51,7 @@ class RecentItemWidget extends StatelessWidget {
     if (presentationSearch is ContactPresentationSearch) {
       return _ContactInformation(
         contactPresentationSearch: presentationSearch as ContactPresentationSearch,
-        searchKeyword: highlightKeyword
+        searchKeyword: highlightKeyword,
       );
     } else {
       final recentChatPresentationSearch = presentationSearch as RecentChatPresentationSearch;
@@ -60,7 +60,7 @@ class RecentItemWidget extends StatelessWidget {
       } else {
         return _DirectChatInformation(
           recentChatPresentationSearch: recentChatPresentationSearch,
-          searchKeyword: highlightKeyword
+          searchKeyword: highlightKeyword,
         );
       }
     }
@@ -165,7 +165,7 @@ class _ContactInformation extends StatelessWidget {
                   mxContent: snapshot.data?.avatarUrl,
                   name: contactPresentationSearch.displayName,
                 );
-              }
+              },
           ),
         ),
         const SizedBox(width: 8),

@@ -71,7 +71,7 @@ class HomeserverPickerView extends StatelessWidget {
                     letterSpacing: 0.25,
                     color: Theme.of(context).colorScheme.outline,
                   ),
-                  textAlign: TextAlign.center),
+                  textAlign: TextAlign.center,),
               ),
             Container(
               padding: const EdgeInsets.all(16),
@@ -94,7 +94,7 @@ class HomeserverPickerView extends StatelessWidget {
                       onPressed: () => controller.loginButtonPressed(),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [_getLabelLoginButton(context)]
+                        children: [_getLabelLoginButton(context)],
                       ),
                     ),
                   ),
@@ -197,7 +197,7 @@ class HomeserverTextField extends StatelessWidget {
       },
       suggestionsBoxDecoration: const SuggestionsBoxDecoration(
         constraints: BoxConstraints(maxHeight: 200),
-        borderRadius: BorderRadius.all(Radius.circular(16))),
+        borderRadius: BorderRadius.all(Radius.circular(16)),),
       debounceDuration: const Duration(milliseconds: 300),
       direction: AxisDirection.up,
 

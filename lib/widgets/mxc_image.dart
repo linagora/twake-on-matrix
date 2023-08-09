@@ -172,7 +172,7 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
-          ImageViewer(widget.event!, imageData: _imageData)
+          ImageViewer(widget.event!, imageData: _imageData),
       );
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
@@ -201,7 +201,7 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
     final imageWidget = widget.animated
       ? AnimatedSwitcher(
           duration: widget.animationDuration,
-          child: _buildImageWidget())
+          child: _buildImageWidget(),)
       : _buildImageWidget();
 
     if (widget.isPreview) {
@@ -234,7 +234,7 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
               _imageData = null;
               WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
               return placeholder(context);
-            }));
+            },),);
   }
 
   @override

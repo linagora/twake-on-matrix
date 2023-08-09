@@ -180,6 +180,6 @@ class HtmlMessage extends StatelessWidget {
           url: url, 
           onTap: onTap,
         );
-      });    
+      },);    
   }
 }

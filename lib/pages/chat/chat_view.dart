@@ -170,7 +170,7 @@ class ChatView extends StatelessWidget {
                   preferredSize: const Size(double.infinity, 4),
                   child: Container(
                     color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-                    height: 1,)),
+                    height: 1,),),
               ),
               floatingActionButton: controller.showScrollDownButton &&
                       controller.selectedEvents.isEmpty

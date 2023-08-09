@@ -70,7 +70,7 @@ class SearchContactsController {
   void onSelectedContact() {
     textEditingController.selection = TextSelection(
         baseOffset: 0,
-        extentOffset: textEditingController.text.length
+        extentOffset: textEditingController.text.length,
     );
   }
 

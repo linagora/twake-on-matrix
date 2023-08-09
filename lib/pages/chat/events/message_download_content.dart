@@ -17,7 +17,7 @@ class MessageDownloadContent extends StatelessWidget {
   const MessageDownloadContent(
     this.event,
     this.textColor,
-    {Key? key, required this.controller})
+    {Key? key, required this.controller,})
       : super(key: key);
 
   @override

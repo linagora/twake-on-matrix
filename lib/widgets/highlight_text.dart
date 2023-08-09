@@ -21,7 +21,7 @@ class HighlightText extends StatelessWidget {
       TextSpan(children: spans),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      softWrap: false
+      softWrap: false,
     );
   }
 
@@ -50,8 +50,8 @@ class HighlightText extends StatelessWidget {
   TextSpan buildHighlightSpan(String content) {
     if (highlightStyle == null) {
       return TextSpan(text: content, style: style!.copyWith(
-        color: Colors.amber[900]
-      ));
+        color: Colors.amber[900],
+      ),);
     }
 
     return TextSpan(text: content, style: highlightStyle);

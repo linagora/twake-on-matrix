@@ -71,7 +71,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
             }
           
             return selectedContactsListWidget;
-          }
+          },
         ),
       ),
     );

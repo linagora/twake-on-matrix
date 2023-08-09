@@ -14,14 +14,14 @@ class LoadMoreInternalContacts {
 
   Stream<Either<Failure, GetContactsSuccess>> execute({
     int limit = limitInternalContacts, 
-    int? offset = 0
+    int? offset = 0,
   }) async* {
     try {
       final contacts = await _contactRepository
         .loadMoreContact(
           query: ContactQuery(keyword: ''),
           limit: limit,
-          offset: offset
+          offset: offset,
         );
 
       if (contacts.isEmpty || contacts.length < limit) {

@@ -68,8 +68,8 @@ class ContactsTabBodyView extends StatelessWidget {
                         ),
                       );
                     },
-                    child: ExpansionContactListTile(contact: contact)
-                  ))
+                    child: ExpansionContactListTile(contact: contact),
+                  ),)
                   .toList()..addAll([
                     ValueListenableBuilder(
                       valueListenable: controller.searchContactsController.isSearchModeNotifier,
@@ -90,9 +90,9 @@ class ContactsTabBodyView extends StatelessWidget {
                             }
 
                             return const SizedBox.shrink();
-                          }
+                          },
                         );
-                      }
+                      },
                     ),
                   ]),
               ),

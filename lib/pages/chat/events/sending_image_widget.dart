@@ -30,7 +30,7 @@ class SendingImageWidget extends StatelessWidget {
         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
-            ImageViewer(event, filePath: filePath)
+            ImageViewer(event, filePath: filePath),
         );
     }
   }

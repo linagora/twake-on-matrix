@@ -8,14 +8,14 @@ extension ContactExtension on Contact {
       matrixId,
       email,
       displayName: displayName,
-    )).toSet() ?? {};
+    ),).toSet() ?? {};
 
     if (emails == null || emails!.isEmpty) {
       listContacts.add(ContactSearchModel(
         matrixId,
         null,
         displayName: displayName,
-      ));
+      ),);
     }
 
     return listContacts;

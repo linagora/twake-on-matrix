@@ -38,14 +38,14 @@ class _ExpansionList extends State<ExpansionList> {
           context: context, 
           onPressed: () => widget.newPrivateChatController.goToNewGroupChat(), 
           iconData: Icons.supervisor_account_outlined, 
-          text: L10n.of(context)!.newGroupChat
+          text: L10n.of(context)!.newGroupChat,
         );
 
         final getHelpsButton = _IconTextTileButton(
           context: context, 
           onPressed:() => {}, 
           iconData: Icons.question_mark, 
-          text: L10n.of(context)!.getHelp
+          text: L10n.of(context)!.getHelp,
         );
 
         final moreListTile = Padding(
@@ -84,7 +84,7 @@ class _ExpansionList extends State<ExpansionList> {
         final contactsList = fetchContactsController.getContactsFromFetchStream(snapshot.data!);
 
         final contactsListSorted = contactsList.sorted(
-          (a, b) => widget.newPrivateChatController.comparePresentationContacts(a, b));
+          (a, b) => widget.newPrivateChatController.comparePresentationContacts(a, b),);
 
         if (contactsListSorted.isEmpty) {
           return Column(
@@ -151,11 +151,11 @@ class _ExpansionList extends State<ExpansionList> {
                       }
 
                       return const SizedBox.shrink();
-                    }
+                    },
                   );
-                }
+                },
               );
-            }
+            },
           ),
         ];
 
@@ -176,7 +176,7 @@ class _ExpansionList extends State<ExpansionList> {
               newGroupButton,
               getHelpsButton
             ]
-          ]
+          ],
         );
       },
     );
@@ -209,8 +209,8 @@ class _ExpansionList extends State<ExpansionList> {
                         widget.newPrivateChatController.toggleContactsList();
                       }, tooltip: isShow 
                         ? L10n.of(context)!.shrink 
-                        : L10n.of(context)!.expand);
-                  }
+                        : L10n.of(context)!.expand,);
+                  },
                 ),
               ],
             ),
@@ -253,7 +253,7 @@ class _IconTextTileButton extends StatelessWidget {
                 ),
                 Text(text, style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
-                  letterSpacing: -0.15
+                  letterSpacing: -0.15,
                 ),)
               ],
             ),

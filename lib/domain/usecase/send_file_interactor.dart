@@ -19,7 +19,7 @@ class SendFileInteractor {
         xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
         xFile.size,
         readStream: xFile.readStream,
-      )).toList();
+      ),).toList();
 
       for (final fileInfo in fileInfos) {
         await room.sendFileEvent(

@@ -17,7 +17,7 @@ class MessageTimeStyle {
     => Theme.of(context).textTheme.bodySmall?.merge(
         TextStyle(
           color: timelineColor(timelineOverlayMessage),
-          letterSpacing: 0.4
+          letterSpacing: 0.4,
         ),
       );
 }

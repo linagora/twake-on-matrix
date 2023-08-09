@@ -85,15 +85,15 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
                   decoration: InputDecoration(
                     isCollapsed: true,
                     hintText: widget.hintText, hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: LinagoraRefColors.material().neutral[60]),
+                      color: LinagoraRefColors.material().neutral[60],),
                   ),
                 ),
               );
             }
             return Text(widget.title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface));
-          }
+                color: Theme.of(context).colorScheme.onSurface,),);
+          },
         ),
       ),
       actions: [
@@ -116,17 +116,17 @@ class _SearchContactAppBarState extends State<SearchContactAppBar> {
                   onPressed: () => widget.searchContactsController.openSearchBar(),
                   tooltip: L10n.of(context)!.search,
                   paddingAll: 10.0,
-                  margin: const EdgeInsets.symmetric(vertical: 10.0)),
+                  margin: const EdgeInsets.symmetric(vertical: 10.0),),
                 TwakeIconButton(
                   icon: Icons.more_vert,
                   onPressed: () {},
                   tooltip: L10n.of(context)!.more,
                   paddingAll: 10.0,
-                  margin: const EdgeInsets.symmetric(vertical: 10.0)),
+                  margin: const EdgeInsets.symmetric(vertical: 10.0),),
               ],
             );
-          }
+          },
         ),
-      ]);
+      ],);
   }
 }

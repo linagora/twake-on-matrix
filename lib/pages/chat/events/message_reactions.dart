@@ -52,7 +52,7 @@ class MessageReactions extends StatelessWidget {
       reactionList: reactionList, 
       allReactionEvents: allReactionEvents, 
       event: event, 
-      client: client);
+      client: client,);
   }
 }
 
@@ -210,8 +210,8 @@ class _Reaction extends StatelessWidget {
             content,
             const SizedBox(width: 4,),
             Text('$count', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface
-            )),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),),
           ],
         ),
       ),

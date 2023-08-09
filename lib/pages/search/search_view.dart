@@ -18,7 +18,7 @@ class SearchView extends StatelessWidget {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64.0),
-        child: _buildAppBarSearch(context)),
+        child: _buildAppBarSearch(context),),
       body: WillPopScope(
         onWillPop: () async {
           searchController.goToRoomsShellBranch();
@@ -52,9 +52,9 @@ class SearchView extends StatelessWidget {
                             ),
                             toolbarHeight: 112,
                             backgroundColor: Colors.transparent,
-                            automaticallyImplyLeading: false
+                            automaticallyImplyLeading: false,
                           );
-                        }
+                        },
                       );
                     default: return emptyChild!;
                   }
@@ -176,7 +176,7 @@ class SearchView extends StatelessWidget {
         preferredSize: const Size(double.infinity, 4),
         child: Container(
           color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-          height: 1)),
+          height: 1,),),
     );
   }
 
@@ -196,9 +196,9 @@ class SearchView extends StatelessWidget {
               builder: (context, value, child) {
                 return Text(value.text.isEmpty ? L10n.of(context)!.recent : L10n.of(context)!.chatsAndContacts,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: LinagoraRefColors.material().neutral[40])
+                    color: LinagoraRefColors.material().neutral[40],),
                 );
-              }
+              },
             ),
           )
         ],

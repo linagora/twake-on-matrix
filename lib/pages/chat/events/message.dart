@@ -175,7 +175,7 @@ class Message extends StatelessWidget {
                                                   return Padding(
                                                     padding: EdgeInsets.only(
                                                       left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-                                                      bottom: 4.0),
+                                                      bottom: 4.0,),
                                                     child: Text(
                                                       displayName,
                                                       style: Theme.of(context)
@@ -327,7 +327,7 @@ class Message extends StatelessWidget {
                                                         padding: const EdgeInsets.only(
                                                           left: 6,
                                                           right: 8.0,
-                                                          bottom: 4.0
+                                                          bottom: 4.0,
                                                         ),
                                                         child: MessageTime(
                                                           timelineOverlayMessage:
@@ -549,7 +549,7 @@ class ReplyIconWidget extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: MessageStyle.forwardColorBackground(context)
+                color: MessageStyle.forwardColorBackground(context),
               ),
               width: MessageStyle.forwardContainerSize,
               height: MessageStyle.forwardContainerSize,

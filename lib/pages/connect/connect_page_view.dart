@@ -183,7 +183,7 @@ class ConnectPageView extends StatelessWidget {
                               onPressed: () => controller
                                   .ssoLoginAction(
                                     context: context,
-                                    id: identityProviders.single.id!),
+                                    id: identityProviders.single.id!,),
                               label: Text(
                                 identityProviders.single.name ??
                                     identityProviders.single.brand ??
@@ -198,7 +198,7 @@ class ConnectPageView extends StatelessWidget {
                                   onPressed: () => controller
                                       .ssoLoginAction(
                                         context: context,
-                                        id: identityProvider.id!),
+                                        id: identityProvider.id!,),
                                   identityProvider: identityProvider,
                                 ),
                             ].toList(),

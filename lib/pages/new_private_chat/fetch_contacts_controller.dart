@@ -6,7 +6,6 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_network_contact_success.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/usecase/fetch_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/load_more_internal_contacts.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';

@@ -18,13 +18,13 @@ class SearchRecentChatInteractor {
       final recentChat = rooms.searchRecentChat(
         matrixLocalizations: matrixLocalizations,
         keyword: keyword,
-        limit: limit);
+        limit: limit,);
       yield Right(GetContactAndRecentChatSuccess(
         searchResult: recentChat, 
         shouldLoadMoreContacts: keyword.isNotEmpty,
         contactsOffset: 0,
         keyword: keyword,
-      ));
+      ),);
     } catch (e) {
       yield Left(GetContactAndRecentChatFailed(exception: e));
     }

@@ -68,10 +68,10 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                                         tooltip: L10n.of(context)!.cancel,
                                         icon: const Icon(Icons.close_outlined),
                                         onPressed: controller.cancelSearch,
-                                        color: Theme.of(context).colorScheme.onBackground)
+                                        color: Theme.of(context).colorScheme.onBackground,)
                                     : Icon(
                                         Icons.search_outlined,
-                                        color: Theme.of(context).colorScheme.onBackground),
+                                        color: Theme.of(context).colorScheme.onBackground,),
                                   suffixIcon: controller.isSearchMode
                                     ? controller.isSearching
                                       ? const Padding(
@@ -89,10 +89,10 @@ class ChatListHeader extends StatelessWidget implements PreferredSizeWidget {
                                       : TextButton(
                                           onPressed: controller.setServer,
                                               style: TextButton.styleFrom(
-                                                textStyle: const TextStyle(fontSize: 12)),
+                                                textStyle: const TextStyle(fontSize: 12),),
                                           child: Text(
                                             controller.searchServer ?? Matrix.of(context).client.homeserver!.host,
-                                            maxLines: 2),
+                                            maxLines: 2,),
                                       )
                                     : const SizedBox.shrink(),
                                 ),

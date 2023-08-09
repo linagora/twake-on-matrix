@@ -30,7 +30,7 @@ class ForwardMessageIsShareFileState extends Success {
 
   const ForwardMessageIsShareFileState({
     required this.shareFile,
-    required this.room
+    required this.room,
   });
 
   @override

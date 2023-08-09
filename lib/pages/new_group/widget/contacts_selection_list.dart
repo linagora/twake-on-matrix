@@ -92,14 +92,14 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                                   widget.newGroupController.selectedContact();
                                 },
                               );
-                            }
+                            },
                           )
                         ],
                       ),
                     ),
                   ),
                 );
-              }
+              },
             ),
             ValueListenableBuilder<bool>(
               valueListenable: widget.newGroupController.searchContactsController.isSearchModeNotifier,
@@ -120,9 +120,9 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                     }
 
                     return const SizedBox.shrink();
-                  }
+                  },
                 );
-              }
+              },
             )
           ],
         );
