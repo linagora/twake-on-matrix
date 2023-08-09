@@ -42,8 +42,6 @@ import '../utils/background_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
 
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 class Matrix extends StatefulWidget {
   final Widget? child;
 
@@ -53,14 +51,14 @@ class Matrix extends StatefulWidget {
 
   final Map<String, String>? queryParameters;
 
-  final GlobalKey<NavigatorState>? globalRouteKey;
+  final GoRouterDelegate? routerDelegate;
 
   const Matrix({
     this.child,
     required this.context,
     required this.clients,
     this.queryParameters,
-    required this.globalRouteKey,
+    required this.routerDelegate,
     Key? key,
   }) : super(key: key);
 
@@ -425,7 +423,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (PlatformInfos.isMobile) {
       backgroundPush = BackgroundPush(
         client,
-        widget.globalRouteKey,
+        widget.routerDelegate,
         onFcmError: (errorMsg, {Uri? link}) async {
           final result = await showOkCancelAlertDialog(
             barrierDismissible: true,

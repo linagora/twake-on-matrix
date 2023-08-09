@@ -54,8 +54,6 @@ class FluffyChatAppState extends State<FluffyChatApp> {
     return ThemeBuilder(
       builder: (context, themeMode, primaryColor) => MaterialApp.router(
         restorationScopeId: 'Twake',
-        // ignore: deprecated_member_use
-        useInheritedMediaQuery: true,
         title: AppConfig.applicationName,
         debugShowCheckedModeBanner: false,
         themeMode: themeMode,
@@ -70,7 +68,7 @@ class FluffyChatAppState extends State<FluffyChatApp> {
         builder: (context, child) => Matrix(
           context: context,
           clients: widget.clients,
-          globalRouteKey: router.routerDelegate.navigatorKey,
+          routerDelegate: router.routerDelegate,
           child: child,
         ),
       ),
