@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
@@ -50,7 +49,7 @@ class BackgroundPush {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Client client;
-  GlobalKey<NavigatorState>? globalRouteKey;
+  GoRouterDelegate? routerDelegate;
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
@@ -59,8 +58,8 @@ class BackgroundPush {
   Future<void> loadLocale() async {
     // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
     l10n ??= (currentContext != null ? L10n.of(currentContext!) : null) ??
-        // ignore: deprecated_member_use
-        (await L10n.delegate.load(window.locale));
+        (await L10n.delegate
+            .load(View.of(currentContext!).platformDispatcher.locale));
   }
 
   final pendingTests = <String, Completer<void>>{};
@@ -71,7 +70,7 @@ class BackgroundPush {
 
   bool upAction = false;
 
-  BackgroundPush._(this.client, this.globalRouteKey) {
+  BackgroundPush._(this.client, this.routerDelegate) {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
@@ -102,22 +101,20 @@ class BackgroundPush {
 
   factory BackgroundPush.clientOnly(
     Client client, {
-    GlobalKey<NavigatorState>? globalRouteKey,
+    GoRouterDelegate? routerDelegate,
   }) {
-    _instance ??= BackgroundPush._(client, globalRouteKey);
+    _instance ??= BackgroundPush._(client, routerDelegate);
     return _instance!;
   }
 
   factory BackgroundPush(
     Client client,
-    GlobalKey<NavigatorState>? globalRouteKey, {
+    GoRouterDelegate? routerDelegate, {
     final void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
     final instance =
-        BackgroundPush.clientOnly(client, globalRouteKey: globalRouteKey);
-    instance.globalRouteKey = globalRouteKey;
-    // ignore: prefer_initializing_formals
-    // ignore: prefer_initializing_formals
+        BackgroundPush.clientOnly(client, routerDelegate: routerDelegate);
+    instance.routerDelegate = routerDelegate;
     instance.onFcmError = onFcmError;
     return instance;
   }
@@ -547,12 +544,11 @@ class BackgroundPush {
   }
 
   String? get roomId {
-    return currentContext != null
-        ? GoRouterState.of(currentContext!).pathParameters['roomid']
-        : '';
+    return routerDelegate?.currentConfiguration.pathParameters['roomid'];
   }
 
-  BuildContext? get currentContext => globalRouteKey?.currentState?.context;
+  BuildContext? get currentContext =>
+      routerDelegate?.navigatorKey.currentContext;
 
   PushNotification _parseMessagePayload(dynamic message) {
     Logs().d('BackgroundPush::_parseMessagePayload()');
