@@ -98,7 +98,7 @@ class ForwardController extends State<Forward> {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor.execute(
       rooms: filteredRoomsForAll,
       selectedEvents: selectedEvents,
-      matrixState: Matrix.of(context)
+      matrixState: Matrix.of(context),
     ).listen(
       (event) => _handleForwardMessageOnData(context, event),
       onDone: _handleForwardMessageOnDone,
@@ -127,7 +127,7 @@ class ForwardController extends State<Forward> {
               useRootNavigator: false,
               builder: (c) => SendFileDialog(
                 files: [dataOnSuccess.shareFile],
-                room: dataOnSuccess.room)
+                room: dataOnSuccess.room,),
             );
             break;
         }

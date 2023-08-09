@@ -18,7 +18,7 @@ class TomContactAPI {
       fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],
       val: query.keyword,
       limit: limit,
-      offset: offset
+      offset: offset,
     );
     
     final response = await _client.post(

@@ -83,7 +83,7 @@ class BackgroundPush {
       );
       fcmSharedIsolate?.setListeners(onMessage: (message) {
         onReceiveNotification(message);
-      });
+      },);
     } else if (Platform.isIOS) {
       apnChannel.setMethodCallHandler((call) async {
         Logs().v('[Push] Received APN call: $call');
@@ -106,7 +106,7 @@ class BackgroundPush {
     Client client,
     GlobalKey<NavigatorState>? globalRouteKey,
     {
-    final void Function(String errorMsg, {Uri? link})? onFcmError
+    final void Function(String errorMsg, {Uri? link})? onFcmError,
     }
   ) {
     final instance = BackgroundPush.clientOnly(client, globalRouteKey: globalRouteKey);
@@ -202,7 +202,7 @@ class BackgroundPush {
                           }
                         }
                       }
-                    : {}),
+                    : {},),
             kind: 'http',
           ),
           append: false,
@@ -339,6 +339,7 @@ class BackgroundPush {
       }
       await client.roomsLoading;
       await client.accountDataLoading;
+      // ignore: unused_local_variable
       final isStory = client
               .getRoomById(roomId)
               ?.getState(EventTypes.RoomCreate)

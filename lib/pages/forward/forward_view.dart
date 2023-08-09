@@ -38,7 +38,7 @@ class _ForwardViewState extends State<ForwardView> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ForwardViewStyle.preferredAppBarSize),
-        child: _buildAppBarForward(context)),
+        child: _buildAppBarForward(context),),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
         child: Column(
@@ -51,7 +51,7 @@ class _ForwardViewState extends State<ForwardView> {
       ),
       floatingActionButton: Align(
         alignment: const Alignment(0.5, 1.1),
-        child: _buildBottomBar()),
+        child: _buildBottomBar(),),
     );
   }
 
@@ -74,7 +74,7 @@ class _ForwardViewState extends State<ForwardView> {
                       child: Padding(
                         padding: EdgeInsets.only(right: 14),
                         child: TwakeFloatingActionButton(
-                          customIcon: SizedBox(child: CircularProgressIndicator())
+                          customIcon: SizedBox(child: CircularProgressIndicator()),
                         ),
                       ),
                     ),
@@ -143,12 +143,12 @@ class _ForwardViewState extends State<ForwardView> {
                     isCollapsed: true,
                     hintText: "...",
                     hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: LinagoraRefColors.material().neutral[60]),
-                  )))
+                  ),),)
             : Text(
               L10n.of(context)!.forwardTo,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName)),
+                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,),),
         ],
       ),
       actions: [
@@ -162,7 +162,7 @@ class _ForwardViewState extends State<ForwardView> {
           preferredSize: const Size(double.infinity, 4),
           child: Container(
             color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-            height: 1)),
+            height: 1,),),
     );
   }
 
@@ -196,7 +196,7 @@ class _ForwardViewState extends State<ForwardView> {
       children: [
         Text(L10n.of(context)!.recentlyChats,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: LinagoraRefColors.material().neutral[40])
+            color: LinagoraRefColors.material().neutral[40],),
         ),
         Expanded(
           child: Row(
@@ -212,7 +212,7 @@ class _ForwardViewState extends State<ForwardView> {
                 onPressed: () => _toggleRecentlyChats(),
                 tooltip: isShowRecentlyChats
                   ? L10n.of(context)!.shrink
-                  : L10n.of(context)!.expand),
+                  : L10n.of(context)!.expand,),
             ],
           ),
         )

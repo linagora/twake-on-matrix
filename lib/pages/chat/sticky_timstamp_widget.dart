@@ -8,7 +8,7 @@ class StickyTimestampWidget extends StatelessWidget {
   const StickyTimestampWidget({
     Key? key,
     required this.content,
-    this.isStickyHeader = false
+    this.isStickyHeader = false,
   }) : super(key: key);
 
   @override

@@ -73,7 +73,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
     sortedSelectedAssets = imagePickerController.sortedSelectedAssets;
     return _createRoom(onRoomCreatedSuccess: (room) {
       super.sendImages(room: room, assets: sortedSelectedAssets);
-    });
+    },);
   }
 
   @override
@@ -127,7 +127,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
           sendController.text,
         );
       },
-      onRoomCreatedFailed: onCreateRoomFailed
+      onRoomCreatedFailed: onCreateRoomFailed,
     );
   }
 
@@ -137,7 +137,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
   }) async {
     createDirectChatInteractor.execute(
       contactMxId: presentationContact!.matrixId!, 
-      client: Matrix.of(context).client
+      client: Matrix.of(context).client,
     ).listen((event) {
       event.fold(
         (failure) {
@@ -153,7 +153,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            });
+            },);
           } else if (success is CreateDirectChatSuccess) {
             final room = Matrix.of(context).client.getRoomById(success.roomId);
             if (room != null) {
@@ -233,7 +233,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
       onCreateRoomFailed: () {
         Fluttertoast.showToast(msg: 'Create room failed');
         FocusScope.of(context).requestFocus(inputFocus);
-      }
+      },
     );
     
   }

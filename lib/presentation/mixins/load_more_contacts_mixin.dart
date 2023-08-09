@@ -20,7 +20,7 @@ mixin LoadMoreContactsMixin {
       if(allowLoadMore) {
         if (isLoadMoreAction) {
           fetchContactsController.loadMoreContacts(
-            offset: fetchContactsController.lastContactIndexNotifier.value
+            offset: fetchContactsController.lastContactIndexNotifier.value,
           );
         }
       }

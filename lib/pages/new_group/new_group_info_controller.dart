@@ -21,7 +21,7 @@ extension NewGroupInfoController on NewGroupController {
     if (avatarNotifier.value != null) {
       uploadAvatarNewGroupChat(
         matrixClient: client, 
-        entity: avatarNotifier.value!);
+        entity: avatarNotifier.value!,);
     } else {
       createNewGroup();
     }

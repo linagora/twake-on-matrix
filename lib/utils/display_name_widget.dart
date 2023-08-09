@@ -8,7 +8,7 @@ class BuildDisplayName extends StatelessWidget {
     super.key,
     this.profileDisplayName,
     this.contactDisplayName,
-    this.style
+    this.style,
   });
 
   @override
@@ -34,7 +34,7 @@ class _DisplayName extends StatelessWidget {
       displayName,
       style: style ?? Theme.of(context).textTheme.bodySmall!.copyWith(
         color: Theme.of(context).colorScheme.onSurface,
-        fontWeight: FontWeight.w700
+        fontWeight: FontWeight.w700,
       ),
       overflow: TextOverflow.ellipsis,
     );

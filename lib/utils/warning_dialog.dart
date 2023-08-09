@@ -64,7 +64,7 @@ class _WarningDialogWidgetState extends State<WarningDialogWidget> {
                       if (widget.onAcceptButton != null) {
                           widget.onAcceptButton!.call();
                       }
-                    })
+                    },)
                 ],
               ),
             ),
@@ -96,9 +96,9 @@ class _WarningTextButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             child: Text(text, style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary
-          )),
-        )),
+              color: Theme.of(context).colorScheme.primary,
+          ),),
+        ),),
     );
   }
 }

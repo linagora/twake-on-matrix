@@ -22,7 +22,7 @@ class SearchContactsInteractor {
       final contacts = await contactRepository.searchContact(
         query: ContactQuery(keyword: keyword), 
         offset: offset,
-        limit: limit);
+        limit: limit,);
       final newSearches = contacts.expand((contact) => contact.toSearch()).toList();
       final shouldLoadMoreContacts = contacts.length == limit;
       final contactsOffset = shouldLoadMoreContacts ? offset + limit : offset;
@@ -30,8 +30,8 @@ class SearchContactsInteractor {
         searchResult: newSearches,
         contactsOffset: contactsOffset,
         shouldLoadMoreContacts: shouldLoadMoreContacts,
-        keyword: keyword
-      ));
+        keyword: keyword,
+      ),);
     } catch (e) {
       yield Left(GetContactAndRecentChatFailed(exception: e));
     }

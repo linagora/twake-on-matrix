@@ -119,7 +119,7 @@ class TwakeRoutes {
           ),
         ],
       ),
-    ]
+    ],
   );
 
   StatefulShellBranch get _roomsShellBranch => StatefulShellBranch(
@@ -130,7 +130,7 @@ class TwakeRoutes {
         path: '/rooms',
         pageBuilder: (context, state) {
           return const NoTransitionPage(
-              child: AdaptiveScaffoldRoute(body: ChatList())
+              child: AdaptiveScaffoldRoute(body: ChatList()),
           );
         },
         routes: [
@@ -140,7 +140,7 @@ class TwakeRoutes {
               routes: [
                 _draftChatRoute(body: const Search()),
                 _roomIdRoute(body: const Search()),
-              ]
+              ],
           ),
           GoRoute(
               path: 'newprivatechat',
@@ -161,10 +161,10 @@ class TwakeRoutes {
                   ),
                 ),
                 _draftChatRoute(body: const ChatList()),
-              ]
+              ],
           ),
           _roomIdRoute(body: const ChatList()),
-        ]
+        ],
       ),
     ],
   );
@@ -179,7 +179,7 @@ class TwakeRoutes {
           return const NoTransitionPage(
             child: AdaptiveScaffoldRoute(
               body: ContactsTab(),
-            )
+            ),
           );
         },
         routes: [
@@ -211,7 +211,7 @@ class TwakeRoutes {
           return  NoTransitionPage(child: AdaptiveScaffoldRoute(
             body: Container(),
             secondaryBody: widget,
-          ));
+          ),);
         },
         routes: [
           GoRoute(
@@ -243,7 +243,7 @@ class TwakeRoutes {
 
   GoRoute _draftChatRoute({
     String? path,
-    required Widget body
+    required Widget body,
   }) => GoRoute(
     path: path ?? 'draftChat',
     pageBuilder: (context, state) {
@@ -317,7 +317,7 @@ class TwakeRoutes {
       path: 'forward',
       builder: (context, state) {
         return const Forward();
-      }
+      },
     )
   ];
 

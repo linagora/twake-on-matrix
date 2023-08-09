@@ -137,7 +137,7 @@ class NewGroupController extends State<NewGroup>
       final groupName = contactLis.map((contact) => contact.displayName).join(", ");
       groupNameTextEditingController.text = groupName;
       groupNameTextEditingController.selection = TextSelection.fromPosition(
-          TextPosition(offset: groupNameTextEditingController.text.length)
+          TextPosition(offset: groupNameTextEditingController.text.length),
       );
       groupNameFocusNode.requestFocus();
     } else {
@@ -175,7 +175,7 @@ class NewGroupController extends State<NewGroup>
           .whereNotNull()
           .toList(),
         enableEncryption: true,
-        urlAvatar: urlAvatar
+        urlAvatar: urlAvatar,
       ),
     );
   }
@@ -190,7 +190,7 @@ class NewGroupController extends State<NewGroup>
     ).listen(
       (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
       onDone: _handleUploadAvatarNewGroupChatOnDone,
-      onError: _handleUploadAvatarNewGroupChatOnError
+      onError: _handleUploadAvatarNewGroupChatOnError,
     );
   }
 
@@ -204,7 +204,7 @@ class NewGroupController extends State<NewGroup>
     ).listen(
       (event) => _handleCreateNewGroupChatChatOnData(context, event),
       onDone: _handleCreateNewGroupChatOnDone,
-      onError: _handleCreateNewGroupChatOnError
+      onError: _handleCreateNewGroupChatOnError,
     );
   }
 
@@ -217,7 +217,7 @@ class NewGroupController extends State<NewGroup>
         WarningDialog.showWarningDialog(context, onAcceptButton: () {
           WarningDialog.hideWarningDialog(context);
           createNewGroup();
-        });
+        },);
       },
       (success) {
         Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success');
@@ -301,7 +301,7 @@ class NewGroupController extends State<NewGroup>
   bool get isCreatingRoom {
     return createRoomStateNotifier.value.fold(
       (failure) => false, 
-      (success) => success is UploadContentLoading || success is CreateNewGroupChatLoading
+      (success) => success is UploadContentLoading || success is CreateNewGroupChatLoading,
     ) ?? false;
   }
 

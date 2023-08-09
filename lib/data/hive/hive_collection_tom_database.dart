@@ -121,7 +121,7 @@ class HiveCollectionToMDatabase {
     );
     tomConfigurationsBox = await _collection.openBox(
       _tomConfigurationsBoxName,
-      preload: true
+      preload: true,
     );
   }
 

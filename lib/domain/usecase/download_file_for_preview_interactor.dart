@@ -24,7 +24,7 @@ class DownloadFileForPreviewInteractor {
     try {
       final matrixFile = await event.downloadAndDecryptAttachment(
         downloadCallback: downloadCallback,
-        getThumbnail: getThumbnail
+        getThumbnail: getThumbnail,
       );
       final tempFile = File('$tempDirPath/${event.filename}');
       tempFile.createSync(recursive: true);
@@ -36,9 +36,9 @@ class DownloadFileForPreviewInteractor {
       yield Right(DownloadFileForPreviewSuccess(
         downloadFileForPreviewResponse: DownloadFileForPreviewResponse(
           filePath: tempFile.path,
-          mimeType: lookupMimeType(tempFile.path)
-        )
-      ));
+          mimeType: lookupMimeType(tempFile.path),
+        ),
+      ),);
     } catch (e) {
       yield Left(DownloadFileForPreviewFailure(exception: e));
     }

@@ -77,7 +77,7 @@ class ImageBubble extends StatelessWidget {
         duration: const Duration(seconds: 1),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20)
+            borderRadius: BorderRadius.circular(20),
           ),
           constraints: maxSize
             ? BoxConstraints(

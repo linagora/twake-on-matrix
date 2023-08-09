@@ -56,7 +56,7 @@ class SearchContactsAndChatsController {
       keyword: '',
       matrixLocalizations: matrixLocalizations,
       rooms: rooms,
-      limit: limitPrefetchedRecentChats
+      limit: limitPrefetchedRecentChats,
     ).listen((event) => mapPreSearchChatToPresentation(event, isLoadMore: false));
   }
 
@@ -76,11 +76,11 @@ class SearchContactsAndChatsController {
     final oldPresentation = isLoadMore 
       ? recentAndContactsNotifier.value.fold(
           (failure) => null, 
-          (success) => success is GetContactAndRecentChatPresentation ? success : null) 
+          (success) => success is GetContactAndRecentChatPresentation ? success : null,) 
       : null;
     final newEvent = event.map((success) => success is GetContactAndRecentChatSuccess 
       ? success.toPresentation(oldPresentation: oldPresentation) 
-      : success);
+      : success,);
     recentAndContactsNotifier.value = newEvent;
     checkListNotEnoughToDisplay();
   }
@@ -118,11 +118,11 @@ class SearchContactsAndChatsController {
         keyword: success.keyword,
         matrixLocalizations: matrixLocalizations,
         offset: success.contactsOffset,
-        limit: limitContactsPerPage
+        limit: limitContactsPerPage,
       ).listen((event) => {
         _isLoadingMore = false,
         mapPreSearchChatToPresentation(event, isLoadMore: true)
-      });
+      },);
     }
   );
 

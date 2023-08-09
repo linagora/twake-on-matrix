@@ -22,7 +22,7 @@ class LookupMxidRequest with EquatableMixin {
     required this.fields,
     this.val,
     this.limit,
-    this.offset
+    this.offset,
   });
     
   @override

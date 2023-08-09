@@ -32,7 +32,7 @@ extension ContactExtensionInPresentation on Contact {
           displayName: displayName,
           matrixId: matrixId,
           status: status,
-        )).toSet() ?? {};
+        ),).toSet() ?? {};
 
     if (emails == null || emails!.isEmpty) {
       listContacts.add(PresentationContact(
@@ -40,7 +40,7 @@ extension ContactExtensionInPresentation on Contact {
         displayName: displayName,
         matrixId: matrixId,
         status: status,
-      ));
+      ),);
     }
 
     return listContacts;

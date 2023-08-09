@@ -163,6 +163,7 @@ class AddStoryController extends State<AddStoryPage> {
         var video = this.video?.detectFileType;
         if (video != null) {
           video = await video.resizeVideo();
+          // ignore: unused_local_variable
           final thumbnail = await video.getVideoThumbnail();
           // await storiesRoom.sendFileEvent(
           //   video,

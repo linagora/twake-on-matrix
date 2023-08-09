@@ -212,8 +212,8 @@ class UrlLauncher {
           url: Uri.parse(url!),
           options: ChromeSafariBrowserClassOptions(
             android: AndroidChromeCustomTabsOptions(
-              shareState: CustomTabsShareState.SHARE_STATE_ON),
-            ios: IOSSafariOptions(barCollapsingEnabled: true)));
+              shareState: CustomTabsShareState.SHARE_STATE_ON,),
+            ios: IOSSafariOptions(barCollapsingEnabled: true),),);
       } else {
         launchUrlString(url!);
       }

@@ -30,13 +30,13 @@ class NoContactsFound extends StatelessWidget {
                     TextSpan(
                       text: L10n.of(context)!.searchResultNotFound5,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     )
                   ],
                 ),
-              ]
-            )
+              ],
+            ),
           )
         ],
       ),

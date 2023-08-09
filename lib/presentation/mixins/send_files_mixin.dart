@@ -30,7 +30,7 @@ mixin SendFilesMixin on ImagePickerMixin {
       room: room,
       entities: selectedAssets
         .map<AssetEntity>((entity) => entity.asset)
-        .toList()
+        .toList(),
     );
 
     removeAllImageSelected();

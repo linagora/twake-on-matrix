@@ -46,7 +46,7 @@ class TwakeLinkText extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: _buildCleanRichText(context),
           )
-        ]);
+        ],);
   }
 
   Widget _buildWidgetNoPreview(BuildContext context) {

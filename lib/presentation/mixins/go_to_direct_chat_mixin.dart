@@ -55,7 +55,7 @@ mixin GoToDraftChatMixin {
   void onRecentChatTap({
     required BuildContext context,
     required String path,
-    required RecentChatPresentationSearch recentChatPresentationSearch
+    required RecentChatPresentationSearch recentChatPresentationSearch,
   }) {
     Logs().d('GoToDraftChatMixin::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}');
     context.go('/$path/${recentChatPresentationSearch.id}');
@@ -64,7 +64,7 @@ mixin GoToDraftChatMixin {
   void goToDraftChat({
     required BuildContext context,
     required String path,
-    required ContactPresentationSearch contactPresentationSearch
+    required ContactPresentationSearch contactPresentationSearch,
   }) {
     if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
       context.go('/$path/draftChat', extra: {
@@ -72,7 +72,7 @@ mixin GoToDraftChatMixin {
         PresentationContactConstant.email: contactPresentationSearch.email ?? '',
         PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',
         PresentationContactConstant.status: '',
-      });
+      },);
     }
   }
 

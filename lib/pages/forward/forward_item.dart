@@ -60,12 +60,12 @@ class ForwardItem extends StatelessWidget {
                             height: ForwardItemStyle.selectedContainerSize,
                             decoration: const BoxDecoration(
                               color: Colors.white,
-                              shape: BoxShape.circle
+                              shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.check_circle,
                               size: ForwardItemStyle.selectedIconSize,
-                              color: LinagoraSysColors.material().primary))),
+                              color: LinagoraSysColors.material().primary,),),),
                     ],
                   ),
                 ),

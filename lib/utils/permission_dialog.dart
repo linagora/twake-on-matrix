@@ -79,7 +79,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                       context: context,
                       text: L10n.of(context)!.deny, onPressed: () async {
                         Navigator.of(context).pop();
-                      }),
+                      },),
                     _PermissionTextButton(
                       context: context, 
                       text: L10n.of(context)!.allow,
@@ -89,9 +89,9 @@ class _PermissionDialogState extends State<PermissionDialog>
                         } else {
                           await widget.permission.request();
                         }
-                      })
+                      },)
                   ],
-                )
+                ),
               ),
             ],
           ),
@@ -122,9 +122,9 @@ class _PermissionTextButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
           child: Text(text, style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary
-          )),
-        )),
+            color: Theme.of(context).colorScheme.primary,
+          ),),
+        ),),
     );
   }
 }

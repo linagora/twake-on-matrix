@@ -129,6 +129,7 @@ class ChatListViewBody extends StatelessWidget {
                         ),
                       ],
                       if (displayStoriesHeader)
+                        // ignore: dead_code
                         StoriesHeader(
                           key: const Key('stories_header'),
                           filter: controller.searchChatController.text,

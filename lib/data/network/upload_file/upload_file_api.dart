@@ -25,7 +25,7 @@ class UploadFileAPI {
       queryParameters: {
         'fileName': fileInfo.fileName,
       },
-      options: Options(headers: dioHeaders)
+      options: Options(headers: dioHeaders),
     ).onError((error, stackTrace) => throw Exception(error));
 
     return UploadFileResponse.fromJson(response);

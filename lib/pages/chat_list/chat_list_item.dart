@@ -239,7 +239,7 @@ class ChatListItem extends StatelessWidget {
                         children: [
                           Expanded(child: typingTextWidget(typingText, context)), 
                           const Spacer(),
-                        ])
+                        ],)
                       : (isGroup
                           ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

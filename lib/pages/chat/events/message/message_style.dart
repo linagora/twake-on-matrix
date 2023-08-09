@@ -41,7 +41,7 @@ class MessageStyle {
       TextStyle(
         color: Theme.of(context).colorScheme.onSurface,
         letterSpacing: 0.4,
-      )
+      ),
     );
 
   static double get forwardContainerSize => 40.0;

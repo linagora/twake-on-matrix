@@ -24,7 +24,7 @@ extension AssetEntityExtension on AssetEntity {
     return FileInfo(
       file.path.split('/').last,
       file.path,
-      file.lengthSync()
+      file.lengthSync(),
     );
   }
 }

@@ -118,9 +118,9 @@ abstract class FluffyThemes {
             TextStyle(
               fontSize: 17,
               color: LinagoraRefColors.material().neutralVariant[60],
-              overflow: TextOverflow.ellipsis
+              overflow: TextOverflow.ellipsis,
             ),
-          )
+          ),
         ),
         appBarTheme: AppBarTheme(
           scrolledUnderElevation: 0,
@@ -266,13 +266,13 @@ abstract class FluffyThemes {
                 ? LinagoraSysColors.material().onSurface
                 : LinagoraSysColors.material().onSurfaceDark,
             ),
-          )
+          ),
         ),
         iconTheme: IconThemeData(
           size: iconSize,
           color: brightness == Brightness.light
             ? LinagoraSysColors.material().onBackground
-            : LinagoraSysColors.material().onBackgroundDark
+            : LinagoraSysColors.material().onBackgroundDark,
         ),
         switchTheme: SwitchThemeData(
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -339,7 +339,7 @@ abstract class FluffyThemes {
           surfaceTintColor: brightness == Brightness.light
             ? LinagoraSysColors.material().background
             : LinagoraSysColors.material().backgroundDark,
-        )
+        ),
       );
 }
 

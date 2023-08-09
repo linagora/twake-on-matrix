@@ -39,7 +39,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
   void fetchPreSearchRecentContacts() {
     _preSearchRecentContactsInteractor.execute(
       recentRooms: Matrix.of(context).client.rooms,
-      limit: limitPrefetchedRecentContacts
+      limit: limitPrefetchedRecentContacts,
     ).listen((value) {
       preSearchRecentContactsNotifier.value = value;
     });
@@ -76,7 +76,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
 
   void goToDraftChat({
     required BuildContext context,
-    required ContactPresentationSearch contactPresentationSearch
+    required ContactPresentationSearch contactPresentationSearch,
   }) {
     if (contactPresentationSearch.matrixId != Matrix.of(context).client.userID) {
       context.go('/rooms/search/draftChat', extra: {
@@ -84,7 +84,7 @@ class SearchController extends State<Search> with ComparablePresentationSearchMi
         PresentationContactConstant.email: contactPresentationSearch.email ?? '',
         PresentationContactConstant.displayName: contactPresentationSearch.displayName ?? '',
         PresentationContactConstant.status: '',
-      });
+      },);
     }
   }
 

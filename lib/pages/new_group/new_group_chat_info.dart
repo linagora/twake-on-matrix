@@ -36,7 +36,7 @@ class NewGroupChatInfo extends StatelessWidget {
           builder: (context, constraint) {
             return ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom
+                maxHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom,
               ),
               child: IntrinsicHeight(
                 child: Column(
@@ -44,7 +44,7 @@ class NewGroupChatInfo extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
-                      child: _buildChangeProfileWidget(context)),
+                      child: _buildChangeProfileWidget(context),),
                     const SizedBox(height: 16.0),
                     Text(L10n.of(context)!.addAPhoto,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -59,11 +59,11 @@ class NewGroupChatInfo extends StatelessWidget {
                           return Text(L10n.of(context)!.maxImageSize(maxMediaSize!.bytesToMB()),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: LinagoraRefColors.material().neutral[40],
-                            ));
+                            ),);
                         } else {
                           return const SizedBox.shrink();
                         }
-                      }
+                      },
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextFieid(context),
@@ -78,7 +78,7 @@ class NewGroupChatInfo extends StatelessWidget {
                 ),
               ),
             );
-          }
+          },
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -94,7 +94,7 @@ class NewGroupChatInfo extends StatelessWidget {
           builder: (context, value, child) {
             if (newGroupController.isCreatingRoom) {
               return const TwakeFloatingActionButton(
-                customIcon: SizedBox(child: CircularProgressIndicator())
+                customIcon: SizedBox(child: CircularProgressIndicator()),
               );
             }
             return TwakeFloatingActionButton(
@@ -148,7 +148,7 @@ class NewGroupChatInfo extends StatelessWidget {
                 ),
               ],
             ),
-          )),
+          ),),
       ),
     );
   }
@@ -192,14 +192,14 @@ class NewGroupChatInfo extends StatelessWidget {
                       );
                     },
                   ),
-                ));
+                ),);
             },
             child: Icon(
               Icons.camera_alt_outlined,
               color: Theme.of(context).colorScheme.surface,
             ),
           ),
-        ));
+        ),);
   }
 
   Widget _buildGroupNameTextFieid(BuildContext context) {
@@ -230,7 +230,7 @@ class NewGroupChatInfo extends StatelessWidget {
               contentPadding: const EdgeInsets.all(16.0),
             ),
           );
-        }
+        },
       ),
     );
   }

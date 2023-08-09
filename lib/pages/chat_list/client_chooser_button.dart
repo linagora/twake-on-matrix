@@ -188,9 +188,9 @@ class ClientChooserButton extends StatelessWidget {
                 ),
               ),
             ),
-          ]
+          ],
         );
-      } 
+      }, 
     );
   }
 

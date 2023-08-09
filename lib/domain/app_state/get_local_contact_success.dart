@@ -3,6 +3,6 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 
 class GetLocalContactSuccess extends GetContactsSuccess {
   const GetLocalContactSuccess({
-    required Set<Contact> contacts
+    required Set<Contact> contacts,
   }) : super(contacts: contacts);
 }

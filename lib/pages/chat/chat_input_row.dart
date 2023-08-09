@@ -133,8 +133,8 @@ class ChatInputRow extends StatelessWidget {
                               hintText: L10n.of(context)!.chatMessage,
                               hintMaxLines: 1,
                               hintStyle: Theme.of(context).textTheme.bodyLarge?.merge(
-                                Theme.of(context).inputDecorationTheme.hintStyle
-                              ).copyWith(letterSpacing: -0.15)
+                                Theme.of(context).inputDecorationTheme.hintStyle,
+                              ).copyWith(letterSpacing: -0.15),
                             ),
                             onChanged: controller.onInputBarChanged,
                           ),
@@ -172,7 +172,7 @@ class ChatInputRow extends StatelessWidget {
                                           onPressed: () => controller.emojiPickerAction(),
                                           icon: Icons.tag_faces,
                                         );
-                                      })
+                                      },)
                                   : ValueListenableBuilder(
                                       valueListenable: controller.inputText,
                                       builder: (context, value, child) {
@@ -182,7 +182,7 @@ class ChatInputRow extends StatelessWidget {
                                           onPressed: () => controller.inputFocus.requestFocus(),
                                           icon: Icons.keyboard,
                                         );
-                                      }),
+                                      },),
                             ),
                           ),
                         ),

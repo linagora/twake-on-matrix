@@ -10,7 +10,7 @@ class CreateNewGroupChatInteractor {
 
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
-    required CreateNewGroupChatRequest createNewGroupChatRequest
+    required CreateNewGroupChatRequest createNewGroupChatRequest,
   }) async* {
     try {
       yield Right(CreateNewGroupChatLoading());
@@ -20,7 +20,7 @@ class CreateNewGroupChatInteractor {
         content: {
           'url': createNewGroupChatRequest.urlAvatar,
         },
-        stateKey: ''
+        stateKey: '',
       );
 
       final roomId = await matrixClient.createGroupChat(
@@ -28,7 +28,7 @@ class CreateNewGroupChatInteractor {
         invite: createNewGroupChatRequest.invite,
         enableEncryption: createNewGroupChatRequest.enableEncryption,
         preset: createNewGroupChatRequest.createRoomPreset,
-        initialState: [addAvatarStateEvent]
+        initialState: [addAvatarStateEvent],
       );
 
       if (roomId.isNotEmpty) {
