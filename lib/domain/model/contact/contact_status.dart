@@ -1,4 +1,1 @@
-enum ContactStatus {
-  inactive,
-  active
-}
+enum ContactStatus { inactive, active }

@@ -229,8 +229,8 @@ class _SpaceViewState extends State<SpaceView> {
                   parentSpace == null
                       ? L10n.of(context)!.allSpaces
                       : parentSpace.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)!),
-                  ),
+                          MatrixLocals(L10n.of(context)!),
+                        ),
                 ),
                 trailing: IconButton(
                   icon: snapshot.connectionState != ConnectionState.done
@@ -264,11 +264,10 @@ class _SpaceViewState extends State<SpaceView> {
             }
             final isSpace = spaceChild.roomType == 'm.space';
             final topic =
-            spaceChild.topic?.isEmpty ?? true ? null : spaceChild.topic;
+                spaceChild.topic?.isEmpty ?? true ? null : spaceChild.topic;
             if (spaceChild.roomId == activeSpaceId) {
               return SearchTitle(
-                title:
-                spaceChild.name ?? spaceChild.canonicalAlias ?? 'Space',
+                title: spaceChild.name ?? spaceChild.canonicalAlias ?? 'Space',
                 icon: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Avatar(
@@ -331,7 +330,7 @@ class _SpaceViewState extends State<SpaceView> {
                 ),
               ),
               trailing:
-              isSpace ? const Icon(Icons.chevron_right_outlined) : null,
+                  isSpace ? const Icon(Icons.chevron_right_outlined) : null,
             );
           },
         );

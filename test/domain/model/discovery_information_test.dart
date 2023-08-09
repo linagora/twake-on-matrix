@@ -5,15 +5,9 @@ void main() {
   group('Customization field test cases', () {
     test('multiple valid customization fields', () {
       final multipleCustomizationFields = {
-        "m.homeserver": {
-          "base_url": "matrix.tom-dev.xyz"
-        },
-        "m.identity_server": {
-          "base_url": "https://tom.tom-dev.xyz/"
-        },
-        "t.server": {
-          "base_url": "https://tom.tom-dev.xyz/"
-        },
+        "m.homeserver": {"base_url": "matrix.tom-dev.xyz"},
+        "m.identity_server": {"base_url": "https://tom.tom-dev.xyz/"},
+        "t.server": {"base_url": "https://tom.tom-dev.xyz/"},
         "m.integrations": {
           "jitsi": {
             "preferredDomain": "jitsi.linagora.com",
@@ -21,9 +15,7 @@ void main() {
             "useJwt": false
           }
         },
-        "t.domain": {
-          "url": "tom-dev.xyz"
-        }
+        "t.domain": {"url": "tom-dev.xyz"}
       };
 
       final actual = DiscoveryInformation.fromJson(multipleCustomizationFields);
@@ -35,12 +27,8 @@ void main() {
 
     test('multiple valid customization from ToM', () {
       final multipleCustomizationFields = {
-        "m.homeserver": {
-          "base_url": "matrix.tom-dev.xyz"
-        },
-        "m.identity_server": {
-          "base_url": "https://tom.tom-dev.xyz/"
-        },
+        "m.homeserver": {"base_url": "matrix.tom-dev.xyz"},
+        "m.identity_server": {"base_url": "https://tom.tom-dev.xyz/"},
         "t.server": {
           "base_url": "https://tom.tom-dev.xyz/",
           "server_name": "tom-dev.xyz"
@@ -63,15 +51,9 @@ void main() {
 
     test('one invalid customization field', () {
       final multipleCustomizationFields = {
-        "m.homeserver": {
-          "base_url": "matrix.tom-dev.xyz"
-        },
-        "m.identity_server": {
-          "base_url": "https://tom.tom-dev.xyz/"
-        },
-        "t.server": {
-          "base_url": "https://tom.tom-dev.xyz/"
-        },
+        "m.homeserver": {"base_url": "matrix.tom-dev.xyz"},
+        "m.identity_server": {"base_url": "https://tom.tom-dev.xyz/"},
+        "t.server": {"base_url": "https://tom.tom-dev.xyz/"},
         "m.integrations": {
           "jitsi": {
             "preferredDomain": "jitsi.linagora.com",
@@ -81,7 +63,10 @@ void main() {
         },
         "t.domain": "tom-dev.xyz"
       };
-      expect(() => DiscoveryInformation.fromJson(multipleCustomizationFields), throwsA(isA<TypeError>()));
+      expect(
+        () => DiscoveryInformation.fromJson(multipleCustomizationFields),
+        throwsA(isA<TypeError>()),
+      );
     });
   });
 }

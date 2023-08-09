@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 mixin LoadMoreSearchMixin {
   final mainScrollController = ScrollController();
 
-  void listenForScrollChanged({required SearchContactsAndChatsController? controller}) {
+  void listenForScrollChanged({
+    required SearchContactsAndChatsController? controller,
+  }) {
     mainScrollController.addListener(() {
       if (mainScrollController.shouldLoadMore) {
         controller?.loadMoreContacts();

@@ -23,15 +23,15 @@ class NewPrivateChat extends StatefulWidget {
   NewPrivateChatController createState() => NewPrivateChatController();
 }
 
-class NewPrivateChatController extends State<NewPrivateChat> 
-  with ComparablePresentationContactMixin, GoToDraftChatMixin {
-
+class NewPrivateChatController extends State<NewPrivateChat>
+    with ComparablePresentationContactMixin, GoToDraftChatMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
-  final networkStreamController = StreamController<Either<Failure, GetContactsSuccess>>();
-  
+  final networkStreamController =
+      StreamController<Either<Failure, GetContactsSuccess>>();
+
   final isShowContactsNotifier = ValueNotifier(true);
-  
+
   @override
   void initState() {
     super.initState();
@@ -44,14 +44,17 @@ class NewPrivateChatController extends State<NewPrivateChat>
     listenSearchContacts();
     listenContactsStartList();
     fetchContactsController.fetchCurrentTomContacts();
-    fetchContactsController.listenForScrollChanged(fetchContactsController: fetchContactsController);
+    fetchContactsController.listenForScrollChanged(
+      fetchContactsController: fetchContactsController,
+    );
     searchContactsController.onSearchKeywordChanged = (searchKey) {
       disableLoadMoreInSearch();
     };
   }
 
   void disableLoadMoreInSearch() {
-    fetchContactsController.allowLoadMore = searchContactsController.searchKeyword.isEmpty;
+    fetchContactsController.allowLoadMore =
+        searchContactsController.searchKeyword.isEmpty;
   }
 
   void listenContactsStartList() {
@@ -63,14 +66,17 @@ class NewPrivateChatController extends State<NewPrivateChat>
 
   void listenSearchContacts() {
     searchContactsController.lookupStreamController.stream.listen((event) {
-      Logs().d('NewPrivateChatController::_fetchRemoteContacts() - event: $event');
+      Logs().d(
+        'NewPrivateChatController::_fetchRemoteContacts() - event: $event',
+      );
       networkStreamController.add(event);
     });
   }
 
   void toggleContactsList() {
     isShowContactsNotifier.value = !isShowContactsNotifier.value;
-    fetchContactsController.haveMoreCountactsNotifier.value = isShowContactsNotifier.value;
+    fetchContactsController.haveMoreCountactsNotifier.value =
+        isShowContactsNotifier.value;
   }
 
   void goToNewGroupChat() {
@@ -81,7 +87,8 @@ class NewPrivateChatController extends State<NewPrivateChat>
     required BuildContext context,
     required PresentationContact contact,
   }) {
-    final roomId = Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+    final roomId =
+        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {
       goToDraftChat(
         context: context,

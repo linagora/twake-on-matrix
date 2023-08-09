@@ -12,11 +12,11 @@ class AdaptiveScaffoldShell extends StatefulWidget {
   const AdaptiveScaffoldShell({super.key, required this.navigationShell});
 
   @override
-  State<AdaptiveScaffoldShell> createState() => AdaptiveScaffoldShellController();
+  State<AdaptiveScaffoldShell> createState() =>
+      AdaptiveScaffoldShellController();
 }
 
 class AdaptiveScaffoldShellController extends State<AdaptiveScaffoldShell> {
-
   late final profileMemoizers = <Client?, AsyncMemoizer<Profile>>{};
 
   Future<Profile?> fetchOwnProfile() {

@@ -28,18 +28,26 @@ class NetworkConnectionService {
   void _listenNetworkConnectionChanged() {
     networkStreamSubscription = connectivity.onConnectivityChanged.listen(
       (result) {
-        Logs().d('NetworkConnectionService::_listenNetworkConnectionChanged():onConnectivityChanged: $result');
+        Logs().d(
+          'NetworkConnectionService::_listenNetworkConnectionChanged():onConnectivityChanged: $result',
+        );
         _setNetworkConnectivityState(result);
       },
       onError: (error, stackTrace) {
-        Logs().e('NetworkConnectionService::_listenNetworkConnectionChanged():error: $error');
-        Logs().e('NetworkConnectionService::_listenNetworkConnectionChanged():stackTrace: $stackTrace');
+        Logs().e(
+          'NetworkConnectionService::_listenNetworkConnectionChanged():error: $error',
+        );
+        Logs().e(
+          'NetworkConnectionService::_listenNetworkConnectionChanged():stackTrace: $stackTrace',
+        );
       },
     );
   }
 
   void _setNetworkConnectivityState(ConnectivityResult newConnectivityResult) {
-    Logs().d('NetworkConnectionService::_setNetworkConnectivityState():newConnectivityResult: $newConnectivityResult');
+    Logs().d(
+      'NetworkConnectionService::_setNetworkConnectivityState():newConnectivityResult: $newConnectivityResult',
+    );
     networkStreamController.add(newConnectivityResult);
   }
 
@@ -49,7 +57,9 @@ class NetworkConnectionService {
 
   void getCurrentNetworkConnectionState() async {
     final currentConnectionResult = await connectivity.checkConnectivity();
-    Logs().d('NetworkConnectionService::onReady():_getCurrentNetworkConnectionState: $currentConnectionResult');
+    Logs().d(
+      'NetworkConnectionService::onReady():_getCurrentNetworkConnectionState: $currentConnectionResult',
+    );
     _setNetworkConnectivityState(currentConnectionResult);
   }
 

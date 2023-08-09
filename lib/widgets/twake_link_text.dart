@@ -37,16 +37,17 @@ class TwakeLinkText extends StatelessWidget {
 
   Widget _buildWidgetWithPreview(BuildContext context, String url) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TwakePreviewLink(link: url),
-          const SizedBox(height: 2),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildCleanRichText(context),
-          )
-        ],);
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TwakePreviewLink(link: url),
+        const SizedBox(height: 2),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildCleanRichText(context),
+        )
+      ],
+    );
   }
 
   Widget _buildWidgetNoPreview(BuildContext context) {

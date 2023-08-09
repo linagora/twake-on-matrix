@@ -1,20 +1,17 @@
 import 'package:fluffychat/domain/model/search/search_model.dart';
 
 class ContactSearchModel extends SearchModel {
-
   final String? matrixId;
 
   final String? email;
 
   const ContactSearchModel(
-      this.matrixId,
-      this.email,
-      {
-        String? displayName,
-      }
-      ) : super(
-    displayName: displayName,
-  );
+    this.matrixId,
+    this.email, {
+    String? displayName,
+  }) : super(
+          displayName: displayName,
+        );
 
   @override
   String get id => matrixId ?? email ?? '';

@@ -5,7 +5,6 @@ part 'tom_contact.g.dart';
 
 @JsonSerializable()
 class TomContact with EquatableMixin {
-
   @JsonKey(name: "uid")
   final String uid;
 
@@ -36,8 +35,8 @@ class TomContact with EquatableMixin {
   @override
   List<Object?> get props => [uid, mail, phoneNumber, address];
 
-  factory TomContact.fromJson(Map<String, dynamic> json) 
-    => _$TomContactFromJson(json);
+  factory TomContact.fromJson(Map<String, dynamic> json) =>
+      _$TomContactFromJson(json);
 
   Map<String, dynamic> toJson() => _$TomContactToJson(this);
 }

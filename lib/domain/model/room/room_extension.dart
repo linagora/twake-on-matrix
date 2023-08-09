@@ -3,7 +3,9 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.
 import 'package:matrix/matrix.dart';
 
 extension RoomExtension on Room {
-  RecentChatSearchModel toRecentChatSearchModel(MatrixLocalizations matrixLocalizations) {
+  RecentChatSearchModel toRecentChatSearchModel(
+    MatrixLocalizations matrixLocalizations,
+  ) {
     return RecentChatSearchModel(
       id,
       displayName: getLocalizedDisplayname(matrixLocalizations),

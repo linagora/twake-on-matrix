@@ -92,19 +92,16 @@ class ClientChooserButton extends StatelessWidget {
               ],
             ),
           ),
-        ...matrix.accountBundles[bundle]!
-            .map(
-              (client) {
-                return PopupMenuItem(
-                  value: client,
-                  child: ProfileWidget(
-                    controller: controller, 
-                    bundle: bundle,
-                    client: client!,
-                  ),
-                );
-              } 
-            ).toList(),
+        ...matrix.accountBundles[bundle]!.map((client) {
+          return PopupMenuItem(
+            value: client,
+            child: ProfileWidget(
+              controller: controller,
+              bundle: bundle,
+              client: client!,
+            ),
+          );
+        }).toList(),
       ],
       // PopupMenuItem(
       //   value: SettingsAction.addAccount,
@@ -176,7 +173,8 @@ class ClientChooserButton extends StatelessWidget {
                   children: [
                     Avatar(
                       mxContent: snapshot.data?.avatarUrl,
-                      name: snapshot.data?.displayName ?? matrix.client.userID!.localpart,
+                      name: snapshot.data?.displayName ??
+                          matrix.client.userID!.localpart,
                       size: ClientChooserButtonStyle.avatarSizeInAppBar,
                       fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
                     ),
@@ -190,7 +188,7 @@ class ClientChooserButton extends StatelessWidget {
             ),
           ],
         );
-      }, 
+      },
     );
   }
 
@@ -337,7 +335,6 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Profile?>(
@@ -350,16 +347,15 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           children: [
             Avatar(
               mxContent: snapshot.data?.avatarUrl,
-              name: snapshot.data?.displayName ??
-                  widget.client.userID!.localpart,
+              name:
+                  snapshot.data?.displayName ?? widget.client.userID!.localpart,
               size: 32,
               fontSize: 12,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                snapshot.data?.displayName ??
-                    widget.client.userID!.localpart!,
+                snapshot.data?.displayName ?? widget.client.userID!.localpart!,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -372,7 +368,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             //   ),
             // ),
           ],
-        ); 
+        );
       },
     );
   }

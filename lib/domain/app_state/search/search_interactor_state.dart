@@ -4,7 +4,6 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/model/search/search_model.dart';
 
 class GetContactAndRecentChatInitial extends Initial {
-
   const GetContactAndRecentChatInitial() : super();
 
   @override
@@ -25,16 +24,15 @@ class GetContactAndRecentChatSuccess extends Success {
   });
 
   @override
-  List<Object?> get props => [searchResult, contactsOffset, shouldLoadMoreContacts, keyword];
+  List<Object?> get props =>
+      [searchResult, contactsOffset, shouldLoadMoreContacts, keyword];
 }
 
 class GetContactAndRecentChatFailed extends Failure {
-
   final dynamic exception;
 
   const GetContactAndRecentChatFailed({required this.exception});
 
   @override
   List<Object?> get props => [exception];
-
 }

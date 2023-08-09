@@ -31,7 +31,9 @@ class SearchForwardController {
     );
 
     _debouncer.values.listen((keyword) async {
-      Logs().d("SearchForwardController::_initializeDebouncer: searchKeyword: $searchKeyword");
+      Logs().d(
+        "SearchForwardController::_initializeDebouncer: searchKeyword: $searchKeyword",
+      );
       searchKeyword = keyword;
       if (onSearchKeywordChanged != null) {
         onSearchKeywordChanged!(textEditingController.text);

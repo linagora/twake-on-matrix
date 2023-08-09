@@ -14,11 +14,11 @@ class GroupChatEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasCreatedRoom = firstEvent.type == EventTypes.RoomCreate &&
-      firstEvent.senderId == Matrix.of(context).client.userID;
+        firstEvent.senderId == Matrix.of(context).client.userID;
 
     return hasCreatedRoom
-      ? _buildOwnGroupChatEmptyView(context)
-      : OthersGroupChatEmptyView(firstEvent: firstEvent);
+        ? _buildOwnGroupChatEmptyView(context)
+        : OthersGroupChatEmptyView(firstEvent: firstEvent);
   }
 
   Container _buildOwnGroupChatEmptyView(BuildContext context) {

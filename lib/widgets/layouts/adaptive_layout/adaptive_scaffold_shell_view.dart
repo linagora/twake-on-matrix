@@ -10,18 +10,19 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AppScaffoldShellView extends StatelessWidget {
-
   final StatefulNavigationShell navigationShell;
 
   final AdaptiveScaffoldShellController controller;
 
   static const int roomsShellIndex = 1;
 
-  static const ValueKey scaffoldWithNestedNavigationKey = ValueKey('ScaffoldWithNestedNavigation');
+  static const ValueKey scaffoldWithNestedNavigationKey =
+      ValueKey('ScaffoldWithNestedNavigation');
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
 
-  static const ValueKey primaryNavigationKey = ValueKey('AdaptiveScaffoldPrimaryNavigation');
+  static const ValueKey primaryNavigationKey =
+      ValueKey('AdaptiveScaffoldPrimaryNavigation');
 
   static const ValueKey shellKey = ValueKey('Body');
 
@@ -126,7 +127,8 @@ class AppScaffoldShellView extends StatelessWidget {
     if (path == null || path.isEmpty == true) {
       return true;
     } else {
-      return bottomNavigationAvailableList.any((element) => path.endsWith(element));
+      return bottomNavigationAvailableList
+          .any((element) => path.endsWith(element));
     }
   }
 

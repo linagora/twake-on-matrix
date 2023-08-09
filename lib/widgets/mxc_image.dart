@@ -53,7 +53,8 @@ class MxcImage extends StatefulWidget {
   State<MxcImage> createState() => _MxcImageState();
 }
 
-class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+class _MxcImageState extends State<MxcImage>
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   static const String placeholderKey = 'placeholder';
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
@@ -61,7 +62,8 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
 
   Uint8List? get _imageData {
     final cacheKey = widget.cacheKey;
-    final image = cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
+    final image =
+        cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
     return image;
   }
 
@@ -169,10 +171,11 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
         context: context,
         useRootNavigator: false,
         barrierDismissible: true,
-        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
-          ImageViewer(widget.event!, imageData: _imageData),
+            ImageViewer(widget.event!, imageData: _imageData),
       );
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
@@ -199,10 +202,11 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
   Widget build(BuildContext context) {
     super.build(context);
     final imageWidget = widget.animated
-      ? AnimatedSwitcher(
-          duration: widget.animationDuration,
-          child: _buildImageWidget(),)
-      : _buildImageWidget();
+        ? AnimatedSwitcher(
+            duration: widget.animationDuration,
+            child: _buildImageWidget(),
+          )
+        : _buildImageWidget();
 
     if (widget.isPreview) {
       return InkWell(
@@ -217,24 +221,26 @@ class _MxcImageState extends State<MxcImage> with AutomaticKeepAliveClientMixin,
   Widget _buildImageWidget() {
     final data = _imageData;
     return data == null || data.isEmpty
-      ? placeholder(context)
-      : ClipRRect(
-          key: Key('${data.hashCode}'),
-          borderRadius: widget.rounded
-            ? BorderRadius.circular(12.0)
-            : BorderRadius.zero,
-          child: Image.memory(
-            data,
-            width: widget.width,
-            height: widget.height,
-            fit: widget.fit,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: (context, __, ___) {
-              _isCached = false;
-              _imageData = null;
-              WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
-              return placeholder(context);
-            },),);
+        ? placeholder(context)
+        : ClipRRect(
+            key: Key('${data.hashCode}'),
+            borderRadius: widget.rounded
+                ? BorderRadius.circular(12.0)
+                : BorderRadius.zero,
+            child: Image.memory(
+              data,
+              width: widget.width,
+              height: widget.height,
+              fit: widget.fit,
+              filterQuality: FilterQuality.medium,
+              errorBuilder: (context, __, ___) {
+                _isCached = false;
+                _imageData = null;
+                WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+                return placeholder(context);
+              },
+            ),
+          );
   }
 
   @override

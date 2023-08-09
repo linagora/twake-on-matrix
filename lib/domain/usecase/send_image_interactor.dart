@@ -23,7 +23,7 @@ class SendImageInteractor {
           inReplyTo: inReplyTo,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
         );
-      } catch(error) {
+      } catch (error) {
         Logs().d("SendImageInteractor: execute(): $error");
       }
     }

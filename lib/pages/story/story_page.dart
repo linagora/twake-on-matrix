@@ -120,7 +120,7 @@ class StoryPageController extends State<StoryPage> {
   void share() async {
     Matrix.of(context).shareContent = currentEvent?.content;
     hold();
-     context.go('/share');
+    context.go('/share');
   }
 
   void displaySeenByUsers() async {
@@ -231,9 +231,9 @@ class StoryPageController extends State<StoryPage> {
   void skip() {
     if (index + 1 >= max) {
       if (isOwnStory) {
-         context.go('/stories/create');
+        context.go('/stories/create');
       } else {
-         context.go('/rooms');
+        context.go('/rooms');
       }
       return;
     }
@@ -502,7 +502,7 @@ class StoryPageController extends State<StoryPage> {
               currentEvent!.senderFromMemoryOrFallback.startDirectChat(),
         );
         if (roomIdResult.error != null) return;
-         context.go('/rooms/${roomIdResult.result!}');
+        context.go('/rooms/${roomIdResult.result!}');
         break;
     }
   }

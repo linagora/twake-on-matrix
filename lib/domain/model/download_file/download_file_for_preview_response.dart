@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class DownloadFileForPreviewResponse with EquatableMixin {
-
   final String filePath;
 
   final String? mimeType;

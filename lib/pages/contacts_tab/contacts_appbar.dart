@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
-
   final ContactsTabController controller;
 
-  const ContactsAppBar(this.controller, {
+  const ContactsAppBar(
+    this.controller, {
     super.key,
   });
 
@@ -15,39 +15,45 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       surfaceTintColor: Theme.of(context).brightness == Brightness.light
-        ? Colors.white
-        : Colors.black,
+          ? Colors.white
+          : Colors.black,
       shadowColor: Colors.black.withOpacity(0.15),
       elevation: 4.0,
       backgroundColor: Theme.of(context).brightness == Brightness.light
-        ? Colors.white
-        : Colors.black,
+          ? Colors.white
+          : Colors.black,
       automaticallyImplyLeading: false,
       centerTitle: false,
       titleSpacing: 0,
       title: Padding(
         padding: const EdgeInsetsDirectional.only(start: 16.0),
-        child: Text(L10n.of(context)!.contacts,
+        child: Text(
+          L10n.of(context)!.contacts,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: Container(
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: Colors.black.withOpacity(0.15))),
+            border: Border(
+              bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: ValueListenableBuilder<bool>(
-            valueListenable: controller.searchContactsController.isSearchModeNotifier,
+            valueListenable:
+                controller.searchContactsController.isSearchModeNotifier,
             builder: (context, isSearchMode, child) {
               return SizedBox(
                 height: 48,
                 child: TextField(
-                  focusNode: controller.searchContactsController.searchFocusNode,
-                  controller: controller.searchContactsController.textEditingController,
+                  focusNode:
+                      controller.searchContactsController.searchFocusNode,
+                  controller:
+                      controller.searchContactsController.textEditingController,
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(0),
@@ -62,12 +68,13 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
                       Icons.search_outlined,
                     ),
                     suffixIcon: isSearchMode
-                      ? TwakeIconButton(
-                        tooltip: "Clear",
-                        icon: Icons.close,
-                        onPressed: () => controller.searchContactsController.clearSearchBar(),
-                      )
-                      : null,
+                        ? TwakeIconButton(
+                            tooltip: "Clear",
+                            icon: Icons.close,
+                            onPressed: () => controller.searchContactsController
+                                .clearSearchBar(),
+                          )
+                        : null,
                   ),
                 ),
               );
@@ -77,8 +84,7 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-  
+
   @override
   Size get preferredSize => const Size.fromHeight(120);
-
 }

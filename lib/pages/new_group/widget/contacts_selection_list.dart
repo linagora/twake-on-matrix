@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
@@ -11,7 +10,6 @@ import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart'
 import 'package:flutter/material.dart';
 
 class ContactsSelectionList extends StatefulWidget {
-
   final NewGroupController newGroupController;
 
   const ContactsSelectionList({
@@ -24,12 +22,14 @@ class ContactsSelectionList extends StatefulWidget {
 }
 
 class _ContactsSelectionListState extends State<ContactsSelectionList> {
-  SelectedContactsMapChangeNotifier selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
+  SelectedContactsMapChangeNotifier selectedContactsMapNotifier =
+      SelectedContactsMapChangeNotifier();
   FetchContactsController? fetchContactsController = FetchContactsController();
 
   @override
   void initState() {
-    selectedContactsMapNotifier = widget.newGroupController.selectedContactsMapNotifier;
+    selectedContactsMapNotifier =
+        widget.newGroupController.selectedContactsMapNotifier;
     fetchContactsController = widget.newGroupController.fetchContactsController;
     super.initState();
   }
@@ -39,25 +39,32 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
     return StreamBuilder<Either<Failure, GetContactsSuccess>>(
       stream: widget.newGroupController.contactStreamController.stream,
       builder: (context, snapshot) {
-        final searchKeyword = widget.newGroupController.searchContactsController.searchKeyword;
-        final fetchContactsController = widget.newGroupController.fetchContactsController;
+        final searchKeyword =
+            widget.newGroupController.searchContactsController.searchKeyword;
+        final fetchContactsController =
+            widget.newGroupController.fetchContactsController;
         if (!snapshot.hasData) {
           return const LoadingContactWidget();
         }
 
         final contactsList = fetchContactsController
-          .getContactsFromFetchStream(snapshot.data!)
-          .toList();
+            .getContactsFromFetchStream(snapshot.data!)
+            .toList();
 
-        contactsList.sort((a, b) => widget.newGroupController.comparePresentationContacts(a, b));
+        contactsList.sort(
+          (a, b) => widget.newGroupController.comparePresentationContacts(a, b),
+        );
 
         if (searchKeyword.isNotEmpty && contactsList.isEmpty) {
           return Padding(
             padding: const EdgeInsets.only(left: 8.0),
-            child: NoContactsFound(keyword: widget.newGroupController.searchContactsController.searchKeyword),
+            child: NoContactsFound(
+              keyword: widget
+                  .newGroupController.searchContactsController.searchKeyword,
+            ),
           );
         }
-        
+
         return Column(
           children: [
             ListView.builder(
@@ -65,11 +72,15 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: contactsList.length,
               itemBuilder: (context, i) {
-                final contactNotifier = selectedContactsMapNotifier.getNotifierAtContact(contactsList[i]);
+                final contactNotifier = selectedContactsMapNotifier
+                    .getNotifierAtContact(contactsList[i]);
                 return InkWell(
                   key: ValueKey(contactsList[i].matrixId),
                   onTap: () {
-                    selectedContactsMapNotifier.onContactTileTap(context, contactsList[i]);
+                    selectedContactsMapNotifier.onContactTileTap(
+                      context,
+                      contactsList[i],
+                    );
                   },
                   borderRadius: BorderRadius.circular(16.0),
                   child: SizedBox(
@@ -80,7 +91,9 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: ExpansionContactListTile(contact: contactsList[i]),
+                            child: ExpansionContactListTile(
+                              contact: contactsList[i],
+                            ),
                           ),
                           ValueListenableBuilder<bool>(
                             valueListenable: contactNotifier,
@@ -88,7 +101,10 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                               return Checkbox(
                                 value: contactNotifier.value,
                                 onChanged: (newValue) {
-                                  selectedContactsMapNotifier.onContactTileTap(context, contactsList[i]);
+                                  selectedContactsMapNotifier.onContactTileTap(
+                                    context,
+                                    contactsList[i],
+                                  );
                                   widget.newGroupController.selectedContact();
                                 },
                               );
@@ -102,13 +118,15 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
               },
             ),
             ValueListenableBuilder<bool>(
-              valueListenable: widget.newGroupController.searchContactsController.isSearchModeNotifier,
+              valueListenable: widget.newGroupController
+                  .searchContactsController.isSearchModeNotifier,
               builder: (context, isSearchMode, child) {
                 if (isSearchMode) {
                   return const SizedBox.shrink();
                 }
                 return ValueListenableBuilder(
-                  valueListenable: fetchContactsController.haveMoreCountactsNotifier,
+                  valueListenable:
+                      fetchContactsController.haveMoreCountactsNotifier,
                   builder: (context, value, child) {
                     if (value) {
                       return const Padding(
@@ -116,7 +134,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
                         child: Center(
                           child: CircularProgressIndicator(),
                         ),
-                      ); 
+                      );
                     }
 
                     return const SizedBox.shrink();
@@ -129,5 +147,4 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
       },
     );
   }
-
 }

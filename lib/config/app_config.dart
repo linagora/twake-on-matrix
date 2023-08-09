@@ -56,9 +56,11 @@ abstract class AppConfig {
   static const String pushNotificationsChannelName = 'Twake push channel';
   static const String pushNotificationsChannelDescription =
       'Push notifications for Twake';
-  static String pushNotificationsAppId = Platform.isIOS 
-    ? kReleaseMode ? "com.linagora.ios.twake" : "com.linagora.ios.twake.sandbox"
-    : "com.twake.twake";
+  static String pushNotificationsAppId = Platform.isIOS
+      ? kReleaseMode
+          ? "com.linagora.ios.twake"
+          : "com.linagora.ios.twake.sandbox"
+      : "com.twake.twake";
   static const String pushNotificationsGatewayUrl =
       'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';
   static const String pushNotificationsPusherFormat = 'event_id_only';

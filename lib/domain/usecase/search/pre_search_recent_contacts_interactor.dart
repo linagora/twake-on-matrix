@@ -11,17 +11,21 @@ class PreSearchRecentContactsInteractor {
     required List<Room> recentRooms,
     int? limit,
   }) async* {
-    try {        
+    try {
       final List<User> result = [];
 
       for (final room in recentRooms) {
-        final users = room.getParticipants()
-          .where((user) => user.membership.isInvite == true && user.displayName != null)
-          .toSet();
+        final users = room
+            .getParticipants()
+            .where(
+              (user) =>
+                  user.membership.isInvite == true && user.displayName != null,
+            )
+            .toSet();
 
         for (final user in users) {
-          final isDuplicateUser = result
-            .any((existingUser) => existingUser.id == user.id);
+          final isDuplicateUser =
+              result.any((existingUser) => existingUser.id == user.id);
 
           if (!isDuplicateUser) {
             result.add(user);

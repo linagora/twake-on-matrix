@@ -38,20 +38,21 @@ class _ForwardViewState extends State<ForwardView> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(ForwardViewStyle.preferredAppBarSize),
-        child: _buildAppBarForward(context),),
+        child: _buildAppBarForward(context),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
         child: Column(
           children: [
             _recentlyChatsTitle(context),
-            if (isShowRecentlyChats)
-              _chatList(),
+            if (isShowRecentlyChats) _chatList(),
           ],
         ),
       ),
       floatingActionButton: Align(
         alignment: const Alignment(0.5, 1.1),
-        child: _buildBottomBar(),),
+        child: _buildBottomBar(),
+      ),
     );
   }
 
@@ -63,27 +64,25 @@ class _ForwardViewState extends State<ForwardView> {
           if (forwardMessageNotifier == null) {
             return child!;
           } else {
-            return forwardMessageNotifier.fold(
-              (failure) => child!,
-              (success) {
-                if (success is ForwardMessageLoading) {
-                  return SizedBox(
-                    height: ForwardViewStyle.bottomBarHeight,
-                    child: const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 14),
-                        child: TwakeFloatingActionButton(
-                          customIcon: SizedBox(child: CircularProgressIndicator()),
-                        ),
+            return forwardMessageNotifier.fold((failure) => child!, (success) {
+              if (success is ForwardMessageLoading) {
+                return SizedBox(
+                  height: ForwardViewStyle.bottomBarHeight,
+                  child: const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 14),
+                      child: TwakeFloatingActionButton(
+                        customIcon:
+                            SizedBox(child: CircularProgressIndicator()),
                       ),
                     ),
-                  );
-                } else {
-                  return const SizedBox();
-                }
+                  ),
+                );
+              } else {
+                return const SizedBox();
               }
-            );
+            });
           }
         },
         child: SizedBox(
@@ -126,29 +125,39 @@ class _ForwardViewState extends State<ForwardView> {
           ),
           const SizedBox(width: 8.0),
           isSearchBarShow
-            ? Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TextField(
-                  autofocus: true,
-                  maxLines: 1,
-                  buildCounter: (BuildContext context, {
-                    required int currentLength,
-                    required int? maxLength,
-                    required bool isFocused,
-                  }) => const SizedBox.shrink(),
-                  maxLength: 200,
-                  cursorHeight: 26,
-                  scrollPadding: const EdgeInsets.all(0),
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    hintText: "...",
-                    hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: LinagoraRefColors.material().neutral[60]),
-                  ),),)
-            : Text(
-              L10n.of(context)!.forwardTo,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,),),
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextField(
+                    autofocus: true,
+                    maxLines: 1,
+                    buildCounter: (
+                      BuildContext context, {
+                      required int currentLength,
+                      required int? maxLength,
+                      required bool isFocused,
+                    }) =>
+                        const SizedBox.shrink(),
+                    maxLength: 200,
+                    cursorHeight: 26,
+                    scrollPadding: const EdgeInsets.all(0),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      hintText: "...",
+                      hintStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: LinagoraRefColors.material().neutral[60],
+                              ),
+                    ),
+                  ),
+                )
+              : Text(
+                  L10n.of(context)!.forwardTo,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        letterSpacing:
+                            ChatAppBarTitleStyle.letterSpacingRoomName,
+                      ),
+                ),
         ],
       ),
       actions: [
@@ -159,10 +168,12 @@ class _ForwardViewState extends State<ForwardView> {
         ),
       ],
       bottom: PreferredSize(
-          preferredSize: const Size(double.infinity, 4),
-          child: Container(
-            color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-            height: 1,),),
+        preferredSize: const Size(double.infinity, 4),
+        child: Container(
+          color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
+          height: 1,
+        ),
+      ),
     );
   }
 
@@ -194,9 +205,11 @@ class _ForwardViewState extends State<ForwardView> {
   Widget _recentlyChatsTitle(BuildContext context) {
     return Row(
       children: [
-        Text(L10n.of(context)!.recentlyChats,
+        Text(
+          L10n.of(context)!.recentlyChats,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: LinagoraRefColors.material().neutral[40],),
+                color: LinagoraRefColors.material().neutral[40],
+              ),
         ),
         Expanded(
           child: Row(
@@ -205,14 +218,17 @@ class _ForwardViewState extends State<ForwardView> {
               TwakeIconButton(
                 paddingAll: 6.0,
                 buttonDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                icon: isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
+                icon:
+                    isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
                 onPressed: () => _toggleRecentlyChats(),
                 tooltip: isShowRecentlyChats
-                  ? L10n.of(context)!.shrink
-                  : L10n.of(context)!.expand,),
+                    ? L10n.of(context)!.shrink
+                    : L10n.of(context)!.expand,
+              ),
             ],
           ),
         )

@@ -16,7 +16,8 @@ import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' hide ImagePicker;
+import 'package:linagora_design_flutter/images_picker/images_picker.dart'
+    hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -30,15 +31,16 @@ class DraftChat extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => DraftChatController();
-  
 }
 
-class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFilesMixin {
+class DraftChatController extends State<DraftChat>
+    with ImagePickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   PresentationContact? presentationContact;
 
-  final NetworkConnectionService networkConnectionService = getIt.get<NetworkConnectionService>();
+  final NetworkConnectionService networkConnectionService =
+      getIt.get<NetworkConnectionService>();
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
@@ -71,9 +73,11 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
   @override
   Future<void> sendImages({Room? room, List<IndexedAssetEntity>? assets}) {
     sortedSelectedAssets = imagePickerController.sortedSelectedAssets;
-    return _createRoom(onRoomCreatedSuccess: (room) {
-      super.sendImages(room: room, assets: sortedSelectedAssets);
-    },);
+    return _createRoom(
+      onRoomCreatedSuccess: (room) {
+        super.sendImages(room: room, assets: sortedSelectedAssets);
+      },
+    );
   }
 
   @override
@@ -86,7 +90,8 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
         displayName: extra[PresentationContactConstant.displayName],
       );
     } else {
-      presentationContact = const PresentationContact().presentationContactEmpty;
+      presentationContact =
+          const PresentationContact().presentationContactEmpty;
     }
 
     scrollController.addListener(_updateScrollController);
@@ -107,11 +112,11 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
   TextEditingController sendController = TextEditingController();
 
   void setActiveClient(Client c) => setState(() {
-    Matrix.of(context).setActiveClient(c);
-  });
+        Matrix.of(context).setActiveClient(c);
+      });
 
   Future<void> sendText({
-    OnRoomCreatedSuccess onRoomCreatedSuccess, 
+    OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onCreateRoomFailed,
   }) async {
     scrollDown();
@@ -119,7 +124,7 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
       text: sendController.value.text,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
+
     _createRoom(
       onRoomCreatedSuccess: (room) {
         onRoomCreatedSuccess?.call(room);
@@ -135,43 +140,47 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
-    createDirectChatInteractor.execute(
-      contactMxId: presentationContact!.matrixId!, 
+    createDirectChatInteractor
+        .execute(
+      contactMxId: presentationContact!.matrixId!,
       client: Matrix.of(context).client,
-    ).listen((event) {
-      event.fold(
-        (failure) {
-          onRoomCreatedFailed?.call();
-          Logs().d("_createRoom: $failure");
-          context.pop();
-        },
-        (success) {
-          if (success is CreateDirectChatLoading) {
-            showDialog(
-              useRootNavigator: false,
-              context: context, builder: (context) {
+    )
+        .listen((event) {
+      event.fold((failure) {
+        onRoomCreatedFailed?.call();
+        Logs().d("_createRoom: $failure");
+        context.pop();
+      }, (success) {
+        if (success is CreateDirectChatLoading) {
+          showDialog(
+            useRootNavigator: false,
+            context: context,
+            builder: (context) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            },);
-          } else if (success is CreateDirectChatSuccess) {
-            final room = Matrix.of(context).client.getRoomById(success.roomId);
-            if (room != null) {
-              onRoomCreatedSuccess?.call(room);
-              context.pop();
-              context.go('${goShellBranch()}/${room.id}/');
-            }
+            },
+          );
+        } else if (success is CreateDirectChatSuccess) {
+          final room = Matrix.of(context).client.getRoomById(success.roomId);
+          if (room != null) {
+            onRoomCreatedSuccess?.call(room);
+            context.pop();
+            context.go('${goShellBranch()}/${room.id}/');
           }
         }
-      );
+      });
     });
   }
 
   String goShellBranch() {
     final currentShellBranch = widget.state.fullPath;
-    Logs().d('DraftChat()::goShellBranch() currentShellBranch: $currentShellBranch');
-    return TwakeRoutes.shellBranch
-      .firstWhere((branch) => currentShellBranch?.startsWith('$branch/') == true);
+    Logs().d(
+      'DraftChat()::goShellBranch() currentShellBranch: $currentShellBranch',
+    );
+    return TwakeRoutes.shellBranch.firstWhere(
+      (branch) => currentShellBranch?.startsWith('$branch/') == true,
+    );
   }
 
   void emojiPickerAction() {
@@ -235,7 +244,6 @@ class DraftChatController extends State<DraftChat> with ImagePickerMixin, SendFi
         FocusScope.of(context).requestFocus(inputFocus);
       },
     );
-    
   }
 
   void onInputBarChanged(String text) {

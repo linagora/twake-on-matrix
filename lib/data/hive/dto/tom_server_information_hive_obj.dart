@@ -6,7 +6,6 @@ part 'tom_server_information_hive_obj.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class ToMServerInformationHiveObj with EquatableMixin {
-
   final String? baseUrl;
 
   final String? serverName;
@@ -14,10 +13,9 @@ class ToMServerInformationHiveObj with EquatableMixin {
   ToMServerInformationHiveObj(this.baseUrl, this.serverName);
 
   factory ToMServerInformationHiveObj.fromJson(Map<String, dynamic> json) =>
-    _$ToMServerInformationHiveObjFromJson(json);
+      _$ToMServerInformationHiveObjFromJson(json);
 
   Map<String, dynamic> toJson() => _$ToMServerInformationHiveObjToJson(this);
-
 
   @override
   List<Object?> get props => [baseUrl, serverName];
@@ -29,7 +27,9 @@ class ToMServerInformationHiveObj with EquatableMixin {
     );
   }
 
-  factory ToMServerInformationHiveObj.fromToMServerInformation(ToMServerInformation toMServerInformation) {
+  factory ToMServerInformationHiveObj.fromToMServerInformation(
+    ToMServerInformation toMServerInformation,
+  ) {
     return ToMServerInformationHiveObj(
       toMServerInformation.baseUrl?.toString(),
       toMServerInformation.serverName,

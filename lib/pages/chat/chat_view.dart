@@ -117,9 +117,7 @@ class ChatView extends StatelessWidget {
         )
       ];
     } else {
-      return [
-        const SizedBox.shrink()
-      ];
+      return [const SizedBox.shrink()];
     }
   }
 
@@ -152,13 +150,15 @@ class ChatView extends StatelessWidget {
       onTapDown: controller.setReadMarker,
       behavior: HitTestBehavior.opaque,
       child: StreamBuilder(
-        stream: controller.room!.onUpdate.stream.rateLimit(const Duration(seconds: 1)),
+        stream: controller.room!.onUpdate.stream
+            .rateLimit(const Duration(seconds: 1)),
         builder: (context, snapshot) => FutureBuilder<bool>(
           future: controller.getTimeline(),
           builder: (BuildContext context, snapshot) {
             return Scaffold(
               appBar: AppBar(
-                automaticallyImplyLeading: controller.responsive.isMobile(context) ? true : false,
+                automaticallyImplyLeading:
+                    controller.responsive.isMobile(context) ? true : false,
                 toolbarHeight: 64,
                 surfaceTintColor: Colors.transparent,
                 leadingWidth: 8 + 24 + 8,
@@ -169,8 +169,13 @@ class ChatView extends StatelessWidget {
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 4),
                   child: Container(
-                    color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
-                    height: 1,),),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceTint
+                        .withOpacity(0.08),
+                    height: 1,
+                  ),
+                ),
               ),
               floatingActionButton: controller.showScrollDownButton &&
                       controller.selectedEvents.isEmpty
@@ -224,8 +229,7 @@ class ChatView extends StatelessWidget {
                                 maxWidth: FluffyThemes.columnWidth * 2.5,
                               ),
                               alignment: Alignment.center,
-                              child: controller.room?.isAbandonedDMRoom ==
-                                      true
+                              child: controller.room?.isAbandonedDMRoom == true
                                   ? Padding(
                                       padding: EdgeInsets.only(
                                         bottom: bottomSheetPadding,
@@ -233,7 +237,8 @@ class ChatView extends StatelessWidget {
                                         right: bottomSheetPadding,
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
                                           TextButton.icon(
                                             style: TextButton.styleFrom(

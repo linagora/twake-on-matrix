@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TwakeChip extends StatelessWidget {
-
   final String text;
 
   final EdgeInsets paddingText;
@@ -11,7 +10,8 @@ class TwakeChip extends StatelessWidget {
   const TwakeChip({
     super.key,
     required this.text,
-    this.paddingText = const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+    this.paddingText =
+        const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
     required this.textColor,
   });
 
@@ -24,9 +24,12 @@ class TwakeChip extends StatelessWidget {
       ),
       child: Padding(
         padding: paddingText,
-        child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: textColor,
-        ),),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: textColor,
+              ),
+        ),
       ),
     );
   }

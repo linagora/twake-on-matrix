@@ -58,8 +58,8 @@ class Avatar extends StatelessWidget {
   }
 
   bool get _havePicture {
-    return mxContent == null
-      || mxContent.toString().isEmpty
-      || mxContent.toString() == 'null';
+    return mxContent == null ||
+        mxContent.toString().isEmpty ||
+        mxContent.toString() == 'null';
   }
 }

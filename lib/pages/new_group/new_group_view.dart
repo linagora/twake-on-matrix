@@ -26,27 +26,35 @@ class NewGroupView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          SelectedParticipantsList(newGroupController: controller,),
+          SelectedParticipantsList(
+            newGroupController: controller,
+          ),
           Expanded(
             child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               controller: controller.fetchContactsController.scrollController,
               child: ValueListenableBuilder<bool>(
-                valueListenable: controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
+                valueListenable: controller
+                    .selectedContactsMapNotifier.haveSelectedContactsNotifier,
                 builder: (context, haveSelectedContact, child) {
                   return Padding(
-                    padding: EdgeInsets.only(top: haveSelectedContact ? 0.0 : 8.0,),
+                    padding: EdgeInsets.only(
+                      top: haveSelectedContact ? 0.0 : 8.0,
+                    ),
                     child: child,
                   );
                 },
-                child: ContactsSelectionList(newGroupController: controller,),
+                child: ContactsSelectionList(
+                  newGroupController: controller,
+                ),
               ),
             ),
           ),
         ],
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
+        valueListenable:
+            controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
         builder: (context, haveSelectedContacts, child) {
           if (!haveSelectedContacts) {
             return const SizedBox.shrink();

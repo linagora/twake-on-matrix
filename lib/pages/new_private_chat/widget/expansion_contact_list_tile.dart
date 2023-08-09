@@ -32,7 +32,7 @@ class ExpansionContactListTile extends StatelessWidget {
             children: [
               IgnorePointer(
                 child: Avatar(
-                  mxContent: snapshot.data?.avatarUrl, 
+                  mxContent: snapshot.data?.avatarUrl,
                   name: contact.displayName,
                 ),
               ),
@@ -51,19 +51,26 @@ class ExpansionContactListTile extends StatelessWidget {
                               children: [
                                 Flexible(
                                   child: BuildDisplayName(
-                                    profileDisplayName: snapshot.data?.displayname,
+                                    profileDisplayName:
+                                        snapshot.data?.displayname,
                                     contactDisplayName: contact.displayName,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 17.0,
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 17.0,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          if (contact.matrixId != null && contact.matrixId!.isCurrentMatrixId(context)) ... [
+                          if (contact.matrixId != null &&
+                              contact.matrixId!.isCurrentMatrixId(context)) ...[
                             const SizedBox(width: 8.0),
                             TwakeChip(
                               text: L10n.of(context)!.owner,
@@ -72,23 +79,28 @@ class ExpansionContactListTile extends StatelessWidget {
                           ],
                           const SizedBox(width: 8.0),
                           if (contact.status != null)
-                            ContactStatusWidget(status: contact.status!,),
+                            ContactStatusWidget(
+                              status: contact.status!,
+                            ),
                         ],
                       ),
                     ),
                     if (contact.matrixId != null)
-                      Text(contact.matrixId!,
+                      Text(
+                        contact.matrixId!,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          letterSpacing: 0.1,
-                          color: LinagoraRefColors.material().neutral[30],
-                        ),
+                              letterSpacing: 0.1,
+                              color: LinagoraRefColors.material().neutral[30],
+                            ),
                       ),
                     if (contact.email != null)
-                      Text(contact.email!,
+                      Text(
+                        contact.email!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          letterSpacing: 0.25,
-                          color: LinagoraRefColors.material().neutral[30],
-                        ),)
+                              letterSpacing: 0.25,
+                              color: LinagoraRefColors.material().neutral[30],
+                            ),
+                      )
                   ],
                 ),
               )
@@ -106,10 +118,14 @@ class ExpansionContactListTile extends StatelessWidget {
     }
     try {
       final profile = await client.getUserProfile(contact.matrixId!);
-      Logs().d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
+      Logs()
+          .d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
       return profile;
     } catch (e) {
-      return ProfileInformation(avatarUrl: null, displayname: contact.displayName);
+      return ProfileInformation(
+        avatarUrl: null,
+        displayname: contact.displayName,
+      );
     }
   }
 }

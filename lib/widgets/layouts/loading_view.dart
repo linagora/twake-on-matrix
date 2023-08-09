@@ -12,11 +12,13 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(
-          (_) async {
+      (_) async {
         await UpdateCheckerNoStore(context).checkUpdate();
         context.go(
-          Matrix.of(context).widget.clients
-            .any((client) => client.onLoginStateChanged.value == LoginState.loggedIn)
+          Matrix.of(context).widget.clients.any(
+                    (client) =>
+                        client.onLoginStateChanged.value == LoginState.loggedIn,
+                  )
               ? '/rooms'
               : '/home',
           extra: GoRouterState.of(context).pathParameters,

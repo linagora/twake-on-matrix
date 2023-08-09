@@ -51,10 +51,12 @@ class ChatEventList extends StatelessWidget {
                 controller: controller.scrollController,
                 physics: const ClampingScrollPhysics(),
                 child: controller.room?.isDirectChat ?? true
-                  ? DirectDraftChatView(
-                      onTap: () => controller.inputFocus.requestFocus(),
-                  )
-                  : GroupChatEmptyView(firstEvent: controller.timeline!.events.last),
+                    ? DirectDraftChatView(
+                        onTap: () => controller.inputFocus.requestFocus(),
+                      )
+                    : GroupChatEmptyView(
+                        firstEvent: controller.timeline!.events.last,
+                      ),
               ),
             ),
           ),
@@ -104,7 +106,9 @@ class ChatEventList extends StatelessWidget {
           // The message at this index:
           final currentEventIndex = i - 1;
           final event = controller.timeline!.events[currentEventIndex];
-          final previousEvent = currentEventIndex > 0 ? controller.timeline!.events[currentEventIndex - 1] : null;
+          final previousEvent = currentEventIndex > 0
+              ? controller.timeline!.events[currentEventIndex - 1]
+              : null;
           final nextEvent = i < controller.timeline!.events.length
               ? controller.timeline!.events[currentEventIndex + 1]
               : null;

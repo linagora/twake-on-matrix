@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -11,22 +10,27 @@ import 'package:fluffychat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
 
 class UploadFileAPI {
-  final DioClient _client = getIt.get<DioClient>(instanceName: NetworkDI.homeDioClientName);
+  final DioClient _client =
+      getIt.get<DioClient>(instanceName: NetworkDI.homeDioClientName);
 
   UploadFileAPI();
 
   Future<UploadFileResponse> uploadFile({required FileInfo fileInfo}) async {
     final dioHeaders = _client.getHeaders();
-    dioHeaders[HttpHeaders.contentLengthHeader] = await File(fileInfo.filePath).length();
+    dioHeaders[HttpHeaders.contentLengthHeader] =
+        await File(fileInfo.filePath).length();
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
-    final response = await _client.post(
-      HomeserverEndpoint.uploadMediaServicePath.generateHomeserverIdentityEndpoint(),
-      data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
-      queryParameters: {
-        'fileName': fileInfo.fileName,
-      },
-      options: Options(headers: dioHeaders),
-    ).onError((error, stackTrace) => throw Exception(error));
+    final response = await _client
+        .post(
+          HomeserverEndpoint.uploadMediaServicePath
+              .generateHomeserverIdentityEndpoint(),
+          data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
+          queryParameters: {
+            'fileName': fileInfo.fileName,
+          },
+          options: Options(headers: dioHeaders),
+        )
+        .onError((error, stackTrace) => throw Exception(error));
 
     return UploadFileResponse.fromJson(response);
   }

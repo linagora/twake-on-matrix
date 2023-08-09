@@ -3,7 +3,6 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class SendImagesInteractor {
-
   Future<void> execute({
     required Room room,
     required List<AssetEntity> entities,

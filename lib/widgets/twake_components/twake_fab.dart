@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class TwakeFloatingActionButton extends StatelessWidget {
-
   final Function()? onTap;
 
   final IconData? icon;
@@ -57,21 +56,23 @@ class TwakeFloatingActionButton extends StatelessWidget {
     );
   }
 
-   Widget _buildBottomWidget(BuildContext context) {
-     if (icon != null) {
-       return Icon(
-         icon,
-         size: size,
-         color: Theme.of(context).colorScheme.onPrimaryContainer,);
-     } else if (customIcon != null) {
-       return SizedBox(
-         width: 24.0,
-         height: 24.0,
-         child: customIcon,);
-     } else if (imagePath != null) {
-       return SvgPicture.asset(imagePath!);
-     } else {
-       return const SizedBox();
-     }
-   }
+  Widget _buildBottomWidget(BuildContext context) {
+    if (icon != null) {
+      return Icon(
+        icon,
+        size: size,
+        color: Theme.of(context).colorScheme.onPrimaryContainer,
+      );
+    } else if (customIcon != null) {
+      return SizedBox(
+        width: 24.0,
+        height: 24.0,
+        child: customIcon,
+      );
+    } else if (imagePath != null) {
+      return SvgPicture.asset(imagePath!);
+    } else {
+      return const SizedBox();
+    }
+  }
 }

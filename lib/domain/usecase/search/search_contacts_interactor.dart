@@ -20,18 +20,22 @@ class SearchContactsInteractor {
   }) async* {
     try {
       final contacts = await contactRepository.searchContact(
-        query: ContactQuery(keyword: keyword), 
+        query: ContactQuery(keyword: keyword),
         offset: offset,
-        limit: limit,);
-      final newSearches = contacts.expand((contact) => contact.toSearch()).toList();
+        limit: limit,
+      );
+      final newSearches =
+          contacts.expand((contact) => contact.toSearch()).toList();
       final shouldLoadMoreContacts = contacts.length == limit;
       final contactsOffset = shouldLoadMoreContacts ? offset + limit : offset;
-      yield Right(GetContactAndRecentChatSuccess(
-        searchResult: newSearches,
-        contactsOffset: contactsOffset,
-        shouldLoadMoreContacts: shouldLoadMoreContacts,
-        keyword: keyword,
-      ),);
+      yield Right(
+        GetContactAndRecentChatSuccess(
+          searchResult: newSearches,
+          contactsOffset: contactsOffset,
+          shouldLoadMoreContacts: shouldLoadMoreContacts,
+          keyword: keyword,
+        ),
+      );
     } catch (e) {
       yield Left(GetContactAndRecentChatFailed(exception: e));
     }

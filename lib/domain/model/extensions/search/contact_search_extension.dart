@@ -9,7 +9,7 @@ extension SearchExtension on ContactSearchModel {
       displayName: displayName,
     );
   }
-    
+
   bool isDisplayNameContains(String keyword) {
     return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
   }

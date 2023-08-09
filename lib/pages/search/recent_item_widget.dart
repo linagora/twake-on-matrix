@@ -25,7 +25,6 @@ class RecentItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
@@ -50,13 +49,17 @@ class RecentItemWidget extends StatelessWidget {
   Widget _buildInformationWidget(BuildContext context) {
     if (presentationSearch is ContactPresentationSearch) {
       return _ContactInformation(
-        contactPresentationSearch: presentationSearch as ContactPresentationSearch,
+        contactPresentationSearch:
+            presentationSearch as ContactPresentationSearch,
         searchKeyword: highlightKeyword,
       );
     } else {
-      final recentChatPresentationSearch = presentationSearch as RecentChatPresentationSearch;
+      final recentChatPresentationSearch =
+          presentationSearch as RecentChatPresentationSearch;
       if (recentChatPresentationSearch.directChatMatrixID == null) {
-        return _GroupChatInformation(recentChatPresentationSearch: recentChatPresentationSearch);
+        return _GroupChatInformation(
+          recentChatPresentationSearch: recentChatPresentationSearch,
+        );
       } else {
         return _DirectChatInformation(
           recentChatPresentationSearch: recentChatPresentationSearch,
@@ -73,29 +76,32 @@ class _GroupChatInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actualMembersCount = recentChatPresentationSearch.roomSummary?.actualMembersCount ?? 0;
+    final actualMembersCount =
+        recentChatPresentationSearch.roomSummary?.actualMembersCount ?? 0;
     return Text(
       L10n.of(context)!.membersCount(actualMembersCount),
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
       softWrap: false,
       style: Theme.of(context).textTheme.bodyMedium?.merge(
-        TextStyle(
-          overflow: TextOverflow.ellipsis,
-          letterSpacing: 0.15,
-          color: LinagoraRefColors.material().tertiary[30],
-        ),
-      ),
+            TextStyle(
+              overflow: TextOverflow.ellipsis,
+              letterSpacing: 0.15,
+              color: LinagoraRefColors.material().tertiary[30],
+            ),
+          ),
     );
   }
 }
-
 
 class _DirectChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
   final String? searchKeyword;
 
-  const _DirectChatInformation({required this.recentChatPresentationSearch, this.searchKeyword});
+  const _DirectChatInformation({
+    required this.recentChatPresentationSearch,
+    this.searchKeyword,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,23 +123,23 @@ class _DirectChatInformation extends StatelessWidget {
               HighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.merge(
-                  TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    letterSpacing: 0.15,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                      TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        letterSpacing: 0.15,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                 searchWord: searchKeyword,
               ),
               HighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
                 style: Theme.of(context).textTheme.bodyMedium?.merge(
-                  TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    letterSpacing: 0.15,
-                    color: LinagoraRefColors.material().tertiary[30],
-                  ),
-                ),
+                      TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        letterSpacing: 0.15,
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+                    ),
                 searchWord: searchKeyword,
               ),
             ],
@@ -148,7 +154,10 @@ class _ContactInformation extends StatelessWidget {
   final ContactPresentationSearch contactPresentationSearch;
   final String? searchKeyword;
 
-  const _ContactInformation({required this.contactPresentationSearch, this.searchKeyword});
+  const _ContactInformation({
+    required this.contactPresentationSearch,
+    this.searchKeyword,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -159,13 +168,13 @@ class _ContactInformation extends StatelessWidget {
         SizedBox(
           width: RecentItemStyle.avatarSize,
           child: FutureBuilder<ProfileInformation?>(
-              future: contactPresentationSearch.getProfile(client),
-              builder: (context, snapshot) {
-                return Avatar(
-                  mxContent: snapshot.data?.avatarUrl,
-                  name: contactPresentationSearch.displayName,
-                );
-              },
+            future: contactPresentationSearch.getProfile(client),
+            builder: (context, snapshot) {
+              return Avatar(
+                mxContent: snapshot.data?.avatarUrl,
+                name: contactPresentationSearch.displayName,
+              );
+            },
           ),
         ),
         const SizedBox(width: 8),
@@ -176,12 +185,12 @@ class _ContactInformation extends StatelessWidget {
               HighlightText(
                 text: contactPresentationSearch.displayName ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.merge(
-                  TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    letterSpacing: 0.15,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                      TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        letterSpacing: 0.15,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                 searchWord: searchKeyword,
               ),
               Column(
@@ -191,24 +200,24 @@ class _ContactInformation extends StatelessWidget {
                     HighlightText(
                       text: contactPresentationSearch.matrixId ?? "",
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
-                        TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          letterSpacing: 0.15,
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
-                      ),
+                            TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              letterSpacing: 0.15,
+                              color: LinagoraRefColors.material().tertiary[30],
+                            ),
+                          ),
                       searchWord: searchKeyword,
                     ),
                   if (contactPresentationSearch.email != null)
                     HighlightText(
                       text: contactPresentationSearch.email ?? "",
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
-                        TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          letterSpacing: 0.15,
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
-                      ),
+                            TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              letterSpacing: 0.15,
+                              color: LinagoraRefColors.material().tertiary[30],
+                            ),
+                          ),
                       searchWord: searchKeyword,
                     ),
                 ],

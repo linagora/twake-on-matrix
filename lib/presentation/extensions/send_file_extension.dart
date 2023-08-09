@@ -15,8 +15,8 @@ import 'package:photo_manager/photo_manager.dart';
 typedef TransactionId = String;
 
 typedef FakeImageEvent = SyncUpdate;
-extension SendFileExtension on Room {
 
+extension SendFileExtension on Room {
   static const maxImagesCacheInRoom = 10;
 
   Future<String?> sendFileEvent(
@@ -45,7 +45,9 @@ extension SendFileExtension on Room {
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      Logs().d('SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize');
+      Logs().d(
+        'SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize',
+      );
       if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
         throw FileTooBigMatrixException(fileInfo.fileSize, maxMediaSize);
       }
@@ -60,7 +62,9 @@ extension SendFileExtension on Room {
     final encryptedService = EncryptedService();
     final tempDir = await getTemporaryDirectory();
     final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
-    final tempEncryptedFile = await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}').create();
+    final tempEncryptedFile =
+        await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
+            .create();
     EncryptedFileInfo? encryptedFileInfo;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
@@ -71,7 +75,11 @@ extension SendFileExtension on Room {
         fileInfo: fileInfo,
         outputFile: tempEncryptedFile,
       );
-      tempfileInfo = FileInfo(fileInfo.fileName, tempEncryptedFile.path, fileInfo.fileSize);
+      tempfileInfo = FileInfo(
+        fileInfo.fileName,
+        tempEncryptedFile.path,
+        fileInfo.fileSize,
+      );
     }
     Uri? uploadResp;
 
@@ -92,7 +100,7 @@ extension SendFileExtension on Room {
         rethrow;
       } catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-              .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
+            .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
         Logs().e('Error: $e');
         Logs().e('Send File into room failed. Try again...');
@@ -117,8 +125,7 @@ extension SendFileExtension on Room {
       'body': fileInfo.fileName,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
-      if (encryptedFileInfo != null)
-        'file': encryptedFileInfo.toJson(),
+      if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
       'info': {
         ...fileInfo.metadata,
       },
@@ -188,8 +195,10 @@ extension SendFileExtension on Room {
     return fakeImageEvent;
   }
 
-  Future<void> handleImageFakeSync(SyncUpdate fakeImageEvent,
-      {Direction? direction,}) async {
+  Future<void> handleImageFakeSync(
+    SyncUpdate fakeImageEvent, {
+    Direction? direction,
+  }) async {
     if (client.database != null) {
       await client.database?.transaction(() async {
         await client.handleSync(fakeImageEvent, direction: direction);
@@ -199,11 +208,14 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<Tuple2<Map<TransactionId, FileInfo>, Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
+  Future<
+      Tuple2<Map<TransactionId, FileInfo>,
+          Map<TransactionId, FakeImageEvent>>> sendPlaceholdersForImages({
     required List<AssetEntity> entities,
   }) async {
     // ignore: prefer_const_constructors
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, FileInfo>, Map<TransactionId, FakeImageEvent>>({}, {});
+    final txIdMapToImageFile = Tuple2<Map<TransactionId, FileInfo>,
+        Map<TransactionId, FakeImageEvent>>({}, {});
     for (final entity in entities) {
       final fileInfo = await entity.toFileInfo();
 

@@ -210,7 +210,8 @@ class _StoryButton extends StatelessWidget {
                       color: unread
                           ? null
                           : Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
+                      borderRadius:
+                          BorderRadius.circular(AvatarStyle.defaultSize),
                     ),
                     child: Stack(
                       children: [

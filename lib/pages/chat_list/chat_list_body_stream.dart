@@ -6,14 +6,13 @@ import 'package:fluffychat/config/themes.dart';
 import 'chat_list_body.dart';
 
 class ChatListBodyStream extends StatelessWidget {
-
   final ChatListController controller;
 
   const ChatListBodyStream({
     super.key,
     required this.controller,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Object?>(

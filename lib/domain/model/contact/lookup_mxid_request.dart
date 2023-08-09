@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -6,7 +5,6 @@ part 'lookup_mxid_request.g.dart';
 
 @JsonSerializable()
 class LookupMxidRequest with EquatableMixin {
-
   final List<String> scope;
 
   final List<String> fields;
@@ -24,12 +22,12 @@ class LookupMxidRequest with EquatableMixin {
     this.limit,
     this.offset,
   });
-    
+
   @override
   List<Object?> get props => [scope, fields, val, limit, offset];
 
-  factory LookupMxidRequest.fromJson(Map<String, dynamic> json) 
-    => _$LookupMxidRequestFromJson(json);
+  factory LookupMxidRequest.fromJson(Map<String, dynamic> json) =>
+      _$LookupMxidRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$LookupMxidRequestToJson(this);
 }

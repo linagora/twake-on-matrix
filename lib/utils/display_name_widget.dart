@@ -32,10 +32,11 @@ class _DisplayName extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       displayName,
-      style: style ?? Theme.of(context).textTheme.bodySmall!.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontWeight: FontWeight.w700,
-      ),
+      style: style ??
+          Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
       overflow: TextOverflow.ellipsis,
     );
   }

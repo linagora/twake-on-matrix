@@ -7,12 +7,16 @@ import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_response.dart';
 
 class TomContactAPI {
-  
-  final DioClient _client = getIt.get<DioClient>(instanceName: NetworkDI.identityDioClientName);
+  final DioClient _client =
+      getIt.get<DioClient>(instanceName: NetworkDI.identityDioClientName);
 
   TomContactAPI();
 
-  Future<LookupMxidResponse> searchContacts(ContactQuery query, {int? limit, int? offset}) async {
+  Future<LookupMxidResponse> searchContacts(
+    ContactQuery query, {
+    int? limit,
+    int? offset,
+  }) async {
     final requestBody = LookupMxidRequest(
       scope: ['mail', 'uid', 'mobile', 'cn', 'displayName'],
       fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],
@@ -20,11 +24,14 @@ class TomContactAPI {
       limit: limit,
       offset: offset,
     );
-    
-    final response = await _client.post(
-      IdentityEndpoint.matchUserIdServicePath.generateTwakeIdentityEndpoint(),
-      data: requestBody.toJson(),
-    ).onError((error, stackTrace) => throw Exception(error));
+
+    final response = await _client
+        .post(
+          IdentityEndpoint.matchUserIdServicePath
+              .generateTwakeIdentityEndpoint(),
+          data: requestBody.toJson(),
+        )
+        .onError((error, stackTrace) => throw Exception(error));
 
     return LookupMxidResponse.fromJson(response);
   }

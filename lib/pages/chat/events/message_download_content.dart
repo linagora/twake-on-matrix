@@ -13,12 +13,13 @@ class MessageDownloadContent extends StatelessWidget {
   final Event event;
   final Color textColor;
   final ChatController controller;
-  
+
   const MessageDownloadContent(
     this.event,
-    this.textColor,
-    {Key? key, required this.controller,})
-      : super(key: key);
+    this.textColor, {
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,9 @@ class MessageDownloadContent extends StatelessWidget {
     final filetype = event.fileType;
     final sizeString = event.sizeString;
 
-    Logs().i('filename: $filename, filetype: $filetype, sizeString: $sizeString, content: ${event.content}');
+    Logs().i(
+      'filename: $filename, filetype: $filetype, sizeString: $sizeString, content: ${event.content}',
+    );
     return InkWell(
       onTap: () async {
         controller.onFileTapped(event: event);
@@ -71,7 +74,7 @@ class MessageDownloadContent extends StatelessWidget {
                       const _TextInformationOfFile(value: " · "),
                       Flexible(
                         child: _TextInformationOfFile(
-                         value: event.getFileType(context),
+                          value: event.getFileType(context),
                         ),
                       ),
                     ],
@@ -86,7 +89,6 @@ class MessageDownloadContent extends StatelessWidget {
   }
 }
 
-
 class _TextInformationOfFile extends StatelessWidget {
   final String value;
   const _TextInformationOfFile({required this.value});
@@ -96,11 +98,10 @@ class _TextInformationOfFile extends StatelessWidget {
     return Text(
       value,
       style: Theme.of(context).textTheme.bodySmall!.copyWith(
-        color: LinagoraRefColors.material().neutral,
-      ),
+            color: LinagoraRefColors.material().neutral,
+          ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 }
-

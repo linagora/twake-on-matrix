@@ -22,22 +22,22 @@ class ChatListView extends StatelessWidget {
       appBar: ChatListHeader(controller: controller),
       body: ChatListBodyStream(controller: controller),
       extendBody: true,
-      floatingActionButtonLocation:FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: controller.selectMode == SelectMode.normal
-        ? KeyBoardShortcuts(
-          keysToPress: {
-            LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.keyN
-          },
-          onKeysPressed: () => context.go('/rooms/newprivatechat'),
-          helpLabel: L10n.of(context)!.newChat,
-          child: TwakeFloatingActionButton(
-            icon: Icons.mode_edit_outline_outlined,
-            size: 18.0,
-            onTap: () => context.go('/rooms/newprivatechat'),
-          ),
-        )
-        : null,
+          ? KeyBoardShortcuts(
+              keysToPress: {
+                LogicalKeyboardKey.controlLeft,
+                LogicalKeyboardKey.keyN
+              },
+              onKeysPressed: () => context.go('/rooms/newprivatechat'),
+              helpLabel: L10n.of(context)!.newChat,
+              child: TwakeFloatingActionButton(
+                icon: Icons.mode_edit_outline_outlined,
+                size: 18.0,
+                onTap: () => context.go('/rooms/newprivatechat'),
+              ),
+            )
+          : null,
     );
   }
 }

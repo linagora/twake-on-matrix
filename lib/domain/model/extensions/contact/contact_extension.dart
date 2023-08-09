@@ -4,18 +4,25 @@ import 'package:fluffychat/domain/model/search/search_model.dart';
 
 extension ContactExtension on Contact {
   Set<SearchModel> toSearch() {
-    final listContacts = emails?.map((email) => ContactSearchModel(
-      matrixId,
-      email,
-      displayName: displayName,
-    ),).toSet() ?? {};
+    final listContacts = emails
+            ?.map(
+              (email) => ContactSearchModel(
+                matrixId,
+                email,
+                displayName: displayName,
+              ),
+            )
+            .toSet() ??
+        {};
 
     if (emails == null || emails!.isEmpty) {
-      listContacts.add(ContactSearchModel(
-        matrixId,
-        null,
-        displayName: displayName,
-      ),);
+      listContacts.add(
+        ContactSearchModel(
+          matrixId,
+          null,
+          displayName: displayName,
+        ),
+      );
     }
 
     return listContacts;

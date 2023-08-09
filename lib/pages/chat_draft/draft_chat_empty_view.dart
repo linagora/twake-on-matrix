@@ -48,7 +48,10 @@ class DirectDraftChatView extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '🤗',
-              style: Theme.of(context).textTheme.titleLarge?.merge(const TextStyle(fontSize: 88)),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.merge(const TextStyle(fontSize: 88)),
             ),
           ],
         ),

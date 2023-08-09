@@ -16,7 +16,8 @@ class ConnectPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatar = Matrix.of(context).loginAvatar;
-    final identityProviders = controller.identityProviders(rawLoginTypes: controller.rawLoginTypes);
+    final identityProviders =
+        controller.identityProviders(rawLoginTypes: controller.rawLoginTypes);
     return LoginScaffold(
       appBar: AppBar(
         leading: controller.loading ? null : const BackButton(),
@@ -180,10 +181,10 @@ class ConnectPageView extends StatelessWidget {
                                       width: 32,
                                       height: 32,
                                     ),
-                              onPressed: () => controller
-                                  .ssoLoginAction(
-                                    context: context,
-                                    id: identityProviders.single.id!,),
+                              onPressed: () => controller.ssoLoginAction(
+                                context: context,
+                                id: identityProviders.single.id!,
+                              ),
                               label: Text(
                                 identityProviders.single.name ??
                                     identityProviders.single.brand ??
@@ -195,10 +196,10 @@ class ConnectPageView extends StatelessWidget {
                             children: [
                               for (final identityProvider in identityProviders)
                                 SsoButton(
-                                  onPressed: () => controller
-                                      .ssoLoginAction(
-                                        context: context,
-                                        id: identityProvider.id!,),
+                                  onPressed: () => controller.ssoLoginAction(
+                                    context: context,
+                                    id: identityProvider.id!,
+                                  ),
                                   identityProvider: identityProvider,
                                 ),
                             ].toList(),

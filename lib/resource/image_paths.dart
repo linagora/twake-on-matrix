@@ -13,9 +13,11 @@ class ImagePaths {
   static String get icKeyBoard => _getImagePath('ic_keyboard.svg');
   static String get icSkeletons => _getImagePath('ic_skeletons.svg');
   static String get icStatus => _getImagePath('ic_status.svg');
-  static String get icEmptyGroupChat => _getImagePath('ic_empty_group_chat.svg');
+  static String get icEmptyGroupChat =>
+      _getImagePath('ic_empty_group_chat.svg');
   static String get icTwakeLogo => _getImagePath('ic_twake_logo.svg');
-  static String get icPhotosSettingPermission => _getImagePath('ic_photos_setting.svg');
+  static String get icPhotosSettingPermission =>
+      _getImagePath('ic_photos_setting.svg');
   static String get icFileDocx => _getImagePath('ic_file_doc.svg');
   static String get icFileZip => _getImagePath('ic_file_zip.svg');
   static String get icFileXlsx => _getImagePath('ic_file_excel.svg');
@@ -23,8 +25,10 @@ class ImagePaths {
   static String get icFilePptx => _getImagePath('ic_file_ppt.svg');
   static String get icFileFolder => _getImagePath('ic_file_folder.svg');
   static String get icFileUnKnow => _getImagePath('ic_file_unknow.svg');
-  static String get icTwakeImageLogo => _getImagePath('ic_twake_image_logo.svg');
-  static String get icApplicationGrid => _getImagePath('ic_application_grid.svg');
+  static String get icTwakeImageLogo =>
+      _getImagePath('ic_twake_image_logo.svg');
+  static String get icApplicationGrid =>
+      _getImagePath('ic_application_grid.svg');
   static String get icUsersOutline => _getImagePath('ic_users_outline.svg');
 
   static String _getImagePath(String imageName) {

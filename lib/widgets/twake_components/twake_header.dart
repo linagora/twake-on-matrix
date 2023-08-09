@@ -6,14 +6,15 @@ import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class TwakeHeader extends StatelessWidget with ShowDialogMixin implements PreferredSizeWidget {
+class TwakeHeader extends StatelessWidget
+    with ShowDialogMixin
+    implements PreferredSizeWidget {
   final ChatListController controller;
 
   const TwakeHeader({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     final isWebWidth = ResponsiveUtils().isDesktop(context);
 
     return AppBar(

@@ -4,7 +4,6 @@ import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class AvatarWithBottomIconWidget extends StatelessWidget {
-
   final PresentationContact presentationContact;
 
   final double size;
@@ -45,12 +44,12 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 12,
-                color: Theme.of(context).colorScheme.surface,),
+                color: Theme.of(context).colorScheme.surface,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-  
 }

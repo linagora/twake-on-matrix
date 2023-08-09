@@ -7,8 +7,10 @@ import 'package:matrix/matrix.dart';
 
 extension StringCasingExtension on String {
   String removeDiacritics() {
-    const withDia = 'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
-    const withoutDia = 'AAAAAAaaaaaaOOOOOOOooooooEEEEeeeeeCcDIIIIiiiiUUUUuuuuNnSsYyyZz';
+    const withDia =
+        'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
+    const withoutDia =
+        'AAAAAAaaaaaaOOOOOOOooooooEEEEeeeeeCcDIIIIiiiiUUUUuuuuNnSsYyyZz';
 
     String str = this;
     for (int i = 0; i < withDia.length; i++) {
@@ -41,7 +43,8 @@ extension StringCasingExtension on String {
   }
 
   String capitalize(BuildContext context) {
-    return toBeginningOfSentenceCase(this, L10n.of(context)!.localeName) ?? this;
+    return toBeginningOfSentenceCase(this, L10n.of(context)!.localeName) ??
+        this;
   }
 
   bool isCurrentMatrixId(BuildContext context) {
@@ -80,13 +83,15 @@ extension StringCasingExtension on String {
 
   String? getFirstValidUrl() {
     final RegExp regex = RegExp(r'https:\/\/[^\s]+');
-    final List<String?> matches = regex.allMatches(this).map((m) => m.group(0)).toList();
+    final List<String?> matches =
+        regex.allMatches(this).map((m) => m.group(0)).toList();
 
     if (matches.isEmpty) {
       return null;
     }
 
-    final String? firstValidLink = matches.firstWhere((link) => AnyLinkPreview.isValidLink(link!));
+    final String? firstValidLink =
+        matches.firstWhere((link) => AnyLinkPreview.isValidLink(link!));
     return firstValidLink;
   }
 
@@ -96,7 +101,8 @@ extension StringCasingExtension on String {
     final RegExp regex = RegExp(r'https:\/\/[^\s]+');
 
     final Iterable<Match> formattedLinksMatches = regex.allMatches(this);
-    final Iterable<Match> unformattedLinksMatches = regex.allMatches(unformattedText);
+    final Iterable<Match> unformattedLinksMatches =
+        regex.allMatches(unformattedText);
 
     if (formattedLinksMatches.isEmpty ||
         unformattedLinksMatches.isEmpty ||
@@ -107,7 +113,8 @@ extension StringCasingExtension on String {
     var unMarkdownedText = this;
 
     final Iterator<Match> formattedIterator = formattedLinksMatches.iterator;
-    final Iterator<Match> unformattedIterator = unformattedLinksMatches.iterator;
+    final Iterator<Match> unformattedIterator =
+        unformattedLinksMatches.iterator;
 
     // Replace respectively all formatted links with unformatted links
     while (formattedIterator.moveNext() && unformattedIterator.moveNext()) {
@@ -117,7 +124,8 @@ extension StringCasingExtension on String {
       final String formattedLink = formattedLinkMatch.group(0)!;
       final String unformattedLink = unformattedLinkMatch.group(0)!;
 
-      unMarkdownedText = unMarkdownedText.replaceFirst(formattedLink, unformattedLink);
+      unMarkdownedText =
+          unMarkdownedText.replaceFirst(formattedLink, unformattedLink);
     }
 
     return unMarkdownedText;

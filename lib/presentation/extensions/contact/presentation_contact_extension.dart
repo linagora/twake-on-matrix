@@ -2,7 +2,6 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 extension PresentaionContactExtension on PresentationContact {
-
   bool matched({required bool Function(String) condition}) {
     if (displayName != null && condition(displayName!)) {
       return true;
@@ -14,8 +13,8 @@ extension PresentaionContactExtension on PresentationContact {
 
     if (email != null && condition(email!)) {
       return true;
-    } 
-    
+    }
+
     if (status != null && condition(status.toString())) {
       return true;
     }
@@ -26,21 +25,27 @@ extension PresentaionContactExtension on PresentationContact {
 
 extension ContactExtensionInPresentation on Contact {
   Set<PresentationContact> toPresentationContacts() {
-    final listContacts = emails?.map((email) =>
+    final listContacts = emails
+            ?.map(
+              (email) => PresentationContact(
+                email: email,
+                displayName: displayName,
+                matrixId: matrixId,
+                status: status,
+              ),
+            )
+            .toSet() ??
+        {};
+
+    if (emails == null || emails!.isEmpty) {
+      listContacts.add(
         PresentationContact(
-          email: email,
+          email: null,
           displayName: displayName,
           matrixId: matrixId,
           status: status,
-        ),).toSet() ?? {};
-
-    if (emails == null || emails!.isEmpty) {
-      listContacts.add(PresentationContact(
-        email: null,
-        displayName: displayName,
-        matrixId: matrixId,
-        status: status,
-      ),);
+        ),
+      );
     }
 
     return listContacts;

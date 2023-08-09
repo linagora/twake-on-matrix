@@ -4,7 +4,8 @@ import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 
 class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
-  final ToMConfigurationsDatasource tomConfigurationsDatasource = getIt.get<ToMConfigurationsDatasource>();
+  final ToMConfigurationsDatasource tomConfigurationsDatasource =
+      getIt.get<ToMConfigurationsDatasource>();
 
   @override
   Future<ToMConfigurations> getTomConfigurations(String clientName) {
@@ -12,7 +13,13 @@ class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
   }
 
   @override
-  Future<void> saveTomConfigurations(String clientName, ToMConfigurations toMConfigurations) {
-    return tomConfigurationsDatasource.saveTomConfigurations(clientName, toMConfigurations);
+  Future<void> saveTomConfigurations(
+    String clientName,
+    ToMConfigurations toMConfigurations,
+  ) {
+    return tomConfigurationsDatasource.saveTomConfigurations(
+      clientName,
+      toMConfigurations,
+    );
   }
 }
