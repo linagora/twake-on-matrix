@@ -13,25 +13,21 @@ class SendFileOnWebInteractor {
     Map<String, dynamic>? extraContent,
   }) async {
     try {
-      final fileInfos = filePickerResult.files
+      final matrixFiles = filePickerResult.files
           .map(
             (xFile) => MatrixFile(
               bytes: xFile.bytes,
               name: xFile.name,
+              filePath: '',
             ),
           )
           .toList();
 
-      final txIdMapToImageInfo =
-          await room.sendPlaceholdersWebForImages(entities: fileInfos);
-
-      for (final txId in txIdMapToImageInfo.value1.keys) {
+      for (final matrixFile in matrixFiles) {
         await room.sendFileOnWebEvent(
-          txIdMapToImageInfo.value1[txId]!,
-          fakeImageEvent: txIdMapToImageInfo.value2[txId],
+          matrixFile,
           txid: txId,
         );
-        room.clearOlderImagesCacheInRoom(txId: txId);
       }
     } catch (error) {
       Logs().d("SendFileInteractor: execute(): $error");

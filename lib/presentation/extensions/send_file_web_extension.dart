@@ -1,8 +1,3 @@
-import 'dart:collection';
-
-import 'package:dartz/dartz.dart' hide id;
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension SendFileWebExtension on Room {
@@ -46,22 +41,26 @@ extension SendFileWebExtension on Room {
     }
 
     EncryptedFile? encryptedFile;
+    MatrixFile? uploadFile;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
       await handleImageFakeSync(fakeImageEvent);
       encryptedFile = await file.encrypt();
+      uploadFile =
+          MatrixFile.fromMimeType(bytes: encryptedFile!.data, name: 'crypt');
     }
     Uri? uploadResp;
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
-    while (uploadResp == null && file.bytes != null) {
+    while (
+        uploadResp == null && uploadFile != null && uploadFile.bytes != null) {
       try {
         uploadResp = await client.uploadContent(
-          file.bytes!,
-          filename: file.name,
-          contentType: file.mimeType,
+          uploadFile.bytes!,
+          filename: uploadFile.name,
+          contentType: uploadFile.mimeType,
         );
       } on MatrixException catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
@@ -175,35 +174,5 @@ extension SendFileWebExtension on Room {
     } else {
       await client.handleSync(fakeImageEvent, direction: direction);
     }
-  }
-
-  void clearOlderImagesCacheInRoom({String? txId}) {
-    final imageCacheQueue = getIt.get<Queue>();
-    // clear older image cache
-    while (imageCacheQueue.length >= maxImagesCacheInRoom) {
-      if (sendingFilePlaceholders.containsKey(txId)) {
-        sendingFilePlaceholders.remove(txId);
-      }
-      if (sendingFileThumbnails.containsKey(txId)) {
-        sendingFileThumbnails.remove(txId);
-      }
-    }
-  }
-
-  Future<
-      Tuple2<Map<TransactionId, MatrixFile>,
-          Map<TransactionId, FakeImageEvent>>> sendPlaceholdersWebForImages({
-    required List<MatrixFile> entities,
-  }) async {
-    // ignore: prefer_const_constructors
-    final txIdMapToImageFile = Tuple2<Map<TransactionId, MatrixFile>,
-        Map<TransactionId, FakeImageEvent>>({}, {});
-    for (final entity in entities) {
-      final txid = client.generateUniqueTransactionId();
-      final fakeImageEvent = await sendFakeImageEvent(entity, txid: txid);
-      txIdMapToImageFile.value1[txid] = entity;
-      txIdMapToImageFile.value2[txid] = fakeImageEvent;
-    }
-    return txIdMapToImageFile;
   }
 }
