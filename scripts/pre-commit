@@ -6,7 +6,7 @@ if ! output=$(flutter analyze); then
     exit 1
 fi
 
-if ! output=$(dart format lib); then
+if ! output=$(dart format --set-exit-if-changed lib test); then
     echo "COMMIT REJECTED: Dart format found the following errors:"
     echo "$output"
     exit 1
