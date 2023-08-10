@@ -1,7 +1,4 @@
 #!/bin/sh -ve
 flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
-flutter pub run import_sorter:main --no-comments
-dart format lib/ test/
-flutter pub get
+dart format --set-exit-if-changed lib/ test/
 flutter analyze
-flutter pub run dart_code_metrics:metrics lib -r github || true
