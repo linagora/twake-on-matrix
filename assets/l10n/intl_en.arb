@@ -61,7 +61,7 @@
             "mxid": {}
         }
     },
-    "addGroupDescription": "Add a group description",
+    "addGroupDescription": "Add a chat description",
     "@addGroupDescription": {
         "type": "text",
         "placeholders": {}
@@ -334,7 +334,7 @@
             "username": {}
         }
     },
-    "changedTheRoomAliases": "{username} changed the group chat aliases",
+    "changedTheRoomAliases": "{username} changed the chat aliases",
     "@changedTheRoomAliases": {
         "type": "text",
         "placeholders": {
@@ -363,7 +363,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "changeTheNameOfTheGroup": "Change the name of the group",
+    "changeTheNameOfTheGroup": "Change the name of the chat",
     "@changeTheNameOfTheGroup": {
         "type": "text",
         "placeholders": {}
@@ -433,9 +433,9 @@
     },
     "commandHint_markasdm": "Mark as direct chat",
     "@commandHint_markasdm": {},
-    "commandHint_markasgroup": "Mark as group",
+    "commandHint_markasgroup": "Mark as chat",
     "@commandHint_markasgroup": {},
-    "commandHint_ban": "Ban the given user from this group chat",
+    "commandHint_ban": "Ban the given user from this chat",
     "@commandHint_ban": {
         "type": "text",
         "description": "Usage hint for the command /ban"
@@ -445,7 +445,7 @@
         "type": "text",
         "description": "Usage hint for the command /clearcache"
     },
-    "commandHint_create": "Create an empty group chat\nUse --no-encryption to disable encryption",
+    "commandHint_create": "Create an empty chat\nUse --no-encryption to disable encryption",
     "@commandHint_create": {
         "type": "text",
         "description": "Usage hint for the command /create"
@@ -465,22 +465,22 @@
         "type": "text",
         "description": "Usage hint for the command /html"
     },
-    "commandHint_invite": "Invite the given user to this group chat",
+    "commandHint_invite": "Invite the given user to this chat",
     "@commandHint_invite": {
         "type": "text",
         "description": "Usage hint for the command /invite"
     },
-    "commandHint_join": "Join the given group chat",
+    "commandHint_join": "Join the given chat",
     "@commandHint_join": {
         "type": "text",
         "description": "Usage hint for the command /join"
     },
-    "commandHint_kick": "Remove the given user from this group chat",
+    "commandHint_kick": "Remove the given user from this chat",
     "@commandHint_kick": {
         "type": "text",
         "description": "Usage hint for the command /kick"
     },
-    "commandHint_leave": "Leave this group chat",
+    "commandHint_leave": "Leave this chat",
     "@commandHint_leave": {
         "type": "text",
         "description": "Usage hint for the command /leave"
@@ -490,12 +490,12 @@
         "type": "text",
         "description": "Usage hint for the command /me"
     },
-    "commandHint_myroomavatar": "Set your picture for this group chat (by mxc-uri)",
+    "commandHint_myroomavatar": "Set your picture for this chat (by mxc-uri)",
     "@commandHint_myroomavatar": {
         "type": "text",
         "description": "Usage hint for the command /myroomavatar"
     },
-    "commandHint_myroomnick": "Set your display name for this group chat",
+    "commandHint_myroomnick": "Set your display name for this chat",
     "@commandHint_myroomnick": {
         "type": "text",
         "description": "Usage hint for the command /myroomnick"
@@ -520,7 +520,7 @@
         "type": "text",
         "description": "Usage hint for the command /send"
     },
-    "commandHint_unban": "Unban the given user from this group chat",
+    "commandHint_unban": "Unban the given user from this chat",
     "@commandHint_unban": {
         "type": "text",
         "description": "Usage hint for the command /unban"
@@ -562,7 +562,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "contactHasBeenInvitedToTheGroup": "Contact has been invited to the group",
+    "contactHasBeenInvitedToTheGroup": "Contact has been invited to the chat",
     "@contactHasBeenInvitedToTheGroup": {
         "type": "text",
         "placeholders": {}
@@ -623,7 +623,7 @@
             "username": {}
         }
     },
-    "createNewGroup": "Create new group",
+    "createNewGroup": "Create new chat",
     "@createNewGroup": {
         "type": "text",
         "placeholders": {}
@@ -758,12 +758,12 @@
         "type": "text",
         "placeholders": {}
     },
-    "editRoomAliases": "Edit group chat aliases",
+    "editRoomAliases": "Edit chat aliases",
     "@editRoomAliases": {
         "type": "text",
         "placeholders": {}
     },
-    "editRoomAvatar": "Edit group chat avatar",
+    "editRoomAvatar": "Edit chat avatar",
     "@editRoomAvatar": {
         "type": "text",
         "placeholders": {}
@@ -778,7 +778,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "emotePacks": "Emote packs for group chat",
+    "emotePacks": "Emote packs for chat",
     "@emotePacks": {
         "type": "text",
         "placeholders": {}
@@ -840,7 +840,7 @@
             "senderName": {}
         }
     },
-    "enterGroupName": "Enter group name",
+    "enterGroupName": "Enter chat name",
     "@enterGroupName": {
         "type": "text",
         "placeholders": {}
@@ -911,37 +911,37 @@
         "type": "text",
         "placeholders": {}
     },
-    "goToTheNewRoom": "Go to the new group chat",
+    "goToTheNewRoom": "Go to the new chat",
     "@goToTheNewRoom": {
         "type": "text",
         "placeholders": {}
     },
-    "group": "Group",
+    "group": "Chat",
     "@group": {
         "type": "text",
         "placeholders": {}
     },
-    "groupDescription": "Group description",
+    "groupDescription": "Chat description",
     "@groupDescription": {
         "type": "text",
         "placeholders": {}
     },
-    "groupDescriptionHasBeenChanged": "Group description changed",
+    "groupDescriptionHasBeenChanged": "Chat description changed",
     "@groupDescriptionHasBeenChanged": {
         "type": "text",
         "placeholders": {}
     },
-    "groupIsPublic": "Group is public",
+    "groupIsPublic": "Chat is public",
     "@groupIsPublic": {
         "type": "text",
         "placeholders": {}
     },
-    "groups": "Groups",
+    "groups": "Chats",
     "@groups": {
         "type": "text",
         "placeholders": {}
     },
-    "groupWith": "Group with {displayname}",
+    "groupWith": "Chat with {displayname}",
     "@groupWith": {
         "type": "text",
         "placeholders": {
@@ -1006,7 +1006,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "ignoreListDescription": "You can ignore users who are disturbing you. You won't be able to receive any messages or group chat invites from the users on your personal ignore list.",
+    "ignoreListDescription": "You can ignore users who are disturbing you. You won't be able to receive any messages or chat invites from the users on your personal ignore list.",
     "@ignoreListDescription": {
         "type": "text",
         "placeholders": {}
@@ -1086,7 +1086,7 @@
             "username": {}
         }
     },
-    "joinRoom": "Join group chat",
+    "joinRoom": "Join chat",
     "@joinRoom": {
         "type": "text",
         "placeholders": {}
@@ -1292,7 +1292,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "noEncryptionForPublicRooms": "You can only activate encryption as soon as the group chat is no longer publicly accessible.",
+    "noEncryptionForPublicRooms": "You can only activate encryption as soon as the chat is no longer publicly accessible.",
     "@noEncryptionForPublicRooms": {
         "type": "text",
         "placeholders": {}
@@ -1331,7 +1331,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "noRoomsFound": "No group chats found…",
+    "noRoomsFound": "No chats found…",
     "@noRoomsFound": {
         "type": "text",
         "placeholders": {}
@@ -1550,7 +1550,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "publicRooms": "Public group chats",
+    "publicRooms": "Public chats",
     "@publicRooms": {
         "type": "text",
         "placeholders": {}
@@ -1641,7 +1641,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "replaceRoomWithNewerVersion": "Replace group chat with newer version",
+    "replaceRoomWithNewerVersion": "Replace chat with newer version",
     "@replaceRoomWithNewerVersion": {
         "type": "text",
         "placeholders": {}
@@ -1824,7 +1824,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "setGroupDescription": "Set group description",
+    "setGroupDescription": "Set description",
     "@setGroupDescription": {
         "type": "text",
         "placeholders": {}
@@ -1954,7 +1954,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "thisRoomHasBeenArchived": "This group chat has been archived.",
+    "thisRoomHasBeenArchived": "This chat has been archived.",
     "@thisRoomHasBeenArchived": {
         "type": "text",
         "placeholders": {}
@@ -2192,7 +2192,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "whoIsAllowedToJoinThisGroup": "Who is allowed to join this group",
+    "whoIsAllowedToJoinThisGroup": "Who is allowed to join this chat",
     "@whoIsAllowedToJoinThisGroup": {
         "type": "text",
         "placeholders": {}
@@ -2482,7 +2482,7 @@
     "@whyIsThisMessageEncrypted": {},
     "noKeyForThisMessage": "This can happen if the message was sent before you have signed in to your account at this device.\n\nIt is also possible that the sender has blocked your device or something went wrong with the internet connection.\n\nAre you able to read the message on another session? Then you can transfer the message from it! Go to Settings > Devices and make sure that your devices have verified each other. When you open the room the next time and both sessions are in the foreground, the keys will be transmitted automatically.\n\nDo you not want to loose the keys when logging out or switching devices? Make sure that you have enabled the chat backup in the settings.",
     "@noKeyForThisMessage": {},
-    "newGroup": "New group",
+    "newGroup": "New chat",
     "@newGroup": {},
     "newSpace": "New space",
     "@newSpace": {},
@@ -2556,7 +2556,7 @@
     "noMessageHereYet": "No message here yet...",
     "sendMessageGuide": "Send a message or tap on the greeting bellow.",
     "youCreatedGroupChat": "You created a Group chat",
-    "groupChatsCanHave": "Group chats can have:",
+    "chatCanHave": "Chat can have:",
     "upTo100000Members": "Up to 100.000 members",
     "persistentChatHistory": "Persistent Chat history",
     "multiInteractionThreadedDiscussion": "Multi-interaction threaded discussions",
@@ -2650,24 +2650,24 @@
     "clear": "Clear",
     "membersCount": "{count} Members",
     "@membersCount": {
-      "placeholders": {
-        "count": {}
-      }
+        "placeholders": {
+            "count": {}
+        }
     },
     "keyboard": "Keyboard",
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
-    "changeGroupAvatar": "Change the group avatar",
+    "changeChatAvatar": "Change the Chat avatar",
     "roomAvatarMaxFileSize": "The avatar size is too large",
     "@roomAvatarMaxFileSize": {},
     "roomAvatarMaxFileSizeLong": "The avatar size must be less than {max}",
     "@roomAvatarMaxFileSizeLong": {
-       "placeholders": {
-         "max": {}
-       }
+        "placeholders": {
+            "max": {}
+        }
     },
     "continueProcess": "Continue",
-    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Image upload error! Do you still want to continue creating groups?",
-    "hasCreatedAGroupChat": "created a group chat “{groupName}”",
+    "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Image upload error! Do you still want to continue creating chat?",
+    "hasCreatedAGroupChat": "created a chat “{groupName}”",
     "@hasCreatedAGroupChat": {
         "type": "text",
         "placeholders": {

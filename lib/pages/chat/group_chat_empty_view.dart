@@ -1,9 +1,9 @@
 import 'package:fluffychat/pages/chat/others_group_chat_empty_view.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluffychat/resource/image_paths.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -52,7 +52,7 @@ class GroupChatEmptyView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                L10n.of(context)!.groupChatsCanHave,
+                L10n.of(context)!.chatCanHave,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w400,
