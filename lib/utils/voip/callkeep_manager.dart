@@ -1,14 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
 import 'package:callkeep/callkeep.dart';
+import 'package:fluffychat/utils/voip_plugin.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'package:fluffychat/utils/voip_plugin.dart';
 
 class CallKeeper {
   CallKeeper(this.callKeepManager, this.call) {

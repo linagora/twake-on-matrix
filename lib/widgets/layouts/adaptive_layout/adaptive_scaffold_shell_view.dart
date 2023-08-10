@@ -6,8 +6,8 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_she
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 
 class AppScaffoldShellView extends StatelessWidget {
   final StatefulNavigationShell navigationShell;

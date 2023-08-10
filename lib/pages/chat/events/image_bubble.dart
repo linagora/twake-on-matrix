@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 
 class ImageBubble extends StatelessWidget {
   final Event event;

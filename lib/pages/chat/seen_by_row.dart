@@ -1,9 +1,8 @@
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:flutter/material.dart';
-
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 

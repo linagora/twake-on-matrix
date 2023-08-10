@@ -4,8 +4,8 @@ import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:matrix/matrix.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
+import 'package:matrix/matrix.dart';
 
 class MessageTime extends StatelessWidget {
   const MessageTime({

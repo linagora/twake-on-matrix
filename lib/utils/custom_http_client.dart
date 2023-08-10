@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/config/isrg_x1.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-
-import 'package:fluffychat/config/isrg_x1.dart';
 
 class CustomHttpClient {
   static HttpClient customHttpClient(String? cert) {

@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/search/recent_item_widget_style.dart';
+import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/extensions/search/presentation_search_extensions.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -8,7 +9,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class RecentItemWidget extends StatelessWidget {

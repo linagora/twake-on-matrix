@@ -8,6 +8,7 @@ linter:
     - prefer_final_locals
     - prefer_final_in_for_each
     - require_trailing_commas
+    - directives_ordering
 
 analyzer:
   errors:

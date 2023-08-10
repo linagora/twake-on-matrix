@@ -1,11 +1,10 @@
+import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/search_contact_appbar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
 
 class NewGroupView extends StatelessWidget {
   final NewGroupController controller;

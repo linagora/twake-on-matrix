@@ -1,7 +1,7 @@
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/themes.dart';
 
 import 'chat_list_body.dart';
 

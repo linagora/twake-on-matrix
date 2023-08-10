@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 typedef OnAcceptButton = void Function()?;
 

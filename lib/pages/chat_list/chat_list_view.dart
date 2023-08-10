@@ -4,9 +4,9 @@ import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;

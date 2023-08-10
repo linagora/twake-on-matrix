@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
@@ -10,22 +11,21 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
-import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
+import 'package:fluffychat/pages/new_group/new_group_view.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
+import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/pages/new_group/new_group_view.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class NewGroup extends StatefulWidget {

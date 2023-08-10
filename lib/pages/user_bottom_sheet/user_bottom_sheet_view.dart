@@ -1,11 +1,10 @@
+import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import '../../utils/matrix_sdk_extensions/presence_extension.dart';
 import '../../widgets/matrix.dart';
 import 'user_bottom_sheet.dart';

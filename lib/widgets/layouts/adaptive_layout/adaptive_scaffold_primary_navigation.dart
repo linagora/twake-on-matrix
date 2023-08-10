@@ -5,8 +5,8 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_pri
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_shell.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
   final AdaptiveScaffoldShellController controller;
