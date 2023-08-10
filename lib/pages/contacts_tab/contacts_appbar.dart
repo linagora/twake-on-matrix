@@ -3,7 +3,9 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
+import '../../utils/responsive/responsive_utils.dart';
+
+class ContactsAppBar extends StatelessWidget {
   final ContactsTabController controller;
 
   const ContactsAppBar(
@@ -26,7 +28,10 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: false,
       titleSpacing: 0,
       title: Padding(
-        padding: const EdgeInsetsDirectional.only(start: 16.0),
+        padding: EdgeInsetsDirectional.only(
+          start: 16.0,
+          top: ResponsiveUtils().isMobile(context) ? 30 : 8,
+        ),
         child: Text(
           L10n.of(context)!.contacts,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -84,7 +89,4 @@ class ContactsAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(120);
 }

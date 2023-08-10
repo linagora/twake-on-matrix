@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
+import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
@@ -130,6 +131,7 @@ class ChatView extends StatelessWidget {
     if (controller.room == null) {
       return Scaffold(
         appBar: AppBar(
+          toolbarHeight: 120,
           title: Text(L10n.of(context)!.oopsSomethingWentWrong),
         ),
         body: Center(
@@ -159,10 +161,13 @@ class ChatView extends StatelessWidget {
               appBar: AppBar(
                 automaticallyImplyLeading:
                     controller.responsive.isMobile(context) ? true : false,
-                toolbarHeight: 64,
+                toolbarHeight: ChatViewStyle.toolbarHeight(context),
                 surfaceTintColor: Colors.transparent,
                 leadingWidth: 8 + 24 + 8,
-                leading: _buildLeading(context),
+                leading: Padding(
+                  padding: ChatViewStyle.paddingLeading(context),
+                  child: _buildLeading(context),
+                ),
                 titleSpacing: 0,
                 title: ChatAppBarTitle(controller),
                 actions: _appBarActions(context),

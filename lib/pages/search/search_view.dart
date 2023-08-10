@@ -17,7 +17,7 @@ class SearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64.0),
+        preferredSize: Size.fromHeight(SearchViewStyle.toolbarHeightSearch),
         child: _buildAppBarSearch(context),
       ),
       body: WillPopScope(
@@ -132,7 +132,6 @@ class SearchView extends StatelessWidget {
   Widget _buildAppBarSearch(BuildContext context) {
     return AppBar(
       toolbarHeight: SearchViewStyle.toolbarHeightSearch,
-      surfaceTintColor: Colors.transparent,
       leadingWidth: double.infinity,
       leading: Padding(
         padding: SearchViewStyle.paddingLeadingAppBar,
