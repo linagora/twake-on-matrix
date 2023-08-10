@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,10 @@ class ChatAppBarTitle extends StatelessWidget {
               ? null
               : () => context.go('/rooms/${room.id}/details'),
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
+        padding: EdgeInsets.only(
+          left: 8.0,
+          top: ResponsiveUtils().isMobile(context) ? 30 : 0,
+        ),
         child: Row(
           children: [
             Stack(

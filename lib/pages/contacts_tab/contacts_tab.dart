@@ -23,9 +23,8 @@ class ContactsTab extends StatefulWidget {
   State<StatefulWidget> createState() => ContactsTabController();
 }
 
-class ContactsTabController extends State<ContactsTab> 
-  with ComparablePresentationContactMixin {
-
+class ContactsTabController extends State<ContactsTab>
+    with ComparablePresentationContactMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
   final responsive = getIt.get<ResponsiveUtils>();
