@@ -1,13 +1,12 @@
 import 'dart:io';
-
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
-class SendingImageWidget extends StatelessWidget {
-  SendingImageWidget({
+class SendImageInfoWidget extends StatelessWidget {
+  SendImageInfoWidget({
     super.key,
     required this.matrixFile,
     required this.event,

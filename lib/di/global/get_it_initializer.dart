@@ -63,7 +63,7 @@ class GetItInitializer {
   }
 
   void bindingQueue() {
-    getIt.registerSingleton<Queue>(Queue());
+    getIt.registerFactory<Queue>(() => Queue());
   }
 
   void bindingAPI() {

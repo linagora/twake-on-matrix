@@ -84,19 +84,7 @@ class ChatInputRow extends StatelessWidget {
                   tooltip: L10n.of(context)!.more,
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
-                  onPressed: () async {
-                    controller.showImagesPickerBottomSheetAction(
-                      room: controller.room,
-                      context: context,
-                      onItemAction: (action) => controller.onClickItemAction(
-                        action: action,
-                        room: controller.room,
-                        context: context,
-                      ),
-                      onSendTap: () =>
-                          controller.sendImages(room: controller.room),
-                    );
-                  },
+                  onPressed: controller.onSendFileClick,
                 ),
                 if (controller.matrix!.isMultiAccount &&
                     controller.matrix!.hasComplexBundles &&

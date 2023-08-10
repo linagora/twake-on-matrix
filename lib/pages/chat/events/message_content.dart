@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
+import 'package:fluffychat/pages/chat/events/send_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -131,16 +131,17 @@ class MessageContent extends StatelessWidget {
                   child: Icon(Icons.error, color: Colors.red),
                 ),
               );
-            }
-            final matrixFile = event.getMatrixFile();
-            if (matrixFile != null &&
-                matrixFile.filePath != null &&
-                matrixFile is MatrixImageFile) {
-              return SendingImageWidget(
-                matrixFile: matrixFile,
-                event: event,
-                onTapPreview: onTapPreview,
-              );
+            } else if (event.status == EventStatus.sending) {
+              final matrixFile = event.getMatrixFile();
+              if (matrixFile != null &&
+                  matrixFile.filePath != null &&
+                  matrixFile is MatrixImageFile) {
+                return SendImageInfoWidget(
+                  matrixFile: matrixFile,
+                  event: event,
+                  onTapPreview: onTapPreview,
+                );
+              }
             }
             return ImageBubble(
               event,

@@ -397,7 +397,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     prefs.remove('draft_$roomId');
     var parseCommands = true;
 
-    final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
+    final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&
         !room!.client.commands.keys.contains(commandMatch[1]!.toLowerCase())) {
       final l10n = L10n.of(context)!;
@@ -1248,6 +1248,23 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
         replyEvent = null;
         editEvent = null;
       });
+
+  void onSendFileClick() async {
+    if (PlatformInfos.isMobile) {
+      showImagesPickerBottomSheetAction(
+        room: room,
+        context: context,
+        onItemAction: (action) => onClickItemAction(
+          action: action,
+          room: room,
+          context: context,
+        ),
+        onSendTap: () => sendImages(room: room),
+      );
+    } else {
+      sendFileOnWebAction(context, room: room);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

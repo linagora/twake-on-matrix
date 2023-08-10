@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
@@ -55,6 +56,20 @@ mixin SendFilesMixin on ImagePickerMixin {
     if (result == null && result?.files.isEmpty == true) return;
 
     sendFileInteractor.execute(room: room!, filePickerResult: result!);
+  }
+
+  void sendFileOnWebAction(
+    BuildContext context, {
+    Room? room,
+  }) async {
+    if (room == null) {}
+    final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
+    final result = await FilePicker.platform.pickFiles(
+      withData: true,
+    );
+    if (result == null && result?.files.isEmpty == true) return;
+
+    sendFileOnWebInteractor.execute(room: room!, filePickerResult: result!);
   }
 
   void onClickItemAction({
