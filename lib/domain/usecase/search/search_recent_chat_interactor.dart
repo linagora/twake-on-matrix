@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/search/search_interactor_state.dart';
+import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/model/room/room_list_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -21,15 +21,13 @@ class SearchRecentChatInteractor {
         limit: limit,
       );
       yield Right(
-        GetContactAndRecentChatSuccess(
-          searchResult: recentChat,
-          shouldLoadMoreContacts: keyword.isNotEmpty,
-          contactsOffset: 0,
+        SearchRecentChatSuccess(
+          data: recentChat,
           keyword: keyword,
         ),
       );
     } catch (e) {
-      yield Left(GetContactAndRecentChatFailed(exception: e));
+      yield Left(SearchRecentChatFailed(exception: e));
     }
   }
 }

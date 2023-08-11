@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
@@ -36,7 +36,7 @@ class _ContactsSelectionListState extends State<ContactsSelectionList> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Either<Failure, GetContactsSuccess>>(
+    return StreamBuilder<Either<Failure, Success>>(
       stream: widget.newGroupController.contactStreamController.stream,
       builder: (context, snapshot) {
         final searchKeyword =

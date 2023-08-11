@@ -4,7 +4,6 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
@@ -42,8 +41,7 @@ class NewGroupController extends State<NewGroup>
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
-  final contactStreamController =
-      StreamController<Either<Failure, GetContactsSuccess>>();
+  final contactStreamController = StreamController<Either<Failure, Success>>();
   final groupNameTextEditingController = TextEditingController();
   final avatarNotifier = ValueNotifier<AssetEntity?>(null);
   final createRoomStateNotifier =

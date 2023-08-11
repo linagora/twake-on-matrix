@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
@@ -30,11 +30,11 @@ class _ExpansionList extends State<ExpansionList> {
         widget.newPrivateChatController.searchContactsController;
     final fetchContactsController =
         widget.newPrivateChatController.fetchContactsController;
-    return StreamBuilder<Either<Failure, GetContactsSuccess>>(
+    return StreamBuilder<Either<Failure, Success>>(
       stream: widget.newPrivateChatController.networkStreamController.stream,
       builder: (
         context,
-        AsyncSnapshot<Either<Failure, GetContactsSuccess>> snapshot,
+        AsyncSnapshot<Either<Failure, Success>> snapshot,
       ) {
         final newGroupButton = _IconTextTileButton(
           context: context,
