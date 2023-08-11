@@ -1,20 +1,17 @@
-import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/app_state/lazy_load_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 
-class GetContactAndRecentChatPresentation extends Success {
-  final List<PresentationSearch> searchResult;
-  final int contactsOffset;
-  final bool shouldLoadMoreContacts;
+class GetContactAndRecentChatPresentation
+    extends LazyLoadSuccess<PresentationSearch> {
   final String keyword;
 
   const GetContactAndRecentChatPresentation({
-    required this.searchResult,
-    required this.contactsOffset,
-    required this.shouldLoadMoreContacts,
+    required super.data,
+    required super.offset,
+    required super.isEnd,
     required this.keyword,
   });
 
   @override
-  List<Object?> get props =>
-      [searchResult, contactsOffset, shouldLoadMoreContacts, keyword];
+  List<Object?> get props => [data, offset, isEnd, keyword];
 }

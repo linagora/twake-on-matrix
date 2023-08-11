@@ -3,21 +3,19 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/usecase/lookup_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class SearchContactsController {
   static const debouncerIntervalInMilliseconds = 300;
 
-  final LookupContactsInteractor _lookupNetworkContactsInteractor =
-      getIt.get<LookupContactsInteractor>();
+  final _lookupNetworkContactsInteractor = getIt.get<GetContactsInteractor>();
   late final Debouncer<String> _debouncer;
   final TextEditingController textEditingController = TextEditingController();
-  StreamController<Either<Failure, GetContactsSuccess>> lookupStreamController =
+  StreamController<Either<Failure, Success>> lookupStreamController =
       StreamController();
   void Function(String)? onSearchKeywordChanged;
   ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
@@ -58,7 +56,7 @@ class SearchContactsController {
 
   void fetchLookupContacts() {
     _lookupNetworkContactsInteractor
-        .execute(query: ContactQuery(keyword: searchKeyword))
+        .execute(keyword: searchKeyword, limit: 20, offset: 0)
         .listen((event) {
       lookupStreamController.add(event);
     });

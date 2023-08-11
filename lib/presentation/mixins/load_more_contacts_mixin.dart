@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
@@ -22,6 +23,7 @@ mixin LoadMoreContactsMixin {
         if (isLoadMoreAction) {
           fetchContactsController.loadMoreContacts(
             offset: fetchContactsController.lastContactIndexNotifier.value,
+            limit: AppConfig.fetchLimit,
           );
         }
       }

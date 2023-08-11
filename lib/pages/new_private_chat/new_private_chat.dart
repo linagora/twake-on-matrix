@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_success.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
@@ -27,8 +27,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
     with ComparablePresentationContactMixin, GoToDraftChatMixin {
   final searchContactsController = SearchContactsController();
   final fetchContactsController = FetchContactsController();
-  final networkStreamController =
-      StreamController<Either<Failure, GetContactsSuccess>>();
+  final networkStreamController = StreamController<Either<Failure, Success>>();
 
   final isShowContactsNotifier = ValueNotifier(true);
 
