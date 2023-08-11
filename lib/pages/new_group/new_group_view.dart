@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/search_contact_appbar.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/new_private_appbar.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/new_private_appbar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +17,9 @@ class NewGroupView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: SearchContactAppBar(
+        preferredSize:
+            Size.fromHeight(NewPrivateAppBarStyle.appbarHeight(context)),
+        child: NewPrivateAppBar(
           focusNode: controller.searchContactsController.searchFocusNode,
           title: L10n.of(context)!.newGroupChat,
           searchContactsController: controller.searchContactsController,

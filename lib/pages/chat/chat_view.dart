@@ -27,84 +27,84 @@ class ChatView extends StatelessWidget {
 
   const ChatView(this.controller, {Key? key}) : super(key: key);
 
-  List<Widget> _appBarActions(BuildContext context) {
+  Widget _appBarActions(BuildContext context) {
     if (controller.selectMode) {
-      return [
-        // FIXME: 7Aug2023: Need user story for edit message
-        TwakeIconButton(
-          icon: Icons.copy_outlined,
-          tooltip: L10n.of(context)!.copy,
-          onPressed: controller.copyEventsAction,
-        ),
-        if (controller.canRedactSelectedEvents)
+      return Row(
+        children: [
+          // FIXME: 7Aug2023: Need user story for edit message
           TwakeIconButton(
-            icon: Icons.delete_outlined,
-            tooltip: L10n.of(context)!.redactMessage,
-            onPressed: controller.redactEventsAction,
+            icon: Icons.copy_outlined,
+            tooltip: L10n.of(context)!.copy,
+            onPressed: controller.copyEventsAction,
           ),
-        TwakeIconButton(
-          icon: Icons.push_pin_outlined,
-          onPressed: controller.pinEvent,
-          tooltip: L10n.of(context)!.pinMessage,
-        ),
-        if (controller.selectedEvents.length == 1)
-          PopupMenuButton<_EventContextAction>(
-            onSelected: (action) {
-              switch (action) {
-                case _EventContextAction.info:
-                  controller.showEventInfo();
-                  controller.clearSelectedEvents();
-                  break;
-                case _EventContextAction.report:
-                  controller.reportEventAction();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: _EventContextAction.info,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.info_outlined),
-                    const SizedBox(width: 12),
-                    Text(L10n.of(context)!.messageInfo),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: _EventContextAction.report,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.shield_outlined,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(L10n.of(context)!.reportMessage),
-                  ],
-                ),
-              ),
-            ],
-          ),
-      ];
-    } else if (controller.isArchived) {
-      return [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextButton.icon(
-            onPressed: controller.forgetRoom,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+          if (controller.canRedactSelectedEvents)
+            TwakeIconButton(
+              icon: Icons.delete_outlined,
+              tooltip: L10n.of(context)!.redactMessage,
+              onPressed: controller.redactEventsAction,
             ),
-            icon: const Icon(Icons.delete_forever_outlined),
-            label: Text(L10n.of(context)!.delete),
+          TwakeIconButton(
+            icon: Icons.push_pin_outlined,
+            onPressed: controller.pinEvent,
+            tooltip: L10n.of(context)!.pinMessage,
           ),
-        )
-      ];
+          if (controller.selectedEvents.length == 1)
+            PopupMenuButton<_EventContextAction>(
+              onSelected: (action) {
+                switch (action) {
+                  case _EventContextAction.info:
+                    controller.showEventInfo();
+                    controller.clearSelectedEvents();
+                    break;
+                  case _EventContextAction.report:
+                    controller.reportEventAction();
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _EventContextAction.info,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.info_outlined),
+                      const SizedBox(width: 12),
+                      Text(L10n.of(context)!.messageInfo),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: _EventContextAction.report,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.shield_outlined,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(L10n.of(context)!.reportMessage),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
+      );
+    } else if (controller.isArchived) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextButton.icon(
+          onPressed: controller.forgetRoom,
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
+          icon: const Icon(Icons.delete_forever_outlined),
+          label: Text(L10n.of(context)!.delete),
+        ),
+      );
     } else {
-      return [const SizedBox.shrink()];
+      return const SizedBox.shrink();
     }
   }
 
@@ -155,8 +155,10 @@ class ChatView extends StatelessWidget {
                   child: _buildLeading(context),
                 ),
                 titleSpacing: 0,
-                title: ChatAppBarTitle(controller),
-                actions: _appBarActions(context),
+                title: ChatAppBarTitle(
+                  controller,
+                  actions: _appBarActions(context),
+                ),
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 4),
                   child: Container(

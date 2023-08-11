@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
+import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -16,8 +17,13 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;
+  final Widget? actions;
 
-  const ChatAppBarTitle(this.controller, {Key? key}) : super(key: key);
+  const ChatAppBarTitle(
+    this.controller, {
+    Key? key,
+    required this.actions,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +32,16 @@ class ChatAppBarTitle extends StatelessWidget {
       return Container();
     }
     if (controller.selectedEvents.isNotEmpty) {
-      return Text(controller.selectedEvents.length.toString());
+      return Padding(
+        padding: ChatViewStyle.paddingLeading(context),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(controller.selectedEvents.length.toString()),
+            actions ?? const SizedBox.shrink(),
+          ],
+        ),
+      );
     }
     final directChatMatrixID = room.directChatMatrixID;
     return InkWell(
