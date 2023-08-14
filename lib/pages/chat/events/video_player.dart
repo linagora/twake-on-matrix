@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -56,12 +57,16 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
           ),
           autoPlay: true,
           autoInitialize: true,
+          showControlsOnInitialize: false,
+          customControls: const MaterialControls(),
         );
       } else if (!kIsWeb && tmpFile != null && _chewieManager == null) {
         _chewieManager ??= ChewieController(
           videoPlayerController: VideoPlayerController.file(tmpFile),
           autoPlay: true,
           autoInitialize: true,
+          showControlsOnInitialize: false,
+          customControls: const MaterialControls(),
         );
       }
     } on MatrixConnectionException catch (e) {
@@ -100,49 +105,59 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
         fallbackBlurHash;
 
     final chewieManager = _chewieManager;
-    return Material(
-      color: Colors.black,
-      child: SizedBox(
-        height: 300,
-        child: chewieManager != null
-            ? Center(child: Chewie(controller: chewieManager))
-            : Stack(
-                children: [
-                  if (hasThumbnail)
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12.0),
+      child: Material(
+        color: Colors.black,
+        child: SizedBox(
+          width: MessageContentStyle.imageBubbleWidth,
+          height: MessageContentStyle.imageBubbleHeight,
+          child: chewieManager != null
+              ? FittedBox(
+                fit: BoxFit.contain,
+                child: Chewie(
+                  key: ValueKey(widget.event.eventId),
+                  controller: chewieManager,
+                ),
+              )
+              : Stack(
+                  children: [
+                    if (hasThumbnail)
+                      Center(
+                        child: ImageBubble(
+                          widget.event,
+                          tapToView: false,
+                        ),
+                      )
+                    else
+                      BlurHash(hash: blurHash),
                     Center(
-                      child: ImageBubble(
-                        widget.event,
-                        tapToView: false,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                        ),
+                        icon: _isDownloading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator.adaptive(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.download_outlined),
+                        label: Text(
+                          _isDownloading
+                              ? L10n.of(context)!.loadingPleaseWait
+                              : L10n.of(context)!.videoWithSize(
+                                  widget.event.sizeString ?? '?MB',
+                                ),
+                        ),
+                        onPressed: _isDownloading ? null : _downloadAction,
                       ),
-                    )
-                  else
-                    BlurHash(hash: blurHash),
-                  Center(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                      ),
-                      icon: _isDownloading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.download_outlined),
-                      label: Text(
-                        _isDownloading
-                            ? L10n.of(context)!.loadingPleaseWait
-                            : L10n.of(context)!.videoWithSize(
-                                widget.event.sizeString ?? '?MB',
-                              ),
-                      ),
-                      onPressed: _isDownloading ? null : _downloadAction,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }

@@ -144,30 +144,31 @@ class ChatAppBarTitle extends StatelessWidget {
             style: statusTextStyle,
           );
         } else {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  typingText,
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
-                  style: statusTextStyle,
-                ),
-              ),
-              SizedBox(
-                width: 32,
-                height: 16,
-                child: Transform.translate(
-                  offset: const Offset(0, -2),
-                  child: LottieBuilder.asset(
-                    'assets/typing-indicator.zip',
-                    fit: BoxFit.fitWidth,
-                    width: 32,
+          return IntrinsicWidth(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    typingText,
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    style: statusTextStyle,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: 32,
+                  height: 16,
+                  child: Transform.translate(
+                    offset: const Offset(0, -2),
+                    child: LottieBuilder.asset(
+                      'assets/typing-indicator.zip', fit: BoxFit.fitWidth,
+                      width: 32,
+                      ),
+                  ),
+                ),
+              ],
+            ),
           );
         }
       },
