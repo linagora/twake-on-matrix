@@ -1,9 +1,8 @@
+import 'package:fluffychat/pages/contacts_tab/contacts_appbar_style.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-
-import '../../utils/responsive/responsive_utils.dart';
 
 class ContactsAppBar extends StatelessWidget {
   final ContactsTabController controller;
@@ -28,10 +27,7 @@ class ContactsAppBar extends StatelessWidget {
       centerTitle: false,
       titleSpacing: 0,
       title: Padding(
-        padding: EdgeInsetsDirectional.only(
-          start: 16.0,
-          top: ResponsiveUtils().isMobile(context) ? 30 : 8,
-        ),
+        padding: ContactsAppbarStyle.paddingTitle(context),
         child: Text(
           L10n.of(context)!.contacts,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(

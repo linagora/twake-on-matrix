@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_stream.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,9 +21,7 @@ class ChatListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-          ResponsiveUtils().isMobile(context) ? 160 : 120,
-        ),
+        preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(controller: controller),
       ),
       body: ChatListBodyStream(controller: controller),

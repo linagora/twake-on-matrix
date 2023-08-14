@@ -343,6 +343,12 @@ class ChatDetailsController extends State<ChatDetails> {
 
   static const fixedWidth = 360.0;
 
+  void onPressedClose() {
+    GoRouterState.of(context).path?.startsWith('/spaces/') == true
+        ? context.pop()
+        : context.go('/rooms/${roomId!}');
+  }
+
   @override
   Widget build(BuildContext context) {
     members ??=

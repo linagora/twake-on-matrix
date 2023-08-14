@@ -1,9 +1,12 @@
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 
 class ForwardViewStyle {
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+
   static double preferredAppBarSize(BuildContext context) =>
-      ResponsiveUtils().isMobile(context) ? 104 : 64;
+      responsive.isMobile(context) ? 104 : 64;
 
   static double get paddingBody => 16.0;
 
@@ -13,6 +16,6 @@ class ForwardViewStyle {
 
   static EdgeInsetsDirectional paddingItemAppbar(BuildContext context) =>
       EdgeInsetsDirectional.only(
-        top: ResponsiveUtils().isMobile(context) ? 30 : 0,
+        top: responsive.isMobile(context) ? 30 : 0,
       );
 }

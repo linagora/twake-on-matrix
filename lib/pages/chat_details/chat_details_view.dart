@@ -1,5 +1,5 @@
+import 'package:fluffychat/pages/chat_details/chat_detail_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -49,26 +49,19 @@ class ChatDetailsView extends StatelessWidget {
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
               SliverAppBar(
-                toolbarHeight: ResponsiveUtils().isMobile(context) ? 96 : 56,
+                toolbarHeight: ChatDetailViewStyle.toolbarHeight(context),
                 automaticallyImplyLeading: false,
                 elevation: Theme.of(context).appBarTheme.elevation,
                 expandedHeight: 300.0,
                 floating: true,
                 pinned: true,
                 title: Padding(
-                  padding: ResponsiveUtils().isMobile(context)
-                      ? const EdgeInsets.only(top: 40.0)
-                      : EdgeInsetsDirectional.zero,
+                  padding: ChatDetailViewStyle.paddingTitle(context),
                   child: Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.close_outlined),
-                        onPressed: () => GoRouterState.of(context)
-                                    .path
-                                    ?.startsWith('/spaces/') ==
-                                true
-                            ? context.pop()
-                            : context.go('/rooms/${controller.roomId!}'),
+                        onPressed: controller.onPressedClose,
                       ),
                       Flexible(
                         flex: 8,

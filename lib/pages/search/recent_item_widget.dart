@@ -5,7 +5,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
@@ -59,6 +59,7 @@ class RecentItemWidget extends StatelessWidget {
       if (recentChatPresentationSearch.directChatMatrixID == null) {
         return _GroupChatInformation(
           recentChatPresentationSearch: recentChatPresentationSearch,
+          searchKeyword: highlightKeyword,
         );
       } else {
         return _DirectChatInformation(
@@ -72,24 +73,59 @@ class RecentItemWidget extends StatelessWidget {
 
 class _GroupChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
-  const _GroupChatInformation({required this.recentChatPresentationSearch});
+  final String? searchKeyword;
+
+  const _GroupChatInformation({
+    required this.recentChatPresentationSearch,
+    this.searchKeyword,
+  });
 
   @override
   Widget build(BuildContext context) {
     final actualMembersCount =
         recentChatPresentationSearch.roomSummary?.actualMembersCount ?? 0;
-    return Text(
-      L10n.of(context)!.membersCount(actualMembersCount),
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      softWrap: false,
-      style: Theme.of(context).textTheme.bodyMedium?.merge(
-            TextStyle(
-              overflow: TextOverflow.ellipsis,
-              letterSpacing: 0.15,
-              color: LinagoraRefColors.material().tertiary[30],
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: RecentItemStyle.avatarSize,
+          child: Avatar(
+            name: recentChatPresentationSearch.displayName,
           ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HighlightText(
+                text: recentChatPresentationSearch.displayName ?? "",
+                style: Theme.of(context).textTheme.titleMedium?.merge(
+                      TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        letterSpacing: 0.15,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                searchWord: searchKeyword,
+              ),
+              Text(
+                L10n.of(context)!.membersCount(actualMembersCount),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                softWrap: false,
+                style: Theme.of(context).textTheme.bodyMedium?.merge(
+                      TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                        letterSpacing: 0.15,
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+                    ),
+              )
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -108,7 +144,6 @@ class _DirectChatInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // FIXME: ABc
         SizedBox(
           width: RecentItemStyle.avatarSize,
           child: Avatar(

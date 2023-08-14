@@ -11,7 +11,7 @@ import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter/scheduler.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
@@ -157,6 +157,20 @@ class SearchController extends State<Search>
 
   void clearSearchBar() {
     textEditingController.clear();
+  }
+
+  String? getUserId(String directChatMatrixID) {
+    final roomId =
+        Matrix.of(context).client.getDirectChatFromUserId(directChatMatrixID);
+
+    if (roomId != null) {
+      final room = Matrix.of(context).client.getRoomById(roomId);
+      final userId =
+          room?.unsafeGetUserFromMemoryOrFallback(directChatMatrixID).id;
+      return userId;
+    } else {
+      return null;
+    }
   }
 
   @override

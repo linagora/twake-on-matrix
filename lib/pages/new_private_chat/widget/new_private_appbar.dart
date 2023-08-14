@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class NewPrivateAppBar extends StatefulWidget {
+class NewPrivateAppBar extends StatelessWidget {
   final SearchContactsController searchContactsController;
   final FocusNode? focusNode;
   final String title;
@@ -20,11 +20,6 @@ class NewPrivateAppBar extends StatefulWidget {
     this.focusNode,
   });
 
-  @override
-  State<NewPrivateAppBar> createState() => _NewPrivateAppBarState();
-}
-
-class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -67,14 +62,13 @@ class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
       title: Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: const EdgeInsetsDirectional.only(top: 30),
+          padding: NewPrivateAppBarStyle.paddingItemAppbar(context),
           child: ValueListenableBuilder(
-            valueListenable:
-                widget.searchContactsController.isSearchModeNotifier,
+            valueListenable: searchContactsController.isSearchModeNotifier,
             builder: (context, isSearchModeNotifier, child) {
               if (isSearchModeNotifier) {
                 return TextField(
-                  focusNode: widget.focusNode,
+                  focusNode: focusNode,
                   autofocus: true,
                   maxLines: 1,
                   buildCounter: (
@@ -87,11 +81,10 @@ class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
                   maxLength: 200,
                   cursorHeight: 26,
                   scrollPadding: const EdgeInsets.all(0),
-                  controller:
-                      widget.searchContactsController.textEditingController,
+                  controller: searchContactsController.textEditingController,
                   decoration: InputDecoration(
                     isCollapsed: true,
-                    hintText: widget.hintText,
+                    hintText: hintText,
                     hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: LinagoraRefColors.material().neutral[60],
                         ),
@@ -99,7 +92,7 @@ class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
                 );
               }
               return Text(
-                widget.title,
+                title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -112,13 +105,12 @@ class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
         Padding(
           padding: NewPrivateAppBarStyle.paddingItemAppbar(context),
           child: ValueListenableBuilder(
-            valueListenable:
-                widget.searchContactsController.isSearchModeNotifier,
+            valueListenable: searchContactsController.isSearchModeNotifier,
             builder: (context, isSearchModeNotifier, child) {
               if (isSearchModeNotifier) {
                 return TwakeIconButton(
                   onPressed: () =>
-                      widget.searchContactsController.onCloseSearchTapped(),
+                      searchContactsController.onCloseSearchTapped(),
                   tooltip: L10n.of(context)!.close,
                   icon: Icons.close,
                   paddingAll: 10.0,
@@ -133,8 +125,7 @@ class _NewPrivateAppBarState extends State<NewPrivateAppBar> {
                 children: [
                   TwakeIconButton(
                     icon: Icons.search,
-                    onPressed: () =>
-                        widget.searchContactsController.openSearchBar(),
+                    onPressed: () => searchContactsController.openSearchBar(),
                     tooltip: L10n.of(context)!.search,
                     paddingAll: 10.0,
                     margin: const EdgeInsets.symmetric(vertical: 10.0),

@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
@@ -15,20 +14,18 @@ class TwakeHeader extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final isWebWidth = ResponsiveUtils().isDesktop(context);
-
     return AppBar(
       toolbarHeight: TwakeHeaderStyle.toolbarHeight,
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,
-      leading: !isWebWidth
+      leading: !TwakeHeaderStyle.isDesktop(context)
           ? SizedBox(
               width: 0,
               child: ClientChooserButton(controller),
             )
           : null,
       titleSpacing: 0,
-      title: isWebWidth
+      title: TwakeHeaderStyle.isDesktop(context)
           ? Padding(
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               child: Text(
