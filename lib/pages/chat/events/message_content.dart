@@ -3,6 +3,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_widget.dart';
+import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -131,10 +132,14 @@ class MessageContent extends StatelessWidget {
                 ),
               );
             }
-            final filePath = event.getFilePath();
-            if (filePath != null) {
+            final matrixFile = event.getMatrixFile();
+            if (
+              matrixFile != null && 
+              matrixFile.filePath != null && 
+              matrixFile is MatrixImageFile
+            ) {
               return SendingImageWidget(
-                filePath: filePath,
+                matrixFile: matrixFile,
                 event: event,
                 onTapPreview: onTapPreview,
               );
@@ -172,6 +177,14 @@ class MessageContent extends StatelessWidget {
               controller: controller,
             );
           case MessageTypes.Video:
+            final matrixFile = event.getMatrixFile();
+            if (matrixFile is MatrixVideoFile) {
+              return SendingVideoWidget(
+                key: ValueKey(event.eventId),
+                event: event,
+                matrixFile: matrixFile,
+              );
+            }
             if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
               return EventVideoPlayer(event);
             }

@@ -9,12 +9,12 @@ import 'package:matrix/matrix.dart' hide Visibility;
 class SendingImageWidget extends StatelessWidget {
   SendingImageWidget({
     super.key,
-    required this.filePath,
-    required this.event,
+    required this.matrixFile,
+    required this.event, 
     this.onTapPreview,
   });
 
-  final String filePath;
+  final MatrixImageFile matrixFile;
 
   final Event event;
 
@@ -32,8 +32,8 @@ class SendingImageWidget extends StatelessWidget {
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
-            ImageViewer(event, filePath: filePath),
-      );
+            ImageViewer(event, filePath: matrixFile.filePath),
+        );
     }
   }
 
@@ -70,7 +70,7 @@ class SendingImageWidget extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12.0),
           child: Image.file(
-            File(filePath),
+            File(matrixFile.filePath!),
             width: MessageContentStyle.imageBubbleWidth,
             height: MessageContentStyle.imageBubbleHeight,
             fit: BoxFit.cover,
