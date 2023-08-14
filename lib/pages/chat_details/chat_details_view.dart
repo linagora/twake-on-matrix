@@ -1,4 +1,5 @@
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -48,33 +49,51 @@ class ChatDetailsView extends StatelessWidget {
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
               SliverAppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.close_outlined),
-                  onPressed: () =>
-                      GoRouterState.of(context).path?.startsWith('/spaces/') ==
-                              true
-                          ? context.pop()
-                          : context.go('/rooms/${controller.roomId!}'),
-                ),
+                toolbarHeight: ResponsiveUtils().isMobile(context) ? 96 : 56,
+                automaticallyImplyLeading: false,
                 elevation: Theme.of(context).appBarTheme.elevation,
                 expandedHeight: 300.0,
                 floating: true,
                 pinned: true,
-                actions: <Widget>[
-                  if (room.canonicalAlias.isNotEmpty)
-                    IconButton(
-                      tooltip: L10n.of(context)!.share,
-                      icon: Icon(Icons.adaptive.share_outlined),
-                      onPressed: () => FluffyShare.share(
-                        AppConfig.inviteLinkPrefix + room.canonicalAlias,
-                        context,
+                title: Padding(
+                  padding: ResponsiveUtils().isMobile(context)
+                      ? const EdgeInsets.only(top: 40.0)
+                      : EdgeInsetsDirectional.zero,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close_outlined),
+                        onPressed: () => GoRouterState.of(context)
+                                    .path
+                                    ?.startsWith('/spaces/') ==
+                                true
+                            ? context.pop()
+                            : context.go('/rooms/${controller.roomId!}'),
                       ),
-                    ),
-                  ChatSettingsPopupMenu(room, false)
-                ],
-                title: Text(
-                  room.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)!),
+                      Flexible(
+                        flex: 8,
+                        child: Text(
+                          room.getLocalizedDisplayname(
+                            MatrixLocals(L10n.of(context)!),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          if (room.canonicalAlias.isNotEmpty)
+                            IconButton(
+                              tooltip: L10n.of(context)!.share,
+                              icon: Icon(Icons.adaptive.share_outlined),
+                              onPressed: () => FluffyShare.share(
+                                AppConfig.inviteLinkPrefix +
+                                    room.canonicalAlias,
+                                context,
+                              ),
+                            ),
+                          ChatSettingsPopupMenu(room, false)
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
