@@ -20,9 +20,9 @@ class NewGroupView extends StatelessWidget {
         preferredSize:
             Size.fromHeight(NewPrivateAppBarStyle.appbarHeight(context)),
         child: NewPrivateAppBar(
-          focusNode: controller.searchContactsController.searchFocusNode,
+          focusNode: controller.searchFocusNode,
           title: L10n.of(context)!.newGroupChat,
-          searchContactsController: controller.searchContactsController,
+          searchContactsController: controller,
           hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
         ),
       ),
@@ -34,7 +34,7 @@ class NewGroupView extends StatelessWidget {
           Expanded(
             child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              controller: controller.fetchContactsController.scrollController,
+              controller: controller.scrollController,
               child: ValueListenableBuilder<bool>(
                 valueListenable: controller
                     .selectedContactsMapNotifier.haveSelectedContactsNotifier,

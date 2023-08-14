@@ -1,70 +1,53 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success_converter.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/pages/search/get_contacts_controller.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class SearchContactsController {
-  static const debouncerIntervalInMilliseconds = 300;
+mixin class SearchContactsController {
+  static const _debouncerIntervalInMilliseconds = 300;
 
-  final _lookupNetworkContactsInteractor = getIt.get<GetContactsInteractor>();
-  late final Debouncer<String> _debouncer;
+  final _getContactController =
+      GetContactsController(_PresentationContactConverter());
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: _debouncerIntervalInMilliseconds),
+    initialValue: '',
+  );
   final TextEditingController textEditingController = TextEditingController();
-  StreamController<Either<Failure, Success>> lookupStreamController =
-      StreamController();
-  void Function(String)? onSearchKeywordChanged;
-  ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
+  // FIXME: Consider can use FocusNode instead ?
+  final isSearchModeNotifier = ValueNotifier(false);
   final searchFocusNode = FocusNode();
 
-  String searchKeyword = "";
+  ValueNotifier<Either<Failure, Success>> get contactsNotifier =>
+      _getContactController.contactsNotifier;
 
-  void init() {
-    fetchLookupContacts();
-    _initializeDebouncer();
-    textEditingController.addListener(() {
-      onSearchBarChanged(textEditingController.text);
+  void initSearchContacts() {
+    _getContactController.contactsNotifier.addListener(() {
+      Logs().d('contactsNotifier: ${contactsNotifier.value}');
     });
-  }
-
-  void _initializeDebouncer() {
-    _debouncer = Debouncer(
-      const Duration(milliseconds: debouncerIntervalInMilliseconds),
-      initialValue: '',
-    );
+    textEditingController.addListener(() {
+      _debouncer.value = textEditingController.text;
+    });
 
     _debouncer.values.listen((keyword) async {
-      Logs().d(
-        "SearchContactsController::_initializeDebouncer: searchKeyword: $searchKeyword",
-      );
-      searchKeyword = keyword;
-      Logs().d(
-        "SearchContactsController::_initializeDebouncer: isSearchModeNotifier: ${isSearchModeNotifier.value}",
-      );
-      if (isSearchModeNotifier.value) {
-        if (onSearchKeywordChanged != null) {
-          onSearchKeywordChanged!(textEditingController.text);
-        }
-      }
-      fetchLookupContacts();
+      fetchContacts(keyword: keyword);
     });
+
+    fetchContacts(keyword: '');
   }
 
-  void fetchLookupContacts() {
-    _lookupNetworkContactsInteractor
-        .execute(keyword: searchKeyword, limit: 20, offset: 0)
-        .listen((event) {
-      lookupStreamController.add(event);
-    });
+  void fetchContacts({required String keyword}) {
+    _getContactController.fetch(keyword: keyword);
   }
 
-  void onSearchBarChanged(String keyword) {
-    _debouncer.setValue(keyword);
-    searchKeyword = keyword;
+  void loadMoreContacts() {
+    _getContactController.loadMore();
   }
 
   void onCloseSearchTapped() {
@@ -90,9 +73,24 @@ class SearchContactsController {
     searchFocusNode.requestFocus();
   }
 
-  void dispose() {
+  void disposeSearchContacts() {
     _debouncer.cancel();
+    _getContactController.dispose();
     textEditingController.dispose();
-    lookupStreamController.close();
+  }
+}
+
+class _PresentationContactConverter implements SuccessConverter {
+  @override
+  Success convert(Success success) {
+    if (success is GetContactsSuccess) {
+      return PresentationContactsSuccess(
+        data: success.data.expand((e) => e.toPresentationContacts()).toList(),
+        offset: success.offset,
+        isEnd: success.isEnd,
+        keyword: success.keyword,
+      );
+    }
+    return success;
   }
 }

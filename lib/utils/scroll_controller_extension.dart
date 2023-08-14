@@ -5,4 +5,12 @@ extension ScrollControllerExtension on ScrollController {
   bool get shouldLoadMore {
     return position.extentAfter < endReachedDistance;
   }
+
+  void addLoadMoreListener(VoidCallback listener) {
+    addListener(() {
+      if (shouldLoadMore) {
+        listener();
+      }
+    });
+  }
 }

@@ -1,8 +1,8 @@
 mixin LazyLoadDataMixin {
   LazyLoadInfos calculateLazyLoadInfo({
-    required length,
-    required offset,
-    required limit,
+    required int length,
+    required int offset,
+    required int limit,
   }) {
     final isEnd = length < limit;
     return LazyLoadInfos(isEnd: isEnd, offset: isEnd ? offset : offset + limit);

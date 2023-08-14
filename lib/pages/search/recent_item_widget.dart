@@ -165,17 +165,14 @@ class _ContactInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: RecentItemStyle.avatarSize,
-          child: FutureBuilder<ProfileInformation?>(
-            future: contactPresentationSearch.getProfile(client),
-            builder: (context, snapshot) {
-              return Avatar(
-                mxContent: snapshot.data?.avatarUrl,
-                name: contactPresentationSearch.displayName,
-              );
-            },
-          ),
+        FutureBuilder<ProfileInformation?>(
+          future: contactPresentationSearch.getProfile(client),
+          builder: (context, snapshot) {
+            return Avatar(
+              mxContent: snapshot.data?.avatarUrl,
+              name: contactPresentationSearch.displayName,
+            );
+          },
         ),
         const SizedBox(width: 8),
         Flexible(

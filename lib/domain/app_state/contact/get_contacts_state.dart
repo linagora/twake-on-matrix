@@ -30,13 +30,26 @@ class GetContactsSuccess extends LazyLoadSuccess<Contact> {
 
   @override
   List<Object?> get props => [data, offset, isEnd, keyword];
+
+  GetContactsSuccess addMore(GetContactsSuccess other) {
+    return GetContactsSuccess(
+      data: data + other.data,
+      offset: other.offset,
+      isEnd: other.isEnd,
+      keyword: other.keyword,
+    );
+  }
 }
 
-class GetContactsFailed extends Failure {
+class GetContactsFailure extends Failure {
+  final String keyword;
   final dynamic exception;
 
-  const GetContactsFailed({required this.exception});
+  const GetContactsFailure({
+    required this.keyword,
+    required this.exception,
+  });
 
   @override
-  List<Object?> get props => [exception];
+  List<Object?> get props => [keyword, exception];
 }
