@@ -17,7 +17,7 @@ mixin SendFilesMixin on ImagePickerMixin {
     if (asset.type == AssetType.image) {
       sendImageInteractor.execute(
         room: room,
-        entity: asset,
+        entity: FileAssetEntity.createAssetEntity(asset),
       );
       removeAllImageSelected();
     }
@@ -34,11 +34,9 @@ mixin SendFilesMixin on ImagePickerMixin {
     final sendImagesInteractor = getIt.get<SendImagesInteractor>();
     await sendImagesInteractor.execute(
       room: room,
-      entities: selectedAssets
-        .map<FileAssetEntity>((entity) {
-          return FileAssetEntity.createAssetEntity(entity.asset);
-        })
-        .toList(),
+      entities: selectedAssets.map<FileAssetEntity>((entity) {
+        return FileAssetEntity.createAssetEntity(entity.asset);
+      }).toList(),
     );
 
     removeAllImageSelected();

@@ -162,9 +162,10 @@ class ChatAppBarTitle extends StatelessWidget {
                   child: Transform.translate(
                     offset: const Offset(0, -2),
                     child: LottieBuilder.asset(
-                      'assets/typing-indicator.zip', fit: BoxFit.fitWidth,
+                      'assets/typing-indicator.zip',
+                      fit: BoxFit.fitWidth,
                       width: 32,
-                      ),
+                    ),
                   ),
                 ),
               ],

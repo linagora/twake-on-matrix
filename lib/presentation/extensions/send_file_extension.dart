@@ -214,7 +214,8 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<Map<TransactionId, FakeSendingFileInfo>> sendPlaceholdersForImagePickerFiles({
+  Future<Map<TransactionId, FakeSendingFileInfo>>
+      sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
@@ -229,13 +230,13 @@ extension SendFileExtension on Room {
         );
 
         final fakeImageEvent = await sendFakeImagePickerFileEvent(
-          fileInfo, 
-          txid: txid, 
+          fileInfo,
+          txid: txid,
           messageType: entity.messageType,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
-          fileInfo: fileInfo, 
-          fakeImageEvent: fakeImageEvent, 
+          fileInfo: fileInfo,
+          fakeImageEvent: fakeImageEvent,
           messageType: entity.messageType,
         );
       }

@@ -3,9 +3,8 @@ import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class FakeSendingFileInfo with EquatableMixin {
-
   final FileInfo fileInfo;
-  
+
   final FakeImageEvent fakeImageEvent;
 
   final MessageType messageType;

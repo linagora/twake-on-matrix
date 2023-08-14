@@ -87,8 +87,9 @@ class Message extends StatelessWidget {
             ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
         final displayEvent = event.getDisplayEvent(timeline);
-        final noBubble = { MessageTypes.Sticker,}
-                .contains(event.messageType) &&
+        final noBubble = {
+              MessageTypes.Sticker,
+            }.contains(event.messageType) &&
             !event.redacted;
         final timelineOverlayMessage = {
           MessageTypes.Video,

@@ -114,12 +114,12 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
           height: MessageContentStyle.imageBubbleHeight,
           child: chewieManager != null
               ? FittedBox(
-                fit: BoxFit.contain,
-                child: Chewie(
-                  key: ValueKey(widget.event.eventId),
-                  controller: chewieManager,
-                ),
-              )
+                  fit: BoxFit.contain,
+                  child: Chewie(
+                    key: ValueKey(widget.event.eventId),
+                    controller: chewieManager,
+                  ),
+                )
               : Stack(
                   children: [
                     if (hasThumbnail)
@@ -134,7 +134,8 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
                     Center(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                         icon: _isDownloading
                             ? const SizedBox(

@@ -17,7 +17,7 @@ class SendImagesInteractor {
         if (fakeSendingFileInfo == null) {
           continue;
         }
-        
+
         await room.sendFileEvent(
           fakeSendingFileInfo.fileInfo,
           msgType: fakeSendingFileInfo.messageType,

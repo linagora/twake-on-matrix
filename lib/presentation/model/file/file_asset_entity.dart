@@ -8,7 +8,6 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 abstract class FileAssetEntity with EquatableMixin {
-
   final AssetEntity assetEntity;
 
   FileAssetEntity({required this.assetEntity});
@@ -20,7 +19,7 @@ abstract class FileAssetEntity with EquatableMixin {
   String get messageType;
 
   factory FileAssetEntity.createAssetEntity(AssetEntity asset) {
-    switch(asset.type) {
+    switch (asset.type) {
       case AssetType.video:
         return VideoAssetEntity(
           assetEntity: asset,
@@ -37,7 +36,8 @@ abstract class FileAssetEntity with EquatableMixin {
     }
   }
 
-  Future<Uint8List?> get placeholderBytes => throw UnimplementedError('unrecognized file type.');
+  Future<Uint8List?> get placeholderBytes =>
+      throw UnimplementedError('unrecognized file type.');
 
   @override
   List<Object?> get props => [assetEntity];

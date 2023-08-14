@@ -9,7 +9,6 @@ import 'package:matrix/matrix.dart';
 import 'package:video_player/video_player.dart';
 
 class SendingVideoWidget extends StatefulWidget {
-
   final Event event;
 
   final MatrixVideoFile matrixFile;
@@ -24,7 +23,8 @@ class SendingVideoWidget extends StatefulWidget {
   State<SendingVideoWidget> createState() => _SendingVideoWidgetState();
 }
 
-class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticKeepAliveClientMixin {
+class _SendingVideoWidgetState extends State<SendingVideoWidget>
+    with AutomaticKeepAliveClientMixin {
   final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
   ChewieController? chewieController;
   VideoPlayerController? videoPlayerController;
@@ -40,7 +40,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
 
   Future<void> initVideoController() async {
     if (widget.matrixFile.filePath == null) {
-      return ;
+      return;
     }
     videoPlayerController = VideoPlayerController.file(
       File(widget.matrixFile.filePath!),
@@ -73,20 +73,21 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
     /// Sincerely sorry to person who read this code in the future.
     super.build(context);
     _checkSendingFileStatus();
-    final (imageWidth, imageHeight) = _getImageSize(widget.matrixFile.width, widget.matrixFile.height);
+    final (imageWidth, imageHeight) =
+        _getImageSize(widget.matrixFile.width, widget.matrixFile.height);
     if (isPlay) {
       sendingFileProgressNotifier.value = SendingVideoStatus.playing;
     }
-    
+
     return ValueListenableBuilder<SendingVideoStatus>(
       key: ValueKey(widget.event.eventId),
-      valueListenable: sendingFileProgressNotifier, 
+      valueListenable: sendingFileProgressNotifier,
       builder: ((context, value, child) {
         return Stack(
           alignment: Alignment.center,
           children: [
             child!,
-            if (value == SendingVideoStatus.sending)... [
+            if (value == SendingVideoStatus.sending) ...[
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -100,15 +101,15 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
                     ),
                   ),
                 ],
-              ), 
-            ] else if (value == SendingVideoStatus.sent)... [
+              ),
+            ] else if (value == SendingVideoStatus.sent) ...[
               InkWell(
                 onTap: _onPlayVideo,
                 child: const _PlayVideoButton(),
               )
-            ] else if (value == SendingVideoStatus.playing)... [
+            ] else if (value == SendingVideoStatus.playing) ...[
               const SizedBox(),
-            ] else if (value == SendingVideoStatus.error) ... [
+            ] else if (value == SendingVideoStatus.error) ...[
               const SizedBox(
                 width: 56,
                 height: 56,
@@ -119,8 +120,8 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
         );
       }),
       child: VideoWidget(
-        chewieController: chewieController, 
-        imageHeight: imageHeight, 
+        chewieController: chewieController,
+        imageHeight: imageHeight,
         imageWidth: imageWidth,
         matrixFile: widget.matrixFile,
       ),
@@ -129,13 +130,19 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
 
   (double, double) _getImageSize(int? imageWidth, int? imageHeight) {
     if (imageWidth == null || imageHeight == null) {
-      return (MessageContentStyle.imageBubbleWidth, MessageContentStyle.imageBubbleHeight);
+      return (
+        MessageContentStyle.imageBubbleWidth,
+        MessageContentStyle.imageBubbleHeight
+      );
     }
 
     final ratio = MessageContentStyle.imageBubbleWidth / imageWidth;
 
     if (imageWidth <= imageHeight) {
-      return (MessageContentStyle.imageBubbleWidth, MessageContentStyle.imageBubbleHeight);
+      return (
+        MessageContentStyle.imageBubbleWidth,
+        MessageContentStyle.imageBubbleHeight
+      );
     } else {
       return (MessageContentStyle.imageBubbleWidth, imageHeight * ratio);
     }
@@ -150,16 +157,15 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget> with AutomaticK
   }
 
   void _checkSendingFileStatus() {
-    if (
-      (widget.event.status == EventStatus.sent || widget.event.status == EventStatus.synced)
-      && sendingFileProgressNotifier.value != SendingVideoStatus.sent
-    ) {
+    if ((widget.event.status == EventStatus.sent ||
+            widget.event.status == EventStatus.synced) &&
+        sendingFileProgressNotifier.value != SendingVideoStatus.sent) {
       sendingFileProgressNotifier.value = SendingVideoStatus.sent;
     } else if (widget.event.status == EventStatus.error) {
       sendingFileProgressNotifier.value = SendingVideoStatus.error;
     }
   }
-  
+
   @override
   bool get wantKeepAlive => true;
 }
@@ -180,33 +186,32 @@ class VideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return chewieController != null 
-      ? SizedBox(
-        height: imageHeight,
-        width: imageWidth,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12.0),
-          child: Material(
-            color: Colors.black,
-            child: Chewie(controller: chewieController!),
-          ),
-        ),
-      )
-      : ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
-        child: Image.memory(
-          matrixFile.bytes ?? Uint8List(0),
-          width: imageWidth,
-          height: imageHeight,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
-        ),
-      );
+    return chewieController != null
+        ? SizedBox(
+            height: imageHeight,
+            width: imageWidth,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Material(
+                color: Colors.black,
+                child: Chewie(controller: chewieController!),
+              ),
+            ),
+          )
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: Image.memory(
+              matrixFile.bytes ?? Uint8List(0),
+              width: imageWidth,
+              height: imageHeight,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+            ),
+          );
   }
 }
 
 class _PlayVideoButton extends StatelessWidget {
-
   const _PlayVideoButton();
 
   @override
@@ -226,11 +231,10 @@ class _PlayVideoButton extends StatelessWidget {
       ),
     );
   }
-
 }
 
 enum SendingVideoStatus {
-  sending, 
+  sending,
   sent,
   playing,
   error,

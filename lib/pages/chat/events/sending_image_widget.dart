@@ -10,7 +10,7 @@ class SendingImageWidget extends StatelessWidget {
   SendingImageWidget({
     super.key,
     required this.matrixFile,
-    required this.event, 
+    required this.event,
     this.onTapPreview,
   });
 
@@ -33,7 +33,7 @@ class SendingImageWidget extends StatelessWidget {
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
             ImageViewer(event, filePath: matrixFile.filePath),
-        );
+      );
     }
   }
 

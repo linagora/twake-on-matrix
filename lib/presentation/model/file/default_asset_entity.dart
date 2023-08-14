@@ -33,5 +33,4 @@ class DefaultAssetEntity extends FileAssetEntity {
       filePath: file.path,
     );
   }
-  
 }
