@@ -33,7 +33,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_she
 import 'package:fluffychat/widgets/layouts/empty_page.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -250,7 +250,7 @@ class TwakeRoutes {
           }
         },
         pageBuilder: (context, state) {
-          return NoTransitionPage(
+          return CupertinoPage(
             child: AdaptiveScaffoldRoute(
               body: body,
               secondaryBody: DraftChat(
@@ -264,7 +264,7 @@ class TwakeRoutes {
 
   GoRoute _roomIdRoute({required Widget body}) => GoRoute(
         path: ':roomid',
-        pageBuilder: (context, state) => NoTransitionPage(
+        pageBuilder: (context, state) => CupertinoPage(
           child: AdaptiveScaffoldRoute(
             body: body,
             secondaryBody: Chat(

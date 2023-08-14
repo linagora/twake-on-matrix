@@ -14,7 +14,10 @@ mixin SendFilesMixin on ImagePickerMixin {
   void sendImage({required Room room, required AssetEntity asset}) {
     final sendImageInteractor = getIt.get<SendImageInteractor>();
     if (asset.type == AssetType.image) {
-      sendImageInteractor.execute(room: room, entity: asset);
+      sendImageInteractor.execute(
+        room: room,
+        entity: asset,
+      );
       removeAllImageSelected();
     }
   }

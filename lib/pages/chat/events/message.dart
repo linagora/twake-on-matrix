@@ -536,7 +536,7 @@ class Message extends StatelessWidget {
                   child: Icon(Icons.reply_outlined),
                 ),
               ),
-              onOverScrollTheMaxOffset:() => HapticFeedback.heavyImpact(),
+              onOverScrollTheMaxOffset: () => HapticFeedback.heavyImpact(),
               maxOffset: 0.4,
               movementDuration: const Duration(milliseconds: 100),
               swipeIntensity: 2.5,
