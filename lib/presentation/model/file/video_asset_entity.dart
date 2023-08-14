@@ -8,7 +8,7 @@ class VideoAssetEntity extends FileAssetEntity {
   VideoAssetEntity({
     required super.assetEntity,
   });
-  
+
   @override
   Future<FileInfo?> toFileInfo() async {
     final file = await assetEntity.loadFile();
@@ -22,8 +22,9 @@ class VideoAssetEntity extends FileAssetEntity {
       width: assetEntity.width,
       height: assetEntity.height,
       imagePlaceholderBytes: await assetEntity.thumbnailDataWithSize(
-        ThumbnailSize(assetEntity.width, assetEntity.height),
-      ) ?? Uint8List(0),
+            ThumbnailSize(assetEntity.width, assetEntity.height),
+          ) ??
+          Uint8List(0),
     );
   }
 
@@ -44,7 +45,8 @@ class VideoAssetEntity extends FileAssetEntity {
   }
 
   @override
-  Future<Uint8List?> get placeholderBytes async => await assetEntity.thumbnailData;
+  Future<Uint8List?> get placeholderBytes async =>
+      await assetEntity.thumbnailData;
 
   @override
   String get messageType => MessageTypes.Video;

@@ -133,11 +133,9 @@ class MessageContent extends StatelessWidget {
               );
             }
             final matrixFile = event.getMatrixFile();
-            if (
-              matrixFile != null && 
-              matrixFile.filePath != null && 
-              matrixFile is MatrixImageFile
-            ) {
+            if (matrixFile != null &&
+                matrixFile.filePath != null &&
+                matrixFile is MatrixImageFile) {
               return SendingImageWidget(
                 matrixFile: matrixFile,
                 event: event,

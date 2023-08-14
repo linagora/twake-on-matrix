@@ -4,7 +4,8 @@ import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker.dart' as linagora_image_picker;
+import 'package:linagora_design_flutter/images_picker/images_picker.dart'
+    as linagora_image_picker;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
@@ -339,7 +340,7 @@ mixin ImagePickerMixin {
       final sendImageInteractor = getIt.get<SendImageInteractor>();
       sendImageInteractor.execute(
         room: room,
-        entity: assetEntity,
+        entity: FileAssetEntity.createAssetEntity(assetEntity),
       );
     }
   }
