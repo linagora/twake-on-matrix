@@ -49,16 +49,13 @@ class ContactsAppBar extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: ValueListenableBuilder<bool>(
-            valueListenable:
-                controller.searchContactsController.isSearchModeNotifier,
+            valueListenable: controller.isSearchModeNotifier,
             builder: (context, isSearchMode, child) {
               return SizedBox(
                 height: 48,
                 child: TextField(
-                  focusNode:
-                      controller.searchContactsController.searchFocusNode,
-                  controller:
-                      controller.searchContactsController.textEditingController,
+                  focusNode: controller.searchFocusNode,
+                  controller: controller.textEditingController,
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(0),
@@ -76,8 +73,7 @@ class ContactsAppBar extends StatelessWidget {
                         ? TwakeIconButton(
                             tooltip: "Clear",
                             icon: Icons.close,
-                            onPressed: () => controller.searchContactsController
-                                .clearSearchBar(),
+                            onPressed: () => controller.clearSearchBar(),
                           )
                         : null,
                   ),

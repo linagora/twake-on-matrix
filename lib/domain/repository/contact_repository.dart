@@ -7,10 +7,4 @@ abstract class ContactRepository {
     int? limit,
     int? offset,
   });
-
-  Future<List<Contact>> loadMoreContact({
-    required ContactQuery query,
-    int? limit,
-    int? offset,
-  });
 }

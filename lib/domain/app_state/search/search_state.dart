@@ -18,7 +18,7 @@ class SearchRecentChatSuccess extends Success {
   });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [data, keyword];
 }
 
 class SearchRecentChatFailed extends Failure {

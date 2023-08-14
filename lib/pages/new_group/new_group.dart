@@ -15,9 +15,9 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
-import 'package:fluffychat/pages/new_private_chat/fetch_contacts_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
+import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 import 'package:flutter/material.dart';
@@ -35,13 +35,14 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends State<NewGroup>
-    with ComparablePresentationContactMixin, ImagePickerMixin {
-  final searchContactsController = SearchContactsController();
-  final fetchContactsController = FetchContactsController();
+    with
+        ComparablePresentationContactMixin,
+        ImagePickerMixin,
+        SearchContactsController {
+  final scrollController = ScrollController();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
-  final contactStreamController = StreamController<Either<Failure, Success>>();
   final groupNameTextEditingController = TextEditingController();
   final avatarNotifier = ValueNotifier<AssetEntity?>(null);
   final createRoomStateNotifier =
@@ -58,60 +59,23 @@ class NewGroupController extends State<NewGroup>
   @override
   void initState() {
     super.initState();
-    searchContactsController.init();
-    listenContactsStartList();
-    listenSearchContacts();
+    initSearchContacts();
     listenGroupNameChanged();
     _registerListenerForSelectedImagesChanged();
-    fetchContactsController.fetchCurrentTomContacts();
-    fetchContactsController.listenForScrollChanged(
-      fetchContactsController: fetchContactsController,
-    );
-    searchContactsController.onSearchKeywordChanged = (searchKey) {
-      disableLoadMoreInSearch();
-    };
-  }
-
-  void disableLoadMoreInSearch() {
-    fetchContactsController.allowLoadMore =
-        searchContactsController.searchKeyword.isEmpty;
+    scrollController.addLoadMoreListener(loadMoreContacts);
   }
 
   @override
   void dispose() {
     super.dispose();
-    contactStreamController.close();
-    searchContactsController.dispose();
-    fetchContactsController.dispose();
+    disposeSearchContacts();
+    scrollController.dispose();
     imagePickerController.dispose();
     selectedContactsMapNotifier.dispose();
     haveGroupNameNotifier.dispose();
     avatarNotifier.dispose();
     uploadContentInteractorStreamSubscription?.cancel();
     createNewGroupChatInteractorStreamSubscription?.cancel();
-  }
-
-  void listenContactsStartList() {
-    fetchContactsController.streamController.stream.listen((event) {
-      Logs().d('NewGroupController::fetchContacts() - event: $event');
-      contactStreamController.add(event);
-    });
-  }
-
-  void listenSearchContacts() {
-    searchContactsController.lookupStreamController.stream.listen((event) {
-      Logs().d('NewGroupController::_fetchRemoteContacts() - event: $event');
-      contactStreamController.add(event);
-    });
-  }
-
-  void onCloseSearchTapped() {
-    searchContactsController.onCloseSearchTapped();
-    fetchContactsController.haveMoreCountactsNotifier.value = false;
-  }
-
-  void selectedContact() {
-    searchContactsController.onSelectedContact();
   }
 
   Future<ServerConfig> getServerConfig() async {

@@ -18,7 +18,8 @@ class GetContactsInteractor with LazyLoadDataMixin {
     required int limit,
   }) async* {
     try {
-      yield const Right(GetContactsLoading());
+      // FIXME: It can break the lazy load logic
+      // yield const Right(GetContactsLoading());
       final contacts = await contactRepository.searchContact(
         query: ContactQuery(keyword: keyword),
         offset: offset,
@@ -38,7 +39,7 @@ class GetContactsInteractor with LazyLoadDataMixin {
         ),
       );
     } catch (e) {
-      yield Left(GetContactsFailed(exception: e));
+      yield Left(GetContactsFailure(keyword: keyword, exception: e));
     }
   }
 }

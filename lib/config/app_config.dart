@@ -69,7 +69,7 @@ abstract class AppConfig {
       'https://github.com/googlefonts/noto-emoji/';
   static const double borderRadius = 20.0;
   static const double columnWidth = 360.0;
-  static const int fetchLimit = 20;
+  static const int fetchContactsLimit = 20;
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
