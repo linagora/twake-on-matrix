@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +16,7 @@ class ChatListHeader extends StatelessWidget {
     final selectMode = controller.selectMode;
 
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        top: ResponsiveUtils().isMobile(context) ? 40 : 0,
-      ),
+      padding: ChatListHeaderStyle.paddingChatListHeader(context),
       child: Column(
         children: [
           TwakeHeader(controller: controller),

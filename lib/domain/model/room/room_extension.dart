@@ -10,6 +10,7 @@ extension RoomExtension on Room {
       id,
       displayName: getLocalizedDisplayname(matrixLocalizations),
       roomSummary: summary,
+      directChatMatrixID: directChatMatrixID,
     );
   }
 

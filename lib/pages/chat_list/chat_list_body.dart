@@ -320,13 +320,13 @@ class ChatListViewBody extends StatelessWidget {
                 itemCount: userSearchResult.results.length,
                 itemBuilder: (context, i) => _SearchItem(
                   title: userSearchResult.results[i].displayName ??
-                      userSearchResult.results[i].userId.localpart ??
+                      userSearchResult.results[i].getUserId.localpart ??
                       L10n.of(context)!.unknownDevice,
                   avatar: userSearchResult.results[i].avatarUrl,
                   onPressed: () => showAdaptiveBottomSheet(
                     context: context,
                     builder: (c) => ProfileBottomSheet(
-                      userId: userSearchResult.results[i].userId,
+                      userId: userSearchResult.results[i].getUserId,
                       outerContext: context,
                     ),
                   ),

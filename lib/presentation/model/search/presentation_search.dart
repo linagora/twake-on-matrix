@@ -6,6 +6,8 @@ import 'package:matrix/matrix.dart';
 abstract class PresentationSearch extends Equatable {
   final String? displayName;
 
+  final String? directChatMatrixID;
+
   String get id;
 
   @override
@@ -13,6 +15,7 @@ abstract class PresentationSearch extends Equatable {
 
   const PresentationSearch({
     this.displayName,
+    this.directChatMatrixID,
   });
 }
 
@@ -37,31 +40,35 @@ class ContactPresentationSearch extends PresentationSearch {
 }
 
 class RecentChatPresentationSearch extends PresentationSearch {
-  final String? directChatMatrixID;
+  final String? roomId;
 
   final RoomSummary? roomSummary;
 
-  const RecentChatPresentationSearch(
-    this.directChatMatrixID, {
+  const RecentChatPresentationSearch({
+    this.roomId,
     this.roomSummary,
     String? displayName,
+    String? directChatMatrixID,
   }) : super(
           displayName: displayName,
+          directChatMatrixID: directChatMatrixID,
         );
 
   @override
-  String get id => directChatMatrixID ?? '';
+  String get id => roomId ?? '';
 
   @override
-  List<Object?> get props => [directChatMatrixID, displayName, roomSummary];
+  List<Object?> get props =>
+      [roomId, displayName, roomSummary, directChatMatrixID];
 }
 
 extension RecentChatSearchModelExtension on RecentChatSearchModel {
   RecentChatPresentationSearch toPresentation() {
     return RecentChatPresentationSearch(
-      id,
+      roomId: id,
       displayName: displayName,
       roomSummary: roomSummary,
+      directChatMatrixID: directChatMatrixID,
     );
   }
 }
