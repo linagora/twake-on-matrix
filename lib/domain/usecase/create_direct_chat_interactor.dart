@@ -11,7 +11,7 @@ class CreateDirectChatInteractor {
     required String contactMxId,
     required Client client,
     List<StateEvent>? initialState,
-    bool? enableEncryption,
+    bool enableEncryption = true,
     bool waitForSync = true,
     Map<String, dynamic>? powerLevelContentOverride,
     CreateRoomPreset? preset = CreateRoomPreset.trustedPrivateChat,

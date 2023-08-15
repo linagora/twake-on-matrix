@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/go_routes/go_router.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
@@ -8,19 +12,15 @@ import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
-import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
-
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -144,6 +144,7 @@ class DraftChatController extends State<DraftChat>
         .execute(
       contactMxId: presentationContact!.matrixId!,
       client: Matrix.of(context).client,
+      enableEncryption: true,
     )
         .listen((event) {
       event.fold((failure) {
