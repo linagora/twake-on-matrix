@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
@@ -117,26 +118,34 @@ class NewGroupChatInfo extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(64.0),
+      preferredSize:
+          Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight(context)),
       child: AppBar(
-        toolbarHeight: 64,
-        leading: TwakeIconButton(
-          icon: Icons.arrow_back,
-          onPressed: () => Navigator.of(context).pop(),
-          tooltip: L10n.of(context)!.back,
-          paddingAll: 8.0,
-          margin: const EdgeInsets.symmetric(
-            vertical: 12.0,
-            horizontal: 8.0,
+        automaticallyImplyLeading: false,
+        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight(context),
+        title: Padding(
+          padding: NewGroupChatInfoStyle.paddingTitle(context),
+          child: Row(
+            children: [
+              TwakeIconButton(
+                icon: Icons.arrow_back,
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: L10n.of(context)!.back,
+                paddingAll: 8.0,
+                margin: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 8.0,
+                ),
+              ),
+              Text(
+                L10n.of(context)!.newGroupChat,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
           ),
-        ),
-        title: Text(
-          L10n.of(context)!.newGroupChat,
-          style: Theme.of(context).textTheme.titleLarge,
         ),
         titleSpacing: 0,
         centerTitle: false,
-        leadingWidth: 64,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(

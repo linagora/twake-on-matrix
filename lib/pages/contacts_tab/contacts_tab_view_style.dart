@@ -6,6 +6,6 @@ class ContactsTabViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static Size preferredSizeAppBar(BuildContext context) => Size.fromHeight(
-        responsive.isMobile(context) ? 120 : 96,
+        responsive.isMobile(context) ? 144 : 96,
       );
 }

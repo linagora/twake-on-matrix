@@ -159,20 +159,6 @@ class SearchController extends State<Search>
     textEditingController.clear();
   }
 
-  String? getUserId(String directChatMatrixID) {
-    final roomId =
-        Matrix.of(context).client.getDirectChatFromUserId(directChatMatrixID);
-
-    if (roomId != null) {
-      final room = Matrix.of(context).client.getRoomById(roomId);
-      final userId =
-          room?.unsafeGetUserFromMemoryOrFallback(directChatMatrixID).id;
-      return userId;
-    } else {
-      return null;
-    }
-  }
-
   @override
   void dispose() {
     mainScrollController.dispose();

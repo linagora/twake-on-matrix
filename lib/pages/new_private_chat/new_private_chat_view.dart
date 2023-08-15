@@ -19,7 +19,10 @@ class NewPrivateChatView extends StatelessWidget {
         ),
         child: NewPrivateAppBar(
           title: L10n.of(context)!.newChat,
-          searchContactsController: controller,
+          searchModeNotifier: controller.isSearchModeNotifier,
+          textEditingController: controller.textEditingController,
+          onCloseSearchTapped: controller.onCloseSearchTapped,
+          openSearchBar: controller.openSearchBar,
         ),
       ),
       body: SingleChildScrollView(
