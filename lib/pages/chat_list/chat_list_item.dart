@@ -40,18 +40,7 @@ class ChatListItem extends StatelessWidget {
     if (onTap != null) return onTap!();
     if (activeChat) return;
     if (room.membership == Membership.invite) {
-      final joinResult = await showFutureLoadingDialog(
-        context: context,
-        future: () async {
-          final waitForRoom = room.client.waitForRoomInSync(
-            room.id,
-            join: true,
-          );
-          await room.join();
-          await waitForRoom;
-        },
-      );
-      if (joinResult.error != null) return;
+      context.go('/rooms/${room.id}');
     }
 
     if (room.membership == Membership.ban) {

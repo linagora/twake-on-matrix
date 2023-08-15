@@ -33,14 +33,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[controller.timeline!.events[i].eventId] = i;
     }
 
-    if (!controller.timeline!.events.any(
-      (e) => {
-        EventTypes.Message,
-        EventTypes.Sticker,
-        EventTypes.Encrypted,
-        EventTypes.CallInvite,
-      }.contains(e.type),
-    )) {
+    if (controller.timeline != null && controller.timeline!.events.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -50,13 +43,7 @@ class ChatEventList extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 controller: controller.scrollController,
                 physics: const ClampingScrollPhysics(),
-                child: controller.room?.isDirectChat ?? true
-                    ? DirectDraftChatView(
-                        onTap: () => controller.inputFocus.requestFocus(),
-                      )
-                    : GroupChatEmptyView(
-                        firstEvent: controller.timeline!.events.last,
-                      ),
+                child: _chatEmptyBuilder(controller.timeline!),
               ),
             ),
           ),
@@ -150,5 +137,25 @@ class ChatEventList extends StatelessWidget {
             controller.findChildIndexCallback(key, thisEventsKeyMap),
       ),
     );
+  }
+
+  Widget _chatEmptyBuilder(Timeline timeline) {
+    if (controller.room?.isDirectChat ?? true) {
+      return DirectDraftChatView(
+        onTap: () => controller.inputFocus.requestFocus(),
+      );
+    } else {
+      return _groupChatEmptyBuilder(timeline);
+    }
+  }
+
+  Widget _groupChatEmptyBuilder(Timeline timeline) {
+    if (timeline.events.isNotEmpty) {
+      return GroupChatEmptyView(
+        firstEvent: timeline.events.last,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }

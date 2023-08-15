@@ -13,7 +13,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../utils/stream_extension.dart';
@@ -126,12 +125,6 @@ class ChatView extends StatelessWidget {
       );
     }
 
-    if (controller.room!.membership == Membership.invite) {
-      showFutureLoadingDialog(
-        context: context,
-        future: () => controller.room!.join(),
-      );
-    }
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
 
     return GestureDetector(
@@ -224,6 +217,8 @@ class ChatView extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (controller.room!.membership == Membership.invite)
+                            _inputMessageWidget(bottomSheetPadding),
                           if (controller.room!.canSendDefaultMessages &&
                               controller.room!.membership == Membership.join)
                             Container(
@@ -272,28 +267,7 @@ class ChatView extends StatelessWidget {
                                         ],
                                       ),
                                     )
-                                  : Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ...[
-                                          const ConnectionStatusHeader(),
-                                          // Currently we can't support reactions
-                                          // ReactionsPicker(controller),
-                                          ReplyDisplay(controller),
-                                          ChatInputRow(controller),
-                                        ].map(
-                                          (widget) => Padding(
-                                            padding: EdgeInsets.only(
-                                              left: bottomSheetPadding,
-                                              right: bottomSheetPadding,
-                                            ),
-                                            child: widget,
-                                          ),
-                                        ),
-                                        SizedBox(height: bottomSheetPadding),
-                                        ChatEmojiPicker(controller),
-                                      ],
-                                    ),
+                                  : _inputMessageWidget(bottomSheetPadding),
                             ),
                         ],
                       ),
@@ -316,6 +290,31 @@ class ChatView extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Widget _inputMessageWidget(double bottomSheetPadding) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...[
+          const ConnectionStatusHeader(),
+          // Currently we can't support reactions
+          // ReactionsPicker(controller),
+          ReplyDisplay(controller),
+          ChatInputRow(controller),
+        ].map(
+          (widget) => Padding(
+            padding: EdgeInsets.only(
+              left: bottomSheetPadding,
+              right: bottomSheetPadding,
+            ),
+            child: widget,
+          ),
+        ),
+        SizedBox(height: bottomSheetPadding),
+        ChatEmojiPicker(controller),
+      ],
     );
   }
 
