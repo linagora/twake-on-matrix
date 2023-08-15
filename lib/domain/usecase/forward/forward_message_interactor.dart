@@ -54,7 +54,7 @@ class ForwardMessageInteractor {
       final message = matrixState.shareContent;
       if (message != null) {
         yield* _forwardMessage(message, room);
-        message.clear();
+        matrixState.shareContent = null;
       }
       yield Right(ForwardMessageSuccess(room));
     } catch (exception) {
@@ -78,7 +78,7 @@ class ForwardMessageInteractor {
             continue;
           }
         }
-        messages.clear();
+        matrixState.shareContentList = null;
       }
       yield Right(ForwardMessageSuccess(room));
     } catch (exception) {
