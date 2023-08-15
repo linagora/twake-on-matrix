@@ -16,6 +16,6 @@ class ForwardViewStyle {
 
   static EdgeInsetsDirectional paddingItemAppbar(BuildContext context) =>
       EdgeInsetsDirectional.only(
-        top: responsive.isMobile(context) ? 30 : 0,
+        top: responsive.isMobile(context) ? 40 : 0,
       );
 }

@@ -145,19 +145,28 @@ class ChatView extends StatelessWidget {
           builder: (BuildContext context, snapshot) {
             return Scaffold(
               appBar: AppBar(
-                automaticallyImplyLeading:
-                    controller.responsive.isMobile(context) ? true : false,
+                automaticallyImplyLeading: false,
                 toolbarHeight: ChatViewStyle.toolbarHeight(context),
                 surfaceTintColor: Colors.transparent,
-                leadingWidth: 8 + 24 + 8,
-                leading: Padding(
-                  padding: ChatViewStyle.paddingLeading(context),
-                  child: _buildLeading(context),
-                ),
                 titleSpacing: 0,
-                title: ChatAppBarTitle(
-                  controller,
-                  actions: _appBarActions(context),
+                title: Padding(
+                  padding: ChatViewStyle.paddingLeading(context),
+                  child: Row(
+                    children: [
+                      _buildLeading(context),
+                      Expanded(
+                        child: ChatAppBarTitle(
+                          selectedEvents: controller.selectedEvents,
+                          room: controller.room,
+                          isArchived: controller.isArchived,
+                          sendController: controller.sendController,
+                          getStreamInstance: controller.networkConnectionService
+                              .getStreamInstance(),
+                          actions: _appBarActions(context),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 4),
@@ -310,7 +319,7 @@ class ChatView extends StatelessWidget {
     );
   }
 
-  Widget? _buildLeading(BuildContext context) {
+  Widget _buildLeading(BuildContext context) {
     if (controller.responsive.isMobile(context)) {
       if (controller.selectMode) {
         return TwakeIconButton(
@@ -328,7 +337,7 @@ class ChatView extends StatelessWidget {
         );
       }
     } else {
-      return null;
+      return const SizedBox.shrink();
     }
   }
 }

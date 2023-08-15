@@ -7,6 +7,6 @@ class ContactsAppbarStyle {
 
   static paddingTitle(BuildContext context) => EdgeInsetsDirectional.only(
         start: 16.0,
-        top: responsive.isMobile(context) ? 30 : 8,
+        top: responsive.isMobile(context) ? 56 : 8,
       );
 }

@@ -22,8 +22,10 @@ class NewGroupView extends StatelessWidget {
         child: NewPrivateAppBar(
           focusNode: controller.searchFocusNode,
           title: L10n.of(context)!.newGroupChat,
-          searchContactsController: controller,
+          searchModeNotifier: controller.isSearchModeNotifier,
           hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
+          onCloseSearchTapped: controller.onCloseSearchTapped,
+          openSearchBar: controller.openSearchBar,
         ),
       ),
       body: Column(

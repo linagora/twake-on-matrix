@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/input_bar.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -34,25 +35,29 @@ class DraftChatView extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 64,
+        toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
         surfaceTintColor: Colors.transparent,
-        leadingWidth: 40,
-        leading: TwakeIconButton(
-          tooltip: L10n.of(context)!.back,
-          icon: Icons.arrow_back,
-          onPressed: () => context.pop(),
-          paddingAll: 8.0,
-          margin: const EdgeInsets.symmetric(vertical: 12.0),
-        ),
-        titleSpacing: 0,
-        title: controller.presentationContact?.matrixId != null &&
-                controller.presentationContact?.displayName != null
-            ? _EmptyChatTitle(
-                receiverId: controller.presentationContact!.matrixId!,
-                displayName: controller.presentationContact!.displayName,
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: DraftChatViewStyle.paddingTopScreen(context),
+          child: Row(
+            children: [
+              TwakeIconButton(
+                tooltip: L10n.of(context)!.back,
+                icon: Icons.arrow_back,
+                onPressed: () => context.pop(),
+                paddingAll: 8.0,
+                margin: const EdgeInsets.symmetric(vertical: 12.0),
+              ),
+              Expanded(
+                child: _EmptyChatTitle(
+                  receiverId: controller.presentationContact!.matrixId!,
+                  displayName: controller.presentationContact!.displayName,
+                ),
               )
-            : null,
-        actions: _appBarActions(context),
+            ],
+          ),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size(double.infinity, 4),
           child: Container(
@@ -255,10 +260,6 @@ class DraftChatView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  List<Widget> _appBarActions(BuildContext context) {
-    return [];
   }
 }
 

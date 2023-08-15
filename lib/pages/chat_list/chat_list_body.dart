@@ -5,12 +5,8 @@ import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/chat_list/stories_header.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/profile_bottom_sheet.dart';
-import 'package:fluffychat/widgets/public_room_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,8 +23,6 @@ class ChatListViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roomSearchResult = controller.roomSearchResult;
-    final userSearchResult = controller.userSearchResult;
     final client = Matrix.of(context).client;
 
     return PageTransitionSwitcher(
@@ -125,14 +119,15 @@ class ChatListViewBody extends StatelessWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (controller.isSearchMode) ...[
-                        ..._buildPublicRooms(context, roomSearchResult),
-                        ..._buildUsers(context, userSearchResult),
-                        SearchTitle(
-                          title: L10n.of(context)!.stories,
-                          icon: const Icon(Icons.camera_alt_outlined),
-                        ),
-                      ],
+                      //FIXME: https://github.com/linagora/twake-on-matrix/issues/465
+                      // if (controller.isSearchMode) ...[
+                      //   ..._buildPublicRooms(context, roomSearchResult),
+                      //   ..._buildUsers(context, userSearchResult),
+                      //   SearchTitle(
+                      //     title: L10n.of(context)!.stories,
+                      //     icon: const Icon(Icons.camera_alt_outlined),
+                      //   ),
+                      // ],
                       if (displayStoriesHeader)
                         // ignore: dead_code
                         StoriesHeader(
@@ -251,131 +246,4 @@ class ChatListViewBody extends StatelessWidget {
       ),
     );
   }
-
-  List<Widget> _buildPublicRooms(context, roomSearchResult) {
-    if (roomSearchResult == null || roomSearchResult.chunk.isEmpty) {
-      return [const SizedBox.shrink()];
-    }
-
-    return [
-      SearchTitle(
-        title: L10n.of(context)!.publicRooms,
-        icon: const Icon(Icons.explore_outlined),
-      ),
-      AnimatedContainer(
-        clipBehavior: Clip.hardEdge,
-        decoration: const BoxDecoration(),
-        height: roomSearchResult == null || roomSearchResult.chunk.isEmpty
-            ? 0
-            : 106,
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: roomSearchResult == null
-            ? null
-            : ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: roomSearchResult.chunk.length,
-                itemBuilder: (context, i) => _SearchItem(
-                  title: roomSearchResult.chunk[i].name ??
-                      roomSearchResult.chunk[i].canonicalAlias?.localpart ??
-                      L10n.of(context)!.group,
-                  avatar: roomSearchResult.chunk[i].avatarUrl,
-                  onPressed: () => showAdaptiveBottomSheet(
-                    context: context,
-                    builder: (c) => PublicRoomBottomSheet(
-                      roomAlias: roomSearchResult.chunk[i].canonicalAlias ??
-                          roomSearchResult.chunk[i].roomId,
-                      outerContext: context,
-                      chunk: roomSearchResult.chunk[i],
-                    ),
-                  ),
-                ),
-              ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildUsers(context, userSearchResult) {
-    if (userSearchResult == null || userSearchResult.results.isEmpty) {
-      return [const SizedBox.shrink()];
-    }
-
-    return [
-      SearchTitle(
-        title: L10n.of(context)!.users,
-        icon: const Icon(Icons.group_outlined),
-      ),
-      AnimatedContainer(
-        clipBehavior: Clip.hardEdge,
-        decoration: const BoxDecoration(),
-        height: userSearchResult == null || userSearchResult.results.isEmpty
-            ? 0
-            : 106,
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: userSearchResult == null
-            ? null
-            : ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: userSearchResult.results.length,
-                itemBuilder: (context, i) => _SearchItem(
-                  title: userSearchResult.results[i].displayName ??
-                      userSearchResult.results[i].getUserId.localpart ??
-                      L10n.of(context)!.unknownDevice,
-                  avatar: userSearchResult.results[i].avatarUrl,
-                  onPressed: () => showAdaptiveBottomSheet(
-                    context: context,
-                    builder: (c) => ProfileBottomSheet(
-                      userId: userSearchResult.results[i].getUserId,
-                      outerContext: context,
-                    ),
-                  ),
-                ),
-              ),
-      )
-    ];
-  }
-}
-
-class _SearchItem extends StatelessWidget {
-  final String title;
-  final Uri? avatar;
-  final void Function() onPressed;
-
-  const _SearchItem({
-    required this.title,
-    this.avatar,
-    required this.onPressed,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onPressed,
-        child: SizedBox(
-          width: 84,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Avatar(
-                mxContent: avatar,
-                name: title,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
 }
