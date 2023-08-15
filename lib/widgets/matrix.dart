@@ -202,7 +202,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   List<Map<String, dynamic>?> get shareContentList => _shareContentList ?? [];
 
-  set shareContentList(List<Map<String, dynamic>?> content) {
+  set shareContentList(List<Map<String, dynamic>?>? content) {
     _shareContentList = content;
     onShareContentChanged.add(_shareContent);
   }
