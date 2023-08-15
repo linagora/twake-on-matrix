@@ -115,8 +115,8 @@ class Message extends StatelessWidget {
               mainAxisAlignment:
                   ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
               children: [
-                if (ownMessage && event.messageType == MessageTypes.Image)
-                  ReplyIconWidget(isOwnMessage: ownMessage),
+                // if (ownMessage && event.messageType == MessageTypes.Image)
+                //   ReplyIconWidget(isOwnMessage: ownMessage),
                 Expanded(
                   flex: MessageStyle.messageFlexMobile,
                   child: Column(
@@ -511,8 +511,8 @@ class Message extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (!ownMessage && event.messageType == MessageTypes.Image)
-                  ReplyIconWidget(isOwnMessage: !ownMessage)
+                // if (!ownMessage && event.messageType == MessageTypes.Image)
+                //   ReplyIconWidget(isOwnMessage: !ownMessage)
               ],
             ),
           ),
