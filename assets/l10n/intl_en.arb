@@ -2679,5 +2679,8 @@
     },
     "today": "Today",
     "yesterday": "Yesterday",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "rejectInvite" : "No thanks, delete",
+    "acceptInvite" : "Yes please, join",
+    "askToInvite": " wants you to join this chat. What do you say?"
 }

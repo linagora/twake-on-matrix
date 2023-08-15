@@ -14,6 +14,7 @@ import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
@@ -251,6 +252,60 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     _loadDraft();
     listenToSelectionInImagePicker();
     super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      _askToAcceptInvitation();
+    });
+  }
+
+  void _askToAcceptInvitation() async {
+    if (room!.membership != Membership.invite) return;
+
+    final result = await showDialog<DialogAcceptInviteResult>(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => DialogAcceptInviteWidget(
+        displayInviterName: _getDisplayInviterName(),
+      ),
+    );
+
+    if (result == null) return;
+
+    _actionToAcceptInvitation(result);
+  }
+
+  String _getDisplayInviterName() {
+    if (room!.isDirectChat) {
+      return room!.getLocalizedDisplayname();
+    } else {
+      return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
+          room!.getLocalizedDisplayname();
+    }
+  }
+
+  void _actionToAcceptInvitation(
+    DialogAcceptInviteResult dialogAcceptInviteResult,
+  ) async {
+    switch (dialogAcceptInviteResult) {
+      case DialogAcceptInviteResult.accept:
+        await showFutureLoadingDialog(
+          context: context,
+          future: () async {
+            final waitForRoom = room?.client.waitForRoomInSync(
+              room!.id,
+              join: true,
+            );
+            await room!.join();
+            await waitForRoom;
+          },
+        );
+        break;
+      case DialogAcceptInviteResult.reject:
+        leaveChat();
+        break;
+      case DialogAcceptInviteResult.cancel:
+        context.pop();
+        break;
+    }
   }
 
   void updateView() {
