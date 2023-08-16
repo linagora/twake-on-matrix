@@ -109,12 +109,6 @@ class HiveCollectionToMDatabase {
     return path!;
   }
 
-  static registerCacheAdapter<T>(TypeAdapter<T> typeAdapter, int typeId) {
-    if (!Hive.isAdapterRegistered(typeId)) {
-      Hive.registerAdapter<T>(typeAdapter);
-    }
-  }
-
   Future<void> open() async {
     _collection = await BoxCollection.open(
       name,

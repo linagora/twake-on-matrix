@@ -34,7 +34,7 @@ class _PermissionDialogState extends State<PermissionDialog>
   }
 
   @override
-  didChangeAppLifecycleState(AppLifecycleState state) async {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed &&
         !(await widget.permission.isDenied)) {
       Navigator.of(context).pop();
@@ -42,7 +42,7 @@ class _PermissionDialogState extends State<PermissionDialog>
   }
 
   @override
-  dispose() {
+  void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
