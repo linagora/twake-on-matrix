@@ -170,6 +170,7 @@ class ChatListItem extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(

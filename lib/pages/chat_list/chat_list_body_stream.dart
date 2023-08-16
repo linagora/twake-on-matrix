@@ -15,9 +15,9 @@ class ChatListBodyStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Object?>(
+    return StreamBuilder<Map<String, dynamic>?>(
       stream: Matrix.of(context).onShareContentChanged.stream,
-      builder: (_, __) {
+      builder: (context, __) {
         return Row(
           children: [
             if (FluffyThemes.isColumnMode(context) &&

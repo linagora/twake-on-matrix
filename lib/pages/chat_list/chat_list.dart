@@ -64,9 +64,8 @@ class ChatList extends StatefulWidget {
 
 class ChatListController extends State<ChatList>
     with
-        TickerProviderStateMixin,
-        RouteAware,
-        ComparablePresentationContactMixin {
+      RouteAware,
+      ComparablePresentationContactMixin {
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
@@ -78,6 +77,8 @@ class ChatListController extends State<ChatList>
   bool get displayNavigationBar => false;
 
   String? activeSpaceId;
+
+  final chatListIndexes = <String, int>{};
 
   late final profileMemoizers = <Client?, AsyncMemoizer<Profile>>{};
 
