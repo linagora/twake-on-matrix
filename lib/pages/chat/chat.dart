@@ -1041,7 +1041,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     FocusScope.of(context).requestFocus(inputFocus);
   }
 
-  unpinEvent(String eventId) async {
+  void unpinEvent(String eventId) async {
     final response = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context)!.unpin,

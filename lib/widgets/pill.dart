@@ -21,7 +21,7 @@ class Pill extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  build(BuildContext context) {
+  Widget build(BuildContext context) {
     final user = chatController.room?.getUser(identifier);
     final displayname = user?.displayName ?? identifier;
     final avatarUrl =

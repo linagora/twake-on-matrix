@@ -24,7 +24,7 @@ class ContactsTabController extends State<ContactsTab>
   final responsive = getIt.get<ResponsiveUtils>();
 
   @override
-  initState() {
+  void initState() {
     initSearchContacts();
     _listenFocusTextEditing();
     scrollController.addLoadMoreListener(loadMoreContacts);

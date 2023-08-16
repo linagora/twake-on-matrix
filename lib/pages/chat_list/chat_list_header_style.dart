@@ -9,7 +9,7 @@ class ChatListHeaderStyle {
   static const double searchBarHeight = 56.0;
   static const double searchBarContainerHeight = 64.0;
 
-  static paddingChatListHeader(BuildContext context) =>
+  static EdgeInsetsDirectional paddingChatListHeader(BuildContext context) =>
       responsive.isMobile(context)
           ? const EdgeInsetsDirectional.only(top: 40)
           : EdgeInsetsDirectional.zero;

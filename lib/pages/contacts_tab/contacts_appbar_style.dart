@@ -5,7 +5,8 @@ import 'package:flutter/cupertino.dart';
 class ContactsAppbarStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static paddingTitle(BuildContext context) => EdgeInsetsDirectional.only(
+  static EdgeInsetsDirectional paddingTitle(BuildContext context) =>
+      EdgeInsetsDirectional.only(
         start: 16.0,
         top: responsive.isMobile(context) ? 56 : 8,
       );

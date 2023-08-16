@@ -14,6 +14,6 @@ class PresentaionSearchableSuccess<T> extends LazyLoadSuccess<T> {
   List<Object?> get props => [data, offset, isEnd, keyword];
 
   @override
-  toString() =>
+  String toString() =>
       "PresentaionSearchableSuccess data: ${data.length}, offset: $offset, isEnd: $isEnd, keyword: $keyword";
 }
