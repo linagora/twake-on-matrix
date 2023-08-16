@@ -1,32 +1,44 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/external_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 
-class ExpansionList extends StatefulWidget {
-  final NewPrivateChatController newPrivateChatController;
+class ExpansionList extends StatelessWidget {
+  final ValueNotifier<Either<Failure, Success>> contactsNotifier;
+  final ValueNotifier<bool> isShowContactsNotifier;
+  final ValueNotifier<bool> isSearchModeNotifier;
+  final Function() goToNewGroupChat;
+  final Function() toggleContactsList;
+  final Function(BuildContext context, PresentationContact contact)
+      onExternalContactTap;
+  final Function(BuildContext context, PresentationContact contact)
+      onContactTap;
 
   const ExpansionList({
     super.key,
-    required this.newPrivateChatController,
+    required this.contactsNotifier,
+    required this.isShowContactsNotifier,
+    required this.isSearchModeNotifier,
+    required this.goToNewGroupChat,
+    required this.toggleContactsList,
+    required this.onExternalContactTap,
+    required this.onContactTap,
   });
-
-  @override
-  State<StatefulWidget> createState() => _ExpansionList();
-}
-
-class _ExpansionList extends State<ExpansionList> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: widget.newPrivateChatController.contactsNotifier,
+      valueListenable: contactsNotifier,
       builder: (context, value, child) => value.fold(
         (failure) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,18 +51,39 @@ class _ExpansionList extends State<ExpansionList> {
             ),
             _MoreListTile(),
             _NewGroupButton(
-              onPressed: widget.newPrivateChatController.goToNewGroupChat,
+              onPressed: goToNewGroupChat,
             ),
             _GetHelpButton(),
           ],
         ),
         (success) {
+          if (success is PresentationExternalContactSuccess) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 12,
+                ),
+                ExternalContactWidget(
+                  contact: success.contact,
+                  onTap: () {
+                    onExternalContactTap(context, success.contact);
+                  },
+                ),
+                _MoreListTile(),
+                _NewGroupButton(
+                  onPressed: goToNewGroupChat,
+                ),
+                _GetHelpButton(),
+              ],
+            );
+          }
           if (success is! PresentationContactsSuccess) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _NewGroupButton(
-                  onPressed: widget.newPrivateChatController.goToNewGroupChat,
+                  onPressed: goToNewGroupChat,
                 ),
                 const LoadingContactWidget(),
                 _GetHelpButton()
@@ -67,7 +100,7 @@ class _ExpansionList extends State<ExpansionList> {
                 NoContactsFound(keyword: success.keyword),
                 _MoreListTile(),
                 _NewGroupButton(
-                  onPressed: widget.newPrivateChatController.goToNewGroupChat,
+                  onPressed: goToNewGroupChat,
                 ),
                 _GetHelpButton(),
               ],
@@ -79,10 +112,9 @@ class _ExpansionList extends State<ExpansionList> {
             const SizedBox(
               height: 4,
             ),
-            _buildTitle(success.data.length),
+            _buildTitle(context, success.data.length),
             ValueListenableBuilder<bool>(
-              valueListenable:
-                  widget.newPrivateChatController.isShowContactsNotifier,
+              valueListenable: isShowContactsNotifier,
               builder: ((context, isShow, child) {
                 if (!isShow) {
                   return const SizedBox.shrink();
@@ -95,9 +127,9 @@ class _ExpansionList extends State<ExpansionList> {
                     final contact = success.data[index];
                     return InkWell(
                       onTap: () {
-                        widget.newPrivateChatController.onContactAction(
-                          context: context,
-                          contact: contact,
+                        onContactTap(
+                          context,
+                          contact,
                         );
                       },
                       borderRadius: BorderRadius.circular(16.0),
@@ -108,15 +140,13 @@ class _ExpansionList extends State<ExpansionList> {
               }),
             ),
             ValueListenableBuilder(
-              valueListenable:
-                  widget.newPrivateChatController.isSearchModeNotifier,
+              valueListenable: isSearchModeNotifier,
               builder: (context, isSearchMode, child) {
                 if (isSearchMode) {
                   return const SizedBox.shrink();
                 }
                 return ValueListenableBuilder(
-                  valueListenable:
-                      widget.newPrivateChatController.isShowContactsNotifier,
+                  valueListenable: isShowContactsNotifier,
                   builder: (context, isShow, child) {
                     if (!isShow || success.isEnd) {
                       return const SizedBox.shrink();
@@ -138,7 +168,7 @@ class _ExpansionList extends State<ExpansionList> {
             children: [
               if (isSearchEmpty) ...[
                 _NewGroupButton(
-                  onPressed: widget.newPrivateChatController.goToNewGroupChat,
+                  onPressed: goToNewGroupChat,
                 ),
                 for (final child in expansionList) ...[child],
                 _GetHelpButton()
@@ -146,7 +176,7 @@ class _ExpansionList extends State<ExpansionList> {
                 for (final child in expansionList) ...[child],
                 _MoreListTile(),
                 _NewGroupButton(
-                  onPressed: widget.newPrivateChatController.goToNewGroupChat,
+                  onPressed: goToNewGroupChat,
                 ),
                 _GetHelpButton()
               ]
@@ -157,7 +187,7 @@ class _ExpansionList extends State<ExpansionList> {
     );
   }
 
-  Widget _buildTitle(int countContacts) {
+  Widget _buildTitle(BuildContext context, int countContacts) {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0),
       child: Row(
@@ -173,8 +203,7 @@ class _ExpansionList extends State<ExpansionList> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ValueListenableBuilder<bool>(
-                  valueListenable:
-                      widget.newPrivateChatController.isShowContactsNotifier,
+                  valueListenable: isShowContactsNotifier,
                   builder: (context, isShow, child) {
                     return TwakeIconButton(
                       paddingAll: 6.0,
@@ -186,9 +215,7 @@ class _ExpansionList extends State<ExpansionList> {
                         shape: BoxShape.circle,
                       ),
                       icon: isShow ? Icons.expand_less : Icons.expand_more,
-                      onPressed: () {
-                        widget.newPrivateChatController.toggleContactsList();
-                      },
+                      onPressed: toggleContactsList,
                       tooltip: isShow
                           ? L10n.of(context)!.shrink
                           : L10n.of(context)!.expand,

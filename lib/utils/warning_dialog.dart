@@ -1,33 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef OnAcceptButton = void Function()?;
 
-class WarningDialogWidget extends StatefulWidget {
-  final Widget explainTextRequestWidget;
-
-  final OnAcceptButton onAcceptButton;
+class WarningDialogWidget extends StatelessWidget {
+  final String? title;
+  final String? message;
+  final List<DialogAction>? actions;
 
   const WarningDialogWidget({
-    required this.explainTextRequestWidget,
     Key? key,
-    this.onAcceptButton,
+    this.title,
+    this.message,
+    this.actions,
   }) : super(key: key);
-
-  @override
-  State<WarningDialogWidget> createState() => _WarningDialogWidgetState();
-}
-
-class _WarningDialogWidgetState extends State<WarningDialogWidget> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,34 +23,32 @@ class _WarningDialogWidgetState extends State<WarningDialogWidget> {
           color: Theme.of(context).colorScheme.surface,
         ),
         width: 312,
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 24.0),
-            widget.explainTextRequestWidget,
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _WarningTextButton(
-                    context: context,
-                    text: L10n.of(context)!.continueProcess,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  _WarningTextButton(
-                    context: context,
-                    text: L10n.of(context)!.cancel,
-                    onPressed: () async {
-                      if (widget.onAcceptButton != null) {
-                        widget.onAcceptButton!.call();
-                      }
-                    },
-                  )
-                ],
+            if (title != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(
+                  title!,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
+            if (message != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Text(
+                  message!,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: (actions ?? [])
+                  .map((action) => _WarningTextButton(action: action))
+                  .toList(),
             ),
           ],
         ),
@@ -74,16 +57,21 @@ class _WarningDialogWidgetState extends State<WarningDialogWidget> {
   }
 }
 
-class _WarningTextButton extends StatelessWidget {
-  const _WarningTextButton({
-    required this.text,
-    required this.onPressed,
-    required this.context,
-  });
-
+class DialogAction {
   final String text;
   final VoidCallback? onPressed;
-  final BuildContext context;
+
+  DialogAction({
+    required this.text,
+    this.onPressed,
+  });
+}
+
+class _WarningTextButton extends StatelessWidget {
+  final DialogAction action;
+  const _WarningTextButton({
+    required this.action,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +79,11 @@ class _WarningTextButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(100.0),
-        onTap: onPressed,
+        onTap: action.onPressed,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
           child: Text(
-            text,
+            action.text,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                 ),

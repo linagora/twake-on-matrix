@@ -46,9 +46,15 @@ class NewGroupView extends StatelessWidget {
                     child: child,
                   );
                 },
-                child: ContactsSelectionList(
-                  newGroupController: controller,
-                ),
+                child: controller.contactsNotifier == null
+                    ? null
+                    : ContactsSelectionList(
+                        contactsNotifier: controller.contactsNotifier!,
+                        selectedContactsMapNotifier:
+                            controller.selectedContactsMapNotifier,
+                        isSearchModeNotifier: controller.isSearchModeNotifier,
+                        onSelectedContact: controller.onSelectedContact,
+                      ),
               ),
             ),
           ),

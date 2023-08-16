@@ -5,25 +5,54 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 typedef OnAcceptButton = void Function()?;
 
 class WarningDialog {
-  static void showWarningDialog(
+  static void show(
     BuildContext context, {
-    OnAcceptButton? onAcceptButton,
+    String? title,
+    String? message,
+    List<DialogAction>? actions,
   }) {
     showDialog(
       context: context,
       useRootNavigator: false,
       builder: (c) => WarningDialogWidget(
-        explainTextRequestWidget: RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            text: L10n.of(context)!
-                .youAreUploadingPhotosDoYouWantToCancelOrContinue,
-            style: Theme.of(context).textTheme.titleSmall,
+        title: title,
+        message: message,
+        actions: actions,
+      ),
+    );
+  }
+
+  static void showCancelable(
+    BuildContext context, {
+    String? title,
+    String? message,
+    String? acceptText,
+    OnAcceptButton? onAccept,
+    String? cancelText,
+    OnAcceptButton? onCancel,
+  }) {
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => WarningDialogWidget(
+        title: title,
+        message: message,
+        actions: [
+          DialogAction(
+            text: cancelText ?? L10n.of(context)!.cancel,
+            onPressed: () {
+              onCancel?.call();
+              Navigator.pop(context);
+            },
           ),
-        ),
-        onAcceptButton: () {
-          onAcceptButton?.call();
-        },
+          DialogAction(
+            text: acceptText ?? L10n.of(context)!.ok,
+            onPressed: () {
+              onAccept?.call();
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }
