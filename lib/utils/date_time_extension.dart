@@ -29,8 +29,7 @@ extension DateTimeExtension on DateTime {
   /// Checks if two DateTimes are close enough to belong to the same
   /// environment.
   bool sameEnvironment(DateTime prevTime) {
-    return millisecondsSinceEpoch - prevTime.millisecondsSinceEpoch <
-        1000 * 60 * minutesBetweenEnvironments;
+    return DateUtils.isSameDay(this, prevTime);
   }
 
   /// Returns a simple time String.
