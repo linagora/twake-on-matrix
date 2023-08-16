@@ -23,7 +23,7 @@ class InvitationSelectionView extends StatelessWidget {
             ? null
             : IconButton(
                 icon: const Icon(Icons.close_outlined),
-                onPressed: () => context.go('/rooms/${controller.roomId!}'),
+                onPressed: () => context.pop(),
               ),
         titleSpacing: 0,
         title: SizedBox(

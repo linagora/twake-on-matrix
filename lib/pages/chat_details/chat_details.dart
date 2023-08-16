@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -255,9 +256,9 @@ class ChatDetailsController extends State<ChatDetails> {
     if ((room.states['im.ponies.room_emotes'] ?? <String, Event>{})
         .keys
         .any((String s) => s.isNotEmpty)) {
-      context.go('/multiple_emotes');
+      context.goChild('multiple_emotes');
     } else {
-      context.go('/emotes');
+      context.goChild('emotes');
     }
   }
 
