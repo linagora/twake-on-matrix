@@ -1,27 +1,33 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:flutter/material.dart';
+
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
-import 'package:flutter/material.dart';
 
 class ContactsSelectionList extends StatelessWidget {
-  final NewGroupController newGroupController;
+  final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
+  final ValueNotifier<Either<Failure, Success>> contactsNotifier;
+  final Function() onSelectedContact;
+  final ValueNotifier<bool> isSearchModeNotifier;
 
   const ContactsSelectionList({
-    super.key,
-    required this.newGroupController,
-  });
-
-  SelectedContactsMapChangeNotifier get _selectedContactsMapNotifier =>
-      newGroupController.selectedContactsMapNotifier;
+    Key? key,
+    required this.contactsNotifier,
+    required this.selectedContactsMapNotifier,
+    required this.isSearchModeNotifier,
+    required this.onSelectedContact,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: newGroupController.contactsNotifier,
+      valueListenable: contactsNotifier,
       builder: (context, value, child) => value.fold(
         (failure) => Padding(
           padding: const EdgeInsets.only(left: 8.0),
@@ -50,12 +56,12 @@ class ContactsSelectionList extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: success.data.length,
                 itemBuilder: (context, index) {
-                  final contactNotifier = _selectedContactsMapNotifier
+                  final contactNotifier = selectedContactsMapNotifier
                       .getNotifierAtContact(success.data[index]);
                   return InkWell(
                     key: ValueKey(success.data[index].matrixId),
                     onTap: () {
-                      _selectedContactsMapNotifier.onContactTileTap(
+                      selectedContactsMapNotifier.onContactTileTap(
                         context,
                         success.data[index],
                       );
@@ -79,12 +85,12 @@ class ContactsSelectionList extends StatelessWidget {
                                 return Checkbox(
                                   value: contactNotifier.value,
                                   onChanged: (newValue) {
-                                    _selectedContactsMapNotifier
+                                    selectedContactsMapNotifier
                                         .onContactTileTap(
                                       context,
                                       success.data[index],
                                     );
-                                    newGroupController.onSelectedContact();
+                                    onSelectedContact();
                                   },
                                 );
                               },
@@ -97,7 +103,7 @@ class ContactsSelectionList extends StatelessWidget {
                 },
               ),
               ValueListenableBuilder<bool>(
-                valueListenable: newGroupController.isSearchModeNotifier,
+                valueListenable: isSearchModeNotifier,
                 builder: (context, isSearchMode, child) {
                   if (isSearchMode || success.isEnd) {
                     return const SizedBox.shrink();

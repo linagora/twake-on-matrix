@@ -197,9 +197,12 @@ class NewGroupController extends State<NewGroup>
         Logs().e(
           'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure',
         );
-        WarningDialog.showWarningDialog(
+        WarningDialog.showCancelable(
           context,
-          onAcceptButton: () {
+          message: L10n.of(context)!
+              .youAreUploadingPhotosDoYouWantToCancelOrContinue,
+          acceptText: L10n.of(context)!.continueProcess,
+          onAccept: () {
             WarningDialog.hideWarningDialog(context);
             createNewGroup();
           },

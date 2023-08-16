@@ -1887,6 +1887,7 @@
         "placeholders": {}
     },
     "skip": "Skip",
+    "invite": "Invite",
     "@skip": {
         "type": "text",
         "placeholders": {}
@@ -2647,6 +2648,8 @@
     "file": "File",
     "recent": "Recent",
     "chatsAndContacts": "Chats and Contacts",
+    "externalContactTitle": "Invite new users",
+    "externalContactMessage": "Some of the users you want to add are not in your contacs. Do you want to invite them?",
     "clear": "Clear",
     "membersCount": "{count} Members",
     "@membersCount": {

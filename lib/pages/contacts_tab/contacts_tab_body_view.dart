@@ -20,72 +20,71 @@ class ContactsTabBodyView extends StatelessWidget {
       controller: controller.scrollController,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: ValueListenableBuilder(
-          valueListenable: controller.contactsNotifier,
-          builder: (context, value, child) => value.fold(
-            (failure) => const EmptyContactBody(),
-            (success) {
-              if (success is! PresentationContactsSuccess) {
-                return const LoadingContactWidget();
-              }
+        child: controller.contactsNotifier == null
+            ? null
+            : ValueListenableBuilder(
+                valueListenable: controller.contactsNotifier!,
+                builder: (context, value, child) => value.fold(
+                  (failure) => const EmptyContactBody(),
+                  (success) {
+                    if (success is! PresentationContactsSuccess) {
+                      return const LoadingContactWidget();
+                    }
 
-              if (success.data.isEmpty) {
-                return const EmptyContactBody();
-              }
+                    if (success.data.isEmpty) {
+                      if (success.keyword.isEmpty) {
+                        return const EmptyContactBody();
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                          child: NoContactsFound(
+                            keyword: success.keyword,
+                          ),
+                        );
+                      }
+                    }
 
-              if (success.data.isEmpty) {
-                if (success.keyword.isEmpty) {
-                  return const EmptyContactBody();
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                    child: NoContactsFound(
-                      keyword: success.keyword,
-                    ),
-                  );
-                }
-              }
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: success.data
-                      .map<Widget>(
-                        (contact) => InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            controller.onContactTap(
-                              context: context,
-                              path: 'contacts',
-                              contact: contact,
-                            );
-                          },
-                          child: ExpansionContactListTile(contact: contact),
-                        ),
-                      )
-                      .toList()
-                    ..addAll([
-                      ValueListenableBuilder(
-                        valueListenable: controller.isSearchModeNotifier,
-                        builder: (context, isSearchMode, child) {
-                          if (isSearchMode || success.isEnd) {
-                            return const SizedBox.shrink();
-                          }
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: success.data
+                            .map<Widget>(
+                              (contact) => InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {
+                                  controller.onContactTap(
+                                    context: context,
+                                    path: 'contacts',
+                                    contact: contact,
+                                  );
+                                },
+                                child:
+                                    ExpansionContactListTile(contact: contact),
+                              ),
+                            )
+                            .toList()
+                          ..addAll([
+                            ValueListenableBuilder(
+                              valueListenable: controller.isSearchModeNotifier,
+                              builder: (context, isSearchMode, child) {
+                                if (isSearchMode || success.isEnd) {
+                                  return const SizedBox.shrink();
+                                }
+                                return const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ]),
                       ),
-                    ]),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
+              ),
       ),
     );
   }

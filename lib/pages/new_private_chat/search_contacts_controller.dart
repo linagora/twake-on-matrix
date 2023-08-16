@@ -3,18 +3,15 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success_converter.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/search/get_contacts_controller.dart';
-import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 mixin class SearchContactsController {
   static const _debouncerIntervalInMilliseconds = 300;
 
-  final _getContactController =
-      GetContactsController(_PresentationContactConverter());
+  GetContactsController? _getContactController;
   final _debouncer = Debouncer(
     const Duration(milliseconds: _debouncerIntervalInMilliseconds),
     initialValue: '',
@@ -24,12 +21,16 @@ mixin class SearchContactsController {
   final isSearchModeNotifier = ValueNotifier(false);
   final searchFocusNode = FocusNode();
 
-  ValueNotifier<Either<Failure, Success>> get contactsNotifier =>
-      _getContactController.contactsNotifier;
+  ValueNotifier<Either<Failure, Success>>? get contactsNotifier =>
+      _getContactController?.contactsNotifier;
 
-  void initSearchContacts() {
-    _getContactController.contactsNotifier.addListener(() {
-      Logs().d('contactsNotifier: ${contactsNotifier.value}');
+  void initSearchContacts({
+    SuccessConverter? converter,
+  }) {
+    _getContactController =
+        GetContactsController(converter ?? PresentationContactConverter());
+    contactsNotifier?.addListener(() {
+      Logs().d('contactsNotifier: ${contactsNotifier?.value}');
     });
     textEditingController.addListener(() {
       _debouncer.value = textEditingController.text;
@@ -43,11 +44,11 @@ mixin class SearchContactsController {
   }
 
   void fetchContacts({required String keyword}) {
-    _getContactController.fetch(keyword: keyword);
+    _getContactController?.fetch(keyword: keyword);
   }
 
   void loadMoreContacts() {
-    _getContactController.loadMore();
+    _getContactController?.loadMore();
   }
 
   void onCloseSearchTapped() {
@@ -75,22 +76,7 @@ mixin class SearchContactsController {
 
   void disposeSearchContacts() {
     _debouncer.cancel();
-    _getContactController.dispose();
+    _getContactController?.dispose();
     textEditingController.dispose();
-  }
-}
-
-class _PresentationContactConverter implements SuccessConverter {
-  @override
-  Success convert(Success success) {
-    if (success is GetContactsSuccess) {
-      return PresentationContactsSuccess(
-        data: success.data.expand((e) => e.toPresentationContacts()).toList(),
-        offset: success.offset,
-        isEnd: success.isEnd,
-        keyword: success.keyword,
-      );
-    }
-    return success;
   }
 }
