@@ -1,5 +1,6 @@
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 extension ContextExtensionss on BuildContext {
   /// The same of [MediaQuery.of(context).size]
@@ -137,4 +138,9 @@ extension ContextExtensionss on BuildContext {
       return mobile!;
     }
   }
+
+  void goChild(String path) => go('${GoRouterState.of(this).uri.path}/$path');
+
+  void pushChild(String path) =>
+      push('${GoRouterState.of(this).uri.path}/$path');
 }
