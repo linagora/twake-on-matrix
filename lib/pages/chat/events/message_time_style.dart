@@ -11,6 +11,18 @@ class MessageTimeStyle {
 
   static double get paddingTimeAndIcon => 8;
   static double get seenByRowIconSize => 16;
+  static Color seenByRowIconPrimaryColor(
+    bool timelineOverlayMessage,
+    BuildContext context,
+  ) =>
+      timelineOverlayMessage ? Colors.white : Theme.of(context).primaryColor;
+  static Color? seenByRowIconSecondaryColor(
+    bool timelineOverlayMessage,
+    BuildContext context,
+  ) =>
+      timelineOverlayMessage
+          ? Theme.of(context).colorScheme.onPrimary
+          : LinagoraRefColors.material().neutral[50];
 
   static TextStyle? textStyle(
     BuildContext context,

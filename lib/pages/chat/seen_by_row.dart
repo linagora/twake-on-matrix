@@ -1,11 +1,16 @@
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
+
+enum MessageStatus {
+  sending,
+  sent,
+  hasBeenSeenByOne,
+  hasBeenSeenByAll,
+}
 
 class SeenByRow extends StatelessWidget {
   final ChatController controller;
@@ -27,93 +32,73 @@ class SeenByRow extends StatelessWidget {
       controller.timeline!,
       eventId: eventId,
     );
-    if (eventStatus == EventStatus.error) {
-      return Icon(
-        Icons.error,
-        color: Colors.red,
-        size: MessageTimeStyle.seenByRowIconSize,
-      );
+
+    return getEventIcon(context, eventStatus, seenByUsers);
+  }
+
+  MessageStatus getMessageStatus(
+    BuildContext context,
+    EventStatus? eventStatus,
+    List<User> seenByUsers,
+  ) {
+    if (eventStatus == null || eventStatus == EventStatus.sending) {
+      return MessageStatus.sending;
     }
-    if (eventStatus == EventStatus.sending) {
-      return SvgPicture.asset(
-        ImagePaths.icSending,
-        colorFilter: ColorFilter.mode(
-          timelineOverlayMessage
-              ? Colors.white
-              : Theme.of(context).colorScheme.primary,
-          BlendMode.srcIn,
-        ),
-        width: MessageTimeStyle.seenByRowIconSize,
-        height: MessageTimeStyle.seenByRowIconSize,
-      );
+
+    if (eventStatus == EventStatus.sent || seenByUsers.isEmpty) {
+      return MessageStatus.sent;
     }
-    if (seenByUsers.isEmpty) {
-      return Icon(
-        Icons.done,
-        color: timelineOverlayMessage
-            ? Colors.white
-            : Theme.of(context).colorScheme.primary,
-        size: MessageTimeStyle.seenByRowIconSize,
-      );
+
+    if (seenByUsers.length == controller.room!.getParticipants().length - 1) {
+      return MessageStatus.hasBeenSeenByAll;
     }
-    return Icon(
-      Icons.done_all,
-      color: timelineOverlayMessage
-          ? Colors.white
-          : Theme.of(context).colorScheme.primary,
-      size: MessageTimeStyle.seenByRowIconSize,
-    );
-    // const maxAvatars = 7;
-    // return Container(
-    //   width: double.infinity,
-    //   alignment: Alignment.center,
-    //   child: AnimatedContainer(
-    //     constraints:
-    //         const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
-    //     height: seenByUsers.isEmpty ? 0 : 24,
-    //     duration: seenByUsers.isEmpty
-    //         ? Duration.zero
-    //         : FluffyThemes.animationDuration,
-    //     curve: FluffyThemes.animationCurve,
-    //     alignment: controller.timeline!.events.isNotEmpty &&
-    //             controller.timeline!.events.first.senderId ==
-    //                 Matrix.of(context).client.userID
-    //         ? Alignment.topRight
-    //         : Alignment.topLeft,
-    //     padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
-    //     child: Wrap(
-    //       spacing: 4,
-    //       children: [
-    //         ...(seenByUsers.length > maxAvatars
-    //                 ? seenByUsers.sublist(0, maxAvatars)
-    //                 : seenByUsers)
-    //             .map(
-    //               (user) => Avatar(
-    //                 mxContent: user.avatarUrl,
-    //                 name: user.calcDisplayname(),
-    //                 size: 16,
-    //                 fontSize: 9,
-    //               ),
-    //             )
-    //             .toList(),
-    //         if (seenByUsers.length > maxAvatars)
-    //           SizedBox(
-    //             width: 16,
-    //             height: 16,
-    //             child: Material(
-    //               color: Theme.of(context).colorScheme.background,
-    //               borderRadius: BorderRadius.circular(32),
-    //               child: Center(
-    //                 child: Text(
-    //                   '+${seenByUsers.length - maxAvatars}',
-    //                   style: const TextStyle(fontSize: 9),
-    //                 ),
-    //               ),
-    //             ),
-    //           ),
-    //       ],
-    //     ),
-    //   ),
-    // );
+
+    return MessageStatus.hasBeenSeenByOne;
+  }
+
+  Widget getEventIcon(
+    BuildContext context,
+    EventStatus? eventStatus,
+    List<User> seenByUsers,
+  ) {
+    final messageStatus = getMessageStatus(context, eventStatus, seenByUsers);
+    switch (messageStatus) {
+      case MessageStatus.sending:
+        return Icon(
+          Icons.schedule,
+          color: MessageTimeStyle.seenByRowIconSecondaryColor(
+            timelineOverlayMessage,
+            context,
+          ),
+          size: MessageTimeStyle.seenByRowIconSize,
+        );
+      case MessageStatus.sent:
+        return Icon(
+          Icons.done,
+          color: MessageTimeStyle.seenByRowIconSecondaryColor(
+            timelineOverlayMessage,
+            context,
+          ),
+          size: MessageTimeStyle.seenByRowIconSize,
+        );
+      case MessageStatus.hasBeenSeenByAll:
+        return Icon(
+          Icons.done_all,
+          color: MessageTimeStyle.seenByRowIconPrimaryColor(
+            timelineOverlayMessage,
+            context,
+          ),
+          size: MessageTimeStyle.seenByRowIconSize,
+        );
+      case MessageStatus.hasBeenSeenByOne:
+        return Icon(
+          Icons.done_all,
+          color: MessageTimeStyle.seenByRowIconSecondaryColor(
+            timelineOverlayMessage,
+            context,
+          ),
+          size: MessageTimeStyle.seenByRowIconSize,
+        );
+    }
   }
 }
