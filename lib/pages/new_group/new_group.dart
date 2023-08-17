@@ -17,7 +17,6 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
-import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 import 'package:flutter/material.dart';
@@ -39,7 +38,6 @@ class NewGroupController extends State<NewGroup>
         ComparablePresentationContactMixin,
         ImagePickerMixin,
         SearchContactsController {
-  final scrollController = ScrollController();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
@@ -62,16 +60,13 @@ class NewGroupController extends State<NewGroup>
     initSearchContacts();
     listenGroupNameChanged();
     _registerListenerForSelectedImagesChanged();
-    scrollController.addLoadMoreListener(loadMoreContacts);
   }
 
   @override
   void dispose() {
     super.dispose();
     disposeSearchContacts();
-    scrollController.dispose();
     imagePickerController.dispose();
-    selectedContactsMapNotifier.dispose();
     haveGroupNameNotifier.dispose();
     avatarNotifier.dispose();
     uploadContentInteractorStreamSubscription?.cancel();

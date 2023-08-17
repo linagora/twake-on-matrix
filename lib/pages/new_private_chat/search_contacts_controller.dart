@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/search/get_contacts_controller.dart';
 import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 mixin class SearchContactsController {
   static const _debouncerIntervalInMilliseconds = 300;
@@ -24,6 +25,9 @@ mixin class SearchContactsController {
   ValueNotifier<Either<Failure, Success>>? get contactsNotifier =>
       _getContactController?.contactsNotifier;
 
+  RefreshController? get refreshController =>
+      _getContactController?.refreshController;
+
   void initSearchContacts({
     SuccessConverter? converter,
   }) {
@@ -40,20 +44,26 @@ mixin class SearchContactsController {
       fetchContacts(keyword: keyword);
     });
 
-    fetchContacts(keyword: '');
+    fetchContacts();
   }
 
-  void fetchContacts({required String keyword}) {
-    _getContactController?.fetch(keyword: keyword);
+  void fetchContacts({String? keyword}) {
+    _getContactController?.fetch(
+      keyword: keyword ?? textEditingController.text,
+    );
   }
 
   void loadMoreContacts() {
     _getContactController?.loadMore();
   }
 
-  void onCloseSearchTapped() {
-    isSearchModeNotifier.value = false;
-    textEditingController.clear();
+  void toggleSearchMode() {
+    isSearchModeNotifier.value = !isSearchModeNotifier.value;
+    if (isSearchModeNotifier.value) {
+      searchFocusNode.requestFocus();
+    } else {
+      textEditingController.clear();
+    }
   }
 
   void onSelectedContact() {
@@ -67,11 +77,6 @@ mixin class SearchContactsController {
     searchFocusNode.unfocus();
     isSearchModeNotifier.value = false;
     textEditingController.clear();
-  }
-
-  void openSearchBar() {
-    isSearchModeNotifier.value = true;
-    searchFocusNode.requestFocus();
   }
 
   void disposeSearchContacts() {

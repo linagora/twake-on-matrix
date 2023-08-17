@@ -1,35 +1,33 @@
-import 'package:fluffychat/pages/new_private_chat/widget/new_private_appbar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class NewPrivateAppBar extends StatelessWidget {
+class SearchableAppBar extends StatelessWidget {
   final ValueNotifier<bool> searchModeNotifier;
-  final FocusNode? focusNode;
+  final FocusNode focusNode;
   final String title;
   final String? hintText;
-  final TextEditingController? textEditingController;
-  final Function()? onCloseSearchTapped;
-  final Function()? openSearchBar;
+  final TextEditingController textEditingController;
+  final Function() toggleSearchMode;
 
-  const NewPrivateAppBar({
+  const SearchableAppBar({
     super.key,
     required this.searchModeNotifier,
     required this.title,
     this.hintText,
-    this.focusNode,
-    this.textEditingController,
-    this.onCloseSearchTapped,
-    this.openSearchBar,
+    required this.focusNode,
+    required this.textEditingController,
+    required this.toggleSearchMode,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: NewPrivateAppBarStyle.appbarHeight(context),
+      toolbarHeight: SearchableAppBarStyle.appBarHeight(context),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
@@ -57,7 +55,7 @@ class NewPrivateAppBar extends StatelessWidget {
       title: Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: NewPrivateAppBarStyle.paddingItemAppbar(context),
+          padding: SearchableAppBarStyle.paddingItemAppBar(context),
           child: Row(
             children: [
               TwakeIconButton(
@@ -70,8 +68,8 @@ class NewPrivateAppBar extends StatelessWidget {
               Expanded(
                 child: ValueListenableBuilder(
                   valueListenable: searchModeNotifier,
-                  builder: (context, isSearchModeNotifier, child) {
-                    if (isSearchModeNotifier) {
+                  builder: (context, searchModeNotifier, child) {
+                    if (searchModeNotifier) {
                       return TextField(
                         focusNode: focusNode,
                         autofocus: true,
@@ -112,10 +110,10 @@ class NewPrivateAppBar extends StatelessWidget {
               ),
               ValueListenableBuilder(
                 valueListenable: searchModeNotifier,
-                builder: (context, isSearchModeNotifier, child) {
-                  if (isSearchModeNotifier) {
+                builder: (context, searchModeNotifier, child) {
+                  if (searchModeNotifier) {
                     return TwakeIconButton(
-                      onPressed: onCloseSearchTapped,
+                      onPressed: toggleSearchMode,
                       tooltip: L10n.of(context)!.close,
                       icon: Icons.close,
                       paddingAll: 10.0,
@@ -125,24 +123,12 @@ class NewPrivateAppBar extends StatelessWidget {
                       ),
                     );
                   }
-
-                  return Row(
-                    children: [
-                      TwakeIconButton(
-                        icon: Icons.search,
-                        onPressed: openSearchBar,
-                        tooltip: L10n.of(context)!.search,
-                        paddingAll: 10.0,
-                        margin: const EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                      TwakeIconButton(
-                        icon: Icons.more_vert,
-                        onPressed: () {},
-                        tooltip: L10n.of(context)!.more,
-                        paddingAll: 10.0,
-                        margin: const EdgeInsets.symmetric(vertical: 10.0),
-                      ),
-                    ],
+                  return TwakeIconButton(
+                    icon: Icons.search,
+                    onPressed: toggleSearchMode,
+                    tooltip: L10n.of(context)!.search,
+                    paddingAll: 10.0,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
                   );
                 },
               )

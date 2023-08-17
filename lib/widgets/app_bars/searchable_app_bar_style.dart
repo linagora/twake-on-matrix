@@ -2,13 +2,16 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
 
-class NewPrivateAppBarStyle {
+class SearchableAppBarStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double appbarHeight(BuildContext context) =>
+  static Size preferredSize(BuildContext context) =>
+      Size.fromHeight(appBarHeight(context));
+
+  static double appBarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 104 : 56;
 
-  static EdgeInsetsDirectional paddingItemAppbar(BuildContext context) =>
+  static EdgeInsetsDirectional paddingItemAppBar(BuildContext context) =>
       EdgeInsetsDirectional.only(
         top: responsive.isMobile(context) ? 40 : 0,
       );
