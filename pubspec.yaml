@@ -130,6 +130,7 @@ dependencies:
   any_link_preview: ^3.0.0
   async: ^2.11.0
   cached_network_image: ^3.2.3
+  pull_to_refresh: ^2.0.0
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3

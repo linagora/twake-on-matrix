@@ -8,6 +8,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class GetContactsController {
   SuccessConverter converter;
@@ -17,6 +18,7 @@ class GetContactsController {
   final contactsNotifier = ValueNotifier<Either<Failure, Success>>(
     const Right(GetContactsInitial()),
   );
+  final refreshController = RefreshController();
   bool _isLoadMore = false;
   Success? _lastSuccess;
 
@@ -31,6 +33,7 @@ class GetContactsController {
         _lastSuccess = success;
         return converter.convert(success);
       });
+      refreshController.refreshCompleted();
     });
   }
 
@@ -40,10 +43,12 @@ class GetContactsController {
     if (_isLoadMore ||
         _lastSuccess == null ||
         _lastSuccess is! GetContactsSuccess) {
+      refreshController.loadComplete();
       return;
     }
     final success = _lastSuccess as GetContactsSuccess;
     if (success.isEnd) {
+      refreshController.loadComplete();
       return;
     }
     _isLoadMore = true;
@@ -56,6 +61,7 @@ class GetContactsController {
         .listen(
       (event) {
         _isLoadMore = false;
+        refreshController.loadComplete();
         contactsNotifier.value = event.map(
           (newSuccess) {
             final expandedSuccess = newSuccess is GetContactsSuccess

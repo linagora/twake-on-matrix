@@ -1,8 +1,9 @@
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/new_private_appbar.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/new_private_appbar_style.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_appbar.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_appbar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
+import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -17,15 +18,14 @@ class NewGroupView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize:
-            Size.fromHeight(NewPrivateAppBarStyle.appbarHeight(context)),
-        child: NewPrivateAppBar(
+        preferredSize: SearchableAppBarStyle.preferredSize(context),
+        child: SearchableAppBar(
           focusNode: controller.searchFocusNode,
           title: L10n.of(context)!.newGroupChat,
           searchModeNotifier: controller.isSearchModeNotifier,
           hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
-          onCloseSearchTapped: controller.onCloseSearchTapped,
-          openSearchBar: controller.openSearchBar,
+          textEditingController: controller.textEditingController,
+          toggleSearchMode: controller.toggleSearchMode,
         ),
       ),
       body: Column(
@@ -34,30 +34,31 @@ class NewGroupView extends StatelessWidget {
             newGroupController: controller,
           ),
           Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              controller: controller.scrollController,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: controller
-                    .selectedContactsMapNotifier.haveSelectedContactsNotifier,
-                builder: (context, haveSelectedContact, child) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      top: haveSelectedContact ? 0.0 : 8.0,
-                    ),
-                    child: child,
-                  );
-                },
-                child: controller.contactsNotifier == null
-                    ? null
-                    : ContactsSelectionList(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+              builder: (context, haveSelectedContact, child) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    top: haveSelectedContact ? 0.0 : 8.0,
+                  ),
+                  child: child,
+                );
+              },
+              child: controller.contactsNotifier == null ||
+                      controller.refreshController == null
+                  ? null
+                  : TwakeSmartRefresher(
+                      controller: controller.refreshController!,
+                      onRefresh: controller.fetchContacts,
+                      onLoading: controller.loadMoreContacts,
+                      child: ContactsSelectionList(
                         contactsNotifier: controller.contactsNotifier!,
                         selectedContactsMapNotifier:
                             controller.selectedContactsMapNotifier,
-                        isSearchModeNotifier: controller.isSearchModeNotifier,
                         onSelectedContact: controller.onSelectedContact,
                       ),
-              ),
+                    ),
             ),
           ),
         ],

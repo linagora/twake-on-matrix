@@ -1,11 +1,12 @@
+import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_appbar.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_appbar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
+import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class InvitationSelectionView extends StatelessWidget {
@@ -18,103 +19,46 @@ class InvitationSelectionView extends StatelessWidget {
     final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
     final groupName = room.name.isEmpty ? L10n.of(context)!.group : room.name;
     return Scaffold(
-      appBar: AppBar(
-        leading: GoRouterState.of(context).path?.startsWith('/spaces/') == true
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close_outlined),
-                onPressed: () => context.pop(),
-              ),
-        titleSpacing: 0,
-        title: SizedBox(
-          height: 44,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: TextField(
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: L10n.of(context)!.inviteContactToGroup(groupName),
-                suffixIcon: controller.loading
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10.0,
-                          horizontal: 12,
-                        ),
-                        child: SizedBox.square(
-                          dimension: 24,
-                          child: CircularProgressIndicator.adaptive(
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.search_outlined),
-              ),
-              onChanged: controller.searchUserWithCoolDown,
-            ),
-          ),
+      appBar: PreferredSize(
+        preferredSize: SearchableAppBarStyle.preferredSize(context),
+        child: SearchableAppBar(
+          searchModeNotifier: controller.isSearchModeNotifier,
+          title: L10n.of(context)!.inviteContactToGroup(groupName),
+          hintText: L10n.of(context)!.inviteContactToGroup(groupName),
+          focusNode: controller.searchFocusNode,
+          textEditingController: controller.textEditingController,
+          toggleSearchMode: controller.toggleSearchMode,
         ),
       ),
-      body: MaxWidthBody(
-        withScrolling: true,
-        child: controller.foundProfiles.isNotEmpty
-            ? ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: controller.foundProfiles.length,
-                itemBuilder: (BuildContext context, int i) => ListTile(
-                  leading: Avatar(
-                    mxContent: controller.foundProfiles[i].avatarUrl,
-                    name: controller.foundProfiles[i].displayName ??
-                        controller.foundProfiles[i].userId,
-                  ),
-                  title: Text(
-                    controller.foundProfiles[i].displayName ??
-                        controller.foundProfiles[i].userId.localpart!,
-                  ),
-                  subtitle: Text(controller.foundProfiles[i].userId),
-                  onTap: () => controller.inviteAction(
-                    context,
-                    controller.foundProfiles[i].userId,
-                  ),
-                ),
-              )
-            : FutureBuilder<List<User>>(
-                future: controller.getContacts(context),
-                builder: (BuildContext context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    );
-                  }
-                  final contacts = snapshot.data!;
-                  return ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: contacts.length,
-                    itemBuilder: (BuildContext context, int i) => ListTile(
-                      leading: Avatar(
-                        mxContent: contacts[i].avatarUrl,
-                        name: contacts[i].calcDisplayname(),
-                      ),
-                      title: Text(
-                        contacts[i].calcDisplayname(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        contacts[i].id,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                      onTap: () =>
-                          controller.inviteAction(context, contacts[i].id),
+      body: controller.refreshController == null
+          ? null
+          : TwakeSmartRefresher(
+              controller: controller.refreshController!,
+              onRefresh: controller.fetchContacts,
+              onLoading: controller.loadMoreContacts,
+              child: controller.contactsNotifier == null
+                  ? null
+                  : ContactsSelectionList(
+                      disabledContacts: controller.joinedContacts,
+                      contactsNotifier: controller.contactsNotifier!,
+                      selectedContactsMapNotifier:
+                          controller.selectedContactsMapNotifier,
+                      onSelectedContact: controller.onSelectedContact,
                     ),
-                  );
-                },
-              ),
+            ),
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable:
+            controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
+        builder: (context, haveSelectedContacts, child) {
+          if (!haveSelectedContacts) {
+            return const SizedBox.shrink();
+          }
+          return child!;
+        },
+        child: TwakeFloatingActionButton(
+          icon: Icons.arrow_forward,
+          onTap: controller.inviteAction,
+        ),
       ),
     );
   }
