@@ -8,7 +8,6 @@ import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 class ContactsTab extends StatefulWidget {
@@ -51,14 +50,7 @@ class ContactsTabController extends State<ContactsTab>
         contact: contact,
       );
     } else {
-      showFutureLoadingDialog(
-        context: context,
-        future: () async {
-          if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
-            context.go('/$path/$roomId');
-          }
-        },
-      );
+      context.go('/$path/$roomId');
     }
   }
 
