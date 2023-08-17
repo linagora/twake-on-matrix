@@ -30,7 +30,7 @@ class ExternalContactWidget extends StatelessWidget {
             highlightColor: Colors.transparent,
           ),
           child: ListTile(
-            contentPadding: EdgeInsets.zero,
+            contentPadding: const EdgeInsetsDirectional.only(end: 16),
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -41,7 +41,7 @@ class ExternalContactWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Flexible(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -65,6 +65,7 @@ class ExternalContactWidget extends StatelessWidget {
                     ],
                   ),
                 ),
+                Checkbox(value: false, onChanged: (_) {})
               ],
             ),
             onTap: onTap,

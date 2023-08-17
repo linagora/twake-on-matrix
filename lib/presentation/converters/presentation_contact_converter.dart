@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/app_state/success.dart';
@@ -25,7 +26,7 @@ class PresentationContactConverter implements SuccessConverter {
           contact: PresentationContact(
             matrixId: success.keyword,
             displayName: success.keyword.substring(1),
-            email: success.keyword,
+            type: ContactType.external,
           ),
         );
       }

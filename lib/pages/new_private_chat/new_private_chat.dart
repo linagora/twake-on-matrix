@@ -21,7 +21,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
         GoToDraftChatMixin,
-        SearchContactsController,
+        SearchContactsMixinController,
         InviteExternalContactMixin {
   final isShowContactsNotifier = ValueNotifier(true);
   final scrollController = ScrollController();
@@ -70,7 +70,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
     BuildContext context,
     PresentationContact contact,
   ) {
-    showInviteExternalContactDialog(context, contact, () {
+    showInviteExternalContactDialog(context, () {
       onContactAction(
         context,
         contact,

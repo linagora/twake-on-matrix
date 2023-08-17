@@ -18,7 +18,7 @@ class ContactsTab extends StatefulWidget {
 }
 
 class ContactsTabController extends State<ContactsTab>
-    with ComparablePresentationContactMixin, SearchContactsController {
+    with ComparablePresentationContactMixin, SearchContactsMixinController {
   final scrollController = ScrollController();
   final responsive = getIt.get<ResponsiveUtils>();
 
