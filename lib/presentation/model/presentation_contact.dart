@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
 
 class PresentationContact extends Equatable {
   final String? email;
@@ -10,11 +11,14 @@ class PresentationContact extends Equatable {
 
   final ContactStatus? status;
 
+  final ContactType? type;
+
   const PresentationContact({
     this.email,
     this.displayName,
     this.matrixId,
     this.status,
+    this.type,
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
@@ -25,5 +29,5 @@ class PresentationContact extends Equatable {
       );
 
   @override
-  List<Object?> get props => [email, displayName, matrixId, status];
+  List<Object?> get props => [email, displayName, matrixId, status, type];
 }

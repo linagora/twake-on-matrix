@@ -1,13 +1,13 @@
-import 'package:fluffychat/pages/new_group/new_group.dart';
+import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/widgets/avatar/avatar_with_bottom_icon_widget.dart';
 import 'package:flutter/material.dart';
 
 class SelectedParticipantsList extends StatefulWidget {
-  final NewGroupController newGroupController;
+  final ContactsSelectionController contactsSelectionController;
 
   const SelectedParticipantsList({
     super.key,
-    required this.newGroupController,
+    required this.contactsSelectionController,
   });
 
   @override
@@ -18,7 +18,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
   @override
   Widget build(BuildContext context) {
     final contactsNotifier =
-        widget.newGroupController.selectedContactsMapNotifier;
+        widget.contactsSelectionController.selectedContactsMapNotifier;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,

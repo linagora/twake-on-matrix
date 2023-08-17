@@ -1,3 +1,5 @@
+import 'package:fluffychat/pages/new_group/contacts_selection.dart';
+import 'package:fluffychat/pages/new_group/contacts_selection_view_style.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
@@ -6,13 +8,10 @@ import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
+class ContactsSelectionView extends StatelessWidget {
+  final ContactsSelectionController controller;
 
-class NewGroupView extends StatelessWidget {
-  final NewGroupController controller;
-
-  const NewGroupView(this.controller, {Key? key}) : super(key: key);
+  const ContactsSelectionView(this.controller, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +20,9 @@ class NewGroupView extends StatelessWidget {
         preferredSize: SearchableAppBarStyle.preferredSize(context),
         child: SearchableAppBar(
           focusNode: controller.searchFocusNode,
-          title: L10n.of(context)!.newGroupChat,
+          title: controller.getTitle(context),
           searchModeNotifier: controller.isSearchModeNotifier,
-          hintText: L10n.of(context)!.whoWouldYouLikeToAdd,
+          hintText: controller.getHintText(context),
           textEditingController: controller.textEditingController,
           toggleSearchMode: controller.toggleSearchMode,
         ),
@@ -31,7 +30,7 @@ class NewGroupView extends StatelessWidget {
       body: Column(
         children: [
           SelectedParticipantsList(
-            newGroupController: controller,
+            contactsSelectionController: controller,
           ),
           Expanded(
             child: ValueListenableBuilder<bool>(
@@ -39,8 +38,8 @@ class NewGroupView extends StatelessWidget {
                   .selectedContactsMapNotifier.haveSelectedContactsNotifier,
               builder: (context, haveSelectedContact, child) {
                 return Padding(
-                  padding: EdgeInsets.only(
-                    top: haveSelectedContact ? 0.0 : 8.0,
+                  padding: ContactsSelectionViewStyle.getSelectionListPadding(
+                    haveSelectedContact: haveSelectedContact,
                   ),
                   child: child,
                 );
@@ -57,8 +56,7 @@ class NewGroupView extends StatelessWidget {
                         selectedContactsMapNotifier:
                             controller.selectedContactsMapNotifier,
                         onSelectedContact: controller.onSelectedContact,
-                        onSelectedExternalContact:
-                            controller.onExternalContactAction,
+                        disabledContactIds: controller.disabledContactIds,
                       ),
                     ),
             ),
@@ -76,7 +74,7 @@ class NewGroupView extends StatelessWidget {
         },
         child: TwakeFloatingActionButton(
           icon: Icons.arrow_forward,
-          onTap: () => controller.moveToNewGroupInfoScreen(),
+          onTap: () => controller.trySubmit(context),
         ),
       ),
     );

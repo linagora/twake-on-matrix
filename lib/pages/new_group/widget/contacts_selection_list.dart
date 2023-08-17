@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/external_contact_widget.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
@@ -16,16 +15,14 @@ class ContactsSelectionList extends StatelessWidget {
   final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
   final ValueNotifier<Either<Failure, Success>> contactsNotifier;
   final Function() onSelectedContact;
-  final Function(BuildContext, PresentationContact)? onSelectedExternalContact;
-  final List<String> disabledContacts;
+  final List<String> disabledContactIds;
 
   const ContactsSelectionList({
     Key? key,
     required this.contactsNotifier,
     required this.selectedContactsMapNotifier,
     required this.onSelectedContact,
-    this.onSelectedExternalContact,
-    this.disabledContacts = const [],
+    this.disabledContactIds = const [],
   }) : super(key: key);
 
   @override
@@ -41,19 +38,10 @@ class ContactsSelectionList extends StatelessWidget {
         ),
         (success) {
           if (success is PresentationExternalContactSuccess) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ExternalContactWidget(
-                    contact: success.contact,
-                    onTap: () {
-                      onSelectedExternalContact?.call(context, success.contact);
-                    },
-                  )
-                ],
-              ),
+            return _buildContactItem(
+              context,
+              contact: success.contact,
+              paddingTop: 8,
             );
           }
           if (success is! PresentationContactsSuccess) {
@@ -73,65 +61,74 @@ class ContactsSelectionList extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: success.data.length,
-            itemBuilder: (context, index) {
-              final contactNotifier = selectedContactsMapNotifier
-                  .getNotifierAtContact(success.data[index]);
-              final disabled = disabledContacts.contains(
-                success.data[index].matrixId,
-              );
-              return InkWell(
-                key: ValueKey(success.data[index].matrixId),
-                onTap: disabled
-                    ? null
-                    : () {
-                        selectedContactsMapNotifier.onContactTileTap(
-                          context,
-                          success.data[index],
-                        );
-                      },
-                borderRadius: BorderRadius.circular(16.0),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 8.0,
-                      right: 16,
-                      top: index == 0 ? 12 : 0,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ExpansionContactListTile(
-                            contact: success.data[index],
-                          ),
-                        ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: contactNotifier,
-                          builder: (context, isCurrentSelected, child) {
-                            return Checkbox(
-                              value: disabled || contactNotifier.value,
-                              onChanged: disabled
-                                  ? null
-                                  : (newValue) {
-                                      selectedContactsMapNotifier
-                                          .onContactTileTap(
-                                        context,
-                                        success.data[index],
-                                      );
-                                      onSelectedContact();
-                                    },
-                            );
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+            itemBuilder: (context, index) => _buildContactItem(
+              context,
+              contact: success.data[index],
+              paddingTop: index == 0 ? 8.0 : 0,
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildContactItem(
+    BuildContext context, {
+    required PresentationContact contact,
+    double paddingTop = 0,
+  }) {
+    final contactNotifier =
+        selectedContactsMapNotifier.getNotifierAtContact(contact);
+    final disabled = disabledContactIds.contains(
+      contact.matrixId,
+    );
+    return InkWell(
+      key: ValueKey(contact.matrixId),
+      onTap: disabled
+          ? null
+          : () {
+              selectedContactsMapNotifier.onContactTileTap(
+                context,
+                contact,
+              );
+            },
+      borderRadius: BorderRadius.circular(16.0),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 8.0,
+            right: 16,
+            top: paddingTop,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ExpansionContactListTile(
+                  contact: contact,
+                ),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: contactNotifier,
+                builder: (context, isCurrentSelected, child) {
+                  return Checkbox(
+                    value: disabled || contactNotifier.value,
+                    onChanged: disabled
+                        ? null
+                        : (newValue) {
+                            selectedContactsMapNotifier.onContactTileTap(
+                              context,
+                              contact,
+                            );
+                            onSelectedContact();
+                          },
+                  );
+                },
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

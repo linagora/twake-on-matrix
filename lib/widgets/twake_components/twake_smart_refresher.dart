@@ -3,8 +3,10 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class TwakeSmartRefresher extends StatelessWidget {
   final RefreshController controller;
-  final VoidCallback onRefresh;
-  final VoidCallback onLoading;
+  final VoidCallback? onRefresh;
+  final VoidCallback? onLoading;
+  final bool enablePullUp;
+  final bool enablePullDown;
   final Widget? child;
 
   const TwakeSmartRefresher({
@@ -12,13 +14,16 @@ class TwakeSmartRefresher extends StatelessWidget {
     required this.controller,
     required this.onRefresh,
     required this.onLoading,
+    this.enablePullUp = true,
+    this.enablePullDown = true,
     this.child,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
-      enablePullUp: true,
+      enablePullUp: enablePullUp,
+      enablePullDown: enablePullDown,
       header: CustomHeader(
         builder: (context, mode) {
           if (mode != RefreshStatus.refreshing) {

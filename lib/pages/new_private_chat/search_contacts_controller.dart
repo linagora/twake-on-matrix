@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-mixin class SearchContactsController {
+mixin class SearchContactsMixinController {
   static const _debouncerIntervalInMilliseconds = 300;
 
   GetContactsController? _getContactController;

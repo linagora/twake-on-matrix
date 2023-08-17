@@ -9,14 +9,12 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
+import 'package:fluffychat/pages/new_group/contacts_selection.dart';
+import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
-import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
@@ -24,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/pages/new_group/new_group_view.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class NewGroup extends StatefulWidget {
@@ -34,12 +31,8 @@ class NewGroup extends StatefulWidget {
   NewGroupController createState() => NewGroupController();
 }
 
-class NewGroupController extends State<NewGroup>
-    with
-        ComparablePresentationContactMixin,
-        ImagePickerMixin,
-        SearchContactsController,
-        InviteExternalContactMixin {
+class NewGroupController extends ContactsSelectionController<NewGroup>
+    with ImagePickerMixin {
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
@@ -48,7 +41,6 @@ class NewGroupController extends State<NewGroup>
   final createRoomStateNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
 
-  final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
   final haveGroupNameNotifier = ValueNotifier(false);
   final groupNameFocusNode = FocusNode();
   StreamSubscription? uploadContentInteractorStreamSubscription;
@@ -59,7 +51,6 @@ class NewGroupController extends State<NewGroup>
   @override
   void initState() {
     super.initState();
-    initSearchExternalContacts();
     listenGroupNameChanged();
     _registerListenerForSelectedImagesChanged();
   }
@@ -67,7 +58,6 @@ class NewGroupController extends State<NewGroup>
   @override
   void dispose() {
     super.dispose();
-    disposeSearchContacts();
     imagePickerController.dispose();
     haveGroupNameNotifier.dispose();
     avatarNotifier.dispose();
@@ -75,13 +65,25 @@ class NewGroupController extends State<NewGroup>
     createNewGroupChatInteractorStreamSubscription?.cancel();
   }
 
+  @override
+  String getTitle(BuildContext context) {
+    return L10n.of(context)!.newGroupChat;
+  }
+
+  @override
+  String getHintText(BuildContext context) {
+    return L10n.of(context)!.whoWouldYouLikeToAdd;
+  }
+
+  @override
+  void onSubmit() {
+    moveToNewGroupInfoScreen();
+  }
+
   Future<ServerConfig> getServerConfig() async {
     final serverConfig = await Matrix.of(context).client.getConfig();
     return serverConfig;
   }
-
-  Iterable<PresentationContact> get contactsList =>
-      selectedContactsMapNotifier.contactsList;
 
   Future<Set<PresentationContact>> getAllContactsGroupChat({
     bool isCustomDisplayName = true,
@@ -313,16 +315,6 @@ class NewGroupController extends State<NewGroup>
         false;
   }
 
-  void onExternalContactAction(
-    BuildContext context,
-    PresentationContact contact,
-  ) {
-    showInviteExternalContactDialog(context, contact, () {
-      textEditingController.clear();
-      selectedContactsMapNotifier.onContactTileTap(context, contact);
-    });
-  }
-
   @override
   void removeAllImageSelected() {
     uploadContentInteractorStreamSubscription?.cancel();
@@ -334,5 +326,5 @@ class NewGroupController extends State<NewGroup>
   }
 
   @override
-  Widget build(BuildContext context) => NewGroupView(this);
+  Widget build(BuildContext context) => ContactsSelectionView(this);
 }

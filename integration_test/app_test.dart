@@ -2,7 +2,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
-import 'package:fluffychat/pages/invitation_selection/invitation_selection_view.dart';
+import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -144,13 +144,13 @@ void main() {
 
         await tester.waitFor(
           find.descendant(
-            of: find.byType(InvitationSelectionView),
+            of: find.byType(ContactsSelectionView),
             matching: find.byType(TextField),
           ),
         );
         await tester.enterText(
           find.descendant(
-            of: find.byType(InvitationSelectionView),
+            of: find.byType(ContactsSelectionView),
             matching: find.byType(TextField),
           ),
           Users.user2.name,
@@ -166,7 +166,7 @@ void main() {
           find
               .descendant(
                 of: find.descendant(
-                  of: find.byType(InvitationSelectionView),
+                  of: find.byType(ContactsSelectionView),
                   matching: find.byType(ListTile),
                 ),
                 matching: find.text(Users.user2.name),
