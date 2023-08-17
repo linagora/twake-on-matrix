@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar_style.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 

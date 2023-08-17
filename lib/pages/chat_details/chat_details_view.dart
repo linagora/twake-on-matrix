@@ -63,8 +63,7 @@ class ChatDetailsView extends StatelessWidget {
                         icon: const Icon(Icons.close_outlined),
                         onPressed: controller.onPressedClose,
                       ),
-                      Flexible(
-                        flex: 8,
+                      Expanded(
                         child: Text(
                           room.getLocalizedDisplayname(
                             MatrixLocals(L10n.of(context)!),

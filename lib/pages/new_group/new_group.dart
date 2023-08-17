@@ -9,7 +9,8 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
+import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
@@ -37,7 +38,8 @@ class NewGroupController extends State<NewGroup>
     with
         ComparablePresentationContactMixin,
         ImagePickerMixin,
-        SearchContactsController {
+        SearchContactsController,
+        InviteExternalContactMixin {
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
@@ -57,7 +59,7 @@ class NewGroupController extends State<NewGroup>
   @override
   void initState() {
     super.initState();
-    initSearchContacts();
+    initSearchExternalContacts();
     listenGroupNameChanged();
     _registerListenerForSelectedImagesChanged();
   }
@@ -309,6 +311,16 @@ class NewGroupController extends State<NewGroup>
               success is CreateNewGroupChatLoading,
         ) ??
         false;
+  }
+
+  void onExternalContactAction(
+    BuildContext context,
+    PresentationContact contact,
+  ) {
+    showInviteExternalContactDialog(context, contact, () {
+      textEditingController.clear();
+      selectedContactsMapNotifier.onContactTileTap(context, contact);
+    });
   }
 
   @override

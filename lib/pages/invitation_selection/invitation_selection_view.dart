@@ -1,13 +1,12 @@
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar_style.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 
 class InvitationSelectionView extends StatelessWidget {
   final InvitationSelectionController controller;
@@ -16,15 +15,14 @@ class InvitationSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
-    final groupName = room.name.isEmpty ? L10n.of(context)!.group : room.name;
+    final title = L10n.of(context)!.inviteContactToGroup(controller.groupName);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: SearchableAppBarStyle.preferredSize(context),
         child: SearchableAppBar(
           searchModeNotifier: controller.isSearchModeNotifier,
-          title: L10n.of(context)!.inviteContactToGroup(groupName),
-          hintText: L10n.of(context)!.inviteContactToGroup(groupName),
+          title: title,
+          hintText: title,
           focusNode: controller.searchFocusNode,
           textEditingController: controller.textEditingController,
           toggleSearchMode: controller.toggleSearchMode,
@@ -44,6 +42,8 @@ class InvitationSelectionView extends StatelessWidget {
                       selectedContactsMapNotifier:
                           controller.selectedContactsMapNotifier,
                       onSelectedContact: controller.onSelectedContact,
+                      onSelectedExternalContact:
+                          controller.onExternalContactAction,
                     ),
             ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -57,7 +57,7 @@ class InvitationSelectionView extends StatelessWidget {
         },
         child: TwakeFloatingActionButton(
           icon: Icons.arrow_forward,
-          onTap: controller.inviteAction,
+          onTap: controller.onSubmit,
         ),
       ),
     );
