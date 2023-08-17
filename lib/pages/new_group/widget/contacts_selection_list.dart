@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/external_contact_widget.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
@@ -14,6 +16,7 @@ class ContactsSelectionList extends StatelessWidget {
   final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
   final ValueNotifier<Either<Failure, Success>> contactsNotifier;
   final Function() onSelectedContact;
+  final Function(BuildContext, PresentationContact)? onSelectedExternalContact;
   final List<String> disabledContacts;
 
   const ContactsSelectionList({
@@ -21,6 +24,7 @@ class ContactsSelectionList extends StatelessWidget {
     required this.contactsNotifier,
     required this.selectedContactsMapNotifier,
     required this.onSelectedContact,
+    this.onSelectedExternalContact,
     this.disabledContacts = const [],
   }) : super(key: key);
 
@@ -36,6 +40,22 @@ class ContactsSelectionList extends StatelessWidget {
           ),
         ),
         (success) {
+          if (success is PresentationExternalContactSuccess) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ExternalContactWidget(
+                    contact: success.contact,
+                    onTap: () {
+                      onSelectedExternalContact?.call(context, success.contact);
+                    },
+                  )
+                ],
+              ),
+            );
+          }
           if (success is! PresentationContactsSuccess) {
             return const LoadingContactWidget();
           }
@@ -73,7 +93,11 @@ class ContactsSelectionList extends StatelessWidget {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 16),
+                    padding: EdgeInsets.only(
+                      left: 8.0,
+                      right: 16,
+                      top: index == 0 ? 12 : 0,
+                    ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

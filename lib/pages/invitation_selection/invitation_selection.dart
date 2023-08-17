@@ -1,5 +1,7 @@
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notiifer.dart';
+import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
+import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -9,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:matrix/matrix.dart';
 
 class InvitationSelection extends StatefulWidget {
   const InvitationSelection({Key? key}) : super(key: key);
@@ -19,19 +22,25 @@ class InvitationSelection extends StatefulWidget {
 }
 
 class InvitationSelectionController extends State<InvitationSelection>
-    with SearchContactsController {
+    with SearchContactsController, InviteExternalContactMixin {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
-  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get _roomId => GoRouterState.of(context).pathParameters['roomid'];
+
+  Room get _room => Matrix.of(context).client.getRoomById(_roomId!)!;
+
+  String get groupName =>
+      _room.name.isEmpty ? L10n.of(context)!.group : _room.name;
+
   List<String> get joinedContacts => Matrix.of(context)
       .client
-      .getRoomById(roomId!)!
+      .getRoomById(_roomId!)!
       .getParticipants()
       .map((participant) => participant.id)
       .toList();
 
   @override
   void initState() {
-    initSearchContacts();
+    initSearchExternalContacts();
     super.initState();
   }
 
@@ -41,13 +50,12 @@ class InvitationSelectionController extends State<InvitationSelection>
     super.dispose();
   }
 
-  void inviteAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+  void onSubmit() async {
     if (OkCancelResult.ok !=
         await showOkCancelAlertDialog(
           context: context,
           title: L10n.of(context)!.inviteContactToGroup(
-            room.getLocalizedDisplayname(
+            _room.getLocalizedDisplayname(
               MatrixLocals(L10n.of(context)!),
             ),
           ),
@@ -56,11 +64,17 @@ class InvitationSelectionController extends State<InvitationSelection>
         )) {
       return;
     }
+    final selectedContacts = selectedContactsMapNotifier.contactsList
+        .map((contact) => contact.matrixId!)
+        .toList();
+    performInvite(selectedContacts);
+  }
+
+  void performInvite(List<String> ids) async {
     final success = await showFutureLoadingDialog(
       context: context,
       future: () => Future.wait(
-        selectedContactsMapNotifier.contactsList
-            .map((contact) => room.invite(contact.matrixId ?? "")),
+        ids.map((id) => _room.invite(id)),
       ),
     );
     if (success.error == null) {
@@ -69,8 +83,19 @@ class InvitationSelectionController extends State<InvitationSelection>
           content: Text(L10n.of(context)!.contactHasBeenInvitedToTheGroup),
         ),
       );
-      context.go('/rooms/${room.id}');
+      context.go('/rooms/$_roomId');
     }
+  }
+
+  void onExternalContactAction(
+    BuildContext context,
+    PresentationContact contact,
+  ) {
+    showInviteExternalContactDialog(
+      context,
+      contact,
+      () => performInvite([contact.matrixId ?? ""]),
+    );
   }
 
   @override

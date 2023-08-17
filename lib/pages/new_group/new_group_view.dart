@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_appbar_style.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +57,8 @@ class NewGroupView extends StatelessWidget {
                         selectedContactsMapNotifier:
                             controller.selectedContactsMapNotifier,
                         onSelectedContact: controller.onSelectedContact,
+                        onSelectedExternalContact:
+                            controller.onExternalContactAction,
                       ),
                     ),
             ),
