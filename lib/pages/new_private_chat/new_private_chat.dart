@@ -11,7 +11,6 @@ import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
@@ -50,7 +49,10 @@ class NewPrivateChatController extends State<NewPrivateChat>
     context.push('/rooms/newprivatechat/newgroup');
   }
 
-  void onContactAction(BuildContext context, PresentationContact contact) {
+  void onContactAction(
+    BuildContext context,
+    PresentationContact contact,
+  ) async {
     final roomId =
         Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {
@@ -64,14 +66,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
         ),
       );
     } else {
-      showFutureLoadingDialog(
-        context: context,
-        future: () async {
-          if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
-            context.go('/rooms/$roomId');
-          }
-        },
-      );
+      context.go('/rooms/$roomId');
     }
   }
 
