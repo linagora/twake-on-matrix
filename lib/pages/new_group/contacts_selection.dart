@@ -11,11 +11,11 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
     with SearchContactsMixinController, InviteExternalContactMixin {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
 
-  String getTitle(BuildContext context) => "Should override";
+  String getTitle(BuildContext context);
 
-  String getHintText(BuildContext context) => "Should override";
+  String getHintText(BuildContext context);
 
-  void onSubmit() {}
+  void onSubmit();
 
   List<String> get disabledContactIds => [];
 
