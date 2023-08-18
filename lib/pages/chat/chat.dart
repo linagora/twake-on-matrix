@@ -17,7 +17,8 @@ import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
-import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
@@ -61,7 +62,8 @@ class Chat extends StatefulWidget {
   ChatController createState() => ChatController();
 }
 
-class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
+class ChatController extends State<Chat>
+    with CommonMediaPickerMixin, MediaPickerMixin, SendFilesMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -250,7 +252,6 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
-    listenToSelectionInImagePicker();
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _askToAcceptInvitation();

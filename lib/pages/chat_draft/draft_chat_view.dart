@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -19,8 +20,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 
 class DraftChatView extends StatelessWidget {
   const DraftChatView(this.controller, {super.key});
@@ -88,19 +90,7 @@ class DraftChatView extends StatelessWidget {
                         tooltip: L10n.of(context)!.more,
                         margin: const EdgeInsets.only(right: 4.0),
                         icon: Icons.add_circle_outline,
-                        onPressed: () {
-                          controller.showImagesPickerBottomSheetAction(
-                            context: context,
-                            onItemAction: (action) =>
-                                controller.onClickItemAction(
-                              action: action,
-                              context: context,
-                            ),
-                            onSendTap: () => controller.sendImages(
-                              assets: controller.sortedSelectedAssets,
-                            ),
-                          );
-                        },
+                        onPressed: () => _showMediaPicker(context),
                       ),
                       Expanded(
                         child: Container(
@@ -259,6 +249,23 @@ class DraftChatView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showMediaPicker(BuildContext context) {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.multiple),
+    );
+
+    controller.showMediasPickerBottomSheetAction(
+      context: context,
+      imagePickerGridController: imagePickerController,
+      onPickerTypeTap: (action) => controller.onPickerTypeClick(
+        type: action,
+        context: context,
+      ),
+      onSendTap: () => controller.sendImages(imagePickerController),
+      onCameraPicked: (_) => controller.sendImages(imagePickerController),
     );
   }
 }

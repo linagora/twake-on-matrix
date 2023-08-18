@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
 
 import 'chat.dart';
@@ -84,7 +86,7 @@ class ChatInputRow extends StatelessWidget {
                   tooltip: L10n.of(context)!.more,
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
-                  onPressed: controller.onSendFileClick,
+                  onPressed: () => _showMediaPicker(context),
                 ),
                 if (controller.matrix!.isMultiAccount &&
                     controller.matrix!.hasComplexBundles &&
@@ -212,6 +214,27 @@ class ChatInputRow extends StatelessWidget {
                 ),
               ],
       ),
+    );
+  }
+
+  void _showMediaPicker(BuildContext context) {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.multiple),
+    );
+
+    controller.showMediasPickerBottomSheetAction(
+      room: controller.room,
+      context: context,
+      imagePickerGridController: imagePickerController,
+      onPickerTypeTap: (action) => controller.onPickerTypeClick(
+        type: action,
+        room: controller.room,
+        context: context,
+      ),
+      onSendTap: () =>
+          controller.sendImages(imagePickerController, room: controller.room),
+      onCameraPicked: (_) =>
+          controller.sendImages(imagePickerController, room: controller.room),
     );
   }
 }
