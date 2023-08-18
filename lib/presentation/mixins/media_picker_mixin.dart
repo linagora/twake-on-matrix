@@ -46,6 +46,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         onSendTap: onSendTap,
         room: room,
         onPickerTypeTap: onPickerTypeTap,
+        onCameraPicked: onCameraPicked,
       );
     }
   }
