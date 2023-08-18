@@ -72,6 +72,8 @@ class SendImageInfoWidget extends StatelessWidget {
             File(matrixFile.filePath!),
             width: MessageContentStyle.imageBubbleWidth,
             height: MessageContentStyle.imageBubbleHeight,
+            cacheHeight: MessageContentStyle.imageBubbleHeight.toInt(),
+            cacheWidth: MessageContentStyle.imageBubbleWidth.toInt(),
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
           ),
