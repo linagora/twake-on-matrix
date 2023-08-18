@@ -2,57 +2,57 @@ import 'package:fluffychat/pages/chat/chat_actions_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-enum ChatActions { gallery, documents, location, contact }
+enum PickerType { gallery, documents, location, contact }
 
-extension ChatActionsExtension on ChatActions {
+extension PickerTypeExtension on PickerType {
   String getTitle(BuildContext context) {
     switch (this) {
-      case ChatActions.gallery:
+      case PickerType.gallery:
         return L10n.of(context)!.gallery;
-      case ChatActions.documents:
+      case PickerType.documents:
         return L10n.of(context)!.documents;
-      case ChatActions.location:
+      case PickerType.location:
         return L10n.of(context)!.location;
-      case ChatActions.contact:
+      case PickerType.contact:
         return L10n.of(context)!.contact;
     }
   }
 
   IconData getIcon() {
     switch (this) {
-      case ChatActions.gallery:
+      case PickerType.gallery:
         return Icons.photo;
-      case ChatActions.documents:
+      case PickerType.documents:
         return Icons.attach_file;
-      case ChatActions.location:
+      case PickerType.location:
         return Icons.my_location;
-      case ChatActions.contact:
+      case PickerType.contact:
         return Icons.person;
     }
   }
 
   Color getIconColor() {
     switch (this) {
-      case ChatActions.gallery:
+      case PickerType.gallery:
         return ChatActionsStyle.colorGalleryIcon;
-      case ChatActions.documents:
+      case PickerType.documents:
         return ChatActionsStyle.colorDocumentIcon;
-      case ChatActions.location:
+      case PickerType.location:
         return ChatActionsStyle.colorLocationIcon;
-      case ChatActions.contact:
+      case PickerType.contact:
         return ChatActionsStyle.colorContactIcon;
     }
   }
 
   Color getBackgroundColor() {
     switch (this) {
-      case ChatActions.gallery:
+      case PickerType.gallery:
         return ChatActionsStyle.colorBackgroundGalleryBottom;
-      case ChatActions.documents:
+      case PickerType.documents:
         return ChatActionsStyle.colorBackgroundDocumentBottom;
-      case ChatActions.location:
+      case PickerType.location:
         return ChatActionsStyle.colorBackgroundLocationBottom;
-      case ChatActions.contact:
+      case PickerType.contact:
         return ChatActionsStyle.colorBackgroundContactBottom;
     }
   }
