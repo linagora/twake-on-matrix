@@ -59,7 +59,6 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
   @override
   void dispose() {
     super.dispose();
-    disposeSearchContacts();
     haveGroupNameNotifier.dispose();
     avatarNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
@@ -299,7 +298,9 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     imagePickerController.addListener(() {
       final selectedAsset = imagePickerController.selectedAssets.firstOrNull;
       if (selectedAsset?.asset.type == AssetType.image) {
-        Navigator.pop(context);
+        if (!imagePickerController.pickFromCamera()) {
+          Navigator.pop(context);
+        }
         avatarNotifier.value = selectedAsset?.asset;
         imagePickerController.removeAllSelectedItem();
       }
