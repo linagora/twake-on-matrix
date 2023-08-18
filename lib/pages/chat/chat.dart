@@ -37,6 +37,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -1251,21 +1253,31 @@ class ChatController extends State<Chat>
         editEvent = null;
       });
 
-  void onSendFileClick() async {
+  void onSendFileClick(BuildContext context) async {
     if (PlatformInfos.isMobile) {
-      showImagesPickerBottomSheetAction(
-        room: room,
-        context: context,
-        onItemAction: (action) => onClickItemAction(
-          action: action,
-          room: room,
-          context: context,
-        ),
-        onSendTap: () => sendImages(room: room),
-      );
+      _showMediaPicker(context);
     } else {
       sendFileOnWebAction(context, room: room);
     }
+  }
+
+  void _showMediaPicker(BuildContext context) {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.multiple),
+    );
+
+    showMediaPickerBottomSheetAction(
+      room: room,
+      context: context,
+      imagePickerGridController: imagePickerController,
+      onPickerTypeTap: (action) => onPickerTypeClick(
+        type: action,
+        room: room,
+        context: context,
+      ),
+      onSendTap: () => sendImages(imagePickerController, room: room),
+      onCameraPicked: (_) => sendImages(imagePickerController, room: room),
+    );
   }
 
   @override
