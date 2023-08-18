@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
@@ -11,17 +12,19 @@ import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
+import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart';
+import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class NewGroup extends StatefulWidget {
@@ -32,7 +35,7 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends ContactsSelectionController<NewGroup>
-    with ImagePickerMixin {
+    with CommonMediaPickerMixin, SingleImagePickerMixin {
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
@@ -43,7 +46,6 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
 
   final haveGroupNameNotifier = ValueNotifier(false);
   final groupNameFocusNode = FocusNode();
-  StreamSubscription? uploadContentInteractorStreamSubscription;
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
 
   String groupName = "";
@@ -52,16 +54,14 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
   void initState() {
     super.initState();
     listenGroupNameChanged();
-    _registerListenerForSelectedImagesChanged();
   }
 
   @override
   void dispose() {
     super.dispose();
-    imagePickerController.dispose();
+    disposeSearchContacts();
     haveGroupNameNotifier.dispose();
     avatarNotifier.dispose();
-    uploadContentInteractorStreamSubscription?.cancel();
     createNewGroupChatInteractorStreamSubscription?.cancel();
   }
 
@@ -156,7 +156,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     required Client matrixClient,
     required AssetEntity entity,
   }) {
-    uploadContentInteractorStreamSubscription = uploadContentInteractor
+    uploadContentInteractor
         .execute(
           matrixClient: matrixClient,
           entity: entity,
@@ -251,7 +251,6 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          removeAllImageSelected();
           _goToRoom(context, success.roomId);
         }
       },
@@ -272,21 +271,6 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     context.go("/rooms/$roomId");
   }
 
-  void _registerListenerForSelectedImagesChanged() {
-    imagePickerController.addListener(() {
-      numberSelectedImagesNotifier.value =
-          imagePickerController.selectedAssets.length;
-    });
-
-    numberSelectedImagesNotifier.addListener(() {
-      if (numberSelectedImagesNotifier.value == 1) {
-        Navigator.pop(context);
-        avatarNotifier.value = imagePickerController.selectedAssets.first.asset;
-        removeAllImageSelected();
-      }
-    });
-  }
-
   void showImagesPickerAction({
     required BuildContext context,
   }) async {
@@ -296,13 +280,32 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     final currentPermissionPhotos = await getCurrentPhotoPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionPhotos != null && currentPermissionCamera != null) {
-      showImagesPickerBottomSheet(
-        context: context,
-        permissionStatusPhotos: currentPermissionPhotos,
-        permissionStatusCamera: currentPermissionCamera,
-        onItemAction: (_) {},
+      final imagePickerController = createImagePickerController();
+      groupNameFocusNode.unfocus();
+      showImagePickerBottomSheet(
+        context,
+        currentPermissionPhotos,
+        currentPermissionCamera,
+        imagePickerController,
       );
     }
+  }
+
+  ImagePickerGridController createImagePickerController() {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.single),
+    );
+
+    imagePickerController.addListener(() {
+      final selectedAsset = imagePickerController.selectedAssets.firstOrNull;
+      if (selectedAsset?.asset.type == AssetType.image) {
+        Navigator.pop(context);
+        avatarNotifier.value = selectedAsset?.asset;
+        imagePickerController.removeAllSelectedItem();
+      }
+    });
+
+    return imagePickerController;
   }
 
   bool get isCreatingRoom {
@@ -313,16 +316,6 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
               success is CreateNewGroupChatLoading,
         ) ??
         false;
-  }
-
-  @override
-  void removeAllImageSelected() {
-    uploadContentInteractorStreamSubscription?.cancel();
-    imagePickerController.clearAssetCounter();
-    numberSelectedImagesNotifier.value = 0;
-    Logs().d(
-      'NewGroupController::_removeAllImageSelected() - numberSelectedImagesNotifier.value  ${numberSelectedImagesNotifier.value}',
-    );
   }
 
   @override
