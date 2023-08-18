@@ -2,36 +2,24 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/images_picker/model/indexed_asset_entity.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
-mixin SendFilesMixin on ImagePickerMixin {
-  void sendImage({required Room room, required AssetEntity asset}) {
-    final sendImageInteractor = getIt.get<SendImageInteractor>();
-    if (asset.type == AssetType.image) {
-      sendImageInteractor.execute(
-        room: room,
-        entity: FileAssetEntity.createAssetEntity(asset),
-      );
-      removeAllImageSelected();
-    }
-  }
+import 'media_picker_mixin.dart';
 
-  Future<void> sendImages({
+mixin SendFilesMixin on MediaPickerMixin {
+  Future<void> sendImages(
+    ImagePickerGridController imagePickerController, {
     Room? room,
-    List<IndexedAssetEntity>? assets,
   }) async {
     if (room == null) {
       return;
     }
-    final selectedAssets = assets ?? imagePickerController.sortedSelectedAssets;
+    final selectedAssets = imagePickerController.sortedSelectedAssets;
     final sendImagesInteractor = getIt.get<SendImagesInteractor>();
     await sendImagesInteractor.execute(
       room: room,
@@ -39,8 +27,6 @@ mixin SendFilesMixin on ImagePickerMixin {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),
     );
-
-    removeAllImageSelected();
   }
 
   void sendFileAction(
@@ -72,20 +58,20 @@ mixin SendFilesMixin on ImagePickerMixin {
     sendFileOnWebInteractor.execute(room: room!, filePickerResult: result!);
   }
 
-  void onClickItemAction({
+  void onPickerTypeClick({
     required BuildContext context,
     Room? room,
-    required ChatActions action,
+    required PickerType type,
   }) async {
-    switch (action) {
-      case ChatActions.gallery:
+    switch (type) {
+      case PickerType.gallery:
         break;
-      case ChatActions.documents:
+      case PickerType.documents:
         sendFileAction(context, room: room);
         break;
-      case ChatActions.location:
+      case PickerType.location:
         break;
-      case ChatActions.contact:
+      case PickerType.contact:
         break;
     }
   }
