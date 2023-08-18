@@ -27,7 +27,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         PickerType.contact
       ];
 
-  void showMediasPickerBottomSheetAction({
+  void showMediaPickerBottomSheetAction({
     required BuildContext context,
     required ImagePickerGridController imagePickerGridController,
     OnPickerTypeTap? onPickerTypeTap,

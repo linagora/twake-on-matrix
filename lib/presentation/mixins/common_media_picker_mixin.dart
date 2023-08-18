@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +8,15 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 typedef OnSendPhotosTap = void Function()?;
 
 mixin CommonMediaPickerMixin {
+  final PermissionHandlerService _permissionHandlerService =
+      PermissionHandlerService();
+
   Future<PermissionStatus>? getCurrentPhotoPermission() {
-    return PermissionHandlerService().requestPermissionForPhotoActions();
+    return _permissionHandlerService.requestPermissionForPhotoActions();
   }
 
   Future<PermissionStatus>? getCurrentCameraPermission() {
-    return PermissionHandlerService().requestPermissionForCameraActions();
+    return _permissionHandlerService.requestPermissionForCameraActions();
   }
 
   Future<void> goToSettings(BuildContext context) async {
@@ -32,8 +33,8 @@ mixin CommonMediaPickerMixin {
               TextSpan(
                 text: '${L10n.of(context)!.twake}.',
                 style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -62,8 +63,7 @@ mixin CommonMediaPickerMixin {
               enableRecording: true,
               enableAudio: true,
             ),
-      // ignore: deprecated_member_use
-      locale: window.locale,
+      locale: View.of(context).platformDispatcher.locale,
     );
   }
 }

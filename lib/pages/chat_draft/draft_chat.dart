@@ -18,6 +18,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
@@ -73,8 +74,10 @@ class DraftChatController extends State<DraftChat>
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
   @override
-  Future<void> sendImages(ImagePickerGridController imagePickerController,
-      {Room? room}) {
+  Future<void> sendImages(
+    ImagePickerGridController imagePickerController, {
+    Room? room,
+  }) {
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
         super.sendImages(imagePickerController, room: newRoom);
@@ -250,6 +253,23 @@ class DraftChatController extends State<DraftChat>
 
   void onInputBarChanged(String text) {
     setState(() => inputText = text);
+  }
+
+  void showMediaPicker(BuildContext context) {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.multiple),
+    );
+
+    showMediaPickerBottomSheetAction(
+      context: context,
+      imagePickerGridController: imagePickerController,
+      onPickerTypeTap: (action) => onPickerTypeClick(
+        type: action,
+        context: context,
+      ),
+      onSendTap: () => sendImages(imagePickerController),
+      onCameraPicked: (_) => sendImages(imagePickerController),
+    );
   }
 
   @override

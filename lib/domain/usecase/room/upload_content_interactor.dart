@@ -1,26 +1,31 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/exception/room/can_not_upload_content_exception.dart';
-import 'package:fluffychat/presentation/extensions/asset_entity_extension.dart';
+import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class UploadContentInteractor {
+  final uploadFileApi = getIt.get<UploadFileAPI>();
+
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
     required AssetEntity entity,
   }) async* {
     try {
       yield Right(UploadContentLoading());
-      final matrixFile = await entity.toMatrixFile();
+      final contentEntity = FileAssetEntity.createAssetEntity(entity);
+      final contentFileInfo = await contentEntity.toFileInfo();
       final mediaConfig = await matrixClient.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
-      if (matrixFile != null && matrixFile.bytes != null) {
-        final fileSize = matrixFile.bytes!.length;
+      if (contentFileInfo != null) {
+        final fileSize = contentFileInfo.fileSize;
         Logs().d(
-          'SendImage::sendImageFileEvent(): FileSized $fileSize || maxMediaSize $maxMediaSize',
+          'UploadContentInteractor::execute(): FileSized $fileSize || maxMediaSize $maxMediaSize',
         );
         if (maxMediaSize != null && maxMediaSize < fileSize) {
           yield Left(
@@ -29,12 +34,18 @@ class UploadContentInteractor {
             ),
           );
         }
-        final uri = await matrixClient.uploadContent(
-          matrixFile.bytes!,
-          filename: matrixFile.name,
-          contentType: matrixFile.mimeType,
-        );
-        yield Right(UploadContentSuccess(uri: uri));
+
+        final response =
+            await uploadFileApi.uploadFile(fileInfo: contentFileInfo);
+
+        if (response.contentUri != null) {
+          final contentUri = Uri.parse(response.contentUri!);
+          yield Right(UploadContentSuccess(uri: contentUri));
+        } else {
+          yield Left(
+            UploadContentFailed(exception: CannotUploadContentException()),
+          );
+        }
       } else {
         yield Left(
           UploadContentFailed(exception: CannotUploadContentException()),
