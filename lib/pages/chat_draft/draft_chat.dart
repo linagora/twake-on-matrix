@@ -8,7 +8,8 @@ import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_succe
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
-import 'package:fluffychat/presentation/mixins/image_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
@@ -27,6 +28,7 @@ typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
 class DraftChat extends StatefulWidget {
   final GoRouterState state;
+
   const DraftChat({super.key, required this.state});
 
   @override
@@ -34,7 +36,7 @@ class DraftChat extends StatefulWidget {
 }
 
 class DraftChatController extends State<DraftChat>
-    with ImagePickerMixin, SendFilesMixin {
+    with CommonMediaPickerMixin, MediaPickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   PresentationContact? presentationContact;
@@ -71,11 +73,11 @@ class DraftChatController extends State<DraftChat>
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
   @override
-  Future<void> sendImages({Room? room, List<IndexedAssetEntity>? assets}) {
-    sortedSelectedAssets = imagePickerController.sortedSelectedAssets;
+  Future<void> sendImages(ImagePickerGridController imagePickerController,
+      {Room? room}) {
     return _createRoom(
-      onRoomCreatedSuccess: (room) {
-        super.sendImages(room: room, assets: sortedSelectedAssets);
+      onRoomCreatedSuccess: (newRoom) {
+        super.sendImages(imagePickerController, room: newRoom);
       },
     );
   }
@@ -96,7 +98,6 @@ class DraftChatController extends State<DraftChat>
 
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
-    listenToSelectionInImagePicker();
     super.initState();
   }
 
