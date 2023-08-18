@@ -33,8 +33,8 @@ mixin CommonMediaPickerMixin {
               TextSpan(
                 text: '${L10n.of(context)!.twake}.',
                 style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
