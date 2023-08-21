@@ -15,6 +15,7 @@ prime
 
 # libolm package
 /assets/js/package
+/assets/assets/js/package
 
 # IntelliJ related
 *.iml
