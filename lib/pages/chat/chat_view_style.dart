@@ -13,6 +13,7 @@ class ChatViewStyle {
   static EdgeInsetsDirectional paddingLeading(BuildContext context) =>
       EdgeInsetsDirectional.only(
         top: responsive.isMobile(context) ? 40 : 0,
+        start: responsive.isMobile(context) ? 0 : 16,
       );
 
   static EdgeInsetsDirectional paddingBanner(BuildContext context) =>
