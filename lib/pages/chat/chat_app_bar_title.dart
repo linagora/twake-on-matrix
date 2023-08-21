@@ -76,13 +76,13 @@ class ChatAppBarTitle extends StatelessWidget {
                     name: room!.getLocalizedDisplayname(
                       MatrixLocals(L10n.of(context)!),
                     ),
-                    size: ChatAppBarTitleStyle.avatarSize,
+                    size: ChatAppBarTitleStyle.avatarSize(context),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,11 +93,7 @@ class ChatAppBarTitle extends StatelessWidget {
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        letterSpacing:
-                            ChatAppBarTitleStyle.letterSpacingRoomName,
-                      ),
+                  style: ChatAppBarTitleStyle.appBarTitleStyle(context),
                 ),
                 _buildStatusContent(context, room!),
               ],
@@ -113,11 +109,7 @@ class ChatAppBarTitle extends StatelessWidget {
     Room room,
   ) {
     final TextStyle? statusTextStyle =
-        Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 11,
-              color: Theme.of(context).colorScheme.tertiary,
-              letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-            );
+        ChatAppBarTitleStyle.statusTextStyle(context);
 
     return StreamBuilder<ConnectivityResult>(
       stream: getStreamInstance,

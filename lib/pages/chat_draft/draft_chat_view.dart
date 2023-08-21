@@ -290,7 +290,7 @@ class _EmptyChatTitle extends StatelessWidget {
                       name: snapshot.data?.displayName ??
                           displayName ??
                           receiverId,
-                      size: ChatAppBarTitleStyle.avatarSize,
+                      size: ChatAppBarTitleStyle.avatarSize(context),
                     ),
                   ),
                 ),
