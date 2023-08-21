@@ -57,14 +57,17 @@ class ImageBubble extends StatelessWidget {
     } else {
       width = (height * ratio).round();
     }
-    return SizedBox(
-      width: this.width,
-      height: this.height,
-      child: BlurHash(
-        hash: blurHashString,
-        decodingWidth: width,
-        decodingHeight: height,
-        imageFit: fit,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: this.width,
+        height: this.height,
+        child: BlurHash(
+          hash: blurHashString,
+          decodingWidth: width,
+          decodingHeight: height,
+          imageFit: fit,
+        ),
       ),
     );
   }

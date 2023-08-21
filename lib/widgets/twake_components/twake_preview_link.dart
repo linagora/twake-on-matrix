@@ -1,4 +1,5 @@
 import 'package:any_link_preview/any_link_preview.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -31,6 +32,10 @@ class TwakePreviewLink extends StatelessWidget {
         removeElevation: true,
         bodyMaxLines: 4,
         borderRadius: 12,
+        placeholderWidget: TwakePreviewPlaceHolder(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.35,
+        ),
       ),
     );
   }
