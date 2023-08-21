@@ -8,7 +8,6 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/external_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
@@ -64,8 +63,10 @@ class ExpansionList extends StatelessWidget {
                 const SizedBox(
                   height: 12,
                 ),
-                ExternalContactWidget(
-                  contact: success.contact,
+                InkWell(
+                  child: ExpansionContactListTile(
+                    contact: success.contact,
+                  ),
                   onTap: () {
                     onExternalContactTap(context, success.contact);
                   },
