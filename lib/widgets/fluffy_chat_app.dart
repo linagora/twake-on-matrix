@@ -29,13 +29,16 @@ class FluffyChatApp extends StatefulWidget {
   /// in with qr code or magic link.
   static bool gotInitialLink = false;
 
+  // Router must be outside of build method so that hot reload does not reset
+  // the current path.
+  static final GoRouter router = GoRouter(routes: AppRoutes.routes);
+
   @override
   FluffyChatAppState createState() => FluffyChatAppState();
 }
 
 class FluffyChatAppState extends State<FluffyChatApp> {
   final networkConnectionService = getIt.get<NetworkConnectionService>();
-  final GoRouter router = TwakeRoutes().router;
 
   @override
   void initState() {
@@ -62,13 +65,10 @@ class FluffyChatAppState extends State<FluffyChatApp> {
         scrollBehavior: CustomScrollBehavior(),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
-        routeInformationProvider: router.routeInformationProvider,
-        routeInformationParser: router.routeInformationParser,
-        routerDelegate: router.routerDelegate,
+        routerConfig: FluffyChatApp.router,
         builder: (context, child) => Matrix(
           context: context,
           clients: widget.clients,
-          routerDelegate: router.routerDelegate,
           child: child,
         ),
       ),
