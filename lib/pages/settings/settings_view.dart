@@ -25,8 +25,6 @@ class SettingsView extends StatelessWidget {
           onPressed: () {
             if (context.canPop()) {
               context.pop();
-            } else {
-              context.push('/rooms');
             }
           },
         ),
@@ -164,25 +162,25 @@ class SettingsView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
               title: Text(L10n.of(context)!.notifications),
-              onTap: () => context.go('/settings/notifications'),
+              onTap: () => context.go('/rooms/settings/notifications'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.devices_outlined),
               title: Text(L10n.of(context)!.devices),
-              onTap: () => context.go('/settings/devices'),
+              onTap: () => context.go('/rooms/settings/devices'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.chat_bubble_outline_outlined),
               title: Text(L10n.of(context)!.chat),
-              onTap: () => context.go('/settings/chat'),
+              onTap: () => context.go('/rooms/settings/chat'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.shield_outlined),
               title: Text(L10n.of(context)!.security),
-              onTap: () => context.go('/settings/security'),
+              onTap: () => context.go('/rooms/settings/security'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             const Divider(thickness: 1),

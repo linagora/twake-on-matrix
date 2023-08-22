@@ -18,7 +18,8 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class Search extends StatefulWidget {
-  const Search({super.key});
+  final Function()? callBack;
+  const Search({super.key, this.callBack});
 
   @override
   State<Search> createState() => SearchController();
@@ -72,7 +73,7 @@ class SearchController extends State<Search>
         future: () async {
           if (contactPresentationSearch.matrixId != null &&
               contactPresentationSearch.matrixId!.isNotEmpty) {
-            context.go('/search/$roomId');
+            context.go('/rooms/$roomId');
           }
         },
       );
@@ -85,7 +86,7 @@ class SearchController extends State<Search>
     Logs().d(
       'SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}',
     );
-    context.go('/rooms/search/${recentChatPresentationSearch.id}');
+    context.go('/rooms/${recentChatPresentationSearch.id}');
   }
 
   void goToDraftChat({
@@ -95,7 +96,7 @@ class SearchController extends State<Search>
     if (contactPresentationSearch.matrixId !=
         Matrix.of(context).client.userID) {
       context.go(
-        '/rooms/search/draftChat',
+        '/rooms/draftChat',
         extra: {
           PresentationContactConstant.receiverId:
               contactPresentationSearch.matrixId ?? '',
@@ -117,12 +118,12 @@ class SearchController extends State<Search>
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;
-    context.go('/rooms/search/${roomIdResult.result!}');
+    context.go('/rooms/${roomIdResult.result!}');
   }
 
   void goToRoomsShellBranch() {
     textEditingController.clear();
-    context.pop();
+    widget.callBack?.call();
   }
 
   @override

@@ -230,7 +230,8 @@ abstract class AppRoutes {
                 context,
                 !_responsive.isMobile(context)
                     ? AdaptiveScaffoldRoute(
-                        body: const SizedBox(),
+                        displayAppBar: false,
+                        body: const Settings(),
                         secondaryBody: child,
                       )
                     : child,
