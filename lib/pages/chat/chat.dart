@@ -1126,6 +1126,7 @@ class ChatController extends State<Chat> with ImagePickerMixin, SendFilesMixin {
     } else {
       pinnedEventIds.addAll(selectedEventIds);
     }
+    clearSelectedEvents();
     showFutureLoadingDialog(
       context: context,
       future: () => room.setPinnedEvents(pinnedEventIds),
