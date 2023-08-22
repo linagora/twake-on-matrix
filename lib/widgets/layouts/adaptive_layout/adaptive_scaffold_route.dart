@@ -7,6 +7,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class AdaptiveScaffoldRoute extends StatelessWidget {
   final Widget body;
   final Widget? secondaryBody;
+  final bool? displayAppBar;
 
   static const scaffoldWithNestedNavigationKey =
       ValueKey('ScaffoldWithNestedNavigation');
@@ -19,13 +20,14 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
     Key? key,
     required this.body,
     this.secondaryBody,
+    this.displayAppBar = true,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: const AdaptiveScaffoldAppBar(),
+      appBar: displayAppBar == true ? const AdaptiveScaffoldAppBar() : null,
       body: AdaptiveLayout(
         internalAnimations: false,
         body: SlotLayout(

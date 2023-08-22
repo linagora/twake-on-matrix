@@ -36,14 +36,14 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
 
   void onDestinationSelected(int index) {
     switch (index) {
+      //FIXME: NOW WE SUPPORT FOR ONLY 2 TABS
       case 0:
         activeNavigationBar.value = AdaptiveDestinationEnum.contacts;
         break;
       case 1:
         activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
         break;
-      case 2:
-        activeNavigationBar.value = AdaptiveDestinationEnum.stories;
+      default:
         break;
     }
   }
