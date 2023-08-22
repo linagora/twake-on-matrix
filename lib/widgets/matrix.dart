@@ -51,14 +51,11 @@ class Matrix extends StatefulWidget {
 
   final Map<String, String>? queryParameters;
 
-  final GoRouterDelegate? routerDelegate;
-
   const Matrix({
     this.child,
     required this.context,
     required this.clients,
     this.queryParameters,
-    required this.routerDelegate,
     Key? key,
   }) : super(key: key);
 
@@ -423,7 +420,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (PlatformInfos.isMobile) {
       backgroundPush = BackgroundPush(
         client,
-        widget.routerDelegate,
         onFcmError: (errorMsg, {Uri? link}) async {
           final result = await showOkCancelAlertDialog(
             barrierDismissible: true,

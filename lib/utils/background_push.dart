@@ -25,6 +25,7 @@ import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -49,17 +50,19 @@ class BackgroundPush {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   Client client;
-  GoRouterDelegate? routerDelegate;
+  MatrixState? _matrixState;
   String? _pushToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
   Store? _store;
+
   Store get store => _store ??= Store();
+
   Future<void> loadLocale() async {
+    final context = _matrixState?.context;
     // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
-    l10n ??= (currentContext != null ? L10n.of(currentContext!) : null) ??
-        (await L10n.delegate
-            .load(View.of(currentContext!).platformDispatcher.locale));
+    l10n ??= (context != null ? L10n.of(context) : null) ??
+        (await L10n.delegate.load(View.of(context!).platformDispatcher.locale));
   }
 
   final pendingTests = <String, Completer<void>>{};
@@ -70,7 +73,7 @@ class BackgroundPush {
 
   bool upAction = false;
 
-  BackgroundPush._(this.client, this.routerDelegate) {
+  BackgroundPush._(this.client) {
     onRoomSync ??= client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((s) => _onClearingPush(getFromServer: false));
@@ -100,21 +103,17 @@ class BackgroundPush {
   }
 
   factory BackgroundPush.clientOnly(
-    Client client, {
-    GoRouterDelegate? routerDelegate,
-  }) {
-    _instance ??= BackgroundPush._(client, routerDelegate);
+    Client client,
+  ) {
+    _instance ??= BackgroundPush._(client);
     return _instance!;
   }
 
   factory BackgroundPush(
-    Client client,
-    GoRouterDelegate? routerDelegate, {
+    Client client, {
     final void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
-    final instance =
-        BackgroundPush.clientOnly(client, routerDelegate: routerDelegate);
-    instance.routerDelegate = routerDelegate;
+    final instance = BackgroundPush.clientOnly(client);
     instance.onFcmError = onFcmError;
     return instance;
   }
@@ -219,7 +218,7 @@ class BackgroundPush {
     Logs().d("SetupPush");
     if (client.onLoginStateChanged.value != LoginState.loggedIn ||
         !PlatformInfos.isMobile ||
-        currentContext == null) {
+        _matrixState == null) {
       return;
     }
     // Do not setup unifiedpush if this has been initialized by
@@ -241,7 +240,7 @@ class BackgroundPush {
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup ||
-          currentContext == null) {
+          _matrixState == null) {
         return;
       }
       _wentToRoomOnStartup = true;
@@ -250,7 +249,7 @@ class BackgroundPush {
   }
 
   Future<void> _noFcmWarning() async {
-    if (currentContext == null) {
+    if (_matrixState == null) {
       return;
     }
     if (await store.getItemBool(SettingKeys.showNoGoogle, true) == true) {
@@ -316,14 +315,14 @@ class BackgroundPush {
 
   void onReceiveNotification(dynamic message) {
     Logs().d(
-      'BackgroundPush::onReceiveNotification(): Message $message - roomId $roomId',
+      'BackgroundPush::onReceiveNotification(): Message $message - roomId ${_matrixState?.activeRoomId}',
     );
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
       client: client,
       l10n: l10n,
-      activeRoomId: roomId,
+      activeRoomId: _matrixState?.activeRoomId,
       onSelectNotification: onSelectNotification,
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
@@ -336,7 +335,7 @@ class BackgroundPush {
   Future<void> goToRoom(String? roomId) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
-      if (currentContext == null || roomId == null) {
+      if (_matrixState == null || roomId == null) {
         return;
       }
       await client.roomsLoading;
@@ -348,14 +347,14 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      currentContext?.go('/rooms/$roomId');
+      _matrixState?.context.go('/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
   }
 
   Future<void> setupUp() async {
-    await UnifiedPush.registerAppWithDialog(currentContext!);
+    await UnifiedPush.registerAppWithDialog(_matrixState!.context);
   }
 
   Future<void> _newUpEndpoint(String newEndpoint, String i) async {
@@ -428,7 +427,7 @@ class BackgroundPush {
       PushNotification.fromJson(data),
       client: client,
       l10n: l10n,
-      activeRoomId: roomId,
+      activeRoomId: _matrixState?.activeRoomId,
     );
   }
 
@@ -436,6 +435,7 @@ class BackgroundPush {
   /// sort by [roomId] which is a String. To make sure that we don't have duplicated
   /// IDs we map the [roomId] to a number and store this number.
   late Map<String, int> idMap;
+
   Future<void> _loadIdMap() async {
     idMap = Map<String, int>.from(
       json.decode(
@@ -465,6 +465,7 @@ class BackgroundPush {
   }
 
   bool _clearingPushLock = false;
+
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
       return;
@@ -542,13 +543,6 @@ class BackgroundPush {
       _clearingPushLock = false;
     }
   }
-
-  String? get roomId {
-    return routerDelegate?.currentConfiguration.pathParameters['roomid'];
-  }
-
-  BuildContext? get currentContext =>
-      routerDelegate?.navigatorKey.currentContext;
 
   PushNotification _parseMessagePayload(dynamic message) {
     Logs().d('BackgroundPush::_parseMessagePayload()');
