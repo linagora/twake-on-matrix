@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
@@ -17,7 +16,8 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class Forward extends StatefulWidget {
-  const Forward({Key? key}) : super(key: key);
+  final String? sendFromRoomId;
+  const Forward({Key? key, this.sendFromRoomId}) : super(key: key);
 
   @override
   ForwardController createState() => ForwardController();
@@ -124,7 +124,7 @@ class ForwardController extends State<Forward> {
       switch (success.runtimeType) {
         case ForwardMessageSuccess:
           final dataOnSuccess = success as ForwardMessageSuccess;
-          context.go('${goShellBranch()}/${dataOnSuccess.room.id}');
+          context.go('/rooms/${dataOnSuccess.room.id}');
           break;
         case ForwardMessageIsShareFileState:
           final dataOnSuccess = success as ForwardMessageIsShareFileState;
@@ -141,16 +141,6 @@ class ForwardController extends State<Forward> {
     });
   }
 
-  String goShellBranch() {
-    final currentShellBranch = GoRouterState.of(context).fullPath;
-    Logs().d(
-      'Forward()::goShellBranch() currentShellBranch: $currentShellBranch',
-    );
-    return TwakeRoutes.shellBranch.firstWhere(
-      (branch) => currentShellBranch?.startsWith('$branch/') == true,
-    );
-  }
-
   void _handleForwardMessageOnDone() {
     Logs().d('ForwardController::_handleForwardMessageOnDone()');
   }
@@ -159,6 +149,10 @@ class ForwardController extends State<Forward> {
     Logs().e(
       'ForwardController::_handleForwardMessageOnError() - error: $error | stackTrace: $stackTrace',
     );
+  }
+
+  void popScreen() {
+    context.go('/rooms/${widget.sendFromRoomId}');
   }
 
   @override
