@@ -56,9 +56,10 @@ import 'send_location_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
+  final String roomId;
   final Widget? sideView;
 
-  const Chat({Key? key, this.sideView}) : super(key: key);
+  const Chat({Key? key, this.sideView, required this.roomId}) : super(key: key);
 
   @override
   ChatController createState() => ChatController();
@@ -79,7 +80,7 @@ class ChatController extends State<Chat>
 
   MatrixState? matrix;
 
-  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get roomId => widget.roomId;
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
@@ -823,7 +824,7 @@ class ChatController extends State<Chat>
       );
     }
     setState(() => selectedEvents.clear());
-    context.go('/rooms/${room!.id}/forward');
+    context.go('/rooms/forward', extra: roomId);
   }
 
   void sendAgainAction() {
