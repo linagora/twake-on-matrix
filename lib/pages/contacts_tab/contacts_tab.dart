@@ -11,7 +11,12 @@ import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dar
 import 'package:go_router/go_router.dart';
 
 class ContactsTab extends StatefulWidget {
-  const ContactsTab({super.key});
+  final Widget? bottomNavigationBar;
+
+  const ContactsTab({
+    super.key,
+    this.bottomNavigationBar,
+  });
 
   @override
   State<StatefulWidget> createState() => ContactsTabController();
@@ -83,6 +88,8 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      ContactsTabView(contactsController: this);
+  Widget build(BuildContext context) => ContactsTabView(
+        contactsController: this,
+        bottomNavigationBar: widget.bottomNavigationBar,
+      );
 }

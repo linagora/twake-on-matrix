@@ -55,7 +55,7 @@ class ContactsTabBodyView extends StatelessWidget {
                                 onTap: () {
                                   controller.onContactTap(
                                     context: context,
-                                    path: 'contacts',
+                                    path: 'rooms',
                                     contact: contact,
                                   );
                                 },

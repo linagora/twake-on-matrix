@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 
 class ContactsTabView extends StatelessWidget {
   final ContactsTabController contactsController;
+  final Widget? bottomNavigationBar;
 
-  const ContactsTabView({super.key, required this.contactsController});
+  const ContactsTabView({
+    super.key,
+    required this.contactsController,
+    this.bottomNavigationBar,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,7 @@ class ContactsTabView extends StatelessWidget {
           textEditingController: contactsController.textEditingController,
         ),
       ),
+      bottomNavigationBar: bottomNavigationBar,
       body: ContactsTabBodyView(contactsController),
     );
   }
