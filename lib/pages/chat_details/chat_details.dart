@@ -20,7 +20,8 @@ import 'package:fluffychat/widgets/matrix.dart';
 enum AliasActions { copy, delete, setCanonical }
 
 class ChatDetails extends StatefulWidget {
-  const ChatDetails({Key? key}) : super(key: key);
+  final String roomId;
+  const ChatDetails({Key? key, required this.roomId}) : super(key: key);
 
   @override
   ChatDetailsController createState() => ChatDetailsController();
@@ -33,7 +34,7 @@ class ChatDetailsController extends State<ChatDetails> {
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
 
-  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;

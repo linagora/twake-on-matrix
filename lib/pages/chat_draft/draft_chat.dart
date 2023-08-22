@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:fluffychat/config/go_routes/go_router.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
@@ -170,22 +169,11 @@ class DraftChatController extends State<DraftChat>
           final room = Matrix.of(context).client.getRoomById(success.roomId);
           if (room != null) {
             onRoomCreatedSuccess?.call(room);
-            context.pop();
-            context.go('${goShellBranch()}/${room.id}/');
+            context.go('/rooms/${room.id}/');
           }
         }
       });
     });
-  }
-
-  String goShellBranch() {
-    final currentShellBranch = widget.state.fullPath;
-    Logs().d(
-      'DraftChat()::goShellBranch() currentShellBranch: $currentShellBranch',
-    );
-    return TwakeRoutes.shellBranch.firstWhere(
-      (branch) => currentShellBranch?.startsWith('$branch/') == true,
-    );
   }
 
   void emojiPickerAction() {
