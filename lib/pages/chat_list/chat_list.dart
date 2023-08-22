@@ -49,14 +49,28 @@ enum PopupMenuAction {
   archive,
 }
 
-enum ActiveFilter { allChats, groups, messages, spaces }
+enum ActiveFilter {
+  allChats,
+  groups,
+  messages,
+  spaces,
+}
 
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
 
-  final Widget? child;
+  final String? activeChat;
 
-  const ChatList({Key? key, this.child}) : super(key: key);
+  final Widget? bottomNavigationBar;
+
+  final Function()? onTapSearch;
+
+  const ChatList({
+    Key? key,
+    this.activeChat,
+    this.bottomNavigationBar,
+    this.onTapSearch,
+  }) : super(key: key);
 
   @override
   ChatListController createState() => ChatListController();
@@ -265,7 +279,7 @@ class ChatListController extends State<ChatList>
 
   final selectedRoomIds = <String>{};
 
-  String? get activeChat => GoRouterState.of(context).pathParameters['roomid'];
+  String? get activeChat => widget.activeChat;
 
   SelectMode get selectMode => Matrix.of(context).shareContent != null
       ? SelectMode.share
@@ -681,7 +695,11 @@ class ChatListController extends State<ChatList>
   @override
   Widget build(BuildContext context) {
     Matrix.of(context).navigatorContext = context;
-    return ChatListView(controller: this);
+    return ChatListView(
+      controller: this,
+      bottomNavigationBar: widget.bottomNavigationBar,
+      onTapSearch: widget.onTapSearch,
+    );
   }
 
   void _hackyWebRTCFixForWeb() {

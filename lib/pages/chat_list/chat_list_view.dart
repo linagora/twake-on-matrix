@@ -11,19 +11,34 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
+  final Widget? bottomNavigationBar;
+  final Function()? onTapSearch;
 
   const ChatListView({
     Key? key,
     required this.controller,
+    this.bottomNavigationBar,
+    this.onTapSearch,
   }) : super(key: key);
+
+  static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
+
+  static const ValueKey primaryNavigationKey =
+      ValueKey('AdaptiveScaffoldPrimaryNavigation');
+
+  static const ValueKey contacts = ValueKey('Contacts');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
-        child: ChatListHeader(controller: controller),
+        child: ChatListHeader(
+          controller: controller,
+          onTapSearch: onTapSearch,
+        ),
       ),
+      bottomNavigationBar: bottomNavigationBar,
       body: ChatListBodyStream(controller: controller),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: controller.selectMode == SelectMode.normal

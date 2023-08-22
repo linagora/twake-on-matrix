@@ -11,7 +11,8 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
 class InvitationSelection extends StatefulWidget {
-  const InvitationSelection({Key? key}) : super(key: key);
+  final String roomId;
+  const InvitationSelection({Key? key, required this.roomId}) : super(key: key);
 
   @override
   InvitationSelectionController createState() =>
@@ -20,7 +21,7 @@ class InvitationSelection extends StatefulWidget {
 
 class InvitationSelectionController
     extends ContactsSelectionController<InvitationSelection> {
-  String? get _roomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get _roomId => widget.roomId;
 
   Room get _room => Matrix.of(context).client.getRoomById(_roomId!)!;
 

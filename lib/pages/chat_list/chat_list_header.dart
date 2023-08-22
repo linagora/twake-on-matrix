@@ -4,12 +4,16 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
 
 class ChatListHeader extends StatelessWidget {
   final ChatListController controller;
+  final Function()? onTapSearch;
 
-  const ChatListHeader({Key? key, required this.controller}) : super(key: key);
+  const ChatListHeader({
+    Key? key,
+    required this.controller,
+    this.onTapSearch,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +46,7 @@ class ChatListHeader extends StatelessWidget {
                       : SizedBox(
                           height: ChatListHeaderStyle.searchBarHeight,
                           child: InkWell(
-                            onTap: () {
-                              context.push('/rooms/search');
-                            },
+                            onTap: onTapSearch,
                             child: TextField(
                               controller: controller.searchChatController,
                               textInputAction: TextInputAction.search,
