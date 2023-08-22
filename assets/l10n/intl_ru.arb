@@ -11,7 +11,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "acceptedTheInvitation": "{username} принял(а) приглашение войти в чат",
+    "acceptedTheInvitation": "{username} принял(а) приглашение",
     "@acceptedTheInvitation": {
         "type": "text",
         "placeholders": {
@@ -35,7 +35,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "addGroupDescription": "Добавить описание группы",
+    "addGroupDescription": "Добавить описание чата",
     "@addGroupDescription": {
         "type": "text",
         "placeholders": {}
@@ -304,7 +304,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "changeTheNameOfTheGroup": "Изменить название группы",
+    "changeTheNameOfTheGroup": "Изменить название чата",
     "@changeTheNameOfTheGroup": {
         "type": "text",
         "placeholders": {}
@@ -334,7 +334,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "chatBackupDescription": "Резервная старых сообщений защищена ключом восстановления. Пожалуйста, не потеряйте его.",
+    "chatBackupDescription": "Старые сообщения защищены ключом восстановления. Пожалуйста, не потеряйте его.",
     "@chatBackupDescription": {
         "type": "text",
         "placeholders": {}
@@ -473,7 +473,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "contactHasBeenInvitedToTheGroup": "Контакт был приглашен в группу",
+    "contactHasBeenInvitedToTheGroup": "Контакт был приглашен в чат",
     "@contactHasBeenInvitedToTheGroup": {
         "type": "text",
         "placeholders": {}
@@ -488,7 +488,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "contentHasBeenReported": "О контенте было сообщено администраторам сервера",
+    "contentHasBeenReported": "Жалоба отправлена администраторам сервера",
     "@contentHasBeenReported": {
         "type": "text",
         "placeholders": {}
@@ -515,8 +515,8 @@
             "error": {}
         }
     },
-    "countMembers": "{count} участника(ов)",
-    "@countMembers": {
+    "countParticipants": "{count} участника(ов)",
+    "@countParticipants": {
         "type": "text",
         "placeholders": {
             "count": {}
@@ -534,7 +534,7 @@
             "username": {}
         }
     },
-    "createNewGroup": "Новая группа",
+    "createNewGroup": "Создать новый чат",
     "@createNewGroup": {
         "type": "text",
         "placeholders": {}
@@ -584,7 +584,7 @@
             "day": {}
         }
     },
-    "deactivateAccountWarning": "Это деактивирует вашу учётную запись пользователя. Данное действие не может быть отменено! Вы уверены?",
+    "deactivateAccountWarning": "Это действие деактивирует вашу учётную запись. Оно не может быть отменено! Вы уверены?",
     "@deactivateAccountWarning": {
         "type": "text",
         "placeholders": {}
@@ -751,7 +751,7 @@
             "senderName": {}
         }
     },
-    "enterAGroupName": "Введите название группы",
+    "enterAGroupName": "Введите название чата",
     "@enterAGroupName": {
         "type": "text",
         "placeholders": {}
@@ -825,32 +825,32 @@
         "type": "text",
         "placeholders": {}
     },
-    "group": "Группа",
+    "group": "Чат",
     "@group": {
         "type": "text",
         "placeholders": {}
     },
-    "groupDescription": "Описание группы",
+    "groupDescription": "Описание чата",
     "@groupDescription": {
         "type": "text",
         "placeholders": {}
     },
-    "groupDescriptionHasBeenChanged": "Описание группы изменено",
+    "groupDescriptionHasBeenChanged": "Описание чата изменено",
     "@groupDescriptionHasBeenChanged": {
         "type": "text",
         "placeholders": {}
     },
-    "groupIsPublic": "Публичная группа",
+    "groupIsPublic": "Публичный чат",
     "@groupIsPublic": {
         "type": "text",
         "placeholders": {}
     },
-    "groups": "Группы",
+    "groups": "Чаты",
     "@groups": {
         "type": "text",
         "placeholders": {}
     },
-    "groupWith": "Группа с {displayname}",
+    "groupWith": "Чат с {displayname}",
     "@groupWith": {
         "type": "text",
         "placeholders": {
@@ -890,7 +890,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Насколько оскорбительным является этот контент?",
+    "howOffensiveIsThisContent": "Насколько оскорбительным является это сообщение?",
     "@howOffensiveIsThisContent": {
         "type": "text",
         "placeholders": {}
@@ -983,7 +983,7 @@
             "link": {}
         }
     },
-    "isTyping": "печатает",
+    "isTyping": "печатает…",
     "@isTyping": {
         "type": "text",
         "placeholders": {}
@@ -1207,7 +1207,7 @@
             "server2": {}
         }
     },
-    "none": "Ничего",
+    "none": "Нет",
     "@none": {
         "type": "text",
         "placeholders": {}
@@ -1237,7 +1237,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "numUsersTyping": "{count} пользователей печатают",
+    "numUsersTyping": "{count} пользователей печатают…",
     "@numUsersTyping": {
         "type": "text",
         "placeholders": {
@@ -1279,12 +1279,12 @@
         "type": "text",
         "placeholders": {}
     },
-    "oopsSomethingWentWrong": "Упс! Что-то пошло не так…",
+    "oopsSomethingWentWrong": "Ой! Что-то пошло не так…",
     "@oopsSomethingWentWrong": {
         "type": "text",
         "placeholders": {}
     },
-    "openAppToReadMessages": "Откройте приложение для чтения сообщений",
+    "openAppToReadMessages": "Открыть приложение для чтения сообщений",
     "@openAppToReadMessages": {
         "type": "text",
         "placeholders": {}
@@ -1299,7 +1299,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "optionalGroupName": "(необязательно) Название группы",
+    "optionalGroupName": "(Необязательно) Название чата",
     "@optionalGroupName": {
         "type": "text",
         "placeholders": {}
@@ -1376,7 +1376,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "pleaseClickOnLink": "Пожалуйста, нажмите на ссылку в электронной почте, для того чтобы продолжить.",
+    "pleaseClickOnLink": "Пожалуйста, нажмите на ссылку в письме, чтобы продолжить.",
     "@pleaseClickOnLink": {
         "type": "text",
         "placeholders": {}
@@ -1406,7 +1406,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "pleaseFollowInstructionsOnWeb": "Следуйте инструкциям на веб-сайте и нажмите «Далее».",
+    "pleaseFollowInstructionsOnWeb": "Следуйте инструкциям на сайте и нажмите «Далее».",
     "@pleaseFollowInstructionsOnWeb": {
         "type": "text",
         "placeholders": {}
@@ -1517,7 +1517,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "reportMessage": "Сообщить о сообщении",
+    "reportMessage": "Пожаловаться на сообщение",
     "@reportMessage": {
         "type": "text",
         "placeholders": {}
@@ -1681,7 +1681,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "setGroupDescription": "Задать описание группы",
+    "setGroupDescription": "Задать описание чата",
     "@setGroupDescription": {
         "type": "text",
         "placeholders": {}
@@ -1908,7 +1908,7 @@
             "unreadCount": {}
         }
     },
-    "userAndOthersAreTyping": "{username} и {count} других участников печатают",
+    "userAndOthersAreTyping": "{username} и {count} других участников печатают…",
     "@userAndOthersAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1916,7 +1916,7 @@
             "count": {}
         }
     },
-    "userAndUserAreTyping": "{username} и {username2} печатают",
+    "userAndUserAreTyping": "{username} и {username2} печатают…",
     "@userAndUserAreTyping": {
         "type": "text",
         "placeholders": {
@@ -1924,7 +1924,7 @@
             "username2": {}
         }
     },
-    "userIsTyping": "{username} печатает",
+    "userIsTyping": "{username} печатает…",
     "@userIsTyping": {
         "type": "text",
         "placeholders": {
@@ -1991,7 +1991,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "visibleForEveryone": "Видна всем",
+    "visibleForEveryone": "Видима для всех",
     "@visibleForEveryone": {
         "type": "text",
         "placeholders": {}
@@ -2001,17 +2001,17 @@
         "type": "text",
         "placeholders": {}
     },
-    "waitingPartnerAcceptRequest": "Жду, когда партнер примет запроc…",
+    "waitingPartnerAcceptRequest": "Ждем, когда партнер примет запроc…",
     "@waitingPartnerAcceptRequest": {
         "type": "text",
         "placeholders": {}
     },
-    "waitingPartnerEmoji": "Жду, когда партнер примет эмодзи…",
+    "waitingPartnerEmoji": "Ждем, когда партнер примет эмодзи…",
     "@waitingPartnerEmoji": {
         "type": "text",
         "placeholders": {}
     },
-    "waitingPartnerNumbers": "В ожидании партнёра, чтобы принять числа…",
+    "waitingPartnerNumbers": "Ждем, когда партнер примет числа…",
     "@waitingPartnerNumbers": {
         "type": "text",
         "placeholders": {}
@@ -2041,7 +2041,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "whoIsAllowedToJoinThisGroup": "Кому разрешено вступать в эту группу",
+    "whoIsAllowedToJoinThisGroup": "Кому разрешено вступать в этот чат",
     "@whoIsAllowedToJoinThisGroup": {
         "type": "text",
         "placeholders": {}
@@ -2081,7 +2081,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "youAreNoLongerParticipatingInThisChat": "Вы больше не участвуете в этом чате",
+    "youAreNoLongerParticipatingInThisChat": "Вы больше не состоите в этом чате",
     "@youAreNoLongerParticipatingInThisChat": {
         "type": "text",
         "placeholders": {}
@@ -2115,7 +2115,7 @@
     "@sendOnEnter": {},
     "homeserver": "Сервер Matrix",
     "@homeserver": {},
-    "serverRequiresEmail": "Этот сервер должен подтвердить ваш адрес электронной почты для регистрации.",
+    "serverRequiresEmail": "Для регистрации этот сервер должен подтвердить ваш адрес электронной почты.",
     "@serverRequiresEmail": {},
     "enableMultiAccounts": "(БЕТА) Включить несколько учетных записей на этом устройстве",
     "@enableMultiAccounts": {},
@@ -2166,7 +2166,7 @@
     "@loginWithOneClick": {},
     "pleaseEnterValidEmail": "Пожалуйста, введите действительный адрес электронной почты.",
     "@pleaseEnterValidEmail": {},
-    "pleaseChooseAtLeastChars": "Пожалуйста, выберите не менее {min} символов.",
+    "pleaseChooseAtLeastChars": "Пожалуйста, введите не менее {min} символов.",
     "@pleaseChooseAtLeastChars": {
         "type": "text",
         "placeholders": {
@@ -2249,7 +2249,7 @@
     "@openChat": {},
     "matrixWidgets": "Виджеты Matrix",
     "@matrixWidgets": {},
-    "reactedWith": "{sender} реагирует с {reaction}",
+    "reactedWith": "{sender} оставил(а) реакцию {reaction}",
     "@reactedWith": {
         "type": "text",
         "placeholders": {
@@ -2257,17 +2257,17 @@
             "reaction": {}
         }
     },
-    "emojis": "Эмоджи",
+    "emojis": "Эмодзи",
     "@emojis": {},
     "voiceCall": "Голосовой звонок",
     "@voiceCall": {},
     "unsupportedAndroidVersion": "Неподдерживаемая версия Android",
     "@unsupportedAndroidVersion": {},
-    "unsupportedAndroidVersionLong": "Для этой функции требуется более новая версия Android. Проверьте наличие обновлений или поддержку Lineage OS.",
+    "unsupportedAndroidVersionLong": "Для этой функции требуется более новая версия Android. Проверьте наличие обновлений или обратитесь в поддержку Lineage OS.",
     "@unsupportedAndroidVersionLong": {},
     "placeCall": "Совершить звонок",
     "@placeCall": {},
-    "videoCallsBetaWarning": "Обратите внимание, что видеозвонки в настоящее время находятся в бета-версии. Они могут работать не так, как ожидалось, или вообще не работать на всех платформах.",
+    "videoCallsBetaWarning": "Обратите внимание, что видеозвонки в настоящее время находятся в бета-версии. На всех платформах они могут работать не так, как ожидалось, или вообще не работать.",
     "@videoCallsBetaWarning": {},
     "experimentalVideoCalls": "Экспериментальные видеозвонки",
     "@experimentalVideoCalls": {},
@@ -2298,7 +2298,7 @@
     "@widgetEtherpad": {},
     "widgetCustom": "Пользовательский",
     "@widgetCustom": {},
-    "widgetJitsi": "Совещание Jitsi",
+    "widgetJitsi": "Конференция Jitsi",
     "@widgetJitsi": {},
     "widgetName": "Имя",
     "@widgetName": {},
@@ -2313,7 +2313,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "separateChatTypes": "Разделять личные чаты и группы",
+    "separateChatTypes": "Разделять личные и групповые чаты",
     "@separateChatTypes": {
         "type": "text",
         "placeholders": {}
@@ -2427,13 +2427,13 @@
     "@hydrate": {},
     "hydrateTor": "Пользователи TOR: Импорт экспорта сессии",
     "@hydrateTor": {},
-    "hydrateTorLong": "В прошлый раз вы экспортировали свою сессию в TOR? Быстро импортируйте его и продолжайте общение.",
+    "hydrateTorLong": "В прошлый раз вы экспортировали сессию в TOR? Импортируйте ее и продолжайте общение.",
     "@hydrateTorLong": {},
     "dehydrateTorLong": "Для пользователей TOR рекомендуется экспортировать сессию перед закрытием окна.",
     "@dehydrateTorLong": {},
     "dehydrate": "Экспорт сеанса и очистка устройства",
     "@dehydrate": {},
-    "dehydrateWarning": "Это действие не может быть отменено. Убедитесь, что вы безопасно сохранили файл резервной копии.",
+    "dehydrateWarning": "Это действие не может быть отменено. Убедитесь, что вы сохранили файл резервной копии.",
     "@dehydrateWarning": {},
     "indexedDbErrorTitle": "Проблемы с приватным режимом",
     "@indexedDbErrorTitle": {},
@@ -2455,7 +2455,7 @@
     "@appearOnTopDetails": {},
     "foregroundServiceRunning": "Это уведомление появляется, когда запущена основная служба.",
     "@foregroundServiceRunning": {},
-    "newGroup": "Новая группа",
+    "newGroup": "Новый чат",
     "@newGroup": {},
     "enterRoom": "Войти в комнату",
     "@enterRoom": {},
@@ -2465,11 +2465,11 @@
     "@callingPermissions": {},
     "callingAccount": "Аккаунт для звонков",
     "@callingAccount": {},
-    "commandHint_markasgroup": "Пометить как группу",
+    "commandHint_markasgroup": "Пометить как групповой чат",
     "@commandHint_markasgroup": {},
-    "whyIsThisMessageEncrypted": "Почему это сообщение нечитаемо?",
+    "whyIsThisMessageEncrypted": "Почему это сообщение нельзя прочитать?",
     "@whyIsThisMessageEncrypted": {},
-    "noKeyForThisMessage": "Это может произойти, если сообщение было отправлено до того, как вы вошли в свою учетную запись на данном устройстве.\n\nТакже возможно, что отправитель заблокировал ваше устройство или что-то пошло не так с интернет-соединением.\n\nВы можете прочитать сообщение на другой сессии? Тогда вы можете перенести сообщение с неё! Перейдите в Настройки > Устройства и убедитесь, что ваши устройства проверили друг друга. Когда вы откроете комнату в следующий раз и обе сессии будут открыты, ключи будут переданы автоматически.\n\nВы не хотите потерять ключи при выходе из системы или переключении устройств? Убедитесь, что вы включили резервное копирование чата в настройках.",
+    "noKeyForThisMessage": "Это может произойти, если сообщение было отправлено до того, как вы вошли в свою учетную запись на данном устройстве.\n\nТакже возможно, что отправитель заблокировал ваше устройство или что-то пошло не так с интернет-соединением.\n\nВы можете прочитать сообщение на другом устройстве? Тогда вы можете перенести сообщение с него! Перейдите в Настройки > Устройства и убедитесь, что ваши устройства проверили друг друга. Когда вы откроете комнату в следующий раз и обе сессии будут открыты, ключи будут переданы автоматически.\n\nВы не хотите потерять ключи при выходе из системы или переключении устройств? Убедитесь, что вы включили резервное копирование чата в настройках.",
     "@noKeyForThisMessage": {},
     "screenSharingTitle": "общий доступ к экрану",
     "@screenSharingTitle": {},
@@ -2479,5 +2479,71 @@
         "placeholders": {
             "number": {}
         }
-    }
+    },
+    "googlyEyesContent": "{senderName} строит вам глазки",
+    "@googlyEyesContent": {
+        "type": "text",
+        "placeholders": {
+            "senderName": {}
+        }
+    },
+    "cuddleContent": "{senderName} крепко вас обнимает",
+    "@cuddleContent": {
+        "type": "text",
+        "placeholders": {
+            "senderName": {}
+        }
+    },
+    "hugContent": "{senderName} отправил вам обнимашки",
+    "@hugContent": {
+        "type": "text",
+        "placeholders": {
+            "senderName": {}
+        }
+    },
+    "commandHint_googly": "Оправить эмоджи глаз",
+    "@commandHint_googly": {},
+    "commandHint_cuddle": "Крепко обнять",
+    "@commandHint_cuddle": {},
+    "commandHint_hug": "Отправить обнимашки",
+    "@commandHint_hug": {},
+    "noSearchResult": "Нет подходящих результатов поиска.",
+    "@noSearchResult": {},
+    "startFirstChat": "Создайте свой первый чат",
+    "@startFirstChat": {},
+    "hideUnimportantStateEvents": "Скрыть неважные события",
+    "@hideUnimportantStateEvents": {},
+    "doNotShowAgain": "Больше не показывать",
+    "@doNotShowAgain": {},
+    "wasDirectChatDisplayName": "Пустой чат (раньше – {oldDisplayName})",
+    "@wasDirectChatDisplayName": {
+        "type": "text",
+        "placeholders": {
+            "oldDisplayName": {}
+        }
+    },
+    "newSpaceDescription": "Пространства позволяют объединять ваши чаты и создавать частные или публичные сообщества.",
+    "@newSpaceDescription": {},
+    "encryptThisChat": "Зашифровать этот чат",
+    "@encryptThisChat": {},
+    "endToEndEncryption": "Сквозное шифрование",
+    "@endToEndEncryption": {},
+    "reopenChat": "Открыть чат еще раз",
+    "@reopenChat": {},
+    "noOtherDevicesFound": "Другие устройства не найдены",
+    "@noOtherDevicesFound": {},
+    "fileIsTooBigForServer": "Ответ сервера: размер файла превышает максимальный.",
+    "@fileIsTooBigForServer": {},
+    "disableEncryptionWarning": "В целях безопасности вы не можете отключить шифрование в чате, где оно было включено ранее.",
+    "@disableEncryptionWarning": {},
+    "sorryThatsNotPossible": "Нам жаль... Это невозможно",
+    "@sorryThatsNotPossible": {},
+    "deviceKeys": "Ключи устройства:",
+    "@deviceKeys": {},
+    "letsStart": "Начнем",
+    "@letsStart": {},
+    "enterInviteLinkOrMatrixId": "Введите пригласительную ссылку или Matrix ID...",
+    "@enterInviteLinkOrMatrixId": {},
+    "noBackupWarning": "Будьте внимательны! Без резервного копирования чата вы потеряете доступ к зашифрованным сообщениям. Мы настоятельно рекомендуем включить резервное копирование чата перед выходом из системы.",
+    "@noBackupWarning": {}
 }
