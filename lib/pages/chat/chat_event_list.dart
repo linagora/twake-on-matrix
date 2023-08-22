@@ -12,7 +12,6 @@ import 'package:fluffychat/pages/chat/events/message.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -60,9 +59,7 @@ class ChatEventList extends StatelessWidget {
       ),
       reverse: true,
       controller: controller.scrollController,
-      keyboardDismissBehavior: PlatformInfos.isIOS
-          ? ScrollViewKeyboardDismissBehavior.onDrag
-          : ScrollViewKeyboardDismissBehavior.manual,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       childrenDelegate: SliverChildBuilderDelegate(
         (BuildContext context, int i) {
           // Footer to display typing indicator and read receipts:
