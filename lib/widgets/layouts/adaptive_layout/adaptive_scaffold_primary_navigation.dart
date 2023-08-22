@@ -2,24 +2,25 @@ import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button_style.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_shell.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
-  final AdaptiveScaffoldShellController controller;
+  final Future<Profile?>? futureProfile;
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
+  final Function(Object)? onSelected;
 
   const AdaptiveScaffoldPrimaryNavigation({
     super.key,
-    required this.controller,
+    this.futureProfile,
     required this.getNavigationRailDestinations,
     this.selectedIndex,
     this.onDestinationSelected,
+    this.onSelected,
   });
 
   List<PopupMenuEntry<Object>> _bundleMenuItems(BuildContext context) {
@@ -49,57 +50,61 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationMargin,
-      width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: NavigationRail(
-              selectedIndex: selectedIndex,
-              destinations: getNavigationRailDestinations,
-              onDestinationSelected: onDestinationSelected,
-              labelType: NavigationRailLabelType.all,
+    return Material(
+      child: Container(
+        margin: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationMargin,
+        width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: NavigationRail(
+                selectedIndex: selectedIndex,
+                destinations: getNavigationRailDestinations,
+                onDestinationSelected: onDestinationSelected,
+                labelType: NavigationRailLabelType.all,
+                backgroundColor: Colors.white,
+              ),
             ),
-          ),
-          Column(
-            children: [
-              const Padding(
-                padding: AdaptiveScaffoldPrimaryNavigationStyle.dividerPadding,
-                child: Divider(
-                  height: AdaptiveScaffoldPrimaryNavigationStyle.dividerSize,
-                  color: AdaptiveScaffoldPrimaryNavigationStyle
-                      .separatorLightColor,
+            Column(
+              children: [
+                const Padding(
+                  padding:
+                      AdaptiveScaffoldPrimaryNavigationStyle.dividerPadding,
+                  child: Divider(
+                    height: AdaptiveScaffoldPrimaryNavigationStyle.dividerSize,
+                    color: AdaptiveScaffoldPrimaryNavigationStyle
+                        .separatorLightColor,
+                  ),
                 ),
-              ),
-              FutureBuilder<Profile?>(
-                future: controller.fetchOwnProfile(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
+                FutureBuilder<Profile?>(
+                  future: futureProfile,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
 
-                  return PopupMenuButton<Object>(
-                    padding: EdgeInsets.zero,
-                    onSelected: (object) =>
-                        controller.clientSelected(object, context),
-                    itemBuilder: _bundleMenuItems,
-                    child: Avatar(
-                      mxContent: snapshot.data?.avatarUrl,
-                      name: snapshot.data?.displayName ??
-                          Matrix.of(context).client.userID!.localpart,
-                      size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
-                      fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                    ),
-                  );
-                },
-              ),
-            ],
-          )
-        ],
+                    return PopupMenuButton<Object>(
+                      padding: EdgeInsets.zero,
+                      onSelected: onSelected,
+                      itemBuilder: _bundleMenuItems,
+                      child: Avatar(
+                        mxContent: snapshot.data?.avatarUrl,
+                        name: snapshot.data?.displayName ??
+                            Matrix.of(context).client.userID!.localpart,
+                        size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
+                        fontSize:
+                            ClientChooserButtonStyle.avatarFontSizeInAppBar,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

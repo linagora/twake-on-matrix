@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AdaptiveScaffoldPrimaryNavigationStyle {
   static const EdgeInsetsDirectional primaryNavigationMargin =
-      EdgeInsetsDirectional.only(start: 16, top: 32, bottom: 32);
+      EdgeInsetsDirectional.only(top: 32, bottom: 32);
   static const EdgeInsetsDirectional dividerPadding =
       EdgeInsetsDirectional.only(bottom: 16);
 

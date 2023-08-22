@@ -1,11 +1,11 @@
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class AdaptiveScaffoldRoute extends StatelessWidget {
   final Widget body;
-
   final Widget? secondaryBody;
 
   static const scaffoldWithNestedNavigationKey =
@@ -23,14 +23,16 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: AdaptiveLayout(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: const AdaptiveScaffoldAppBar(),
+      body: AdaptiveLayout(
         internalAnimations: false,
         body: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(end: ResponsiveUtils.maxMobileWidth):
-                SlotLayout.from(
+            const WidthPlatformBreakpoint(
+              end: ResponsiveUtils.maxMobileWidth,
+            ): SlotLayout.from(
               key: breakpointMobileKey,
               builder: (_) => secondaryBody != null
                   ? _secondaryBodyWidget(context, isWebAndDesktop: false)
