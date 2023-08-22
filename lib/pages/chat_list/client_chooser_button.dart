@@ -237,10 +237,10 @@ class ClientChooserButton extends StatelessWidget {
           );
           break;
         case SettingsAction.settings:
-          context.push('/settings');
+          context.go('/rooms/settings');
           break;
         case SettingsAction.archive:
-          context.push('/archive');
+          context.go('/rooms/archive');
           break;
         default:
           break;
