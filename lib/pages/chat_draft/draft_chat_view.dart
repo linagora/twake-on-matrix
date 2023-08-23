@@ -67,190 +67,204 @@ class DraftChatView extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: DirectDraftChatView(
-                  onTap: chatDraftArgument.onTapDirectDraftChat,
-                ),
-              ),
-            ),
-            Column(
+        child: Center(
+          child: Container(
+            constraints:
+                const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TwakeIconButton(
-                        tooltip: L10n.of(context)!.more,
-                        margin: const EdgeInsets.only(right: 4.0),
-                        icon: Icons.add_circle_outline,
-                        onPressed: chatDraftArgument.onPressedAddMore,
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding:
-                              const EdgeInsetsDirectional.only(start: 12.0),
-                          margin: const EdgeInsetsDirectional.only(end: 8.0),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(25)),
-                            color: Theme.of(context).colorScheme.surface,
+                Expanded(
+                  child: Center(
+                    child: DirectDraftChatView(
+                      onTap: chatDraftArgument.onTapDirectDraftChat,
+                    ),
+                  ),
+                ),
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TwakeIconButton(
+                            tooltip: L10n.of(context)!.more,
+                            margin: const EdgeInsets.only(right: 4.0),
+                            icon: Icons.add_circle_outline,
+                            onPressed: chatDraftArgument.onPressedAddMore,
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: InputBar(
-                                  minLines: 1,
-                                  maxLines: 8,
-                                  autofocus: !PlatformInfos.isMobile,
-                                  keyboardType: TextInputType.multiline,
-                                  textInputAction: AppConfig.sendOnEnter
-                                      ? TextInputAction.send
-                                      : null,
-                                  onSubmitted:
-                                      chatDraftArgument.onInputBarSubmitted,
-                                  focusNode: chatDraftArgument.inputFocus,
-                                  controller:
-                                      chatDraftArgument.textEditingController,
-                                  decoration: InputDecoration(
-                                    hintText: L10n.of(context)!.chatMessage,
-                                    hintMaxLines: 1,
-                                    hintStyle: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.merge(
-                                          Theme.of(context)
-                                              .inputDecorationTheme
-                                              .hintStyle,
-                                        )
-                                        .copyWith(letterSpacing: -0.15),
-                                  ),
-                                  onChanged:
-                                      chatDraftArgument.onInputBarChanged,
-                                ),
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding:
+                                  const EdgeInsetsDirectional.only(start: 12.0),
+                              margin:
+                                  const EdgeInsetsDirectional.only(end: 8.0),
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(25)),
+                                color: Theme.of(context).colorScheme.surface,
                               ),
-                              KeyBoardShortcuts(
-                                keysToPress: {
-                                  LogicalKeyboardKey.altLeft,
-                                  LogicalKeyboardKey.keyE
-                                },
-                                onKeysPressed:
-                                    chatDraftArgument.emojiPickerAction,
-                                helpLabel: L10n.of(context)!.emojis,
-                                child: InkWell(
-                                  onTap: chatDraftArgument.emojiPickerAction,
-                                  child: PageTransitionSwitcher(
-                                    transitionBuilder: (
-                                      Widget child,
-                                      Animation<double> primaryAnimation,
-                                      Animation<double> secondaryAnimation,
-                                    ) {
-                                      return SharedAxisTransition(
-                                        animation: primaryAnimation,
-                                        secondaryAnimation: secondaryAnimation,
-                                        transitionType:
-                                            SharedAxisTransitionType.scaled,
-                                        fillColor: Colors.transparent,
-                                        child: child,
-                                      );
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: InputBar(
+                                      minLines: 1,
+                                      maxLines: 8,
+                                      autofocus: !PlatformInfos.isMobile,
+                                      keyboardType: TextInputType.multiline,
+                                      textInputAction: AppConfig.sendOnEnter
+                                          ? TextInputAction.send
+                                          : null,
+                                      onSubmitted:
+                                          chatDraftArgument.onInputBarSubmitted,
+                                      focusNode: chatDraftArgument.inputFocus,
+                                      controller: chatDraftArgument
+                                          .textEditingController,
+                                      decoration: InputDecoration(
+                                        hintText: L10n.of(context)!.chatMessage,
+                                        hintMaxLines: 1,
+                                        hintStyle: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.merge(
+                                              Theme.of(context)
+                                                  .inputDecorationTheme
+                                                  .hintStyle,
+                                            )
+                                            .copyWith(letterSpacing: -0.15),
+                                      ),
+                                      onChanged:
+                                          chatDraftArgument.onInputBarChanged,
+                                    ),
+                                  ),
+                                  KeyBoardShortcuts(
+                                    keysToPress: {
+                                      LogicalKeyboardKey.altLeft,
+                                      LogicalKeyboardKey.keyE
                                     },
-                                    child: chatDraftArgument.showEmojiPicker ==
-                                            false
-                                        ? TwakeIconButton(
-                                            paddingAll: chatDraftArgument
-                                                    .inputText.isEmpty
-                                                ? 5.0
-                                                : 12,
-                                            tooltip: L10n.of(context)!.emojis,
-                                            onPressed: chatDraftArgument
-                                                .emojiPickerAction,
-                                            icon: Icons.tag_faces,
-                                          )
-                                        : TwakeIconButton(
-                                            paddingAll: chatDraftArgument
-                                                    .inputText.isEmpty
-                                                ? 5.0
-                                                : 12,
-                                            tooltip: L10n.of(context)!.keyboard,
-                                            onPressed: () => chatDraftArgument
-                                                .inputFocus
-                                                ?.requestFocus(),
-                                            icon: Icons.keyboard,
-                                          ),
+                                    onKeysPressed:
+                                        chatDraftArgument.emojiPickerAction,
+                                    helpLabel: L10n.of(context)!.emojis,
+                                    child: InkWell(
+                                      onTap:
+                                          chatDraftArgument.emojiPickerAction,
+                                      child: PageTransitionSwitcher(
+                                        transitionBuilder: (
+                                          Widget child,
+                                          Animation<double> primaryAnimation,
+                                          Animation<double> secondaryAnimation,
+                                        ) {
+                                          return SharedAxisTransition(
+                                            animation: primaryAnimation,
+                                            secondaryAnimation:
+                                                secondaryAnimation,
+                                            transitionType:
+                                                SharedAxisTransitionType.scaled,
+                                            fillColor: Colors.transparent,
+                                            child: child,
+                                          );
+                                        },
+                                        child: chatDraftArgument
+                                                    .showEmojiPicker ==
+                                                false
+                                            ? TwakeIconButton(
+                                                paddingAll: chatDraftArgument
+                                                        .inputText.isEmpty
+                                                    ? 5.0
+                                                    : 12,
+                                                tooltip:
+                                                    L10n.of(context)!.emojis,
+                                                onPressed: chatDraftArgument
+                                                    .emojiPickerAction,
+                                                icon: Icons.tag_faces,
+                                              )
+                                            : TwakeIconButton(
+                                                paddingAll: chatDraftArgument
+                                                        .inputText.isEmpty
+                                                    ? 5.0
+                                                    : 12,
+                                                tooltip:
+                                                    L10n.of(context)!.keyboard,
+                                                onPressed: () =>
+                                                    chatDraftArgument.inputFocus
+                                                        ?.requestFocus(),
+                                                icon: Icons.keyboard,
+                                              ),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  if (PlatformInfos.platformCanRecord &&
+                                      chatDraftArgument.inputText.isEmpty)
+                                    Container(
+                                      height: 56,
+                                      alignment: Alignment.center,
+                                      child: TwakeIconButton(
+                                        margin:
+                                            const EdgeInsets.only(right: 7.0),
+                                        paddingAll: 5.0,
+                                        onPressed: () {},
+                                        tooltip: L10n.of(context)!.send,
+                                        icon: Icons.mic_none,
+                                      ),
+                                    ),
+                                ],
                               ),
-                              if (PlatformInfos.platformCanRecord &&
-                                  chatDraftArgument.inputText.isEmpty)
-                                Container(
-                                  height: 56,
-                                  alignment: Alignment.center,
-                                  child: TwakeIconButton(
-                                    margin: const EdgeInsets.only(right: 7.0),
-                                    paddingAll: 5.0,
-                                    onPressed: () {},
-                                    tooltip: L10n.of(context)!.send,
-                                    icon: Icons.mic_none,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (!PlatformInfos.isMobile ||
-                          chatDraftArgument.inputText.isNotEmpty)
-                        Container(
-                          height: 56,
-                          alignment: Alignment.center,
-                          child: TwakeIconButton(
-                            size: ChatInputRowStyle.sendIconButtonSize,
-                            onPressed: chatDraftArgument.sendText,
-                            tooltip: L10n.of(context)!.send,
-                            imagePath: ImagePaths.icSend,
-                          ),
-                        )
-                    ],
-                  ),
-                ),
-                Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: FluffyThemes.columnWidth * 2.5,
-                  ),
-                  alignment: Alignment.center,
-                  child: AnimatedContainer(
-                    duration: FluffyThemes.animationDuration,
-                    curve: FluffyThemes.animationCurve,
-                    width: MediaQuery.of(context).size.width,
-                    height: chatDraftArgument.showEmojiPicker == true
-                        ? MediaQuery.of(context).size.height / 3
-                        : 0,
-                    child: chatDraftArgument.showEmojiPicker == true
-                        ? EmojiPicker(
-                            onEmojiSelected:
-                                chatDraftArgument.onEmojiBottomSheetSelected,
-                            onBackspacePressed:
-                                chatDraftArgument.emojiPickerBackspace,
-                            config: Config(
-                              backspaceColor:
-                                  Theme.of(context).colorScheme.primary,
-                              bgColor: Theme.of(context).colorScheme.surface,
-                              indicatorColor:
-                                  Theme.of(context).colorScheme.primary,
-                              iconColorSelected:
-                                  Theme.of(context).colorScheme.primary,
                             ),
-                          )
-                        : null,
-                  ),
-                ),
+                          ),
+                          if (!PlatformInfos.isMobile ||
+                              chatDraftArgument.inputText.isNotEmpty)
+                            Container(
+                              height: 56,
+                              alignment: Alignment.center,
+                              child: TwakeIconButton(
+                                size: ChatInputRowStyle.sendIconButtonSize,
+                                onPressed: chatDraftArgument.sendText,
+                                tooltip: L10n.of(context)!.send,
+                                imagePath: ImagePaths.icSend,
+                              ),
+                            )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      constraints: const BoxConstraints(
+                        maxWidth: FluffyThemes.columnWidth * 2.5,
+                      ),
+                      alignment: Alignment.center,
+                      child: AnimatedContainer(
+                        duration: FluffyThemes.animationDuration,
+                        curve: FluffyThemes.animationCurve,
+                        width: MediaQuery.of(context).size.width,
+                        height: chatDraftArgument.showEmojiPicker == true
+                            ? MediaQuery.of(context).size.height / 3
+                            : 0,
+                        child: chatDraftArgument.showEmojiPicker == true
+                            ? EmojiPicker(
+                                onEmojiSelected: chatDraftArgument
+                                    .onEmojiBottomSheetSelected,
+                                onBackspacePressed:
+                                    chatDraftArgument.emojiPickerBackspace,
+                                config: Config(
+                                  backspaceColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  bgColor:
+                                      Theme.of(context).colorScheme.surface,
+                                  indicatorColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  iconColorSelected:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );
