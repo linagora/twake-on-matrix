@@ -118,68 +118,60 @@ class _ForwardViewState extends State<ForwardView> {
       toolbarHeight: ForwardViewStyle.preferredAppBarSize(context),
       surfaceTintColor: Colors.transparent,
       leadingWidth: double.infinity,
-      leading: Padding(
-        padding: ForwardViewStyle.paddingItemAppbar(context),
-        child: Row(
-          children: [
-            TwakeIconButton(
-              tooltip: L10n.of(context)!.back,
-              icon: Icons.arrow_back,
-              onPressed: () {
-                Matrix.of(context).shareContent = null;
-                widget.controller.popScreen();
-              },
-              paddingAll: 8.0,
-              margin: const EdgeInsets.symmetric(vertical: 12.0),
-            ),
-            const SizedBox(width: 8.0),
-            isSearchBarShow
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: TextField(
-                      autofocus: true,
-                      maxLines: 1,
-                      buildCounter: (
-                        BuildContext context, {
-                        required int currentLength,
-                        required int? maxLength,
-                        required bool isFocused,
-                      }) =>
-                          const SizedBox.shrink(),
-                      maxLength: 200,
-                      cursorHeight: 26,
-                      scrollPadding: const EdgeInsets.all(0),
-                      decoration: InputDecoration(
-                        isCollapsed: true,
-                        hintText: "...",
-                        hintStyle: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(
-                              color: LinagoraRefColors.material().neutral[60],
-                            ),
-                      ),
+      leading: Row(
+        children: [
+          TwakeIconButton(
+            tooltip: L10n.of(context)!.back,
+            icon: Icons.arrow_back,
+            onPressed: () {
+              Matrix.of(context).shareContent = null;
+              widget.controller.popScreen();
+            },
+            paddingAll: 8.0,
+            margin: const EdgeInsets.symmetric(vertical: 12.0),
+          ),
+          const SizedBox(width: 8.0),
+          isSearchBarShow
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextField(
+                    autofocus: true,
+                    maxLines: 1,
+                    buildCounter: (
+                      BuildContext context, {
+                      required int currentLength,
+                      required int? maxLength,
+                      required bool isFocused,
+                    }) =>
+                        const SizedBox.shrink(),
+                    maxLength: 200,
+                    cursorHeight: 26,
+                    scrollPadding: const EdgeInsets.all(0),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      hintText: "...",
+                      hintStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: LinagoraRefColors.material().neutral[60],
+                              ),
                     ),
-                  )
-                : Text(
-                    L10n.of(context)!.forwardTo,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          letterSpacing:
-                              ChatAppBarTitleStyle.letterSpacingRoomName,
-                        ),
                   ),
-          ],
-        ),
+                )
+              : Text(
+                  L10n.of(context)!.forwardTo,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        letterSpacing:
+                            ChatAppBarTitleStyle.letterSpacingRoomName,
+                      ),
+                ),
+        ],
       ),
       actions: [
-        Padding(
-          padding: ForwardViewStyle.paddingItemAppbar(context),
-          child: TwakeIconButton(
-            icon: Icons.search,
-            onPressed: () {},
-            tooltip: L10n.of(context)!.search,
-          ),
+        TwakeIconButton(
+          icon: Icons.search,
+          onPressed: () {},
+          tooltip: L10n.of(context)!.search,
         ),
       ],
       bottom: PreferredSize(

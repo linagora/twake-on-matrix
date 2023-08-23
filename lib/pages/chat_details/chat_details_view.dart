@@ -55,38 +55,34 @@ class ChatDetailsView extends StatelessWidget {
                 expandedHeight: 300.0,
                 floating: true,
                 pinned: true,
-                title: Padding(
-                  padding: ChatDetailViewStyle.paddingTitle(context),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.close_outlined),
-                        onPressed: controller.onPressedClose,
-                      ),
-                      Expanded(
-                        child: Text(
-                          room.getLocalizedDisplayname(
-                            MatrixLocals(L10n.of(context)!),
-                          ),
+                title: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close_outlined),
+                      onPressed: controller.onPressedClose,
+                    ),
+                    Expanded(
+                      child: Text(
+                        room.getLocalizedDisplayname(
+                          MatrixLocals(L10n.of(context)!),
                         ),
                       ),
-                      Row(
-                        children: [
-                          if (room.canonicalAlias.isNotEmpty)
-                            IconButton(
-                              tooltip: L10n.of(context)!.share,
-                              icon: Icon(Icons.adaptive.share_outlined),
-                              onPressed: () => FluffyShare.share(
-                                AppConfig.inviteLinkPrefix +
-                                    room.canonicalAlias,
-                                context,
-                              ),
+                    ),
+                    Row(
+                      children: [
+                        if (room.canonicalAlias.isNotEmpty)
+                          IconButton(
+                            tooltip: L10n.of(context)!.share,
+                            icon: Icon(Icons.adaptive.share_outlined),
+                            onPressed: () => FluffyShare.share(
+                              AppConfig.inviteLinkPrefix + room.canonicalAlias,
+                              context,
                             ),
-                          ChatSettingsPopupMenu(room, false)
-                        ],
-                      ),
-                    ],
-                  ),
+                          ),
+                        ChatSettingsPopupMenu(room, false)
+                      ],
+                    ),
+                  ],
                 ),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                 flexibleSpace: FlexibleSpaceBar(

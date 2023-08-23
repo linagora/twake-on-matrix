@@ -5,11 +5,5 @@ import 'package:flutter/material.dart';
 class DraftChatViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 104 : 86;
-
-  static EdgeInsetsDirectional paddingTopScreen(BuildContext context) =>
-      EdgeInsetsDirectional.only(
-        top: responsive.isMobile(context) ? 40 : 0,
-      );
+  static double toolbarHeight(BuildContext context) => 56;
 }
