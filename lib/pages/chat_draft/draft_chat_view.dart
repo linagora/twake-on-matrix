@@ -38,25 +38,22 @@ class DraftChatView extends StatelessWidget {
         toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
-        title: Padding(
-          padding: DraftChatViewStyle.paddingTopScreen(context),
-          child: Row(
-            children: [
-              TwakeIconButton(
-                tooltip: L10n.of(context)!.back,
-                icon: Icons.arrow_back,
-                onPressed: () => context.pop(),
-                paddingAll: 8.0,
-                margin: const EdgeInsets.symmetric(vertical: 12.0),
+        title: Row(
+          children: [
+            TwakeIconButton(
+              tooltip: L10n.of(context)!.back,
+              icon: Icons.arrow_back,
+              onPressed: () => context.pop(),
+              paddingAll: 8.0,
+              margin: const EdgeInsets.symmetric(vertical: 12.0),
+            ),
+            Expanded(
+              child: _EmptyChatTitle(
+                receiverId: controller.presentationContact!.matrixId!,
+                displayName: controller.presentationContact!.displayName,
               ),
-              Expanded(
-                child: _EmptyChatTitle(
-                  receiverId: controller.presentationContact!.matrixId!,
-                  displayName: controller.presentationContact!.displayName,
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
         bottom: PreferredSize(
           preferredSize: const Size(double.infinity, 4),

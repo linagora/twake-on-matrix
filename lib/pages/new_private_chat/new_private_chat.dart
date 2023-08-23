@@ -54,7 +54,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
     if (roomId == null) {
       goToDraftChat(
         context: context,
-        path: 'rooms/newprivatechat',
+        path: 'rooms',
         contactPresentationSearch: ContactPresentationSearch(
           contact.matrixId,
           contact.email,

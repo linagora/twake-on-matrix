@@ -8,11 +8,5 @@ class SearchableAppBarStyle {
   static Size preferredSize(BuildContext context) =>
       Size.fromHeight(appBarHeight(context));
 
-  static double appBarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 104 : 56;
-
-  static EdgeInsetsDirectional paddingItemAppBar(BuildContext context) =>
-      EdgeInsetsDirectional.only(
-        top: responsive.isMobile(context) ? 40 : 0,
-      );
+  static double appBarHeight(BuildContext context) => 56;
 }

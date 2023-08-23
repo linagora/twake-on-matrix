@@ -141,7 +141,6 @@ class SearchView extends StatelessWidget {
               icon: Icons.arrow_back,
               onPressed: () => searchController.goToRoomsShellBranch(),
               paddingAll: 8.0,
-              margin: SearchViewStyle.marginIconBack,
             ),
             const SizedBox(width: 4.0),
             Expanded(
@@ -167,7 +166,7 @@ class SearchView extends StatelessWidget {
         ),
       ),
       bottom: PreferredSize(
-        preferredSize: const Size(double.infinity, 4),
+        preferredSize: const Size(double.infinity, 6),
         child: Container(
           color: Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
           height: 1,

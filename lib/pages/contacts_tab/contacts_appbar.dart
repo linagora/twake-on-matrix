@@ -20,7 +20,7 @@ class ContactsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: 152,
+      toolbarHeight: ContactsAppbarStyle.preferredSizeAppBar(context).height,
       surfaceTintColor: Theme.of(context).brightness == Brightness.light
           ? Colors.white
           : Colors.black,

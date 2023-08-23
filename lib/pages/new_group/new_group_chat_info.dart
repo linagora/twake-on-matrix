@@ -123,26 +123,23 @@ class NewGroupChatInfo extends StatelessWidget {
       child: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: NewGroupChatInfoStyle.toolbarHeight(context),
-        title: Padding(
-          padding: NewGroupChatInfoStyle.paddingTitle(context),
-          child: Row(
-            children: [
-              TwakeIconButton(
-                icon: Icons.arrow_back,
-                onPressed: () => Navigator.of(context).pop(),
-                tooltip: L10n.of(context)!.back,
-                paddingAll: 8.0,
-                margin: const EdgeInsets.symmetric(
-                  vertical: 12.0,
-                  horizontal: 8.0,
-                ),
+        title: Row(
+          children: [
+            TwakeIconButton(
+              icon: Icons.arrow_back,
+              onPressed: () => Navigator.of(context).pop(),
+              tooltip: L10n.of(context)!.back,
+              paddingAll: 8.0,
+              margin: const EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 8.0,
               ),
-              Text(
-                L10n.of(context)!.newGroupChat,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
-          ),
+            ),
+            Text(
+              L10n.of(context)!.newGroupChat,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
         ),
         titleSpacing: 0,
         centerTitle: false,

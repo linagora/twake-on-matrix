@@ -54,86 +54,83 @@ class SearchableAppBar extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.background,
       title: Align(
         alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: SearchableAppBarStyle.paddingItemAppBar(context),
-          child: Row(
-            children: [
-              TwakeIconButton(
-                icon: Icons.arrow_back,
-                onPressed: () => context.pop(),
-                tooltip: L10n.of(context)!.back,
-                paddingAll: 8.0,
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              ),
-              Expanded(
-                child: ValueListenableBuilder(
-                  valueListenable: searchModeNotifier,
-                  builder: (context, searchModeNotifier, child) {
-                    if (searchModeNotifier) {
-                      return TextField(
-                        focusNode: focusNode,
-                        autofocus: true,
-                        maxLines: 1,
-                        buildCounter: (
-                          BuildContext context, {
-                          required int currentLength,
-                          required int? maxLength,
-                          required bool isFocused,
-                        }) =>
-                            const SizedBox.shrink(),
-                        maxLength: 200,
-                        cursorHeight: 26,
-                        scrollPadding: const EdgeInsets.all(0),
-                        controller: textEditingController,
-                        decoration: InputDecoration(
-                          contentPadding:
-                              const EdgeInsetsDirectional.only(top: 10),
-                          isCollapsed: true,
-                          hintText: hintText,
-                          hintStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
-                              ),
-                        ),
-                      );
-                    }
-                    return Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                    );
-                  },
-                ),
-              ),
-              ValueListenableBuilder(
+        child: Row(
+          children: [
+            TwakeIconButton(
+              icon: Icons.arrow_back,
+              onPressed: () => context.pop(),
+              tooltip: L10n.of(context)!.back,
+              paddingAll: 8.0,
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+            ),
+            Expanded(
+              child: ValueListenableBuilder(
                 valueListenable: searchModeNotifier,
                 builder: (context, searchModeNotifier, child) {
                   if (searchModeNotifier) {
-                    return TwakeIconButton(
-                      onPressed: toggleSearchMode,
-                      tooltip: L10n.of(context)!.close,
-                      icon: Icons.close,
-                      paddingAll: 10.0,
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 10.0,
-                        horizontal: 6.0,
+                    return TextField(
+                      focusNode: focusNode,
+                      autofocus: true,
+                      maxLines: 1,
+                      buildCounter: (
+                        BuildContext context, {
+                        required int currentLength,
+                        required int? maxLength,
+                        required bool isFocused,
+                      }) =>
+                          const SizedBox.shrink(),
+                      maxLength: 200,
+                      cursorHeight: 26,
+                      scrollPadding: const EdgeInsets.all(0),
+                      controller: textEditingController,
+                      decoration: InputDecoration(
+                        contentPadding:
+                            const EdgeInsetsDirectional.only(top: 10),
+                        isCollapsed: true,
+                        hintText: hintText,
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(
+                              color: LinagoraRefColors.material().neutral[60],
+                            ),
                       ),
                     );
                   }
-                  return TwakeIconButton(
-                    icon: Icons.search,
-                    onPressed: toggleSearchMode,
-                    tooltip: L10n.of(context)!.search,
-                    paddingAll: 10.0,
-                    margin: const EdgeInsets.symmetric(vertical: 10.0),
+                  return Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                   );
                 },
-              )
-            ],
-          ),
+              ),
+            ),
+            ValueListenableBuilder(
+              valueListenable: searchModeNotifier,
+              builder: (context, searchModeNotifier, child) {
+                if (searchModeNotifier) {
+                  return TwakeIconButton(
+                    onPressed: toggleSearchMode,
+                    tooltip: L10n.of(context)!.close,
+                    icon: Icons.close,
+                    paddingAll: 10.0,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 10.0,
+                      horizontal: 6.0,
+                    ),
+                  );
+                }
+                return TwakeIconButton(
+                  icon: Icons.search,
+                  onPressed: toggleSearchMode,
+                  tooltip: L10n.of(context)!.search,
+                  paddingAll: 10.0,
+                  margin: const EdgeInsets.symmetric(vertical: 10.0),
+                );
+              },
+            )
+          ],
         ),
       ),
     );
