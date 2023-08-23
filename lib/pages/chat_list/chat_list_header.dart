@@ -7,12 +7,12 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatListHeader extends StatelessWidget {
   final ChatListController controller;
-  final Function()? onTapSearch;
+  final VoidCallback? onOpenSearchPage;
 
   const ChatListHeader({
     Key? key,
     required this.controller,
-    this.onTapSearch,
+    this.onOpenSearchPage,
   }) : super(key: key);
 
   @override
@@ -43,7 +43,7 @@ class ChatListHeader extends StatelessWidget {
                     : SizedBox(
                         height: ChatListHeaderStyle.searchBarHeight,
                         child: InkWell(
-                          onTap: onTapSearch,
+                          onTap: onOpenSearchPage,
                           child: TextField(
                             controller: controller.searchChatController,
                             textInputAction: TextInputAction.search,

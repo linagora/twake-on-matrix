@@ -12,13 +12,13 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
   final Widget? bottomNavigationBar;
-  final Function()? onTapSearch;
+  final VoidCallback? onOpenSearchPage;
 
   const ChatListView({
     Key? key,
     required this.controller,
     this.bottomNavigationBar,
-    this.onTapSearch,
+    this.onOpenSearchPage,
   }) : super(key: key);
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
@@ -35,7 +35,7 @@ class ChatListView extends StatelessWidget {
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(
           controller: controller,
-          onTapSearch: onTapSearch,
+          onOpenSearchPage: onOpenSearchPage,
         ),
       ),
       bottomNavigationBar: bottomNavigationBar,

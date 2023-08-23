@@ -7,12 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
+typedef OnOpenSearchPage = Function();
+typedef OnCloseSearchPage = Function();
+typedef OnClientSelectedSetting = Function(Object object, BuildContext context);
+typedef OnDestinationSelected = Function(int index);
+
 class AdaptiveScaffoldApp extends StatefulWidget {
-  final String? activeChat;
+  final String? activeRoomId;
 
   const AdaptiveScaffoldApp({
     super.key,
-    this.activeChat,
+    this.activeRoomId,
   });
 
   @override
@@ -24,6 +29,9 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
 
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
+
+  final PageController pageController =
+      PageController(initialPage: 1, keepPage: false);
 
   Future<Profile?> fetchOwnProfile() {
     if (!profileMemoizers.containsKey(matrix.client)) {
@@ -39,9 +47,11 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
       //FIXME: NOW WE SUPPORT FOR ONLY 2 TABS
       case 0:
         activeNavigationBar.value = AdaptiveDestinationEnum.contacts;
+        pageController.jumpToPage(index);
         break;
       case 1:
         activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+        pageController.jumpToPage(index);
         break;
       default:
         break;
@@ -83,11 +93,28 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
     }
   }
 
+  void _onOpenSearchPage() {
+    activeNavigationBar.value = AdaptiveDestinationEnum.search;
+    pageController.jumpToPage(3);
+  }
+
+  void _onCloseSearchPage() {
+    activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+    pageController.jumpToPage(1);
+  }
+
   MatrixState get matrix => Matrix.of(context);
 
   @override
   Widget build(BuildContext context) => AppScaffoldView(
-        controller: this,
-        activeChat: widget.activeChat,
+        activeRoomId: widget.activeRoomId,
+        activeNavigationBar: activeNavigationBar,
+        pageController: pageController,
+        fetchOwnProfile: fetchOwnProfile(),
+        activeNavigationBarIndex: activeNavigationBarIndex,
+        onOpenSearchPage: _onOpenSearchPage,
+        onCloseSearchPage: _onCloseSearchPage,
+        onDestinationSelected: onDestinationSelected,
+        onClientSelected: clientSelected,
       );
 }

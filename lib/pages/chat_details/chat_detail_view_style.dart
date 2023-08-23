@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class ChatDetailViewStyle {
-  static double toolbarHeight(BuildContext context) => 56;
+  static double toolbarHeight = 56;
 }

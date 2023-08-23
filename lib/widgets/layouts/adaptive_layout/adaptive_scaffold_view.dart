@@ -9,11 +9,19 @@ import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class AppScaffoldView extends StatelessWidget {
-  final AdaptiveScaffoldAppController controller;
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
+  final PageController pageController;
+  final Future<Profile?> fetchOwnProfile;
+  final int activeNavigationBarIndex;
+  final OnOpenSearchPage onOpenSearchPage;
+  final OnCloseSearchPage onCloseSearchPage;
+  final OnDestinationSelected onDestinationSelected;
+  final OnClientSelectedSetting onClientSelected;
 
-  final String? activeChat;
+  final String? activeRoomId;
 
   static const ValueKey scaffoldWithNestedNavigationKey =
       ValueKey('ScaffoldWithNestedNavigation');
@@ -27,8 +35,15 @@ class AppScaffoldView extends StatelessWidget {
 
   const AppScaffoldView({
     Key? key,
-    required this.controller,
-    this.activeChat,
+    this.activeRoomId,
+    required this.activeNavigationBar,
+    required this.pageController,
+    required this.fetchOwnProfile,
+    required this.activeNavigationBarIndex,
+    required this.onOpenSearchPage,
+    required this.onCloseSearchPage,
+    required this.onDestinationSelected,
+    required this.onClientSelected,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -46,9 +61,11 @@ class AppScaffoldView extends StatelessWidget {
                   key: primaryNavigationKey,
                   builder: (_) {
                     return ValueListenableBuilder(
-                      valueListenable: controller.activeNavigationBar,
+                      valueListenable: activeNavigationBar,
                       builder: (_, navigatorBar, child) {
                         switch (navigatorBar) {
+                          case AdaptiveDestinationEnum.search:
+                            return const SizedBox();
                           case AdaptiveDestinationEnum.contacts:
                           case AdaptiveDestinationEnum.rooms:
                           default:
@@ -66,39 +83,51 @@ class AppScaffoldView extends StatelessWidget {
             ),
           ],
           Expanded(
-            child: ValueListenableBuilder<AdaptiveDestinationEnum>(
-              valueListenable: controller.activeNavigationBar,
-              builder: (context, navigatorBar, child) {
-                switch (navigatorBar) {
-                  case AdaptiveDestinationEnum.contacts:
-                    return ContactsTab(
-                      bottomNavigationBar: _bottomNavigationBarBuilder(context),
-                    );
-                  case AdaptiveDestinationEnum.rooms:
-                    return child!;
-                  case AdaptiveDestinationEnum.search:
-                    return Search(
-                      callBack: () {
-                        controller.activeNavigationBar.value =
-                            AdaptiveDestinationEnum.rooms;
-                      },
-                    );
-                  default:
-                    return child!;
-                }
-              },
-              child: ChatList(
-                activeChat: activeChat,
-                bottomNavigationBar: _bottomNavigationBarBuilder(context),
-                onTapSearch: () {
-                  controller.activeNavigationBar.value =
-                      AdaptiveDestinationEnum.search;
-                },
-              ),
+            child: PageView(
+              controller: pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _triggerPageViewBuilder(
+                  navigatorBarType: AdaptiveDestinationEnum.contacts,
+                  navigatorBarWidget: ContactsTab(
+                    bottomNavigationBar: _bottomNavigationBarBuilder(context),
+                  ),
+                ),
+                ChatList(
+                  activeRoomId: activeRoomId,
+                  bottomNavigationBar: _bottomNavigationBarBuilder(context),
+                  onOpenSearchPage: onOpenSearchPage,
+                ),
+                _triggerPageViewBuilder(
+                  navigatorBarType: AdaptiveDestinationEnum.stories,
+                  navigatorBarWidget: const SizedBox(),
+                ),
+                _triggerPageViewBuilder(
+                  navigatorBarType: AdaptiveDestinationEnum.search,
+                  navigatorBarWidget: Search(
+                    onCloseSearchPage: onCloseSearchPage,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _triggerPageViewBuilder({
+    required AdaptiveDestinationEnum navigatorBarType,
+    required Widget navigatorBarWidget,
+  }) {
+    return ValueListenableBuilder<AdaptiveDestinationEnum>(
+      valueListenable: activeNavigationBar,
+      builder: (context, currentNavigatorBar, child) {
+        if (navigatorBarType == currentNavigatorBar) {
+          return navigatorBarWidget;
+        }
+        return const SizedBox();
+      },
     );
   }
 
@@ -118,9 +147,9 @@ class AppScaffoldView extends StatelessWidget {
                 children: [
                   NavigationBar(
                     height: ResponsiveUtils.heightBottomNavigation,
-                    selectedIndex: controller.activeNavigationBarIndex,
+                    selectedIndex: activeNavigationBarIndex,
                     destinations: getNavigationDestinations(context),
-                    onDestinationSelected: controller.onDestinationSelected,
+                    onDestinationSelected: onDestinationSelected,
                   ),
                 ],
               ),
@@ -135,16 +164,13 @@ class AppScaffoldView extends StatelessWidget {
     final destinations = getNavigationDestinations(context);
 
     return AdaptiveScaffoldPrimaryNavigation(
-      futureProfile: controller.fetchOwnProfile(),
-      selectedIndex: controller.activeNavigationBar.value.index,
+      myProfile: fetchOwnProfile,
+      selectedIndex: activeNavigationBar.value.index,
       getNavigationRailDestinations: destinations
           .map((_) => AdaptiveScaffold.toRailDestination(_))
           .toList(),
-      onDestinationSelected: controller.onDestinationSelected,
-      onSelected: (object) => controller.clientSelected(
-        object,
-        context,
-      ),
+      onDestinationSelected: onDestinationSelected,
+      onSelected: (object) => onClientSelected,
     );
   }
 

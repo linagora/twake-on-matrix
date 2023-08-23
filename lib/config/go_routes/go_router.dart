@@ -106,7 +106,7 @@ abstract class AppRoutes {
                 state.fullPath?.startsWith('/rooms/settings') == false
             ? AdaptiveScaffoldRoute(
                 body: AdaptiveScaffoldApp(
-                  activeChat: state.pathParameters['roomid'],
+                  activeRoomId: state.pathParameters['roomid'],
                 ),
                 secondaryBody: child,
               )
@@ -121,7 +121,7 @@ abstract class AppRoutes {
             !_responsive.isMobile(context)
                 ? const EmptyPage()
                 : AdaptiveScaffoldApp(
-                    activeChat: state.pathParameters['roomid'],
+                    activeRoomId: state.pathParameters['roomid'],
                   ),
           ),
           routes: [

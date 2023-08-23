@@ -21,7 +21,7 @@ enum AliasActions { copy, delete, setCanonical }
 
 class ChatDetails extends StatefulWidget {
   final String roomId;
-  const ChatDetails({Key? key, required this.roomId}) : super(key: key);
+  const ChatDetails({super.key, required this.roomId});
 
   @override
   ChatDetailsController createState() => ChatDetailsController();

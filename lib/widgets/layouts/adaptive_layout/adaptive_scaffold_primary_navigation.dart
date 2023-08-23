@@ -8,7 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
-  final Future<Profile?>? futureProfile;
+  final Future<Profile?>? myProfile;
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
@@ -16,7 +16,7 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
 
   const AdaptiveScaffoldPrimaryNavigation({
     super.key,
-    this.futureProfile,
+    this.myProfile,
     required this.getNavigationRailDestinations,
     this.selectedIndex,
     this.onDestinationSelected,
@@ -78,7 +78,7 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
                   ),
                 ),
                 FutureBuilder<Profile?>(
-                  future: futureProfile,
+                  future: myProfile,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(
