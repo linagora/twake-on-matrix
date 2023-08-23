@@ -24,7 +24,7 @@ class ExpansionContactListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
-      child: FutureBuilder<ProfileInformation?>(
+      child: FutureBuilder<Profile?>(
         future: getProfile(context),
         builder: (context, snapshot) {
           return Row(
@@ -52,7 +52,7 @@ class ExpansionContactListTile extends StatelessWidget {
                                 Flexible(
                                   child: BuildDisplayName(
                                     profileDisplayName:
-                                        snapshot.data?.displayname,
+                                        snapshot.data?.displayName,
                                     contactDisplayName: contact.displayName,
                                     style: Theme.of(context)
                                         .textTheme
@@ -111,20 +111,21 @@ class ExpansionContactListTile extends StatelessWidget {
     );
   }
 
-  Future<ProfileInformation?> getProfile(BuildContext context) async {
+  Future<Profile?> getProfile(BuildContext context) async {
     final client = Matrix.of(context).client;
     if (contact.matrixId == null) {
       return Future.error(Exception("MatrixId is null"));
     }
     try {
-      final profile = await client.getUserProfile(contact.matrixId!);
+      final profile = await client.getProfileFromUserId(contact.matrixId!);
       Logs()
           .d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
       return profile;
     } catch (e) {
-      return ProfileInformation(
+      return Profile(
+        userId: contact.matrixId!,
+        displayName: contact.displayName,
         avatarUrl: null,
-        displayname: contact.displayName,
       );
     }
   }
