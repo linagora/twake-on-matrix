@@ -32,9 +32,10 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
         children: [
           if (presentationContact.matrixId != null)
             FutureBuilder<Profile>(
-              future: Matrix.of(context)
-                  .client
-                  .getProfileFromUserId(presentationContact.matrixId!),
+              future: Matrix.of(context).client.getProfileFromUserId(
+                    presentationContact.matrixId!,
+                    getFromRooms: false,
+                  ),
               builder: ((context, snapshot) {
                 return Avatar(
                   mxContent: snapshot.data?.avatarUrl,

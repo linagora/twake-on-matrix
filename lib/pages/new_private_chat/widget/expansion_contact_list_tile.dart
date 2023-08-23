@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
@@ -25,7 +26,8 @@ class ExpansionContactListTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
       child: FutureBuilder<Profile?>(
-        future: getProfile(context),
+        future:
+            contact.status == ContactStatus.active ? getProfile(context) : null,
         builder: (context, snapshot) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +119,10 @@ class ExpansionContactListTile extends StatelessWidget {
       return Future.error(Exception("MatrixId is null"));
     }
     try {
-      final profile = await client.getProfileFromUserId(contact.matrixId!);
+      final profile = await client.getProfileFromUserId(
+        contact.matrixId!,
+        getFromRooms: false,
+      );
       Logs()
           .d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
       return profile;
