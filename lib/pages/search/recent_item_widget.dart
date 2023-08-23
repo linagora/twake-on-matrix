@@ -200,7 +200,7 @@ class _ContactInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FutureBuilder<ProfileInformation?>(
+        FutureBuilder<Profile?>(
           future: contactPresentationSearch.getProfile(client),
           builder: (context, snapshot) {
             return Avatar(
