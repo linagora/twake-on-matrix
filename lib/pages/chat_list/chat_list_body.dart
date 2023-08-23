@@ -177,7 +177,7 @@ class ChatListViewBody extends StatelessWidget {
                       ? () => controller.toggleSelection(rooms[i].id)
                       : null,
                   onLongPress: () => controller.toggleSelection(rooms[i].id),
-                  activeChat: controller.activeChat == rooms[i].id,
+                  activeChat: controller.activeRoomId == rooms[i].id,
                 );
               },
             );

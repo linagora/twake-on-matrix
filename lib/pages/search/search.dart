@@ -18,8 +18,8 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class Search extends StatefulWidget {
-  final Function()? callBack;
-  const Search({super.key, this.callBack});
+  final VoidCallback? onCloseSearchPage;
+  const Search({super.key, this.onCloseSearchPage});
 
   @override
   State<Search> createState() => SearchController();
@@ -123,7 +123,7 @@ class SearchController extends State<Search>
 
   void goToRoomsShellBranch() {
     textEditingController.clear();
-    widget.callBack?.call();
+    widget.onCloseSearchPage?.call();
   }
 
   @override

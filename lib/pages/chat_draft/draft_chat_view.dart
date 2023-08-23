@@ -6,12 +6,11 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/input_bar.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
+import 'package:fluffychat/presentation/model/chat_draft/chat_draft_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -21,21 +20,25 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 
 class DraftChatView extends StatelessWidget {
-  const DraftChatView(this.controller, {super.key});
+  const DraftChatView({
+    super.key,
+    required this.chatDraftArgument,
+  });
 
-  final DraftChatController controller;
+  final ChatDraftArgument chatDraftArgument;
 
   @override
   Widget build(BuildContext context) {
-    if (controller.showEmojiPicker &&
-        controller.emojiPickerType == EmojiPickerType.reaction) {
+    if (chatDraftArgument.showEmojiPicker == true &&
+        chatDraftArgument.emojiPickerType == EmojiPickerType.reaction) {
       return Container();
     }
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
+        toolbarHeight: DraftChatViewStyle.toolbarHeight,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: Row(
@@ -49,8 +52,8 @@ class DraftChatView extends StatelessWidget {
             ),
             Expanded(
               child: _EmptyChatTitle(
-                receiverId: controller.presentationContact!.matrixId!,
-                displayName: controller.presentationContact!.displayName,
+                receiverId: chatDraftArgument.matrixId!,
+                displayName: chatDraftArgument.displayName,
               ),
             )
           ],
@@ -69,7 +72,7 @@ class DraftChatView extends StatelessWidget {
             Expanded(
               child: Center(
                 child: DirectDraftChatView(
-                  onTap: () => controller.inputFocus.requestFocus(),
+                  onTap: chatDraftArgument.onTapDirectDraftChat,
                 ),
               ),
             ),
@@ -85,7 +88,7 @@ class DraftChatView extends StatelessWidget {
                         tooltip: L10n.of(context)!.more,
                         margin: const EdgeInsets.only(right: 4.0),
                         icon: Icons.add_circle_outline,
-                        onPressed: () => controller.showMediaPicker(context),
+                        onPressed: chatDraftArgument.onPressedAddMore,
                       ),
                       Expanded(
                         child: Container(
@@ -109,9 +112,11 @@ class DraftChatView extends StatelessWidget {
                                   textInputAction: AppConfig.sendOnEnter
                                       ? TextInputAction.send
                                       : null,
-                                  onSubmitted: controller.onInputBarSubmitted,
-                                  focusNode: controller.inputFocus,
-                                  controller: controller.sendController,
+                                  onSubmitted:
+                                      chatDraftArgument.onInputBarSubmitted,
+                                  focusNode: chatDraftArgument.inputFocus,
+                                  controller:
+                                      chatDraftArgument.textEditingController,
                                   decoration: InputDecoration(
                                     hintText: L10n.of(context)!.chatMessage,
                                     hintMaxLines: 1,
@@ -125,7 +130,8 @@ class DraftChatView extends StatelessWidget {
                                         )
                                         .copyWith(letterSpacing: -0.15),
                                   ),
-                                  onChanged: controller.onInputBarChanged,
+                                  onChanged:
+                                      chatDraftArgument.onInputBarChanged,
                                 ),
                               ),
                               KeyBoardShortcuts(
@@ -133,10 +139,11 @@ class DraftChatView extends StatelessWidget {
                                   LogicalKeyboardKey.altLeft,
                                   LogicalKeyboardKey.keyE
                                 },
-                                onKeysPressed: controller.emojiPickerAction,
+                                onKeysPressed:
+                                    chatDraftArgument.emojiPickerAction,
                                 helpLabel: L10n.of(context)!.emojis,
                                 child: InkWell(
-                                  onTap: controller.emojiPickerAction,
+                                  onTap: chatDraftArgument.emojiPickerAction,
                                   child: PageTransitionSwitcher(
                                     transitionBuilder: (
                                       Widget child,
@@ -152,33 +159,34 @@ class DraftChatView extends StatelessWidget {
                                         child: child,
                                       );
                                     },
-                                    child: !controller.showEmojiPicker
+                                    child: chatDraftArgument.showEmojiPicker ==
+                                            false
                                         ? TwakeIconButton(
-                                            paddingAll:
-                                                controller.inputText.isEmpty
-                                                    ? 5.0
-                                                    : 12,
+                                            paddingAll: chatDraftArgument
+                                                    .inputText.isEmpty
+                                                ? 5.0
+                                                : 12,
                                             tooltip: L10n.of(context)!.emojis,
-                                            onPressed: () =>
-                                                controller.emojiPickerAction(),
+                                            onPressed: chatDraftArgument
+                                                .emojiPickerAction,
                                             icon: Icons.tag_faces,
                                           )
                                         : TwakeIconButton(
-                                            paddingAll:
-                                                controller.inputText.isEmpty
-                                                    ? 5.0
-                                                    : 12,
+                                            paddingAll: chatDraftArgument
+                                                    .inputText.isEmpty
+                                                ? 5.0
+                                                : 12,
                                             tooltip: L10n.of(context)!.keyboard,
-                                            onPressed: () => controller
+                                            onPressed: () => chatDraftArgument
                                                 .inputFocus
-                                                .requestFocus(),
+                                                ?.requestFocus(),
                                             icon: Icons.keyboard,
                                           ),
                                   ),
                                 ),
                               ),
                               if (PlatformInfos.platformCanRecord &&
-                                  controller.inputText.isEmpty)
+                                  chatDraftArgument.inputText.isEmpty)
                                 Container(
                                   height: 56,
                                   alignment: Alignment.center,
@@ -195,13 +203,13 @@ class DraftChatView extends StatelessWidget {
                         ),
                       ),
                       if (!PlatformInfos.isMobile ||
-                          controller.inputText.isNotEmpty)
+                          chatDraftArgument.inputText.isNotEmpty)
                         Container(
                           height: 56,
                           alignment: Alignment.center,
                           child: TwakeIconButton(
                             size: ChatInputRowStyle.sendIconButtonSize,
-                            onPressed: controller.sendText,
+                            onPressed: chatDraftArgument.sendText,
                             tooltip: L10n.of(context)!.send,
                             imagePath: ImagePaths.icSend,
                           ),
@@ -218,14 +226,15 @@ class DraftChatView extends StatelessWidget {
                     duration: FluffyThemes.animationDuration,
                     curve: FluffyThemes.animationCurve,
                     width: MediaQuery.of(context).size.width,
-                    height: controller.showEmojiPicker
+                    height: chatDraftArgument.showEmojiPicker == true
                         ? MediaQuery.of(context).size.height / 3
                         : 0,
-                    child: controller.showEmojiPicker
+                    child: chatDraftArgument.showEmojiPicker == true
                         ? EmojiPicker(
                             onEmojiSelected:
-                                controller.onEmojiBottomSheetSelected,
-                            onBackspacePressed: controller.emojiPickerBackspace,
+                                chatDraftArgument.onEmojiBottomSheetSelected,
+                            onBackspacePressed:
+                                chatDraftArgument.emojiPickerBackspace,
                             config: Config(
                               backspaceColor:
                                   Theme.of(context).colorScheme.primary,

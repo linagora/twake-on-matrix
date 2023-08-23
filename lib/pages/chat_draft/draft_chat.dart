@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/model/chat_draft/chat_draft_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -239,6 +240,19 @@ class DraftChatController extends State<DraftChat>
     );
   }
 
+  void onPressedAddMore() {
+    showImagesPickerBottomSheetAction(
+      context: context,
+      onItemAction: (action) => onClickItemAction(
+        action: action,
+        context: context,
+      ),
+      onSendTap: () => sendImages(
+        assets: sortedSelectedAssets,
+      ),
+    );
+  }
+
   void onInputBarChanged(String text) {
     setState(() => inputText = text);
   }
@@ -261,5 +275,24 @@ class DraftChatController extends State<DraftChat>
   }
 
   @override
-  Widget build(BuildContext context) => DraftChatView(this);
+  Widget build(BuildContext context) {
+    final argument = ChatDraftArgument(
+      inputText: inputText,
+      showEmojiPicker: showEmojiPicker,
+      emojiPickerType: emojiPickerType,
+      matrixId: presentationContact!.matrixId,
+      displayName: presentationContact!.displayName,
+      onTapDirectDraftChat: inputFocus.requestFocus,
+      onPressedAddMore: onPressedAddMore,
+      onInputBarSubmitted: onInputBarSubmitted,
+      emojiPickerAction: emojiPickerAction,
+      inputFocus: inputFocus,
+      textEditingController: sendController,
+      onInputBarChanged: onInputBarChanged,
+      sendText: sendText,
+      onEmojiBottomSheetSelected: onEmojiBottomSheetSelected,
+      emojiPickerBackspace: emojiPickerBackspace,
+    );
+    return DraftChatView(chatDraftArgument: argument);
+  }
 }

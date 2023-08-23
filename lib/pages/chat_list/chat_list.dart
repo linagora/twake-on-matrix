@@ -59,17 +59,17 @@ enum ActiveFilter {
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
 
-  final String? activeChat;
+  final String? activeRoomId;
 
   final Widget? bottomNavigationBar;
 
-  final Function()? onTapSearch;
+  final VoidCallback? onOpenSearchPage;
 
   const ChatList({
     Key? key,
-    this.activeChat,
+    this.activeRoomId,
     this.bottomNavigationBar,
-    this.onTapSearch,
+    this.onOpenSearchPage,
   }) : super(key: key);
 
   @override
@@ -279,7 +279,7 @@ class ChatListController extends State<ChatList>
 
   final selectedRoomIds = <String>{};
 
-  String? get activeChat => widget.activeChat;
+  String? get activeRoomId => widget.activeRoomId;
 
   SelectMode get selectMode => Matrix.of(context).shareContent != null
       ? SelectMode.share
@@ -698,7 +698,7 @@ class ChatListController extends State<ChatList>
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
-      onTapSearch: widget.onTapSearch,
+      onOpenSearchPage: widget.onOpenSearchPage,
     );
   }
 

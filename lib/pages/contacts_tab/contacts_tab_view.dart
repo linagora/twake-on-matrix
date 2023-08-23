@@ -18,7 +18,7 @@ class ContactsTabView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: ContactsTabViewStyle.preferredSizeAppBar(context),
+        preferredSize: ContactsTabViewStyle.preferredSizeAppBar,
         child: ContactsAppBar(
           isSearchModeNotifier: contactsController.isSearchModeNotifier,
           searchFocusNode: contactsController.searchFocusNode,

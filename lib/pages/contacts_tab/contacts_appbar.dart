@@ -20,7 +20,7 @@ class ContactsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: ContactsAppbarStyle.preferredSizeAppBar(context).height,
+      toolbarHeight: ContactsAppbarStyle.preferredSizeAppBar.height,
       surfaceTintColor: Theme.of(context).brightness == Brightness.light
           ? Colors.white
           : Colors.black,
@@ -32,7 +32,7 @@ class ContactsAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       centerTitle: false,
       title: Padding(
-        padding: ContactsAppbarStyle.paddingTitle(context),
+        padding: ContactsAppbarStyle.paddingTitle,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

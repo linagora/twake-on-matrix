@@ -49,7 +49,7 @@ class ChatDetailsView extends StatelessWidget {
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
               SliverAppBar(
-                toolbarHeight: ChatDetailViewStyle.toolbarHeight(context),
+                toolbarHeight: ChatDetailViewStyle.toolbarHeight,
                 automaticallyImplyLeading: false,
                 elevation: Theme.of(context).appBarTheme.elevation,
                 expandedHeight: 300.0,

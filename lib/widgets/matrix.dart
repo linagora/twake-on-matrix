@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
+import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -256,8 +257,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   bool webHasFocus = true;
 
-  String? get activeRoomId =>
-      GoRouterState.of(context).pathParameters['roomid'];
+  String? get activeRoomId {
+    final route = FluffyChatApp.router.routeInformationProvider.value.location;
+    if (route == null || !route.startsWith('/rooms/')) return null;
+    return route.split('/')[2];
+  }
 
   final linuxNotifications =
       PlatformInfos.isLinux ? NotificationsClient() : null;
@@ -419,6 +423,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     if (PlatformInfos.isMobile) {
       backgroundPush = BackgroundPush(
+        this,
         client,
         onFcmError: (errorMsg, {Uri? link}) async {
           final result = await showOkCancelAlertDialog(

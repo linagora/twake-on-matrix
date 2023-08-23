@@ -25,12 +25,12 @@ import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
@@ -110,10 +110,12 @@ class BackgroundPush {
   }
 
   factory BackgroundPush(
+    MatrixState matrixState,
     Client client, {
     final void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
     final instance = BackgroundPush.clientOnly(client);
+    instance._matrixState = matrixState;
     instance.onFcmError = onFcmError;
     return instance;
   }
@@ -315,7 +317,7 @@ class BackgroundPush {
 
   void onReceiveNotification(dynamic message) {
     Logs().d(
-      'BackgroundPush::onReceiveNotification(): Message $message - roomId ${_matrixState?.activeRoomId}',
+      'BackgroundPush::onReceiveNotification(): Message $message}',
     );
     final notification = _parseMessagePayload(message);
     pushHelper(
@@ -347,7 +349,7 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      _matrixState?.context.go('/rooms/$roomId');
+      FluffyChatApp.router.go('/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
