@@ -1,7 +1,9 @@
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class AvatarWithBottomIconWidget extends StatelessWidget {
   final PresentationContact presentationContact;
@@ -28,7 +30,22 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
-          RoundAvatar(text: presentationContact.displayName ?? "@"),
+          if (presentationContact.matrixId != null)
+            FutureBuilder<Profile>(
+              future: Matrix.of(context)
+                  .client
+                  .getProfileFromUserId(presentationContact.matrixId!),
+              builder: ((context, snapshot) {
+                return Avatar(
+                  mxContent: snapshot.data?.avatarUrl,
+                  name: presentationContact.displayName,
+                );
+              }),
+            ),
+          if (presentationContact.matrixId == null)
+            Avatar(
+              name: presentationContact.displayName,
+            ),
           Container(
             height: 20,
             width: 20,
