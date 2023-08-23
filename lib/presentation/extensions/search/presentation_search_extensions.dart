@@ -7,7 +7,10 @@ extension PresentationSearchExtensions on ContactPresentationSearch {
       return Future.error(Exception("MatrixId is null"));
     }
     try {
-      final profile = await client.getProfileFromUserId(matrixId!);
+      final profile = await client.getProfileFromUserId(
+        matrixId!,
+        getFromRooms: false,
+      );
       Logs().d("SearchController()::getProfiles(): ${profile.avatarUrl}");
       return profile;
     } catch (e) {
