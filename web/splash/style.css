@@ -3,10 +3,10 @@ html {
 }
 
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  min-height: 100%;
   background-color: #000000;
-  background-size: 100% 100%;
 }
 
 .center {
@@ -37,10 +37,9 @@ body {
 
 .bottom {
   position: absolute;
-  bottom: 0;
   left: 50%;
-  -ms-transform: translate(-50%, 0);
-  transform: translate(-50%, 0);
+  bottom: 3%;
+  transform: translateX(-50%);
 }
 
 .bottomLeft {
