@@ -117,8 +117,10 @@ class Message extends StatelessWidget {
               children: [
                 // if (ownMessage && event.messageType == MessageTypes.Image)
                 //   ReplyIconWidget(isOwnMessage: ownMessage),
-                Expanded(
-                  flex: MessageStyle.messageFlexMobile,
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MessageStyle.messageBubbleWidth(context),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
