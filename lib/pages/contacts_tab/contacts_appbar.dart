@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/contacts_tab/contacts_appbar_style.dart';
+import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -55,6 +56,9 @@ class ContactsAppBar extends StatelessWidget {
                   return SizedBox(
                     height: 48,
                     child: TextField(
+                      onTapOutside: (event) {
+                        dismissKeyboard();
+                      },
                       focusNode: searchFocusNode,
                       controller: textEditingController,
                       textInputAction: TextInputAction.search,

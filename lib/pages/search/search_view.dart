@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
+import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -145,6 +146,9 @@ class SearchView extends StatelessWidget {
             const SizedBox(width: 4.0),
             Expanded(
               child: TextField(
+                onTapOutside: (event) {
+                  dismissKeyboard();
+                },
                 controller: searchController.textEditingController,
                 textInputAction: TextInputAction.search,
                 enabled: true,

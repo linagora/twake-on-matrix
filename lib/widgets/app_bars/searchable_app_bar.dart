@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,9 @@ class SearchableAppBar extends StatelessWidget {
                 builder: (context, searchModeNotifier, child) {
                   if (searchModeNotifier) {
                     return TextField(
+                      onTapOutside: (event) {
+                        dismissKeyboard();
+                      },
                       focusNode: focusNode,
                       autofocus: true,
                       maxLines: 1,

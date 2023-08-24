@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,8 +9,6 @@ class SelectedContactsMapChangeNotifier extends ChangeNotifier {
       .where((contact) => selectedContactsMap[contact]?.value ?? false);
 
   void onContactTileTap(BuildContext context, PresentationContact contact) {
-    dismissKeyboard();
-
     final oldVal = selectedContactsMap[contact]?.value ?? false;
     final newVal = !oldVal;
     selectedContactsMap.putIfAbsent(contact, () => ValueNotifier(newVal));
