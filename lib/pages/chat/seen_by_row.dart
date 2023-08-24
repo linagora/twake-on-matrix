@@ -27,34 +27,43 @@ class SeenByRow extends StatelessWidget {
       controller.timeline!,
       eventId: eventId,
     );
+    if (eventStatus == EventStatus.error) {
+      return Icon(
+        Icons.error,
+        color: Colors.red,
+        size: MessageTimeStyle.seenByRowIconSize,
+      );
+    }
+    if (eventStatus == EventStatus.sending) {
+      return SvgPicture.asset(
+        ImagePaths.icSending,
+        colorFilter: ColorFilter.mode(
+          timelineOverlayMessage
+              ? Colors.white
+              : Theme.of(context).colorScheme.primary,
+          BlendMode.srcIn,
+        ),
+        width: MessageTimeStyle.seenByRowIconSize,
+        height: MessageTimeStyle.seenByRowIconSize,
+      );
+    }
+    if (seenByUsers.isEmpty) {
+      return Icon(
+        Icons.done,
+        color: timelineOverlayMessage
+            ? Colors.white
+            : Theme.of(context).colorScheme.primary,
+        size: MessageTimeStyle.seenByRowIconSize,
+      );
+    }
+    return Icon(
+      Icons.done_all,
+      color: timelineOverlayMessage
+          ? Colors.white
+          : Theme.of(context).colorScheme.primary,
+      size: MessageTimeStyle.seenByRowIconSize,
+    );
     // const maxAvatars = 7;
-    return eventStatus == EventStatus.sending
-        ? SvgPicture.asset(
-            ImagePaths.icSending,
-            colorFilter: ColorFilter.mode(
-              timelineOverlayMessage
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.primary,
-              BlendMode.srcIn,
-            ),
-            width: MessageTimeStyle.seenByRowIconSize,
-            height: MessageTimeStyle.seenByRowIconSize,
-          )
-        : seenByUsers.isEmpty
-            ? Icon(
-                Icons.done,
-                color: timelineOverlayMessage
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.primary,
-                size: MessageTimeStyle.seenByRowIconSize,
-              )
-            : Icon(
-                Icons.done_all,
-                color: timelineOverlayMessage
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.primary,
-                size: MessageTimeStyle.seenByRowIconSize,
-              );
     // return Container(
     //   width: double.infinity,
     //   alignment: Alignment.center,

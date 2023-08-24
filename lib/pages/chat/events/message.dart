@@ -583,9 +583,6 @@ class Message extends StatelessWidget {
 
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
     if (controller.selectMode || event.room.isDirectChat) {
-      if (event.status == EventStatus.error) {
-        return const Icon(Icons.error, color: Colors.red);
-      }
       return const SizedBox();
     }
 
@@ -605,21 +602,7 @@ class Message extends StatelessWidget {
       );
     }
 
-    return SizedBox(
-      width: MessageStyle.avatarSize,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 4.0),
-        child: Center(
-          child: SizedBox(
-            width: MessageStyle.errorStatusPlaceHolderWidth,
-            height: MessageStyle.errorStatusPlaceHolderHeight,
-            child: event.status == EventStatus.error
-                ? const Icon(Icons.error, color: Colors.red)
-                : null,
-          ),
-        ),
-      ),
-    );
+    return const SizedBox(width: MessageStyle.avatarSize);
   }
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
