@@ -15,7 +15,6 @@ class AppScaffoldView extends StatelessWidget {
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
   final PageController pageController;
   final Future<Profile?> fetchOwnProfile;
-  final int activeNavigationBarIndex;
   final OnOpenSearchPage onOpenSearchPage;
   final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
@@ -39,7 +38,6 @@ class AppScaffoldView extends StatelessWidget {
     required this.activeNavigationBar,
     required this.pageController,
     required this.fetchOwnProfile,
-    required this.activeNavigationBarIndex,
     required this.onOpenSearchPage,
     required this.onCloseSearchPage,
     required this.onDestinationSelected,
@@ -147,7 +145,7 @@ class AppScaffoldView extends StatelessWidget {
                 children: [
                   NavigationBar(
                     height: ResponsiveUtils.heightBottomNavigation,
-                    selectedIndex: activeNavigationBarIndex,
+                    selectedIndex: _getActiveBottomNavigationBarIndex(),
                     destinations: getNavigationDestinations(context),
                     onDestinationSelected: onDestinationSelected,
                   ),
@@ -158,6 +156,19 @@ class AppScaffoldView extends StatelessWidget {
         )
       },
     );
+  }
+
+  int _getActiveBottomNavigationBarIndex() {
+    switch (activeNavigationBar.value) {
+      case AdaptiveDestinationEnum.contacts:
+        return 0;
+      case AdaptiveDestinationEnum.rooms:
+        return 1;
+      case AdaptiveDestinationEnum.stories:
+        return 2;
+      default:
+        return 1;
+    }
   }
 
   Widget _primaryNavigationBarBuilder(BuildContext context) {

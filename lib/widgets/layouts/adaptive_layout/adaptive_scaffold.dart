@@ -58,17 +58,6 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
     }
   }
 
-  int get activeNavigationBarIndex {
-    switch (activeNavigationBar.value) {
-      case AdaptiveDestinationEnum.contacts:
-        return 0;
-      case AdaptiveDestinationEnum.rooms:
-        return 1;
-      default:
-        return 1;
-    }
-  }
-
   void clientSelected(
     Object object,
     BuildContext context,
@@ -111,7 +100,6 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
         activeNavigationBar: activeNavigationBar,
         pageController: pageController,
         fetchOwnProfile: fetchOwnProfile(),
-        activeNavigationBarIndex: activeNavigationBarIndex,
         onOpenSearchPage: _onOpenSearchPage,
         onCloseSearchPage: _onCloseSearchPage,
         onDestinationSelected: onDestinationSelected,
