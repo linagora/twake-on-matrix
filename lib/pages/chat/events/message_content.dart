@@ -412,15 +412,6 @@ class _MessageImageBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (event.status == EventStatus.error) {
-      return SizedBox(
-        width: MessageContentStyle.imageBubbleWidth,
-        height: MessageContentStyle.imageBubbleHeight,
-        child: const Center(
-          child: Icon(Icons.error, color: Colors.red),
-        ),
-      );
-    }
     final matrixFile = event.getMatrixFile();
     if (matrixFile != null &&
         matrixFile.filePath != null &&
