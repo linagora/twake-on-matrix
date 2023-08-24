@@ -705,5 +705,7 @@
       "username": {},
       "joinRules": {}
     }
-  }
+  },
+  "passwordsDoNotMatch": "Mật khẩu không đúng!",
+  "@passwordsDoNotMatch": {}
 }
