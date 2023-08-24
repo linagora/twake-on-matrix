@@ -34,8 +34,8 @@ class MessageContent extends StatelessWidget {
   final void Function(Event)? onInfoTab;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
-  final Function()? onTapPreview;
-  final Function()? onTapSelectMode;
+  final void Function()? onTapPreview;
+  final void Function()? onTapSelectMode;
   final ChatController controller;
 
   const MessageContent(
@@ -123,34 +123,10 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.status == EventStatus.error) {
-              return SizedBox(
-                width: MessageContentStyle.imageBubbleWidth,
-                height: MessageContentStyle.imageBubbleHeight,
-                child: const Center(
-                  child: Icon(Icons.error, color: Colors.red),
-                ),
-              );
-            } else if (event.status == EventStatus.sending) {
-              final matrixFile = event.getMatrixFile();
-              if (matrixFile != null &&
-                  matrixFile.filePath != null &&
-                  matrixFile is MatrixImageFile) {
-                return SendImageInfoWidget(
-                  matrixFile: matrixFile,
-                  event: event,
-                  onTapPreview: onTapPreview,
-                );
-              }
-            }
-            return ImageBubble(
-              event,
-              width: MessageContentStyle.imageBubbleWidth,
-              height: MessageContentStyle.imageBubbleHeight,
-              fit: BoxFit.cover,
-              onTapSelectMode: onTapSelectMode,
+            return MessageImageBuilder(
+              event: event,
               onTapPreview: onTapPreview,
-              animated: true,
+              onTapSelectMode: onTapSelectMode,
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
@@ -417,6 +393,54 @@ class _ButtonContent extends StatelessWidget {
         foregroundColor: textColor,
         backgroundColor: MessageContentStyle.backgroundColorButton,
       ),
+    );
+  }
+}
+
+class MessageImageBuilder extends StatelessWidget {
+  final Event event;
+
+  final void Function()? onTapPreview;
+
+  final void Function()? onTapSelectMode;
+
+  const MessageImageBuilder({
+    super.key,
+    required this.event,
+    this.onTapPreview,
+    this.onTapSelectMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (event.status == EventStatus.error) {
+      return SizedBox(
+        width: MessageContentStyle.imageBubbleWidth,
+        height: MessageContentStyle.imageBubbleHeight,
+        child: const Center(
+          child: Icon(Icons.error, color: Colors.red),
+        ),
+      );
+    }
+    final matrixFile = event.getMatrixFile();
+    if (matrixFile != null &&
+        matrixFile.filePath != null &&
+        matrixFile is MatrixImageFile) {
+      return SendingImageWidget(
+        matrixFile: matrixFile,
+        event: event,
+        onTapPreview: onTapPreview,
+      );
+    }
+
+    return ImageBubble(
+      event,
+      width: MessageContentStyle.imageBubbleWidth,
+      height: MessageContentStyle.imageBubbleHeight,
+      fit: BoxFit.cover,
+      onTapSelectMode: onTapSelectMode,
+      onTapPreview: onTapPreview,
+      animated: true,
     );
   }
 }
