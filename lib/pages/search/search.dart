@@ -68,15 +68,7 @@ class SearchController extends State<Search>
         contactPresentationSearch: contactPresentationSearch,
       );
     } else {
-      showFutureLoadingDialog(
-        context: context,
-        future: () async {
-          if (contactPresentationSearch.matrixId != null &&
-              contactPresentationSearch.matrixId!.isNotEmpty) {
-            context.go('/rooms/$roomId');
-          }
-        },
-      );
+      context.go('/rooms/$roomId');
     }
   }
 
