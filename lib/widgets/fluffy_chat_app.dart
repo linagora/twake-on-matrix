@@ -15,13 +15,12 @@ import 'matrix.dart';
 class FluffyChatApp extends StatefulWidget {
   final Widget? testWidget;
   final List<Client> clients;
-  final Map<String, String>? queryParameters;
   static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
+
   const FluffyChatApp({
     Key? key,
     this.testWidget,
     required this.clients,
-    this.queryParameters,
   }) : super(key: key);
 
   /// getInitialLink may rereturn the value multiple times if this view is
