@@ -830,14 +830,13 @@ class ChatController extends State<Chat>
   void sendAgainAction() {
     final event = selectedEvents.first;
     if (event.status.isError) {
-      // event.sendAgain();
+      event.sendAgain();
     }
     final allEditEvents = event
         .aggregatedEvents(timeline!, RelationshipTypes.edit)
         .where((e) => e.status.isError);
-    // ignore: unused_local_variable
     for (final e in allEditEvents) {
-      // e.sendAgain();
+      e.sendAgain();
     }
     setState(() => selectedEvents.clear());
   }
