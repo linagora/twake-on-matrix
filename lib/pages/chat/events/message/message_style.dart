@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 
 class MessageStyle {
   static final bubbleBorderRadius = BorderRadius.circular(20);
@@ -47,4 +48,17 @@ class MessageStyle {
   static double get forwardContainerSize => 40.0;
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
+
+  static const double messageBubbleLargeMaxWidth = 620.0;
+  static const double messageBubbleWatchMaxWidth = 240.0;
+  static const double messageBubbleMobileRatioMaxWidth = 0.80;
+  static double messageBubbleWidth(BuildContext context) {
+    return context.responsiveValue<double>(
+      desktop: messageBubbleLargeMaxWidth,
+      tablet: messageBubbleLargeMaxWidth,
+      mobile:
+          MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
+      watch: messageBubbleWatchMaxWidth,
+    );
+  }
 }
