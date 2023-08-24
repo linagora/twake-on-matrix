@@ -240,19 +240,6 @@ class DraftChatController extends State<DraftChat>
     );
   }
 
-  void onPressedAddMore() {
-    showImagesPickerBottomSheetAction(
-      context: context,
-      onItemAction: (action) => onClickItemAction(
-        action: action,
-        context: context,
-      ),
-      onSendTap: () => sendImages(
-        assets: sortedSelectedAssets,
-      ),
-    );
-  }
-
   void onInputBarChanged(String text) {
     setState(() => inputText = text);
   }
@@ -283,7 +270,9 @@ class DraftChatController extends State<DraftChat>
       matrixId: presentationContact!.matrixId,
       displayName: presentationContact!.displayName,
       onTapDirectDraftChat: inputFocus.requestFocus,
-      onPressedAddMore: onPressedAddMore,
+      onPressedAddMore: () {
+        showMediaPicker(context);
+      },
       onInputBarSubmitted: onInputBarSubmitted,
       emojiPickerAction: emojiPickerAction,
       inputFocus: inputFocus,
