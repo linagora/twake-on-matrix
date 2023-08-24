@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
-class SendingImageWidget extends StatelessWidget {
-  SendingImageWidget({
+class SendingImageInfoWidget extends StatelessWidget {
+  SendingImageInfoWidget({
     super.key,
     required this.matrixFile,
     required this.event,

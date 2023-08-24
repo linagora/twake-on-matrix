@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/pages/chat/events/send_image_info_widget.dart';
+import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -123,7 +123,7 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            return MessageImageBuilder(
+            return _MessageImageBuilder(
               event: event,
               onTapPreview: onTapPreview,
               onTapSelectMode: onTapSelectMode,
@@ -397,15 +397,14 @@ class _ButtonContent extends StatelessWidget {
   }
 }
 
-class MessageImageBuilder extends StatelessWidget {
+class _MessageImageBuilder extends StatelessWidget {
   final Event event;
 
   final void Function()? onTapPreview;
 
   final void Function()? onTapSelectMode;
 
-  const MessageImageBuilder({
-    super.key,
+  const _MessageImageBuilder({
     required this.event,
     this.onTapPreview,
     this.onTapSelectMode,
@@ -426,7 +425,7 @@ class MessageImageBuilder extends StatelessWidget {
     if (matrixFile != null &&
         matrixFile.filePath != null &&
         matrixFile is MatrixImageFile) {
-      return SendingImageWidget(
+      return SendingImageInfoWidget(
         matrixFile: matrixFile,
         event: event,
         onTapPreview: onTapPreview,
