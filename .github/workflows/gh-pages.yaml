@@ -2,6 +2,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+  pull_request:
 
 env:
   FLUTTER_VERSION: 3.10.6
@@ -9,8 +10,9 @@ env:
 name: Deploying on GitHub Pages
 
 jobs:
-  deploy_page:
-    name: Deploy on GitHub Pages
+  deploy_preview:
+    name: Deploy preview versions on pull requests
+    if: startsWith(github.ref, "refs/pull/")
     runs-on: ubuntu-latest
 
     steps:
@@ -47,5 +49,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
-          cname: "beta.twake.app"
-          destination_dir: "web"
+          cname: "tk"
+          destination_dir: "${{ github.event.pull_request.number }}"
