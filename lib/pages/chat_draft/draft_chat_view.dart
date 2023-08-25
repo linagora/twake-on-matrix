@@ -69,8 +69,7 @@ class DraftChatView extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: Container(
-            constraints:
-                const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
+            constraints: DraftChatViewStyle.containerMaxWidthConstraints,
             child: Column(
               children: [
                 Expanded(
@@ -83,35 +82,35 @@ class DraftChatView extends StatelessWidget {
                 Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
+                      padding: DraftChatViewStyle.inputWidgetPadding,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           TwakeIconButton(
                             tooltip: L10n.of(context)!.more,
-                            margin: const EdgeInsets.only(right: 4.0),
+                            margin: DraftChatViewStyle.buttonAddMoreMargin,
                             icon: Icons.add_circle_outline,
                             onPressed: chatDraftArgument.onPressedAddMore,
                           ),
                           Expanded(
                             child: Container(
                               alignment: Alignment.center,
-                              padding:
-                                  const EdgeInsetsDirectional.only(start: 12.0),
-                              margin:
-                                  const EdgeInsetsDirectional.only(end: 8.0),
+                              padding: DraftChatViewStyle.bottomBarPadding,
+                              margin: DraftChatViewStyle.bottomBarMargin,
                               decoration: BoxDecoration(
                                 borderRadius:
-                                    const BorderRadius.all(Radius.circular(25)),
+                                    DraftChatViewStyle.bottomBarBorderRadius,
                                 color: Theme.of(context).colorScheme.surface,
                               ),
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: InputBar(
-                                      minLines: 1,
-                                      maxLines: 8,
+                                      minLines:
+                                          DraftChatViewStyle.minLinesInputBar,
+                                      maxLines:
+                                          DraftChatViewStyle.maxLinesInputBar,
                                       autofocus: !PlatformInfos.isMobile,
                                       keyboardType: TextInputType.multiline,
                                       textInputAction: AppConfig.sendOnEnter
@@ -122,19 +121,8 @@ class DraftChatView extends StatelessWidget {
                                       focusNode: chatDraftArgument.inputFocus,
                                       controller: chatDraftArgument
                                           .textEditingController,
-                                      decoration: InputDecoration(
-                                        hintText: L10n.of(context)!.chatMessage,
-                                        hintMaxLines: 1,
-                                        hintStyle: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.merge(
-                                              Theme.of(context)
-                                                  .inputDecorationTheme
-                                                  .hintStyle,
-                                            )
-                                            .copyWith(letterSpacing: -0.15),
-                                      ),
+                                      decoration: DraftChatViewStyle
+                                          .bottomBarInputDecoration(context),
                                       onChanged:
                                           chatDraftArgument.onInputBarChanged,
                                     ),
@@ -166,44 +154,25 @@ class DraftChatView extends StatelessWidget {
                                             child: child,
                                           );
                                         },
-                                        child: chatDraftArgument
-                                                    .showEmojiPicker ==
-                                                false
-                                            ? TwakeIconButton(
-                                                paddingAll: chatDraftArgument
-                                                        .inputText.isEmpty
-                                                    ? 5.0
-                                                    : 12,
-                                                tooltip:
-                                                    L10n.of(context)!.emojis,
-                                                onPressed: chatDraftArgument
-                                                    .emojiPickerAction,
-                                                icon: Icons.tag_faces,
-                                              )
-                                            : TwakeIconButton(
-                                                paddingAll: chatDraftArgument
-                                                        .inputText.isEmpty
-                                                    ? 5.0
-                                                    : 12,
-                                                tooltip:
-                                                    L10n.of(context)!.keyboard,
-                                                onPressed: () =>
-                                                    chatDraftArgument.inputFocus
-                                                        ?.requestFocus(),
-                                                icon: Icons.keyboard,
-                                              ),
+                                        child: _keyBoardShortcutsButtonBuilder(
+                                          context,
+                                          chatDraftArgument.showEmojiPicker ==
+                                              false,
+                                        ),
                                       ),
                                     ),
                                   ),
                                   if (PlatformInfos.platformCanRecord &&
                                       chatDraftArgument.inputText.isEmpty)
                                     Container(
-                                      height: 56,
+                                      height: DraftChatViewStyle
+                                          .bottomBarButtonButtonContainerHeight,
                                       alignment: Alignment.center,
                                       child: TwakeIconButton(
-                                        margin:
-                                            const EdgeInsets.only(right: 7.0),
-                                        paddingAll: 5.0,
+                                        margin: DraftChatViewStyle
+                                            .bottomBarButtonRecordMargin,
+                                        paddingAll: DraftChatViewStyle
+                                            .bottomBarButtonRecordPaddingAll,
                                         onPressed: () {},
                                         tooltip: L10n.of(context)!.send,
                                         icon: Icons.mic_none,
@@ -216,7 +185,8 @@ class DraftChatView extends StatelessWidget {
                           if (!PlatformInfos.isMobile ||
                               chatDraftArgument.inputText.isNotEmpty)
                             Container(
-                              height: 56,
+                              height: DraftChatViewStyle
+                                  .bottomBarButtonButtonContainerHeight,
                               alignment: Alignment.center,
                               child: TwakeIconButton(
                                 size: ChatInputRowStyle.sendIconButtonSize,
@@ -229,17 +199,17 @@ class DraftChatView extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      constraints: const BoxConstraints(
-                        maxWidth: FluffyThemes.columnWidth * 2.5,
-                      ),
+                      constraints:
+                          DraftChatViewStyle.containerMaxWidthConstraints,
                       alignment: Alignment.center,
                       child: AnimatedContainer(
                         duration: FluffyThemes.animationDuration,
                         curve: FluffyThemes.animationCurve,
                         width: MediaQuery.of(context).size.width,
-                        height: chatDraftArgument.showEmojiPicker == true
-                            ? MediaQuery.of(context).size.height / 3
-                            : 0,
+                        height: DraftChatViewStyle.animatedContainerHeight(
+                          context,
+                          chatDraftArgument.showEmojiPicker == true,
+                        ),
                         child: chatDraftArgument.showEmojiPicker == true
                             ? EmojiPicker(
                                 onEmojiSelected: chatDraftArgument
@@ -269,6 +239,23 @@ class DraftChatView extends StatelessWidget {
       ),
     );
   }
+
+  Widget _keyBoardShortcutsButtonBuilder(
+    BuildContext context,
+    bool isEmojiPicker,
+  ) {
+    return TwakeIconButton(
+      paddingAll: DraftChatViewStyle.bottomBarButtonPaddingAll(
+        chatDraftArgument.inputText.isEmpty,
+      ),
+      tooltip:
+          isEmojiPicker ? L10n.of(context)!.keyboard : L10n.of(context)!.emojis,
+      onPressed: isEmojiPicker
+          ? () => chatDraftArgument.inputFocus?.requestFocus()
+          : chatDraftArgument.emojiPickerAction,
+      icon: isEmojiPicker ? Icons.keyboard : Icons.tag_faces,
+    );
+  }
 }
 
 class _EmptyChatTitle extends StatelessWidget {
@@ -281,7 +268,7 @@ class _EmptyChatTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
+      padding: DraftChatViewStyle.emptyChatParentPadding,
       child: InkWell(
         child: FutureBuilder<Profile>(
           future: Matrix.of(context).client.getProfileFromUserId(receiverId),
@@ -289,7 +276,7 @@ class _EmptyChatTitle extends StatelessWidget {
             return Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(right: 3, top: 3),
+                  padding: DraftChatViewStyle.emptyChatChildrenPadding,
                   child: Hero(
                     tag: 'content_banner',
                     child: Avatar(
@@ -302,7 +289,7 @@ class _EmptyChatTitle extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: DraftChatViewStyle.emptyChatGapWidth),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
