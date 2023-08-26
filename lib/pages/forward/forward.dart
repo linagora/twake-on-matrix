@@ -34,7 +34,7 @@ class ForwardController extends State<Forward> {
 
   Timeline? timeline;
 
-  String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+  String? get roomId => widget.sendFromRoomId;
 
   final AutoScrollController forwardListController = AutoScrollController();
 

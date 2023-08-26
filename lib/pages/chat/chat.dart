@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -824,7 +825,12 @@ class ChatController extends State<Chat>
       );
     }
     setState(() => selectedEvents.clear());
-    context.go('/rooms/forward', extra: roomId);
+    context.go(
+      '/rooms/forward',
+      extra: ForwardArgument(
+        fromRoomId: roomId ?? '',
+      ),
+    );
   }
 
   void sendAgainAction() {

@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
+import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
@@ -217,11 +218,16 @@ abstract class AppRoutes {
             ),
             GoRoute(
               path: 'forward',
+              redirect: (context, state) {
+                if (state.extra is ForwardArgument) return '/rooms/forward';
+
+                return '${state.fullPath?.replaceAll('forward', '')}';
+              },
               pageBuilder: (context, state) {
-                final extra = state.extra as String?;
+                final extra = state.extra as ForwardArgument;
                 return defaultPageBuilder(
                   context,
-                  Forward(sendFromRoomId: extra ?? ''),
+                  Forward(sendFromRoomId: extra.fromRoomId),
                 );
               },
             ),
