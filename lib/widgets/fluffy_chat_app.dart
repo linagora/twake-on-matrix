@@ -30,8 +30,10 @@ class FluffyChatApp extends StatefulWidget {
 
   // Router must be outside of build method so that hot reload does not reset
   // the current path.
-  static final GoRouter router =
-      GoRouter(routes: AppRoutes.routes, debugLogDiagnostics: true);
+  static final GoRouter router = GoRouter(
+    routes: AppRoutes.routes,
+    debugLogDiagnostics: true,
+  );
 
   @override
   FluffyChatAppState createState() => FluffyChatAppState();
