@@ -707,5 +707,1125 @@
     }
   },
   "passwordsDoNotMatch": "Mật khẩu không đúng!",
-  "@passwordsDoNotMatch": {}
+  "@passwordsDoNotMatch": {},
+  "containsUserName": "Chứa tên người dùng",
+  "@containsUserName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "copyToClipboard": "Sao chép vào bộ nhớ tạm",
+  "@copyToClipboard": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "commandInvalid": "Lệnh không hợp lệ",
+  "@commandInvalid": {
+    "type": "text"
+  },
+  "commandHint_unban": "Bỏ cấm người dùng khỏi cuộc trò chuyện",
+  "@commandHint_unban": {
+    "type": "text",
+    "description": "Usage hint for the command /unban"
+  },
+  "commandMissing": "{command} không phải là một lệnh.",
+  "@commandMissing": {
+    "type": "text",
+    "placeholders": {
+      "command": {}
+    },
+    "description": "State that {command} is not a valid /command."
+  },
+  "editChatPermissions": "Chỉnh sửa quyền cuộc trò chuyện",
+  "@editChatPermissions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inviteText": "{username} đã mời bạn tham gia FluffyChat.\n1. Cài đặt FluffyChat: https://fluffychat.im\n2. Đăng ký hoặc đăng nhập\n3. Mở link mời: {link}",
+  "@inviteText": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "link": {}
+    }
+  },
+  "editRoomAliases": "Chỉnh sửa biệt danh cuộc trò chuyện",
+  "@editRoomAliases": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emotePacks": "Gói biểu tượng cảm xúc cho cuộc trò chuyện",
+  "@emotePacks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emptyChat": "Cuộc trò chuyện trống",
+  "@emptyChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enableEncryption": "Kích hoạt mã hóa",
+  "@enableEncryption": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "encryptionNotEnabled": "Mã hóa không được kích hoạt",
+  "@encryptionNotEnabled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "groups": "Cuộc trò chuyện",
+  "@groups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inviteContactToGroup": "Mời liên hệ vào {groupName}",
+  "@inviteContactToGroup": {
+    "type": "text",
+    "placeholders": {
+      "groupName": {}
+    }
+  },
+  "kickedAndBanned": "🙅 {username} đã đá và cấm {targetName}",
+  "@kickedAndBanned": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "targetName": {}
+    }
+  },
+  "dehydrateTorLong": "Đối với người dùng TOR, khuyến cáo xuất phiên trước khi đóng cửa sổ.",
+  "@dehydrateTorLong": {},
+  "hydrateTorLong": "Lần trước bạn có xuất phiên của mình trên TOR không? Nhanh chóng nhập nó và tiếp tục trò chuyện.",
+  "@hydrateTorLong": {},
+  "lastActiveAgo": "Hoạt động lần cuối: {localizedTimeShort}",
+  "@lastActiveAgo": {
+    "type": "text",
+    "placeholders": {
+      "localizedTimeShort": {}
+    }
+  },
+  "lightTheme": "Sáng",
+  "@lightTheme": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "dehydrateWarning": "Hành động này không thể được hoàn tác. Đảm bảo bạn đã lưu trữ tệp sao lưu một cách an toàn.",
+  "@dehydrateWarning": {},
+  "loadingPleaseWait": "Đang tải... Vui lòng chờ.",
+  "@loadingPleaseWait": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "license": "Giấy phép",
+  "@license": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "hydrateTor": "Người dùng TOR: Xuất phiên nhập",
+  "@hydrateTor": {},
+  "logInTo": "Đăng nhập vào {homeserver}",
+  "@logInTo": {
+    "type": "text",
+    "placeholders": {
+      "homeserver": {}
+    }
+  },
+  "locationDisabledNotice": "Dịch vụ định vị đã bị vô hiệu hóa. Vui lòng cho phép họ chia sẻ vị trí của bạn.",
+  "@locationDisabledNotice": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "needPantalaimonWarning": "Xin lưu ý rằng hiện tại bạn cần có Pantalaimon để sử dụng mã hóa hai đầu.",
+  "@needPantalaimonWarning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newVerificationRequest": "Yêu cầu xác minh mới!",
+  "@newVerificationRequest": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noGoogleServicesWarning": "Có vẻ như điện thoại của bạn không có dịch vụ Google. Đó là một quyết định tốt cho sự riêng tư của bạn! Để nhận thông báo đẩy trong FluffyChat, chúng tôi khuyên bạn nên sử dụng https://microg.org/ hoặc https://unifiedpush.org/.",
+  "@noGoogleServicesWarning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPasswordRecoveryDescription": "Bạn chưa thêm cách khôi phục mật khẩu của mình.",
+  "@noPasswordRecoveryDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "notificationsEnabledForThisAccount": "Đã bật thông báo cho tài khoản này",
+  "@notificationsEnabledForThisAccount": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openVideoCamera": "Mở camera để quay video",
+  "@openVideoCamera": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oneClientLoggedOut": "Một trong những khách hàng của bạn đã bị đăng xuất",
+  "@oneClientLoggedOut": {},
+  "addAccount": "Thêm tài khoản",
+  "@addAccount": {},
+  "roomAvatarMaxFileSizeLong": "Kích cỡ ảnh đại diện cần bé hơn {max}",
+  "@roomAvatarMaxFileSizeLong": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "hasCreatedAGroupChat": "tạo cuộc trò chuyện \"{groupName}\"",
+  "@hasCreatedAGroupChat": {
+    "type": "text",
+    "placeholders": {
+      "groupName": {}
+    }
+  },
+  "rejectInvite": "Không cảm ơn, xóa",
+  "@rejectInvite": {},
+  "today": "Hôm nay",
+  "@today": {},
+  "yesterday": "Hôm qua",
+  "@yesterday": {},
+  "adminPanel": "Bảng quản trị",
+  "@adminPanel": {},
+  "askToInvite": " muốn bạn tham gia cuộc trò chuyện này. Bạn nghĩ sao?",
+  "@askToInvite": {},
+  "acceptInvite": "Đúng, tham gia",
+  "@acceptInvite": {},
+  "bundleName": "Tên gói",
+  "@bundleName": {},
+  "openInMaps": "Mở trong bản đồ",
+  "@openInMaps": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "or": "Hoặc",
+  "@or": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enableMultiAccounts": "(BETA) Cho phép nhiều tài khoản trên thiết bị này",
+  "@enableMultiAccounts": {},
+  "link": "Liên kết",
+  "@link": {},
+  "serverRequiresEmail": "Máy chủ cần xác thực địa chỉ email của bạn để đăng ký.",
+  "@serverRequiresEmail": {},
+  "optionalGroupName": "(Tùy chọn) Tên nhóm",
+  "@optionalGroupName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "participant": "Người tham gia",
+  "@participant": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "passphraseOrKey": "mật khẩu hoặc khóa khôi phục",
+  "@passphraseOrKey": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "passwordForgotten": "Quên mật khẩu",
+  "@passwordForgotten": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "password": "Mật khẩu",
+  "@password": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "passwordHasBeenChanged": "Mật khẩu đã được thay đổi",
+  "@passwordHasBeenChanged": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pleaseEnterRecoveryKeyDescription": "Để mở khóa các tin nhắn cũ của bạn, vui lòng nhập khóa khôi phục đã được tạo trong phiên trước đó. Khóa khôi phục KHÔNG phải là mật khẩu của bạn.",
+  "@pleaseEnterRecoveryKeyDescription": {},
+  "placeCall": "Đặt cuộc gọi",
+  "@placeCall": {},
+  "openChat": "Mở cuộc trò chuyện",
+  "@openChat": {},
+  "markAsRead": "Đánh dấu là đã đọc",
+  "@markAsRead": {},
+  "unsupportedAndroidVersion": "Phiên bản Android không được hỗ trợ",
+  "@unsupportedAndroidVersion": {},
+  "unsupportedAndroidVersionLong": "Tính năng này yêu cầu phiên bản Android mới hơn. Vui lòng kiểm tra các bản cập nhật hoặc đội ngũ hỗ trợ Lineage OS.",
+  "@unsupportedAndroidVersionLong": {},
+  "videoCallsBetaWarning": "Xin lưu ý rằng cuộc gọi điện video hiện đang ở giai đoạn thử nghiệm. Chúng có thể không hoạt động như mong đợi hoặc không hoạt động trên tất cả các nền tảng.",
+  "@videoCallsBetaWarning": {},
+  "emailOrUsername": "Email hoặc tên người dùng",
+  "@emailOrUsername": {},
+  "indexedDbErrorTitle": "Vấn đề về chế độ riêng tư",
+  "@indexedDbErrorTitle": {},
+  "indexedDbErrorLong": "Rất tiếc, tính năng lưu trữ tin nhắn không được bật ở chế độ riêng tư theo mặc định.\nVui lòng truy cập\n  - về: cấu hình\n  - đặt dom.indexedDB.privateBrowsing.enabled thành true\nNếu không, bạn không thể chạy FluffyChat.",
+  "@indexedDbErrorLong": {},
+  "switchToAccount": "Chuyển sang tài khoản {number}",
+  "@switchToAccount": {
+    "type": "number",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "widgetName": "Tên",
+  "@widgetName": {},
+  "widgetUrlError": "Đây không phải URL hợp lệ.",
+  "@widgetUrlError": {},
+  "widgetNameError": "Vui lòng cung cấp tên hiển thị.",
+  "@widgetNameError": {},
+  "errorAddingWidget": "Lỗi khi thêm tiện ích.",
+  "@errorAddingWidget": {},
+  "youRejectedTheInvitation": "Bạn đã từ chối lời mời",
+  "@youRejectedTheInvitation": {},
+  "youJoinedTheChat": "Bạn đã tham gia cuộc trò chuyện",
+  "@youJoinedTheChat": {},
+  "youInvitedBy": "📩 Bạn đã được mời bởi {user}",
+  "@youInvitedBy": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youInvitedUser": "📩 Bạn đã mời {user}",
+  "@youInvitedUser": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youBannedUser": "Bạn đã cấm {user}",
+  "@youBannedUser": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youHaveWithdrawnTheInvitationFor": "Bạn đã thu hồi lời mời dành cho {user}",
+  "@youHaveWithdrawnTheInvitationFor": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youAcceptedTheInvitation": "👍 Bạn đã chấp nhận lời mời",
+  "@youAcceptedTheInvitation": {},
+  "users": "Người dùng",
+  "@users": {},
+  "unlockOldMessages": "Mở khóa tin nhắn cũ",
+  "@unlockOldMessages": {},
+  "storeInSecureStorageDescription": "Lưu trữ khóa khôi phục trong bộ lưu trữ an toàn của thiết bị này.",
+  "@storeInSecureStorageDescription": {},
+  "saveKeyManuallyDescription": "Lưu khóa này thủ công bằng cách kích hoạt hộp thoại chia sẻ hệ thống hoặc bảng nhớ tạm.",
+  "@saveKeyManuallyDescription": {},
+  "foregroundServiceRunning": "Thông báo này xuất hiện khi dịch vụ nền trước đang chạy.",
+  "@foregroundServiceRunning": {},
+  "appearOnTopDetails": "Cho phép ứng dụng xuất hiện trên cùng (không cần thiết nếu bạn đã thiết lập Fluffychat làm tài khoản gọi điện)",
+  "@appearOnTopDetails": {},
+  "callingAccount": "Tài khoản gọi điện",
+  "@callingAccount": {},
+  "callingPermissions": "Quyền gọi điện",
+  "@callingPermissions": {},
+  "pleaseClickOnLink": "Vui lòng nhấp vào liên kết trong email và tiếp tục.",
+  "@pleaseClickOnLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pleaseEnter4Digits": "Vui lòng nhập 4 kí tự hoặc để trống để vô hiệu hóa khóa ứng dụng.",
+  "@pleaseEnter4Digits": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "membersCount": "{count} Thành viên",
+  "@membersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "keyboard": "Bàn phím",
+  "@keyboard": {},
+  "changeChatAvatar": "Thay đổi ảnh đại diện cuộc trò chuyện",
+  "@changeChatAvatar": {},
+  "roomAvatarMaxFileSize": "Kích cỡ ảnh đại diện quá lớn",
+  "@roomAvatarMaxFileSize": {},
+  "continueProcess": "Tiếp tục",
+  "@continueProcess": {},
+  "configureChat": "Cấu hình cuộc trò chuyện",
+  "@configureChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "containsDisplayName": "Chứa tên hiển thị",
+  "@containsDisplayName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "contentHasBeenReported": "Nội dung đã được báo cáo đến quản trị viên server",
+  "@contentHasBeenReported": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "copiedToClipboard": "Đã sao chép vào bộ nhớ tạm",
+  "@copiedToClipboard": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "createNewSpace": "Khoảng trắng mới",
+  "@createNewSpace": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "crossSigningEnabled": "Kí chéo",
+  "@crossSigningEnabled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "darkTheme": "Tối",
+  "@darkTheme": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "defaultPermissionLevel": "Mức quyền hạn mặc định",
+  "@defaultPermissionLevel": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "directChats": "Cuộc trò chuyện trực tiếp",
+  "@directChats": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "discover": "Khám phá",
+  "@discover": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "edit": "Chỉnh sửa",
+  "@edit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editBlockedServers": "Chỉnh sửa máy chủ bị chặn",
+  "@editBlockedServers": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editRoomAvatar": "Chỉnh sửa ảnh đại diện cuộc trò chuyện",
+  "@editRoomAvatar": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emoteExists": "Biểu được cảm xúc đã tồn tại!",
+  "@emoteExists": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emoteInvalid": "Mã biểu tượng cảm xúc không hợp lệ!",
+  "@emoteInvalid": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emoteShortcode": "Mã biểu tượng cảm xúc",
+  "@emoteShortcode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "emoteWarnNeedToPick": "Bạn cần chọn một mã biểu tượng cảm xúc và một hình ảnh!",
+  "@emoteWarnNeedToPick": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enableEmotesGlobally": "Kích hoạt gói biểu tượng cảm xúc trên toàn cầu",
+  "@enableEmotesGlobally": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enableEncryptionWarning": "Bạn sẽ không thể vô hiệu hóa mã hóa nữa. Bạn có chắc không?",
+  "@enableEncryptionWarning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "encrypted": "Đã mã hóa",
+  "@encrypted": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "encryption": "Mã hóa",
+  "@encryption": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "endedTheCall": "{senderName} đã kết thúc cuộc gọi",
+  "@endedTheCall": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "enterGroupName": "Nhập tên cuộc trò chuyện",
+  "@enterGroupName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterAnEmailAddress": "Nhập địa chỉ email",
+  "@enterAnEmailAddress": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterASpacepName": "Nhập tên khoảng trắng",
+  "@enterASpacepName": {},
+  "homeserver": "Máy chủ",
+  "@homeserver": {},
+  "enterYourHomeserver": "Nhập máy chủ của bạn",
+  "@enterYourHomeserver": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "errorObtainingLocation": "Lỗi lấy vị trí: {error}",
+  "@errorObtainingLocation": {
+    "type": "text",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "extremeOffensive": "Rất phản cảm",
+  "@extremeOffensive": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fileName": "Tên tệp",
+  "@fileName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fluffychat": "FluffyChat",
+  "@fluffychat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fontSize": "Cỡ chữ",
+  "@fontSize": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "forward": "Chuyển tiếp",
+  "@forward": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "friday": "Thứ sáu",
+  "@friday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromJoining": "Từ khi tham gia",
+  "@fromJoining": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fromTheInvitation": "Từ lời mời",
+  "@fromTheInvitation": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "goToTheNewRoom": "Đi đến cuộc trò chuyện mới",
+  "@goToTheNewRoom": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "group": "Cuộc trò chuyện",
+  "@group": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "groupDescription": "Mô tả cuộc trò chuyện",
+  "@groupDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "groupDescriptionHasBeenChanged": "Đã thay đổi mô tả cuộc trò chuyện",
+  "@groupDescriptionHasBeenChanged": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "groupIsPublic": "Cuộc trò chuyện công khai",
+  "@groupIsPublic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "groupWith": "Cuộc trò chuyện với {displayname}",
+  "@groupWith": {
+    "type": "text",
+    "placeholders": {
+      "displayname": {}
+    }
+  },
+  "guestsAreForbidden": "Khách bị cấm",
+  "@guestsAreForbidden": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "guestsCanJoin": "Khách có thể tham gia",
+  "@guestsCanJoin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "hasWithdrawnTheInvitationFor": "{username} đã thu hồi lời mời về {targetName}",
+  "@hasWithdrawnTheInvitationFor": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "targetName": {}
+    }
+  },
+  "help": "Trợ giúp",
+  "@help": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "hideRedactedEvents": "Ẩn sự kiện đã được xử lý lại",
+  "@hideRedactedEvents": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "hideUnknownEvents": "Ẩn các sự kiện không xác định",
+  "@hideUnknownEvents": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "howOffensiveIsThisContent": "Nội dung này có tính xúc phạm đến mức nào?",
+  "@howOffensiveIsThisContent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "id": "ID",
+  "@id": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "identity": "Định danh",
+  "@identity": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ignore": "Phớt lờ",
+  "@ignore": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ignoredUsers": "Phớt lờ người dùng",
+  "@ignoredUsers": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ignoreListDescription": "Bạn có thể bỏ qua những người dùng đang làm phiền bạn. Bạn sẽ không thể nhận bất kỳ tin nhắn hoặc lời mời trò chuyện nào từ người dùng trong danh sách bỏ qua cá nhân của bạn.",
+  "@ignoreListDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ignoreUsername": "Bỏ qua tên người dùng",
+  "@ignoreUsername": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "iHaveClickedOnLink": "Tôi đã nhấp vào liên kết",
+  "@iHaveClickedOnLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "incorrectPassphraseOrKey": "Mật khẩu hoặc khóa khôi phục không chính xác",
+  "@incorrectPassphraseOrKey": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inoffensive": "Không xúc phạm",
+  "@inoffensive": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inviteContact": "Mời liên hệ",
+  "@inviteContact": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "invited": "Đã mời",
+  "@invited": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "invitedUser": "📩{username} đã mời {targetName}",
+  "@invitedUser": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "targetName": {}
+    }
+  },
+  "invitedUsersOnly": "Chỉ người dùng được mời",
+  "@invitedUsersOnly": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inviteForMe": "Lời mời tới tôi",
+  "@inviteForMe": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Lỗi tải ảnh! Bạn vẫn muốn tiếp tục tạo trò chuyện?",
+  "@youAreUploadingPhotosDoYouWantToCancelOrContinue": {},
+  "isTyping": "đang nhập",
+  "@isTyping": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "joinedTheChat": "👋 {username} đã tham gia cuộc trò chuyện",
+  "@joinedTheChat": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "joinRoom": "Tham gia cuộc trò chuyện",
+  "@joinRoom": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "keysCached": "Các khóa đã được lưu trữ",
+  "@keysCached": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "kicked": "👞 {username} đã đá {targetName}",
+  "@kicked": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "targetName": {}
+    }
+  },
+  "kickFromChat": "Đá khỏi cuộc trò chuyện",
+  "@kickFromChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "lastSeenLongTimeAgo": "Đã xem một khoảng thời gian trước",
+  "@lastSeenLongTimeAgo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "leave": "Rời khỏi",
+  "@leave": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "leftTheChat": "Đã rời khỏi cuộc trò chuyện",
+  "@leftTheChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loadCountMoreParticipants": "Tải thêm {count} người tham gia",
+  "@loadCountMoreParticipants": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dehydrate": "Xuất phiên và xóa thiết bị",
+  "@dehydrate": {},
+  "dehydrateShare": "Đây là bản xuất FluffyChat riêng tư của bạn. Đảm bảo bạn không làm mất nó và giữ nó ở chế độ riêng tư.",
+  "@dehydrateShare": {},
+  "dehydrateTor": "Người dùng TOR: Xuất phiên",
+  "@dehydrateTor": {},
+  "hydrate": "Khôi phục từ tập tin sao lưu",
+  "@hydrate": {},
+  "loadMore": "Tải thêm…",
+  "@loadMore": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "locationPermissionDeniedNotice": "Quyền vị trí bị từ chối. Hãy cấp cho họ để chia sẻ vị trí của bạn.",
+  "@locationPermissionDeniedNotice": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "login": "Đăng nhập",
+  "@login": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loginWithOneClick": "Đăng nhập với một lần nhấp",
+  "@loginWithOneClick": {},
+  "logout": "Đăng xuất",
+  "@logout": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "makeSureTheIdentifierIsValid": "Đảm bảo mã định danh hợp lệ",
+  "@makeSureTheIdentifierIsValid": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "memberChanges": "Thay đổi thành viên",
+  "@memberChanges": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "mention": "Nhắc đến",
+  "@mention": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "messages": "Tin nhắn",
+  "@messages": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageWillBeRemovedWarning": "Tin nhắn sẽ bị xóa đối với tất cả người tham gia",
+  "@messageWillBeRemovedWarning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noSearchResult": "Không có kết quả tìm kiếm phù hợp.",
+  "@noSearchResult": {},
+  "moderator": "Người điều hành",
+  "@moderator": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "monday": "Thứ hai",
+  "@monday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "muteChat": "Tắt thông báo trò chuyện",
+  "@muteChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newChat": "Cuộc trò chuyện mới",
+  "@newChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newMessageInFluffyChat": "💬 Tin nhắn mới trong FluffyChat",
+  "@newMessageInFluffyChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "no": "Không",
+  "@no": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noConnectionToTheServer": "Không có kết nối với máy chủ",
+  "@noConnectionToTheServer": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noEmotesFound": "Không tìm thấy biểu tượng cảm xúc. 😕",
+  "@noEmotesFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noMatrixServer": "{server1} không phải là máy chủ ma trận, thay vào đó sử dụng {server2}?",
+  "@noMatrixServer": {
+    "type": "text",
+    "placeholders": {
+      "server1": {},
+      "server2": {}
+    }
+  },
+  "shareYourInviteLink": "Chia sẻ liên kết mời của bạn",
+  "@shareYourInviteLink": {},
+  "typeInInviteLinkManually": "Nhập thủ công liên kết lời mời...",
+  "@typeInInviteLinkManually": {},
+  "scanQrCode": "Quét mã QR",
+  "@scanQrCode": {},
+  "none": "Không có",
+  "@none": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPermission": "Không cho phép",
+  "@noPermission": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noRoomsFound": "Không tìm thấy cuộc trò chuyện nào…",
+  "@noRoomsFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "notifications": "Thông báo",
+  "@notifications": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "numUsersTyping": "{count} người dùng đang nhập",
+  "@numUsersTyping": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "obtainingLocation": "Đang lấy vị trí…",
+  "@obtainingLocation": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "offensive": "Xúc phạm",
+  "@offensive": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "offline": "Ngoại tuyến",
+  "@offline": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ok": "Ok",
+  "@ok": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "online": "Trực tuyến",
+  "@online": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onlineKeyBackupEnabled": "Sao lưu khóa trực tuyến đã được bật",
+  "@onlineKeyBackupEnabled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oopsPushError": "Ối! Thật không may, đã xảy ra lỗi khi thiết lập thông báo đẩy.",
+  "@oopsPushError": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "oopsSomethingWentWrong": "Rất tiếc, đã xảy ra sự cố…",
+  "@oopsSomethingWentWrong": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openAppToReadMessages": "Mở ứng dụng để đọc tin nhắn",
+  "@openAppToReadMessages": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openCamera": "Mở máy ảnh",
+  "@openCamera": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editBundlesForAccount": "Chỉnh sửa gói cho tài khoản này",
+  "@editBundlesForAccount": {},
+  "addToBundle": "Thêm vào gói",
+  "@addToBundle": {},
+  "removeFromBundle": "Xóa khỏi gói này",
+  "@removeFromBundle": {},
+  "pleaseEnterAMatrixIdentifier": "Vui lòng nhập Matrix ID.",
+  "@pleaseEnterAMatrixIdentifier": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pleaseEnterRecoveryKey": "Vui lòng nhập khóa khôi phục:",
+  "@pleaseEnterRecoveryKey": {},
+  "pleaseEnterYourPassword": "Vui lòng nhập mật khẩu",
+  "@pleaseEnterYourPassword": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "wipeChatBackup": "Xóa bản sao lưu trò chuyện của bạn để tạo khóa khôi phục mới?",
+  "@wipeChatBackup": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "withTheseAddressesRecoveryDescription": "Với những địa chỉ này, bạn có thể khôi phục mật khẩu của mình.",
+  "@withTheseAddressesRecoveryDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "writeAMessage": "Viết tin nhắn…",
+  "@writeAMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "yes": "Đúng",
+  "@yes": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "you": "Bạn",
+  "@you": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youAreInvitedToThisChat": "Bạn được mời tham gia cuộc trò chuyện này",
+  "@youAreInvitedToThisChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youAreNoLongerParticipatingInThisChat": "Bạn không còn tham gia vào cuộc trò chuyện này nữa",
+  "@youAreNoLongerParticipatingInThisChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youCannotInviteYourself": "Bạn không thể mời chính mình",
+  "@youCannotInviteYourself": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youHaveBeenBannedFromThisChat": "Bạn đã bị cấm tham gia cuộc trò chuyện này",
+  "@youHaveBeenBannedFromThisChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "yourPublicKey": "Khóa công khai của bạn",
+  "@yourPublicKey": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "messageInfo": "Thông tin tin nhắn",
+  "@messageInfo": {},
+  "time": "Thời gian",
+  "@time": {},
+  "messageType": "Loại tin nhắn",
+  "@messageType": {},
+  "sender": "Người gửi",
+  "@sender": {},
+  "openGallery": "Mở thư viện",
+  "@openGallery": {},
+  "removeFromSpace": "Xóa khỏi không gian",
+  "@removeFromSpace": {},
+  "addToSpaceDescription": "Chọn một không gian để thêm cuộc trò chuyện này vào đó.",
+  "@addToSpaceDescription": {},
+  "start": "Bắt đầu",
+  "@start": {},
+  "addToStory": "Thêm vào câu chuyện",
+  "@addToStory": {},
+  "publish": "Xuất bản",
+  "@publish": {},
+  "whoCanSeeMyStories": "Ai có thể xem câu chuyện của tôi?",
+  "@whoCanSeeMyStories": {},
+  "unsubscribeStories": "Hủy theo dõi câu chuyện",
+  "@unsubscribeStories": {},
+  "thisUserHasNotPostedAnythingYet": "Người dùng này chưa đăng bất cứ điều gì trong câu chuyện của họ",
+  "@thisUserHasNotPostedAnythingYet": {},
+  "yourStory": "Câu chuyện của bạn",
+  "@yourStory": {},
+  "replyHasBeenSent": "Trả lời đã được gửi",
+  "@replyHasBeenSent": {},
+  "videoWithSize": "Video ({size})",
+  "@videoWithSize": {
+    "type": "text",
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "storyFrom": "Câu chuyện từ {date}:\n{body}",
+  "@storyFrom": {
+    "type": "text",
+    "placeholders": {
+      "date": {},
+      "body": {}
+    }
+  },
+  "whoCanSeeMyStoriesDesc": "Lưu ý rằng mọi người có thể thấy và liên hệ với nhau trong câu chuyện của bạn.",
+  "@whoCanSeeMyStoriesDesc": {},
+  "whatIsGoingOn": "Điều gì đang xảy ra ?",
+  "@whatIsGoingOn": {},
+  "addDescription": "Thêm mô tả",
+  "@addDescription": {},
+  "storyPrivacyWarning": "Xin lưu ý rằng mọi người có thể thấy và liên hệ với nhau trong câu chuyện của bạn. Câu chuyện của bạn sẽ hiển thị trong 24 giờ nhưng không có gì đảm bảo rằng chúng sẽ bị xóa khỏi tất cả các thiết bị và máy chủ.",
+  "@storyPrivacyWarning": {},
+  "iUnderstand": "Tôi hiểu",
+  "@iUnderstand": {},
+  "reportUser": "Báo cáo người dùng",
+  "@reportUser": {},
+  "dismiss": "Giải tán",
+  "@dismiss": {},
+  "matrixWidgets": "Tiện ích Matrix",
+  "@matrixWidgets": {},
+  "reactedWith": "{sender} bày tỏ cảm xúc với {reaction}",
+  "@reactedWith": {
+    "type": "text",
+    "placeholders": {
+      "sender": {},
+      "reaction": {}
+    }
+  },
+  "pinMessage": "Ghim vào phòng",
+  "@pinMessage": {},
+  "confirmEventUnpin": "Bạn có chắc chắn bỏ ghim sự kiện này vĩnh viễn không?",
+  "@confirmEventUnpin": {},
+  "emojis": "Biểu tượng cảm xúc",
+  "@emojis": {},
+  "voiceCall": "Cuộc gọi thoại",
+  "@voiceCall": {},
+  "experimentalVideoCalls": "Cuộc gọi video thử nghiệm",
+  "@experimentalVideoCalls": {},
+  "nextAccount": "Tài khoản tiếp theo",
+  "@nextAccount": {},
+  "previousAccount": "Tài khoản trước",
+  "@previousAccount": {},
+  "editWidgets": "Chỉnh sửa tiện ích",
+  "@editWidgets": {},
+  "addWidget": "Thêm tiện ích",
+  "@addWidget": {},
+  "widgetVideo": "Video",
+  "@widgetVideo": {},
+  "widgetEtherpad": "Ghi chú văn bản",
+  "@widgetEtherpad": {},
+  "widgetJitsi": "Cuộc gọi Jitsi",
+  "@widgetJitsi": {},
+  "widgetCustom": "Cá nhân hóa",
+  "@widgetCustom": {},
+  "youKicked": "👞 Bạn đã đá {user}",
+  "@youKicked": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youKickedAndBanned": "🙅 Bạn đã đá và cấm {user}",
+  "@youKickedAndBanned": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "youUnbannedUser": "Bạn đã bỏ cấm {user}",
+  "@youUnbannedUser": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "noEmailWarning": "Vui lòng nhập địa chỉ email hợp lệ. Nếu không, bạn sẽ không thể đặt lại mật khẩu của mình. Nếu bạn không muốn, hãy nhấn lại vào nút để tiếp tục.",
+  "@noEmailWarning": {},
+  "stories": "Câu chuyện",
+  "@stories": {},
+  "enableAutoBackups": "Bật sao lưu tự động",
+  "@enableAutoBackups": {},
+  "storeInAndroidKeystore": "Lưu trữ trong Android KeyStore",
+  "@storeInAndroidKeystore": {},
+  "storeInAppleKeyChain": "Lưu trữ trong Apple KeyChain",
+  "@storeInAppleKeyChain": {},
+  "storeSecurlyOnThisDevice": "Lưu trữ an toàn trên thiết bị này",
+  "@storeSecurlyOnThisDevice": {},
+  "countFiles": "{count} tệp",
+  "@countFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "user": "Người dùng",
+  "@user": {},
+  "custom": "Cá nhân hóa",
+  "@custom": {},
+  "screenSharingTitle": "Chia sẻ màn hình",
+  "@screenSharingTitle": {},
+  "screenSharingDetail": "Bạn đang chia sẻ màn hình trong FuffyChat",
+  "@screenSharingDetail": {},
+  "callingAccountDetails": "Cho phép FluffyChat sử dụng ứng dụng quay số Android gốc.",
+  "@callingAccountDetails": {},
+  "appearOnTop": "Xuất hiện trên cùng",
+  "@appearOnTop": {},
+  "otherCallingPermissions": "Micro, máy ảnh và các quyền FluffyChat khác",
+  "@otherCallingPermissions": {}
 }
