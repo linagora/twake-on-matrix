@@ -21,23 +21,21 @@ abstract class AppConfig {
   static const Color primaryColor = Color.fromARGB(255, 135, 103, 172);
   static const Color primaryColorLight = Color(0xFFCCBDEA);
   static const Color secondaryColor = Color(0xFF41a2bc);
-  static String _privacyUrl =
-      'https://gitlab.com/famedly/fluffychat/-/blob/main/PRIVACY.md';
+  static String _privacyUrl = 'https://twake.app/en/privacy/';
+
   static String get privacyUrl => _privacyUrl;
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/How-to-use-end-to-end-encryption-in-FluffyChat';
-  static const String appId = 'im.fluffychat.FluffyChat';
   static const String appOpenUrlScheme = 'twake.chat';
   static String _webBaseUrl = 'https://fluffychat.im/web';
+
   static String get webBaseUrl => _webBaseUrl;
-  static const String sourceCodeUrl = 'https://gitlab.com/famedly/fluffychat';
+  static const String sourceCodeUrl =
+      'https://github.com/linagora/twake-on-matrix';
   static const String supportUrl =
-      'https://gitlab.com/famedly/fluffychat/issues';
-  static const bool enableSentry = true;
-  static const String sentryDns =
-      'https://8591d0d863b646feb4f3dda7e5dcab38@o256755.ingest.sentry.io/5243143';
+      'https://github.com/linagora/twake-on-matrix/issues';
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;
@@ -70,6 +68,8 @@ abstract class AppConfig {
   static const double borderRadius = 20.0;
   static const double columnWidth = 360.0;
   static const int fetchContactsLimit = 20;
+
+  static String? issueId;
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
@@ -105,6 +105,9 @@ abstract class AppConfig {
     }
     if (json['hide_unknown_events'] is bool) {
       hideUnknownEvents = json['hide_unknown_events'];
+    }
+    if (json['issue_id'] is String?) {
+      issueId = json['issue_id'];
     }
   }
 }
