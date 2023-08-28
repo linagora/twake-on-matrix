@@ -175,7 +175,7 @@ class _MxcImageState extends State<MxcImage>
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
         transitionDuration: const Duration(milliseconds: 200),
         pageBuilder: (_, animationOne, animationTwo) =>
-            ImageViewer(widget.event!, imageData: _imageData),
+            ImageViewer(widget.event!),
       );
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
@@ -231,6 +231,8 @@ class _MxcImageState extends State<MxcImage>
               data,
               width: widget.width,
               height: widget.height,
+              cacheWidth: widget.width?.toInt(),
+              cacheHeight: widget.height?.toInt(),
               fit: widget.fit,
               filterQuality: FilterQuality.medium,
               errorBuilder: (context, __, ___) {

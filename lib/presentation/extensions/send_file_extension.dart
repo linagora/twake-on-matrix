@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 typedef TransactionId = String;
 
@@ -27,6 +28,7 @@ extension SendFileExtension on Room {
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
+    FileInfo? thumbnail,
     Map<String, dynamic>? extraContent,
   }) async {
     FileInfo tempfileInfo = fileInfo;
@@ -65,7 +67,32 @@ extension SendFileExtension on Room {
     final tempEncryptedFile =
         await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
             .create();
+    final tempThumbnailFile = await File(
+      '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_thumbnail.jpg',
+    ).create();
+    final tempEncryptedThumbnailFile = await File(
+      '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_encrypted_thumbnail',
+    ).create();
+
+    // computing the thumbnail in case we can
+    if (fileInfo is ImageFileInfo &&
+        (thumbnail == null || shrinkImageMaxDimension != null)) {
+      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+              .unsigned![fileSendingStatusKey] =
+          FileSendingStatus.generatingThumbnail.name;
+      await handleImageFakeSync(fakeImageEvent);
+      thumbnail ??= await _generateThumbnail(
+        fileInfo,
+        targetPath: tempThumbnailFile.path,
+      );
+
+      if (thumbnail != null && fileInfo.fileSize < thumbnail.fileSize) {
+        thumbnail = null; // in this case, the thumbnail is not usefull
+      }
+    }
+
     EncryptedFileInfo? encryptedFileInfo;
+    EncryptedFileInfo? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
@@ -80,17 +107,37 @@ extension SendFileExtension on Room {
         tempEncryptedFile.path,
         fileInfo.fileSize,
       );
+      if (thumbnail != null) {
+        encryptedThumbnail = await encryptedService.encryptFile(
+          fileInfo: thumbnail,
+          outputFile: tempEncryptedThumbnailFile,
+        );
+      }
     }
-    Uri? uploadResp;
+    Uri? uploadResp, thumbnailUploadResp;
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
-    while (uploadResp == null) {
+    while (uploadResp == null ||
+        (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
         final uploadFileApi = getIt.get<UploadFileAPI>();
         final response = await uploadFileApi.uploadFile(fileInfo: tempfileInfo);
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
+        }
+        if (uploadResp != null &&
+            encryptedThumbnail != null &&
+            thumbnail != null) {
+          final thumbnailResponse = await uploadFileApi.uploadFile(
+            fileInfo: FileInfo(
+              thumbnail.fileName,
+              tempEncryptedThumbnailFile.path,
+              thumbnail.fileSize,
+            ),
+          );
+          thumbnailUploadResp =
+              Uri.tryParse(thumbnailResponse.contentUri ?? "");
         }
       } on MatrixException catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
@@ -119,6 +166,17 @@ extension SendFileExtension on Room {
       Logs().d('RoomExtension::EncryptedFileInfo: $encryptedFileInfo');
     }
 
+    if (encryptedThumbnail != null) {
+      encryptedThumbnail = EncryptedFileInfo(
+        key: encryptedThumbnail.key,
+        version: encryptedThumbnail.version,
+        initialVector: encryptedThumbnail.initialVector,
+        hashes: encryptedThumbnail.hashes,
+        url: thumbnailUploadResp.toString(),
+      );
+      Logs().d('RoomExtension::EncryptedThumbnail: $encryptedThumbnail');
+    }
+
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
@@ -128,6 +186,11 @@ extension SendFileExtension on Room {
       if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
       'info': {
         ...fileInfo.metadata,
+        if (thumbnail != null && encryptedThumbnail == null)
+          'thumbnail_url': thumbnailUploadResp.toString(),
+        if (thumbnail != null && encryptedThumbnail != null)
+          'thumbnail_file': encryptedThumbnail.toJson(),
+        if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
       },
       if (extraContent != null) ...extraContent,
     };
@@ -246,5 +309,24 @@ extension SendFileExtension on Room {
 
   User? getUser(mxId) {
     return getParticipants().firstWhereOrNull((user) => user.id == mxId);
+  }
+
+  Future<FileInfo?> _generateThumbnail(
+    ImageFileInfo originalFile, {
+    required String targetPath,
+  }) async {
+    try {
+      final result = await FlutterImageCompress.compressAndGetFile(
+        originalFile.filePath,
+        targetPath,
+        quality: 70,
+      );
+      if (result == null) return null;
+      final size = await result.length();
+      return FileInfo(result.name, result.path, size);
+    } catch (e) {
+      Logs().e('Error while generating thumbnail', e);
+      return null;
+    }
   }
 }
