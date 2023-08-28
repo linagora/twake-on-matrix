@@ -1,4 +1,5 @@
 import 'package:any_link_preview/any_link_preview.dart';
+import 'package:collection/collection.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -129,5 +130,20 @@ extension StringCasingExtension on String {
     }
 
     return unMarkdownedText;
+  }
+
+  bool isEventIdOlderOrSameAs(Timeline timeline, String thatEventId) {
+    if (timeline.events.isEmpty) return false;
+
+    final firstEvent =
+        timeline.events.firstWhereOrNull((e) => e.eventId == this);
+    final secondEvent =
+        timeline.events.firstWhereOrNull((e) => e.eventId == thatEventId);
+
+    if (secondEvent == null || firstEvent == null) return false;
+
+    return this == thatEventId ||
+        timeline.events.indexOf(secondEvent) >
+            timeline.events.indexOf(firstEvent);
   }
 }
