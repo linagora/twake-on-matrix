@@ -1,3 +1,4 @@
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 
 extension SendFileWebExtension on Room {
@@ -10,6 +11,7 @@ extension SendFileWebExtension on Room {
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
+    MatrixFile? thumbnail,
     Map<String, dynamic>? extraContent,
   }) async {
     txid ??= client.generateUniqueTransactionId();
@@ -39,9 +41,23 @@ extension SendFileWebExtension on Room {
       await handleImageFakeSync(fakeImageEvent);
       rethrow;
     }
+    // computing the thumbnail in case we can
+    if (file.msgType == MessageTypes.Image &&
+        (thumbnail == null || shrinkImageMaxDimension != null)) {
+      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+              .unsigned![fileSendingStatusKey] =
+          FileSendingStatus.generatingThumbnail.name;
+      await handleImageFakeSync(fakeImageEvent);
+      thumbnail ??= await _generateThumbnail(file);
+      if (thumbnail != null && file.size < thumbnail.size) {
+        thumbnail = null; // in this case, the thumbnail is not usefull
+      }
+    }
 
     EncryptedFile? encryptedFile;
     MatrixFile? uploadFile;
+    MatrixFile? uploadThumbnail = thumbnail;
+    EncryptedFile? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
@@ -49,8 +65,15 @@ extension SendFileWebExtension on Room {
       encryptedFile = await file.encrypt();
       uploadFile =
           MatrixFile.fromMimeType(bytes: encryptedFile!.data, name: 'crypt');
+      if (thumbnail != null) {
+        encryptedThumbnail = await thumbnail.encrypt();
+        uploadThumbnail = MatrixFile.fromMimeType(
+          bytes: encryptedThumbnail?.data,
+          name: 'crypt',
+        );
+      }
     }
-    Uri? uploadResp;
+    Uri? uploadResp, thumbnailUploadResp;
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
@@ -62,6 +85,14 @@ extension SendFileWebExtension on Room {
           filename: uploadFile.name,
           contentType: uploadFile.mimeType,
         );
+        thumbnailUploadResp =
+            uploadThumbnail != null && uploadThumbnail.bytes != null
+                ? await client.uploadContent(
+                    uploadThumbnail.bytes!,
+                    filename: uploadThumbnail.name,
+                    contentType: uploadThumbnail.mimeType,
+                  )
+                : null;
       } on MatrixException catch (e) {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
@@ -101,6 +132,24 @@ extension SendFileWebExtension on Room {
         },
       'info': {
         ...file.info,
+        if (thumbnail != null && encryptedThumbnail == null)
+          'thumbnail_url': thumbnailUploadResp.toString(),
+        if (thumbnail != null && encryptedThumbnail != null)
+          'thumbnail_file': {
+            'url': thumbnailUploadResp.toString(),
+            'mimetype': thumbnail.mimeType,
+            'v': 'v2',
+            'key': {
+              'alg': 'A256CTR',
+              'ext': true,
+              'k': encryptedThumbnail.k,
+              'key_ops': ['encrypt', 'decrypt'],
+              'kty': 'oct'
+            },
+            'iv': encryptedThumbnail.iv,
+            'hashes': {'sha256': encryptedThumbnail.sha256}
+          },
+        if (thumbnail != null) 'thumbnail_info': thumbnail.info,
       },
       if (extraContent != null) ...extraContent,
     };
@@ -173,6 +222,24 @@ extension SendFileWebExtension on Room {
       });
     } else {
       await client.handleSync(fakeImageEvent, direction: direction);
+    }
+  }
+
+  Future<MatrixFile?> _generateThumbnail(MatrixFile originalFile) async {
+    if (originalFile.bytes == null) return null;
+    try {
+      final result = await FlutterImageCompress.compressWithList(
+        originalFile.bytes!,
+        quality: 70,
+      );
+      return MatrixFile(
+        bytes: result,
+        name: originalFile.name,
+        mimeType: originalFile.mimeType,
+      );
+    } catch (e) {
+      Logs().e('Error while generating thumbnail', e);
+      return null;
     }
   }
 }
