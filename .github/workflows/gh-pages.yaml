@@ -54,6 +54,8 @@ jobs:
           FOLDER: ${{ github.event.pull_request.number }}
         run: |
           echo "URL=https://$GITHUB_REPOSITORY_OWNER.github.io/${GITHUB_REPOSITORY##*/}/$FOLDER" >> $GITHUB_OUTPUT
+          web_path="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
+          sed -i "s|<base href=\".*\" />|<base href=\"$web_path\" />|g" build/web/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
