@@ -23,6 +23,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
 
       - uses: webfactory/ssh-agent@v0.8.0
         with:
