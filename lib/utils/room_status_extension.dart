@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -91,17 +92,32 @@ extension RoomStatusExtension on Room {
     eventId ??= timeline.events.first.eventId;
 
     final lastReceipts = <User>{};
-    // now we iterate the timeline events until we hit the first rendered event
-    for (final event in timeline.events) {
-      lastReceipts.addAll(event.receipts.map((r) => r.user));
-      if (event.eventId == eventId) {
-        break;
+
+    if (receiptState.mainThread != null) {
+      // receiptState contains all users and their last seen event
+      // we checked users that have seen the eventId argument or older
+      final mainThreadReceipts = receiptState.mainThread!.otherUsers.entries
+          .where(
+            (element) => element.value.eventId
+                .isEventIdOlderOrSameAs(timeline, eventId!),
+          )
+          .map((e) => unsafeGetUserFromMemoryOrFallback(e.key))
+          .toList();
+      lastReceipts.addAll(mainThreadReceipts);
+    } else {
+      // now we iterate the timeline events until we hit the first rendered event
+      for (final event in timeline.events) {
+        lastReceipts.addAll(event.receipts.map((r) => r.user));
+        if (event.eventId == eventId) {
+          break;
+        }
       }
+      lastReceipts.removeWhere(
+        (user) =>
+            user.id == client.userID ||
+            user.id == timeline.events.first.senderId,
+      );
     }
-    lastReceipts.removeWhere(
-      (user) =>
-          user.id == client.userID || user.id == timeline.events.first.senderId,
-    );
     return lastReceipts.toList();
   }
 }
