@@ -1,13 +1,13 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:fluffychat/config/app_config.dart';
 
 mixin ConnectPageMixin {
   bool supportsFlow({
@@ -50,9 +50,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    final redirectUrl = kIsWeb
-        ? '${html.window.origin!}/web/auth.html'
-        : '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
+    final redirectUrl = _generateRedirectUrl();
     final url = _getAuthenticateUrl(
       context: context,
       id: id,
@@ -74,6 +72,16 @@ mixin ConnectPageMixin {
             initialDeviceDisplayName: PlatformInfos.clientName,
           ),
     );
+  }
+
+  String _generateRedirectUrl() {
+    if (kIsWeb) {
+      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
+        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+      }
+      return '${html.window.origin!}/web/auth.html';
+    }
+    return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
 
   List<IdentityProvider>? identityProviders({

@@ -2,9 +2,9 @@
   "application_name": "Twake",
   "application_welcome_message": "Welcome to Twake!",
   "default_homeserver": "matrix.linagora.com",
-  "web_base_url": "https://twakematrix-on-commit.twake.app/web",
   "privacy_url": "https://twake.app/en/privacy/",
-  "render_html": false,
+  "render_html": true,
   "hide_redacted_events": false,
-  "hide_unknown_events": false
+  "hide_unknown_events": false,
+  "issue_id": "231"
 }
