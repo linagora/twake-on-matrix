@@ -181,7 +181,7 @@ class AppScaffoldView extends StatelessWidget {
           .map((_) => AdaptiveScaffold.toRailDestination(_))
           .toList(),
       onDestinationSelected: onDestinationSelected,
-      onSelected: (object) => onClientSelected,
+      onSelected: (object) => onClientSelected(object, context),
     );
   }
 
