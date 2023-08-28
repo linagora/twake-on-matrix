@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 
@@ -45,7 +46,7 @@ abstract class AppConfig {
   static bool showDirectChatsInSpaces = true;
   static bool separateChatTypes = false;
   static bool autoplayImages = true;
-  static bool sendOnEnter = false;
+  static bool sendOnEnter = PlatformInfos.isMobile ? false : true;
   static bool experimentalVoip = false;
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
