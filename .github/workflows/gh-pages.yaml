@@ -1,7 +1,4 @@
 on:
-  push:
-    tags:
-      - "v*.*.*"
   pull_request:
 
 env:
@@ -12,8 +9,15 @@ name: Deploying on GitHub Pages
 jobs:
   deploy_preview:
     name: Deploy preview versions on pull requests
-    if: startsWith(github.ref, "refs/pull/")
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      pull-requests: write
+      contents: write
+
+    environment:
+      name: PR-${{ github.event.pull_request.number }}
+      url: ${{ steps.configure.outputs.URL }}
 
     steps:
       - name: Checkout repository
@@ -44,10 +48,34 @@ jobs:
       - name: Build Web version
         run: ./scripts/build-web.sh
 
+      - name: Configure environments
+        id: configure
+        env:
+          FOLDER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "URL=https://$GITHUB_REPOSITORY_OWNER.github.io/${GITHUB_REPOSITORY##*/}/$FOLDER" >> $GITHUB_OUTPUT
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
-          cname: "tk"
+          publish_dir: build/web
+          keep_files: true
           destination_dir: "${{ github.event.pull_request.number }}"
+
+      - name: Find deployment comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          comment-author: "github-actions[bot]"
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "This PR has been deployed to"
+
+      - name: Create or update deployment comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            This PR has been deployed to ${{ step.configure.outputs.URL }}
+          edit-mode: replace
