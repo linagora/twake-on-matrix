@@ -1827,5 +1827,443 @@
   "appearOnTop": "Xuất hiện trên cùng",
   "@appearOnTop": {},
   "otherCallingPermissions": "Micro, máy ảnh và các quyền FluffyChat khác",
-  "@otherCallingPermissions": {}
+  "@otherCallingPermissions": {},
+  "reason": "Lý do",
+  "@reason": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recording": "Đang ghi âm",
+  "@recording": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pushRules": "Quy tắc đẩy",
+  "@pushRules": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "redactMessage": "Soạn lại tin nhắn",
+  "@redactMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "register": "Đăng ký",
+  "@register": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "reject": "Từ chối",
+  "@reject": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "rejectedTheInvitation": "{username} đã từ chối lời mời",
+  "@rejectedTheInvitation": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "redactedAnEvent": "{username} đã biên tập lại một sự kiện",
+  "@redactedAnEvent": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "rejoin": "Tham gia lại",
+  "@rejoin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "remove": "Loại bỏ",
+  "@remove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevices": "Loại bỏ tất cả các thiết bị khác",
+  "@removeAllOtherDevices": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removedBy": "Loại bỏ bởi {username}",
+  "@removedBy": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "removeDevice": "Loại bỏ thiết bị",
+  "@removeDevice": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "unbanFromChat": "Bỏ cấm khỏi cuộc trò chuyện",
+  "@unbanFromChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeYourAvatar": "Xóa ảnh đại diện",
+  "@removeYourAvatar": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "renderRichContent": "Hiển thị nội dung tin nhắn phong phú",
+  "@renderRichContent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "replaceRoomWithNewerVersion": "Thay thế cuộc trò chuyện với phiên bản mới hơn",
+  "@replaceRoomWithNewerVersion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sentAPicture": "🖼️ {username} đã gửi một ảnh",
+  "@sentAPicture": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "sentASticker": "😊 {username} đã gửi một nhãn dán",
+  "@sentASticker": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "sentAVideo": "🎥 {username} đã gửi một video",
+  "@sentAVideo": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "sentCallInformations": "{senderName} đã gửi thông tin cuộc gọi",
+  "@sentCallInformations": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "setInvitationLink": "Đặt liên kết lời mời",
+  "@setInvitationLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "setPermissionsLevel": "Đặt mức quyền",
+  "@setPermissionsLevel": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sharedTheLocation": "{username} đã chia sẻ vị trí của họ",
+  "@sharedTheLocation": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "status": "Trạng thái",
+  "@status": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pleaseEnterYourPin": "Vui lòng nhập mã pin",
+  "@pleaseEnterYourPin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pleaseEnterYourUsername": "Vui lòng nhập tên đăng nhập",
+  "@pleaseEnterYourUsername": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "privacy": "Riêng tư",
+  "@privacy": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicRooms": "Cuộc trò chuyện công khai",
+  "@publicRooms": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "reply": "Trả lời",
+  "@reply": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "reportMessage": "Báo cáo tin nhắn",
+  "@reportMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "requestPermission": "Yêu cầu quyền",
+  "@requestPermission": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomHasBeenUpgraded": "Trò chuyện nhóm đã được nâng cấp",
+  "@roomHasBeenUpgraded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomVersion": "Phiên bản trò chuyện nhóm",
+  "@roomVersion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saturday": "Thứ bảy",
+  "@saturday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saveFile": "Lưu tệp",
+  "@saveFile": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "search": "Tìm kiếm",
+  "@search": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "security": "Bảo mật",
+  "@security": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recoveryKey": "Khóa khôi phục",
+  "@recoveryKey": {},
+  "recoveryKeyLost": "Mất khóa khôi phục?",
+  "@recoveryKeyLost": {},
+  "seenByUser": "Đã xem bởi {username}",
+  "@seenByUser": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "seenByUserAndCountOthers": "{count, plural, other{Đã xem bởi {username} và {count} người khác}}",
+  "@seenByUserAndCountOthers": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "count": {}
+    }
+  },
+  "seenByUserAndUser": "Đã xem bởi {username} và {username2}",
+  "@seenByUserAndUser": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "username2": {}
+    }
+  },
+  "send": "Gửi",
+  "@send": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendAMessage": "Gửi tin nhắn",
+  "@sendAMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendAsText": "Gửi dưới dạng văn bản",
+  "@sendAsText": {
+    "type": "text"
+  },
+  "sendAudio": "Gửi âm thanh",
+  "@sendAudio": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendFile": "Gửi tệp",
+  "@sendFile": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendImage": "Gửi hình ảnh",
+  "@sendImage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendMessages": "Gửi tin nhắn",
+  "@sendMessages": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendOriginal": "Gửi bản gốc",
+  "@sendOriginal": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendSticker": "Gửi nhãn dán",
+  "@sendSticker": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendVideo": "Gửi video",
+  "@sendVideo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sentAFile": "📁 {username} gửi tệp",
+  "@sentAFile": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "sentAnAudio": "🎤 {username} đã gửi 1 đoạn âm thanh",
+  "@sentAnAudio": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "separateChatTypes": "Tách các cuộc trò chuyện trực tiếp và nhóm",
+  "@separateChatTypes": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "setAsCanonicalAlias": "Đặt làm biệt danh chính",
+  "@setAsCanonicalAlias": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "setCustomEmotes": "Đặt biểu tượng cảm xúc tùy chỉnh",
+  "@setCustomEmotes": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "setGroupDescription": "Đặt mô tả",
+  "@setGroupDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "setStatus": "Đặt trạng thái",
+  "@setStatus": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "settings": "Cài đặt",
+  "@settings": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "share": "Chia sẻ",
+  "@share": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "shareLocation": "Chia sẻ vị trí",
+  "@shareLocation": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "showDirectChatsInSpaces": "Hiển thị Cuộc trò chuyện trực tiếp có liên quan trong Spaces",
+  "@showDirectChatsInSpaces": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "signUp": "Đăng ký",
+  "@signUp": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "singlesignon": "Dấu hiệu duy nhất trên",
+  "@singlesignon": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "skip": "Bỏ qua",
+  "@skip": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "invite": "Mời",
+  "@invite": {},
+  "sourceCode": "Mã nguồn",
+  "@sourceCode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceIsPublic": "Không gian công khai",
+  "@spaceIsPublic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceName": "Tên không gian",
+  "@spaceName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startedACall": "{senderName} đã bắt đầu cuộc gọi",
+  "@startedACall": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "startFirstChat": "Bắt đầu cuộc trò chuyện đầu tiên của bạn",
+  "@startFirstChat": {},
+  "statusExampleMessage": "Hôm nay bạn thế nào?",
+  "@statusExampleMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "submit": "Nộp",
+  "@submit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sunday": "Chủ nhật",
+  "@sunday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "synchronizingPleaseWait": "Đang đồng bộ... Vui lòng chờ.",
+  "@synchronizingPleaseWait": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "systemTheme": "Hệ thống",
+  "@systemTheme": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "theyDontMatch": "Chúng không phù hợp",
+  "@theyDontMatch": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "theyMatch": "Chúng phù hợp",
+  "@theyMatch": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "thisRoomHasBeenArchived": "Cuộc trò chuyện này đã được lưu trữ.",
+  "@thisRoomHasBeenArchived": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "thursday": "Thứ năm",
+  "@thursday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "title": "FluffyChat",
+  "@title": {
+    "description": "Title for the application",
+    "type": "text",
+    "placeholders": {}
+  },
+  "toggleFavorite": "Chuyển đổi yêu thích",
+  "@toggleFavorite": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
