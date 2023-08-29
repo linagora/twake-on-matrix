@@ -34,17 +34,17 @@ class ChatView extends StatelessWidget {
           TwakeIconButton(
             icon: Icons.copy_outlined,
             tooltip: L10n.of(context)!.copy,
-            onPressed: controller.copyEventsAction,
+            onTap: controller.copyEventsAction,
           ),
           if (controller.canRedactSelectedEvents)
             TwakeIconButton(
               icon: Icons.delete_outlined,
               tooltip: L10n.of(context)!.redactMessage,
-              onPressed: controller.redactEventsAction,
+              onTap: controller.redactEventsAction,
             ),
           TwakeIconButton(
             icon: Icons.push_pin_outlined,
-            onPressed: controller.pinEvent,
+            onTap: controller.pinEvent,
             tooltip: L10n.of(context)!.pinMessage,
           ),
           if (controller.selectedEvents.length == 1)
@@ -323,14 +323,14 @@ class ChatView extends StatelessWidget {
       if (controller.selectMode) {
         return TwakeIconButton(
           icon: Icons.close,
-          onPressed: controller.clearSelectedEvents,
+          onTap: controller.clearSelectedEvents,
           tooltip: L10n.of(context)!.close,
         );
       } else {
         return TwakeIconButton(
           tooltip: L10n.of(context)!.back,
           icon: Icons.arrow_back,
-          onPressed: () => controller.backToPreviousPage(),
+          onTap: () => controller.backToPreviousPage(),
           paddingAll: 8.0,
           margin: const EdgeInsets.symmetric(vertical: 12.0),
         );

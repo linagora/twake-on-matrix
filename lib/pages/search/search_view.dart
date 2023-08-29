@@ -140,7 +140,7 @@ class SearchView extends StatelessWidget {
             TwakeIconButton(
               tooltip: L10n.of(context)!.back,
               icon: Icons.arrow_back,
-              onPressed: () => searchController.goToRoomsShellBranch(),
+              onTap: () => searchController.goToRoomsShellBranch(),
               paddingAll: 8.0,
             ),
             const SizedBox(width: 4.0),
