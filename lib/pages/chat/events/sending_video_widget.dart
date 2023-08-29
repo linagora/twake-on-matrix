@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:chewie/chewie.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -200,13 +199,15 @@ class VideoWidget extends StatelessWidget {
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
-            child: Image.memory(
-              matrixFile.bytes ?? Uint8List(0),
-              width: imageWidth,
-              height: imageHeight,
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.medium,
-            ),
+            child: matrixFile.bytes != null
+                ? Image.memory(
+                    matrixFile.bytes!,
+                    width: imageWidth,
+                    height: imageHeight,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                  )
+                : SizedBox(width: imageWidth, height: imageHeight),
           );
   }
 }

@@ -8,10 +8,9 @@ import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
+import 'package:path_provider/path_provider.dart';
 
-import 'media_picker_mixin.dart';
-
-mixin SendFilesMixin on MediaPickerMixin {
+mixin SendFilesMixin {
   Future<void> sendImages(
     ImagePickerGridController imagePickerController, {
     Room? room,
@@ -32,6 +31,7 @@ mixin SendFilesMixin on MediaPickerMixin {
   void sendFileAction(
     BuildContext context, {
     Room? room,
+    List<FileInfo>? fileInfos,
   }) async {
     if (room == null) {}
     final sendFileInteractor = getIt.get<SendFileInteractor>();
@@ -39,9 +39,20 @@ mixin SendFilesMixin on MediaPickerMixin {
     final result = await FilePicker.platform.pickFiles(
       withReadStream: true,
     );
-    if (result == null && result?.files.isEmpty == true) return;
+    fileInfos ??= result?.files
+        .map(
+          (xFile) => FileInfo(
+            xFile.name,
+            xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
+            xFile.size,
+            readStream: xFile.readStream,
+          ),
+        )
+        .toList();
 
-    sendFileInteractor.execute(room: room!, filePickerResult: result!);
+    if (fileInfos == null || fileInfos.isEmpty == true) return;
+
+    sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
   }
 
   void sendFileOnWebAction(

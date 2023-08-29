@@ -73,13 +73,13 @@ extension MatrixFileExtension on MatrixFile {
       return this;
     }
     if (msgType == MessageTypes.Image) {
-      return MatrixImageFile(bytes: bytes!, name: name);
+      return MatrixImageFile(bytes: bytes!, name: name, filePath: filePath);
     }
     if (msgType == MessageTypes.Video) {
-      return MatrixVideoFile(bytes: bytes!, name: name);
+      return MatrixVideoFile(bytes: bytes!, name: name, filePath: filePath);
     }
     if (msgType == MessageTypes.Audio) {
-      return MatrixAudioFile(bytes: bytes!, name: name);
+      return MatrixAudioFile(bytes: bytes!, name: name, filePath: filePath);
     }
     return this;
   }
