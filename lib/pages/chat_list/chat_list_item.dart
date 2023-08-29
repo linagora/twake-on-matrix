@@ -16,7 +16,6 @@ import 'package:matrix/matrix.dart';
 import '../../config/themes.dart';
 import '../../widgets/avatar/avatar.dart';
 import '../../widgets/matrix.dart';
-import '../chat/send_file_dialog.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
 
@@ -39,45 +38,21 @@ class ChatListItem extends StatelessWidget {
   void clickAction(BuildContext context) async {
     if (onTap != null) return onTap!();
     if (activeChat) return;
-    if (room.membership == Membership.invite) {
-      context.go('/rooms/${room.id}');
-    }
-
-    if (room.membership == Membership.ban) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.youHaveBeenBannedFromThisChat),
-        ),
-      );
-      return;
-    }
-
-    if (room.membership == Membership.leave) {
-      context.go('/archive/${room.id}');
-    }
-
-    if (room.membership == Membership.join) {
-      // Share content into this room
-      final shareContent = Matrix.of(context).shareContent;
-      if (shareContent != null) {
-        final shareFile = shareContent.tryGet<MatrixFile>('file');
-        if (shareContent.tryGet<String>('msgtype') ==
-                'chat.fluffy.shared_file' &&
-            shareFile != null) {
-          await showDialog(
-            context: context,
-            useRootNavigator: false,
-            builder: (c) => SendFileDialog(
-              files: [shareFile],
-              room: room,
-            ),
-          );
-        } else {
-          room.sendEvent(shareContent);
-        }
-        Matrix.of(context).shareContent = null;
-      }
-      context.go('/rooms/${room.id}');
+    switch (room.membership) {
+      case Membership.ban:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(L10n.of(context)!.youHaveBeenBannedFromThisChat),
+          ),
+        );
+        return;
+      case Membership.leave:
+        context.go('/archive/${room.id}');
+      case Membership.invite:
+      case Membership.join:
+        context.go('/rooms/${room.id}');
+      default:
+        return;
     }
   }
 
