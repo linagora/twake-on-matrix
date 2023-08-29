@@ -54,7 +54,7 @@ class DraftChatView extends StatelessWidget {
               TwakeIconButton(
                 tooltip: L10n.of(context)!.back,
                 icon: Icons.arrow_back,
-                onPressed: () => context.pop(),
+                onTap: () => context.pop(),
                 paddingAll: 8.0,
                 margin: const EdgeInsets.symmetric(vertical: 12.0),
               ),
@@ -100,8 +100,7 @@ class DraftChatView extends StatelessWidget {
                               tooltip: L10n.of(context)!.more,
                               margin: DraftChatViewStyle.buttonAddMoreMargin,
                               icon: Icons.add_circle_outline,
-                              onPressed: () =>
-                                  controller.showMediaPicker(context),
+                              onTap: () => controller.showMediaPicker(context),
                             ),
                             Expanded(
                               child: Container(
@@ -178,8 +177,7 @@ class DraftChatView extends StatelessWidget {
                                               .bottomBarButtonRecordMargin,
                                           paddingAll: DraftChatViewStyle
                                               .bottomBarButtonRecordPaddingAll,
-                                          onPressed:
-                                              controller.emojiPickerAction,
+                                          onTap: controller.emojiPickerAction,
                                           tooltip: L10n.of(context)!.send,
                                           icon: Icons.tag_faces,
                                         ),
@@ -215,7 +213,7 @@ class DraftChatView extends StatelessWidget {
                                     return TwakeIconButton(
                                       size:
                                           ChatInputRowStyle.sendIconButtonSize,
-                                      onPressed: controller.sendText,
+                                      onTap: controller.sendText,
                                       tooltip: L10n.of(context)!.send,
                                       imagePath: ImagePaths.icSend,
                                     );
