@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
@@ -36,6 +37,7 @@ import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
 
 abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(
@@ -160,12 +162,14 @@ abstract class AppRoutes {
               routes: [
                 GoRoute(
                   path: ':roomid',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    Chat(
-                      roomId: state.pathParameters['roomid']!,
-                    ),
-                  ),
+                  pageBuilder: (context, state) {
+                    return defaultPageBuilder(
+                      context,
+                      Chat(
+                        roomId: state.pathParameters['roomid']!,
+                      ),
+                    );
+                  },
                   redirect: loggedOutRedirect,
                 ),
               ],
@@ -346,13 +350,17 @@ abstract class AppRoutes {
             ),
             GoRoute(
               path: ':roomid',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                Chat(
-                  roomId: state.pathParameters['roomid']!,
-                  key: Key(state.pathParameters['roomid']!),
-                ),
-              ),
+              pageBuilder: (context, state) {
+                final shareFile = state.extra as MatrixFile?;
+                return defaultPageBuilder(
+                  context,
+                  Chat(
+                    roomId: state.pathParameters['roomid']!,
+                    key: Key(state.pathParameters['roomid']!),
+                    shareFile: shareFile,
+                  ),
+                );
+              },
               redirect: loggedOutRedirect,
               routes: [
                 GoRoute(
@@ -430,6 +438,14 @@ abstract class AppRoutes {
               ],
             ),
           ],
+        ),
+        GoRoute(
+          path: '/share',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            const Share(),
+          ),
+          redirect: loggedOutRedirect,
         ),
       ],
     ),

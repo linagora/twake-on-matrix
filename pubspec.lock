@@ -1933,10 +1933,11 @@ packages:
   receive_sharing_intent:
     dependency: "direct main"
     description:
-      name: receive_sharing_intent
-      sha256: "912bebb551bce75a14098891fd750305b30d53eba0d61cc70cd9973be9866e8d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "receive-.txt-v2"
+      resolved-ref: "7ac2cccb3e1ac4bddce7e287adcb69726f368b89"
+      url: "git@github.com:krabbenprgr/receive_sharing_intent.git"
+    source: git
     version: "1.4.5"
   record:
     dependency: "direct main"
