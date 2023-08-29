@@ -143,4 +143,23 @@ extension ContextExtensionss on BuildContext {
 
   void pushChild(String path) =>
       push('${GoRouterState.of(this).uri.path}/$path');
+
+  RelativeRect getCurrentRelativeRectOfWidget() {
+    final RenderBox button = findRenderObject()! as RenderBox;
+    final RenderBox overlay =
+        Navigator.of(this).overlay!.context.findRenderObject()! as RenderBox;
+    final Offset offset;
+    offset = Offset(0.0, button.size.height);
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(offset, ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero) + offset,
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+    return position;
+  }
 }
