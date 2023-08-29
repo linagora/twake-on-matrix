@@ -2682,5 +2682,8 @@
     "adminPanel": "Admin Panel",
     "rejectInvite" : "No thanks, delete",
     "acceptInvite" : "Yes please, join",
-    "askToInvite": " wants you to join this chat. What do you say?"
+    "askToInvite": " wants you to join this chat. What do you say?",
+    "select" : "Select",
+    "copyMessageText" : "Copy message text",
+    "pinMessage" : "Pin message"
 }
