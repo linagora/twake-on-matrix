@@ -84,7 +84,7 @@ class ChatInputRow extends StatelessWidget {
                   tooltip: L10n.of(context)!.more,
                   margin: const EdgeInsets.only(right: 4.0),
                   icon: Icons.add_circle_outline,
-                  onPressed: () => controller.onSendFileClick(context),
+                  onTap: () => controller.onSendFileClick(context),
                 ),
                 if (controller.matrix!.isMultiAccount &&
                     controller.matrix!.hasComplexBundles &&
@@ -166,7 +166,7 @@ class ChatInputRow extends StatelessWidget {
                                         return TwakeIconButton(
                                           paddingAll: value.isEmpty ? 5.0 : 12,
                                           tooltip: L10n.of(context)!.emojis,
-                                          onPressed: () =>
+                                          onTap: () =>
                                               controller.emojiPickerAction(),
                                           icon: Icons.tag_faces,
                                         );
@@ -178,7 +178,7 @@ class ChatInputRow extends StatelessWidget {
                                         return TwakeIconButton(
                                           paddingAll: value.isEmpty ? 5.0 : 12,
                                           tooltip: L10n.of(context)!.keyboard,
-                                          onPressed: () => controller.inputFocus
+                                          onTap: () => controller.inputFocus
                                               .requestFocus(),
                                           icon: Icons.keyboard,
                                         );
@@ -204,7 +204,7 @@ class ChatInputRow extends StatelessWidget {
                     alignment: Alignment.center,
                     child: TwakeIconButton(
                       size: ChatInputRowStyle.sendIconButtonSize,
-                      onPressed: controller.send,
+                      onTap: controller.send,
                       tooltip: L10n.of(context)!.send,
                       imagePath: ImagePaths.icSend,
                     ),

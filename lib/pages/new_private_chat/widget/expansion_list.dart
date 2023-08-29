@@ -216,7 +216,7 @@ class ExpansionList extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       icon: isShow ? Icons.expand_less : Icons.expand_more,
-                      onPressed: toggleContactsList,
+                      onTap: toggleContactsList,
                       tooltip: isShow
                           ? L10n.of(context)!.shrink
                           : L10n.of(context)!.expand,

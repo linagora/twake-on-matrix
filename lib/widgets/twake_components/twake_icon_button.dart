@@ -25,7 +25,7 @@ class TwakeIconButton extends StatelessWidget {
 
   final double? weight;
 
-  final OnTapIconButtonCallbackAction? onPressed;
+  final OnTapIconButtonCallbackAction? onTap;
 
   final OnTapDownIconButtonCallbackAction? onTapDown;
 
@@ -36,7 +36,7 @@ class TwakeIconButton extends StatelessWidget {
   const TwakeIconButton({
     Key? key,
     required this.tooltip,
-    this.onPressed,
+    this.onTap,
     this.icon,
     this.imagePath,
     this.paddingAll,
@@ -59,7 +59,7 @@ class TwakeIconButton extends StatelessWidget {
         decoration:
             buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
         child: InkWell(
-          onTap: onPressed,
+          onTap: onTap,
           onTapDown: (_) => onTapDown?.call(context),
           customBorder: const CircleBorder(),
           radius: paddingAll,
