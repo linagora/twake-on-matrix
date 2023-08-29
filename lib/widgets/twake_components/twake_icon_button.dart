@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+typedef OnTapIconButtonCallbackAction = void Function();
+typedef OnTapDownIconButtonCallbackAction = void Function(
+  BuildContext,
+);
+
 class TwakeIconButton extends StatelessWidget {
   final BoxDecoration? buttonDecoration;
 
@@ -20,7 +25,13 @@ class TwakeIconButton extends StatelessWidget {
 
   final double? weight;
 
-  final VoidCallback? onPressed;
+  final OnTapIconButtonCallbackAction? onPressed;
+
+  final OnTapDownIconButtonCallbackAction? onTapDown;
+
+  final bool? preferBelow;
+
+  final Color? hoverColor;
 
   const TwakeIconButton({
     Key? key,
@@ -32,34 +43,43 @@ class TwakeIconButton extends StatelessWidget {
     this.size,
     this.fill,
     this.weight,
+    this.preferBelow,
+    this.hoverColor,
+    this.onTapDown,
     this.margin = const EdgeInsets.all(0),
     this.buttonDecoration,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: margin,
-      decoration:
-          buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        radius: paddingAll,
-        child: Tooltip(
-          message: tooltip,
-          child: Padding(
-            padding: EdgeInsets.all(paddingAll ?? 8.0),
-            child: icon != null
-                ? Icon(
-                    icon,
-                    size: size,
-                    fill: fill,
-                    weight: weight,
-                  )
-                : imagePath != null
-                    ? SvgPicture.asset(imagePath!)
-                    : null,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: margin,
+        decoration:
+            buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
+        child: InkWell(
+          onTap: onPressed,
+          onTapDown: (_) => onTapDown?.call(context),
+          customBorder: const CircleBorder(),
+          radius: paddingAll,
+          hoverColor: hoverColor,
+          child: Tooltip(
+            preferBelow: preferBelow,
+            message: tooltip,
+            child: Padding(
+              padding: EdgeInsets.all(paddingAll ?? 8.0),
+              child: icon != null
+                  ? Icon(
+                      icon,
+                      size: size,
+                      fill: fill,
+                      weight: weight,
+                    )
+                  : imagePath != null
+                      ? SvgPicture.asset(imagePath!)
+                      : null,
+            ),
           ),
         ),
       ),
