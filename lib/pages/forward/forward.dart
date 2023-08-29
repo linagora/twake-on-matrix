@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -28,46 +29,48 @@ class ForwardController extends State<Forward> {
 
   final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
 
+  final isShowRecentlyChatsNotifier = ValueNotifier(true);
+  final isSearchBarShowNotifier = ValueNotifier(false);
+
   StreamSubscription? forwardMessageInteractorStreamSubscription;
 
   List<Room>? rooms;
 
-  Timeline? timeline;
+  String? sendFromRoomId;
 
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
-  final AutoScrollController forwardListController = AutoScrollController();
+  final AutoScrollController recentChatScrollController =
+      AutoScrollController();
 
-  List<String> selectedEvents = [];
-
-  bool get selectMode => selectedEvents.isNotEmpty;
+  final selectedEventsNotifier = ValueNotifier(<String>[]);
 
   @override
   void initState() {
     super.initState();
+    sendFromRoomId = widget.sendFromRoomId;
+  }
+
+  void toggleRecentlyChats() {
+    isShowRecentlyChatsNotifier.value = !isShowRecentlyChatsNotifier.value;
   }
 
   @override
   void dispose() {
-    forwardListController.dispose();
+    recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
     super.dispose();
   }
 
   void onSelectChat(String id) {
-    if (selectedEvents.contains(id)) {
-      setState(
-        () => selectedEvents.remove(id),
-      );
+    if (selectedEventsNotifier.value.contains(id)) {
+      selectedEventsNotifier.value.remove(id);
     } else {
-      setState(
-        () => selectedEvents.add(id),
-      );
+      selectedEventsNotifier.value.add(id);
     }
-    selectedEvents.sort(
-      (a, b) => a.compareTo(b),
+    selectedEventsNotifier.value = selectedEventsNotifier.value.sorted(
+      (current, next) => current.compareTo(next),
     );
-    Logs().d("onSelectChat: $selectedEvents");
   }
 
   final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
@@ -93,11 +96,11 @@ class ForwardController extends State<Forward> {
       .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
       .toList();
 
-  void forwardAction(BuildContext context) async {
+  void forwardAction() async {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
-          selectedEvents: selectedEvents,
+          selectedEvents: selectedEventsNotifier.value,
           matrixState: Matrix.of(context),
         )
         .listen(

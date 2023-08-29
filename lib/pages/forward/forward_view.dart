@@ -4,7 +4,8 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/pages/forward/forward_item.dart';
+import 'package:fluffychat/pages/forward/recent_chat_list.dart';
+import 'package:fluffychat/pages/forward/recent_chat_title.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -12,26 +13,13 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-class ForwardView extends StatefulWidget {
+class ForwardView extends StatelessWidget {
   final ForwardController controller;
 
   const ForwardView(this.controller, {super.key});
-
-  @override
-  State<ForwardView> createState() => _ForwardViewState();
-}
-
-class _ForwardViewState extends State<ForwardView> {
-  bool isShowRecentlyChats = true;
-  bool isSearchBarShow = false;
-
-  void _toggleRecentlyChats() {
-    setState(() {
-      isShowRecentlyChats = !isShowRecentlyChats;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,39 +27,89 @@ class _ForwardViewState extends State<ForwardView> {
       appBar: PreferredSize(
         preferredSize:
             Size.fromHeight(ForwardViewStyle.preferredAppBarSize(context)),
-        child: _buildAppBarForward(context),
+        child: _ForwardAppBar(
+          isSearchBarShowNotifier: controller.isSearchBarShowNotifier,
+          sendFromRoomId: controller.sendFromRoomId,
+        ),
       ),
       body: WillPopScope(
         onWillPop: () async {
-          widget.controller.popScreen();
+          controller.popScreen();
           return true;
         },
         child: SingleChildScrollView(
           padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
           child: Column(
             children: [
-              _recentlyChatsTitle(context),
-              if (isShowRecentlyChats) _chatList(),
+              RecentChatsTitle(
+                isShowRecentlyChats:
+                    controller.isShowRecentlyChatsNotifier.value,
+                toggleRecentChat: () => controller.toggleRecentlyChats(),
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: controller.isShowRecentlyChatsNotifier,
+                builder: (context, isShowRecentlyChat, child) {
+                  if (isShowRecentlyChat) {
+                    return RecentChatList(
+                      rooms: controller.filteredRoomsForAll,
+                      selectedEventsNotifier: controller.selectedEventsNotifier,
+                      onSelectedChat: (roomId) =>
+                          controller.onSelectChat(roomId),
+                      recentChatScrollController:
+                          controller.recentChatScrollController,
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
             ],
           ),
         ),
       ),
       floatingActionButton: Align(
         alignment: const Alignment(0.5, 1.1),
-        child: _buildBottomBar(),
+        child: _ForwardButton(
+          forwardAction: controller.forwardAction,
+          selectedEventsNotifier: controller.selectedEventsNotifier,
+          forwardMessageNotifier: controller.forwardMessageNotifier,
+        ),
       ),
     );
   }
+}
 
-  Widget _buildBottomBar() {
-    if (widget.controller.selectedEvents.length == 1) {
-      return ValueListenableBuilder<Either<Failure, Success>?>(
-        valueListenable: widget.controller.forwardMessageNotifier,
-        builder: (context, forwardMessageNotifier, child) {
-          if (forwardMessageNotifier == null) {
+class _ForwardButton extends StatelessWidget {
+  const _ForwardButton({
+    required this.selectedEventsNotifier,
+    required this.forwardMessageNotifier,
+    required this.forwardAction,
+  });
+
+  final ValueNotifier<List<String>> selectedEventsNotifier;
+
+  final void Function() forwardAction;
+
+  final ValueNotifier<Either<Failure, Success>?> forwardMessageNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<String>>(
+      valueListenable: selectedEventsNotifier,
+      builder: ((context, selectedEvents, child) {
+        if (selectedEvents.length != 1) {
+          return const SizedBox();
+        }
+
+        return child!;
+      }),
+      child: ValueListenableBuilder<Either<Failure, Success>?>(
+        valueListenable: forwardMessageNotifier,
+        builder: (context, forwardMessageState, child) {
+          if (forwardMessageState == null) {
             return child!;
           } else {
-            return forwardMessageNotifier.fold((failure) => child!, (success) {
+            return forwardMessageState.fold((failure) => child!, (success) {
               if (success is ForwardMessageLoading) {
                 return SizedBox(
                   height: ForwardViewStyle.bottomBarHeight,
@@ -96,24 +134,31 @@ class _ForwardViewState extends State<ForwardView> {
           height: ForwardViewStyle.bottomBarHeight,
           child: Align(
             alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 14),
-              child: TwakeIconButton(
-                size: ForwardViewStyle.iconSendSize,
-                onPressed: () => widget.controller.forwardAction(context),
-                tooltip: L10n.of(context)!.send,
-                imagePath: ImagePaths.icSend,
-              ),
+            child: TwakeIconButton(
+              size: ForwardViewStyle.iconSendSize,
+              onPressed: forwardAction,
+              tooltip: L10n.of(context)!.send,
+              imagePath: ImagePaths.icSend,
             ),
           ),
         ),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
+      ),
+    );
   }
+}
 
-  Widget _buildAppBarForward(BuildContext context) {
+class _ForwardAppBar extends StatelessWidget {
+  const _ForwardAppBar({
+    required this.isSearchBarShowNotifier,
+    this.sendFromRoomId,
+  });
+
+  final String? sendFromRoomId;
+
+  final ValueNotifier<bool> isSearchBarShowNotifier;
+
+  @override
+  Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: ForwardViewStyle.preferredAppBarSize(context),
       surfaceTintColor: Colors.transparent,
@@ -125,52 +170,64 @@ class _ForwardViewState extends State<ForwardView> {
             icon: Icons.arrow_back,
             onPressed: () {
               Matrix.of(context).shareContent = null;
-              widget.controller.popScreen();
+              if (sendFromRoomId != null) {
+                context.go('/rooms/$sendFromRoomId');
+              }
             },
             paddingAll: 8.0,
             margin: const EdgeInsets.symmetric(vertical: 12.0),
           ),
           const SizedBox(width: 8.0),
-          isSearchBarShow
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: TextField(
-                    autofocus: true,
-                    maxLines: 1,
-                    buildCounter: (
-                      BuildContext context, {
-                      required int currentLength,
-                      required int? maxLength,
-                      required bool isFocused,
-                    }) =>
-                        const SizedBox.shrink(),
-                    maxLength: 200,
-                    cursorHeight: 26,
-                    scrollPadding: const EdgeInsets.all(0),
-                    decoration: InputDecoration(
-                      isCollapsed: true,
-                      hintText: "...",
-                      hintStyle:
-                          Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
-                              ),
-                    ),
-                  ),
-                )
-              : Text(
-                  L10n.of(context)!.forwardTo,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        letterSpacing:
-                            ChatAppBarTitleStyle.letterSpacingRoomName,
+          Expanded(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isSearchBarShowNotifier,
+              builder: (context, isSearchBarShow, child) {
+                if (isSearchBarShow) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: TextField(
+                      autofocus: true,
+                      maxLines: 1,
+                      buildCounter: (
+                        BuildContext context, {
+                        required int currentLength,
+                        required int? maxLength,
+                        required bool isFocused,
+                      }) =>
+                          const SizedBox.shrink(),
+                      maxLength: 200,
+                      cursorHeight: 26,
+                      scrollPadding: const EdgeInsets.all(0),
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(
+                              color: LinagoraRefColors.material().neutral[60],
+                            ),
                       ),
-                ),
+                    ),
+                  );
+                } else {
+                  return Text(
+                    L10n.of(context)!.forwardTo,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          letterSpacing:
+                              ChatAppBarTitleStyle.letterSpacingRoomName,
+                        ),
+                  );
+                }
+              },
+            ),
+          ),
         ],
       ),
       actions: [
         TwakeIconButton(
           icon: Icons.search,
-          onPressed: () {},
+          onPressed: () => isSearchBarShowNotifier.value = true,
           tooltip: L10n.of(context)!.search,
         ),
       ],
@@ -181,65 +238,6 @@ class _ForwardViewState extends State<ForwardView> {
           height: 1,
         ),
       ),
-    );
-  }
-
-  Widget _chatList() {
-    final rooms = widget.controller.filteredRoomsForAll;
-    if (rooms.isEmpty) {
-      const SizedBox();
-    } else {
-      return ListView.builder(
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        controller: widget.controller.forwardListController,
-        itemCount: rooms.length,
-        itemBuilder: (BuildContext context, int i) {
-          return ForwardItem(
-            rooms[i],
-            key: Key('chat_list_item_${rooms[i].id}'),
-            selected: widget.controller.selectedEvents.contains(rooms[i].id),
-            onTap: () {
-              widget.controller.onSelectChat(rooms[i].id);
-            },
-          );
-        },
-      );
-    }
-    return const SizedBox();
-  }
-
-  Widget _recentlyChatsTitle(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          L10n.of(context)!.recentlyChats,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraRefColors.material().neutral[40],
-              ),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TwakeIconButton(
-                paddingAll: 6.0,
-                buttonDecoration: BoxDecoration(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                icon:
-                    isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
-                onPressed: () => _toggleRecentlyChats(),
-                tooltip: isShowRecentlyChats
-                    ? L10n.of(context)!.shrink
-                    : L10n.of(context)!.expand,
-              ),
-            ],
-          ),
-        )
-      ],
     );
   }
 }
