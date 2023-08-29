@@ -13,7 +13,9 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
@@ -22,6 +24,7 @@ import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -30,6 +33,8 @@ import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +72,12 @@ class Chat extends StatefulWidget {
 }
 
 class ChatController extends State<Chat>
-    with CommonMediaPickerMixin, MediaPickerMixin, SendFilesMixin {
+    with
+        CommonMediaPickerMixin,
+        MediaPickerMixin,
+        SendFilesMixin,
+        PopupContextMenuActionMixin,
+        PopupMenuWidgetMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -85,6 +95,7 @@ class ChatController extends State<Chat>
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
+  final ValueNotifier<String?> focusHover = ValueNotifier(null);
 
   FocusNode inputFocus = FocusNode();
 
@@ -1283,6 +1294,143 @@ class ChatController extends State<Chat>
       ),
       onSendTap: () => sendImages(imagePickerController, room: room),
       onCameraPicked: (_) => sendImages(imagePickerController, room: room),
+    );
+  }
+
+  void onHover(bool isHovered, int index, Event event) {
+    if (timeline!.events[index - 1].eventId == event.eventId &&
+        !responsive.isMobile(context) &&
+        !selectMode) {
+      focusHover.value = isHovered ? event.eventId : null;
+    }
+  }
+
+  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
+    final listAction = [
+      ChatHorizontalActionMenu.reply,
+      ChatHorizontalActionMenu.forward,
+      ChatHorizontalActionMenu.more,
+    ];
+    return listAction
+        .map(
+          (action) => ContextMenuItemChatAction(
+            action,
+            action.getContextMenuItemState(),
+          ),
+        )
+        .toList();
+  }
+
+  void handleHorizontalActionMenu(
+    BuildContext context,
+    ChatHorizontalActionMenu actions,
+    Event event,
+  ) {
+    switch (actions) {
+      case ChatHorizontalActionMenu.reply:
+        replyAction(replyTo: event);
+        break;
+      case ChatHorizontalActionMenu.forward:
+        onSelectMessage(event);
+        forwardEventsAction();
+        break;
+      case ChatHorizontalActionMenu.more:
+        handleContextMenuAction(context, event);
+        break;
+    }
+  }
+
+  List<PopupMenuEntry> _popupMenuActionTile(
+    BuildContext context,
+    Event event,
+  ) {
+    return [
+      _buildSelectPopupMenuItem(context, event),
+      _buildCopyMessagePopupMenuItem(context, event),
+      _buildPinMessagePopupMenuItem(context, event),
+      _buildForwardPopupMenuItem(context, event),
+    ];
+  }
+
+  PopupMenuEntry _buildSelectPopupMenuItem(
+    BuildContext context,
+    Event event,
+  ) {
+    return PopupMenuItem(
+      padding: EdgeInsets.zero,
+      child: popupItem(
+        context,
+        L10n.of(context)!.select,
+        iconAction: Icons.check_circle_outline,
+        onCallbackAction: () {
+          onSelectMessage(event);
+        },
+      ),
+    );
+  }
+
+  PopupMenuEntry _buildCopyMessagePopupMenuItem(
+    BuildContext context,
+    Event event,
+  ) {
+    return PopupMenuItem(
+      padding: EdgeInsets.zero,
+      child: popupItem(
+        context,
+        L10n.of(context)!.copyMessageText,
+        iconAction: Icons.content_copy,
+        onCallbackAction: () {
+          onSelectMessage(event);
+          copyEventsAction();
+        },
+      ),
+    );
+  }
+
+  PopupMenuEntry _buildPinMessagePopupMenuItem(
+    BuildContext context,
+    Event event,
+  ) {
+    return PopupMenuItem(
+      padding: EdgeInsets.zero,
+      child: popupItem(
+        context,
+        L10n.of(context)!.pinMessage,
+        iconAction: Icons.push_pin,
+        onCallbackAction: () {
+          onSelectMessage(event);
+          pinEvent();
+        },
+      ),
+    );
+  }
+
+  PopupMenuEntry _buildForwardPopupMenuItem(
+    BuildContext context,
+    Event event,
+  ) {
+    return PopupMenuItem(
+      padding: EdgeInsets.zero,
+      child: popupItem(
+        context,
+        L10n.of(context)!.forward,
+        iconAction: Icons.shortcut,
+        onCallbackAction: () {
+          onSelectMessage(event);
+          forwardEventsAction();
+        },
+      ),
+    );
+  }
+
+  void handleContextMenuAction(
+    BuildContext context,
+    Event event,
+  ) {
+    openPopupMenuAction(
+      context,
+      context.getCurrentRelativeRectOfWidget(),
+      _popupMenuActionTile(context, event),
     );
   }
 
