@@ -72,6 +72,9 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
 
   double calculateBodyRatio(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    if (width < ResponsiveUtils.minDesktopWidth) {
+      return 0.32;
+    }
     return ResponsiveUtils.defaultSizeBodyLayoutWeb / width;
   }
 

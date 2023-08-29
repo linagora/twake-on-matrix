@@ -15,6 +15,7 @@ class ResponsiveUtils {
   static const double maxMobileWidth = 904;
 
   static const double defaultSizeBodyLayoutWeb = 440;
+  static const double defaultSizeBodyLayoutDesktop = 280;
   static const double heightBottomNavigation = 90;
 
   bool isScreenWithShortestSide(BuildContext context) =>
