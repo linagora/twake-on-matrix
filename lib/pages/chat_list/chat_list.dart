@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:async/async.dart';
@@ -10,12 +9,12 @@ import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
+import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:flutter/foundation.dart';
@@ -24,20 +23,14 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:uni_links/uni_links.dart';
 
 import '../../../utils/account_bundles.dart';
-import '../../utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import '../../utils/url_launcher.dart';
 import '../../utils/voip/callkeep_manager.dart';
-import '../../widgets/fluffy_chat_app.dart';
 import '../../widgets/matrix.dart';
 import '../bootstrap/bootstrap_dialog.dart';
 
 enum SelectMode {
   normal,
-  share,
   select,
 }
 
@@ -80,13 +73,8 @@ class ChatListController extends State<ChatList>
     with
         TickerProviderStateMixin,
         RouteAware,
-        ComparablePresentationContactMixin {
-  StreamSubscription? _intentDataStreamSubscription;
-
-  StreamSubscription? _intentFileStreamSubscription;
-
-  StreamSubscription? _intentUriStreamSubscription;
-
+        ComparablePresentationContactMixin,
+        ReceiveSharingIntentMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
   bool get displayNavigationBar => false;
@@ -281,77 +269,12 @@ class ChatListController extends State<ChatList>
 
   String? get activeRoomId => widget.activeRoomId;
 
-  SelectMode get selectMode => Matrix.of(context).shareContent != null
-      ? SelectMode.share
-      : selectedRoomIds.isEmpty
-          ? SelectMode.normal
-          : SelectMode.select;
-
-  void _processIncomingSharedFiles(List<SharedMediaFile> files) {
-    if (files.isEmpty) return;
-    final file = File(files.first.path.replaceFirst('file://', ''));
-
-    Matrix.of(context).shareContent = {
-      'msgtype': 'chat.fluffy.shared_file',
-      'file': MatrixFile(
-        bytes: file.readAsBytesSync(),
-        name: file.path,
-      ).detectFileType,
-    };
-    context.go('/rooms');
-  }
-
-  void _processIncomingSharedText(String? text) {
-    if (text == null) return;
-    if (text.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
-        text.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        (text.toLowerCase().startsWith(AppConfig.schemePrefix) &&
-            !RegExp(r'\s').hasMatch(text))) {
-      return _processIncomingUris(text);
-    }
-    Matrix.of(context).shareContent = {
-      'msgtype': 'm.text',
-      'body': text,
-    };
-    context.go('/rooms');
-  }
-
-  void _processIncomingUris(String? text) async {
-    if (text == null) return;
-    context.go('/rooms');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, text).openMatrixToUrl();
-    });
-  }
-
-  void _initReceiveSharingIntent() {
-    if (!PlatformInfos.isMobile) return;
-
-    // For sharing images coming from outside the app while the app is in the memory
-    _intentFileStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen(_processIncomingSharedFiles, onError: print);
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then(_processIncomingSharedFiles);
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getTextStream()
-        .listen(_processIncomingSharedText, onError: print);
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then(_processIncomingSharedText);
-
-    // For receiving shared Uris
-    _intentUriStreamSubscription = linkStream.listen(_processIncomingUris);
-    if (FluffyChatApp.gotInitialLink == false) {
-      FluffyChatApp.gotInitialLink = true;
-      getInitialLink().then(_processIncomingUris);
-    }
-  }
+  SelectMode get selectMode =>
+      selectedRoomIds.isEmpty ? SelectMode.normal : SelectMode.select;
 
   @override
   void initState() {
-    _initReceiveSharingIntent();
+    initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
@@ -370,9 +293,9 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    _intentDataStreamSubscription?.cancel();
-    _intentFileStreamSubscription?.cancel();
-    _intentUriStreamSubscription?.cancel();
+    intentDataStreamSubscription?.cancel();
+    intentFileStreamSubscription?.cancel();
+    intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     super.dispose();
   }
@@ -593,11 +516,7 @@ class ChatListController extends State<ChatList>
   }
 
   void cancelAction() {
-    if (selectMode == SelectMode.share) {
-      setState(() => Matrix.of(context).shareContent = null);
-    } else {
-      setState(() => selectedRoomIds.clear());
-    }
+    setState(() => selectedRoomIds.clear());
   }
 
   void setActiveClient(Client client) {

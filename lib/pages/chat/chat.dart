@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
@@ -59,8 +60,14 @@ import 'sticker_picker_dialog.dart';
 class Chat extends StatefulWidget {
   final String roomId;
   final Widget? sideView;
+  final MatrixFile? shareFile;
 
-  const Chat({Key? key, this.sideView, required this.roomId}) : super(key: key);
+  const Chat({
+    Key? key,
+    this.sideView,
+    required this.roomId,
+    this.shareFile,
+  }) : super(key: key);
 
   @override
   ChatController createState() => ChatController();
@@ -80,6 +87,8 @@ class ChatController extends State<Chat>
   Timeline? timeline;
 
   MatrixState? matrix;
+
+  MatrixFile? get shareFile => widget.shareFile;
 
   String? get roomId => widget.roomId;
 
@@ -259,6 +268,15 @@ class ChatController extends State<Chat>
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _askToAcceptInvitation();
+      if (shareFile != null && room != null && shareFile!.filePath != null) {
+        final sendFileInteractor = getIt.get<SendFileInteractor>();
+        sendFileInteractor.execute(
+          room: room!,
+          fileInfos: [
+            FileInfo(shareFile!.name, shareFile!.filePath!, shareFile!.size),
+          ],
+        );
+      }
     });
   }
 
