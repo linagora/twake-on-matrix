@@ -49,13 +49,14 @@ class MessageStyle {
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
-  static const double messageBubbleLargeMaxWidth = 620.0;
+  static const double messageBubbleLargeMaxWidth = 520.0;
+  static const double messageBubbleLargeMaxDesktop = 340.0;
   static const double messageBubbleWatchMaxWidth = 240.0;
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
   static double messageBubbleWidth(BuildContext context) {
     return context.responsiveValue<double>(
       desktop: messageBubbleLargeMaxWidth,
-      tablet: messageBubbleLargeMaxWidth,
+      tablet: messageBubbleLargeMaxDesktop,
       mobile:
           MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
       watch: messageBubbleWatchMaxWidth,
