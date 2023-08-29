@@ -59,7 +59,7 @@ class SearchableAppBar extends StatelessWidget {
           children: [
             TwakeIconButton(
               icon: Icons.arrow_back,
-              onPressed: () => context.pop(),
+              onTap: () => context.pop(),
               tooltip: L10n.of(context)!.back,
               paddingAll: 8.0,
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -115,7 +115,7 @@ class SearchableAppBar extends StatelessWidget {
               builder: (context, searchModeNotifier, child) {
                 if (searchModeNotifier) {
                   return TwakeIconButton(
-                    onPressed: toggleSearchMode,
+                    onTap: toggleSearchMode,
                     tooltip: L10n.of(context)!.close,
                     icon: Icons.close,
                     paddingAll: 10.0,
@@ -127,7 +127,7 @@ class SearchableAppBar extends StatelessWidget {
                 }
                 return TwakeIconButton(
                   icon: Icons.search,
-                  onPressed: toggleSearchMode,
+                  onTap: toggleSearchMode,
                   tooltip: L10n.of(context)!.search,
                   paddingAll: 10.0,
                   margin: const EdgeInsets.symmetric(vertical: 10.0),

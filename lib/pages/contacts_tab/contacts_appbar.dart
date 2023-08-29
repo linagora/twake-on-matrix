@@ -78,7 +78,7 @@ class ContactsAppBar extends StatelessWidget {
                             ? TwakeIconButton(
                                 tooltip: "Clear",
                                 icon: Icons.close,
-                                onPressed: clearSearchBar,
+                                onTap: clearSearchBar,
                               )
                             : null,
                       ),

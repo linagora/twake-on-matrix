@@ -20,7 +20,7 @@ class AddStoryView extends StatelessWidget {
         leading: TwakeIconButton(
           icon: Icons.arrow_back,
           tooltip: L10n.of(context)!.back,
-          onPressed: () => context.pop(),
+          onTap: () => context.pop(),
         ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: Colors.transparent,

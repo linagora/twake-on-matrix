@@ -21,7 +21,7 @@ class ArchiveView extends StatelessWidget {
           leading: TwakeIconButton(
             icon: Icons.arrow_back,
             tooltip: L10n.of(context)!.back,
-            onPressed: () => context.pop(),
+            onTap: () => context.pop(),
           ),
           title: Text(L10n.of(context)!.archive),
           actions: [

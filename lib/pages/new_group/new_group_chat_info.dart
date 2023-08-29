@@ -127,7 +127,7 @@ class NewGroupChatInfo extends StatelessWidget {
           children: [
             TwakeIconButton(
               icon: Icons.arrow_back,
-              onPressed: () => Navigator.of(context).pop(),
+              onTap: () => Navigator.of(context).pop(),
               tooltip: L10n.of(context)!.back,
               paddingAll: 8.0,
               margin: const EdgeInsets.symmetric(
