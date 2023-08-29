@@ -2552,5 +2552,110 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "onlineHourAgo": "был(а) в сети {hour} ч. {min} мин. назад",
+  "@onlineHourAgo": {
+    "placeholders": {
+      "hour": {},
+      "min": {}
+    }
+  },
+  "onlineStatus": "онлайн",
+  "@onlineStatus": {},
+  "onlineLongTimeAgo": "был(а) в сети давно",
+  "@onlineLongTimeAgo": {},
+  "onlineMinAgo": "был(а) в сети {min} мин. назад",
+  "@onlineMinAgo": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "onlineDayAgo": "был(а) в сети {day} дня назад",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "chatCanHave": "В этом чате:",
+  "@chatCanHave": {},
+  "channels": "Каналы",
+  "@channels": {},
+  "chatMessage": "Новое сообщение",
+  "@chatMessage": {},
+  "welcomeToTwake": "Добро пожаловать в Twake, {user}",
+  "@welcomeToTwake": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "startNewChatMessage": "Всегда приятно пообщаться с друзьями или коллегами.\nНапишите им в личные сообщения, создайте чат или присоединитесь к уже существующему.",
+  "@startNewChatMessage": {},
+  "inactive": "Не активирован",
+  "@inactive": {},
+  "newGroupChat": "Новый групповой чат",
+  "@newGroupChat": {},
+  "getHelp": "Помощь",
+  "@getHelp": {},
+  "expand": "Развернуть",
+  "@expand": {},
+  "shrink": "Свернуть",
+  "@shrink": {},
+  "noResultForKeyword": "Нет результатов по запросу \"{keyword}\"",
+  "@noResultForKeyword": {
+    "placeholders": {
+      "keyword": {}
+    }
+  },
+  "invite": "Пригласить",
+  "@invite": {},
+  "enterGroupName": "Введите название чата",
+  "@enterGroupName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onlineWeekAgo": "был(а) в сети {week} недели назад",
+  "@onlineWeekAgo": {
+    "placeholders": {
+      "week": {}
+    }
+  },
+  "onlineMonthAgo": "был(а) в сети {month} месяца назад",
+  "@onlineMonthAgo": {
+    "placeholders": {
+      "month": {}
+    }
+  },
+  "noMessageHereYet": "Здесь еще нет сообщений...",
+  "@noMessageHereYet": {},
+  "sendMessageGuide": "Отправьте сообщение или нажмите на приветствие.",
+  "@sendMessageGuide": {},
+  "youCreatedGroupChat": "Вы создали групповой чат",
+  "@youCreatedGroupChat": {},
+  "upTo100000Members": "Не более 100.000 участников",
+  "@upTo100000Members": {},
+  "persistentChatHistory": "История чата сохраняется",
+  "@persistentChatHistory": {},
+  "multiInteractionThreadedDiscussion": "Многофункциональные треды с обсуждениями",
+  "@multiInteractionThreadedDiscussion": {},
+  "addMember": "Добавить участников",
+  "@addMember": {},
+  "profile": "Профиль",
+  "@profile": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "statusDot": "⬤",
+  "@statusDot": {},
+  "active": "Активирован",
+  "@active": {},
+  "twakeUsers": "Пользователи Twake",
+  "@twakeUsers": {},
+  "searchResultNotFound1": "• Убедитесь, что в вашем запросе нет опечаток.\n",
+  "@searchResultNotFound1": {},
+  "back": "Назад",
+  "@back": {},
+  "loginWithSSO": "Войти с помощью единого входа",
+  "@loginWithSSO": {},
+  "wrongServerName": "Неверное имя сервера",
+  "@wrongServerName": {}
 }
