@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -10,7 +9,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
-import 'package:fluffychat/presentation/model/chat_draft/chat_draft_argument.dart';
+import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -58,6 +57,8 @@ class DraftChatController extends State<DraftChat>
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
+  final isSendingNotifier = ValueNotifier(false);
+
   void _updateScrollController() {
     if (!mounted) {
       return;
@@ -88,7 +89,7 @@ class DraftChatController extends State<DraftChat>
   @override
   void initState() {
     final extra = widget.state.extra as Map<String, String>;
-    if (extra != {}) {
+    if (extra.isNotEmpty) {
       presentationContact = PresentationContact(
         matrixId: extra[PresentationContactConstant.receiverId],
         email: extra[PresentationContactConstant.email],
@@ -128,7 +129,8 @@ class DraftChatController extends State<DraftChat>
       text: sendController.value.text,
       selection: const TextSelection.collapsed(offset: 0),
     );
-
+    inputFocus.unfocus();
+    isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) {
         onRoomCreatedSuccess?.call(room);
@@ -154,23 +156,18 @@ class DraftChatController extends State<DraftChat>
       event.fold((failure) {
         onRoomCreatedFailed?.call();
         Logs().d("_createRoom: $failure");
-        context.pop();
+        isSendingNotifier.value = false;
       }, (success) {
-        if (success is CreateDirectChatLoading) {
-          showDialog(
-            useRootNavigator: false,
-            context: context,
-            builder: (context) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            },
-          );
-        } else if (success is CreateDirectChatSuccess) {
+        if (success is CreateDirectChatSuccess) {
           final room = Matrix.of(context).client.getRoomById(success.roomId);
           if (room != null) {
             onRoomCreatedSuccess?.call(room);
-            context.go('/rooms/${room.id}/');
+            context.go(
+              '/rooms/${room.id}/',
+              extra: ChatRouterInputArgument(
+                type: ChatRouterInputArgumentType.draft,
+              ),
+            );
           }
         }
       });
@@ -263,25 +260,6 @@ class DraftChatController extends State<DraftChat>
 
   @override
   Widget build(BuildContext context) {
-    final argument = ChatDraftArgument(
-      inputText: inputText,
-      showEmojiPicker: showEmojiPicker,
-      emojiPickerType: emojiPickerType,
-      matrixId: presentationContact!.matrixId,
-      displayName: presentationContact!.displayName,
-      onTapDirectDraftChat: inputFocus.requestFocus,
-      onPressedAddMore: () {
-        showMediaPicker(context);
-      },
-      onInputBarSubmitted: onInputBarSubmitted,
-      emojiPickerAction: emojiPickerAction,
-      inputFocus: inputFocus,
-      textEditingController: sendController,
-      onInputBarChanged: onInputBarChanged,
-      sendText: sendText,
-      onEmojiBottomSheetSelected: onEmojiBottomSheetSelected,
-      emojiPickerBackspace: emojiPickerBackspace,
-    );
-    return DraftChatView(chatDraftArgument: argument);
+    return DraftChatView(controller: this);
   }
 }
