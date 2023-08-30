@@ -148,8 +148,15 @@ class HomeserverTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _buildTypeAheadField(context);
+  }
+
+  TypeAheadField<HomeserverBenchmarkResult> _buildTypeAheadField(
+    BuildContext context,
+  ) {
     return TypeAheadField(
       textFieldConfiguration: TextFieldConfiguration(
+        onEditingComplete: () => controller.loginButtonPressed(),
         autofocus: controller.state != HomeserverState.ssoLoginServer,
         autocorrect: false,
         enabled: true,
