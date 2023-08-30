@@ -24,6 +24,6 @@ class RecoveryWordsAPI {
           data: RecoveryWordsResponse(words: recoveryWords),
         )
         .onError((error, stackTrace) => throw Exception(error));
-    return response.statusCode == 200;
+    return response.statusCode >= 200 && response.statusCode <= 299;
   }
 }
