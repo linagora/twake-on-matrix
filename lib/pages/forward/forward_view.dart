@@ -136,7 +136,7 @@ class _ForwardButton extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: TwakeIconButton(
               size: ForwardViewStyle.iconSendSize,
-              onPressed: forwardAction,
+              onTap: forwardAction,
               tooltip: L10n.of(context)!.send,
               imagePath: ImagePaths.icSend,
             ),
@@ -168,7 +168,7 @@ class _ForwardAppBar extends StatelessWidget {
           TwakeIconButton(
             tooltip: L10n.of(context)!.back,
             icon: Icons.arrow_back,
-            onPressed: () {
+            onTap: () {
               Matrix.of(context).shareContent = null;
               if (sendFromRoomId != null) {
                 context.go('/rooms/$sendFromRoomId');
@@ -227,7 +227,7 @@ class _ForwardAppBar extends StatelessWidget {
       actions: [
         TwakeIconButton(
           icon: Icons.search,
-          onPressed: () => isSearchBarShowNotifier.value = true,
+          onTap: () => isSearchBarShowNotifier.value = true,
           tooltip: L10n.of(context)!.search,
         ),
       ],

@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
@@ -105,6 +106,7 @@ class ChatController extends State<Chat>
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
   final ValueNotifier<String?> focusHover = ValueNotifier(null);
+  final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
   FocusNode inputFocus = FocusNode();
 
@@ -1316,11 +1318,17 @@ class ChatController extends State<Chat>
   }
 
   void onHover(bool isHovered, int index, Event event) {
-    if (timeline!.events[index - 1].eventId == event.eventId &&
-        !responsive.isMobile(context) &&
-        !selectMode) {
+    if (index > 0 &&
+        timeline!.events[index - 1].eventId == event.eventId &&
+        responsive.isDesktop(context) &&
+        !selectMode &&
+        !openingPopupMenu.value) {
       focusHover.value = isHovered ? event.eventId : null;
     }
+  }
+
+  void _handleStateContextMenu() {
+    openingPopupMenu.value = !openingPopupMenu.value;
   }
 
   List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
@@ -1358,97 +1366,67 @@ class ChatController extends State<Chat>
     }
   }
 
-  List<PopupMenuEntry> _popupMenuActionTile(
+  List<PopupMenuItem> _popupMenuActionTile(
     BuildContext context,
     Event event,
   ) {
-    return [
-      _buildSelectPopupMenuItem(context, event),
-      _buildCopyMessagePopupMenuItem(context, event),
-      _buildPinMessagePopupMenuItem(context, event),
-      _buildForwardPopupMenuItem(context, event),
+    final listAction = [
+      ChatContextMenuActions.select,
+      ChatContextMenuActions.copyMessage,
+      ChatContextMenuActions.pinMessage,
+      ChatContextMenuActions.forward,
     ];
+    return listAction.map((action) {
+      return PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: popupItem(
+          context,
+          action.getTitle(context),
+          iconAction: action.getIcon(),
+          onCallbackAction: () => _handleClickOnContextMenuItem(
+            action,
+            event,
+          ),
+        ),
+      );
+    }).toList();
   }
 
-  PopupMenuEntry _buildSelectPopupMenuItem(
-    BuildContext context,
+  void _handleClickOnContextMenuItem(
+    ChatContextMenuActions action,
     Event event,
   ) {
-    return PopupMenuItem(
-      padding: EdgeInsets.zero,
-      child: popupItem(
-        context,
-        L10n.of(context)!.select,
-        iconAction: Icons.check_circle_outline,
-        onCallbackAction: () {
-          onSelectMessage(event);
-        },
-      ),
-    );
-  }
-
-  PopupMenuEntry _buildCopyMessagePopupMenuItem(
-    BuildContext context,
-    Event event,
-  ) {
-    return PopupMenuItem(
-      padding: EdgeInsets.zero,
-      child: popupItem(
-        context,
-        L10n.of(context)!.copyMessageText,
-        iconAction: Icons.content_copy,
-        onCallbackAction: () {
-          onSelectMessage(event);
-          copyEventsAction();
-        },
-      ),
-    );
-  }
-
-  PopupMenuEntry _buildPinMessagePopupMenuItem(
-    BuildContext context,
-    Event event,
-  ) {
-    return PopupMenuItem(
-      padding: EdgeInsets.zero,
-      child: popupItem(
-        context,
-        L10n.of(context)!.pinMessage,
-        iconAction: Icons.push_pin,
-        onCallbackAction: () {
-          onSelectMessage(event);
-          pinEvent();
-        },
-      ),
-    );
-  }
-
-  PopupMenuEntry _buildForwardPopupMenuItem(
-    BuildContext context,
-    Event event,
-  ) {
-    return PopupMenuItem(
-      padding: EdgeInsets.zero,
-      child: popupItem(
-        context,
-        L10n.of(context)!.forward,
-        iconAction: Icons.shortcut,
-        onCallbackAction: () {
-          onSelectMessage(event);
-          forwardEventsAction();
-        },
-      ),
-    );
+    switch (action) {
+      case ChatContextMenuActions.select:
+        onSelectMessage(event);
+        break;
+      case ChatContextMenuActions.copyMessage:
+        onSelectMessage(event);
+        copyEventsAction();
+        break;
+      case ChatContextMenuActions.pinMessage:
+        onSelectMessage(event);
+        pinEvent();
+        break;
+      case ChatContextMenuActions.forward:
+        onSelectMessage(event);
+        forwardEventsAction();
+        break;
+    }
   }
 
   void handleContextMenuAction(
     BuildContext context,
     Event event,
   ) {
+    _handleStateContextMenu();
     openPopupMenuAction(
       context,
       context.getCurrentRelativeRectOfWidget(),
       _popupMenuActionTile(context, event),
+      onClose: () {
+        _handleStateContextMenu();
+      },
     );
   }
 

@@ -15,6 +15,7 @@ class MessageStyle {
   static const notSameSenderPadding = EdgeInsets.only(left: 8.0, bottom: 4);
 
   static const double buttonHeight = 66;
+
   static List<BoxShadow> boxShadow(BuildContext context) {
     return Theme.of(context).brightness == Brightness.light
         ? const [
@@ -39,6 +40,7 @@ class MessageStyle {
   }
 
   static int get messageFlexMobile => 7;
+
   static int get replyIconFlexMobile => 2;
 
   static TextStyle? displayTime(BuildContext context) =>
@@ -50,6 +52,7 @@ class MessageStyle {
           );
 
   static double get forwardContainerSize => 40.0;
+
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
@@ -58,12 +61,11 @@ class MessageStyle {
   static const double messageBubbleTabletRatioMaxWidth = 0.50;
 
   static double messageBubbleWidth(BuildContext context) {
-    if (responsiveUtils.isDesktop(context)) {
-      return messageBubbleDesktopMaxWidth;
-    } else if (responsiveUtils.isTablet(context)) {
-      return context.width * messageBubbleTabletRatioMaxWidth;
-    } else {
-      return context.width * messageBubbleMobileRatioMaxWidth;
-    }
+    return context.responsiveValue<double>(
+      desktop: messageBubbleDesktopMaxWidth,
+      tablet: context.width * messageBubbleTabletRatioMaxWidth,
+      mobile:
+          MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
+    );
   }
 }

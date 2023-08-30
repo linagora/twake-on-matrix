@@ -128,16 +128,24 @@ extension ContextExtensionss on BuildContext {
     if (PlatformInfos.isDesktop) {
       deviceWidth = mediaQuerySize.width;
     }
-    if (deviceWidth >= 1200 && desktop != null) {
+    if (deviceWidth >= minDesktopWidth && desktop != null) {
       return desktop;
-    } else if (deviceWidth >= 600 && tablet != null) {
+    } else if (deviceWidth >= minTabletWidth &&
+        deviceWidth < minDesktopWidth &&
+        tablet != null) {
       return tablet;
-    } else if (deviceWidth < 300 && watch != null) {
-      return watch;
+    } else if (deviceWidth < maxMobileWidth && mobile != null) {
+      return mobile;
     } else {
-      return mobile!;
+      return watch!;
     }
   }
+
+  static const double minDesktopWidth = 1239;
+
+  static const double minTabletWidth = 905;
+
+  static const double maxMobileWidth = 904;
 
   void goChild(String path) => go('${GoRouterState.of(this).uri.path}/$path');
 

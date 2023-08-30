@@ -25,7 +25,7 @@ class ShareView extends StatelessWidget {
         leading: TwakeIconButton(
           tooltip: L10n.of(context)!.cancel,
           icon: Icons.close,
-          onPressed: () => context.pop(),
+          onTap: () => context.pop(),
         ),
       ),
       body: Padding(
