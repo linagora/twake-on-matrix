@@ -3,6 +3,7 @@ on:
 
 env:
   FLUTTER_VERSION: 3.10.6
+  LIBOLM_VERSION: 3.2.15
 
 name: Deploying on GitHub Pages
 
@@ -41,7 +42,7 @@ jobs:
       - name: Build libolm
         run: |
           rm -rf assets/js
-          nix build -v "git+https://gitlab.matrix.org/matrix-org/olm.git#javascript" -o assets/js
+          nix build -v "gitlab:matrix-org/olm/$LIBOLM_VERSION?host=gitlab.matrix.org#javascript" -o assets/js
           sudo chmod 777 -R assets/js
           cd assets/js/ && mv javascript package
 
