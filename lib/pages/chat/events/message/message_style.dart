@@ -1,8 +1,12 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 
 class MessageStyle {
+  static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
+
   static final bubbleBorderRadius = BorderRadius.circular(20);
   static final errorStatusPlaceHolderWidth = 16 * AppConfig.bubbleSizeFactor;
   static final errorStatusPlaceHolderHeight = 16 * AppConfig.bubbleSizeFactor;
@@ -49,17 +53,17 @@ class MessageStyle {
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
-  static const double messageBubbleLargeMaxWidth = 520.0;
-  static const double messageBubbleLargeMaxDesktop = 340.0;
-  static const double messageBubbleWatchMaxWidth = 240.0;
+  static const double messageBubbleDesktopMaxWidth = 520.0;
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
+  static const double messageBubbleTabletRatioMaxWidth = 0.50;
+
   static double messageBubbleWidth(BuildContext context) {
-    return context.responsiveValue<double>(
-      desktop: messageBubbleLargeMaxWidth,
-      tablet: messageBubbleLargeMaxDesktop,
-      mobile:
-          MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
-      watch: messageBubbleWatchMaxWidth,
-    );
+    if (responsiveUtils.isDesktop(context)) {
+      return messageBubbleDesktopMaxWidth;
+    } else if (responsiveUtils.isTablet(context)) {
+      return context.width * messageBubbleTabletRatioMaxWidth;
+    } else {
+      return context.width * messageBubbleMobileRatioMaxWidth;
+    }
   }
 }

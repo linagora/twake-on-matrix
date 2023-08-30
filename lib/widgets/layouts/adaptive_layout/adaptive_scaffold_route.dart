@@ -48,7 +48,7 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
             )
           },
         ),
-        bodyRatio: calculateBodyRatio(context),
+        bodyRatio: ResponsiveUtils.bodyRatio,
         secondaryBody: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
             const WidthPlatformBreakpoint(end: ResponsiveUtils.maxMobileWidth):
@@ -68,14 +68,6 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double calculateBodyRatio(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < ResponsiveUtils.minDesktopWidth) {
-      return 0.32;
-    }
-    return ResponsiveUtils.defaultSizeBodyLayoutWeb / width;
   }
 
   Widget _secondaryBodyWidget(

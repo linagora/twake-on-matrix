@@ -425,7 +425,7 @@ class _MessageImageBuilder extends StatelessWidget {
 
     return ImageBubble(
       event,
-      width: MessageContentStyle.imageBubbleWidth,
+      width: MessageContentStyle.imageBubbleWidth(context),
       height: MessageContentStyle.imageBubbleHeight,
       fit: BoxFit.cover,
       onTapSelectMode: onTapSelectMode,
