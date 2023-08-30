@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/share/share_view.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -50,7 +51,13 @@ class ShareController extends State<Share> with SendFilesMixin {
     if (shareContent != null) {
       final shareFile = shareContent.tryGet<MatrixFile>('file');
       if (shareContent.tryGet<String>('msgtype') == 'chat.fluffy.shared_file') {
-        context.go('/rooms/${room.id}', extra: shareFile);
+        context.go(
+          '/rooms/${room.id}',
+          extra: ChatRouterInputArgument(
+            type: ChatRouterInputArgumentType.share,
+            data: shareFile,
+          ),
+        );
       } else {
         room.sendEvent(shareContent);
         context.go('/rooms/${room.id}');

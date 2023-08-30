@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settin
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
+import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
@@ -357,13 +358,32 @@ abstract class AppRoutes {
             GoRoute(
               path: ':roomid',
               pageBuilder: (context, state) {
-                final shareFile = state.extra as MatrixFile?;
+                if (state.extra is ChatRouterInputArgument) {
+                  final extra = state.extra as ChatRouterInputArgument;
+                  switch (extra.type) {
+                    case ChatRouterInputArgumentType.draft:
+                      return NoTransitionPage(
+                        child: Chat(
+                          roomId: state.pathParameters['roomid']!,
+                          key: Key(state.pathParameters['roomid']!),
+                        ),
+                      );
+                    case ChatRouterInputArgumentType.share:
+                      return defaultPageBuilder(
+                        context,
+                        Chat(
+                          roomId: state.pathParameters['roomid']!,
+                          key: Key(state.pathParameters['roomid']!),
+                          shareFile: extra.data as MatrixFile?,
+                        ),
+                      );
+                  }
+                }
                 return defaultPageBuilder(
                   context,
                   Chat(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(state.pathParameters['roomid']!),
-                    shareFile: shareFile,
                   ),
                 );
               },
