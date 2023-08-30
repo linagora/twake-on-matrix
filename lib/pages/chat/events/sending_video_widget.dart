@@ -131,7 +131,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     if (imageWidth == null || imageHeight == null) {
       return (
         MessageContentStyle.imageBubbleWidth(context),
-        MessageContentStyle.imageBubbleHeight
+        MessageContentStyle.imageBubbleHeight(context)
       );
     }
 
@@ -140,7 +140,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     if (imageWidth <= imageHeight) {
       return (
         MessageContentStyle.imageBubbleWidth(context),
-        MessageContentStyle.imageBubbleHeight
+        MessageContentStyle.imageBubbleHeight(context)
       );
     } else {
       return (
