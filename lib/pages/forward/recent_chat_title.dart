@@ -34,7 +34,7 @@ class RecentChatsTitle extends StatelessWidget {
                 ),
                 icon:
                     isShowRecentlyChats ? Icons.expand_less : Icons.expand_more,
-                onPressed: toggleRecentChat,
+                onTap: toggleRecentChat,
                 tooltip: isShowRecentlyChats
                     ? L10n.of(context)!.shrink
                     : L10n.of(context)!.expand,

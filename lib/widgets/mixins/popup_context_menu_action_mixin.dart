@@ -5,8 +5,9 @@ mixin PopupContextMenuActionMixin {
   void openPopupMenuAction(
     BuildContext context,
     RelativeRect? position,
-    List<PopupMenuEntry> popupMenuItems,
-  ) async {
+    List<PopupMenuEntry> popupMenuItems, {
+    VoidCallback? onClose,
+  }) async {
     await showMenu(
       context: context,
       position: position ?? const RelativeRect.fromLTRB(16, 40, 16, 16),
@@ -14,6 +15,8 @@ mixin PopupContextMenuActionMixin {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       items: popupMenuItems,
-    );
+    ).then((value) {
+      onClose?.call();
+    });
   }
 }
