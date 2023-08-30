@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -209,7 +207,7 @@ class UrlLauncher {
 
   void openUrlInAppBrowser() async {
     if (url != null) {
-      if (Platform.isAndroid) {
+      if (PlatformInfos.isMobile) {
         await browser.open(
           url: Uri.parse(url!),
           options: ChromeSafariBrowserClassOptions(
