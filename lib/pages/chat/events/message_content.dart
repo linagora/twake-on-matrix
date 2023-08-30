@@ -82,7 +82,8 @@ class MessageContent extends StatelessWidget {
           leading: CloseButton(onPressed: Navigator.of(context).pop),
           title: Text(
             l10n.whyIsThisMessageEncrypted,
-            style: TextStyle(fontSize: MessageContentStyle.appBarFontSize),
+            style:
+                const TextStyle(fontSize: MessageContentStyle.appBarFontSize),
           ),
         ),
         body: SafeArea(
@@ -426,7 +427,7 @@ class _MessageImageBuilder extends StatelessWidget {
     return ImageBubble(
       event,
       width: MessageContentStyle.imageBubbleWidth(context),
-      height: MessageContentStyle.imageBubbleHeight,
+      height: MessageContentStyle.imageBubbleHeight(context),
       fit: BoxFit.cover,
       onTapSelectMode: onTapSelectMode,
       onTapPreview: onTapPreview,

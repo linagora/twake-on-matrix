@@ -5,17 +5,28 @@ import 'package:flutter/material.dart';
 class MessageContentStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  static int get maxLengthTextInline => 180;
-  static double get appBarFontSize => 16.0;
+  static const int maxLengthTextInline = 180;
+  static const double appBarFontSize = 16.0;
+
   static double imageBubbleWidth(BuildContext context) {
     if (responsiveUtils.isDesktop(context)) {
-      return 500;
+      return imageBubbleWidthForWeb;
     }
-    return 256;
+    return imageBubbleWidthForMobileAndTablet;
   }
 
-  static double get imageBubbleHeight => 500;
-  static Color get backgroundColorButton => Colors.white.withAlpha(64);
+  static double imageBubbleHeight(BuildContext context) {
+    if (responsiveUtils.isDesktop(context)) {
+      return imageBubbleHeightForWeb;
+    }
+    return imageBubbleHeightForMobileAndTable;
+  }
 
-  static double get letterSpacingMessageContent => -0.15;
+  static const double imageBubbleHeightForWeb = 420;
+  static const double imageBubbleHeightForMobileAndTable = 320;
+  static const double imageBubbleWidthForMobileAndTablet = 256;
+  static const double imageBubbleWidthForWeb = 500;
+  static Color backgroundColorButton = Colors.white.withAlpha(64);
+
+  static const double letterSpacingMessageContent = -0.15;
 }
