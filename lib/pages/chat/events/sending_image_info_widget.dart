@@ -70,10 +70,10 @@ class SendingImageInfoWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.0),
           child: Image.file(
             File(matrixFile.filePath!),
-            width: MessageContentStyle.imageBubbleWidth,
+            width: MessageContentStyle.imageBubbleWidth(context),
             height: MessageContentStyle.imageBubbleHeight,
             cacheHeight: MessageContentStyle.imageBubbleHeight.toInt(),
-            cacheWidth: MessageContentStyle.imageBubbleWidth.toInt(),
+            cacheWidth: MessageContentStyle.imageBubbleWidth(context).toInt(),
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
           ),
