@@ -1,4 +1,3 @@
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -124,10 +123,7 @@ extension ContextExtensionss on BuildContext {
     T? desktop,
     T? watch,
   }) {
-    var deviceWidth = mediaQuerySize.shortestSide;
-    if (PlatformInfos.isDesktop) {
-      deviceWidth = mediaQuerySize.width;
-    }
+    final deviceWidth = mediaQuerySize.width;
     if (deviceWidth >= minDesktopWidth && desktop != null) {
       return desktop;
     } else if (deviceWidth >= minTabletWidth &&
