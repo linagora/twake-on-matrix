@@ -25,6 +25,8 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
                 baseUrl: Uri.parse(toMConfigurationsHiveObj.identityServerUrl!),
               )
             : null,
+        authUrl: toMConfigurationsHiveObj.authUrl,
+        loginType: toMConfigurationsHiveObj.loginType,
       );
     } else {
       throw ToMConfigurationNotFound();

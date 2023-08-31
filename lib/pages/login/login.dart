@@ -67,6 +67,7 @@ class LoginController extends State<Login> {
       } else {
         identifier = AuthenticationUserIdentifier(user: username);
       }
+      Matrix.of(context).loginType = LoginType.mLoginPassword;
       await matrix.getLoginClient().login(
             LoginType.mLoginPassword,
             identifier: identifier,
