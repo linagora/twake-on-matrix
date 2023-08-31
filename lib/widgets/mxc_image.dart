@@ -54,7 +54,7 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage>
-    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   static const String placeholderKey = 'placeholder';
   static final Map<String, Uint8List> _imageDataCache = {};
   Uint8List? _imageDataNoCache;
@@ -200,7 +200,6 @@ class _MxcImageState extends State<MxcImage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final imageWidget = widget.animated
         ? AnimatedSwitcher(
             duration: widget.animationDuration,
@@ -244,8 +243,4 @@ class _MxcImageState extends State<MxcImage>
             ),
           );
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
