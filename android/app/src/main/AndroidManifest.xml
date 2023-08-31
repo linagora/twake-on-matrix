@@ -93,6 +93,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="twake.chat" android:host="login"/>
+                <data
+                    android:scheme="twake.chat"
+                    android:host="redirect" />
             </intent-filter>
         </activity>
 

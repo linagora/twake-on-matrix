@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:fluffychat/data/hive/dto/tom_server_information_hive_obj.dart';
 import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:matrix/matrix.dart';
 
 part 'tom_configurations_hive_obj.g.dart';
 
@@ -11,9 +12,15 @@ class ToMConfigurationsHiveObj with EquatableMixin {
 
   final String? identityServerUrl;
 
+  final String? authUrl;
+
+  final LoginType? loginType;
+
   ToMConfigurationsHiveObj({
     required this.tomServerInformation,
     this.identityServerUrl,
+    this.authUrl,
+    this.loginType,
   });
 
   factory ToMConfigurationsHiveObj.fromToMConfigurations(
@@ -26,6 +33,8 @@ class ToMConfigurationsHiveObj with EquatableMixin {
       ),
       identityServerUrl:
           toMConfigurations.identityServerInformation?.baseUrl.toString(),
+      authUrl: toMConfigurations.authUrl,
+      loginType: toMConfigurations.loginType,
     );
   }
 
@@ -35,5 +44,6 @@ class ToMConfigurationsHiveObj with EquatableMixin {
   Map<String, dynamic> toJson() => _$ToMConfigurationsHiveObjToJson(this);
 
   @override
-  List<Object?> get props => [tomServerInformation, identityServerUrl];
+  List<Object?> get props =>
+      [tomServerInformation, identityServerUrl, authUrl, loginType];
 }
