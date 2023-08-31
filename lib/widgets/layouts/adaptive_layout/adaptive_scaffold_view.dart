@@ -2,10 +2,13 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
+import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
+import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -188,15 +191,21 @@ class AppScaffoldView extends StatelessWidget {
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return [
       NavigationDestination(
-        icon: const Icon(Icons.contacts_outlined),
+        icon: const TwakeNavigationIcon(
+          icon: Icons.contacts_outlined,
+        ),
         label: L10n.of(context)!.contacts,
       ),
       NavigationDestination(
-        icon: const Icon(Icons.chat),
+        icon: UnreadRoomsBadge(
+          filter: (room) => !room.isSpace && !room.isStoryRoom,
+        ),
         label: L10n.of(context)!.chat,
       ),
       NavigationDestination(
-        icon: const Icon(Icons.web_stories_outlined),
+        icon: const TwakeNavigationIcon(
+          icon: Icons.web_stories_outlined,
+        ),
         label: L10n.of(context)!.stories,
       ),
     ];
