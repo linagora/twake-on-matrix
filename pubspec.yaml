@@ -10,7 +10,6 @@ dependencies:
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
   animations: ^2.0.7
-  badges: ^2.0.3
   blurhash_dart: ^1.1.0
   callkeep: ^0.3.2
   chewie: ^1.3.6
