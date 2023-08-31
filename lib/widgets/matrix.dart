@@ -74,8 +74,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   Store store = Store();
   BuildContext? navigatorContext;
   HomeserverSummary? loginHomeserverSummary;
+  String? authUrl;
   XFile? loginAvatar;
   String? loginUsername;
+  LoginType? loginType;
   bool? loginRegistrationSupported;
 
   BackgroundPush? backgroundPush;
@@ -466,6 +468,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
       );
+      authUrl = toMConfigurations.authUrl;
+      loginType = toMConfigurations.loginType;
     } catch (e) {
       Logs().e('MatrixState::_retrieveToMConfiguration: $e');
     }
@@ -495,13 +499,26 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
     final homeServer =
         loginHomeserverSummary?.discoveryInformation?.mHomeserver;
+    final newAuthUrl = loginHomeserverSummary?.discoveryInformation
+        ?.additionalProperties["m.authentication"]?["issuer"];
+    authUrl = newAuthUrl is String ? newAuthUrl : null;
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
     if (homeServer != null) {
       _setUpHomeServer(homeServer.baseUrl);
     }
-    _storeToMConfiguration(client, tomServer, identityServer);
+    if (tomServer != null) {
+      _storeToMConfiguration(
+        client,
+        ToMConfigurations(
+          tomServerInformation: tomServer,
+          identityServerInformation: identityServer,
+          authUrl: authUrl,
+          loginType: loginType,
+        ),
+      );
+    }
     setUpAuthorization(client);
   }
 
@@ -545,22 +562,15 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   void _storeToMConfiguration(
     Client client,
-    ToMServerInformation? tomServerInformation,
-    IdentityServerInformation? identityServerInformation,
+    ToMConfigurations config,
   ) {
     try {
-      if (tomServerInformation != null) {
-        final configuration = ToMConfigurations(
-          tomServerInformation: tomServerInformation,
-          identityServerInformation: identityServerInformation,
-        );
-        final ToMConfigurationsRepository configurationRepository =
-            getIt.get<ToMConfigurationsRepository>();
-        configurationRepository.saveTomConfigurations(
-          client.clientName,
-          configuration,
-        );
-      }
+      final ToMConfigurationsRepository configurationRepository =
+          getIt.get<ToMConfigurationsRepository>();
+      configurationRepository.saveTomConfigurations(
+        client.clientName,
+        config,
+      );
     } catch (e) {
       Logs().e('Matrix::_storeToMConfiguration: error - $e');
     }

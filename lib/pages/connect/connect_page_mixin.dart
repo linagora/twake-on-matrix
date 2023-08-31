@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -46,6 +48,16 @@ mixin ConnectPageMixin {
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
   }
 
+  String? _getLogoutUrl(
+    BuildContext context, {
+    required String redirectUrl,
+  }) {
+    final authUrl = Matrix.of(context).authUrl;
+    if (authUrl == null) return null;
+    final redirectUrlEncode = base64Url.encode(utf8.encode(redirectUrl));
+    return '$authUrl?logout=1&url=$redirectUrlEncode';
+  }
+
   void ssoLoginAction({
     required BuildContext context,
     required String id,
@@ -63,7 +75,7 @@ mixin ConnectPageMixin {
     );
     final token = Uri.parse(result).queryParameters['loginToken'];
     if (token?.isEmpty ?? false) return;
-
+    Matrix.of(context).loginType = LoginType.mLoginToken;
     await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).getLoginClient().login(
@@ -72,6 +84,34 @@ mixin ConnectPageMixin {
             initialDeviceDisplayName: PlatformInfos.clientName,
           ),
     );
+  }
+
+  Future<void> tryLogoutSso(BuildContext context) async {
+    if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
+    final redirectUrl = _generatePostLogoutRedirectUrl();
+    final url = _getLogoutUrl(context, redirectUrl: redirectUrl);
+    if (url == null) return Future.value();
+
+    final urlScheme = _getRedirectUrlScheme(redirectUrl);
+    try {
+      final result = await FlutterWebAuth.authenticate(
+        url: url,
+        callbackUrlScheme: urlScheme,
+      );
+      Logs().d('tryLogoutSso::result: $result');
+    } catch (e) {
+      Logs().d('tryLogoutSso::error: $e');
+    }
+  }
+
+  String _generatePostLogoutRedirectUrl() {
+    if (kIsWeb) {
+      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
+        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+      }
+      return '${html.window.origin!}/web/auth.html';
+    }
+    return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
 
   String _generateRedirectUrl() {
