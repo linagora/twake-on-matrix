@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -23,7 +24,7 @@ class Settings extends StatefulWidget {
   SettingsController createState() => SettingsController();
 }
 
-class SettingsController extends State<Settings> {
+class SettingsController extends State<Settings> with ConnectPageMixin {
   Future<Profile>? profileFuture;
   bool profileUpdated = false;
 
@@ -73,6 +74,7 @@ class SettingsController extends State<Settings> {
         OkCancelResult.cancel) {
       return;
     }
+    await tryLogoutSso(context);
     final matrix = Matrix.of(context);
     await showFutureLoadingDialog(
       context: context,
