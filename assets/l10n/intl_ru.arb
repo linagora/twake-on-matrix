@@ -448,12 +448,12 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Сравните и убедитесь, что следующие эмодзи соответствуют эмодзи на другом устройстве:",
+  "compareEmojiMatch": "Пожалуйста, сравните эмодзи",
   "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
-  "compareNumbersMatch": "Сравните и убедитесь, что следующие числа соответствуют числам на другом устройстве:",
+  "compareNumbersMatch": "Пожалуйста, сравните числа",
   "@compareNumbersMatch": {
     "type": "text",
     "placeholders": {}
@@ -1237,7 +1237,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} пользователей печатают…",
+  "numUsersTyping": "{count} пользователей печатают",
   "@numUsersTyping": {
     "type": "text",
     "placeholders": {
@@ -1908,7 +1908,7 @@
       "unreadCount": {}
     }
   },
-  "userAndOthersAreTyping": "{username} и {count} других участников печатают…",
+  "userAndOthersAreTyping": "{username} и {count} других участников печатают",
   "@userAndOthersAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1916,7 +1916,7 @@
       "count": {}
     }
   },
-  "userAndUserAreTyping": "{username} и {username2} печатают…",
+  "userAndUserAreTyping": "{username} и {username2} печатают",
   "@userAndUserAreTyping": {
     "type": "text",
     "placeholders": {
@@ -1924,7 +1924,7 @@
       "username2": {}
     }
   },
-  "userIsTyping": "{username} печатает…",
+  "userIsTyping": "{username} печатает",
   "@userIsTyping": {
     "type": "text",
     "placeholders": {
@@ -2678,15 +2678,15 @@
   "@captionForImagesIsNotSupportYet": {},
   "tapToAllowAccessToYourCamera": "Вы можете включить доступ к камере в приложении \"Настройки\", чтобы совершать видеозвонки в",
   "@tapToAllowAccessToYourCamera": {},
-  "membersCount": "{количество} участников",
+  "membersCount": "{count} участников",
   "@membersCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "searchResultNotFound2": "• У вас может не быть пользователя в вашей адресной книге.\n.\n",
+  "searchResultNotFound2": "• Этого пользователя может не быть в вашей адресной книге.\n",
   "@searchResultNotFound2": {},
-  "searchResultNotFound3": "• Проверьте разрешение на контакт, пользователь может быть в вашем списке контактов.\n.\n",
+  "searchResultNotFound3": "• Проверьте разрешение на доступ к контактам, пользователь может быть в вашей адресной книге.\n",
   "@searchResultNotFound3": {},
   "searchResultNotFound4": "• Если причина не указана выше, ",
   "@searchResultNotFound4": {},
@@ -2694,7 +2694,7 @@
   "@whoWouldYouLikeToAdd": {},
   "addAPhoto": "Добавить фото",
   "@addAPhoto": {},
-  "searchResultNotFound5": "искать помощь.",
+  "searchResultNotFound5": "обратитесь за помощью.",
   "@searchResultNotFound5": {},
   "maxImageSize": "Максимальный размер файла: {max}MB",
   "@maxImageSize": {
@@ -2718,7 +2718,7 @@
   "@recentlyChats": {},
   "noConnection": "Нет связи",
   "@noConnection": {},
-  "photoSelectedCounter": "{количество, множественное число, =1{1 фотография} выбрано другое{{количество} фотографий}}",
+  "photoSelectedCounter": "Выбрано {count, plural, =1{1 фотография} other{{count} фотографии}}",
   "@photoSelectedCounter": {
     "placeholders": {
       "count": {}
@@ -2726,7 +2726,7 @@
   },
   "allow": "Разрешить",
   "@allow": {},
-  "explainStoragePermission": "Вам нужен доступ к вашему хранилищу для предварительного просмотра файла",
+  "explainStoragePermission": "Для предварительного просмотра файлов Twake требуется доступ к вашему хранилищу",
   "@explainStoragePermission": {},
   "gallery": "Галерея",
   "@gallery": {},
@@ -2738,7 +2738,7 @@
   "@permissionAccess": {},
   "explainGoToStorageSetting": "Вам нужен доступ к вашему хранилищу для предварительного просмотра файла, перейдите в настройки, чтобы разрешить это разрешение",
   "@explainGoToStorageSetting": {},
-  "contact": "Контакты",
+  "contact": "Контакт",
   "@contact": {},
   "file": "Файл",
   "@file": {},
@@ -2746,7 +2746,7 @@
   "@recent": {},
   "chatsAndContacts": "Чаты и контакты",
   "@chatsAndContacts": {},
-  "externalContactTitle": "Пригласить нового участника",
+  "externalContactTitle": "Пригласить новых пользователей",
   "@externalContactTitle": {},
   "clear": "Очистить",
   "@clear": {},
@@ -2772,7 +2772,7 @@
   "@today": {},
   "yesterday": "Вчера",
   "@yesterday": {},
-  "hasCreatedAGroupChat": "создал чат “{Имя группы}”",
+  "hasCreatedAGroupChat": "создал чат “{groupName}”",
   "@hasCreatedAGroupChat": {
     "type": "text",
     "placeholders": {
@@ -2780,5 +2780,15 @@
     }
   },
   "rejectInvite": "Нет, спасибо, удалите",
-  "@rejectInvite": {}
+  "@rejectInvite": {},
+  "participantsCount": "Участники ({count})",
+  "@participantsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "searchSuggestion": "Вы можете искать пользователей по имени или публичному адресу сервера",
+  "@searchSuggestion": {},
+  "forwardTo": "Переслать...",
+  "@forwardTo": {}
 }
