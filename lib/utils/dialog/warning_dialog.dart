@@ -41,15 +41,15 @@ class WarningDialog {
           DialogAction(
             text: cancelText ?? L10n.of(context)!.cancel,
             onPressed: () {
-              onCancel?.call();
               Navigator.pop(context);
+              onCancel?.call();
             },
           ),
           DialogAction(
             text: acceptText ?? L10n.of(context)!.ok,
             onPressed: () {
-              onAccept?.call();
               Navigator.pop(context);
+              onAccept?.call();
             },
           ),
         ],
