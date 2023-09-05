@@ -72,11 +72,8 @@ class HiveCollectionToMDatabase {
     try {
       await db.open();
     } catch (e, s) {
-      Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
-      const FlutterSecureStorage()
-          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
+      Logs().w('Unable to open Hive.', e, s);
       await db.clear().catchError((_) {});
-      await Hive.deleteFromDisk();
       rethrow;
     }
     Logs().d('Hive for ToM is ready');
@@ -123,6 +120,10 @@ class HiveCollectionToMDatabase {
   }
 
   Future<void> clear() async {
+    Logs().w('Delete database and storage key...');
+    await const FlutterSecureStorage()
+        .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
     await tomConfigurationsBox.clear();
+    await Hive.deleteFromDisk();
   }
 }
