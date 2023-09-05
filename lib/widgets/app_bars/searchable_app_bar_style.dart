@@ -5,19 +5,16 @@ import 'package:flutter/cupertino.dart';
 class SearchableAppBarStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static Size preferredSize(
-    BuildContext context, {
+  static Size preferredSize({
     bool? isFullScreen = true,
   }) =>
       Size.fromHeight(
         appBarHeight(
-          context,
           isFullScreen: isFullScreen,
         ),
       );
 
-  static double appBarHeight(
-    BuildContext context, {
+  static double appBarHeight({
     bool? isFullScreen = true,
   }) =>
       isFullScreen == true ? 56 : 112;
