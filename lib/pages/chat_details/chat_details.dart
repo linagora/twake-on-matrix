@@ -1,10 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
+import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +25,7 @@ enum AliasActions { copy, delete, setCanonical }
 
 class ChatDetails extends StatefulWidget {
   final String roomId;
+
   const ChatDetails({super.key, required this.roomId});
 
   @override
@@ -28,6 +33,12 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails> {
+  static const invitationSelectionMobileAndTabletKey =
+      Key('InvitationSelectionMobileAndTabletKey');
+
+  static const invitationSelectionWebAndDesktopKey =
+      Key('InvitationSelectionWebAndDesktopKey');
+
   List<User>? members;
   bool displaySettings = false;
 
@@ -349,6 +360,35 @@ class ChatDetailsController extends State<ChatDetails> {
     GoRouterState.of(context).path?.startsWith('/spaces/') == true
         ? context.pop()
         : context.go('/rooms/${roomId!}');
+  }
+
+  void openDialogInvite() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return SlotLayout(
+          config: <Breakpoint, SlotLayoutConfig>{
+            const WidthPlatformBreakpoint(
+              begin: ResponsiveUtils.minDesktopWidth,
+            ): SlotLayout.from(
+              key: invitationSelectionMobileAndTabletKey,
+              builder: (_) => InvitationSelectionWebView(
+                roomId: roomId!,
+              ),
+            ),
+            const WidthPlatformBreakpoint(
+              end: ResponsiveUtils.minDesktopWidth,
+            ): SlotLayout.from(
+              key: invitationSelectionWebAndDesktopKey,
+              builder: (_) => InvitationSelection(
+                roomId: roomId!,
+              ),
+            )
+          },
+        );
+      },
+    );
   }
 
   @override

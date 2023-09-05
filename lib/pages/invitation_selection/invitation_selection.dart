@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
+import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -12,7 +13,13 @@ import 'package:matrix/matrix.dart';
 
 class InvitationSelection extends StatefulWidget {
   final String roomId;
-  const InvitationSelection({Key? key, required this.roomId}) : super(key: key);
+  final bool? isFullScreen;
+
+  const InvitationSelection({
+    Key? key,
+    required this.roomId,
+    this.isFullScreen = true,
+  }) : super(key: key);
 
   @override
   InvitationSelectionController createState() =>
@@ -25,12 +32,12 @@ class InvitationSelectionController
 
   Room get _room => Matrix.of(context).client.getRoomById(_roomId!)!;
 
-  String get _groupName =>
-      _room.name.isEmpty ? L10n.of(context)!.group : _room.name;
+  @override
+  bool get isFullScreen => widget.isFullScreen == true;
 
   @override
   String getTitle(BuildContext context) {
-    return L10n.of(context)!.inviteContactToGroup(_groupName);
+    return L10n.of(context)!.addMember;
   }
 
   @override
@@ -83,8 +90,17 @@ class InvitationSelectionController
           content: Text(L10n.of(context)!.contactHasBeenInvitedToTheGroup),
         ),
       );
-      context.go('/rooms/$_roomId');
+      onCloseDialogInvite();
+      inviteSuccessAction();
     }
+  }
+
+  void inviteSuccessAction() {
+    context.pop();
+  }
+
+  void onCloseDialogInvite() {
+    FluffyChatApp.router.routerDelegate.pop();
   }
 
   @override
