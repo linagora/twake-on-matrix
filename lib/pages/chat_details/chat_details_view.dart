@@ -412,7 +412,7 @@ class ChatDetailsView extends StatelessWidget {
                                     radius: AvatarStyle.defaultSize / 2,
                                     child: const Icon(Icons.add_outlined),
                                   ),
-                                  onTap: () => context.goChild('invite'),
+                                  onTap: () => controller.openDialogInvite(),
                                 )
                               : Container(),
                         ],
