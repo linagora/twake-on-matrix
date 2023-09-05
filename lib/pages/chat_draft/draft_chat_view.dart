@@ -280,7 +280,7 @@ class _EmptyChatTitle extends StatelessWidget {
       padding: DraftChatViewStyle.emptyChatParentPadding,
       child: InkWell(
         child: FutureBuilder<Profile>(
-          future: Matrix.of(context).client.getProfileFromUserId(receiverId),
+          future: _getReceiverProfile(context, receiverId),
           builder: (context, snapshot) {
             return Row(
               children: [
@@ -328,5 +328,20 @@ class _EmptyChatTitle extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<Profile> _getReceiverProfile(
+    BuildContext context,
+    String receiverId,
+  ) async {
+    try {
+      return await Matrix.of(context).client.getProfileFromUserId(receiverId);
+    } catch (e) {
+      return Profile(
+        avatarUrl: null,
+        displayName: null,
+        userId: receiverId,
+      );
+    }
   }
 }
