@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
 
 class MessageTime extends StatelessWidget {
   const MessageTime({
@@ -57,9 +58,12 @@ class MessageTime extends StatelessWidget {
           if (ownMessage) ...[
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
             SeenByRow(
-              controller,
               timelineOverlayMessage: timelineOverlayMessage,
-              eventId: event.eventId,
+              participants: timeline.room.getParticipants(),
+              getSeenByUsers: controller.room!.getSeenByUsers(
+                controller.timeline!,
+                eventId: event.eventId,
+              ),
               eventStatus: event.status,
             ),
           ],
