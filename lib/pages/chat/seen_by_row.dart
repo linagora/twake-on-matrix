@@ -1,8 +1,5 @@
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:flutter/material.dart';
-
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:matrix/matrix.dart';
 
 enum MessageStatus {
@@ -13,27 +10,22 @@ enum MessageStatus {
 }
 
 class SeenByRow extends StatelessWidget {
-  final ChatController controller;
-  final String? eventId;
+  final List<User> getSeenByUsers;
+  final List<User> participants;
   final EventStatus? eventStatus;
   final bool timelineOverlayMessage;
 
-  const SeenByRow(
-    this.controller, {
-    this.eventId,
+  const SeenByRow({
     this.eventStatus,
     Key? key,
+    required this.getSeenByUsers,
+    required this.participants,
     required this.timelineOverlayMessage,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final seenByUsers = controller.room!.getSeenByUsers(
-      controller.timeline!,
-      eventId: eventId,
-    );
-
-    return getEventIcon(context, eventStatus, seenByUsers);
+    return getEventIcon(context, eventStatus, getSeenByUsers);
   }
 
   MessageStatus getMessageStatus(
@@ -49,7 +41,7 @@ class SeenByRow extends StatelessWidget {
       return MessageStatus.sent;
     }
 
-    if (seenByUsers.length == controller.room!.getParticipants().length - 1) {
+    if (seenByUsers.length == participants.length - 1) {
       return MessageStatus.hasBeenSeenByAll;
     }
 
