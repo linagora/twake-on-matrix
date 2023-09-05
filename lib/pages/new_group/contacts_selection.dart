@@ -25,6 +25,8 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
   bool get isContainsExternal =>
       contactsList.any((contact) => contact.type == ContactType.external);
 
+  bool get isFullScreen => true;
+
   @override
   void initState() {
     initSearchExternalContacts();

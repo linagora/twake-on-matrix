@@ -2685,5 +2685,6 @@
     "askToInvite": " wants you to join this chat. What do you say?",
     "select" : "Select",
     "copyMessageText" : "Copy message text",
-    "pinMessage" : "Pin message"
+    "pinMessage" : "Pin message",
+    "add": "Add"
 }
