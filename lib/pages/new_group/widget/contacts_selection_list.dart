@@ -102,13 +102,7 @@ class ContactsSelectionList extends StatelessWidget {
             top: paddingTop,
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: ExpansionContactListTile(
-                  contact: contact,
-                ),
-              ),
               ValueListenableBuilder<bool>(
                 valueListenable: contactNotifier,
                 builder: (context, isCurrentSelected, child) {
@@ -125,7 +119,12 @@ class ContactsSelectionList extends StatelessWidget {
                           },
                   );
                 },
-              )
+              ),
+              Expanded(
+                child: ExpansionContactListTile(
+                  contact: contact,
+                ),
+              ),
             ],
           ),
         ),
