@@ -23,7 +23,6 @@ class ContactsSelectionView extends StatelessWidget {
       backgroundColor: controller.isFullScreen ? null : Colors.transparent,
       appBar: PreferredSize(
         preferredSize: SearchableAppBarStyle.preferredSize(
-          context,
           isFullScreen: controller.isFullScreen,
         ),
         child: SearchableAppBar(
