@@ -43,6 +43,7 @@ class ExpansionContactListTile extends StatelessWidget {
               ),
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     IntrinsicWidth(

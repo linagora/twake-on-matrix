@@ -1,21 +1,16 @@
-import 'package:fluffychat/pages/chat_details/chat_detail_view_style.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_header_view.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_view.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:matrix_link_text/link_text.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/pages/chat_details/participant_list_item.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/chat_settings_popup_menu.dart';
-import 'package:fluffychat/widgets/content_banner.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import '../../utils/url_launcher.dart';
 
 class ChatDetailsView extends StatelessWidget {
   final ChatDetailsController controller;
@@ -24,8 +19,7 @@ class ChatDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final room = Matrix.of(context).client.getRoomById(controller.roomId!);
-    if (room == null) {
+    if (controller.room == null) {
       return Scaffold(
         appBar: AppBar(
           title: Text(L10n.of(context)!.oopsSomethingWentWrong),
@@ -37,411 +31,186 @@ class ChatDetailsView extends StatelessWidget {
     }
 
     controller.members!.removeWhere((u) => u.membership == Membership.leave);
-    final actualMembersCount = room.summary.actualMembersCount;
-    final canRequestMoreMembers =
-        controller.members!.length < actualMembersCount;
-    final iconColor = Theme.of(context).textTheme.bodyLarge!.color;
     return StreamBuilder(
-      stream: room.onUpdate.stream,
+      stream: controller.room?.onUpdate.stream,
       builder: (context, snapshot) {
         return Scaffold(
-          body: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
-              SliverAppBar(
-                toolbarHeight: ChatDetailViewStyle.toolbarHeight,
-                automaticallyImplyLeading: false,
-                elevation: Theme.of(context).appBarTheme.elevation,
-                expandedHeight: 300.0,
-                floating: true,
-                pinned: true,
-                title: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close_outlined),
-                      onPressed: controller.onPressedClose,
+          backgroundColor: controller.isMobileAndTablet
+              ? Theme.of(context).colorScheme.background
+              : Theme.of(context).colorScheme.surface,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            toolbarHeight: ChatDetailViewStyle.toolbarHeight,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      offset: const Offset(0, 1),
+                      blurRadius: 80,
                     ),
-                    Expanded(
-                      child: Text(
-                        room.getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)!),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        if (room.canonicalAlias.isNotEmpty)
-                          IconButton(
-                            tooltip: L10n.of(context)!.share,
-                            icon: Icon(Icons.adaptive.share_outlined),
-                            onPressed: () => FluffyShare.share(
-                              AppConfig.inviteLinkPrefix + room.canonicalAlias,
-                              context,
-                            ),
-                          ),
-                        ChatSettingsPopupMenu(room, false)
-                      ],
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      offset: const Offset(0, 1),
+                      blurRadius: 3,
+                      spreadRadius: 0.5,
                     ),
                   ],
                 ),
-                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: ContentBanner(
-                    mxContent: room.avatar,
-                    onEdit: room.canSendEvent('m.room.avatar')
-                        ? controller.setAvatarAction
-                        : null,
-                    defaultIcon: Icons.group_outlined,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.background,
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TwakeIconButton(
+                    icon: Icons.arrow_back,
+                    onTap: () => context.pop(),
+                    tooltip: L10n.of(context)!.back,
+                    paddingAll: 8.0,
+                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  ),
+                  Expanded(
+                    child: Text(
+                      L10n.of(context)!.chatInfo,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(width: 56)
+                ],
+              ),
+            ),
+          ),
+          body: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _groupAvatarBuilder(context: context, room: controller.room!),
+                _groupNameAndInfoBuilder(
+                  context: context,
+                  room: controller.room!,
+                ),
+                ActionsHeaderBuilder(
+                  actions: controller.chatDetailsActionsButton(),
+                  width: ChatDetailViewStyle.actionsHeaderWidth(context),
+                  buttonColor: !controller.isMobileAndTablet
+                      ? LinagoraRefColors.material().primary[100]
+                      : null,
+                  onTap: (actions) => controller.onTapActionsButton(
+                    actions,
                   ),
                 ),
-              ),
-            ],
-            body: MaxWidthBody(
-              child: ListView.builder(
-                itemCount: controller.members!.length +
-                    1 +
-                    (canRequestMoreMembers ? 1 : 0),
-                itemBuilder: (BuildContext context, int i) => i == 0
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          ListTile(
-                            onTap: room.canSendEvent(EventTypes.RoomTopic)
-                                ? controller.setTopicAction
-                                : null,
-                            trailing: room.canSendEvent(EventTypes.RoomTopic)
-                                ? Icon(
-                                    Icons.edit_outlined,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
-                                  )
-                                : null,
-                            title: Text(
-                              L10n.of(context)!.groupDescription,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          if (room.topic.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                              ),
-                              child: LinkText(
-                                text: room.topic.isEmpty
-                                    ? L10n.of(context)!.addGroupDescription
-                                    : room.topic,
-                                linkStyle:
-                                    const TextStyle(color: Colors.blueAccent),
-                                textStyle: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .color,
-                                  decorationColor: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .color,
-                                ),
-                                onLinkTap: (url) =>
-                                    UrlLauncher(context, url.toString())
-                                        .launchUrl(),
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          const Divider(height: 1),
-                          ListTile(
-                            title: Text(
-                              L10n.of(context)!.settings,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            trailing: Icon(
-                              controller.displaySettings
-                                  ? Icons.keyboard_arrow_down_outlined
-                                  : Icons.keyboard_arrow_right_outlined,
-                            ),
-                            onTap: controller.toggleDisplaySettings,
-                          ),
-                          if (controller.displaySettings) ...[
-                            if (room.canSendEvent('m.room.name'))
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  foregroundColor: iconColor,
-                                  child: const Icon(
-                                    Icons.people_outline_outlined,
-                                  ),
-                                ),
-                                title: Text(
-                                  L10n.of(context)!.changeTheNameOfTheGroup,
-                                ),
-                                subtitle: Text(
-                                  room.getLocalizedDisplayname(
-                                    MatrixLocals(L10n.of(context)!),
-                                  ),
-                                ),
-                                onTap: controller.setDisplaynameAction,
-                              ),
-                            if (room.joinRules == JoinRules.public)
-                              ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  foregroundColor: iconColor,
-                                  child: const Icon(Icons.link_outlined),
-                                ),
-                                onTap: controller.editAliases,
-                                title: Text(L10n.of(context)!.editRoomAliases),
-                                subtitle: Text(
-                                  (room.canonicalAlias.isNotEmpty)
-                                      ? room.canonicalAlias
-                                      : L10n.of(context)!.none,
-                                ),
-                              ),
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                foregroundColor: iconColor,
-                                child: const Icon(
-                                  Icons.insert_emoticon_outlined,
-                                ),
-                              ),
-                              title: Text(L10n.of(context)!.emoteSettings),
-                              subtitle: Text(L10n.of(context)!.setCustomEmotes),
-                              onTap: controller.goToEmoteSettings,
-                            ),
-                            PopupMenuButton(
-                              onSelected: controller.setJoinRulesAction,
-                              itemBuilder: (BuildContext context) =>
-                                  <PopupMenuEntry<JoinRules>>[
-                                if (room.canChangeJoinRules)
-                                  PopupMenuItem<JoinRules>(
-                                    value: JoinRules.public,
-                                    child: Text(
-                                      JoinRules.public.getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                                if (room.canChangeJoinRules)
-                                  PopupMenuItem<JoinRules>(
-                                    value: JoinRules.invite,
-                                    child: Text(
-                                      JoinRules.invite.getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  foregroundColor: iconColor,
-                                  child: const Icon(Icons.shield_outlined),
-                                ),
-                                title: Text(
-                                  L10n.of(context)!.whoIsAllowedToJoinThisGroup,
-                                ),
-                                subtitle: Text(
-                                  room.joinRules?.getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ) ??
-                                      L10n.of(context)!.none,
-                                ),
-                              ),
-                            ),
-                            PopupMenuButton(
-                              onSelected: controller.setHistoryVisibilityAction,
-                              itemBuilder: (BuildContext context) =>
-                                  <PopupMenuEntry<HistoryVisibility>>[
-                                if (room.canChangeHistoryVisibility)
-                                  PopupMenuItem<HistoryVisibility>(
-                                    value: HistoryVisibility.invited,
-                                    child: Text(
-                                      HistoryVisibility.invited
-                                          .getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                                if (room.canChangeHistoryVisibility)
-                                  PopupMenuItem<HistoryVisibility>(
-                                    value: HistoryVisibility.joined,
-                                    child: Text(
-                                      HistoryVisibility.joined
-                                          .getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                                if (room.canChangeHistoryVisibility)
-                                  PopupMenuItem<HistoryVisibility>(
-                                    value: HistoryVisibility.shared,
-                                    child: Text(
-                                      HistoryVisibility.shared
-                                          .getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                                if (room.canChangeHistoryVisibility)
-                                  PopupMenuItem<HistoryVisibility>(
-                                    value: HistoryVisibility.worldReadable,
-                                    child: Text(
-                                      HistoryVisibility.worldReadable
-                                          .getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  foregroundColor: iconColor,
-                                  child: const Icon(Icons.visibility_outlined),
-                                ),
-                                title: Text(
-                                  L10n.of(context)!.visibilityOfTheChatHistory,
-                                ),
-                                subtitle: Text(
-                                  room.historyVisibility?.getLocalizedString(
-                                        MatrixLocals(L10n.of(context)!),
-                                      ) ??
-                                      L10n.of(context)!.none,
-                                ),
-                              ),
-                            ),
-                            if (room.joinRules == JoinRules.public)
-                              PopupMenuButton(
-                                onSelected: controller.setGuestAccessAction,
-                                itemBuilder: (BuildContext context) =>
-                                    <PopupMenuEntry<GuestAccess>>[
-                                  if (room.canChangeGuestAccess)
-                                    PopupMenuItem<GuestAccess>(
-                                      value: GuestAccess.canJoin,
-                                      child: Text(
-                                        GuestAccess.canJoin.getLocalizedString(
-                                          MatrixLocals(
-                                            L10n.of(context)!,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  if (room.canChangeGuestAccess)
-                                    PopupMenuItem<GuestAccess>(
-                                      value: GuestAccess.forbidden,
-                                      child: Text(
-                                        GuestAccess.forbidden
-                                            .getLocalizedString(
-                                          MatrixLocals(
-                                            L10n.of(context)!,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    foregroundColor: iconColor,
-                                    child: const Icon(
-                                      Icons.person_add_alt_1_outlined,
-                                    ),
-                                  ),
-                                  title: Text(
-                                    L10n.of(context)!.areGuestsAllowedToJoin,
-                                  ),
-                                  subtitle: Text(
-                                    room.guestAccess.getLocalizedString(
-                                      MatrixLocals(L10n.of(context)!),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ListTile(
-                              title:
-                                  Text(L10n.of(context)!.editChatPermissions),
-                              subtitle: Text(
-                                L10n.of(context)!.whoCanPerformWhichAction,
-                              ),
-                              leading: CircleAvatar(
-                                backgroundColor:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                foregroundColor: iconColor,
-                                child: const Icon(
-                                  Icons.edit_attributes_outlined,
-                                ),
-                              ),
-                              onTap: () => context.goChild('permissions'),
-                            ),
-                          ],
-                          const Divider(height: 1),
-                          ListTile(
-                            title: Text(
-                              actualMembersCount > 1
-                                  ? L10n.of(context)!.countMembers(
-                                      actualMembersCount.toString(),
-                                    )
-                                  : L10n.of(context)!.emptyChat,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          room.canInvite
-                              ? ListTile(
-                                  title: Text(L10n.of(context)!.inviteContact),
-                                  leading: CircleAvatar(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    foregroundColor: Colors.white,
-                                    radius: AvatarStyle.defaultSize / 2,
-                                    child: const Icon(Icons.add_outlined),
-                                  ),
-                                  onTap: () => controller.openDialogInvite(),
-                                )
-                              : Container(),
-                        ],
-                      )
-                    : i < controller.members!.length + 1
-                        ? ParticipantListItem(controller.members![i - 1])
-                        : ListTile(
-                            title: Text(
-                              L10n.of(context)!.loadCountMoreParticipants(
-                                (actualMembersCount -
-                                        controller.members!.length)
-                                    .toString(),
-                              ),
-                            ),
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  Theme.of(context).scaffoldBackgroundColor,
-                              child: const Icon(
-                                Icons.refresh,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            onTap: controller.requestMoreMembersAction,
-                          ),
-              ),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(
+                        ChatDetailViewStyle.chatDetailsPageViewWebBorderRadius,
+                      ),
+                    ),
+                    child: Container(
+                      width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.background,
+                      ),
+                      child: ValueListenableBuilder(
+                        valueListenable: controller.currentPage,
+                        builder: (context, currentPage, _) {
+                          return ChatDetailsPageViewBuilder(
+                            pages: controller.chatDetailsPages(),
+                            currentIndexPageSelected: currentPage,
+                            pageController: controller.pageController,
+                            onTapGoToPage: (page) {
+                              controller.currentPage.value = page;
+                              controller.pageController.jumpToPage(page);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Padding _groupAvatarBuilder({
+    required BuildContext context,
+    required Room room,
+  }) {
+    return Padding(
+      padding: ChatDetailViewStyle.groupAvatarPadding,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(
+          ChatDetailViewStyle.groupAvatarBorderRadius,
+        ),
+        onTap: room.canSendEvent('m.room.avatar')
+            ? controller.setAvatarAction
+            : null,
+        child: Hero(
+          tag: 'content_banner',
+          child: Avatar(
+            mxContent: room.avatar,
+            name: room.getLocalizedDisplayname(
+              MatrixLocals(L10n.of(context)!),
+            ),
+            size: ChatDetailViewStyle.groupAvatarSize,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Padding _groupNameAndInfoBuilder({
+    required BuildContext context,
+    required Room room,
+  }) {
+    final actualMembersCount = room.summary.actualMembersCount;
+    return Padding(
+      padding: ChatDetailViewStyle.groupNameAndInfoPadding,
+      child: Column(
+        children: [
+          Text(
+            room.getLocalizedDisplayname(
+              MatrixLocals(L10n.of(context)!),
+            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            actualMembersCount > 1
+                ? L10n.of(context)!.countMembers(
+                    actualMembersCount.toString(),
+                  )
+                : L10n.of(context)!.emptyChat,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: LinagoraRefColors.material().tertiary[20],
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

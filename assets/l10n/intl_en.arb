@@ -2686,5 +2686,19 @@
     "select" : "Select",
     "copyMessageText" : "Copy message text",
     "pinMessage" : "Pin message",
-    "add": "Add"
+    "add": "Add",
+    "addMembers": "Add members",
+    "chatInfo": "Chat info",
+    "mute": "Mute",
+    "membersInfo": "Members ({count})",
+    "@membersInfo": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "members": "Members",
+    "media": "Media",
+    "files": "Files",
+    "links": "Links",
+    "downloads": "Downloads"
 }
