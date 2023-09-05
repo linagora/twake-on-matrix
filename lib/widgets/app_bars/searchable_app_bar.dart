@@ -41,7 +41,6 @@ class SearchableAppBar extends StatelessWidget {
           : null,
       automaticallyImplyLeading: false,
       toolbarHeight: SearchableAppBarStyle.appBarHeight(
-        context,
         isFullScreen: isFullScreen,
       ),
       bottom: PreferredSize(
