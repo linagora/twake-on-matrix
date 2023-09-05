@@ -41,22 +41,23 @@ class ChatDetailsActionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: Container(
-        width: width,
-        padding: padding ?? const EdgeInsetsDirectional.all(8),
-        decoration: ShapeDecoration(
-          color: buttonColor,
-          shape: RoundedRectangleBorder(
-            side: borderSide ??
-                BorderSide(
-                  width: 0.50,
-                  color: LinagoraRefColors.material().neutral[90]!,
-                ),
-            borderRadius: BorderRadius.circular(borderRadius ?? 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(borderRadius ?? 16),
+        child: Container(
+          width: width,
+          padding: padding ?? const EdgeInsetsDirectional.all(8),
+          decoration: ShapeDecoration(
+            color: buttonColor,
+            shape: RoundedRectangleBorder(
+              side: borderSide ??
+                  BorderSide(
+                    width: 0.50,
+                    color: LinagoraRefColors.material().neutral[90]!,
+                  ),
+              borderRadius: BorderRadius.circular(borderRadius ?? 16),
+            ),
           ),
-        ),
-        child: InkWell(
-          onTap: onTap,
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [

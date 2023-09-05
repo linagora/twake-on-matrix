@@ -1,7 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
+import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -33,19 +39,37 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails> {
-  static const invitationSelectionMobileAndTabletKey =
-      Key('InvitationSelectionMobileAndTabletKey');
+  final invitationSelectionMobileAndTabletKey =
+      const Key('InvitationSelectionMobileAndTabletKey');
 
-  static const invitationSelectionWebAndDesktopKey =
-      Key('InvitationSelectionWebAndDesktopKey');
+  final invitationSelectionWebAndDesktopKey =
+      const Key('InvitationSelectionWebAndDesktopKey');
+
+  final actionsMobileAndTabletKey = const Key('ActionsMobileAndTabletKey');
+
+  final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
+
+  final responsive = getIt.get<ResponsiveUtils>();
+
+  PageController pageController = PageController();
+
+  final ValueNotifier<int> currentPage = ValueNotifier(0);
 
   List<User>? members;
+
   bool displaySettings = false;
+
+  String? get roomId => widget.roomId;
+
+  bool get isMobileAndTablet =>
+      responsive.isMobile(context) || responsive.isTablet(context);
+
+  Room? get room => Matrix.of(context).client.getRoomById(roomId!);
+
+  int get actualMembersCount => room!.summary.actualMembersCount;
 
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
-
-  String? get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;
@@ -366,13 +390,15 @@ class ChatDetailsController extends State<ChatDetails> {
     showDialog(
       context: context,
       barrierDismissible: false,
+      useSafeArea: false,
+      useRootNavigator: PlatformInfos.isMobile ? false : true,
       builder: (context) {
         return SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
             const WidthPlatformBreakpoint(
               begin: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
-              key: invitationSelectionMobileAndTabletKey,
+              key: invitationSelectionWebAndDesktopKey,
               builder: (_) => InvitationSelectionWebView(
                 roomId: roomId!,
               ),
@@ -380,7 +406,7 @@ class ChatDetailsController extends State<ChatDetails> {
             const WidthPlatformBreakpoint(
               end: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
-              key: invitationSelectionWebAndDesktopKey,
+              key: invitationSelectionMobileAndTabletKey,
               builder: (_) => InvitationSelection(
                 roomId: roomId!,
               ),
@@ -389,6 +415,55 @@ class ChatDetailsController extends State<ChatDetails> {
         );
       },
     );
+  }
+
+  List<ChatDetailsActions> chatDetailsActionsButton() => [
+        if (responsive.isDesktop(context)) ChatDetailsActions.addMembers,
+        ChatDetailsActions.mute,
+        ChatDetailsActions.search,
+        ChatDetailsActions.more,
+      ];
+
+  List<ChatDetailsPageModel> chatDetailsPages() => [
+        ChatDetailsPageModel(
+          page: ChatDetailsPage.members,
+          child: ChatDetailsMembersPage(
+            members: members ?? [],
+            actualMembersCount: actualMembersCount,
+            canRequestMoreMembers: members!.length < actualMembersCount,
+            requestMoreMembersAction: requestMoreMembersAction,
+            openDialogInvite: openDialogInvite,
+            isMobileAndTablet: isMobileAndTablet,
+          ),
+        ),
+        const ChatDetailsPageModel(
+          page: ChatDetailsPage.media,
+          child: SizedBox.shrink(),
+        ),
+        const ChatDetailsPageModel(
+          page: ChatDetailsPage.files,
+          child: SizedBox.shrink(),
+        ),
+        const ChatDetailsPageModel(
+          page: ChatDetailsPage.links,
+          child: SizedBox.shrink(),
+        ),
+        const ChatDetailsPageModel(
+          page: ChatDetailsPage.downloads,
+          child: SizedBox.shrink(),
+        ),
+      ];
+
+  void onTapActionsButton(ChatDetailsActions action) {
+    switch (action) {
+      case ChatDetailsActions.addMembers:
+        openDialogInvite();
+        break;
+      case ChatDetailsActions.mute:
+      case ChatDetailsActions.search:
+      case ChatDetailsActions.more:
+        break;
+    }
   }
 
   @override
