@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -339,7 +340,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       hidPopup = true;
       await KeyVerificationDialog(request: request).show(navigatorContext!);
     });
-    onLoginStateChanged[name] ??= c.onLoginStateChanged.stream.listen((state) {
+    onLoginStateChanged[name] ??=
+        c.onLoginStateChanged.stream.listen((state) async {
       final loggedInWithMultipleClients = widget.clients.length > 1;
       if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
         _cancelSubs(c.clientName);
@@ -351,13 +353,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           ),
         );
 
-        if (state != LoginState.loggedIn) {
-          navigatorContext?.go('/rooms');
-        }
+        navigatorContext?.go('/rooms');
       } else {
         setUpToMServicesInLogin(c);
         if (state == LoginState.loggedIn) {
           navigatorContext?.go('/rooms');
+        } else {
+          await getIt.get<HiveCollectionToMDatabase>().clear();
         }
       }
     });
