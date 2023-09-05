@@ -6,7 +6,11 @@ import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsSelectionView extends StatelessWidget {
   final ContactsSelectionController controller;
@@ -16,8 +20,12 @@ class ContactsSelectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: controller.isFullScreen ? null : Colors.transparent,
       appBar: PreferredSize(
-        preferredSize: SearchableAppBarStyle.preferredSize(context),
+        preferredSize: SearchableAppBarStyle.preferredSize(
+          context,
+          isFullScreen: controller.isFullScreen,
+        ),
         child: SearchableAppBar(
           focusNode: controller.searchFocusNode,
           title: controller.getTitle(context),
@@ -25,6 +33,7 @@ class ContactsSelectionView extends StatelessWidget {
           hintText: controller.getHintText(context),
           textEditingController: controller.textEditingController,
           toggleSearchMode: controller.toggleSearchMode,
+          isFullScreen: controller.isFullScreen,
         ),
       ),
       body: Column(
@@ -61,20 +70,86 @@ class ContactsSelectionView extends StatelessWidget {
                     ),
             ),
           ),
+          if (!controller.isFullScreen) _webActionButton(context),
         ],
       ),
-      floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable:
-            controller.selectedContactsMapNotifier.haveSelectedContactsNotifier,
-        builder: (context, haveSelectedContacts, child) {
-          if (!haveSelectedContacts) {
-            return const SizedBox.shrink();
-          }
-          return child!;
-        },
-        child: TwakeFloatingActionButton(
-          icon: Icons.arrow_forward,
-          onTap: () => controller.trySubmit(context),
+      floatingActionButton: controller.isFullScreen
+          ? ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+              builder: (context, haveSelectedContacts, child) {
+                if (!haveSelectedContacts) {
+                  return const SizedBox.shrink();
+                }
+                return child!;
+              },
+              child: TwakeFloatingActionButton(
+                icon: Icons.arrow_forward,
+                onTap: () => controller.trySubmit(context),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Padding _webActionButton(BuildContext context) {
+    return Padding(
+      padding: ContactsSelectionViewStyle.webActionsButtonMargin,
+      child: SizedBox(
+        height: ContactsSelectionViewStyle.webActionsButtonHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TwakeTextButton(
+              onTap: () => context.pop(),
+              message: L10n.of(context)!.cancel,
+              paddingAll: ContactsSelectionViewStyle.webActionsButtonPaddingAll,
+              margin: ContactsSelectionViewStyle.webActionsButtonMargin,
+              borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
+              buttonDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                  ContactsSelectionViewStyle.webActionsButtonBorder,
+                ),
+              ),
+              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: LinagoraSysColors.material().primary,
+                  ),
+            ),
+            const SizedBox(width: 8.0),
+            ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+              builder: (context, haveSelectedContacts, _) {
+                return TwakeTextButton(
+                  onTap: () => haveSelectedContacts
+                      ? controller.trySubmit(context)
+                      : null,
+                  message: L10n.of(context)!.add,
+                  paddingAll:
+                      ContactsSelectionViewStyle.webActionsButtonPaddingAll,
+                  margin: ContactsSelectionViewStyle.webActionsButtonMargin,
+                  borderHover:
+                      ContactsSelectionViewStyle.webActionsButtonBorder,
+                  buttonDecoration: BoxDecoration(
+                    color: haveSelectedContacts
+                        ? LinagoraSysColors.material().primary
+                        : LinagoraStateLayer(
+                            LinagoraSysColors.material().onSurface,
+                          ).opacityLayer2,
+                    borderRadius: BorderRadius.circular(
+                      ContactsSelectionViewStyle.webActionsButtonBorder,
+                    ),
+                  ),
+                  styleMessage:
+                      Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: haveSelectedContacts
+                                ? LinagoraSysColors.material().onPrimary
+                                : LinagoraSysColors.material().onSurface,
+                          ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
