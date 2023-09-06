@@ -45,6 +45,11 @@ class NotificationSettingsItem {
       '.m.rule.suppress_notices',
       (c) => L10n.of(c)!.botMessages,
     ),
+    NotificationSettingsItem(
+      PushRuleKind.content,
+      '.m.rule.group_chat_name_changed',
+      (c) => "Group chat name changed",
+    ),
   ];
 }
 

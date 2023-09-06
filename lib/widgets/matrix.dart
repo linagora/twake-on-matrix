@@ -15,6 +15,7 @@ import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_push_rules_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -448,6 +449,77 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     createVoipPlugin();
   }
 
+  Future<void> _setUpUserDefinedPushRules(Client client) async {
+    await client.setPushRuleEnabled(
+      'global',
+      PushRuleKind.override,
+      '.m.rule.invite_for_me',
+      false,
+    );
+    await client.setPushRuleEnabled(
+      'global',
+      PushRuleKind.override,
+      '.m.rule.member_event',
+      false,
+    );
+
+    await client.setupUserDefinedPushRule(
+      ruleId: 'm.rule.invite_for_me',
+      conditions: [
+        PushCondition(
+          kind: 'event_match',
+          key: 'type',
+          pattern: EventTypes.RoomMember,
+        ),
+        PushCondition(
+          kind: 'event_match',
+          key: 'content.membership',
+          pattern: 'invite',
+        ),
+        PushCondition(
+          kind: 'event_match',
+          key: 'state_key',
+          pattern: '${client.userID}',
+        ),
+      ],
+    );
+
+    await client.setupUserDefinedPushRule(
+      ruleId: 'm.rule.change_group_name',
+      conditions: [
+        PushCondition(
+          kind: 'event_match',
+          key: 'type',
+          pattern: EventTypes.RoomName,
+        ),
+      ],
+      after: 'm.rule.invite_for_me',
+    );
+
+    await client.setupUserDefinedPushRule(
+      ruleId: 'm.rule.change_avatar_group',
+      conditions: [
+        PushCondition(
+          kind: 'event_match',
+          key: 'type',
+          pattern: EventTypes.RoomAvatar,
+        ),
+      ],
+      after: 'm.rule.invite_for_me',
+    );
+
+    await client.setupUserDefinedPushRule(
+      ruleId: 'm.rule.set_me_as_admin',
+      conditions: [
+        PushCondition(
+          kind: 'event_match',
+          key: 'type',
+          pattern: EventTypes.RoomPowerLevels,
+        ),
+      ],
+    );
+  }
+
   void createVoipPlugin() async {
     if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
       voipPlugin = null;
@@ -501,6 +573,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (homeServer != null) {
       _setUpHomeServer(homeServer.baseUrl);
     }
+
     _storeToMConfiguration(client, tomServer, identityServer);
     setUpAuthorization(client);
   }
@@ -522,7 +595,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
   }
 
-  void _setUpHomeServer(Uri homeServerUri) {
+  void _setUpHomeServer(Uri homeServerUri) async {
     final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
@@ -530,6 +603,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       'MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}',
     );
     homeServerUrlInterceptor.changeBaseUrl(homeServerUri.toString());
+    _setUpUserDefinedPushRules(client);
   }
 
   void _setUpIdentityServer(IdentityServerInformation identityServer) {
