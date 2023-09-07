@@ -1,9 +1,14 @@
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class DraftChatViewStyle {
-  static const double toolbarHeight = 56;
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+
+  static double toolbarHeight(BuildContext context) =>
+      responsive.isMobile(context) ? 56 : 80;
 
   static BoxConstraints get containerMaxWidthConstraints =>
       const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5);
