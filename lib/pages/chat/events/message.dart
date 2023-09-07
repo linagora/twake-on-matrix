@@ -139,7 +139,12 @@ class Message extends StatelessWidget {
                   if (ownMessage) _menuActionsRowBuilder(context, ownMessage),
                   Container(
                     alignment: alignment,
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: EdgeInsetsDirectional.only(
+                      start: 8,
+                      end: selected || controller.responsive.isDesktop(context)
+                          ? 8
+                          : 0,
+                    ),
                     child: Material(
                       color: Colors.transparent,
                       borderRadius: MessageStyle.bubbleBorderRadius,
@@ -540,12 +545,15 @@ class Message extends StatelessWidget {
                       onTap: () =>
                           controller.selectMode ? onSelect!(event) : null,
                       child: Center(
-                        child: Padding(
+                        child: Container(
+                          margin: EdgeInsetsDirectional.only(
+                            start: selected ? 0.0 : 8.0,
+                          ),
                           padding: EdgeInsets.only(
-                            left: selected ? 0 : 8.0,
                             right: selected
                                 ? 0
-                                : ownMessage
+                                : ownMessage ||
+                                        controller.responsive.isDesktop(context)
                                     ? 8.0
                                     : 16.0,
                             top: selected ? 0 : 1.0,
@@ -630,7 +638,6 @@ class Message extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: selected ? 1 : 0,
-        horizontal: selected ? 8 : 0,
       ),
       color: selected
           ? LinagoraSysColors.material().secondaryContainer
@@ -644,7 +651,11 @@ class Message extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: const EdgeInsets.only(right: 18),
+                padding: EdgeInsetsDirectional.only(
+                  start: (selected || controller.responsive.isDesktop(context))
+                      ? 16
+                      : 8,
+                ),
                 child: Icon(
                   selected ? Icons.check_circle_rounded : Icons.circle_outlined,
                   color: selected
