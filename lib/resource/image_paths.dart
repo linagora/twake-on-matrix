@@ -25,8 +25,8 @@ class ImagePaths {
   static String get icFilePptx => _getImagePath('ic_file_ppt.svg');
   static String get icFileFolder => _getImagePath('ic_file_folder.svg');
   static String get icFileUnKnow => _getImagePath('ic_file_unknow.svg');
-  static String get icTwakeImageLogo =>
-      _getImagePath('ic_twake_image_logo.svg');
+  static String get icTwakeImageLogoDark =>
+      _getImagePath('ic_twake_image_logo_dark.svg');
   static String get icApplicationGrid =>
       _getImagePath('ic_application_grid.svg');
   static String get icUsersOutline => _getImagePath('ic_users_outline.svg');
