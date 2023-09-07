@@ -6,7 +6,7 @@ class AdaptiveScaffoldPrimaryNavigationStyle {
   static const EdgeInsetsDirectional dividerPadding =
       EdgeInsetsDirectional.only(bottom: 16);
 
-  static const double primaryNavigationWidth = 72;
+  static const double primaryNavigationWidth = 80;
   static const double avatarSize = 56;
   static const double dividerSize = 2;
 
