@@ -12,6 +12,7 @@ import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class AppScaffoldView extends StatelessWidget {
@@ -51,6 +52,7 @@ class AppScaffoldView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = getIt.get<ResponsiveUtils>();
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Row(
         children: [
           if (!responsive.isMobile(context)) ...[
@@ -78,38 +80,43 @@ class AppScaffoldView extends StatelessWidget {
                 )
               },
             ),
-            Container(
-              color: Theme.of(context).dividerColor,
-              width: 1,
-            ),
           ],
           Expanded(
-            child: PageView(
-              controller: pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _triggerPageViewBuilder(
-                  navigatorBarType: AdaptiveDestinationEnum.contacts,
-                  navigatorBarWidget: ContactsTab(
-                    bottomNavigationBar: _bottomNavigationBarBuilder(context),
-                  ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: LinagoraRefColors.material().primary[100],
                 ),
-                ChatList(
-                  activeRoomId: activeRoomId,
-                  bottomNavigationBar: _bottomNavigationBarBuilder(context),
-                  onOpenSearchPage: onOpenSearchPage,
+                child: PageView(
+                  controller: pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _triggerPageViewBuilder(
+                      navigatorBarType: AdaptiveDestinationEnum.contacts,
+                      navigatorBarWidget: ContactsTab(
+                        bottomNavigationBar:
+                            _bottomNavigationBarBuilder(context),
+                      ),
+                    ),
+                    ChatList(
+                      activeRoomId: activeRoomId,
+                      bottomNavigationBar: _bottomNavigationBarBuilder(context),
+                      onOpenSearchPage: onOpenSearchPage,
+                    ),
+                    _triggerPageViewBuilder(
+                      navigatorBarType: AdaptiveDestinationEnum.stories,
+                      navigatorBarWidget: const SizedBox(),
+                    ),
+                    _triggerPageViewBuilder(
+                      navigatorBarType: AdaptiveDestinationEnum.search,
+                      navigatorBarWidget: Search(
+                        onCloseSearchPage: onCloseSearchPage,
+                      ),
+                    ),
+                  ],
                 ),
-                _triggerPageViewBuilder(
-                  navigatorBarType: AdaptiveDestinationEnum.stories,
-                  navigatorBarWidget: const SizedBox(),
-                ),
-                _triggerPageViewBuilder(
-                  navigatorBarType: AdaptiveDestinationEnum.search,
-                  navigatorBarWidget: Search(
-                    onCloseSearchPage: onCloseSearchPage,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],

@@ -51,9 +51,13 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Theme.of(context).colorScheme.surface,
       child: Container(
         margin: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationMargin,
         width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -63,7 +67,7 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
                 destinations: getNavigationRailDestinations,
                 onDestinationSelected: onDestinationSelected,
                 labelType: NavigationRailLabelType.all,
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
               ),
             ),
             Column(

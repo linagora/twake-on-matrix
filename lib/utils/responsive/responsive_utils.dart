@@ -14,7 +14,8 @@ class ResponsiveUtils {
   static const double minTabletLargeWidth = 900;
   static const double maxMobileWidth = 904;
 
-  static const double bodyRatio = 0.33;
+  static const double bodyRadioWidth = 472;
+
   static const double defaultSizeBodyLayoutDesktop = 280;
   static const double heightBottomNavigation = 90;
 
