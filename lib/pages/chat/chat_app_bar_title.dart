@@ -47,6 +47,7 @@ class ChatAppBarTitle extends StatelessWidget {
     final directChatMatrixID = room?.directChatMatrixID;
     return InkWell(
       splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       onTap: directChatMatrixID != null
           ? () => showAdaptiveBottomSheet(
@@ -66,18 +67,15 @@ class ChatAppBarTitle extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 3, top: 3),
-                child: Hero(
-                  tag: 'content_banner',
-                  child: Avatar(
-                    fontSize: ChatAppBarTitleStyle.avatarFontSize,
-                    mxContent: room!.avatar,
-                    name: room!.getLocalizedDisplayname(
-                      MatrixLocals(L10n.of(context)!),
-                    ),
-                    size: ChatAppBarTitleStyle.avatarSize(context),
+              Hero(
+                tag: 'content_banner',
+                child: Avatar(
+                  fontSize: ChatAppBarTitleStyle.avatarFontSize,
+                  mxContent: room!.avatar,
+                  name: room!.getLocalizedDisplayname(
+                    MatrixLocals(L10n.of(context)!),
                   ),
+                  size: ChatAppBarTitleStyle.avatarSize(context),
                 ),
               ),
             ],
