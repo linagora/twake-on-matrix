@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsAppBar extends StatelessWidget {
   final ValueNotifier<bool> isSearchModeNotifier;
@@ -26,7 +27,6 @@ class ContactsAppBar extends StatelessWidget {
           ? Colors.white
           : Colors.black,
       shadowColor: Colors.black.withOpacity(0.15),
-      elevation: 4.0,
       backgroundColor: Theme.of(context).brightness == Brightness.light
           ? Colors.white
           : Colors.black,
@@ -44,11 +44,6 @@ class ContactsAppBar extends StatelessWidget {
                   ),
             ),
             Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
-                ),
-              ),
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: ValueListenableBuilder<bool>(
                 valueListenable: isSearchModeNotifier,
@@ -71,14 +66,25 @@ class ContactsAppBar extends StatelessWidget {
                           borderSide: BorderSide.none,
                         ),
                         hintText: L10n.of(context)!.searchForContacts,
-                        prefixIcon: const Icon(
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: LinagoraRefColors.material().neutral[60],
+                            ),
+                        prefixIcon: Icon(
                           Icons.search_outlined,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         suffixIcon: isSearchMode
                             ? TwakeIconButton(
                                 tooltip: "Clear",
                                 icon: Icons.close,
                                 onTap: clearSearchBar,
+                                size: 24,
+                                iconColor:
+                                    Theme.of(context).colorScheme.onSurface,
                               )
                             : null,
                       ),

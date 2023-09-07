@@ -36,6 +36,7 @@ class ExpansionContactListTile extends StatelessWidget {
                 child: Avatar(
                   mxContent: snapshot.data?.avatarUrl,
                   name: contact.displayName,
+                  size: 48.0,
                 ),
               ),
               const SizedBox(
@@ -61,8 +62,6 @@ class ExpansionContactListTile extends StatelessWidget {
                                         .textTheme
                                         .titleMedium
                                         ?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 17.0,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface,
@@ -91,17 +90,15 @@ class ExpansionContactListTile extends StatelessWidget {
                     if (contact.matrixId != null)
                       Text(
                         contact.matrixId!,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              letterSpacing: 0.1,
-                              color: LinagoraRefColors.material().neutral[30],
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: LinagoraRefColors.material().neutral[60],
                             ),
                       ),
                     if (contact.email != null)
                       Text(
                         contact.email!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              letterSpacing: 0.25,
-                              color: LinagoraRefColors.material().neutral[30],
+                              color: LinagoraRefColors.material().neutral[60],
                             ),
                       )
                   ],
