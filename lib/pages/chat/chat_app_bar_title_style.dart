@@ -26,15 +26,14 @@ class ChatAppBarTitleStyle {
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               )
           : Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: Theme.of(context).colorScheme.onBackground,
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
 
   static TextStyle? statusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
-          ? Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 11,
-                color: Theme.of(context).colorScheme.tertiary,
+          ? Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: LinagoraRefColors.material().tertiary[30],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
               )
           : Theme.of(context).textTheme.bodySmall?.copyWith(
