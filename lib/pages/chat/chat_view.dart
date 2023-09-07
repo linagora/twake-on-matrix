@@ -139,7 +139,7 @@ class ChatView extends StatelessWidget {
             return Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: false,
-                toolbarHeight: ChatViewStyle.toolbarHeight,
+                toolbarHeight: ChatViewStyle.toolbarHeight(context),
                 surfaceTintColor: Colors.transparent,
                 titleSpacing: 0,
                 title: Padding(
