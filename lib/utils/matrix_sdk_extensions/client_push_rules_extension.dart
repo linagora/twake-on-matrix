@@ -9,7 +9,7 @@ extension ClientPushRulesExtension on Client {
   }) async {
     await setPushRule(
       'global',
-      PushRuleKind.underride,
+      PushRuleKind.override,
       ruleId,
       [
         PushRuleAction.notify,
