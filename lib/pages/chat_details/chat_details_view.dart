@@ -37,10 +37,10 @@ class ChatDetailsView extends StatelessWidget {
         return Scaffold(
           backgroundColor: controller.isMobileAndTablet
               ? Theme.of(context).colorScheme.background
-              : Theme.of(context).colorScheme.surface,
+              : Theme.of(context).colorScheme.surfaceVariant,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            toolbarHeight: ChatDetailViewStyle.toolbarHeight,
+            toolbarHeight: ChatDetailViewStyle.toolbarHeight(context),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
               child: Container(
@@ -48,19 +48,6 @@ class ChatDetailsView extends StatelessWidget {
                   border: Border(
                     bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      offset: const Offset(0, 1),
-                      blurRadius: 80,
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      offset: const Offset(0, 1),
-                      blurRadius: 3,
-                      spreadRadius: 0.5,
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -83,7 +70,7 @@ class ChatDetailsView extends StatelessWidget {
                       L10n.of(context)!.chatInfo,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: Theme.of(context).colorScheme.onBackground,
                           ),
                     ),
                   ),
@@ -109,6 +96,12 @@ class ChatDetailsView extends StatelessWidget {
                   buttonColor: !controller.isMobileAndTablet
                       ? LinagoraRefColors.material().primary[100]
                       : null,
+                  borderSide: BorderSide(
+                    width: 1,
+                    color: controller.isMobileAndTablet
+                        ? LinagoraRefColors.material().neutral[90]!
+                        : Colors.transparent,
+                  ),
                   onTap: (actions) => controller.onTapActionsButton(
                     actions,
                   ),
@@ -123,7 +116,7 @@ class ChatDetailsView extends StatelessWidget {
                     child: Container(
                       width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background,
+                        color: LinagoraRefColors.material().primary[100],
                       ),
                       child: ValueListenableBuilder(
                         valueListenable: controller.currentPage,
