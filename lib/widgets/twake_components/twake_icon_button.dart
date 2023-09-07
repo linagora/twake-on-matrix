@@ -33,6 +33,8 @@ class TwakeIconButton extends StatelessWidget {
 
   final Color? hoverColor;
 
+  final Color? iconColor;
+
   const TwakeIconButton({
     Key? key,
     required this.tooltip,
@@ -48,6 +50,7 @@ class TwakeIconButton extends StatelessWidget {
     this.onTapDown,
     this.margin = const EdgeInsets.all(0),
     this.buttonDecoration,
+    this.iconColor,
   }) : super(key: key);
 
   @override
@@ -75,6 +78,7 @@ class TwakeIconButton extends StatelessWidget {
                       size: size,
                       fill: fill,
                       weight: weight,
+                      color: iconColor,
                     )
                   : imagePath != null
                       ? SvgPicture.asset(imagePath!)
