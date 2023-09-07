@@ -2265,5 +2265,510 @@
   "@toggleFavorite": {
     "type": "text",
     "placeholders": {}
+  },
+  "forwardTo": "Chuyển tiếp tới...",
+  "@forwardTo": {},
+  "unknownDevice": "Thiết bị chưa biết",
+  "@unknownDevice": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "participantsCount": "Người tham gia ({count})",
+  "@participantsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "loadingContacts": "Tải liên hệ...",
+  "@loadingContacts": {},
+  "toggleMuted": "Chuyển Tắt tiếng",
+  "@toggleMuted": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "externalContactMessage": "Một số người dùng bạn muốn thêm không có trong danh bạ của bạn. Bạn có muốn mời họ không?",
+  "@externalContactMessage": {},
+  "verifySuccess": "Bạn đã xác minh thành công!",
+  "@verifySuccess": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "warning": "Cảnh báo!",
+  "@warning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "allSpaces": "Tất cả khoảng trắng",
+  "@allSpaces": {},
+  "explainStoragePermission": "Twake cần quyền truy cập vào bộ nhớ của bạn để xem trước tệp",
+  "@explainStoragePermission": {},
+  "soonThereHaveContacts": "Sẽ sớm có liên hệ",
+  "@soonThereHaveContacts": {},
+  "videoCall": "Cuộc gọi Video",
+  "@videoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "userAndOthersAreTyping": "{username} và {count} người khác đang gõ",
+  "@userAndOthersAreTyping": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "count": {}
+    }
+  },
+  "chatCanHave": "Trò chuyện có thể có:",
+  "@chatCanHave": {},
+  "welcomeToTwake": "Chào mừng đến Twake, {user}",
+  "@welcomeToTwake": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "userIsTyping": "{username} đang gõ",
+  "@userIsTyping": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "searchSuggestion": "Hiện tại, tìm kiếm bằng cách nhập tên của một người hoặc địa chỉ máy chủ công cộng",
+  "@searchSuggestion": {},
+  "waitingPartnerAcceptRequest": "Đang chờ đối phương chấp nhận yêu cầu…",
+  "@waitingPartnerAcceptRequest": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "explainGoToStorageSetting": "Twake cần quyền truy cập vào bộ nhớ của bạn để xem trước tệp, hãy chuyển tới cài đặt để cấp quyền này",
+  "@explainGoToStorageSetting": {},
+  "noImagesFound": "Không tìm thấy ảnh",
+  "@noImagesFound": {},
+  "onlineMinAgo": "trực tuyến {min} phút trước",
+  "@onlineMinAgo": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "newGroupChat": "Nhóm trò chuyện mới",
+  "@newGroupChat": {},
+  "onlineHourAgo": "trực truyến {hour} giờ {min} phút trước",
+  "@onlineHourAgo": {
+    "placeholders": {
+      "hour": {},
+      "min": {}
+    }
+  },
+  "addACaption": "Thêm chú thích...",
+  "@addACaption": {},
+  "userAndUserAreTyping": "{username} và {username2} đang gõ",
+  "@userAndUserAreTyping": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "username2": {}
+    }
+  },
+  "onlineWeekAgo": "trực tuyến {week} tuần trước",
+  "@onlineWeekAgo": {
+    "placeholders": {
+      "week": {}
+    }
+  },
+  "tuesday": "Thứ ba",
+  "@tuesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pickImage": "Chọn một ảnh",
+  "@pickImage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newSpaceDescription": "Spaces cho phép bạn hợp nhất các cuộc trò chuyện của mình và xây dựng cộng đồng riêng tư hoặc công khai.",
+  "@newSpaceDescription": {},
+  "documents": "Tài liệu",
+  "@documents": {},
+  "enterSpace": "Nhập khoảng trắng",
+  "@enterSpace": {},
+  "encryptThisChat": "Mã hóa cuộc trò chuyện này",
+  "@encryptThisChat": {},
+  "unavailable": "Không khả dụng",
+  "@unavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onlineLongTimeAgo": "trực tuyến một khoảng thời gian trước",
+  "@onlineLongTimeAgo": {},
+  "reopenChat": "Mở lại cuộc trò chuyện",
+  "@reopenChat": {},
+  "inactive": "Chưa kích hoạt",
+  "@inactive": {},
+  "unpin": "Bỏ ghim",
+  "@unpin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "clear": "Xóa",
+  "@clear": {},
+  "unblockDevice": "Bỏ chặn thiết bị",
+  "@unblockDevice": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noKeyForThisMessage": "Điều này có thể xảy ra nếu tin nhắn được gửi trước khi bạn đăng nhập vào tài khoản của mình trên thiết bị này.\n\nCũng có thể người gửi đã chặn thiết bị của bạn hoặc đã xảy ra sự cố với kết nối internet.\n\nBạn có thể đọc tin nhắn trên một phiên khác không? Sau đó, bạn có thể chuyển tin nhắn từ nó! Đi tới Cài đặt > Thiết bị và đảm bảo rằng các thiết bị của bạn đã xác minh lẫn nhau. Khi bạn mở phòng vào lần tiếp theo và cả hai phiên đều ở phía trước, chìa khóa sẽ được truyền tự động.\n\nBạn không muốn bị mất chìa khóa khi đăng xuất hoặc chuyển đổi thiết bị? Đảm bảo rằng bạn đã bật tính năng sao lưu trò chuyện trong cài đặt.",
+  "@noKeyForThisMessage": {},
+  "passwordRecovery": "Khôi phục mật khẩu",
+  "@passwordRecovery": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youCreatedGroupChat": "Bạn đã tạo một cuộc trò chuyện",
+  "@youCreatedGroupChat": {},
+  "voiceMessage": "Tin nhắn thoại",
+  "@voiceMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "weSentYouAnEmail": "Chúng tôi đã gửi bạn một email",
+  "@weSentYouAnEmail": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "permissionAccess": "Quyền truy cập",
+  "@permissionAccess": {},
+  "whyIsThisMessageEncrypted": "Tại sao tin nhắn này không thể đọc được?",
+  "@whyIsThisMessageEncrypted": {},
+  "unreadChats": "{unreadCount, plural, =1{1 tin nhắn chưa đọc} other{{unreadCount} tin nhắn chưa đọc}}",
+  "@unreadChats": {
+    "type": "text",
+    "placeholders": {
+      "unreadCount": {}
+    }
+  },
+  "userLeftTheChat": "🚪 {username} đã rời khỏi cuộc trò chuyện",
+  "@userLeftTheChat": {
+    "type": "text",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "toggleUnread": "Đánh dấy là đã đọc/chưa đọc",
+  "@toggleUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tapToAllowAccessToYourGallery": "Nhấn để cho phép truy cập vào Thư viện của bạn",
+  "@tapToAllowAccessToYourGallery": {},
+  "noOtherDevicesFound": "Không tìm thấy thiết bị khác",
+  "@noOtherDevicesFound": {},
+  "whoIsAllowedToJoinThisGroup": "Ai được phép tham gia cuộc trò chuyện này",
+  "@whoIsAllowedToJoinThisGroup": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noResultForKeyword": "Không có kết quả cho \"{keyword}\"",
+  "@noResultForKeyword": {
+    "placeholders": {
+      "keyword": {}
+    }
+  },
+  "multiInteractionThreadedDiscussion": "Thảo luận chuỗi đa tương tác",
+  "@multiInteractionThreadedDiscussion": {},
+  "noConnection": "Không có kết nối",
+  "@noConnection": {},
+  "wednesday": "Thứ tư",
+  "@wednesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "unmuteChat": "Bật tiếng trò chuyện",
+  "@unmuteChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "username": "Tên đăng nhập",
+  "@username": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "statusDot": "⬤",
+  "@statusDot": {},
+  "onlineStatus": "trực tuyến",
+  "@onlineStatus": {},
+  "fileIsTooBigForServer": "Máy chủ báo cáo rằng tệp quá lớn để gửi.",
+  "@fileIsTooBigForServer": {},
+  "searchForContacts": "Tìm kiếm liên hệ",
+  "@searchForContacts": {},
+  "channels": "Kênh",
+  "@channels": {},
+  "people": "Con người",
+  "@people": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "back": "Quay lại",
+  "@back": {},
+  "numChats": "{number} cuộc trò chuyện",
+  "@numChats": {
+    "type": "number",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "waitingPartnerEmoji": "Đang chờ đối phương chấp nhận biểu tượng cảm xúc…",
+  "@waitingPartnerEmoji": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tryToSendAgain": "Thử lại",
+  "@tryToSendAgain": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "contacts": "Liên hệ",
+  "@contacts": {},
+  "upTo100000Members": "Lên tới 100.000 thành viên",
+  "@upTo100000Members": {},
+  "chatMessage": "Tin nhắn mới",
+  "@chatMessage": {},
+  "externalContactTitle": "Mời người dùng mới",
+  "@externalContactTitle": {},
+  "visibleForAllParticipants": "Hiển thị với tất cả thành viên",
+  "@visibleForAllParticipants": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "whyDoYouWantToReportThis": "Tại sao bạn muốn báo cáo điều này?",
+  "@whyDoYouWantToReportThis": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "contact": "Liên hệ",
+  "@contact": {},
+  "letsStart": "Bắt đầu",
+  "@letsStart": {},
+  "shrink": "Thu nhỏ",
+  "@shrink": {},
+  "persistentChatHistory": "Lịch sử trò chuyện liên tục",
+  "@persistentChatHistory": {},
+  "enterRoom": "Vào phòng",
+  "@enterRoom": {},
+  "pleaseChooseAPasscode": "Vui lòng chọn một mã mật khẩu",
+  "@pleaseChooseAPasscode": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatsAndContacts": "Trò chuyện và Danh bạ",
+  "@chatsAndContacts": {},
+  "location": "Vị trí",
+  "@location": {},
+  "unbannedUser": "{username} bỏ cấm {targetName}",
+  "@unbannedUser": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "targetName": {}
+    }
+  },
+  "onlineDayAgo": "trực tuyến {day} ngày trước",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "tooManyRequestsWarning": "Quá nhiều yêu cầu. Vui lòng thử lại sau!",
+  "@tooManyRequestsWarning": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "owner": "Chủ sở hữu",
+  "@owner": {},
+  "doNotShowAgain": "Không hiển thị lại",
+  "@doNotShowAgain": {},
+  "active": "Đã kích hoạt",
+  "@active": {},
+  "captionForImagesIsNotSupportYet": "Chú thích cho hình ảnh chưa được hỗ trợ.",
+  "@captionForImagesIsNotSupportYet": {},
+  "verifyStart": "Bắt đầu xác minh",
+  "@verifyStart": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "unverified": "Chưa được xác minh",
+  "@unverified": {},
+  "gallery": "Thư viện",
+  "@gallery": {},
+  "hideUnimportantStateEvents": "Ẩn các sự kiện trạng thái không quan trọng",
+  "@hideUnimportantStateEvents": {},
+  "twake": "Twake",
+  "@twake": {},
+  "more": "Thêm",
+  "@more": {},
+  "whoWouldYouLikeToAdd": "Bạn muốn thêm ai?",
+  "@whoWouldYouLikeToAdd": {},
+  "photoSelectedCounter": "{count, plural, =1{1 photo} other{{count} photos}} đã được chọn",
+  "@photoSelectedCounter": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "sendMessageGuide": "Gửi tin nhắn hoặc nhấn vào lời chào bên dưới.",
+  "@sendMessageGuide": {},
+  "noMessageHereYet": "Không có tin nhắn...",
+  "@noMessageHereYet": {},
+  "addAPhoto": "Thêm ảnh",
+  "@addAPhoto": {},
+  "disableEncryptionWarning": "Vì lý do bảo mật, bạn không thể tắt tính năng mã hóa trong cuộc trò chuyện, nơi tính năng này đã được bật trước đó.",
+  "@disableEncryptionWarning": {},
+  "addMember": "Thêm thành viên",
+  "@addMember": {},
+  "recentlyChats": "Cuộc trò chuyện gần đây",
+  "@recentlyChats": {},
+  "startNewChatMessage": "Thật vui khi được trò chuyện với bạn bè và cộng tác với nhóm của bạn.\nHãy bắt đầu một hộp thoại, tạo cuộc trò chuyện hoặc tham gia cuộc trò chuyện hiện có.",
+  "@startNewChatMessage": {},
+  "searchResultNotFound2": "• Bạn có thể không có người dùng này trong danh bạ của mình.\n",
+  "@searchResultNotFound2": {},
+  "verifyTitle": "Đang xác minh tài khoản khác",
+  "@verifyTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recent": "Gần đây",
+  "@recent": {},
+  "unknownEncryptionAlgorithm": "Thuật toán mã hóa không xác định",
+  "@unknownEncryptionAlgorithm": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "serverNameWrongExplain": "Địa chỉ máy chủ đã được quản trị viên gửi cho bạn. Vui lòng kiểm tra email mời.",
+  "@serverNameWrongExplain": {},
+  "wasDirectChatDisplayName": "Cuộc trò chuyện trống (trước đây là {oldDisplayName})",
+  "@wasDirectChatDisplayName": {
+    "type": "text",
+    "placeholders": {
+      "oldDisplayName": {}
+    }
+  },
+  "whoCanPerformWhichAction": "Ai có thể thực hiện hành động nào",
+  "@whoCanPerformWhichAction": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "wrongServerName": "Tên máy chủ sai",
+  "@wrongServerName": {},
+  "twakeUsers": "Người dùng Twake",
+  "@twakeUsers": {},
+  "onlineMonthAgo": "trực tuyến {month} tháng trước",
+  "@onlineMonthAgo": {
+    "placeholders": {
+      "month": {}
+    }
+  },
+  "newGroup": "Cuộc trò chuyện mới",
+  "@newGroup": {},
+  "enterInviteLinkOrMatrixId": "Nhập liên kết mời hoặc Matrix ID...",
+  "@enterInviteLinkOrMatrixId": {},
+  "userSentUnknownEvent": "{username} đã gửi sự kiện {type}",
+  "@userSentUnknownEvent": {
+    "type": "text",
+    "placeholders": {
+      "username": {},
+      "type": {}
+    }
+  },
+  "sorryThatsNotPossible": "Xin lỗi... điều đó là không thể",
+  "@sorryThatsNotPossible": {},
+  "searchResultNotFound1": "• Đảm bảo không có lỗi chính tả trong tìm kiếm của bạn.\n",
+  "@searchResultNotFound1": {},
+  "expand": "Mở rộng",
+  "@expand": {},
+  "deviceKeys": "Khóa thiết bị:",
+  "@deviceKeys": {},
+  "waitingPartnerNumbers": "Đang chờ đối phương chấp nhận số…",
+  "@waitingPartnerNumbers": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchResultNotFound4": "• Nếu lý do không được liệt kê ở trên, ",
+  "@searchResultNotFound4": {},
+  "loginWithSSO": "Đăng nhập với SSO",
+  "@loginWithSSO": {},
+  "allow": "Cho phép",
+  "@allow": {},
+  "endToEndEncryption": "Mã hóa đầu cuối",
+  "@endToEndEncryption": {},
+  "maxImageSize": "Kích thước tệp tối đa: {max}MB",
+  "@maxImageSize": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "visibilityOfTheChatHistory": "Khả năng hiển thị lịch sử trò chuyện",
+  "@visibilityOfTheChatHistory": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchResultNotFound5": "tìm kiếm sự giúp đỡ.",
+  "@searchResultNotFound5": {},
+  "wallpaper": "Ảnh nền",
+  "@wallpaper": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "play": "Chơi {fileName}",
+  "@play": {
+    "type": "text",
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "visibleForEveryone": "Hiển thị cho mọi người",
+  "@visibleForEveryone": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newSpace": "Khoảng trắng mới",
+  "@newSpace": {},
+  "tapToAllowAccessToYourCamera": "Bạn có thể bật quyền truy cập camera trong ứng dụng Cài đặt để thực hiện cuộc gọi điện video trong",
+  "@tapToAllowAccessToYourCamera": {},
+  "unknownEvent": "Sự kiện không xác định '{type}'",
+  "@unknownEvent": {
+    "type": "text",
+    "placeholders": {
+      "type": {}
+    }
+  },
+  "pleaseChoose": "Vui lòng chọn",
+  "@pleaseChoose": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "file": "Tệp",
+  "@file": {},
+  "searchResultNotFound3": "• Kiểm tra quyền truy cập liên hệ, người dùng có thể có trong danh sách liên hệ của bạn.\n",
+  "@searchResultNotFound3": {},
+  "noBackupWarning": "Cảnh báo! Nếu không bật sao lưu trò chuyện, bạn sẽ mất quyền truy cập vào tin nhắn được mã hóa của mình. Chúng tôi khuyên bạn nên bật sao lưu trò chuyện trước khi đăng xuất.",
+  "@noBackupWarning": {},
+  "verify": "Xác minh",
+  "@verify": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "pin": "Ghim",
+  "@pin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "profile": "Trang cá nhân",
+  "@profile": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "getHelp": "Trợ giúp",
+  "@getHelp": {},
+  "pleaseChooseAUsername": "Vui lòng chọn tên đăng nhập",
+  "@pleaseChooseAUsername": {
+    "type": "text",
+    "placeholders": {}
   }
 }
