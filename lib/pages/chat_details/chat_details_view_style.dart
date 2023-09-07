@@ -5,7 +5,8 @@ import 'package:flutter/cupertino.dart';
 class ChatDetailViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double toolbarHeight = 56;
+  static double toolbarHeight(BuildContext context) =>
+      responsive.isMobile(context) ? 56 : 80;
 
   static double actionsHeaderWidth(BuildContext context) =>
       responsive.isMobile(context) || responsive.isTablet(context) ? 98 : 148;
