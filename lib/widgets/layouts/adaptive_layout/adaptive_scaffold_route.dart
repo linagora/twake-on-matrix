@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
             )
           },
         ),
-        bodyRatio: ResponsiveUtils.bodyRatio,
+        bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
         secondaryBody: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
             const WidthPlatformBreakpoint(end: ResponsiveUtils.maxMobileWidth):
@@ -95,19 +96,9 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
   Widget _bodyWidget({bool isWebAndDesktop = true}) {
     return Padding(
       padding: isWebAndDesktop
-          ? const EdgeInsetsDirectional.only(start: 16, bottom: 16, top: 16)
+          ? const EdgeInsetsDirectional.only(bottom: 16, top: 16)
           : EdgeInsetsDirectional.zero,
-      child: ClipRRect(
-        borderRadius: isWebAndDesktop
-            ? const BorderRadius.all(Radius.circular(16.0))
-            : BorderRadius.zero,
-        child: Container(
-          decoration: BoxDecoration(
-            color: LinagoraRefColors.material().primary[100],
-          ),
-          child: body,
-        ),
-      ),
+      child: body,
     );
   }
 }
