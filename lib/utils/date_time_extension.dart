@@ -35,11 +35,7 @@ extension DateTimeExtension on DateTime {
   /// Returns a simple time String.
   /// TODO: Add localization
   String localizedTimeOfDay(BuildContext context) {
-    if (MediaQuery.of(context).alwaysUse24HourFormat) {
-      return '${_z(hour)}:${_z(minute)}';
-    } else {
-      return '${_z(hour % 12 == 0 ? 12 : hour % 12)}:${_z(minute)} ${hour > 11 ? "pm" : "am"}';
-    }
+    return '${_z(hour)}:${_z(minute)}';
   }
 
   /// Returns [localizedTimeOfDay()] if the ChatTime is today, the name of the week
@@ -75,11 +71,10 @@ extension DateTimeExtension on DateTime {
         case 7:
           return L10n.of(context)!.sunday;
       }
-    } else if (sameYear) {
-      return L10n.of(context)!.dateWithoutYear(
-        month.toString().padLeft(2, '0'),
-        day.toString().padLeft(2, '0'),
-      );
+    } else if (year == DateTime.now().year) {
+      return DateFormat("MMMM d").format(this);
+    } else {
+      return DateFormat("MMMM d, y").format(this);
     }
     return L10n.of(context)!.dateWithYear(
       year.toString(),
