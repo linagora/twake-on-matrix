@@ -192,7 +192,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: |
-            See [CHANGELOG.md](https://github.com/tk-nguyen/twake-on-matrix/blob/${{ github.ref_name }}/CHANGELOG.md) for full changelogs.
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for full changelogs.
 
             ### Checksums
 
