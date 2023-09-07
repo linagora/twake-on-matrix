@@ -311,10 +311,7 @@ class MessageContent extends StatelessWidget {
                 return TwakeLinkText(
                   text: text,
                   textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: fontSize,
-                        color: Theme.of(context).colorScheme.onBackground,
-                        letterSpacing:
-                            MessageContentStyle.letterSpacingMessageContent,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                   linkStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
