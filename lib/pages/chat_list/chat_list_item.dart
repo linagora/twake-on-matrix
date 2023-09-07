@@ -11,6 +11,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../config/themes.dart';
@@ -109,7 +110,7 @@ class ChatListItem extends StatelessWidget {
         color: selected
             ? Theme.of(context).colorScheme.primaryContainer
             : activeChat
-                ? Theme.of(context).colorScheme.secondaryContainer
+                ? Theme.of(context).colorScheme.surface
                 : Colors.transparent,
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -144,20 +145,27 @@ class ChatListItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             softWrap: false,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.merge(
-                                  TextStyle(
-                                    overflow: TextOverflow.ellipsis,
-                                    letterSpacing: 0.15,
-                                    color: unread
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant
-                                        : ChatListItemStyle.readMessageColor,
-                                  ),
-                                ),
+                            style: unread
+                                ? LinagoraTextStyle.material()
+                                    .bodyLarge1
+                                    .merge(
+                                      FluffyThemes.fallbackTextStyle,
+                                    )
+                                    .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    )
+                                : LinagoraTextStyle.material()
+                                    .bodyLarge2
+                                    .merge(
+                                      FluffyThemes.fallbackTextStyle,
+                                    )
+                                    .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
                           ),
                         ),
                         if (room.isFavourite)
@@ -187,13 +195,10 @@ class ChatListItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 4.0),
                 child: Text(
                   room.timeCreated.localizedTimeShort(context),
-                  style: Theme.of(context).textTheme.labelSmall?.merge(
-                        TextStyle(
-                          letterSpacing: 0.5,
-                          color: unread
-                              ? Theme.of(context).colorScheme.onSurface
-                              : LinagoraRefColors.material().neutral[50],
-                        ),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: unread
+                            ? Theme.of(context).colorScheme.onSurface
+                            : LinagoraRefColors.material().tertiary[20],
                       ),
                 ),
               )
@@ -380,12 +385,23 @@ class ChatListItem extends StatelessWidget {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                letterSpacing: 0.4,
-                color: unread
-                    ? Theme.of(context).colorScheme.onSurface
-                    : LinagoraRefColors.material().neutral[50],
-              ),
+          style: unread
+              ? LinagoraTextStyle.material()
+                  .bodyMedium2
+                  .merge(
+                    FluffyThemes.fallbackTextStyle,
+                  )
+                  .copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )
+              : LinagoraTextStyle.material()
+                  .bodyMedium3
+                  .merge(
+                    FluffyThemes.fallbackTextStyle,
+                  )
+                  .copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
         );
       },
     );
