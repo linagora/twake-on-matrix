@@ -222,14 +222,10 @@ class Message extends StatelessWidget {
                                                     ),
                                                     child: Text(
                                                       displayName,
-                                                      style: Theme.of(
-                                                        context,
-                                                      )
+                                                      style: Theme.of(context)
                                                           .textTheme
                                                           .labelMedium
                                                           ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w500,
                                                             color: Theme.of(
                                                               context,
                                                             )
