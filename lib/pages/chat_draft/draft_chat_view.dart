@@ -46,7 +46,7 @@ class DraftChatView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: DraftChatViewStyle.toolbarHeight,
+          toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
           title: Row(
