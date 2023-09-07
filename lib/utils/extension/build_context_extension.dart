@@ -118,7 +118,7 @@ extension ContextExtensionss on BuildContext {
   /// if the device width is less than 300  return [watch] value.
   /// in other cases return [mobile] value.
   T responsiveValue<T>({
-    T? mobile,
+    required T mobile,
     T? tablet,
     T? desktop,
     T? watch,
@@ -130,10 +130,10 @@ extension ContextExtensionss on BuildContext {
         deviceWidth < minDesktopWidth &&
         tablet != null) {
       return tablet;
-    } else if (deviceWidth < maxMobileWidth && mobile != null) {
-      return mobile;
+    } else if (deviceWidth < defaultMinWidth && watch != null) {
+      return watch;
     } else {
-      return watch!;
+      return mobile;
     }
   }
 
@@ -142,6 +142,8 @@ extension ContextExtensionss on BuildContext {
   static const double minTabletWidth = 905;
 
   static const double maxMobileWidth = 904;
+
+  static const double defaultMinWidth = 300;
 
   void goChild(String path) => go('${GoRouterState.of(this).uri.path}/$path');
 

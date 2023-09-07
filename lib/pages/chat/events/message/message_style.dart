@@ -58,7 +58,7 @@ class MessageStyle {
 
   static const double messageBubbleDesktopMaxWidth = 520.0;
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
-  static const double messageBubbleTabletRatioMaxWidth = 0.50;
+  static const double messageBubbleTabletRatioMaxWidth = 0.30;
 
   static double messageBubbleWidth(BuildContext context) {
     return context.responsiveValue<double>(
