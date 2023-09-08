@@ -87,6 +87,9 @@ class ResponsiveUtils {
   bool isWebNotDesktop(BuildContext context) =>
       PlatformInfos.isWeb && !isDesktop(context);
 
+  bool isMobileOrTablet(BuildContext context) =>
+      isMobile(context) || isTablet(context);
+
   bool mailboxDashboardOnlyHasEmailView(BuildContext context) {
     if (PlatformInfos.isWeb) {
       return isMobile(context) || isTablet(context);

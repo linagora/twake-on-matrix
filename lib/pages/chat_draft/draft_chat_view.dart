@@ -211,8 +211,8 @@ class DraftChatView extends StatelessWidget {
                                       );
                                     }
                                     return TwakeIconButton(
-                                      size:
-                                          ChatInputRowStyle.sendIconButtonSize,
+                                      size: ChatInputRowStyle
+                                          .sendIconBtnSizeMobile,
                                       onTap: controller.sendText,
                                       tooltip: L10n.of(context)!.send,
                                       imagePath: ImagePaths.icSend,
