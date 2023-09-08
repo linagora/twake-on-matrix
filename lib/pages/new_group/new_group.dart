@@ -276,7 +276,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     if (isCreatingRoom) {
       return;
     }
-    final currentPermissionPhotos = await getCurrentPhotoPermission();
+    final currentPermissionPhotos = await getCurrentMediaPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionPhotos != null && currentPermissionCamera != null) {
       final imagePickerController = createImagePickerController();
