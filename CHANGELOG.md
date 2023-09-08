@@ -1705,19 +1705,26 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 
 This CHANGELOG.md was generated with [**Changelog for Dart**](https://pub.dartlang.org/packages/changelog)
 
-## Unreleased
+## [2.2.4+2330] - 2023-09-08
 ### Added
+
 - Chat with external contact
-- Translationg for Fr/Ru
+- Translation for Fr/Ru
 
 ### Changed
+
 - Support exactly image picker for user
 - Change the logic of path and navigation in web app
 - sendOnEnter by default in web
+- Change logic of deliver status
+- New UI for Chat Details
 
 ### Fixed
+
 - Prepare for debug web
 - Show error message at exactly position
-- Dismis keyboard base on the behavior
+- Dismiss keyboard base on the behavior
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
+
+[2.2.4+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.2.4
