@@ -38,14 +38,11 @@ class ForwardView extends StatelessWidget {
           return true;
         },
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(ForwardViewStyle.paddingBody),
+          padding:
+              const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
           child: Column(
             children: [
-              RecentChatsTitle(
-                isShowRecentlyChats:
-                    controller.isShowRecentlyChatsNotifier.value,
-                toggleRecentChat: () => controller.toggleRecentlyChats(),
-              ),
+              const RecentChatsTitle(),
               ValueListenableBuilder<bool>(
                 valueListenable: controller.isShowRecentlyChatsNotifier,
                 builder: (context, isShowRecentlyChat, child) {
@@ -67,20 +64,18 @@ class ForwardView extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: Align(
-        alignment: const Alignment(0.5, 1.1),
-        child: _ForwardButton(
-          forwardAction: controller.forwardAction,
-          selectedEventsNotifier: controller.selectedEventsNotifier,
-          forwardMessageNotifier: controller.forwardMessageNotifier,
-        ),
+      floatingActionButton: ForwardButton(
+        forwardAction: controller.forwardAction,
+        selectedEventsNotifier: controller.selectedEventsNotifier,
+        forwardMessageNotifier: controller.forwardMessageNotifier,
       ),
     );
   }
 }
 
-class _ForwardButton extends StatelessWidget {
-  const _ForwardButton({
+class ForwardButton extends StatelessWidget {
+  const ForwardButton({
+    super.key,
     required this.selectedEventsNotifier,
     required this.forwardMessageNotifier,
     required this.forwardAction,
@@ -111,16 +106,12 @@ class _ForwardButton extends StatelessWidget {
           } else {
             return forwardMessageState.fold((failure) => child!, (success) {
               if (success is ForwardMessageLoading) {
-                return SizedBox(
+                return const SizedBox(
                   height: ForwardViewStyle.bottomBarHeight,
-                  child: const Align(
+                  child: Align(
                     alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 14),
-                      child: TwakeFloatingActionButton(
-                        customIcon:
-                            SizedBox(child: CircularProgressIndicator()),
-                      ),
+                    child: TwakeFloatingActionButton(
+                      customIcon: SizedBox(child: CircularProgressIndicator()),
                     ),
                   ),
                 );
@@ -135,10 +126,11 @@ class _ForwardButton extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerRight,
             child: TwakeIconButton(
-              size: ForwardViewStyle.iconSendSize,
+              paddingAll: 0,
               onTap: forwardAction,
               tooltip: L10n.of(context)!.send,
               imagePath: ImagePaths.icSend,
+              imageSize: ForwardViewStyle.iconSendSize,
             ),
           ),
         ),
@@ -172,6 +164,8 @@ class _ForwardAppBar extends StatelessWidget {
               Matrix.of(context).shareContent = null;
               if (sendFromRoomId != null) {
                 context.go('/rooms/$sendFromRoomId');
+              } else {
+                context.pop();
               }
             },
             paddingAll: 8.0,
