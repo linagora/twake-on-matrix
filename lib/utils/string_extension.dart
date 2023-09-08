@@ -2,6 +2,7 @@ import 'package:any_link_preview/any_link_preview.dart';
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:intl/intl.dart';
@@ -203,5 +204,75 @@ extension StringCasingExtension on String {
       default:
         return MimeType.OTHER;
     }
+  }
+
+  bool containsWord(String word) {
+    final containsWordRegex = RegExp(
+      "\\b(?:$word)\\b",
+      caseSensitive: false,
+    );
+    return containsWordRegex.hasMatch(this);
+  }
+
+  String htmlHighlightText(targetText) {
+    final outsideHtmlTagRegex = RegExp(
+      '(<[^>]*>)|(${RegExp.escape(targetText)})',
+      caseSensitive: false,
+    );
+
+    final highlightedContent = replaceAllMapped(outsideHtmlTagRegex, (match) {
+      if (match.group(1) != null) {
+        return match.group(1)!;
+      } else {
+        return '<span data-mx-bg-color=gold>${match.group(2)}</span>';
+      }
+    });
+
+    return highlightedContent;
+  }
+
+  List<TextSpan> buildHighlightTextSpans(
+    String highlightText, {
+    TextStyle? style,
+    TextStyle? highlightStyle,
+    GestureRecognizer? recognizer,
+  }) {
+    if (highlightText.isEmpty || isEmpty) {
+      return [
+        TextSpan(
+          text: this,
+          style: style,
+          recognizer: recognizer,
+        )
+      ];
+    }
+
+    // Split the text into parts by the search word and create a TextSpan for
+    // each part. The search word is not case sensitive.
+    final List<TextSpan> spans = [];
+    splitMapJoin(
+      RegExp(highlightText, caseSensitive: false),
+      onMatch: (Match match) {
+        spans.add(
+          TextSpan(
+            text: match.group(0),
+            style: highlightStyle,
+            recognizer: recognizer,
+          ),
+        );
+        return '';
+      },
+      onNonMatch: (String nonMatch) {
+        spans.add(
+          TextSpan(
+            text: nonMatch,
+            style: style,
+            recognizer: recognizer,
+          ),
+        );
+        return '';
+      },
+    );
+    return spans;
   }
 }
