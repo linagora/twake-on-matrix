@@ -256,6 +256,12 @@ dependency_overrides:
       url: https://github.com/chandrabezzo/wakelock.git
       ref: main
       path: wakelock_windows/
+  # TODO: Remove it after this PR merged
+  # https://github.com/Sorunome/matrix_link_text/pull/4
+  matrix_link_text:
+    git: 
+      url: https://github.com/linagora/matrix_link_text.git
+      ref: feat/add-text-span-builder
 
 cider:
   link_template:

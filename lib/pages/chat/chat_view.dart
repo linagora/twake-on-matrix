@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
+import 'package:fluffychat/pages/chat/chat_search_bottom_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
@@ -148,19 +149,77 @@ class ChatView extends StatelessWidget {
                     children: [
                       _buildLeading(context),
                       Expanded(
-                        child: ChatAppBarTitle(
-                          selectedEvents: controller.selectedEvents,
-                          room: controller.room,
-                          isArchived: controller.isArchived,
-                          sendController: controller.sendController,
-                          getStreamInstance: controller.networkConnectionService
-                              .getStreamInstance(),
-                          actions: _appBarActions(context),
+                        child: ValueListenableBuilder(
+                          valueListenable: controller.isSearchingNotifier,
+                          builder: (context, isSearching, child) {
+                            if (isSearching) {
+                              return TextField(
+                                controller: controller.searchTextController,
+                                autofocus: true,
+                                onChanged: controller.onSearchChanged,
+                                decoration: InputDecoration(
+                                  hintText: L10n.of(context)!.search,
+                                  border: InputBorder.none,
+                                  suffixIcon: ValueListenableBuilder(
+                                    valueListenable:
+                                        controller.searchTextController,
+                                    builder: (context, value, child) => value
+                                            .text.isNotEmpty
+                                        ? IconButton(
+                                            onPressed: controller.clearSearch,
+                                            icon: const Icon(Icons.close),
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                ),
+                              );
+                            }
+                            return ChatAppBarTitle(
+                              selectedEvents: controller.selectedEvents,
+                              room: controller.room,
+                              isArchived: controller.isArchived,
+                              sendController: controller.sendController,
+                              getStreamInstance: controller
+                                  .networkConnectionService
+                                  .getStreamInstance(),
+                              actions: _appBarActions(context),
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
+                actions: [
+                  ValueListenableBuilder(
+                    valueListenable: controller.isSearchingNotifier,
+                    builder: (context, isSearching, child) {
+                      if (isSearching) {
+                        return const SizedBox();
+                      }
+                      return PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'search',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.search),
+                                const SizedBox(width: 12),
+                                Text(L10n.of(context)!.search),
+                              ],
+                            ),
+                          )
+                        ],
+                        onSelected: (item) {
+                          switch (item) {
+                            case "search":
+                              return controller.toggleSearch();
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 4),
                   child: Container(
@@ -224,7 +283,9 @@ class ChatView extends StatelessWidget {
                             ),
                           ),
                           if (controller.room!.membership == Membership.invite)
-                            _inputMessageWidget(bottomSheetPadding),
+                            _inputMessageOrSearchBottomWidget(
+                              bottomSheetPadding,
+                            ),
                           if (controller.room!.canSendDefaultMessages &&
                               controller.room!.membership == Membership.join)
                             Container(
@@ -273,7 +334,9 @@ class ChatView extends StatelessWidget {
                                         ],
                                       ),
                                     )
-                                  : _inputMessageWidget(bottomSheetPadding),
+                                  : _inputMessageOrSearchBottomWidget(
+                                      bottomSheetPadding,
+                                    ),
                             ),
                         ],
                       ),
@@ -304,6 +367,14 @@ class ChatView extends StatelessWidget {
     );
   }
 
+  Widget _inputMessageOrSearchBottomWidget(double bottomSheetPadding) =>
+      ValueListenableBuilder(
+        valueListenable: controller.isSearchingNotifier,
+        builder: (context, isSearching, child) => isSearching
+            ? ChatSearchBottomView(controller: controller)
+            : _inputMessageWidget(bottomSheetPadding),
+      );
+
   Widget _inputMessageWidget(double bottomSheetPadding) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -329,6 +400,14 @@ class ChatView extends StatelessWidget {
     );
   }
 
+  Widget _buildBackButton(BuildContext context) => TwakeIconButton(
+        tooltip: L10n.of(context)!.back,
+        icon: Icons.arrow_back,
+        onTap: controller.onBackPress,
+        paddingAll: 8.0,
+        margin: const EdgeInsets.symmetric(vertical: 12.0),
+      );
+
   Widget _buildLeading(BuildContext context) {
     if (controller.responsive.isMobile(context)) {
       if (controller.selectMode) {
@@ -337,17 +416,17 @@ class ChatView extends StatelessWidget {
           onTap: controller.clearSelectedEvents,
           tooltip: L10n.of(context)!.close,
         );
-      } else {
-        return TwakeIconButton(
-          tooltip: L10n.of(context)!.back,
-          icon: Icons.arrow_back,
-          onTap: () => controller.backToPreviousPage(),
-          paddingAll: 8.0,
-          margin: const EdgeInsets.symmetric(vertical: 12.0),
-        );
       }
-    } else {
-      return const SizedBox.shrink();
+      return _buildBackButton(context);
     }
+    return ValueListenableBuilder(
+      valueListenable: controller.isSearchingNotifier,
+      builder: (context, isSearching, child) {
+        if (isSearching) {
+          return _buildBackButton(context);
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 }
