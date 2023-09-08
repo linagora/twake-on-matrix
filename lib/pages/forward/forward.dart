@@ -51,10 +51,6 @@ class ForwardController extends State<Forward> {
     sendFromRoomId = widget.sendFromRoomId;
   }
 
-  void toggleRecentlyChats() {
-    isShowRecentlyChatsNotifier.value = !isShowRecentlyChatsNotifier.value;
-  }
-
   @override
   void dispose() {
     recentChatScrollController.dispose();
