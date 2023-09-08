@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionHandlerService {
   static final PermissionHandlerService _instance =
       PermissionHandlerService._internal();
+
+  static final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
 
   factory PermissionHandlerService() {
     return _instance;
@@ -11,14 +14,21 @@ class PermissionHandlerService {
 
   PermissionHandlerService._internal();
 
-  Future<PermissionStatus>? requestPermissionForPhotoActions() {
+  Future<PermissionStatus?>? requestPermissionForMediaActions() async {
     if (Platform.isIOS) {
       return _handlePhotosPermissionIOSAction();
     } else if (Platform.isAndroid) {
-      return _handlePhotosPermissionAndroidAction();
+      if (await _getCurrentAndroidVersion() >= 33) {
+        return _handleMediaPickerPermissionAndroidHigher33Action();
+      }
+      return _handleMediaPermissionAndroidAction();
     } else {
       return null;
     }
+  }
+
+  Future<int> _getCurrentAndroidVersion() async {
+    return (await _deviceInfoPlugin.androidInfo).version.sdkInt;
   }
 
   Future<PermissionStatus> requestPermissionForCameraActions() async {
@@ -37,9 +47,29 @@ class PermissionHandlerService {
     return _handlePhotoPermission(currentStatus);
   }
 
-  Future<PermissionStatus> _handlePhotosPermissionAndroidAction() async {
+  Future<PermissionStatus> _handleMediaPermissionAndroidAction() async {
     final currentStatus = await Permission.storage.status;
     return _handlePhotoPermission(currentStatus);
+  }
+
+  Future<PermissionStatus>
+      _handleMediaPickerPermissionAndroidHigher33Action() async {
+    PermissionStatus? photoPermission = await Permission.photos.status;
+    if (photoPermission == PermissionStatus.denied) {
+      photoPermission = await Permission.photos.request();
+    }
+
+    PermissionStatus? videosPermission = await Permission.videos.status;
+    if (videosPermission == PermissionStatus.denied) {
+      videosPermission = await Permission.videos.request();
+    }
+
+    if (photoPermission == PermissionStatus.granted ||
+        videosPermission == PermissionStatus.granted) {
+      return PermissionStatus.granted;
+    }
+
+    return PermissionStatus.denied;
   }
 
   Future<PermissionStatus> _handlePhotoPermission(

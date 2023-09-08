@@ -11,8 +11,8 @@ mixin CommonMediaPickerMixin {
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
 
-  Future<PermissionStatus>? getCurrentPhotoPermission() {
-    return _permissionHandlerService.requestPermissionForPhotoActions();
+  Future<PermissionStatus?>? getCurrentMediaPermission() {
+    return _permissionHandlerService.requestPermissionForMediaActions();
   }
 
   Future<PermissionStatus>? getCurrentCameraPermission() {
