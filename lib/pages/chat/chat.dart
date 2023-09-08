@@ -27,6 +27,7 @@ import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -1375,6 +1376,7 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinMessage,
       ChatContextMenuActions.forward,
+      if (PlatformInfos.isWeb) ChatContextMenuActions.downloadFile,
     ];
     return listAction.map((action) {
       return PopupMenuItem(
@@ -1412,8 +1414,14 @@ class ChatController extends State<Chat>
         onSelectMessage(event);
         forwardEventsAction();
         break;
+      case ChatContextMenuActions.downloadFile:
+        downloadFileAction(context, event);
+        break;
     }
   }
+
+  void downloadFileAction(BuildContext context, Event event) =>
+      event.saveFile(context);
 
   void handleContextMenuAction(
     BuildContext context,

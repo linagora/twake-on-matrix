@@ -17,7 +17,7 @@ import 'package:file_saver/file_saver.dart';
 extension MatrixFileExtension on MatrixFile {
   void downloadFile(BuildContext context) async {
     if (PlatformInfos.isWeb) {
-      return downloadImageInWeb(context);
+      return downloadFileInWeb(context);
     }
 
     if (PlatformInfos.isMobile) {
@@ -40,8 +40,8 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  void downloadImageInWeb(BuildContext context) async {
-    Logs().d("MatrixFileExtension()::downloadImageInWeb()::download on Web");
+  void downloadFileInWeb(BuildContext context) async {
+    Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
 
     final directory = await FileSaver.instance.saveFile(
       name,
