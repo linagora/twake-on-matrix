@@ -31,4 +31,6 @@ class ChatListItemStyle {
                 notificationCount.toString().length +
             unreadBadgePaddingWhenMoreThanOne;
   }
+
+  static const double letterSpaceDisplayname = 0.15;
 }
