@@ -21,6 +21,7 @@ import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
@@ -129,6 +130,9 @@ class GetItInitializer {
     );
     getIt.registerSingleton<SearchRecentChatInteractor>(
       SearchRecentChatInteractor(),
+    );
+    getIt.registerSingleton<ChatRoomSearchInteractor>(
+      ChatRoomSearchInteractor(),
     );
   }
 }

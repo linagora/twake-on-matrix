@@ -13,6 +13,7 @@ class TwakeLinkText extends StatelessWidget {
   final LinkTapHandler? onLinkTap;
   final int? maxLines;
   final String? firstValidUrl;
+  final TextSpanBuilder? textSpanBuilder;
 
   const TwakeLinkText({
     Key? key,
@@ -24,6 +25,7 @@ class TwakeLinkText extends StatelessWidget {
     this.onLinkTap,
     this.maxLines,
     this.firstValidUrl,
+    this.textSpanBuilder,
   }) : super(key: key);
 
   @override
@@ -66,6 +68,7 @@ class TwakeLinkText extends StatelessWidget {
       textAlign: textAlign,
       onLinkTap: onLinkTap,
       maxLines: maxLines,
+      textSpanBuilder: textSpanBuilder,
     );
   }
 }

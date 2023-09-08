@@ -16,6 +16,7 @@ import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.d
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:fluffychat/pages/chat/chat_room_search_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
@@ -88,7 +89,8 @@ class ChatController extends State<Chat>
         MediaPickerMixin,
         SendFilesMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin {
+        PopupMenuWidgetMixin,
+        ChatRoomSearchMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -299,6 +301,11 @@ class ChatController extends State<Chat>
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
+    initializeSearch(
+      getTimeline: () => timeline,
+      scrollToIndex: scrollToIndex,
+      historyCount: _loadHistoryCount,
+    );
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _askToAcceptInvitation();
@@ -370,7 +377,11 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void backToPreviousPage() {
+  void onBackPress() {
+    if (isSearchingNotifier.value) {
+      toggleSearch();
+      return;
+    }
     context.pop();
   }
 
@@ -423,6 +434,7 @@ class ChatController extends State<Chat>
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
+    disposeSearch();
     super.dispose();
   }
 
@@ -953,12 +965,14 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    await scrollController.scrollToIndex(
-      eventIndex,
-      preferPosition: AutoScrollPosition.middle,
-    );
+    await scrollToIndex(eventIndex);
     _updateScrollController();
   }
+
+  Future scrollToIndex(int index) => scrollController.scrollToIndex(
+        index,
+        preferPosition: AutoScrollPosition.middle,
+      );
 
   void scrollDown() {
     if (scrollController.hasClients) {
