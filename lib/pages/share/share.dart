@@ -22,8 +22,14 @@ class ShareController extends State<Share> with SendFilesMixin {
 
   final isShowRecentlyChatsNotifier = ValueNotifier(true);
 
+  final isSearchModeNotifier = ValueNotifier(false);
+
+  final textEditingController = TextEditingController();
+
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
+
+  final searchFocusNode = FocusNode();
 
   final selectedRoomsNotifier = ValueNotifier(<String>[]);
 
@@ -41,6 +47,8 @@ class ShareController extends State<Share> with SendFilesMixin {
   void toggleRecentlyChats() {
     isShowRecentlyChatsNotifier.value = !isShowRecentlyChatsNotifier.value;
   }
+
+  void toggleSearchMode() {}
 
   void shareTo(String roomId) async {
     final room = Room(
