@@ -1,11 +1,16 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
 
 class ForwardViewStyle {
-  static double preferredAppBarSize(BuildContext context) => 64;
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double get paddingBody => 16.0;
+  static double preferredAppBarSize(BuildContext context) =>
+      responsive.isMobile(context) ? 64 : 80;
 
-  static double get bottomBarHeight => 120.0;
+  static const double paddingBody = 8.0;
 
-  static double get iconSendSize => 40.0;
+  static const double bottomBarHeight = 60.0;
+
+  static const double iconSendSize = 56.0;
 }
