@@ -1,49 +1,28 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:mime/mime.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:file_saver/file_saver.dart';
 
 extension MatrixFileExtension on MatrixFile {
-  void save(BuildContext context) async {
-    if (PlatformInfos.isIOS) {
-      return share(context);
+  void downloadFile(BuildContext context) async {
+    if (PlatformInfos.isWeb) {
+      return downloadImageInWeb(context);
     }
 
-    final downloadPath = PlatformInfos.isAndroid
-        ? await getDownloadPathAndroid()
-        : await FilePicker.platform.saveFile(
-            dialogTitle: L10n.of(context)!.saveFile,
-            fileName: name,
-            type: filePickerFileType,
-          );
-    if (downloadPath == null) return;
-
-    final result = await showFutureLoadingDialog(
-      context: context,
-      future: () => File(downloadPath).writeAsBytes(bytes ?? Uint8List(0)),
-    );
-    if (result.error != null) return;
-
-    Logs().d("MatrixFileExtension()::save()::result.error: ${result.error}");
-  }
-
-  Future<String?> getDownloadPathAndroid() async {
-    final directory = await getDownloadDirectoryAndroid();
-    if (directory == null) return null;
-    return '${directory.path}/$name';
-  }
-
-  Future<Directory?> getDownloadDirectoryAndroid() async {
-    return await getApplicationDocumentsDirectory();
+    if (PlatformInfos.isMobile) {
+      return downloadImageInMobile(context);
+    }
   }
 
   void share(BuildContext context) async {
@@ -59,6 +38,38 @@ extension MatrixFileExtension on MatrixFile {
           box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
     return;
+  }
+
+  void downloadImageInWeb(BuildContext context) async {
+    Logs().d("MatrixFileExtension()::downloadImageInWeb()::download on Web");
+
+    final directory = await FileSaver.instance.saveFile(
+      name,
+      bytes!,
+      extensionFromMime(mimeType),
+      mimeType: mimeType.toMimeTypeEnum(),
+    );
+
+    Fluttertoast.showToast(
+      msg: L10n.of(context)!.downloadFileInWeb(directory),
+    );
+  }
+
+  void downloadImageInMobile(BuildContext context) async {
+    Logs().d(
+      "MatrixFileExtension()::downloadImageInMobile()::download on Mobile",
+    );
+
+    final result = await ImageGallerySaver.saveImage(
+      bytes ?? Uint8List(0),
+      name: name,
+    );
+
+    Fluttertoast.showToast(
+      msg: result?['isSuccess']
+          ? L10n.of(context)!.downloadImageSuccess
+          : L10n.of(context)!.downloadImageError,
+    );
   }
 
   FileType get filePickerFileType {
