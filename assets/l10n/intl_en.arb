@@ -2701,5 +2701,8 @@
     "media": "Media",
     "files": "Files",
     "links": "Links",
-    "downloads": "Downloads"
+    "downloads": "Downloads",
+    "downloadImageSuccess" : "Image saved to Pictures",
+    "downloadImageError" : "Error saving image",
+    "downloadImageInWeb" : "Image saved to Downloads"
 }

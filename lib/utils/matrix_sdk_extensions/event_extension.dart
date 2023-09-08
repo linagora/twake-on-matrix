@@ -19,7 +19,7 @@ extension LocalizedBody on Event {
   void saveFile(BuildContext context) async {
     final matrixFile = await getFile(context);
 
-    matrixFile.result?.save(context);
+    matrixFile.result?.downloadFile(context);
   }
 
   String get filename {
