@@ -19,7 +19,7 @@ dependencies:
   desktop_drop: ^0.4.0
   desktop_lifecycle: ^0.1.0
   desktop_notifications: ^0.6.3
-  device_info_plus: ^8.0.0
+  device_info_plus: ^9.0.3
   dynamic_color: ^1.6.0
   emoji_picker_flutter: ^1.5.1
   emoji_proposal: ^0.0.1
@@ -70,7 +70,7 @@ dependencies:
   native_imaging: ^0.1.0
   package_info_plus: ^4.0.0
   path_provider: ^2.0.15
-  permission_handler: ^10.2.0
+  permission_handler: ^10.4.5
   pin_code_text_field: ^1.8.0
   provider: ^6.0.2
   punycode: ^1.0.0
@@ -123,7 +123,7 @@ dependencies:
   debounce_throttle: ^2.0.0
   fluttertoast: ^8.2.2
   rxdart: ^0.27.7
-  photo_manager: ^2.6.0
+  photo_manager: ^2.7.1
   flutter_inappwebview: ^5.7.2+3
   tuple: ^2.0.2
   lottie: ^2.3.2

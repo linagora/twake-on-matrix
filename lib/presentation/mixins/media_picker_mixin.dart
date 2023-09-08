@@ -35,7 +35,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     OnSendPhotosTap onSendTap,
     OnCameraPicked? onCameraPicked,
   }) async {
-    final currentPermissionPhotos = await getCurrentPhotoPermission();
+    final currentPermissionPhotos = await getCurrentMediaPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionPhotos != null && currentPermissionCamera != null) {
       showMediasPickerBottomSheet(
