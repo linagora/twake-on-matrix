@@ -1549,10 +1549,11 @@ packages:
   matrix_link_text:
     dependency: "direct main"
     description:
-      name: matrix_link_text
-      sha256: "4e1c98ce07acf1566d89ccc55221a210bd92739943010f6e06ac40cf8cb634fd"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "feat/add-text-span-builder"
+      resolved-ref: f159e4de7db4a70fa1830cf7c4a066979aa1464d
+      url: "https://github.com/linagora/matrix_link_text.git"
+    source: git
     version: "2.0.0"
   meta:
     dependency: transitive

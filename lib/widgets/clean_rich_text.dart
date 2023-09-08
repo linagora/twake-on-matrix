@@ -9,6 +9,7 @@ class TwakeCleanRichText extends StatelessWidget {
   final TextAlign? textAlign;
   final LinkTapHandler? onLinkTap;
   final int? maxLines;
+  final TextSpanBuilder? textSpanBuilder;
 
   const TwakeCleanRichText({
     Key? key,
@@ -19,6 +20,7 @@ class TwakeCleanRichText extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.onLinkTap,
     this.maxLines,
+    this.textSpanBuilder,
   }) : super(key: key);
 
   @override
@@ -32,6 +34,7 @@ class TwakeCleanRichText extends StatelessWidget {
             linkStyle: linkStyle,
             onLinkTap: onLinkTap,
             themeData: Theme.of(context),
+            textSpanBuilder: textSpanBuilder,
           ),
           const WidgetSpan(child: SizedBox(width: 4)),
           WidgetSpan(child: childWidget)

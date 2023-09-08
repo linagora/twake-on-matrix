@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
@@ -11,6 +12,7 @@ import 'package:fluffychat/widgets/twake_link_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'package:fluffychat/pages/chat/events/video_player.dart';
@@ -201,30 +203,36 @@ class MessageContent extends StatelessWidget {
                   event.numberEmotes <= 10;
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                child: HtmlMessage(
-                  event: event,
-                  html: html,
-                  defaultTextStyle:
-                      Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: textColor,
-                            fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                          ),
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                    decoration: TextDecoration.underline,
-                    decorationColor: textColor.withAlpha(150),
-                  ),
-                  room: event.room,
-                  emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
-                  bottomWidgetSpan: Visibility(
-                    visible: false,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: endOfBubbleWidget,
-                  ),
-                  chatController: controller,
+                child: ValueListenableBuilder(
+                  valueListenable: controller.searchStatus,
+                  builder: (context, searchStatus, child) {
+                    return HtmlMessage(
+                      event: event,
+                      html: html,
+                      highlightText: searchStatus.getSuccessOrNull()?.keyword,
+                      defaultTextStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                // color: textColor,
+                                fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                              ),
+                      linkStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                        decoration: TextDecoration.underline,
+                        decorationColor: textColor.withAlpha(150),
+                      ),
+                      room: event.room,
+                      emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+                      bottomWidgetSpan: Visibility(
+                        visible: false,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: endOfBubbleWidget,
+                      ),
+                      chatController: controller,
+                    );
+                  },
                 ),
               );
             }
@@ -308,26 +316,45 @@ class MessageContent extends StatelessWidget {
                       hideReply: true,
                     );
 
-                return TwakeLinkText(
-                  text: text,
-                  textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                return ValueListenableBuilder(
+                  valueListenable: controller.searchStatus,
+                  builder: (context, searchStatus, child) {
+                    final highlightText =
+                        searchStatus.getSuccessOrNull()?.keyword;
+                    return TwakeLinkText(
+                      text: text,
+                      textStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                      linkStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                        decorationColor: textColor.withAlpha(150),
                       ),
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                    decorationColor: textColor.withAlpha(150),
-                  ),
-                  childWidget: Visibility(
-                    visible: false,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: endOfBubbleWidget,
-                  ),
-                  firstValidUrl: text.getFirstValidUrl(),
-                  onLinkTap: (url) =>
-                      UrlLauncher(context, url.toString()).launchUrl(),
+                      childWidget: Visibility(
+                        visible: false,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: endOfBubbleWidget,
+                      ),
+                      firstValidUrl: text.getFirstValidUrl(),
+                      onLinkTap: (url) =>
+                          UrlLauncher(context, url.toString()).launchUrl(),
+                      textSpanBuilder: (text, textStyle, recognizer) =>
+                          TextSpan(
+                        children: text?.buildHighlightTextSpans(
+                          highlightText ?? '',
+                          style: textStyle,
+                          highlightStyle: textStyle?.copyWith(
+                            backgroundColor: CssColor.fromCss('gold'),
+                          ),
+                          recognizer: recognizer,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             );

@@ -69,6 +69,8 @@ abstract class AppConfig {
   static const double borderRadius = 20.0;
   static const double columnWidth = 360.0;
   static const int fetchContactsLimit = 20;
+  static const int chatRoomSearchKeywordMin = 2;
+  static const bool chatRoomSearchWordStrategy = false;
 
   static String? issueId;
 

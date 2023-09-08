@@ -1272,6 +1272,8 @@
         "type": "text",
         "placeholders": {}
     },
+    "noMoreResult": "No more result!",
+    "previous": "Previous",
     "next": "Next",
     "@next": {
         "type": "text",
