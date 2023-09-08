@@ -13,6 +13,8 @@ class TwakeIconButton extends StatelessWidget {
 
   final String? imagePath;
 
+  final double? imageSize;
+
   final String tooltip;
 
   final EdgeInsets margin;
@@ -41,6 +43,7 @@ class TwakeIconButton extends StatelessWidget {
     this.onTap,
     this.icon,
     this.imagePath,
+    this.imageSize,
     this.paddingAll,
     this.size,
     this.fill,
@@ -81,7 +84,11 @@ class TwakeIconButton extends StatelessWidget {
                       color: iconColor,
                     )
                   : imagePath != null
-                      ? SvgPicture.asset(imagePath!)
+                      ? SvgPicture.asset(
+                          imagePath!,
+                          height: imageSize,
+                          width: imageSize,
+                        )
                       : null,
             ),
           ),
