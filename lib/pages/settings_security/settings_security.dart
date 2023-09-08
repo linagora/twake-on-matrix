@@ -194,7 +194,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       },
     );
 
-    file.result?.save(context);
+    file.result?.downloadFile(context);
   }
 
   @override
