@@ -5,7 +5,8 @@ enum ChatContextMenuActions {
   select,
   copyMessage,
   pinMessage,
-  forward;
+  forward,
+  download;
 
   String getTitle(BuildContext context) {
     switch (this) {
@@ -17,6 +18,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.pinMessage;
       case ChatContextMenuActions.forward:
         return L10n.of(context)!.forward;
+      case ChatContextMenuActions.download:
+        return L10n.of(context)!.downloadFile;
     }
   }
 
@@ -30,6 +33,8 @@ enum ChatContextMenuActions {
         return Icons.push_pin;
       case ChatContextMenuActions.forward:
         return Icons.shortcut;
+      case ChatContextMenuActions.download:
+        return Icons.download;
     }
   }
 }

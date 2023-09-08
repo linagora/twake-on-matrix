@@ -15,7 +15,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 extension MatrixFileExtension on MatrixFile {
   void downloadFile(BuildContext context) async {
     if (PlatformInfos.isWeb) {
-      return downloadImageInWeb(context);
+      return downloadFileInWeb(context);
     }
 
     if (PlatformInfos.isMobile) {
@@ -38,8 +38,8 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  void downloadImageInWeb(BuildContext context) {
-    Logs().d("MatrixFileExtension()::downloadImageInWeb()::download on Web");
+  void downloadFileInWeb(BuildContext context) {
+    Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
 
     html.AnchorElement(
       href: html.Url.createObjectUrlFromBlob(
