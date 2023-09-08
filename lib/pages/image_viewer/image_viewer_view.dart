@@ -24,13 +24,16 @@ class ImageViewerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           GestureDetector(
             onTap: controller.toggleAppbarPreview,
-            onDoubleTap: controller.toggleAppbarPreview,
+            onDoubleTapDown: (details) => controller.onDoubleTapDown(details),
+            onDoubleTap: () => controller.onDoubleTap(),
             child: InteractiveViewer(
+              transformationController: controller.transformationController,
               minScale: 1.0,
               maxScale: 10.0,
               onInteractionEnd: controller.onInteractionEnds,
