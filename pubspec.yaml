@@ -135,6 +135,8 @@ dependencies:
   cached_network_image: ^3.2.3
   pull_to_refresh: ^2.0.0
   flutter_image_compress: ^2.0.4
+  image_gallery_saver: ^2.0.3
+  file_saver: ^0.1.1
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
