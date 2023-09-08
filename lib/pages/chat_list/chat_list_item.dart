@@ -1,26 +1,20 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_mixin.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
-
-import '../../config/themes.dart';
-import '../../widgets/avatar/avatar.dart';
-import '../../widgets/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
 
-class ChatListItem extends StatelessWidget {
+class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final Room room;
   final bool activeChat;
   final bool selected;
@@ -84,21 +78,9 @@ class ChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMuted = room.pushRuleState != PushRuleState.notify;
-    final typingText = room.getLocalizedTypingText(context);
-
-    final ownLastMessage =
-        room.lastEvent?.senderId == Matrix.of(context).client.userID;
-    final unread = room.isUnread || room.membership == Membership.invite;
-    final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      unread,
-      room.hasNewMessages,
-      room.notificationCount > 0,
-    );
     final displayname = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
-    final isGroup = !room.isDirectChat;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -131,332 +113,11 @@ class ChatListItem extends StatelessWidget {
                   name: displayname,
                   onTap: onLongPress,
                 ),
-          title: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            displayname,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: unread
-                                ? LinagoraTextStyle.material()
-                                    .bodyLarge1
-                                    .merge(
-                                      FluffyThemes.fallbackTextStyle,
-                                    )
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    )
-                                : LinagoraTextStyle.material()
-                                    .bodyLarge2
-                                    .merge(
-                                      FluffyThemes.fallbackTextStyle,
-                                    )
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                    ),
-                          ),
-                        ),
-                        if (room.isFavourite)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Icon(
-                              Icons.push_pin_outlined,
-                              size: ChatListItemStyle.readIconSize,
-                              color: ChatListItemStyle.readIconColor,
-                            ),
-                          ),
-                        if (isMuted)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Icon(
-                              Icons.volume_off_outlined,
-                              size: ChatListItemStyle.readIconSize,
-                              color: ChatListItemStyle.readIconColor,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 4.0),
-                child: Text(
-                  room.timeCreated.localizedTimeShort(context),
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: unread
-                            ? Theme.of(context).colorScheme.onSurface
-                            : LinagoraRefColors.material().tertiary[20],
-                      ),
-                ),
-              )
-            ],
-          ),
-          subtitle: SizedBox(
-            height: 39,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                if (typingText.isEmpty &&
-                    ownLastMessage &&
-                    room.lastEvent!.status.isSending) ...[
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  ),
-                  const SizedBox(width: 4),
-                ],
-                Expanded(
-                  child: typingText.isNotEmpty
-                      ? Column(
-                          children: [
-                            Expanded(
-                              child: typingTextWidget(typingText, context),
-                            ),
-                            const Spacer(),
-                          ],
-                        )
-                      : (isGroup
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Flexible(
-                                  child: lastSenderWidget(isGroup, unread),
-                                ),
-                                const SizedBox(height: 2),
-                                Flexible(
-                                  child: textContentWidget(
-                                    context,
-                                    isGroup,
-                                    unread,
-                                  ),
-                                )
-                              ],
-                            )
-                          : textContentWidget(context, isGroup, unread)),
-                ),
-                const SizedBox(width: 8),
-                FutureBuilder<String>(
-                  future: room.lastEvent?.calcLocalizedBody(
-                        MatrixLocals(L10n.of(context)!),
-                        hideReply: true,
-                        hideEdit: true,
-                        plaintextBody: true,
-                        removeMarkdown: true,
-                      ) ??
-                      Future.value(''),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == '' ||
-                        snapshot.data == null ||
-                        room.lastEvent == null) {
-                      return const SizedBox.shrink();
-                    }
-
-                    final isMentionned = snapshot.data!
-                        .getAllMentionedUserIdsFromMessage(room)
-                        .contains(Matrix.of(context).client.userID);
-                    return AnimatedContainer(
-                      duration: FluffyThemes.animationDuration,
-                      curve: FluffyThemes.animationCurve,
-                      padding: const EdgeInsets.only(bottom: 4),
-                      height: ChatListItemStyle.mentionIconWidth,
-                      width: isMentionned && unread
-                          ? ChatListItemStyle.mentionIconWidth
-                          : 0,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius:
-                            BorderRadius.circular(AppConfig.borderRadius),
-                      ),
-                      child: Center(
-                        child: isMentionned && unread
-                            ? Text(
-                                '@',
-                                style: TextStyle(
-                                  color: isMentionned
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .labelMedium
-                                      ?.fontSize,
-                                ),
-                              )
-                            : Container(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 4),
-                AnimatedContainer(
-                  duration: FluffyThemes.animationDuration,
-                  curve: FluffyThemes.animationCurve,
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  height: unreadBadgeSize,
-                  width: ChatListItemStyle.notificationBadgeSize(
-                    unread,
-                    room.hasNewMessages,
-                    room.notificationCount,
-                  ),
-                  decoration: BoxDecoration(
-                    color: room.highlightCount > 0 ||
-                            room.membership == Membership.invite
-                        ? Theme.of(context).colorScheme.primary
-                        : room.notificationCount > 0 || room.markedUnread
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-                  ),
-                  child: Center(
-                    child: room.notificationCount > 0
-                        ? Text(
-                            room.notificationCount.toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  letterSpacing: -0.5,
-                                  color: room.highlightCount > 0
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : room.notificationCount > 0
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
-                                ),
-                          )
-                        : Container(),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          title: ChatListItemTitle(room: room),
+          subtitle: ChatListItemSubtitle(room: room),
           onTap: () => clickAction(context),
         ),
       ),
     );
-  }
-
-  FutureBuilder<String> textContentWidget(
-    BuildContext context,
-    bool isGroup,
-    bool unread,
-  ) {
-    return FutureBuilder<String>(
-      future: room.lastEvent?.calcLocalizedBody(
-            MatrixLocals(L10n.of(context)!),
-            hideReply: true,
-            hideEdit: true,
-            plaintextBody: true,
-            removeMarkdown: true,
-          ) ??
-          Future.value(L10n.of(context)!.emptyChat),
-      builder: (context, snapshot) {
-        return Text(
-          room.membership == Membership.invite
-              ? L10n.of(context)!.youAreInvitedToThisChat
-              : snapshot.data ??
-                  room.lastEvent?.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)!),
-                    hideReply: true,
-                    hideEdit: true,
-                    plaintextBody: true,
-                    removeMarkdown: true,
-                  ) ??
-                  L10n.of(context)!.emptyChat,
-          softWrap: false,
-          maxLines: isGroup ? 1 : 2,
-          overflow: TextOverflow.ellipsis,
-          style: unread
-              ? LinagoraTextStyle.material()
-                  .bodyMedium2
-                  .merge(
-                    FluffyThemes.fallbackTextStyle,
-                  )
-                  .copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  )
-              : LinagoraTextStyle.material()
-                  .bodyMedium3
-                  .merge(
-                    FluffyThemes.fallbackTextStyle,
-                  )
-                  .copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-        );
-      },
-    );
-  }
-
-  Row typingTextWidget(String typingText, BuildContext context) {
-    final displayedTypingText = "~ $typingText…";
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Flexible(
-          child: Text(
-            displayedTypingText,
-            style: Theme.of(context).textTheme.labelLarge?.merge(
-                  TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-            maxLines: 1,
-            softWrap: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  RenderObjectWidget lastSenderWidget(bool isGroup, bool unread) {
-    return isGroup
-        ? Row(
-            children: [
-              FutureBuilder<User?>(
-                future: room.lastEvent?.fetchSenderUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) return const SizedBox.shrink();
-                  return Text(
-                    snapshot.data!.displayName!,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: Theme.of(context).textTheme.labelLarge?.merge(
-                          TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            color: unread
-                                ? Theme.of(context).colorScheme.onSurface
-                                : ChatListItemStyle.readMessageColor,
-                          ),
-                        ),
-                  );
-                },
-              ),
-              const Spacer()
-            ],
-          )
-        : const SizedBox.shrink();
   }
 }
