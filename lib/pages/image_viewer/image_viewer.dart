@@ -25,7 +25,22 @@ class ImageViewer extends StatefulWidget {
 }
 
 class ImageViewerController extends State<ImageViewer> {
+  late TransformationController transformationController;
+  TapDownDetails? tapDownDetails;
+
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
+
+  @override
+  void initState() {
+    super.initState();
+    transformationController = TransformationController();
+  }
+
+  @override
+  void dispose() {
+    transformationController.dispose();
+    super.dispose();
+  }
 
   /// Forward this image to another room.
   void forwardAction() async {
@@ -58,6 +73,28 @@ class ImageViewerController extends State<ImageViewer> {
         Navigator.of(context, rootNavigator: false).pop();
       }
     }
+  }
+
+  void onDoubleTap() {
+    final position = tapDownDetails!.localPosition;
+
+    const double scale = 3;
+    final offset = Offset(
+      position.dx * (1 - scale),
+      position.dy * (1 - scale),
+    );
+    final zoomed = Matrix4.identity()
+      ..translate(offset.dx, offset.dy)
+      ..scale(scale);
+
+    final value = transformationController.value.isIdentity()
+        ? zoomed
+        : Matrix4.identity();
+    transformationController.value = value;
+  }
+
+  void onDoubleTapDown(TapDownDetails details) {
+    tapDownDetails = details;
   }
 
   @override
