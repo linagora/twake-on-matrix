@@ -1,16 +1,8 @@
 # Twake
-## Setup
+![](https://github.com/linagora/twake-on-matrix/assets/6462404/76e7795e-39b6-4667-a313-4068afadb1ed)
 
-### Add commit hook to format and code analyze
-```
-  bash scrips/config-pre-commit.sh
-```
-
-# Fluffy
-![](https://i.imgur.com/wi7RlVt.png)
-
-<p align="center">
-  <a href="https://matrix.to/#/#fluffychat:matrix.org" target="new">Join the community</a> - <a href="https://metalhead.club/@krille" target="new">Follow me on Mastodon</a> - <a href="https://hosted.weblate.org/projects/fluffychat/" target="new">Translate FluffyChat</a> - <a href="https://gitlab.com/ChristianPauly/fluffychat-website" target="new">Translate the website</a> - <a href="https://fluffychat.im" target="new">Website</a> - <a href="https://gitlab.com/famedly/famedlysdk" target="new">Famedly Matrix SDK</a> - <a href="https://famedly.com/kontakt">Server hosting and professional support</a>
+<p>
+  <a href="https://hosted.weblate.org/projects/linagora/twake-matrix/#repository" target="new">Translate Twake</a>
  </p>
 
 
@@ -36,18 +28,17 @@ FluffyChat is an open source, nonprofit and cute matrix messenger app. The app i
 - Emoji verification & cross signing
 - And much more...
 
-# Installation
+## Setup
 
-Please visit our website for installation instructions:
+### Flutter
+```
+  flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+```
 
-https://fluffychat.im
-
-# How to build
-
-Please visit our Wiki for build instructions:
-
-https://gitlab.com/famedly/fluffychat/-/wikis/How-To-Build
-
+### Add commit hook to format and code analyze
+```
+  bash scrips/config-pre-commit.sh
+```
 
 # Special thanks
 
