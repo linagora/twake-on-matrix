@@ -17,8 +17,13 @@ class NotificationSettingsItem {
   static List<NotificationSettingsItem> items = [
     NotificationSettingsItem(
       PushRuleKind.underride,
-      '.m.rule.room_one_to_one',
+      '.m.rule.encrypted_room_one_to_one',
       (c) => L10n.of(c)!.directChats,
+    ),
+    NotificationSettingsItem(
+      PushRuleKind.underride,
+      'm.rule.encrypted_group_chat',
+      (c) => L10n.of(c)!.groupChat,
     ),
     NotificationSettingsItem(
       PushRuleKind.override,
@@ -33,12 +38,22 @@ class NotificationSettingsItem {
     NotificationSettingsItem(
       PushRuleKind.override,
       'm.rule.change_group_name',
-      (c) => "Group chat name change",
+      (c) => L10n.of(c)!.groupNameChange,
     ),
     NotificationSettingsItem(
       PushRuleKind.override,
       'm.rule.change_avatar_group',
-      (c) => "Group chat avatar change",
+      (c) => L10n.of(c)!.groupAvatarChange,
+    ),
+    NotificationSettingsItem(
+      PushRuleKind.override,
+      'm.rule.set_me_as_admin',
+      (c) => L10n.of(c)!.setMeAsAdmin,
+    ),
+    NotificationSettingsItem(
+      PushRuleKind.override,
+      '.m.rule.is_user_mention',
+      (c) => L10n.of(c)!.mentionsMe,
     ),
   ];
 }

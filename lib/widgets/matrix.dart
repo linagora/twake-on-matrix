@@ -450,74 +450,91 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   }
 
   Future<void> _setUpUserDefinedPushRules(Client client) async {
-    await client.setPushRuleEnabled(
-      'global',
-      PushRuleKind.override,
-      '.m.rule.invite_for_me',
-      false,
-    );
-    await client.setPushRuleEnabled(
-      'global',
-      PushRuleKind.override,
-      '.m.rule.member_event',
-      false,
-    );
+    await Future.wait([
+      client.setPushRuleEnabled(
+        'global',
+        PushRuleKind.override,
+        '.m.rule.invite_for_me',
+        false,
+      ),
+      client.setPushRuleEnabled(
+        'global',
+        PushRuleKind.override,
+        '.m.rule.member_event',
+        false,
+      ),
+      client.setupUserDefinedPushRule(
+        ruleId: 'm.rule.invite_for_me',
+        conditions: [
+          PushCondition(
+            kind: 'event_match',
+            key: 'type',
+            pattern: EventTypes.RoomMember,
+          ),
+          PushCondition(
+            kind: 'event_match',
+            key: 'content.membership',
+            pattern: 'invite',
+          ),
+          PushCondition(
+            kind: 'event_match',
+            key: 'state_key',
+            pattern: '${client.userID}',
+          ),
+        ],
+      ),
+      client.setupUserDefinedPushRule(
+        ruleId: 'm.rule.set_me_as_admin',
+        conditions: [
+          PushCondition(
+            kind: 'event_match',
+            key: 'type',
+            pattern: EventTypes.RoomPowerLevels,
+          ),
+        ],
+      ),
+      client.setupUserDefinedPushRule(
+        kind: PushRuleKind.underride,
+        ruleId: 'm.rule.encrypted_group_chat',
+        conditions: [
+          PushCondition(
+            kind: 'event_match',
+            key: 'type',
+            pattern: EventTypes.Encrypted,
+          ),
+          PushCondition(
+            kind: 'event_match',
+            key: 'content.is_direct',
+            pattern: 'false',
+          ),
+        ],
+      ),
+    ]);
 
-    await client.setupUserDefinedPushRule(
-      ruleId: 'm.rule.invite_for_me',
-      conditions: [
-        PushCondition(
-          kind: 'event_match',
-          key: 'type',
-          pattern: EventTypes.RoomMember,
-        ),
-        PushCondition(
-          kind: 'event_match',
-          key: 'content.membership',
-          pattern: 'invite',
-        ),
-        PushCondition(
-          kind: 'event_match',
-          key: 'state_key',
-          pattern: '${client.userID}',
-        ),
-      ],
-    );
-
-    await client.setupUserDefinedPushRule(
-      ruleId: 'm.rule.change_group_name',
-      conditions: [
-        PushCondition(
-          kind: 'event_match',
-          key: 'type',
-          pattern: EventTypes.RoomName,
-        ),
-      ],
-      after: 'm.rule.invite_for_me',
-    );
-
-    await client.setupUserDefinedPushRule(
-      ruleId: 'm.rule.change_avatar_group',
-      conditions: [
-        PushCondition(
-          kind: 'event_match',
-          key: 'type',
-          pattern: EventTypes.RoomAvatar,
-        ),
-      ],
-      after: 'm.rule.invite_for_me',
-    );
-
-    await client.setupUserDefinedPushRule(
-      ruleId: 'm.rule.set_me_as_admin',
-      conditions: [
-        PushCondition(
-          kind: 'event_match',
-          key: 'type',
-          pattern: EventTypes.RoomPowerLevels,
-        ),
-      ],
-    );
+    await Future.wait([
+      client.setupUserDefinedPushRule(
+        ruleId: 'm.rule.change_group_name',
+        conditions: [
+          PushCondition(
+            kind: 'event_match',
+            key: 'type',
+            pattern: EventTypes.RoomName,
+          ),
+        ],
+        after: 'm.rule.invite_for_me',
+      ),
+      client.setupUserDefinedPushRule(
+        ruleId: 'm.rule.change_avatar_group',
+        conditions: [
+          PushCondition(
+            kind: 'event_match',
+            key: 'type',
+            pattern: EventTypes.RoomAvatar,
+          ),
+        ],
+        after: 'm.rule.invite_for_me',
+      ),
+    ]);
   }
 
   void createVoipPlugin() async {
@@ -572,6 +589,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
     if (homeServer != null) {
       _setUpHomeServer(homeServer.baseUrl);
+      _setUpUserDefinedPushRules(client);
     }
 
     _storeToMConfiguration(client, tomServer, identityServer);
@@ -603,7 +621,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       'MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}',
     );
     homeServerUrlInterceptor.changeBaseUrl(homeServerUri.toString());
-    _setUpUserDefinedPushRules(client);
   }
 
   void _setUpIdentityServer(IdentityServerInformation identityServer) {
