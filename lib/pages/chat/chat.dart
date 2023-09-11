@@ -1376,7 +1376,7 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinMessage,
       ChatContextMenuActions.forward,
-      if (PlatformInfos.isWeb) ChatContextMenuActions.download,
+      if (PlatformInfos.isWeb) ChatContextMenuActions.downloadFile,
     ];
     return listAction.map((action) {
       return PopupMenuItem(
@@ -1414,7 +1414,7 @@ class ChatController extends State<Chat>
         onSelectMessage(event);
         forwardEventsAction();
         break;
-      case ChatContextMenuActions.download:
+      case ChatContextMenuActions.downloadFile:
         downloadFileAction(context, event);
         break;
     }
