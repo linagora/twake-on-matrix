@@ -37,7 +37,7 @@ FluffyChat is an open source, nonprofit and cute matrix messenger app. The app i
 
 ### Add commit hook to format and code analyze
 ```
-  bash scrips/config-pre-commit.sh
+  bash scripts/config-pre-commit.sh
 ```
 
 # Special thanks
