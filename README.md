@@ -41,6 +41,7 @@ FluffyChat is an open source, nonprofit and cute matrix messenger app. The app i
 ```
 
 # Special thanks
+* <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original reposotory of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
 
 * <a href="https://github.com/fabiyamada">Fabiyamada</a> is a graphics designer from Brasil and has made the fluffychat logo and the banner. Big thanks for her great designs.
 
