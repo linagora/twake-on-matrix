@@ -4,7 +4,6 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
@@ -19,6 +18,7 @@ class ChatAppBarTitle extends StatelessWidget {
   final bool isArchived;
   final TextEditingController sendController;
   final Stream<ConnectivityResult> getStreamInstance;
+  final VoidCallback onPushDetails;
 
   const ChatAppBarTitle({
     Key? key,
@@ -28,6 +28,7 @@ class ChatAppBarTitle extends StatelessWidget {
     required this.isArchived,
     required this.sendController,
     required this.getStreamInstance,
+    required this.onPushDetails,
   }) : super(key: key);
 
   @override
@@ -62,7 +63,7 @@ class ChatAppBarTitle extends StatelessWidget {
               )
           : isArchived
               ? null
-              : () => context.go('/rooms/${room!.id}/details'),
+              : onPushDetails,
       child: Row(
         children: [
           Stack(

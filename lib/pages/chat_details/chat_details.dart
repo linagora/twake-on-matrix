@@ -461,6 +461,8 @@ class ChatDetailsController extends State<ChatDetails> {
         break;
       case ChatDetailsActions.mute:
       case ChatDetailsActions.search:
+        context.pop(ChatDetailsActions.search);
+        break;
       case ChatDetailsActions.more:
         break;
     }
