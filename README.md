@@ -1,4 +1,5 @@
-# Twake
+# Twake ![Docker Pulls](https://img.shields.io/docker/pulls/linagora/twake-web)
+
 ![](https://github.com/linagora/twake-on-matrix/assets/6462404/76e7795e-39b6-4667-a313-4068afadb1ed)
 
 <p>
