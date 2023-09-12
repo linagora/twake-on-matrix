@@ -22,6 +22,7 @@ import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
@@ -1489,6 +1490,18 @@ class ChatController extends State<Chat>
   void handleOnLongPressMessage(Event event) {
     onSelectMessage(event);
     handleContextMenuAction(context, event);
+  }
+
+  void onPushDetails() async {
+    final result = await context.push('/rooms/${room!.id}/details');
+    if (result is ChatDetailsActions) {
+      switch (result) {
+        case ChatDetailsActions.search:
+          toggleSearch();
+          break;
+        default:
+      }
+    }
   }
 
   @override
