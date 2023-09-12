@@ -183,6 +183,7 @@ class ChatView extends StatelessWidget {
                                   .networkConnectionService
                                   .getStreamInstance(),
                               actions: _appBarActions(context),
+                              onPushDetails: controller.onPushDetails,
                             );
                           },
                         ),
