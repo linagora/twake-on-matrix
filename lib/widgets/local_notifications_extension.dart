@@ -32,10 +32,9 @@ extension LocalNotificationsExtension on MatrixState {
     }
     if (room.notificationCount == 0) return;
     final event = Event.fromJson(eventUpdate.content, room);
-    final title =
-        room.getLocalizedDisplayname(MatrixLocals(L10n.of(widget.context)!));
+    final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
     final body = await event.calcLocalizedBody(
-      MatrixLocals(L10n.of(widget.context)!),
+      MatrixLocals(L10n.of(context)!),
       withSenderNamePrefix:
           !room.isDirectChat || room.lastEvent?.senderId == client.userID,
       plaintextBody: true,
@@ -94,11 +93,11 @@ extension LocalNotificationsExtension on MatrixState {
         actions: [
           NotificationAction(
             DesktopNotificationActions.openChat.name,
-            L10n.of(widget.context)!.openChat,
+            L10n.of(context)!.openChat,
           ),
           NotificationAction(
             DesktopNotificationActions.seen.name,
-            L10n.of(widget.context)!.markAsRead,
+            L10n.of(context)!.markAsRead,
           ),
         ],
         hints: [
