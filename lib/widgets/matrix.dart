@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -27,7 +26,6 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
@@ -47,15 +45,12 @@ import 'local_notifications_extension.dart';
 class Matrix extends StatefulWidget {
   final Widget? child;
 
-  final BuildContext context;
-
   final List<Client> clients;
 
   final Map<String, String>? queryParameters;
 
   const Matrix({
     this.child,
-    required this.context,
     required this.clients,
     this.queryParameters,
     Key? key,
@@ -73,7 +68,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
-  BuildContext? navigatorContext;
   HomeserverSummary? loginHomeserverSummary;
   String? authUrl;
   XFile? loginAvatar;
@@ -184,7 +178,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
         _loginClientCandidate = null;
-        navigatorContext?.go('/rooms');
+        FluffyChatApp.router.go('/rooms');
       });
     return candidate;
   }
@@ -274,7 +268,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    navigatorContext = context;
     initMatrix();
     if (PlatformInfos.isWeb) {
       initConfig().then((_) => initSettings());
@@ -306,7 +299,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
   }
 
-  void _registerSubs(String name) {
+  void _registerSubs(String name) async {
     final c = getClientByName(name);
     if (c == null) {
       Logs().w(
@@ -334,13 +327,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         if (!hidPopup &&
             {KeyVerificationState.done, KeyVerificationState.error}
                 .contains(request.state)) {
-          Navigator.of(navigatorContext!).pop('dialog');
+          Navigator.of(context).pop('dialog');
         }
         hidPopup = true;
       };
       request.onUpdate = null;
       hidPopup = true;
-      await KeyVerificationDialog(request: request).show(navigatorContext!);
+      await KeyVerificationDialog(request: request).show(context);
     });
     onLoginStateChanged[name] ??=
         c.onLoginStateChanged.stream.listen((state) async {
@@ -355,13 +348,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           ),
         );
 
-        navigatorContext?.go('/rooms');
+        if (state != LoginState.loggedIn) {
+          FluffyChatApp.router.go('/rooms');
+        }
       } else {
-        setUpToMServicesInLogin(c);
         if (state == LoginState.loggedIn) {
-          navigatorContext?.go('/rooms');
+          Logs().v('[MATRIX] Log in successful');
+          setUpToMServicesInLogin(c);
+          FluffyChatApp.router.go('/rooms');
         } else {
-          await getIt.get<HiveCollectionToMDatabase>().clear();
+          Logs().v('[MATRIX] Log out successful');
+          FluffyChatApp.router.go('/home');
         }
       }
     });
@@ -404,8 +401,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
                     .read(key: SettingKeys.appLockKey))
             .then((lock) {
           if (lock?.isNotEmpty ?? false) {
-            AppLock.of(widget.context)!.enable();
-            AppLock.of(widget.context)!.showLockScreen();
+            AppLock.of(context)!.enable();
+            AppLock.of(context)!.showLockScreen();
           }
         });
       });
@@ -494,6 +491,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   void setUpToMServicesInLogin(Client client) {
     final tomServer = loginHomeserverSummary?.tomServer;
+    Logs().d('MatrixState::setUpToMServicesInLogin: $tomServer');
     if (tomServer != null) {
       _setUpToMServer(tomServer);
     }
@@ -567,11 +565,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     ToMConfigurations config,
   ) {
     try {
+      Logs().e(
+        'Matrix::_storeToMConfiguration: clientName - ${client.clientName}',
+      );
       final ToMConfigurationsRepository configurationRepository =
           getIt.get<ToMConfigurationsRepository>();
       configurationRepository.saveTomConfigurations(
         client.clientName,
         config,
+      );
+      Logs().e(
+        'Matrix::_storeToMConfiguration: configurationRepository - $configurationRepository',
       );
     } catch (e) {
       Logs().e('Matrix::_storeToMConfiguration: error - $e');
