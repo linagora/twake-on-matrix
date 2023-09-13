@@ -5,8 +5,8 @@ import 'package:matrix/matrix.dart';
 enum MessageStatus {
   sending,
   sent,
-  hasBeenSeenByOne,
-  hasBeenSeenByAll,
+  hasBeenSeen,
+  error,
 }
 
 class SeenByRow extends StatelessWidget {
@@ -41,11 +41,11 @@ class SeenByRow extends StatelessWidget {
       return MessageStatus.sent;
     }
 
-    if (seenByUsers.length == participants.length - 1) {
-      return MessageStatus.hasBeenSeenByAll;
+    if (eventStatus == EventStatus.error) {
+      return MessageStatus.error;
     }
 
-    return MessageStatus.hasBeenSeenByOne;
+    return MessageStatus.hasBeenSeen;
   }
 
   Widget getEventIcon(
@@ -66,14 +66,14 @@ class SeenByRow extends StatelessWidget {
         );
       case MessageStatus.sent:
         return Icon(
-          Icons.done,
+          Icons.done_all,
           color: MessageTimeStyle.seenByRowIconSecondaryColor(
             timelineOverlayMessage,
             context,
           ),
           size: MessageTimeStyle.seenByRowIconSize,
         );
-      case MessageStatus.hasBeenSeenByAll:
+      case MessageStatus.hasBeenSeen:
         return Icon(
           Icons.done_all,
           color: MessageTimeStyle.seenByRowIconPrimaryColor(
@@ -82,13 +82,10 @@ class SeenByRow extends StatelessWidget {
           ),
           size: MessageTimeStyle.seenByRowIconSize,
         );
-      case MessageStatus.hasBeenSeenByOne:
+      case MessageStatus.error:
         return Icon(
-          Icons.done_all,
-          color: MessageTimeStyle.seenByRowIconSecondaryColor(
-            timelineOverlayMessage,
-            context,
-          ),
+          Icons.error,
+          color: Theme.of(context).colorScheme.error,
           size: MessageTimeStyle.seenByRowIconSize,
         );
     }
