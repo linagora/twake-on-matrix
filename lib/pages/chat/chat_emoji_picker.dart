@@ -10,7 +10,7 @@ class ChatEmojiPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.emojiPickerNotifier,
+      valueListenable: controller.showEmojiPickerNotifier,
       builder: (context, showEmojiPicker, _) {
         return AnimatedContainer(
           duration: FluffyThemes.animationDuration,
