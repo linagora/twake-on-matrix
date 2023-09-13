@@ -27,6 +27,7 @@ import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -42,6 +43,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
@@ -116,23 +118,25 @@ class ChatController extends State<Chat>
       );
 
   final AutoScrollController scrollController = AutoScrollController();
-  final AutoScrollController forwardListController = AutoScrollController();
+  final KeyboardVisibilityController keyboardVisibilityController =
+      KeyboardVisibilityController();
   final ValueNotifier<String?> focusHover = ValueNotifier(null);
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
-
+  final ValueNotifier<bool> draggingNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
   FocusNode inputFocus = FocusNode();
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
   bool currentlyTyping = false;
-  bool dragging = false;
 
-  void onDragEntered(_) => setState(() => dragging = true);
+  void onDragEntered(_) => draggingNotifier.value = true;
 
-  void onDragExited(_) => setState(() => dragging = false);
+  void onDragExited(_) => draggingNotifier.value = false;
 
   void onDragDone(DropDoneDetails details) async {
-    setState(() => dragging = false);
+    draggingNotifier.value = false;
     final bytesList = await showFutureLoadingDialog(
       context: context,
       future: () => Future.wait(
@@ -181,8 +185,6 @@ class ChatController extends State<Chat>
 
   Event? editEvent;
 
-  bool showScrollDownButton = false;
-
   bool get selectMode => selectedEvents.isNotEmpty;
 
   final int _loadHistoryCount = 100;
@@ -194,8 +196,6 @@ class ChatController extends State<Chat>
   bool get canLoadMore =>
       timeline!.events.isEmpty ||
       timeline!.events.last.type != EventTypes.RoomCreate;
-
-  bool showEmojiPicker = false;
 
   void recreateChat() async {
     final room = this.room;
@@ -259,6 +259,7 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
+    hideKeyboardChatScreen();
     setReadMarker();
     if (!scrollController.hasClients) return;
     if (scrollController.position.pixels ==
@@ -268,11 +269,12 @@ class ChatController extends State<Chat>
             EventTypes.RoomCreate) {
       requestHistory();
     }
-    if (scrollController.position.pixels > 0 && showScrollDownButton == false) {
-      setState(() => showScrollDownButton = true);
+    if (scrollController.position.pixels > 0 &&
+        !showScrollDownButtonNotifier.value) {
+      showScrollDownButtonNotifier.value = true;
     } else if (scrollController.position.pixels == 0 &&
-        showScrollDownButton == true) {
-      setState(() => showScrollDownButton = false);
+        showScrollDownButtonNotifier.value) {
+      showScrollDownButtonNotifier.value = false;
     }
   }
 
@@ -285,8 +287,15 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _keyboardListener(bool isKeyboardVisible) {
+    if (isKeyboardVisible && showEmojiPickerNotifier.value == true) {
+      showEmojiPickerNotifier.value = false;
+    }
+  }
+
   @override
   void initState() {
+    keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
@@ -685,19 +694,19 @@ class ChatController extends State<Chat>
   }
 
   void emojiPickerAction() {
-    if (showEmojiPicker) {
+    if (showEmojiPickerNotifier.value) {
       inputFocus.requestFocus();
     } else {
       inputFocus.unfocus();
     }
     emojiPickerType = EmojiPickerType.keyboard;
-    setState(() => showEmojiPicker = !showEmojiPicker);
+    showEmojiPickerNotifier.toggle();
   }
 
   void _inputFocusListener() {
-    if (showEmojiPicker && inputFocus.hasFocus) {
+    if (showEmojiPickerNotifier.value && inputFocus.hasFocus) {
       emojiPickerType = EmojiPickerType.keyboard;
-      setState(() => showEmojiPicker = false);
+      showEmojiPickerNotifier.value = true;
     }
   }
 
@@ -728,8 +737,8 @@ class ChatController extends State<Chat>
 
   void copyEventsAction() {
     Clipboard.setData(ClipboardData(text: _getSelectedEventString()));
+    showEmojiPickerNotifier.value = false;
     setState(() {
-      showEmojiPicker = false;
       selectedEvents.clear();
     });
   }
@@ -777,8 +786,8 @@ class ChatController extends State<Chat>
           ),
     );
     if (result.error != null) return;
+    showEmojiPickerNotifier.value = false;
     setState(() {
-      showEmojiPicker = false;
       selectedEvents.clear();
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -820,8 +829,8 @@ class ChatController extends State<Chat>
         },
       );
     }
+    showEmojiPickerNotifier.value = false;
     setState(() {
-      showEmojiPicker = false;
       selectedEvents.clear();
     });
   }
@@ -970,7 +979,7 @@ class ChatController extends State<Chat>
   }
 
   void senEmojiReaction(Emoji? emoji) {
-    setState(() => showEmojiPicker = false);
+    showEmojiPickerNotifier.value = false;
     if (emoji == null) return;
     // make sure we don't send the same emoji twice
     if (_allReactionEvents.any((e) {
@@ -1012,7 +1021,7 @@ class ChatController extends State<Chat>
   void emojiPickerBackspace() {
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
-        setState(() => showEmojiPicker = false);
+        showEmojiPickerNotifier.value = false;
         break;
       case EmojiPickerType.keyboard:
         sendController
@@ -1027,7 +1036,7 @@ class ChatController extends State<Chat>
   void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
     _allReactionEvents = allReactionEvents;
     emojiPickerType = EmojiPickerType.reaction;
-    setState(() => showEmojiPicker = true);
+    showEmojiPickerNotifier.value = true;
   }
 
   void sendEmojiAction(String? emoji) async {
@@ -1041,10 +1050,13 @@ class ChatController extends State<Chat>
     }
   }
 
-  void clearSelectedEvents() => setState(() {
-        selectedEvents.clear();
-        showEmojiPicker = false;
-      });
+  void clearSelectedEvents() {
+    showEmojiPickerNotifier.value = false;
+
+    setState(() {
+      selectedEvents.clear();
+    });
+  }
 
   void clearSingleSelectedEvent() {
     if (selectedEvents.length <= 1) {
@@ -1447,6 +1459,22 @@ class ChatController extends State<Chat>
         _handleStateContextMenu();
       },
     );
+  }
+
+  void hideKeyboardChatScreen() {
+    if (keyboardVisibilityController.isVisible || inputFocus.hasFocus) {
+      inputFocus.unfocus();
+    }
+  }
+
+  void handleOnClickKeyboardAction() {
+    showEmojiPickerNotifier.toggle();
+    inputFocus.requestFocus();
+  }
+
+  void handleOnLongPressMessage(Event event) {
+    onSelectMessage(event);
+    handleContextMenuAction(context, event);
   }
 
   @override
