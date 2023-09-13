@@ -4,6 +4,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
@@ -34,7 +35,6 @@ import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_stories/settings_stories.dart';
 import 'package:fluffychat/pages/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_up/signup.dart';
-import 'package:fluffychat/widgets/layouts/empty_page.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
@@ -123,7 +123,7 @@ abstract class AppRoutes {
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
             !_responsive.isMobile(context)
-                ? const EmptyPage()
+                ? const ChatBlank()
                 : AdaptiveScaffoldApp(
                     activeRoomId: state.pathParameters['roomid'],
                   ),
@@ -253,7 +253,7 @@ abstract class AppRoutes {
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     !_responsive.isMobile(context)
-                        ? const EmptyPage()
+                        ? const ChatBlank()
                         : const Settings(),
                   ),
                   routes: [
