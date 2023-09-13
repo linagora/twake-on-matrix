@@ -613,7 +613,6 @@ class ChatListController extends State<ChatList>
 
   @override
   Widget build(BuildContext context) {
-    Matrix.of(context).navigatorContext = context;
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
