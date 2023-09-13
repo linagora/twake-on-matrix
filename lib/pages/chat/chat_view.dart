@@ -173,7 +173,7 @@ class ChatView extends StatelessWidget {
                 ),
               ),
               floatingActionButton: ValueListenableBuilder(
-                valueListenable: controller.scrollDownButtonNotifier,
+                valueListenable: controller.showScrollDownButtonNotifier,
                 builder: (context, showScrollDownButton, _) {
                   if (showScrollDownButton &&
                       controller.selectedEvents.isEmpty) {
