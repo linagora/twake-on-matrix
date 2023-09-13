@@ -72,7 +72,7 @@ class Message extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       hoverColor: Colors.transparent,
-      onTap: () {},
+      onTap: () => controller.hideKeyboardChatScreen(),
       onHover: (hover) {
         onHover!(hover, event);
       },
@@ -542,8 +542,9 @@ class Message extends StatelessWidget {
                     GestureDetector(
                       onLongPress: () =>
                           controller.selectMode ? onSelect!(event) : null,
-                      onTap: () =>
-                          controller.selectMode ? onSelect!(event) : null,
+                      onTap: () => controller.selectMode
+                          ? onSelect!(event)
+                          : controller.hideKeyboardChatScreen(),
                       child: Center(
                         child: Container(
                           margin: EdgeInsetsDirectional.only(
