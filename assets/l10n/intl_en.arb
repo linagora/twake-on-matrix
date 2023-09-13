@@ -2711,5 +2711,7 @@
         "placeholders": {
             "directory": {}
         }
-    }
+    },
+    "notInAChatYet": "You're not in a chat yet",
+    "blankChatTitle": "Choose a chat or hit #EditIcon# to make one."
 }
