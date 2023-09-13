@@ -22,7 +22,7 @@ class ChatInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.showEmojiPicker &&
+    if (controller.emojiPickerNotifier.value &&
         controller.emojiPickerType == EmojiPickerType.reaction) {
       return Container();
     }
@@ -133,21 +133,27 @@ class ChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      showEmojiPicker: controller.showEmojiPicker,
-      inputText: controller.inputText,
+      emojiPickerNotifier: controller.emojiPickerNotifier,
       onEmojiAction: controller.emojiPickerAction,
-      onKeyboardAction: controller.inputFocus.requestFocus,
+      onKeyboardAction: () {
+        controller.emojiPickerNotifier.value =
+            !controller.emojiPickerNotifier.value;
+        controller.inputFocus.requestFocus();
+      },
     );
   }
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
       inputBar: _buildInputBar(context),
-      showEmojiPicker: controller.showEmojiPicker,
-      inputText: controller.inputText,
+      emojiPickerNotifier: controller.emojiPickerNotifier,
       onTapMoreBtn: () => controller.onSendFileClick(context),
       onEmojiAction: controller.emojiPickerAction,
-      onKeyboardAction: controller.inputFocus.requestFocus,
+      onKeyboardAction: () {
+        controller.emojiPickerNotifier.value =
+            !controller.emojiPickerNotifier.value;
+        controller.inputFocus.requestFocus();
+      },
     );
   }
 
