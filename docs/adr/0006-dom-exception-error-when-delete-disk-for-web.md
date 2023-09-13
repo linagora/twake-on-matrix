@@ -18,7 +18,7 @@ and recreate it. But when we use this method, we have a DOMException error.
 ```
 
 ## Decision
-- Workout round
+- Workaround
 1. Check platform is Web we don't use deleteFromDisk() method. Only support for Mobile platform.
 2. After we have used deleteFromDisk() method. When logging back in, you need to reopen the BoxCollection
 

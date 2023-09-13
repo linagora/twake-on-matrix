@@ -1,6 +1,6 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -100,7 +100,7 @@ class InvitationSelectionController
   }
 
   void onCloseDialogInvite() {
-    FluffyChatApp.router.routerDelegate.pop();
+    TwakeApp.router.routerDelegate.pop();
   }
 
   @override

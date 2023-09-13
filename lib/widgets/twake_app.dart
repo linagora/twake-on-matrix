@@ -12,12 +12,12 @@ import '../config/app_config.dart';
 import '../utils/custom_scroll_behaviour.dart';
 import 'matrix.dart';
 
-class FluffyChatApp extends StatefulWidget {
+class TwakeApp extends StatefulWidget {
   final Widget? testWidget;
   final List<Client> clients;
   static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
 
-  const FluffyChatApp({
+  const TwakeApp({
     Key? key,
     this.testWidget,
     required this.clients,
@@ -36,10 +36,10 @@ class FluffyChatApp extends StatefulWidget {
   );
 
   @override
-  FluffyChatAppState createState() => FluffyChatAppState();
+  TwakeAppState createState() => TwakeAppState();
 }
 
-class FluffyChatAppState extends State<FluffyChatApp> {
+class TwakeAppState extends State<TwakeApp> {
   final networkConnectionService = getIt.get<NetworkConnectionService>();
 
   @override
@@ -67,7 +67,7 @@ class FluffyChatAppState extends State<FluffyChatApp> {
         scrollBehavior: CustomScrollBehavior(),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
-        routerConfig: FluffyChatApp.router,
+        routerConfig: TwakeApp.router,
         builder: (context, child) => Matrix(
           clients: widget.clients,
           child: child,

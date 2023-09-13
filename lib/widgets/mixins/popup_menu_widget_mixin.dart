@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,7 +20,7 @@ mixin PopupMenuWidgetMixin {
       onTap: () {
         /// Pop the current page, snackbar, dialog or bottomsheet in the stack
         /// will close the currently open snackbar/dialog/bottomsheet AND the current page
-        FluffyChatApp.router.routerDelegate.pop();
+        TwakeApp.router.routerDelegate.pop();
 
         onCallbackAction!.call();
       },
