@@ -9,25 +9,28 @@ class ChatEmojiPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      width: MediaQuery.of(context).size.width,
-      height: controller.showEmojiPicker
-          ? MediaQuery.of(context).size.height / 3
-          : 0,
-      child: controller.showEmojiPicker
-          ? EmojiPicker(
-              onEmojiSelected: controller.onEmojiSelected,
-              onBackspacePressed: controller.emojiPickerBackspace,
-              config: Config(
-                backspaceColor: Theme.of(context).colorScheme.primary,
-                bgColor: Theme.of(context).colorScheme.surface,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-                iconColorSelected: Theme.of(context).colorScheme.primary,
-              ),
-            )
-          : null,
+    return ValueListenableBuilder(
+      valueListenable: controller.emojiPickerNotifier,
+      builder: (context, showEmojiPicker, _) {
+        return AnimatedContainer(
+          duration: FluffyThemes.animationDuration,
+          curve: FluffyThemes.animationCurve,
+          width: MediaQuery.of(context).size.width,
+          height: showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
+          child: showEmojiPicker
+              ? EmojiPicker(
+                  onEmojiSelected: controller.onEmojiSelected,
+                  onBackspacePressed: controller.emojiPickerBackspace,
+                  config: Config(
+                    backspaceColor: Theme.of(context).colorScheme.primary,
+                    bgColor: Theme.of(context).colorScheme.surface,
+                    indicatorColor: Theme.of(context).colorScheme.primary,
+                    iconColorSelected: Theme.of(context).colorScheme.primary,
+                  ),
+                )
+              : null,
+        );
+      },
     );
   }
 }

@@ -172,17 +172,23 @@ class ChatView extends StatelessWidget {
                   ),
                 ),
               ),
-              floatingActionButton: controller.showScrollDownButton &&
-                      controller.selectedEvents.isEmpty
-                  ? Padding(
+              floatingActionButton: ValueListenableBuilder(
+                valueListenable: controller.scrollDownButtonNotifier,
+                builder: (context, showScrollDownButton, _) {
+                  if (showScrollDownButton &&
+                      controller.selectedEvents.isEmpty) {
+                    return Padding(
                       padding: const EdgeInsets.only(bottom: 56.0),
                       child: FloatingActionButton(
                         onPressed: controller.scrollDown,
                         mini: true,
                         child: const Icon(Icons.arrow_downward_outlined),
                       ),
-                    )
-                  : null,
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
               body: DropTarget(
                 onDragDone: controller.onDragDone,
                 onDragEntered: controller.onDragEntered,
@@ -272,17 +278,22 @@ class ChatView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (controller.dragging)
-                      Container(
-                        color: Theme.of(context)
-                            .scaffoldBackgroundColor
-                            .withOpacity(0.9),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.upload_outlined,
-                          size: 100,
-                        ),
-                      ),
+                    ValueListenableBuilder(
+                      valueListenable: controller.draggingNotifier,
+                      builder: (context, dragging, _) {
+                        if (!dragging) return const SizedBox.shrink();
+                        return Container(
+                          color: Theme.of(context)
+                              .scaffoldBackgroundColor
+                              .withOpacity(0.9),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.upload_outlined,
+                            size: 100,
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
