@@ -31,6 +31,7 @@ class ImagePaths {
       _getImagePath('ic_application_grid.svg');
   static String get icUsersOutline => _getImagePath('ic_users_outline.svg');
   static String get icReply => _getImagePath('ic_reply.svg');
+  static String get icEmptyPage => _getImagePath('ic_empty_page.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
