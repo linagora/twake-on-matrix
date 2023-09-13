@@ -32,7 +32,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[controller.timeline!.events[i].eventId] = i;
     }
 
-    if (controller.timeline != null && controller.timeline!.events.isEmpty) {
+    if (controller.isEmptyChat) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

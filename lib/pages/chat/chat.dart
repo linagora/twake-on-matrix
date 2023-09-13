@@ -103,6 +103,17 @@ class ChatController extends State<Chat>
 
   String? get roomId => widget.roomId;
 
+  bool get isEmptyChat =>
+      timeline != null &&
+      !timeline!.events.any(
+        (event) => {
+          EventTypes.Message,
+          EventTypes.Sticker,
+          EventTypes.Encrypted,
+          EventTypes.CallInvite,
+        }.contains(event.type),
+      );
+
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
   final ValueNotifier<String?> focusHover = ValueNotifier(null);
