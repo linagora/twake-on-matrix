@@ -25,7 +25,7 @@ import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -349,7 +349,7 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      FluffyChatApp.router.go('/rooms/$roomId');
+      TwakeApp.router.go('/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }

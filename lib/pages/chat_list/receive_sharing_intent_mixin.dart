@@ -1,7 +1,7 @@
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -77,8 +77,8 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
     // For receiving shared Uris
     intentUriStreamSubscription = linkStream.listen(_processIncomingUris);
-    if (FluffyChatApp.gotInitialLink == false) {
-      FluffyChatApp.gotInitialLink = true;
+    if (TwakeApp.gotInitialLink == false) {
+      TwakeApp.gotInitialLink = true;
       getInitialLink().then(_processIncomingUris);
     }
   }
