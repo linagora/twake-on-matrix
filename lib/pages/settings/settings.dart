@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 
@@ -75,11 +76,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       return;
     }
     await tryLogoutSso(context);
+    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+    await hiveCollectionToMDatabase.clear();
     final matrix = Matrix.of(context);
     await showFutureLoadingDialog(
       context: context,
       future: () => matrix.client.logout(),
-    ).then((value) => context.go('/home'));
+    );
   }
 
   void setAvatarAction() async {

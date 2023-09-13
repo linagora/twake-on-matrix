@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -72,8 +73,11 @@ class HiveCollectionToMDatabase {
     try {
       await db.open();
     } catch (e, s) {
-      Logs().w('Unable to open Hive.', e, s);
+      Logs().w('Unable to open ToM Hive.', e, s);
+      const FlutterSecureStorage()
+          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
       await db.clear().catchError((_) {});
+      await Hive.deleteFromDisk();
       rethrow;
     }
     Logs().d('Hive for ToM is ready');
@@ -120,10 +124,9 @@ class HiveCollectionToMDatabase {
   }
 
   Future<void> clear() async {
-    Logs().w('Delete database and storage key...');
-    await const FlutterSecureStorage()
-        .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
     await tomConfigurationsBox.clear();
-    await Hive.deleteFromDisk();
+    if (PlatformInfos.isMobile) {
+      await _collection.deleteFromDisk();
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -306,6 +307,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         'Attempted to register subscriptions for non-existing client $name',
       );
       return;
+    }
+    if (PlatformInfos.isMobile) {
+      await HiveCollectionToMDatabase.databaseBuilder();
     }
     onRoomKeyRequestSub[name] ??=
         c.onRoomKeyRequest.stream.listen((RoomKeyRequest request) async {
