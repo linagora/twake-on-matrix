@@ -12,7 +12,7 @@ import 'package:webrtc_interface/webrtc_interface.dart' hide Navigator;
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/dialer/dialer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import '../../utils/famedlysdk_store.dart';
 import '../../utils/voip/callkeep_manager.dart';
 import '../../utils/voip/user_media_manager.dart';
@@ -61,7 +61,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   void addCallingOverlay(String callId, CallSession call) {
     final context = kIsWeb
         ? ChatList.contextForVoip!
-        : FluffyChatApp.routerKey.currentContext!; // web is weird
+        : TwakeApp.routerKey.currentContext!; // web is weird
     if (overlayEntry != null) {
       Logs().e('[VOIP] addCallingOverlay: The call session already exists?');
       overlayEntry!.remove();
@@ -165,7 +165,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
         addCallingOverlay(call.callId, call);
         try {
           if (!hasCallingAccount) {
-            ScaffoldMessenger.of(FluffyChatApp.routerKey.currentContext!)
+            ScaffoldMessenger.of(TwakeApp.routerKey.currentContext!)
                 .showSnackBar(
               const SnackBar(
                 content: Text(

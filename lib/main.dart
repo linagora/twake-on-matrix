@@ -10,7 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'utils/background_push.dart';
-import 'widgets/fluffy_chat_app.dart';
+import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
 
 void main() async {
@@ -71,11 +71,11 @@ Future<void> startGui(List<Client> clients) async {
   runApp(
     PlatformInfos.isMobile
         ? AppLock(
-            builder: (args) => FluffyChatApp(clients: clients),
+            builder: (args) => TwakeApp(clients: clients),
             lockScreen: const LockScreen(),
             enabled: pin?.isNotEmpty ?? false,
           )
-        : FluffyChatApp(clients: clients),
+        : TwakeApp(clients: clients),
   );
 }
 

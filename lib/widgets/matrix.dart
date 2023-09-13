@@ -20,7 +20,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -179,7 +179,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
         _loginClientCandidate = null;
-        FluffyChatApp.router.go('/rooms');
+        TwakeApp.router.go('/rooms');
       });
     return candidate;
   }
@@ -256,7 +256,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool webHasFocus = true;
 
   String? get activeRoomId {
-    final route = FluffyChatApp.router.routeInformationProvider.value.location;
+    final route = TwakeApp.router.routeInformationProvider.value.location;
     if (route == null || !route.startsWith('/rooms/')) return null;
     return route.split('/')[2];
   }
@@ -353,16 +353,16 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         );
 
         if (state != LoginState.loggedIn) {
-          FluffyChatApp.router.go('/rooms');
+          TwakeApp.router.go('/rooms');
         }
       } else {
         if (state == LoginState.loggedIn) {
           Logs().v('[MATRIX] Log in successful');
           setUpToMServicesInLogin(c);
-          FluffyChatApp.router.go('/rooms');
+          TwakeApp.router.go('/rooms');
         } else {
           Logs().v('[MATRIX] Log out successful');
-          FluffyChatApp.router.go('/home');
+          TwakeApp.router.go('/home');
         }
       }
     });
