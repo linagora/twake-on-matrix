@@ -69,6 +69,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       key: hiverCipher,
     );
     try {
+      Logs().i('FlutterHiveCollectionsDatabase()::databaseBuilder()::open()');
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
