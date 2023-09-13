@@ -217,7 +217,6 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   Widget build(BuildContext context) {
-    Matrix.of(context).navigatorContext = context;
     return HomeserverPickerView(this);
   }
 

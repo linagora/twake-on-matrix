@@ -69,7 +69,6 @@ class FluffyChatAppState extends State<FluffyChatApp> {
         supportedLocales: L10n.supportedLocales,
         routerConfig: FluffyChatApp.router,
         builder: (context, child) => Matrix(
-          context: context,
           clients: widget.clients,
           child: child,
         ),
