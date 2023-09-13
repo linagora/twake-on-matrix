@@ -14,15 +14,13 @@ class ChatInputRowMobile extends StatelessWidget {
   const ChatInputRowMobile({
     super.key,
     required this.inputBar,
-    required this.showEmojiPicker,
-    required this.inputText,
+    required this.emojiPickerNotifier,
     required this.onEmojiAction,
     required this.onKeyboardAction,
   });
 
   final InputBar inputBar;
-  final bool showEmojiPicker;
-  final ValueNotifier<String> inputText;
+  final ValueNotifier<bool> emojiPickerNotifier;
   final OnTapEmojiAction onEmojiAction;
   final OnTapKeyboardAction onKeyboardAction;
 
@@ -70,31 +68,20 @@ class ChatInputRowMobile extends StatelessWidget {
                       child: child,
                     );
                   },
-                  child: !showEmojiPicker
-                      ? ValueListenableBuilder(
-                          valueListenable: inputText,
-                          builder: (context, value, child) {
-                            return TwakeIconButton(
-                              paddingAll: ChatInputRowStyle
-                                  .chatInputRowPaddingBtnMobile,
-                              tooltip: L10n.of(context)!.emojis,
-                              onTap: onEmojiAction,
-                              icon: Icons.tag_faces,
-                            );
-                          },
-                        )
-                      : ValueListenableBuilder(
-                          valueListenable: inputText,
-                          builder: (context, value, child) {
-                            return TwakeIconButton(
-                              paddingAll: ChatInputRowStyle
-                                  .chatInputRowPaddingBtnMobile,
-                              tooltip: L10n.of(context)!.keyboard,
-                              onTap: onKeyboardAction,
-                              icon: Icons.keyboard,
-                            );
-                          },
-                        ),
+                  child: ValueListenableBuilder(
+                    valueListenable: emojiPickerNotifier,
+                    builder: (context, showEmojiPicker, child) {
+                      return TwakeIconButton(
+                        paddingAll:
+                            ChatInputRowStyle.chatInputRowPaddingBtnMobile,
+                        tooltip: L10n.of(context)!.emojis,
+                        onTap:
+                            showEmojiPicker ? onKeyboardAction : onEmojiAction,
+                        icon:
+                            showEmojiPicker ? Icons.keyboard : Icons.tag_faces,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
