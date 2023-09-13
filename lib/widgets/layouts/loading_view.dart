@@ -1,9 +1,9 @@
+import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/update_checker_no_store.dart';
-import 'package:fluffychat/widgets/layouts/empty_page.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class LoadingView extends StatelessWidget {
@@ -25,6 +25,6 @@ class LoadingView extends StatelessWidget {
         );
       },
     );
-    return const EmptyPage(loading: true);
+    return const ChatBlank(loading: true);
   }
 }
