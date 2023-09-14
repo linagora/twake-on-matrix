@@ -22,7 +22,7 @@ class MediaAPI {
         await File(fileInfo.filePath).length();
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
     final response = await _client
-        .post(
+        .postToGetBody(
           HomeserverEndpoint.uploadMediaServicePath
               .generateHomeserverMediaEndpoint(),
           data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
