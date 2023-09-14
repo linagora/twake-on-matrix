@@ -1,9 +1,8 @@
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
+import 'package:image/image.dart';
 
 extension SendFileWebExtension on Room {
-  static const maxImagesCacheInRoom = 10;
-
   Future<String?> sendFileOnWebEvent(
     MatrixFile file, {
     SyncUpdate? fakeImageEvent,
@@ -11,10 +10,26 @@ extension SendFileWebExtension on Room {
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
-    MatrixFile? thumbnail,
+    MatrixImageFile? thumbnail,
     Map<String, dynamic>? extraContent,
   }) async {
     txid ??= client.generateUniqueTransactionId();
+    Image? img;
+    if (file.bytes != null && file is MatrixImageFile) {
+      img = decodeImage(file.bytes!);
+      file = MatrixImageFile(
+        name: file.name,
+        width: img?.width,
+        height: img?.height,
+        bytes: file.bytes,
+      );
+    }
+    sendingFilePlaceholders[txid] = MatrixImageFile(
+      name: file.name,
+      width: img?.width,
+      height: img?.height,
+      bytes: file.bytes,
+    );
     fakeImageEvent ??= await sendFakeImageEvent(
       file,
       txid: txid,
@@ -43,7 +58,8 @@ extension SendFileWebExtension on Room {
     }
     // computing the thumbnail in case we can
     if (file.msgType == MessageTypes.Image &&
-        (thumbnail == null || shrinkImageMaxDimension != null)) {
+        (thumbnail == null || shrinkImageMaxDimension != null) &&
+        file is MatrixImageFile) {
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
@@ -149,8 +165,7 @@ extension SendFileWebExtension on Room {
             'iv': encryptedThumbnail.iv,
             'hashes': {'sha256': encryptedThumbnail.sha256}
           },
-        if (thumbnail != null) 'thumbnail_info': thumbnail.info,
-      },
+      }..addAll(thumbnail?.info ?? {}),
       if (extraContent != null) ...extraContent,
     };
     final eventId = await sendEvent(
@@ -170,7 +185,6 @@ extension SendFileWebExtension on Room {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
   }) async {
-    sendingFilePlaceholders[txid] = file;
     // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
 
     // Create a fake Event object as a placeholder for the uploading file:
@@ -225,17 +239,22 @@ extension SendFileWebExtension on Room {
     }
   }
 
-  Future<MatrixFile?> _generateThumbnail(MatrixFile originalFile) async {
+  Future<MatrixImageFile?> _generateThumbnail(
+    MatrixImageFile originalFile,
+  ) async {
     if (originalFile.bytes == null) return null;
     try {
       final result = await FlutterImageCompress.compressWithList(
         originalFile.bytes!,
         quality: 70,
       );
-      return MatrixFile(
+
+      return MatrixImageFile(
         bytes: result,
         name: originalFile.name,
         mimeType: originalFile.mimeType,
+        width: originalFile.width,
+        height: originalFile.height,
       );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);

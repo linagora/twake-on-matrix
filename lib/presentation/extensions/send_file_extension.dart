@@ -18,8 +18,6 @@ typedef MessageType = String;
 typedef FakeImageEvent = SyncUpdate;
 
 extension SendFileExtension on Room {
-  static const maxImagesCacheInRoom = 10;
-
   Future<String?> sendFileEvent(
     FileInfo fileInfo, {
     String msgType = MessageTypes.Image,
@@ -190,8 +188,7 @@ extension SendFileExtension on Room {
           'thumbnail_url': thumbnailUploadResp.toString(),
         if (thumbnail != null && encryptedThumbnail != null)
           'thumbnail_file': encryptedThumbnail.toJson(),
-        if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
-      },
+      }..addAll(thumbnail?.metadata ?? {}),
       if (extraContent != null) ...extraContent,
     };
     final eventId = await sendEvent(
