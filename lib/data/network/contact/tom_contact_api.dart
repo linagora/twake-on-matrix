@@ -26,7 +26,7 @@ class TomContactAPI {
     );
 
     final response = await _client
-        .post(
+        .postToGetBody(
           IdentityEndpoint.matchUserIdServicePath
               .generateTwakeIdentityEndpoint(),
           data: requestBody.toJson(),
