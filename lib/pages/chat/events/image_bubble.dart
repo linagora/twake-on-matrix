@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -76,8 +75,8 @@ class ImageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleWidth = max(MessageContentStyle.imageBubbleMinWidth, width);
-    final bubbleHeight = max(MessageContentStyle.imageBubbleMinHeight, height);
+    final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
+    final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
     return Hero(
       tag: event.eventId,
       child: AnimatedSwitcher(

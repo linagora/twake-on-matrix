@@ -110,8 +110,8 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
       child: Material(
         color: Colors.black,
         child: SizedBox(
-          width: MessageContentStyle.imageBubbleWidth(context),
-          height: MessageContentStyle.imageBubbleHeight(context),
+          width: MessageContentStyle.imageWidth(context),
+          height: MessageContentStyle.imageHeight(context),
           child: chewieManager != null
               ? FittedBox(
                   fit: BoxFit.contain,

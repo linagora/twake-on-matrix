@@ -130,23 +130,20 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
   (double, double) _getImageSize(int? imageWidth, int? imageHeight) {
     if (imageWidth == null || imageHeight == null) {
       return (
-        MessageContentStyle.imageBubbleWidth(context),
-        MessageContentStyle.imageBubbleHeight(context)
+        MessageContentStyle.imageWidth(context),
+        MessageContentStyle.imageHeight(context)
       );
     }
 
-    final ratio = MessageContentStyle.imageBubbleWidth(context) / imageWidth;
+    final ratio = MessageContentStyle.imageWidth(context) / imageWidth;
 
     if (imageWidth <= imageHeight) {
       return (
-        MessageContentStyle.imageBubbleWidth(context),
-        MessageContentStyle.imageBubbleHeight(context)
+        MessageContentStyle.imageWidth(context),
+        MessageContentStyle.imageHeight(context)
       );
     } else {
-      return (
-        MessageContentStyle.imageBubbleWidth(context),
-        imageHeight * ratio
-      );
+      return (MessageContentStyle.imageWidth(context), imageHeight * ratio);
     }
   }
 
