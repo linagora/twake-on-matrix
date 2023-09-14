@@ -26,7 +26,7 @@ class DioClient {
         .catchError((error) => throw error);
   }
 
-  Future<dynamic> post(
+  Future<dynamic> postToGetBody(
     String path, {
     data,
     Map<String, dynamic>? queryParameters,
@@ -46,6 +46,28 @@ class DioClient {
           onReceiveProgress: onReceiveProgress,
         )
         .then((value) => value.data)
+        .catchError((error) => throw error);
+  }
+
+  Future<dynamic> post(
+    String path, {
+    data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return await _dio
+        .post(
+          path,
+          data: data,
+          queryParameters: queryParameters,
+          options: options,
+          cancelToken: cancelToken,
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress,
+        )
         .catchError((error) => throw error);
   }
 
