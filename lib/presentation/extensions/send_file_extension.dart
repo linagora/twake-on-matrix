@@ -28,7 +28,7 @@ extension SendFileExtension on Room {
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
-    FileInfo? thumbnail,
+    ImageFileInfo? thumbnail,
     Map<String, dynamic>? extraContent,
   }) async {
     FileInfo tempfileInfo = fileInfo;
@@ -311,7 +311,7 @@ extension SendFileExtension on Room {
     return getParticipants().firstWhereOrNull((user) => user.id == mxId);
   }
 
-  Future<FileInfo?> _generateThumbnail(
+  Future<ImageFileInfo?> _generateThumbnail(
     ImageFileInfo originalFile, {
     required String targetPath,
   }) async {
@@ -323,7 +323,13 @@ extension SendFileExtension on Room {
       );
       if (result == null) return null;
       final size = await result.length();
-      return FileInfo(result.name, result.path, size);
+      return ImageFileInfo(
+        result.name,
+        result.path,
+        size,
+        width: originalFile.width,
+        height: originalFile.height,
+      );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
       return null;
