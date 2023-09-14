@@ -7,8 +7,8 @@ typedef ImageSize = Size;
 extension DisplayImageInfoExtension on ImageSize {
   DisplayImageInfo getDisplayImageInfo(BuildContext context) {
     Size displayImageSize = Size(
-      MessageContentStyle.imageBubbleWidth(context),
-      MessageContentStyle.imageBubbleHeight(context),
+      MessageContentStyle.imageWidth(context),
+      MessageContentStyle.imageHeight(context),
     );
     displayImageSize = _getDisplaySizeForImage(
       width.toDouble(),
@@ -28,8 +28,8 @@ extension DisplayImageInfoExtension on ImageSize {
     double height, {
     required BuildContext context,
   }) {
-    double displayHeight = MessageContentStyle.imageBubbleHeight(context);
-    double displayWidth = MessageContentStyle.imageBubbleWidth(context);
+    double displayHeight = MessageContentStyle.imageHeight(context);
+    double displayWidth = MessageContentStyle.imageWidth(context);
     if (height == 0 || width == 0) {
       return Size(displayWidth, displayHeight);
     }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
@@ -79,12 +78,10 @@ class SendingImageInfoWidget extends StatelessWidget {
             children: [
               if (displayImageInfo.hasBlur)
                 SizedBox(
-                  width: max(
-                    MessageContentStyle.imageBubbleMinWidth,
+                  width: MessageContentStyle.imageBubbleWidth(
                     displayImageInfo.size.width,
                   ),
-                  height: max(
-                    MessageContentStyle.imageBubbleMinHeight,
+                  height: MessageContentStyle.imageBubbleHeight(
                     displayImageInfo.size.height,
                   ),
                   child:

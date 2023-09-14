@@ -15,7 +15,7 @@ class SendFileOnWebInteractor {
     try {
       final matrixFiles = filePickerResult.files
           .map(
-            (xFile) => MatrixFile(
+            (xFile) => MatrixFile.fromMimeType(
               bytes: xFile.bytes,
               name: xFile.name,
               filePath: '',
