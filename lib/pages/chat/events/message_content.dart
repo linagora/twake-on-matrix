@@ -5,6 +5,8 @@ import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
+import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -438,20 +440,35 @@ class _MessageImageBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final matrixFile = event.getMatrixFile();
+
+    DisplayImageInfo? displayImageInfo =
+        event.getThumbnailSize()?.getDisplayImageInfo(context);
+
     if (matrixFile != null &&
         matrixFile.filePath != null &&
         matrixFile is MatrixImageFile) {
+      displayImageInfo = Size(
+        matrixFile.width!.toDouble(),
+        matrixFile.height!.toDouble(),
+      ).getDisplayImageInfo(context);
       return SendingImageInfoWidget(
         matrixFile: matrixFile,
         event: event,
         onTapPreview: onTapPreview,
+        displayImageInfo: displayImageInfo,
       );
     }
-
+    displayImageInfo ??= DisplayImageInfo(
+      size: Size(
+        MessageContentStyle.imageBubbleWidth(context),
+        MessageContentStyle.imageBubbleHeight(context),
+      ),
+      hasBlur: true,
+    );
     return ImageBubble(
       event,
-      width: MessageContentStyle.imageBubbleWidth(context),
-      height: MessageContentStyle.imageBubbleHeight(context),
+      width: displayImageInfo.size.width,
+      height: displayImageInfo.size.height,
       fit: BoxFit.cover,
       onTapSelectMode: onTapSelectMode,
       onTapPreview: onTapPreview,

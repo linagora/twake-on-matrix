@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
@@ -74,6 +76,8 @@ class ImageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bubbleWidth = max(MessageContentStyle.imageBubbleMinWidth, width);
+    final bubbleHeight = max(MessageContentStyle.imageBubbleMinHeight, height);
     return Hero(
       tag: event.eventId,
       child: AnimatedSwitcher(
@@ -84,24 +88,37 @@ class ImageBubble extends StatelessWidget {
           ),
           constraints: maxSize
               ? BoxConstraints(
-                  maxWidth: width,
-                  maxHeight: height,
+                  maxWidth: bubbleWidth,
+                  maxHeight: bubbleHeight,
                 )
               : null,
-          child: MxcImage(
-            rounded: true,
-            event: event,
-            width: width,
-            height: height,
-            fit: fit,
-            animated: animated,
-            isThumbnail: thumbnailOnly,
-            placeholder: _buildPlaceholder,
-            onTapPreview: onTapPreview,
-            onTapSelectMode: onTapSelectMode,
-            imageData: imageData,
-            isPreview: true,
-            animationDuration: animationDuration,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16.0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: bubbleWidth,
+                  height: bubbleHeight,
+                  child:
+                      const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+                ),
+                MxcImage(
+                  event: event,
+                  width: width,
+                  height: height,
+                  fit: fit,
+                  animated: animated,
+                  isThumbnail: thumbnailOnly,
+                  placeholder: _buildPlaceholder,
+                  onTapPreview: onTapPreview,
+                  onTapSelectMode: onTapSelectMode,
+                  imageData: imageData,
+                  isPreview: true,
+                  animationDuration: animationDuration,
+                ),
+              ],
+            ),
           ),
         ),
       ),
