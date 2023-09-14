@@ -1,4 +1,4 @@
-import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
+import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:matrix/matrix.dart';
 

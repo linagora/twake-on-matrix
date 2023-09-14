@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/data/network/upload_file/file_info_extension.dart';
-import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
+import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
+import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
@@ -119,15 +119,15 @@ extension SendFileExtension on Room {
     while (uploadResp == null ||
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
-        final uploadFileApi = getIt.get<UploadFileAPI>();
-        final response = await uploadFileApi.uploadFile(fileInfo: tempfileInfo);
+        final mediaApi = getIt.get<MediaAPI>();
+        final response = await mediaApi.uploadFile(fileInfo: tempfileInfo);
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
         if (uploadResp != null &&
             encryptedThumbnail != null &&
             thumbnail != null) {
-          final thumbnailResponse = await uploadFileApi.uploadFile(
+          final thumbnailResponse = await mediaApi.uploadFile(
             fileInfo: FileInfo(
               thumbnail.fileName,
               tempEncryptedThumbnailFile.path,

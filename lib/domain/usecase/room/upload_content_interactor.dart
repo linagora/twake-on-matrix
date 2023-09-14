@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
+import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/exception/room/can_not_upload_content_exception.dart';
@@ -10,7 +10,7 @@ import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class UploadContentInteractor {
-  final uploadFileApi = getIt.get<UploadFileAPI>();
+  final mediaApi = getIt.get<MediaAPI>();
 
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
@@ -35,8 +35,7 @@ class UploadContentInteractor {
           );
         }
 
-        final response =
-            await uploadFileApi.uploadFile(fileInfo: contentFileInfo);
+        final response = await mediaApi.uploadFile(fileInfo: contentFileInfo);
 
         if (response.contentUri != null) {
           final contentUri = Uri.parse(response.contentUri!);
