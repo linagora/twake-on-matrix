@@ -26,7 +26,12 @@ class MessageContentStyle {
   static const double imageBubbleHeightForMobileAndTable = 320;
   static const double imageBubbleWidthForMobileAndTablet = 256;
   static const double imageBubbleWidthForWeb = 500;
+  static const double imageBubbleMinWidth = 120;
+  static const double imageBubbleMinHeight = 100;
+  static const double imageBubbleDefaultWidth = 292;
+  static const double imageBubbleDefaultHeight = 340;
   static Color backgroundColorButton = Colors.white.withAlpha(64);
+  static const String defaultBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
 
   static const double letterSpacingMessageContent = -0.15;
 }
