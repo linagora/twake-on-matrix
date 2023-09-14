@@ -73,6 +73,19 @@ extension LocalizedBody on Event {
     return room.sendingFilePlaceholders[txId];
   }
 
+  Size? getThumbnailSize() {
+    final thumbnailInfo = infoMap['thumbnail_info'];
+    if (thumbnailInfo is Map &&
+        thumbnailInfo['width'] != null &&
+        thumbnailInfo['height'] != null) {
+      return Size(
+        thumbnailInfo['width'],
+        thumbnailInfo['height'],
+      );
+    }
+    return null;
+  }
+
   User? getUser() {
     return room
         .getParticipants()
