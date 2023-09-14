@@ -1,4 +1,5 @@
 import 'dart:collection';
+
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
@@ -21,6 +22,9 @@ import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
@@ -29,8 +33,6 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
-import 'package:fluffychat/domain/usecases/save_recovery_words_interactor.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -103,6 +105,9 @@ class GetItInitializer {
     );
     getIt.registerLazySingleton<SaveRecoveryWordsInteractor>(
       () => SaveRecoveryWordsInteractor(),
+    );
+    getIt.registerLazySingleton<DeleteRecoveryWordsInteractor>(
+      () => DeleteRecoveryWordsInteractor(),
     );
     getIt.registerFactory<GetContactsInteractor>(
       () => GetContactsInteractor(),

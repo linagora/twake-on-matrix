@@ -18,4 +18,9 @@ class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
   Future<bool> saveRecoveryWords(String recoveryWords) async {
     return _recoveryWordsAPI.saveRecoveryWords(recoveryWords);
   }
+
+  @override
+  Future<bool> deleteRecoveryWords() {
+    return _recoveryWordsAPI.deleteRecoveryWords();
+  }
 }

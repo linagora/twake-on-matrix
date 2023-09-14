@@ -26,4 +26,11 @@ class RecoveryWordsAPI {
         .onError((error, stackTrace) => throw Exception(error));
     return response.statusCode >= 200 && response.statusCode <= 299;
   }
+
+  Future<bool> deleteRecoveryWords() async {
+    final response = await _client
+        .delete(TomEndpoint.recoveryWordsServicePath.path)
+        .onError((error, stackTrace) => throw Exception(error));
+    return response.statusCode >= 200 && response.statusCode <= 299;
+  }
 }

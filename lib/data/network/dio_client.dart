@@ -86,7 +86,6 @@ class DioClient {
           options: options,
           cancelToken: cancelToken,
         )
-        .then((value) => value.data)
         .catchError((error) => throw (error));
   }
 

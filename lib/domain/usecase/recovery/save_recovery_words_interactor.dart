@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/recovery_words/save_recovery_words_failed.dart';
 import 'package:fluffychat/domain/app_state/recovery_words/save_recovery_words_success.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
+import 'package:matrix/matrix.dart';
 
 class SaveRecoveryWordsInteractor {
   final RecoveryWordsRepository recoveryWordsRepository =
@@ -18,6 +19,7 @@ class SaveRecoveryWordsInteractor {
           ? const Right(SaveRecoveryWordsSuccess())
           : const Left(SaveRecoveryWordsFailed());
     } catch (e) {
+      Logs().e('SaveRecoveryWordsInteractor::execute() [Exception]', e);
       return Left(SaveRecoveryWordsFailed(exception: e));
     }
   }

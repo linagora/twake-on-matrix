@@ -1,15 +1,21 @@
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/widgets/matrix.dart';
-
 extension UiaRequestManager on MatrixState {
   Future uiaRequestHandler(UiaRequest uiaRequest) async {
+    print(
+        'datph UiaRequestManager::uiaRequestHandler() uiaRequest: $uiaRequest');
+    print('datph UiaRequestManager::uiaRequestHandler() conext: $context');
     final l10n = L10n.of(context)!;
+    print(
+        'datph UiaRequestManager::uiaRequestHandler() after uiaRequest: $uiaRequest');
+
     try {
       if (uiaRequest.state != UiaRequestState.waitForUser ||
           uiaRequest.nextStages.isEmpty) {
@@ -86,7 +92,8 @@ extension UiaRequestManager on MatrixState {
           UrlLauncher(context, url.toString()).openUrlInAppBrowser();
           if (OkCancelResult.ok ==
               await showOkCancelAlertDialog(
-                useRootNavigator: false,
+                useRootNavigator: !PlatformInfos.isMobile,
+                barrierDismissible: false,
                 message: l10n.pleaseFollowInstructionsOnWeb,
                 context: context,
                 okLabel: l10n.next,

@@ -1,18 +1,17 @@
 import 'dart:async';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/platform_infos.dart';
 import '../../widgets/matrix.dart';
 import '../bootstrap/bootstrap_dialog.dart';
 import 'settings_view.dart';
@@ -181,6 +180,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             crossSigning == false;
     final isUnknownSession = client.isUnknownSession;
     setState(() {
+      print('datph Settings crossSigning is cached: $crossSigning');
+      print('datph Settings needsBootstrap: $needsBootstrap');
+      print('datph Settings isUnknownSession: $isUnknownSession');
+      print(
+          'datph Settings key manager cache: ${client.encryption?.keyManager.isCached()}');
+      print(
+          'datph Settings crossSigning enabled : ${client.encryption?.crossSigning.enabled}');
       showChatBackupBanner = needsBootstrap || isUnknownSession;
     });
   }

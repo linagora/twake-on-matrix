@@ -1383,6 +1383,12 @@
         "type": "text",
         "placeholders": {}
     },
+    "cannotEnableKeyBackup": "Cannot enable Key Backup. Please Go to Settings to try it again.",
+    "@cannotEnableKeyBackup": {
+        "type": "text",
+        "placeholders": {}
+    },
+    "cannotUploadKey": "Cannot store Key Backup.",
     "oopsPushError": "Oops! Unfortunately, an error occurred when setting up the push notifications.",
     "@oopsPushError": {
         "type": "text",
@@ -2441,6 +2447,8 @@
     "@enableAutoBackups": {},
     "unlockOldMessages": "Unlock old messages",
     "@unlockOldMessages": {},
+    "cannotUnlockBackupKey": "Cannot unlock Key backup.",
+    "@cannotUnlockBackupKey": {},
     "storeInSecureStorageDescription": "Store the recovery key in the secure storage of this device.",
     "@storeInSecureStorageDescription": {},
     "saveKeyManuallyDescription": "Save this key manually by triggering the system share dialog or clipboard.",

@@ -7,10 +7,13 @@ import 'package:matrix/matrix.dart';
 
 abstract class AppConfig {
   static String _applicationName = 'Twake';
+
   static String get applicationName => _applicationName;
   static String? _applicationWelcomeMessage;
+
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
-  static String _defaultHomeserver = 'matrix.linagora.com';
+  static String _defaultHomeserver = 'matrix.tom-dev.xyz';
+
   static String get defaultHomeserver => _defaultHomeserver;
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
