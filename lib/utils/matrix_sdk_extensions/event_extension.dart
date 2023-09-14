@@ -74,13 +74,10 @@ extension LocalizedBody on Event {
   }
 
   Size? getThumbnailSize() {
-    final thumbnailInfo = infoMap['thumbnail_info'];
-    if (thumbnailInfo is Map &&
-        thumbnailInfo['width'] != null &&
-        thumbnailInfo['height'] != null) {
+    if (infoMap['w'] != null && infoMap['h'] != null) {
       return Size(
-        thumbnailInfo['width'],
-        thumbnailInfo['height'],
+        double.tryParse(infoMap['w'].toString()) ?? 0,
+        double.tryParse(infoMap['h'].toString()) ?? 0,
       );
     }
     return null;

@@ -444,15 +444,14 @@ class _MessageImageBuilder extends StatelessWidget {
     DisplayImageInfo? displayImageInfo =
         event.getThumbnailSize()?.getDisplayImageInfo(context);
 
-    if (matrixFile != null &&
-        matrixFile.filePath != null &&
-        matrixFile is MatrixImageFile) {
+    if (isSendingImageInMobile(matrixFile)) {
+      final file = matrixFile as MatrixImageFile;
       displayImageInfo = Size(
-        matrixFile.width!.toDouble(),
-        matrixFile.height!.toDouble(),
+        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
       ).getDisplayImageInfo(context);
       return SendingImageInfoWidget(
-        matrixFile: matrixFile,
+        matrixFile: file,
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
@@ -460,11 +459,18 @@ class _MessageImageBuilder extends StatelessWidget {
     }
     displayImageInfo ??= DisplayImageInfo(
       size: Size(
-        MessageContentStyle.imageBubbleWidth(context),
-        MessageContentStyle.imageBubbleHeight(context),
+        MessageContentStyle.imageWidth(context),
+        MessageContentStyle.imageHeight(context),
       ),
       hasBlur: true,
     );
+    if (isSendingImageInWeb(matrixFile)) {
+      final file = matrixFile as MatrixImageFile;
+      displayImageInfo = Size(
+        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+      ).getDisplayImageInfo(context);
+    }
     return ImageBubble(
       event,
       width: displayImageInfo.size.width,
@@ -474,5 +480,17 @@ class _MessageImageBuilder extends StatelessWidget {
       onTapPreview: onTapPreview,
       animated: true,
     );
+  }
+
+  bool isSendingImageInWeb(MatrixFile? matrixFile) {
+    return matrixFile != null &&
+        matrixFile.bytes != null &&
+        matrixFile is MatrixImageFile;
+  }
+
+  bool isSendingImageInMobile(MatrixFile? matrixFile) {
+    return matrixFile != null &&
+        matrixFile.filePath != null &&
+        matrixFile is MatrixImageFile;
   }
 }
