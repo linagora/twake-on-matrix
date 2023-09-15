@@ -1,14 +1,15 @@
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+
 import 'settings.dart';
 
 class SettingsView extends StatelessWidget {
@@ -138,20 +139,6 @@ class SettingsView extends StatelessWidget {
               },
             ),
             const Divider(thickness: 1),
-            if (showChatBackupBanner == null)
-              ListTile(
-                leading: const Icon(Icons.backup_outlined),
-                title: Text(L10n.of(context)!.chatBackup),
-                trailing: const CircularProgressIndicator.adaptive(),
-              )
-            else
-              SwitchListTile.adaptive(
-                controlAffinity: ListTileControlAffinity.trailing,
-                value: controller.showChatBackupBanner == false,
-                secondary: const Icon(Icons.backup_outlined),
-                title: Text(L10n.of(context)!.chatBackup),
-                onChanged: controller.firstRunBootstrapAction,
-              ),
             const Divider(thickness: 1),
             // ListTile(
             //   leading: const Icon(Icons.format_paint_outlined),
