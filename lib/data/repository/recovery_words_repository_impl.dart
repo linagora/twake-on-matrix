@@ -16,4 +16,9 @@ class RecoveryWordsRepositoryImpl implements RecoveryWordsRepository {
   Future<bool> saveRecoveryWords(String recoveryWords) async {
     return await recoveryWordsDataSource.saveRecoveryWords(recoveryWords);
   }
+
+  @override
+  Future<bool> deleteRecoveryWords() async {
+    return await recoveryWordsDataSource.deleteRecoveryWords();
+  }
 }
