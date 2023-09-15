@@ -4,4 +4,6 @@ abstract class RecoveryWordsRepository {
   Future<RecoveryWords> getRecoveryWords();
 
   Future<bool> saveRecoveryWords(String recoveryWords);
+
+  Future<bool> deleteRecoveryWords();
 }
