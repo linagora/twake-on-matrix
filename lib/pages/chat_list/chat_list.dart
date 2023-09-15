@@ -5,8 +5,9 @@ import 'package:async/async.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
-import 'package:fluffychat/domain/usecases/get_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
@@ -27,7 +28,6 @@ import 'package:matrix/matrix.dart';
 import '../../../utils/account_bundles.dart';
 import '../../utils/voip/callkeep_manager.dart';
 import '../../widgets/matrix.dart';
-import '../bootstrap/bootstrap_dialog.dart';
 
 enum SelectMode {
   normal,
@@ -504,9 +504,10 @@ class ChatListController extends State<ChatList>
           'ChatListController::_waitForFirstSync(): encryption is not enabled',
         );
         final recoveryWords = await _getRecoveryWords();
-        if (recoveryWords == null) {
-          await TomBootstrapDialog(client: client).show(context);
-        }
+        await TomBootstrapDialog(
+          client: client,
+          wipeRecovery: recoveryWords != null,
+        ).show(context);
       }
     }
     if (!mounted) return;
