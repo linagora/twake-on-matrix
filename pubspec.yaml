@@ -119,6 +119,7 @@ dependencies:
   equatable: ^2.0.5
   get_it: ^7.2.0
   dio: ^5.1.1
+  dio_cache_interceptor: ^3.4.2
   dartz: ^0.10.1
   debounce_throttle: ^2.0.0
   fluttertoast: ^8.2.2
@@ -130,7 +131,6 @@ dependencies:
   wechat_camera_picker: ^3.8.0
   open_file: ^3.3.2
   mime: ^1.0.4
-  any_link_preview: ^3.0.0
   async: ^2.11.0
   cached_network_image: ^3.2.3
   pull_to_refresh: ^2.0.0
@@ -138,6 +138,7 @@ dependencies:
   image_gallery_saver: ^2.0.3
   file_saver: ^0.1.1
   flutter_keyboard_visibility: ^5.4.1
+  string_validator: ^1.0.0
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
