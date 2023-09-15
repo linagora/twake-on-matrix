@@ -1,6 +1,6 @@
-import 'package:any_link_preview/any_link_preview.dart';
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:fluffychat/utils/verify_url.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +94,7 @@ extension StringCasingExtension on String {
     }
 
     final String? firstValidLink =
-        matches.firstWhere((link) => AnyLinkPreview.isValidLink(link!));
+        matches.firstWhereOrNull((link) => VerifyUrl.isValidLink(link!));
     return firstValidLink;
   }
 
