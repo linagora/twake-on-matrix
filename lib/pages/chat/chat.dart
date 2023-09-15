@@ -309,6 +309,10 @@ class ChatController extends State<Chat>
     );
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (room == null) {
+        return context.go("/error");
+      }
+
       _askToAcceptInvitation();
       if (shareFile != null && room != null && shareFile!.filePath != null) {
         final sendFileInteractor = getIt.get<SendFileInteractor>();
@@ -323,7 +327,7 @@ class ChatController extends State<Chat>
   }
 
   void _askToAcceptInvitation() async {
-    if (room!.membership != Membership.invite) return;
+    if (room?.membership != Membership.invite) return;
 
     final result = await showDialog<DialogAcceptInviteResult>(
       context: context,

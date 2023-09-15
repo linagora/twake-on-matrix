@@ -115,15 +115,7 @@ class ChatView extends StatelessWidget {
     controller.sendingClient ??= client;
     controller.room = controller.sendingClient!.getRoomById(controller.roomId!);
     if (controller.room == null) {
-      return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 120,
-          title: Text(L10n.of(context)!.oopsSomethingWentWrong),
-        ),
-        body: Center(
-          child: Text(L10n.of(context)!.youAreNoLongerParticipatingInThisChat),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
