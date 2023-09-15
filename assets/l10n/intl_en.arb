@@ -2713,5 +2713,8 @@
         }
     },
     "notInAChatYet": "You're not in a chat yet",
-    "blankChatTitle": "Choose a chat or hit #EditIcon# to make one."
+    "blankChatTitle": "Choose a chat or hit #EditIcon# to make one.",
+    "errorPageTitle": "Something's not right",
+    "errorPageDescription": "That page doesn't exist.",
+    "errorPageButton": "Back to chat"
 }
