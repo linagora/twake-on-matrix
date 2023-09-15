@@ -19,7 +19,6 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showChatBackupBanner = controller.showChatBackupBanner;
     return Scaffold(
       appBar: AppBar(
         leading: CloseButton(

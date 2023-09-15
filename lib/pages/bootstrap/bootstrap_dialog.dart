@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -374,7 +375,16 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     cancelLabel: L10n.of(context)!.cancel,
                                     isDestructiveAction: true,
                                   )) {
-                                setState(() => _createBootstrap(true));
+                                await TomBootstrapDialog(
+                                  wipe: true,
+                                  wipeRecovery: true,
+                                  client: widget.client,
+                                ).show(context).then(
+                                      (value) => Navigator.of(
+                                        context,
+                                        rootNavigator: false,
+                                      ).pop<bool>(false),
+                                    );
                               }
                             },
                     )
