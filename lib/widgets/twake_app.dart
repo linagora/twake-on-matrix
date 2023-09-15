@@ -33,6 +33,10 @@ class TwakeApp extends StatefulWidget {
   static final GoRouter router = GoRouter(
     routes: AppRoutes.routes,
     debugLogDiagnostics: true,
+    onException: (context, state, router) {
+      Logs().e('GoRouter exception: ${state.error}');
+      return router.go('/error');
+    },
   );
 
   @override

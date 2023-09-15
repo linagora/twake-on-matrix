@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
+import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
@@ -101,6 +102,13 @@ abstract class AppRoutes {
       pageBuilder: (context, state) => defaultPageBuilder(
         context,
         const LogViewer(),
+      ),
+    ),
+    GoRoute(
+      path: '/error',
+      pageBuilder: (context, state) => defaultPageBuilder(
+        context,
+        const ErrorPage(),
       ),
     ),
     ShellRoute(
