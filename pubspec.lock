@@ -49,14 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  any_link_preview:
-    dependency: "direct main"
-    description:
-      name: any_link_preview
-      sha256: e76bf06063a2d86a3f014d4d12a2782d139408eb6a9a2a8ccbe8f53b5dfea8e5
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   archive:
     dependency: transitive
     description:
@@ -506,6 +498,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.2"
+  dio_cache_interceptor:
+    dependency: "direct main"
+    description:
+      name: dio_cache_interceptor
+      sha256: a89166e6fb9c90a4bf2b7f20b5c055087969bc445ced3282e32505543e296e0f
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.2"
   dynamic_color:
     dependency: "direct main"
     description:
@@ -2298,13 +2298,13 @@ packages:
     source: hosted
     version: "1.2.0"
   string_validator:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: string_validator
-      sha256: "50dd8ecf91db6a732f4a851eeae81ee12406eedc62d0da72f2d91a04a2d10dd8"
+      sha256: b419cf5d21d608522e6e7cafed4deb34b6f268c43df866e63c320bab98a08cf6
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "1.0.0"
   sync_http:
     dependency: transitive
     description:
