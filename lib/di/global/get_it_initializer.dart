@@ -1,14 +1,17 @@
 import 'dart:collection';
+import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
+import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
-import 'package:fluffychat/data/network/upload_file/upload_file_api.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
+import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
 import 'package:fluffychat/di/global/hive_di.dart';
@@ -21,6 +24,7 @@ import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
@@ -70,12 +74,15 @@ class GetItInitializer {
   void bindingAPI() {
     getIt.registerLazySingleton<RecoveryWordsAPI>(() => RecoveryWordsAPI());
     getIt.registerFactory<TomContactAPI>(() => TomContactAPI());
-    getIt.registerSingleton<UploadFileAPI>(UploadFileAPI());
+    getIt.registerSingleton<MediaAPI>(MediaAPI());
   }
 
   void bindingDatasource() {
     getIt.registerFactory<ToMConfigurationsDatasource>(
       () => HiveToMConfigurationDatasource(),
+    );
+    getIt.registerFactory<MediaDataSource>(
+      () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
     );
   }
 
@@ -85,6 +92,11 @@ class GetItInitializer {
     );
     getIt.registerFactory<TomContactsDatasource>(
       () => TomContactsDatasourceImpl(),
+    );
+    getIt.registerLazySingleton(
+      () => MediaDataSourceImpl(
+        getIt.get<MediaAPI>(),
+      ),
     );
   }
 
@@ -96,6 +108,11 @@ class GetItInitializer {
       () => RecoveryWordsRepositoryImpl(),
     );
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
+    getIt.registerFactory<MediaRepositoryImpl>(
+      () => MediaRepositoryImpl(
+        getIt.get<MediaDataSourceImpl>(),
+      ),
+    );
   }
 
   void bindingInteractor() {
@@ -133,6 +150,11 @@ class GetItInitializer {
     );
     getIt.registerSingleton<ChatRoomSearchInteractor>(
       ChatRoomSearchInteractor(),
+    );
+    getIt.registerSingleton<GetPreviewURLInteractor>(
+      GetPreviewURLInteractor(
+        getIt.get<MediaRepositoryImpl>(),
+      ),
     );
   }
 }
