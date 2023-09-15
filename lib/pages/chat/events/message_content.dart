@@ -10,7 +10,7 @@ import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/twake_link_text.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -41,6 +41,7 @@ class MessageContent extends StatelessWidget {
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final ChatController controller;
+  final bool ownMessage;
 
   const MessageContent(
     this.event, {
@@ -52,6 +53,7 @@ class MessageContent extends StatelessWidget {
     required this.backgroundColor,
     this.onTapPreview,
     this.onTapSelectMode,
+    required this.ownMessage,
   }) : super(key: key);
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -323,7 +325,7 @@ class MessageContent extends StatelessWidget {
                   builder: (context, searchStatus, child) {
                     final highlightText =
                         searchStatus.getSuccessOrNull()?.keyword;
-                    return TwakeLinkText(
+                    return TwakeLinkPreview(
                       text: text,
                       textStyle:
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -341,7 +343,8 @@ class MessageContent extends StatelessWidget {
                         maintainState: true,
                         child: endOfBubbleWidget,
                       ),
-                      firstValidUrl: text.getFirstValidUrl(),
+                      uri: Uri.parse(text.getFirstValidUrl() ?? ''),
+                      ownMessage: ownMessage,
                       onLinkTap: (url) =>
                           UrlLauncher(context, url.toString()).launchUrl(),
                       textSpanBuilder: (text, textStyle, recognizer) =>

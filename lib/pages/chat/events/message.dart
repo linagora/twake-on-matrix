@@ -388,6 +388,8 @@ class Message extends StatelessWidget {
                                                                         .selectMode
                                                                     ? () {}
                                                                     : null,
+                                                            ownMessage:
+                                                                ownMessage,
                                                           ),
                                                           if (timelineOverlayMessage)
                                                             Positioned(
