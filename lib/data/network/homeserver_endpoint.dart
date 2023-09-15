@@ -7,6 +7,10 @@ class HomeserverEndpoint {
   static final ServicePath uploadMediaServicePath = ServicePath(
     '/upload',
   );
+
+  static final ServicePath getPreviewUrlServicePath = ServicePath(
+    '/preview_url',
+  );
 }
 
 extension ServicePathHomeserver on ServicePath {
