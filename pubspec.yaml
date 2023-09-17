@@ -120,6 +120,7 @@ dependencies:
   get_it: ^7.2.0
   dio: ^5.1.1
   dio_cache_interceptor: ^3.4.2
+  dio_cache_interceptor_hive_store: ^3.2.1
   dartz: ^0.10.1
   debounce_throttle: ^2.0.0
   fluttertoast: ^8.2.2
