@@ -14,7 +14,7 @@ class HomeserverEndpoint {
 }
 
 extension ServicePathHomeserver on ServicePath {
-  String generateHomeserverIdentityEndpoint({
+  String generateHomeserverMediaEndpoint({
     String rootPath = HomeserverEndpoint.homeserverMediaPath,
     String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
   }) {

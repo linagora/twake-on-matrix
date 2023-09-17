@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:fluffychat/utils/verify_url.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -93,8 +92,10 @@ extension StringCasingExtension on String {
       return null;
     }
 
-    final String? firstValidLink =
-        matches.firstWhereOrNull((link) => VerifyUrl.isValidLink(link!));
+    final String? firstValidLink = matches.firstWhereOrNull((link) {
+      if (link == null) return false;
+      return Uri.tryParse(link)?.isAbsolute ?? false;
+    });
     return firstValidLink;
   }
 
