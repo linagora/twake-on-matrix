@@ -14,13 +14,13 @@ class GetPreviewURLInteractor {
 
   Stream<Either<Failure, Success>> execute({
     required Uri uri,
-    int? ts,
+    int? preferredPreviewTime,
   }) async* {
     yield const Right(GetPreviewURLLoading());
     try {
       final response = await _mediaRepository.getUrlPreview(
         uri: uri,
-        ts: ts,
+        preferredPreviewTime: preferredPreviewTime,
       );
       Logs().d(
         'GetPreviewURLInteractor::execute(): imageUrl - ${response.imageUrl}}',

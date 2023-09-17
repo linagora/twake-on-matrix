@@ -6,9 +6,10 @@ import 'package:path_provider/path_provider.dart';
 
 class DioCacheOption {
   static const String _hiveBoxName = "twake_dio_cache_hive_store";
-  static const Duration _maxStale = Duration(days: 7);
+  static const Duration _maxStale = Duration(days: 3);
 
   late HiveCacheStore _hiveCacheStore;
+
   DioCacheOption._privateConstructor();
 
   static DioCacheOption get instance => _instance;
@@ -41,11 +42,13 @@ class DioCacheOption {
       store: _hiveCacheStore,
       policy: CachePolicy.forceCache,
       maxStale: _maxStale,
-      hitCacheOnErrorExcept: [401, 404],
+      hitCacheOnErrorExcept: [404],
       keyBuilder: (request) {
+        Logs().d(
+          'DioCacheOption::getCacheOptions() Request URI - ${request.uri}',
+        );
         return request.uri.toString();
       },
-      allowPostMethod: false,
     );
   }
 }
