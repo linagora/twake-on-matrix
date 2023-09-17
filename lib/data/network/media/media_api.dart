@@ -24,7 +24,7 @@ class MediaAPI {
     final response = await _client
         .post(
           HomeserverEndpoint.uploadMediaServicePath
-              .generateHomeserverIdentityEndpoint(),
+              .generateHomeserverMediaEndpoint(),
           data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
           queryParameters: {
             'fileName': fileInfo.fileName,
@@ -38,14 +38,14 @@ class MediaAPI {
 
   Future<UrlPreviewResponse> getUrlPreview({
     required Uri uri,
-    int? ts,
+    int? preferredPreviewTime,
   }) async {
     final response = await _client.get(
       HomeserverEndpoint.getPreviewUrlServicePath
-          .generateHomeserverIdentityEndpoint(),
+          .generateHomeserverMediaEndpoint(),
       queryParameters: {
         'url': uri.toString(),
-        if (ts != null) 'ts': ts,
+        if (preferredPreviewTime != null) 'ts': preferredPreviewTime,
       },
     ).onError((error, stackTrace) => throw Exception(error));
 

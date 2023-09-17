@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
+import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/base_di.dart';
 import 'package:flutter/foundation.dart';
@@ -30,6 +33,7 @@ class NetworkDI extends BaseDI {
     _bindBaseOption(get);
     _bindInterceptor(get);
     _bindDio(get);
+    _bindMethodSupportCache(get);
   }
 
   void _bindBaseOption(GetIt get) {
@@ -37,6 +41,10 @@ class NetworkDI extends BaseDI {
       HttpHeaders.acceptHeader: acceptHeaderDefault,
       HttpHeaders.contentTypeHeader: contentTypeHeaderDefault
     };
+
+    get.registerLazySingleton<DioCacheOption>(
+      () => DioCacheOption(),
+    );
 
     get.registerLazySingleton<BaseOptions>(() => BaseOptions(headers: headers));
   }
@@ -58,6 +66,12 @@ class NetworkDI extends BaseDI {
 
     get.registerLazySingleton(
       () => AuthorizationInterceptor(),
+    );
+
+    get.registerSingleton(
+      MatrixDioCacheInterceptor(
+        options: get.get<DioCacheOption>().getCacheOptions(),
+      ),
     );
   }
 
@@ -125,5 +139,14 @@ class NetworkDI extends BaseDI {
       () => DioClient(get.get<Dio>(instanceName: homeServerDioName)),
       instanceName: homeDioClientName,
     );
+    dio.interceptors.add(get.get<MatrixDioCacheInterceptor>());
+  }
+
+  void _bindMethodSupportCache(GetIt get) {
+    final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>();
+    dioCacheCustomInterceptor.addUriSupportsCache([
+      HomeserverEndpoint.getPreviewUrlServicePath
+          .generateHomeserverMediaEndpoint(),
+    ]);
   }
 }

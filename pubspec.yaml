@@ -139,7 +139,6 @@ dependencies:
   image_gallery_saver: ^2.0.3
   file_saver: ^0.1.1
   flutter_keyboard_visibility: ^5.4.1
-  string_validator: ^1.0.0
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
