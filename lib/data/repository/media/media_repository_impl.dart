@@ -8,7 +8,13 @@ class MediaRepositoryImpl implements MediaRepository {
   MediaRepositoryImpl(this._mediaDataSource);
 
   @override
-  Future<UrlPreview> getUrlPreview({required Uri uri, int? ts}) {
-    return _mediaDataSource.getUrlPreview(uri: uri, ts: ts);
+  Future<UrlPreview> getUrlPreview({
+    required Uri uri,
+    int? preferredPreviewTime,
+  }) {
+    return _mediaDataSource.getUrlPreview(
+      uri: uri,
+      preferredPreviewTime: preferredPreviewTime,
+    );
   }
 }

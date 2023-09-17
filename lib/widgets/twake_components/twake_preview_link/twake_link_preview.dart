@@ -4,8 +4,10 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
+import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -69,7 +71,8 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview> {
     _getPreviewURLInteractor
         .execute(
           uri: widget.uri,
-          ts: widget.preferredPointInTime ?? _defaultPreferredPointInTime,
+          preferredPreviewTime:
+              widget.preferredPointInTime ?? _defaultPreferredPointInTime,
         )
         .listen(
           (event) => _handleGetPreviewUrlOnData(event),
@@ -101,8 +104,6 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview> {
   @override
   Widget build(BuildContext context) {
     return TwakeLinkView(
-      getPreviewUrlStateNotifier: getPreviewUrlStateNotifier,
-      ownMessage: widget.ownMessage,
       text: widget.text,
       textStyle: widget.textStyle,
       linkStyle: widget.linkStyle,
@@ -110,6 +111,25 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview> {
       firstValidUrl: firstValidUrl,
       onLinkTap: (url) => UrlLauncher(context, url.toString()).launchUrl(),
       textSpanBuilder: widget.textSpanBuilder,
+      previewItemWidget: ValueListenableBuilder(
+        valueListenable: getPreviewUrlStateNotifier,
+        builder: (context, state, _) {
+          return state.fold(
+            (failure) => const SizedBox.shrink(),
+            (success) {
+              if (success is GetPreviewUrlSuccess) {
+                final previewLink = success.urlPreview.toPresentation();
+                return TwakeLinkPreviewItem(
+                  ownMessage: widget.ownMessage,
+                  urlPreviewPresentation: previewLink,
+                  textStyle: widget.textStyle,
+                );
+              }
+              return const SizedBox();
+            },
+          );
+        },
+      ),
     );
   }
 }
