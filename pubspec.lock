@@ -506,6 +506,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.2"
+  dio_cache_interceptor_hive_store:
+    dependency: "direct main"
+    description:
+      name: dio_cache_interceptor_hive_store
+      sha256: "7a376b1db0a153e16ad51ce0cf1d2549ca14a2ddf462523c362fac9e077c5f14"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   dynamic_color:
     dependency: "direct main"
     description:
