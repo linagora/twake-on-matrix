@@ -12,13 +12,11 @@ class MediaDataSourceImpl implements MediaDataSource {
   Future<UrlPreview> getUrlPreview({
     required Uri uri,
     int? preferredPreviewTime,
-  }) {
-    return Future.sync(() async {
-      final response = await _mediaAPI.getUrlPreview(
-        uri: uri,
-        preferredPreviewTime: preferredPreviewTime,
-      );
-      return response.toUrlPreview();
-    });
+  }) async {
+    final response = await _mediaAPI.getUrlPreview(
+      uri: uri,
+      preferredPreviewTime: preferredPreviewTime,
+    );
+    return response.toUrlPreview();
   }
 }

@@ -1,4 +1,4 @@
-# 6. Implementing Search Functionality in Chat Room
+# 7. Implementing Search Functionality in Chat Room
 
 Date: 2023-09-11
 
