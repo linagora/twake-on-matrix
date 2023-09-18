@@ -27,7 +27,7 @@ extension IsStateExtension on Event {
           type != EventTypes.RoomMember ||
           room.joinRules != JoinRules.public ||
           content.tryGet<String>('membership') == 'ban' ||
-          stateKey != senderId);
+      !isSomeoneChangeDisplayName() &&
 
   static const Set<String> importantStateEvents = {
     EventTypes.Encryption,
@@ -42,4 +42,9 @@ extension IsStateExtension on Event {
         EventTypes.Sticker,
         EventTypes.Encrypted
       }.contains(type);
+  bool isSomeoneChangeDisplayName() {
+    return stateKey != null &&
+        prevContent?['displayname'] != null &&
+        prevContent!['displayname'] != content['displayname'];
+  }
 }
