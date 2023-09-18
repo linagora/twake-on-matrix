@@ -25,7 +25,7 @@ class UrlPreview with EquatableMixin {
     this.title,
   });
 
-  Uri? get imageUri => imageUrl != null ? Uri.parse(imageUrl!) : null;
+  Uri? get imageUri => imageUrl != null ? Uri.tryParse(imageUrl!) : null;
 
   String? get titlePreview => title ?? siteName ?? imageTitle;
 
