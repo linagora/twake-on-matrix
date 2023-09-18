@@ -152,7 +152,13 @@ class InputBar extends StatelessWidget {
         }
       }
     }
-    final userMatch = RegExp(r'(?:\s|^)@([-\w]+)$').firstMatch(searchText);
+
+    // It ensures that the username starts with the @ symbol,
+    // is preceded by either a space or appears at the beginning of a line,
+    // and captures the username (excluding the @ symbol) for further use
+    const userMentionsRegex = r'(?:\s|^)@([-\w]*)$';
+
+    final userMatch = RegExp(userMentionsRegex).firstMatch(searchText);
     if (userMatch != null && room != null) {
       final userSearch = userMatch[1]!.toLowerCase();
       for (final user in room!.getParticipants()) {
@@ -264,8 +270,14 @@ class InputBar extends StatelessWidget {
     }
     if (suggestion['type'] == 'user') {
       insertText = '${suggestion['mention']!} ';
+
+      // match and capture usernames that start with the @ symbol,
+      // where the @ symbol is either preceded by a whitespace character
+      // or appears at the beginning of a line.
+      const insertMentionsRegex = r'(\s|^)(@[-\w]*)$';
+
       startText = replaceText.replaceAllMapped(
-        RegExp(r'(\s|^)(@[-\w]+)$'),
+        RegExp(insertMentionsRegex),
         (Match m) => '${m[1]}$insertText',
       );
     }
