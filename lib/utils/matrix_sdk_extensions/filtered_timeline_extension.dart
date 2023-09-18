@@ -32,6 +32,7 @@ extension IsStateExtension on Event {
       !isGroupNameChangeWhenCreate() &&
       !isGroupAvatarChangeWhenCreate() &&
       !isActivateEndToEndEncryption() &&
+      !isInviteWhenCreate();
 
   static const Set<String> importantStateEvents = {
     EventTypes.Encryption,
@@ -63,6 +64,12 @@ extension IsStateExtension on Event {
     return type == EventTypes.RoomAvatar &&
         content['url'] == null &&
         prevContent?['url'] == null;
+  }
+  bool isInviteWhenCreate() {
+    return type == EventTypes.RoomMember &&
+        content['membership'] != null &&
+        content['membership'] == 'invite' &&
+        content['reason'] == null;
   }
   bool isSomeoneChangeAvatar() {
     return stateKey != null &&
