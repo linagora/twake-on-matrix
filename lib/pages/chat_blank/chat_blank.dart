@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_blank/chat_blank_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -54,12 +55,21 @@ class _ChatBlankNotChat extends StatelessWidget {
                 ),
           ),
         ),
-        _buildRichText(context)
+        _ChatBlankRichText(context: context),
       ],
     );
   }
+}
 
-  RichText _buildRichText(BuildContext context) {
+class _ChatBlankRichText extends StatelessWidget {
+  const _ChatBlankRichText({
+    required this.context,
+  });
+
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
@@ -69,20 +79,14 @@ class _ChatBlankNotChat extends StatelessWidget {
   }
 
   List<InlineSpan> _buildInlineSpans(BuildContext context) {
-    final List<InlineSpan> inlineSpans = [];
-    L10n.of(context)!.blankChatTitle.splitMapJoin(
-      RegExp(r'#EditIcon#'),
-      onMatch: (_) {
-        inlineSpans.add(_buildIconTitle(context));
-        return '';
-      },
-      onNonMatch: (text) {
-        inlineSpans.add(
-          TextSpan(text: text, style: ChatBlankStyle.textStyle(context)!),
+    final List<InlineSpan> inlineSpans = L10n.of(context)!
+        .blankChatTitle
+        .splitMapJoinToList<InlineSpan>(
+          RegExp(r'#EditIcon#'),
+          onMatch: (_) => _buildIconTitle(context),
+          onNonMatch: (text) =>
+              TextSpan(text: text, style: ChatBlankStyle.textStyle(context)),
         );
-        return '';
-      },
-    );
     return inlineSpans;
   }
 
