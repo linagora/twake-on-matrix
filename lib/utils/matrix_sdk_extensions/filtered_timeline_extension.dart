@@ -29,6 +29,7 @@ extension IsStateExtension on Event {
           content.tryGet<String>('membership') == 'ban' ||
       !isSomeoneChangeDisplayName() &&
       !isSomeoneChangeAvatar() &&
+      !isActivateEndToEndEncryption() &&
 
   static const Set<String> importantStateEvents = {
     EventTypes.Encryption,
@@ -55,4 +56,7 @@ extension IsStateExtension on Event {
         prevContent?['avatar_url'] != content['avatar_url'];
   }
 
+  bool isActivateEndToEndEncryption() {
+    return type == EventTypes.Encryption;
+  }
 }
