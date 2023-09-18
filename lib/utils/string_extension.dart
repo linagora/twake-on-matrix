@@ -243,36 +243,50 @@ extension StringCasingExtension on String {
           text: this,
           style: style,
           recognizer: recognizer,
-        )
+        ),
       ];
     }
 
     // Split the text into parts by the search word and create a TextSpan for
     // each part. The search word is not case sensitive.
-    final List<TextSpan> spans = [];
-    splitMapJoin(
+    final List<TextSpan> spans = splitMapJoinToList<TextSpan>(
       RegExp(highlightText, caseSensitive: false),
       onMatch: (Match match) {
-        spans.add(
-          TextSpan(
-            text: match.group(0),
-            style: highlightStyle,
-            recognizer: recognizer,
-          ),
+        return TextSpan(
+          text: match.group(0),
+          style: highlightStyle,
+          recognizer: recognizer,
         );
+      },
+      onNonMatch: (String nonMatch) {
+        return TextSpan(
+          text: nonMatch,
+          style: style,
+          recognizer: recognizer,
+        );
+      },
+    );
+
+    return spans;
+  }
+
+  List<T> splitMapJoinToList<T>(
+    Pattern pattern, {
+    required T Function(Match) onMatch,
+    required T Function(String) onNonMatch,
+  }) {
+    final List<T> result = [];
+    splitMapJoin(
+      pattern,
+      onMatch: (Match match) {
+        result.add(onMatch(match));
         return '';
       },
       onNonMatch: (String nonMatch) {
-        spans.add(
-          TextSpan(
-            text: nonMatch,
-            style: style,
-            recognizer: recognizer,
-          ),
-        );
+        result.add(onNonMatch(nonMatch));
         return '';
       },
     );
-    return spans;
+    return result;
   }
 }
