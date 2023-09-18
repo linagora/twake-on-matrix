@@ -29,6 +29,8 @@ extension IsStateExtension on Event {
           content.tryGet<String>('membership') == 'ban' ||
       !isSomeoneChangeDisplayName() &&
       !isSomeoneChangeAvatar() &&
+      !isGroupNameChangeWhenCreate() &&
+      !isGroupAvatarChangeWhenCreate() &&
       !isActivateEndToEndEncryption() &&
 
   static const Set<String> importantStateEvents = {
@@ -37,6 +39,8 @@ extension IsStateExtension on Event {
     EventTypes.RoomMember,
     EventTypes.RoomTombstone,
     EventTypes.CallInvite,
+    EventTypes.RoomName,
+    EventTypes.RoomAvatar,
   };
 
   bool get isState => !{
@@ -48,6 +52,17 @@ extension IsStateExtension on Event {
     return stateKey != null &&
         prevContent?['displayname'] != null &&
         prevContent!['displayname'] != content['displayname'];
+  }
+  bool isGroupNameChangeWhenCreate() {
+    return type == EventTypes.RoomName &&
+        content['name'] != null &&
+        prevContent?['name'] == null;
+  }
+
+  bool isGroupAvatarChangeWhenCreate() {
+    return type == EventTypes.RoomAvatar &&
+        content['url'] == null &&
+        prevContent?['url'] == null;
   }
   bool isSomeoneChangeAvatar() {
     return stateKey != null &&
