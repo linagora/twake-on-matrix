@@ -27,10 +27,12 @@ extension IsStateExtension on Event {
           type != EventTypes.RoomMember ||
           room.joinRules != JoinRules.public ||
           content.tryGet<String>('membership') == 'ban' ||
+          stateKey != senderId) &&
       !isSomeoneChangeDisplayName() &&
       !isSomeoneChangeAvatar() &&
       !isGroupNameChangeWhenCreate() &&
       !isGroupAvatarChangeWhenCreate() &&
+      !isJoinedByYourself() &&
       !isActivateEndToEndEncryption() &&
       !isInviteWhenCreate();
 
@@ -49,11 +51,13 @@ extension IsStateExtension on Event {
         EventTypes.Sticker,
         EventTypes.Encrypted
       }.contains(type);
+
   bool isSomeoneChangeDisplayName() {
     return stateKey != null &&
         prevContent?['displayname'] != null &&
         prevContent!['displayname'] != content['displayname'];
   }
+
   bool isGroupNameChangeWhenCreate() {
     return type == EventTypes.RoomName &&
         content['name'] != null &&
@@ -65,12 +69,21 @@ extension IsStateExtension on Event {
         content['url'] == null &&
         prevContent?['url'] == null;
   }
+
+  bool isJoinedByYourself() {
+    return type == EventTypes.RoomMember &&
+        content['membership'] == 'join' &&
+        senderId == stateKey &&
+        stateKey == room.client.userID;
+  }
+
   bool isInviteWhenCreate() {
     return type == EventTypes.RoomMember &&
         content['membership'] != null &&
         content['membership'] == 'invite' &&
         content['reason'] == null;
   }
+
   bool isSomeoneChangeAvatar() {
     return stateKey != null &&
         prevContent?["membership"] == 'join' &&
