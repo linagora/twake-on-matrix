@@ -188,6 +188,7 @@ extension SendFileExtension on Room {
           'thumbnail_url': thumbnailUploadResp.toString(),
         if (thumbnail != null && encryptedThumbnail != null)
           'thumbnail_file': encryptedThumbnail.toJson(),
+        if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
       }..addAll(thumbnail?.metadata ?? {}),
       if (extraContent != null) ...extraContent,
     };

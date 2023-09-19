@@ -163,8 +163,9 @@ extension SendFileWebExtension on Room {
               'kty': 'oct'
             },
             'iv': encryptedThumbnail.iv,
-            'hashes': {'sha256': encryptedThumbnail.sha256}
+            'hashes': {'sha256': encryptedThumbnail.sha256},
           },
+        if (thumbnail != null) 'thumbnail_info': thumbnail.info,
       }..addAll(thumbnail?.info ?? {}),
       if (extraContent != null) ...extraContent,
     };
