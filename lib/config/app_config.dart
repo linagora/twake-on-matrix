@@ -71,6 +71,8 @@ abstract class AppConfig {
   static const int fetchContactsLimit = 20;
   static const int chatRoomSearchKeywordMin = 2;
   static const bool chatRoomSearchWordStrategy = false;
+  static const String defaultImageBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+  static const String defaultVideoBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
 
   static String? issueId;
 

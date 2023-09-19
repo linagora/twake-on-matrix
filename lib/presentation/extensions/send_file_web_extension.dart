@@ -1,3 +1,4 @@
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
@@ -250,12 +251,16 @@ extension SendFileWebExtension on Room {
         quality: 70,
       );
 
+      final image = decodeImage(result);
+      final blurHash = image != null ? BlurHash.encode(image) : null;
+
       return MatrixImageFile(
         bytes: result,
         name: originalFile.name,
         mimeType: originalFile.mimeType,
         width: originalFile.width,
         height: originalFile.height,
+        blurhash: blurHash?.hash,
       );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);

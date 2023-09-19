@@ -1,5 +1,6 @@
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,12 @@ extension LocalizedBody on Event {
     return (content.tryGet<String>('filename') ?? body).ellipsizeFileName;
   }
 
+  String? get blurHash {
+    return infoMap['xyz.amorgan.blurhash'] is String
+        ? infoMap['xyz.amorgan.blurhash']
+        : null;
+  }
+
   String? get mimeType {
     return content
         .tryGetMap<String, dynamic>('info')
@@ -40,6 +47,12 @@ extension LocalizedBody on Event {
             ?.tryGet<String>('mimetype')
             ?.toUpperCase());
   }
+
+  bool get isVideoOrImage =>
+      [MessageTypes.Image, MessageTypes.Video].contains(messageType);
+
+  bool get isContainsLink =>
+      messageType == MessageTypes.Text && text.getFirstValidUrl() != null;
 
   void shareFile(BuildContext context) async {
     final matrixFile = await getFile(context);

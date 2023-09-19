@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -95,14 +96,10 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
     super.dispose();
   }
 
-  static const String fallbackBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
-
   @override
   Widget build(BuildContext context) {
     final hasThumbnail = widget.event.hasThumbnail;
-    final blurHash = (widget.event.infoMap as Map<String, dynamic>)
-            .tryGet<String>('xyz.amorgan.blurhash') ??
-        fallbackBlurHash;
+    final blurHash = widget.event.blurHash ?? AppConfig.defaultVideoBlurHash;
 
     final chewieManager = _chewieManager;
     return ClipRRect(
