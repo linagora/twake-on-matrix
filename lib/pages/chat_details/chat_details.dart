@@ -4,12 +4,15 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -39,6 +42,8 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails> {
+  static const _mediaFetchLimit = 20;
+  static const _linksFetchLimit = 20;
   final invitationSelectionMobileAndTabletKey =
       const Key('InvitationSelectionMobileAndTabletKey');
 
@@ -65,6 +70,15 @@ class ChatDetailsController extends State<ChatDetails> {
       responsive.isMobile(context) || responsive.isTablet(context);
 
   Room? get room => Matrix.of(context).client.getRoomById(roomId!);
+
+  Timeline? _timeline;
+
+  Future<Timeline> getTimeline() async {
+    _timeline ??= await room!.getTimeline();
+    return _timeline!;
+  }
+
+  final Map<EventId, ImageData> _mediaCacheMap = {};
 
   int get actualMembersCount => room!.summary.actualMembersCount;
 
@@ -436,17 +450,24 @@ class ChatDetailsController extends State<ChatDetails> {
             isMobileAndTablet: isMobileAndTablet,
           ),
         ),
-        const ChatDetailsPageModel(
+        ChatDetailsPageModel(
           page: ChatDetailsPage.media,
-          child: SizedBox.shrink(),
+          child: ChatDetailsMediaPage(
+            eventsListController: mediaListController,
+            getTimeline: getTimeline,
+            cacheMap: _mediaCacheMap,
+          ),
         ),
         const ChatDetailsPageModel(
           page: ChatDetailsPage.files,
           child: SizedBox.shrink(),
         ),
-        const ChatDetailsPageModel(
+        ChatDetailsPageModel(
           page: ChatDetailsPage.links,
-          child: SizedBox.shrink(),
+          child: ChatDetailsLinksPage(
+            eventsListController: linksListController,
+            getTimeline: getTimeline,
+          ),
         ),
         const ChatDetailsPageModel(
           page: ChatDetailsPage.downloads,
