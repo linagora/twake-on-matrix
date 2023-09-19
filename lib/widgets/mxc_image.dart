@@ -7,6 +7,9 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
+typedef EventId = String;
+typedef ImageData = Uint8List;
+
 class MxcImage extends StatefulWidget {
   final Uri? uri;
   final Event? event;
@@ -24,8 +27,11 @@ class MxcImage extends StatefulWidget {
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
-  final Uint8List? imageData;
+  final ImageData? imageData;
   final bool isPreview;
+
+  /// Cache for screen locally, if null, use global cache
+  final Map<EventId, ImageData>? cacheMap;
 
   const MxcImage({
     this.uri,
@@ -46,6 +52,7 @@ class MxcImage extends StatefulWidget {
     this.onTapSelectMode,
     this.imageData,
     this.isPreview = false,
+    this.cacheMap,
     Key? key,
   }) : super(key: key);
 
@@ -56,23 +63,38 @@ class MxcImage extends StatefulWidget {
 class _MxcImageState extends State<MxcImage>
     with SingleTickerProviderStateMixin {
   static const String placeholderKey = 'placeholder';
-  static final Map<String, Uint8List> _imageDataCache = {};
-  Uint8List? _imageDataNoCache;
+  static final Map<EventId, ImageData> _imageDataCache = {};
+  ImageData? _imageDataNoCache;
   bool isLoadDone = false;
 
-  Uint8List? get _imageData {
+  ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
-    final image =
-        cacheKey == null ? _imageDataNoCache : _imageDataCache[cacheKey];
+    final image = cacheKey == null
+        ? _imageDataNoCache
+        : widget.cacheMap != null
+            ? _imageDataFromLocalCache
+            : _imageDataFromGlobalCache;
     return image;
   }
 
-  set _imageData(Uint8List? data) {
+  ImageData? get _imageDataFromLocalCache =>
+      widget.cacheKey != null && widget.cacheMap != null
+          ? widget.cacheMap![widget.cacheKey]
+          : null;
+
+  ImageData? get _imageDataFromGlobalCache =>
+      widget.cacheKey != null ? _imageDataCache[widget.cacheKey] : null;
+
+  set _imageData(ImageData? data) {
     if (data == null) return;
     final cacheKey = widget.cacheKey;
-    cacheKey == null
-        ? _imageDataNoCache = data
-        : _imageDataCache[cacheKey] = data;
+    if (cacheKey == null) {
+      _imageDataNoCache = data;
+    } else if (widget.cacheMap != null) {
+      widget.cacheMap![cacheKey] = data;
+    } else {
+      _imageDataCache[cacheKey] = data;
+    }
   }
 
   bool? _isCached;
