@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
@@ -45,9 +47,7 @@ class ImageBubble extends StatelessWidget {
       );
     }
     final String blurHashString =
-        event.infoMap['xyz.amorgan.blurhash'] is String
-            ? event.infoMap['xyz.amorgan.blurhash']
-            : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+        event.blurHash ?? AppConfig.defaultImageBlurHash;
     final ratio = event.infoMap['w'] is int && event.infoMap['h'] is int
         ? event.infoMap['w'] / event.infoMap['h']
         : 1.0;
