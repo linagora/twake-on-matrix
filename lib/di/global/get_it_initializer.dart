@@ -31,6 +31,7 @@ import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
@@ -160,6 +161,9 @@ class GetItInitializer {
       GetPreviewURLInteractor(
         getIt.get<MediaRepositoryImpl>(),
       ),
+    );
+    getIt.registerSingleton<TimelineSearchEventInteractor>(
+      TimelineSearchEventInteractor(),
     );
   }
 }
