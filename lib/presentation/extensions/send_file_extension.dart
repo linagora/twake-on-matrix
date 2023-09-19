@@ -7,6 +7,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:image/image.dart' as img;
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -175,6 +177,9 @@ extension SendFileExtension on Room {
       Logs().d('RoomExtension::EncryptedThumbnail: $encryptedThumbnail');
     }
 
+    final blurHash = thumbnail?.filePath != null
+        ? await _generateBlurHash(thumbnail!.filePath)
+        : null;
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
@@ -189,6 +194,7 @@ extension SendFileExtension on Room {
         if (thumbnail != null && encryptedThumbnail != null)
           'thumbnail_file': encryptedThumbnail.toJson(),
         if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
+        if (blurHash != null) 'xyz.amorgan.blurhash': blurHash,
       }..addAll(thumbnail?.metadata ?? {}),
       if (extraContent != null) ...extraContent,
     };
@@ -332,5 +338,12 @@ extension SendFileExtension on Room {
       Logs().e('Error while generating thumbnail', e);
       return null;
     }
+  }
+
+  Future<String?> _generateBlurHash(String filePath) async {
+    final image = await img.decodeImageFile(filePath);
+    if (image == null) return null;
+    final blurHash = BlurHash.encode(image, numCompX: 4, numCompY: 3);
+    return blurHash.hash;
   }
 }
