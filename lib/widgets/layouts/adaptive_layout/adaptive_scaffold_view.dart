@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
@@ -105,8 +106,11 @@ class AppScaffoldView extends StatelessWidget {
                       onOpenSearchPage: onOpenSearchPage,
                     ),
                     _triggerPageViewBuilder(
-                      navigatorBarType: AdaptiveDestinationEnum.stories,
-                      navigatorBarWidget: const SizedBox(),
+                      navigatorBarType: AdaptiveDestinationEnum.settings,
+                      navigatorBarWidget: Settings(
+                        bottomNavigationBar:
+                            _bottomNavigationBarBuilder(context),
+                      ),
                     ),
                     _triggerPageViewBuilder(
                       navigatorBarType: AdaptiveDestinationEnum.search,
@@ -174,7 +178,7 @@ class AppScaffoldView extends StatelessWidget {
         return 0;
       case AdaptiveDestinationEnum.rooms:
         return 1;
-      case AdaptiveDestinationEnum.stories:
+      case AdaptiveDestinationEnum.settings:
         return 2;
       default:
         return 1;
@@ -211,9 +215,9 @@ class AppScaffoldView extends StatelessWidget {
       ),
       NavigationDestination(
         icon: const TwakeNavigationIcon(
-          icon: Icons.web_stories_outlined,
+          icon: Icons.settings,
         ),
-        label: L10n.of(context)!.stories,
+        label: L10n.of(context)!.settings,
       ),
     ];
   }

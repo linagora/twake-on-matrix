@@ -19,7 +19,12 @@ import '../bootstrap/bootstrap_dialog.dart';
 import 'settings_view.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+  final Widget? bottomNavigationBar;
+
+  const Settings({
+    super.key,
+    this.bottomNavigationBar,
+  });
 
   @override
   SettingsController createState() => SettingsController();
@@ -163,8 +168,15 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final client = Matrix.of(context).client;
+      profileFuture ??= client.getProfileFromUserId(
+        client.userID!,
+        cache: !profileUpdated,
+        getFromRooms: false,
+      );
+      checkBootstrap();
+    });
     super.initState();
   }
 
@@ -209,13 +221,10 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
-    profileFuture ??= client.getProfileFromUserId(
-      client.userID!,
-      cache: !profileUpdated,
-      getFromRooms: false,
+    return SettingsView(
+      this,
+      bottomNavigationBar: widget.bottomNavigationBar,
     );
-    return SettingsView(this);
   }
 }
 
