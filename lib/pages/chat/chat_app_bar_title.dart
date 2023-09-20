@@ -19,11 +19,13 @@ class ChatAppBarTitle extends StatelessWidget {
   final TextEditingController sendController;
   final Stream<ConnectivityResult> getStreamInstance;
   final VoidCallback onPushDetails;
+  final String? roomName;
 
   const ChatAppBarTitle({
     Key? key,
     required this.actions,
     this.room,
+    this.roomName,
     required this.selectedEvents,
     required this.isArchived,
     required this.sendController,
@@ -73,9 +75,10 @@ class ChatAppBarTitle extends StatelessWidget {
                 child: Avatar(
                   fontSize: ChatAppBarTitleStyle.avatarFontSize,
                   mxContent: room!.avatar,
-                  name: room!.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)!),
-                  ),
+                  name: roomName ??
+                      room!.getLocalizedDisplayname(
+                        MatrixLocals(L10n.of(context)!),
+                      ),
                   size: ChatAppBarTitleStyle.avatarSize(context),
                 ),
               ),
@@ -87,9 +90,10 @@ class ChatAppBarTitle extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  room!.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)!),
-                  ),
+                  roomName ??
+                      room!.getLocalizedDisplayname(
+                        MatrixLocals(L10n.of(context)!),
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ChatAppBarTitleStyle.appBarTitleStyle(context),
@@ -109,7 +113,6 @@ class ChatAppBarTitle extends StatelessWidget {
   ) {
     final TextStyle? statusTextStyle =
         ChatAppBarTitleStyle.statusTextStyle(context);
-
     return StreamBuilder<ConnectivityResult>(
       stream: getStreamInstance,
       builder: (context, snapshot) {

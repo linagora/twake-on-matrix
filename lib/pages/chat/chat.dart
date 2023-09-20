@@ -73,12 +73,14 @@ class Chat extends StatefulWidget {
   final String roomId;
   final Widget? sideView;
   final MatrixFile? shareFile;
+  final String? roomName;
 
   const Chat({
     Key? key,
     this.sideView,
     required this.roomId,
     this.shareFile,
+    this.roomName,
   }) : super(key: key);
 
   @override
@@ -108,6 +110,8 @@ class ChatController extends State<Chat>
   MatrixState? matrix;
 
   MatrixFile? get shareFile => widget.shareFile;
+
+  String? get roomName => widget.roomName;
 
   String? get roomId => widget.roomId;
 

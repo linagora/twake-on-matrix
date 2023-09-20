@@ -18,6 +18,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -273,7 +274,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          _goToRoom(context, success.roomId);
+          _goToRoom(success);
         }
       },
     );
@@ -289,8 +290,14 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     );
   }
 
-  void _goToRoom(BuildContext context, String roomId) {
-    context.go("/rooms/$roomId");
+  void _goToRoom(CreateNewGroupChatSuccess success) {
+    context.go(
+      "/rooms/${success.roomId}",
+      extra: ChatRouterInputArgument(
+        type: ChatRouterInputArgumentType.draft,
+        data: success.groupName,
+      ),
+    );
   }
 
   void _getImageOnWeb(
