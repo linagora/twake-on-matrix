@@ -30,19 +30,18 @@ class RecoveryWordsAPI {
   }
 
   Future<bool> deleteRecoveryWords() async {
-    final options = Options(
-      validateStatus: (status) {
-        if (status == null) return false;
-        return status >= 200 && status <= 299 || status == 404;
-      },
-    );
+    final options = Options(validateStatus: _deleteRecoverySuccess);
     final response = await _client
         .delete(TomEndpoint.recoveryWordsServicePath.path, options: options)
         .onError((error, stackTrace) {
       Logs().e('RecoveryWordsAPI::deleteRecoveryWords() [Exception]', error);
       throw Exception(error);
     });
-    return response.statusCode >= 200 && response.statusCode <= 299 ||
-        response.statusCode == 404;
+    return _deleteRecoverySuccess(response?.statusCode);
+  }
+
+  bool _deleteRecoverySuccess(int? statusCode) {
+    if (statusCode == null) return false;
+    return statusCode >= 200 && statusCode <= 299 || statusCode == 404;
   }
 }
