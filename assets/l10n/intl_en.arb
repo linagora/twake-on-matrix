@@ -2725,5 +2725,6 @@
     "errorPageTitle": "Something's not right",
     "errorPageDescription": "That page doesn't exist.",
     "errorPageButton": "Back to chat",
-    "playVideo": "Play"
+    "playVideo": "Play",
+    "done": "Done"
 }

@@ -3,8 +3,15 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
+typedef ChatListBottomNavigatorBarIcon = Function(ChatListBottomNavigatorBar);
+
 class ChatListBottomNavigator extends StatelessWidget {
-  const ChatListBottomNavigator({super.key});
+  const ChatListBottomNavigator({
+    super.key,
+    required this.onTapBottomNavigation,
+  });
+
+  final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
   @override
   Widget build(BuildContext context) {
@@ -16,22 +23,28 @@ class ChatListBottomNavigator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: _getNavigationDestinations.map(
           (item) {
-            return SizedBox(
-              width: ChatListBottomNavigatorStyle.width,
-              child: Column(
-                children: [
-                  Icon(
-                    item.icon(context),
-                    size: ChatListBottomNavigatorStyle.iconSize,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  Text(
-                    item.title(context),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ],
+            return InkWell(
+              onTap: () => onTapBottomNavigation(item),
+              child: SizedBox(
+                width: ChatListBottomNavigatorStyle.width,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: ChatListBottomNavigatorStyle.paddingIcon,
+                      child: Icon(
+                        item.icon(context),
+                        size: ChatListBottomNavigatorStyle.iconSize,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      item.title(context),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
