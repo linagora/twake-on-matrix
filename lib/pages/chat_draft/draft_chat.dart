@@ -166,6 +166,8 @@ class DraftChatController extends State<DraftChat>
               '/rooms/${room.id}/',
               extra: ChatRouterInputArgument(
                 type: ChatRouterInputArgumentType.draft,
+                data: presentationContact?.displayName ??
+                    presentationContact?.matrixId,
               ),
             );
           }
