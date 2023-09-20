@@ -14,20 +14,18 @@ import 'settings.dart';
 
 class SettingsView extends StatelessWidget {
   final SettingsController controller;
+  final Widget? bottomNavigationBar;
 
-  const SettingsView(this.controller, {Key? key}) : super(key: key);
+  const SettingsView(
+    this.controller, {
+    super.key,
+    this.bottomNavigationBar,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: CloseButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            }
-          },
-        ),
         title: Text(L10n.of(context)!.settings),
         actions: [
           TextButton.icon(
@@ -37,6 +35,7 @@ class SettingsView extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: bottomNavigationBar,
       body: ListTileTheme(
         iconColor: Theme.of(context).colorScheme.onBackground,
         child: ListView(
@@ -148,25 +147,25 @@ class SettingsView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
               title: Text(L10n.of(context)!.notifications),
-              onTap: () => context.go('/rooms/settings/notifications'),
+              onTap: () => context.go('/rooms/notifications'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.devices_outlined),
               title: Text(L10n.of(context)!.devices),
-              onTap: () => context.go('/rooms/settings/devices'),
+              onTap: () => context.go('/rooms/devices'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.chat_bubble_outline_outlined),
               title: Text(L10n.of(context)!.chat),
-              onTap: () => context.go('/rooms/settings/chat'),
+              onTap: () => context.go('/rooms/chat'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             ListTile(
               leading: const Icon(Icons.shield_outlined),
               title: Text(L10n.of(context)!.security),
-              onTap: () => context.go('/rooms/settings/security'),
+              onTap: () => context.go('/rooms/security'),
               trailing: const Icon(Icons.chevron_right_outlined),
             ),
             const Divider(thickness: 1),
