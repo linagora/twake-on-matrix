@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_stream.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -13,12 +14,14 @@ class ChatListView extends StatelessWidget {
   final ChatListController controller;
   final Widget? bottomNavigationBar;
   final VoidCallback? onOpenSearchPage;
+  final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
   const ChatListView({
     Key? key,
     required this.controller,
     this.bottomNavigationBar,
     this.onOpenSearchPage,
+    required this.onTapBottomNavigation,
   }) : super(key: key);
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
@@ -34,28 +37,47 @@ class ChatListView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(
-          controller: controller,
+          selectModeNotifier: controller.selectModeNotifier,
+          openSelectMode: controller.toggleSelectMode,
           onOpenSearchPage: onOpenSearchPage,
+          conversationSelectionNotifier:
+              controller.conversationSelectionNotifier,
+          onClearSelection: controller.clearSelection,
         ),
       ),
-      bottomNavigationBar: bottomNavigationBar,
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: controller.selectModeNotifier,
+        builder: (context, _, __) {
+          if (controller.isSelectMode) {
+            return ChatListBottomNavigator(
+              onTapBottomNavigation: onTapBottomNavigation,
+            );
+          } else {
+            return bottomNavigationBar ?? const SizedBox();
+          }
+        },
+      ),
       body: ChatListBodyStream(controller: controller),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: controller.selectMode == SelectMode.normal
-          ? KeyBoardShortcuts(
-              keysToPress: {
-                LogicalKeyboardKey.controlLeft,
-                LogicalKeyboardKey.keyN
-              },
-              onKeysPressed: () => context.go('/rooms/newprivatechat'),
-              helpLabel: L10n.of(context)!.newChat,
-              child: TwakeFloatingActionButton(
-                icon: Icons.mode_edit_outline_outlined,
-                size: 18.0,
-                onTap: () => context.go('/rooms/newprivatechat'),
-              ),
-            )
-          : null,
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: controller.selectModeNotifier,
+        builder: (context, _, __) {
+          if (controller.isSelectMode) return const SizedBox();
+          return KeyBoardShortcuts(
+            keysToPress: {
+              LogicalKeyboardKey.controlLeft,
+              LogicalKeyboardKey.keyN
+            },
+            onKeysPressed: () => context.go('/rooms/newprivatechat'),
+            helpLabel: L10n.of(context)!.newChat,
+            child: TwakeFloatingActionButton(
+              icon: Icons.mode_edit_outline_outlined,
+              size: ChatListViewStyle.editIconSize,
+              onTap: () => context.go('/rooms/newprivatechat'),
+            ),
+          );
+        },
+      ),
     );
   }
 }
