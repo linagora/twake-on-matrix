@@ -2532,36 +2532,16 @@
     "noOtherDevicesFound": "No other devices found",
     "fileIsTooBigForServer": "The server reports that the file is too large to be sent.",
     "onlineStatus": "online",
-    "onlineLongTimeAgo": "online long time ago",
-    "onlineMinAgo": "online {min} min ago",
+    "onlineMinAgo": "online {min}m ago",
     "@onlineMinAgo": {
         "placeholders": {
             "min": {}
         }
     },
-    "onlineHourAgo": "online {hour} h {min} min ago",
+    "onlineHourAgo": "online {hour}h ago",
     "@onlineHourAgo": {
         "placeholders": {
-            "hour": {},
-            "min": {}
-        }
-    },
-    "onlineDayAgo": "online {day} day ago",
-    "@onlineDayAgo": {
-        "placeholders": {
-            "day": {}
-        }
-    },
-    "onlineWeekAgo": "online {week} week ago",
-    "@onlineWeekAgo": {
-        "placeholders": {
-            "week": {}
-        }
-    },
-    "onlineMonthAgo": "online {month} month ago",
-    "@onlineMonthAgo": {
-        "placeholders": {
-            "month": {}
+            "hour": {}
         }
     },
     "noMessageHereYet": "No message here yet...",

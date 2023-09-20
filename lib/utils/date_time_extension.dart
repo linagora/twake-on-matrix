@@ -126,4 +126,14 @@ extension DateTimeExtension on DateTime {
   String getFormattedCurrentDateTime() {
     return millisecondsSinceEpoch.toString();
   }
+
+  bool isLessThanOneHourAgo({DateTime? other}) {
+    other ??= DateTime.now();
+    return other.difference(this) < const Duration(hours: 1);
+  }
+
+  bool isLessThanTenHoursAgo({DateTime? other}) {
+    other ??= DateTime.now();
+    return other.difference(this) < const Duration(hours: 10);
+  }
 }

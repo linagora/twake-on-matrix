@@ -180,7 +180,7 @@ class ChatView extends StatelessWidget {
                               room: controller.room,
                               isArchived: controller.isArchived,
                               sendController: controller.sendController,
-                              getStreamInstance: controller
+                              connectivityResultStream: controller
                                   .networkConnectionService
                                   .getStreamInstance(),
                               actions: _appBarActions(context),
