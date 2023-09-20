@@ -31,7 +31,7 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
   final PageController pageController =
-      PageController(initialPage: 1, keepPage: false);
+      PageController(initialPage: 1, keepPage: true);
 
   Future<Profile?> fetchOwnProfile() {
     if (!profileMemoizers.containsKey(matrix.client)) {
@@ -51,6 +51,10 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
         break;
       case 1:
         activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+        pageController.jumpToPage(index);
+        break;
+      case 2:
+        activeNavigationBar.value = AdaptiveDestinationEnum.settings;
         pageController.jumpToPage(index);
         break;
       default:
