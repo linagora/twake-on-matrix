@@ -1,6 +1,6 @@
 enum AdaptiveDestinationEnum {
   contacts,
   rooms,
-  stories,
+  settings,
   search;
 }
