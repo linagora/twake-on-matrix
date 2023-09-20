@@ -1,7 +1,11 @@
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:universal_html/html.dart' as html;
 
 extension SendFileWebExtension on Room {
   Future<String?> sendFileOnWebEvent(
@@ -69,6 +73,12 @@ extension SendFileWebExtension on Room {
       if (thumbnail != null && file.size < thumbnail.size) {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
+    } else if (file is MatrixVideoFile) {
+      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+              .unsigned![fileSendingStatusKey] =
+          FileSendingStatus.generatingThumbnail.name;
+      await handleImageFakeSync(fakeImageEvent);
+      thumbnail ??= await _generateVideoThumbnail(file);
     }
 
     EncryptedFile? encryptedFile;
@@ -125,7 +135,8 @@ extension SendFileWebExtension on Room {
         return null;
       }
     }
-
+    final duration =
+        file is MatrixVideoFile ? await _getVideoDuration(file) : null;
     // Send event
     final content = <String, dynamic>{
       'msgtype': file.msgType,
@@ -167,7 +178,10 @@ extension SendFileWebExtension on Room {
             'hashes': {'sha256': encryptedThumbnail.sha256},
           },
         if (thumbnail != null) 'thumbnail_info': thumbnail.info,
-      }..addAll(thumbnail?.info ?? {}),
+        if (thumbnail?.blurhash != null)
+          'xyz.amorgan.blurhash': thumbnail?.blurhash,
+        if (duration != null) 'duration': duration,
+      },
       if (extraContent != null) ...extraContent,
     };
     final eventId = await sendEvent(
@@ -262,6 +276,54 @@ extension SendFileWebExtension on Room {
         height: originalFile.height,
         blurhash: blurHash?.hash,
       );
+    } catch (e) {
+      Logs().e('Error while generating thumbnail', e);
+      return null;
+    }
+  }
+
+  Future<MatrixImageFile?> _generateVideoThumbnail(
+    MatrixVideoFile originalFile,
+  ) async {
+    if (originalFile.bytes == null) return null;
+    try {
+      final blob = html.Blob([originalFile.bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final result = await VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: AppConfig.thumbnailQuality,
+      );
+      final image = decodeImage(result);
+      final blurHash = image != null ? BlurHash.encode(image) : null;
+
+      return MatrixImageFile(
+        bytes: result,
+        name: originalFile.name,
+        mimeType: originalFile.mimeType,
+        width: originalFile.width,
+        height: originalFile.height,
+        blurhash: blurHash?.hash,
+      );
+    } catch (e) {
+      Logs().e('Error while generating thumbnail', e);
+      return null;
+    }
+  }
+
+  Future<int?> _getVideoDuration(
+    MatrixVideoFile originalFile,
+  ) async {
+    if (originalFile.bytes == null) {
+      return null;
+    }
+    try {
+      final blob = html.Blob([originalFile.bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final videoPlayerController =
+          VideoPlayerController.networkUrl(Uri.parse(url));
+      await videoPlayerController.initialize();
+      return videoPlayerController.value.duration.inMilliseconds;
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
       return null;
