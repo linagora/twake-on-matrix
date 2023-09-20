@@ -139,6 +139,13 @@ dependencies:
   image_gallery_saver: ^2.0.3
   file_saver: ^0.1.1
   flutter_keyboard_visibility: ^5.4.1
+  # TODO: Remove it after this PR merged
+  # https://github.com/justsoft/video_thumbnail/pull/135
+  video_thumbnail:
+    git:
+      url: https://github.com/maRci002/video_thumbnail.git
+      ref: feat-web_implementation
+      path: video_thumbnail
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3

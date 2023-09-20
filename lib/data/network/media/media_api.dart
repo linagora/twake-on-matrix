@@ -5,7 +5,6 @@ import 'package:fluffychat/data/model/media/upload_file_json.dart';
 import 'package:fluffychat/data/model/media/url_preview_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';

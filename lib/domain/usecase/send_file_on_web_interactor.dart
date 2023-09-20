@@ -30,7 +30,7 @@ class SendFileOnWebInteractor {
         );
       }
     } catch (error) {
-      Logs().d("SendFileInteractor: execute(): $error");
+      Logs().w("SendFileInteractor: execute(): $error");
     }
   }
 }

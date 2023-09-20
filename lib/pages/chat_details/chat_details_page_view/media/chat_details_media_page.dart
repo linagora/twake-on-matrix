@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatDetailsMediaPage extends StatelessWidget {
@@ -62,7 +63,7 @@ class ChatDetailsMediaPage extends StatelessWidget {
                       context,
                     ),
                     child: Text(
-                      "00:00",
+                      events[index].duration?.mediaTimeLength() ?? "--:--",
                       style: ChatDetailsMediaStyle.durationTextStyle(context),
                     ),
                   ),
