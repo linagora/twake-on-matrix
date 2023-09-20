@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -21,8 +22,10 @@ class VideoAssetEntity extends FileAssetEntity {
       file.lengthSync(),
       width: assetEntity.width,
       height: assetEntity.height,
+      duration: assetEntity.videoDuration,
       imagePlaceholderBytes: await assetEntity.thumbnailDataWithSize(
             ThumbnailSize(assetEntity.width, assetEntity.height),
+            quality: AppConfig.thumbnailQuality,
           ) ??
           Uint8List(0),
     );
