@@ -2548,27 +2548,18 @@
       "count": {}
     }
   },
-  "onlineHourAgo": "был(а) в сети {hour} ч. {min} мин. назад",
+  "onlineHourAgo": "был(а) в сети {hour} ч",
   "@onlineHourAgo": {
     "placeholders": {
-      "hour": {},
-      "min": {}
+      "hour": {}
     }
   },
   "onlineStatus": "онлайн",
   "@onlineStatus": {},
-  "onlineLongTimeAgo": "был(а) в сети давно",
-  "@onlineLongTimeAgo": {},
   "onlineMinAgo": "был(а) в сети {min} мин. назад",
   "@onlineMinAgo": {
     "placeholders": {
       "min": {}
-    }
-  },
-  "onlineDayAgo": "был(а) в сети {day} дня назад",
-  "@onlineDayAgo": {
-    "placeholders": {
-      "day": {}
     }
   },
   "chatCanHave": "В этом чате:",
@@ -2607,18 +2598,6 @@
   "@enterGroupName": {
     "type": "text",
     "placeholders": {}
-  },
-  "onlineWeekAgo": "был(а) в сети {week} недели назад",
-  "@onlineWeekAgo": {
-    "placeholders": {
-      "week": {}
-    }
-  },
-  "onlineMonthAgo": "был(а) в сети {month} месяца назад",
-  "@onlineMonthAgo": {
-    "placeholders": {
-      "month": {}
-    }
   },
   "noMessageHereYet": "Здесь еще нет сообщений...",
   "@noMessageHereYet": {},

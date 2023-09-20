@@ -593,6 +593,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
+    client.sync(setPresence: client.syncPresence);
     client.requestHistoryOnLimitedTimeline = !foreground;
     backgroundPush?.clearAllNotifications();
   }

@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
+import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final Widget? actions;
@@ -17,7 +19,7 @@ class ChatAppBarTitle extends StatelessWidget {
   final List<Event> selectedEvents;
   final bool isArchived;
   final TextEditingController sendController;
-  final Stream<ConnectivityResult> getStreamInstance;
+  final Stream<ConnectivityResult> connectivityResultStream;
   final VoidCallback onPushDetails;
   final String? roomName;
 
@@ -29,7 +31,7 @@ class ChatAppBarTitle extends StatelessWidget {
     required this.selectedEvents,
     required this.isArchived,
     required this.sendController,
-    required this.getStreamInstance,
+    required this.connectivityResultStream,
     required this.onPushDetails,
   }) : super(key: key);
 
@@ -98,7 +100,10 @@ class ChatAppBarTitle extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: ChatAppBarTitleStyle.appBarTitleStyle(context),
                 ),
-                _buildStatusContent(context, room!),
+                _ChatAppBarStatusContent(
+                  connectivityResultStream: connectivityResultStream,
+                  room: room!,
+                ),
               ],
             ),
           ),
@@ -106,62 +111,182 @@ class ChatAppBarTitle extends StatelessWidget {
       ),
     );
   }
+}
 
-  StreamBuilder<ConnectivityResult> _buildStatusContent(
-    BuildContext context,
-    Room room,
-  ) {
-    final TextStyle? statusTextStyle =
-        ChatAppBarTitleStyle.statusTextStyle(context);
-    return StreamBuilder<ConnectivityResult>(
-      stream: getStreamInstance,
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data == ConnectivityResult.none) {
-          return Text(
-            L10n.of(context)!.noConnection,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: statusTextStyle,
+class _ChatAppBarStatusContent extends StatelessWidget {
+  const _ChatAppBarStatusContent({
+    required this.connectivityResultStream,
+    required this.room,
+  });
+
+  final Stream<ConnectivityResult> connectivityResultStream;
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    if (room.isDirectChat) {
+      return _DirectChatAppBarStatusContent(
+        connectivityResultStream: connectivityResultStream,
+        room: room,
+      );
+    }
+
+    return _GroupChatAppBarStatusContent(
+      connectivityResultStream: connectivityResultStream,
+      room: room,
+    );
+  }
+}
+
+class _DirectChatAppBarStatusContent extends StatelessWidget {
+  const _DirectChatAppBarStatusContent({
+    required this.connectivityResultStream,
+    required this.room,
+  });
+
+  final Stream<ConnectivityResult> connectivityResultStream;
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    CachedPresence? directChatPresence = room.directChatPresence;
+    return FutureBuilder<GetPresenceResponse>(
+      future: room.client.getPresence(room.directChatMatrixID!),
+      builder: (context, futureSnapshot) {
+        if (futureSnapshot.hasData) {
+          directChatPresence = CachedPresence.fromPresenceResponse(
+            futureSnapshot.data!,
+            room.directChatMatrixID!,
           );
+        }
+        return StreamBuilder<List>(
+          stream: CombineLatestStream.list(
+            [connectivityResultStream, room.directChatPresenceStream],
+          ),
+          builder: (context, snapshot) {
+            final connectivityResult = tryCast<ConnectivityResult>(
+              snapshot.data?[0],
+              fallback: ConnectivityResult.none,
+            );
+            directChatPresence = tryCast<CachedPresence>(
+              snapshot.data?[1],
+              fallback: directChatPresence,
+            );
+            if (snapshot.hasData &&
+                connectivityResult == ConnectivityResult.none) {
+              return _ChatAppBarTitleText(text: L10n.of(context)!.noConnection);
+            }
+            final typingText = room.getLocalizedTypingText(context);
+            if (typingText.isEmpty) {
+              return _ChatAppBarTitleText(
+                text: room
+                    .getLocalizedStatus(context, presence: directChatPresence)
+                    .capitalize(context),
+              );
+            } else {
+              return _ChatAppBarTitleTyping(typingText: typingText);
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+class _GroupChatAppBarStatusContent extends StatelessWidget {
+  const _GroupChatAppBarStatusContent({
+    required this.connectivityResultStream,
+    required this.room,
+  });
+
+  final Stream<ConnectivityResult> connectivityResultStream;
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<ConnectivityResult>(
+      stream: connectivityResultStream,
+      builder: (context, snapshot) {
+        final connectivityResult = tryCast<ConnectivityResult>(
+          snapshot.data,
+          fallback: ConnectivityResult.none,
+        );
+
+        if (snapshot.hasData && connectivityResult == ConnectivityResult.none) {
+          return _ChatAppBarTitleText(text: L10n.of(context)!.noConnection);
         }
         final typingText = room.getLocalizedTypingText(context);
         if (typingText.isEmpty) {
-          return Text(
-            room.getLocalizedStatus(context).capitalize(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: statusTextStyle,
+          return _ChatAppBarTitleText(
+            text: room.getLocalizedStatus(context).capitalize(context),
           );
         } else {
-          return IntrinsicWidth(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    typingText,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    style: statusTextStyle,
-                  ),
-                ),
-                SizedBox(
-                  width: 32,
-                  height: 16,
-                  child: Transform.translate(
-                    offset: const Offset(0, -2),
-                    child: LottieBuilder.asset(
-                      'assets/typing-indicator.zip',
-                      fit: BoxFit.fitWidth,
-                      width: 32,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
+          return _ChatAppBarTitleTyping(typingText: typingText);
         }
       },
+    );
+  }
+}
+
+class _ChatAppBarTitleText extends StatelessWidget {
+  const _ChatAppBarTitleText({
+    required this.text,
+  });
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle? statusTextStyle =
+        ChatAppBarTitleStyle.statusTextStyle(context);
+
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: statusTextStyle,
+    );
+  }
+}
+
+class _ChatAppBarTitleTyping extends StatelessWidget {
+  const _ChatAppBarTitleTyping({
+    required this.typingText,
+  });
+
+  final String typingText;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle? statusTextStyle =
+        ChatAppBarTitleStyle.statusTextStyle(context);
+
+    return IntrinsicWidth(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Text(
+              typingText,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+              style: statusTextStyle,
+            ),
+          ),
+          SizedBox(
+            width: 32,
+            height: 16,
+            child: Transform.translate(
+              offset: const Offset(0, -2),
+              child: LottieBuilder.asset(
+                'assets/typing-indicator.zip',
+                fit: BoxFit.fitWidth,
+                width: 32,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
