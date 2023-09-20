@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
@@ -55,9 +55,11 @@ extension SendFileExtension on Room {
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-          .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
-      await handleImageFakeSync(fakeImageEvent);
+      await _updateFakeSync(
+        fakeImageEvent,
+        messageSendingStatusKey,
+        EventStatus.error.intValue,
+      );
       rethrow;
     }
 
@@ -77,10 +79,11 @@ extension SendFileExtension on Room {
     // computing the thumbnail in case we can
     if (fileInfo is ImageFileInfo &&
         (thumbnail == null || shrinkImageMaxDimension != null)) {
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-              .unsigned![fileSendingStatusKey] =
-          FileSendingStatus.generatingThumbnail.name;
-      await handleImageFakeSync(fakeImageEvent);
+      await _updateFakeSync(
+        fakeImageEvent,
+        fileSendingStatusKey,
+        FileSendingStatus.generatingThumbnail.name,
+      );
       thumbnail ??= await _generateThumbnail(
         fileInfo,
         targetPath: tempThumbnailFile.path,
@@ -89,14 +92,23 @@ extension SendFileExtension on Room {
       if (thumbnail != null && fileInfo.fileSize < thumbnail.fileSize) {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
+    } else if (fileInfo is VideoFileInfo) {
+      await _updateFakeSync(
+        fakeImageEvent,
+        fileSendingStatusKey,
+        FileSendingStatus.generatingThumbnail.name,
+      );
+      thumbnail ??= await _getThumbnailVideo(tempThumbnailFile, fileInfo);
     }
 
     EncryptedFileInfo? encryptedFileInfo;
     EncryptedFileInfo? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-          .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
-      await handleImageFakeSync(fakeImageEvent);
+      await _updateFakeSync(
+        fakeImageEvent,
+        fileSendingStatusKey,
+        FileSendingStatus.encrypting.name,
+      );
 
       encryptedFileInfo = await encryptedService.encryptFile(
         fileInfo: fileInfo,
@@ -116,8 +128,11 @@ extension SendFileExtension on Room {
     }
     Uri? uploadResp, thumbnailUploadResp;
 
-    fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-        .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
+    await _updateFakeSync(
+      fakeImageEvent,
+      fileSendingStatusKey,
+      FileSendingStatus.uploading.name,
+    );
     while (uploadResp == null ||
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
@@ -140,15 +155,19 @@ extension SendFileExtension on Room {
               Uri.tryParse(thumbnailResponse.contentUri ?? "");
         }
       } on MatrixException catch (e) {
-        fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-            .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
-        await handleImageFakeSync(fakeImageEvent);
+        await _updateFakeSync(
+          fakeImageEvent,
+          messageSendingStatusKey,
+          EventStatus.error.name,
+        );
         Logs().e('Error: $e');
         rethrow;
       } catch (e) {
-        fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-            .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
-        await handleImageFakeSync(fakeImageEvent);
+        await _updateFakeSync(
+          fakeImageEvent,
+          messageSendingStatusKey,
+          EventStatus.error.intValue,
+        );
         Logs().e('Error: $e');
         Logs().e('Send File into room failed. Try again...');
         return null;
@@ -195,7 +214,7 @@ extension SendFileExtension on Room {
           'thumbnail_file': encryptedThumbnail.toJson(),
         if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
         if (blurHash != null) 'xyz.amorgan.blurhash': blurHash,
-      }..addAll(thumbnail?.metadata ?? {}),
+      },
       if (extraContent != null) ...extraContent,
     };
     final eventId = await sendEvent(
@@ -204,7 +223,11 @@ extension SendFileExtension on Room {
       inReplyTo: inReplyTo,
       editEventId: editEventId,
     );
-    await tempEncryptedFile.delete();
+    await Future.wait([
+      tempEncryptedFile.delete(),
+      tempThumbnailFile.delete(),
+      tempEncryptedThumbnailFile.delete()
+    ]);
     return eventId;
   }
 
@@ -323,7 +346,7 @@ extension SendFileExtension on Room {
       final result = await FlutterImageCompress.compressAndGetFile(
         originalFile.filePath,
         targetPath,
-        quality: 70,
+        quality: AppConfig.thumbnailQuality,
       );
       if (result == null) return null;
       final size = await result.length();
@@ -345,5 +368,29 @@ extension SendFileExtension on Room {
     if (image == null) return null;
     final blurHash = BlurHash.encode(image, numCompX: 4, numCompY: 3);
     return blurHash.hash;
+  }
+
+  Future<ImageFileInfo> _getThumbnailVideo(
+    File tempThumbnailFile,
+    VideoFileInfo fileInfo,
+  ) async {
+    await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
+    Logs().d('Video thumbnail generated', tempThumbnailFile.path);
+    final newThumbnail = ImageFileInfo(
+      tempThumbnailFile.path.split("/").last,
+      tempThumbnailFile.path,
+      fileInfo.imagePlaceholderBytes.lengthInBytes,
+    );
+    return newThumbnail;
+  }
+
+  Future<void> _updateFakeSync(
+    SyncUpdate fakeImageEvent,
+    String key,
+    Object? value,
+  ) async {
+    fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+        .unsigned![key] = value;
+    await handleImageFakeSync(fakeImageEvent);
   }
 }

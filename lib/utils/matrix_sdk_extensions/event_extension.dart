@@ -76,6 +76,12 @@ extension LocalizedBody on Event {
           isThumbnailSmallEnough ||
           (content['url'] is String));
 
+  Duration? get duration {
+    return infoMap['duration'] is int
+        ? Duration(milliseconds: infoMap['duration'])
+        : null;
+  }
+
   String? get sizeString => content
       .tryGetMap<String, dynamic>('info')
       ?.tryGet<int>('size')
