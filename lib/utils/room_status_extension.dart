@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,50 +11,15 @@ extension RoomStatusExtension on Room {
   CachedPresence? get directChatPresence =>
       client.presences[directChatMatrixID];
 
-  String getLocalizedStatus(BuildContext context) {
-    if (isDirectChat) {
-      final directChatPresence = this.directChatPresence;
-      if (directChatPresence != null) {
-        if (directChatPresence.currentlyActive == true) {
-          return L10n.of(context)!.onlineStatus;
-        }
-        if (directChatPresence.lastActiveTimestamp == null) {
-          return L10n.of(context)!.onlineLongTimeAgo;
-        }
-        final time = directChatPresence.lastActiveTimestamp!;
+  Stream<CachedPresence> get directChatPresenceStream =>
+      client.onPresenceChanged.stream;
 
-        if (DateTime.now().isBefore(time.add(const Duration(hours: 1)))) {
-          return L10n.of(context)!
-              .onlineMinAgo(DateTime.now().difference(time).inMinutes);
-        } else if (DateTime.now()
-            .isBefore(time.add(const Duration(hours: 24)))) {
-          final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!.onlineHourAgo(
-            timeOffline.inHours,
-            timeOffline.inMinutes - (timeOffline.inHours * 60),
-          );
-        } else if (DateTime.now().isBefore(time.add(const Duration(days: 7)))) {
-          final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!.onlineDayAgo(timeOffline.inDays);
-        } else if (DateTime.now()
-            .isBefore(time.add(const Duration(days: 30)))) {
-          final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!
-              .onlineWeekAgo((timeOffline.inDays / 7).truncate());
-        } else if (DateTime.now()
-            .isBefore(time.add(const Duration(days: 365)))) {
-          final timeOffline = DateTime.now().difference(time);
-          return L10n.of(context)!
-              .onlineMonthAgo((timeOffline.inDays / 30).truncate());
-        }
-      }
-      return L10n.of(context)!.onlineLongTimeAgo;
+  String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
+    if (isDirectChat) {
+      return _getLocalizedStatusDirectChat(presence, context);
     }
 
-    final totalMembers =
-        (summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0);
-
-    return L10n.of(context)!.membersCount(totalMembers.toString());
+    return _getLocalizedStatusGroupChat(context);
   }
 
   String getLocalizedTypingText(BuildContext context) {
@@ -125,5 +91,38 @@ extension RoomStatusExtension on Room {
     return getLocalizedTypingText(context).isNotEmpty &&
         lastEvent?.senderId == client.userID &&
         lastEvent!.status.isSending;
+  }
+
+  String _getLocalizedStatusGroupChat(BuildContext context) {
+    final totalMembers =
+        (summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0);
+
+    return L10n.of(context)!.membersCount(totalMembers.toString());
+  }
+
+  String _getLocalizedStatusDirectChat(
+    CachedPresence? directChatPresence,
+    BuildContext context,
+  ) {
+    if (directChatPresence != null) {
+      if (directChatPresence.presence == PresenceType.online) {
+        return L10n.of(context)!.onlineStatus;
+      }
+      final lastActiveDateTime = directChatPresence.lastActiveTimestamp;
+      final currentDateTime = DateTime.now();
+      if (lastActiveDateTime != null) {
+        if (lastActiveDateTime.isLessThanOneHourAgo()) {
+          return L10n.of(context)!.onlineMinAgo(
+            currentDateTime.difference(lastActiveDateTime).inMinutes,
+          );
+        } else if (lastActiveDateTime.isLessThanTenHoursAgo()) {
+          final timeOffline = currentDateTime.difference(lastActiveDateTime);
+          return L10n.of(context)!.onlineHourAgo(
+            (timeOffline.inMinutes / 60).round(),
+          );
+        }
+      }
+    }
+    return L10n.of(context)!.offline;
   }
 }

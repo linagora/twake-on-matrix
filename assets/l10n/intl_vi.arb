@@ -2351,11 +2351,10 @@
   },
   "newGroupChat": "Nhóm trò chuyện mới",
   "@newGroupChat": {},
-  "onlineHourAgo": "trực truyến {hour} giờ {min} phút trước",
+  "onlineHourAgo": "trực truyến {hour} giờ trước",
   "@onlineHourAgo": {
     "placeholders": {
-      "hour": {},
-      "min": {}
+      "hour": {}
     }
   },
   "addACaption": "Thêm chú thích...",
@@ -2366,12 +2365,6 @@
     "placeholders": {
       "username": {},
       "username2": {}
-    }
-  },
-  "onlineWeekAgo": "trực tuyến {week} tuần trước",
-  "@onlineWeekAgo": {
-    "placeholders": {
-      "week": {}
     }
   },
   "tuesday": "Thứ ba",
@@ -2397,8 +2390,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "onlineLongTimeAgo": "trực tuyến một khoảng thời gian trước",
-  "@onlineLongTimeAgo": {},
   "reopenChat": "Mở lại cuộc trò chuyện",
   "@reopenChat": {},
   "inactive": "Chưa kích hoạt",
@@ -2570,12 +2561,6 @@
       "targetName": {}
     }
   },
-  "onlineDayAgo": "trực tuyến {day} ngày trước",
-  "@onlineDayAgo": {
-    "placeholders": {
-      "day": {}
-    }
-  },
   "tooManyRequestsWarning": "Quá nhiều yêu cầu. Vui lòng thử lại sau!",
   "@tooManyRequestsWarning": {
     "type": "text",
@@ -2658,12 +2643,6 @@
   "@wrongServerName": {},
   "twakeUsers": "Người dùng Twake",
   "@twakeUsers": {},
-  "onlineMonthAgo": "trực tuyến {month} tháng trước",
-  "@onlineMonthAgo": {
-    "placeholders": {
-      "month": {}
-    }
-  },
   "newGroup": "Cuộc trò chuyện mới",
   "@newGroup": {},
   "enterInviteLinkOrMatrixId": "Nhập liên kết mời hoặc Matrix ID...",
