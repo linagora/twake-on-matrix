@@ -1,9 +1,11 @@
 import 'package:animations/animations.dart';
+import 'package:collection/collection.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/pages/chat_list/stories_header.dart';
+import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
@@ -114,8 +116,8 @@ class ChatListViewBody extends StatelessWidget {
               controller: controller.scrollController,
               // add +1 space below in order to properly scroll below the spaces bar
               itemCount: rooms.length + 1,
-              itemBuilder: (BuildContext context, int i) {
-                if (i == 0) {
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -160,8 +162,8 @@ class ChatListViewBody extends StatelessWidget {
                     ],
                   );
                 }
-                i--;
-                if (!rooms[i]
+                index--;
+                if (!rooms[index]
                     .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!))
                     .toLowerCase()
                     .contains(
@@ -169,15 +171,44 @@ class ChatListViewBody extends StatelessWidget {
                     )) {
                   return Container();
                 }
-                return ChatListItem(
-                  rooms[i],
-                  key: Key('chat_list_item_${rooms[i].id}'),
-                  selected: controller.selectedRoomIds.contains(rooms[i].id),
-                  onTap: controller.selectMode == SelectMode.select
-                      ? () => controller.toggleSelection(rooms[i].id)
-                      : null,
-                  onLongPress: () => controller.toggleSelection(rooms[i].id),
-                  activeChat: controller.activeRoomId == rooms[i].id,
+                return ValueListenableBuilder(
+                  valueListenable: controller.selectModeNotifier,
+                  builder: (context, selectedRoomIds, _) {
+                    return ChatListItem(
+                      rooms[index],
+                      key: Key('chat_list_item_${rooms[index].id}'),
+                      isEnableSelectMode: controller.isSelectMode,
+                      onTap: controller.isSelectMode
+                          ? () => controller.toggleSelection(rooms[index].id)
+                          : null,
+                      // onLongPress: () => controller.toggleSelection(rooms[i].id),
+                      // conversationSelectionNotifier: ValueNotifier(
+                      //   controller.conversationSelectionNotifier.value
+                      //       .firstWhereOrNull(
+                      //     (conversation) =>
+                      //         conversation.roomId.contains(rooms[i].id),
+                      //   ),
+                      // ),
+                      checkBoxWidget: ValueListenableBuilder(
+                        valueListenable:
+                            controller.conversationSelectionNotifier,
+                        builder: (context, conversationSelection, __) {
+                          final conversation =
+                              conversationSelection.firstWhereOrNull(
+                            (conversation) =>
+                                conversation.roomId.contains(rooms[index].id),
+                          );
+                          return Checkbox(
+                            value: conversation?.isSelected == true,
+                            onChanged: (_) {
+                              controller.toggleSelection(rooms[index].id);
+                            },
+                          );
+                        },
+                      ),
+                      activeChat: controller.activeRoomId == rooms[index].id,
+                    );
+                  },
                 );
               },
             );

@@ -5,7 +5,6 @@ import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -17,14 +16,18 @@ enum ArchivedRoomAction { delete, rejoin }
 class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final Room room;
   final bool activeChat;
-  final bool selected;
+  final bool isSelectedItem;
+  final bool isEnableSelectMode;
+  final Widget? checkBoxWidget;
   final void Function()? onTap;
   final void Function()? onLongPress;
 
   const ChatListItem(
     this.room, {
+    this.checkBoxWidget,
     this.activeChat = false,
-    this.selected = false,
+    this.isSelectedItem = false,
+    this.isEnableSelectMode = false,
     this.onTap,
     this.onLongPress,
     Key? key,
@@ -89,33 +92,40 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
       child: Material(
         borderRadius: BorderRadius.circular(AppConfig.borderRadius),
         clipBehavior: Clip.hardEdge,
-        color: selected
+        color: isSelectedItem
             ? Theme.of(context).colorScheme.primaryContainer
             : activeChat
                 ? Theme.of(context).colorScheme.surface
                 : Colors.transparent,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          onLongPress: onLongPress,
-          leading: selected
-              ? SizedBox(
-                  width: AvatarStyle.defaultSize,
-                  height: AvatarStyle.defaultSize,
-                  child: Material(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius:
-                        BorderRadius.circular(AvatarStyle.defaultSize),
-                    child: const Icon(Icons.check, color: Colors.white),
-                  ),
-                )
-              : Avatar(
-                  mxContent: room.avatar,
-                  name: displayname,
-                  onTap: onLongPress,
-                ),
-          title: ChatListItemTitle(room: room),
-          subtitle: ChatListItemSubtitle(room: room),
+        child: InkWell(
           onTap: () => clickAction(context),
+          // onLongPress: onLongPress,
+          onSecondaryTap: () {},
+          onDoubleTap: () {},
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: Avatar(
+                    mxContent: room.avatar,
+                    name: displayname,
+                    onTap: onLongPress,
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      ChatListItemTitle(room: room),
+                      ChatListItemSubtitle(room: room)
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

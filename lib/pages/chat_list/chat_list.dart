@@ -11,6 +11,8 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
+import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
@@ -19,6 +21,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
@@ -27,26 +30,6 @@ import 'package:matrix/matrix.dart';
 import '../../../utils/account_bundles.dart';
 import '../../utils/voip/callkeep_manager.dart';
 import '../../widgets/matrix.dart';
-
-enum SelectMode {
-  normal,
-  select,
-}
-
-enum PopupMenuAction {
-  settings,
-  invite,
-  newGroup,
-  setStatus,
-  archive,
-}
-
-enum ActiveFilter {
-  allChats,
-  groups,
-  messages,
-  spaces,
-}
 
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
@@ -124,33 +107,14 @@ class ChatListController extends State<ChatList>
   SearchUserDirectoryResponse? userSearchResult;
   QueryPublicRoomsResponse? roomSearchResult;
 
+  final ValueNotifier<SelectMode> selectModeNotifier =
+      ValueNotifier(SelectMode.normal);
+
+  final ValueNotifier<List<ConversationSelectionPresentation>>
+      conversationSelectionNotifier = ValueNotifier([]);
+
   bool isSearching = false;
   static const String _serverStoreNamespace = 'im.fluffychat.search.server';
-
-  void setServer() async {
-    final newServer = await showTextInputDialog(
-      useRootNavigator: false,
-      title: L10n.of(context)!.changeTheHomeserver,
-      context: context,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        DialogTextField(
-          prefixText: 'https://',
-          hintText: Matrix.of(context).client.homeserver?.host,
-          initialText: searchServer,
-          keyboardType: TextInputType.url,
-          autocorrect: false,
-        )
-      ],
-    );
-    if (newServer == null) return;
-    Store().setItem(_serverStoreNamespace, newServer.single);
-    setState(() {
-      searchServer = newServer.single;
-    });
-    onSearchEnter(searchChatController.text);
-  }
 
   final TextEditingController searchChatController = TextEditingController();
 
@@ -249,15 +213,15 @@ class ChatListController extends State<ChatList>
   List<Room> get spaces =>
       Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
 
-  final selectedRoomIds = <String>{};
-
   String? get activeRoomId => widget.activeRoomId;
 
-  SelectMode get selectMode =>
-      selectedRoomIds.isEmpty ? SelectMode.normal : SelectMode.select;
+  bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
 
   @override
   void initState() {
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
     initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
@@ -285,46 +249,72 @@ class ChatListController extends State<ChatList>
   }
 
   void toggleSelection(String roomId) {
-    setState(
-      () => selectedRoomIds.contains(roomId)
-          ? selectedRoomIds.remove(roomId)
-          : selectedRoomIds.add(roomId),
+    final conversation = conversationSelectionNotifier.value.firstWhereOrNull(
+      (conversation) => conversation.roomId == roomId,
     );
+
+    final Set<ConversationSelectionPresentation> temp =
+        conversationSelectionNotifier.value.toSet();
+
+    if (conversation != null) {
+      temp.remove(conversation);
+    } else {
+      temp.add(
+        ConversationSelectionPresentation(
+          roomId: roomId,
+          selectionType: SelectionType.selected,
+        ),
+      );
+    }
+
+    conversationSelectionNotifier.value = temp.toList();
   }
 
-  Future<void> toggleUnread() async {
+  void toggleSelectMode() {
+    selectModeNotifier.value =
+        isSelectMode ? SelectMode.normal : SelectMode.select;
+    clearSelection();
+  }
+
+  void clearSelection() {
+    conversationSelectionNotifier.value = [];
+  }
+
+  void toggleUnread() async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
         final markUnread = anySelectedRoomNotMarkedUnread;
         final client = Matrix.of(context).client;
-        for (final roomId in selectedRoomIds) {
-          final room = client.getRoomById(roomId)!;
+        for (final conversation in conversationSelectionNotifier.value) {
+          final room = client.getRoomById(conversation.roomId)!;
           if (room.markedUnread == markUnread) continue;
-          await client.getRoomById(roomId)!.markUnread(markUnread);
+          await client.getRoomById(conversation.roomId)!.markUnread(markUnread);
         }
       },
     );
-    cancelAction();
+    toggleSelectMode();
   }
 
-  Future<void> toggleFavouriteRoom() async {
+  void toggleFavouriteRoom() async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
         final makeFavorite = anySelectedRoomNotFavorite;
         final client = Matrix.of(context).client;
-        for (final roomId in selectedRoomIds) {
-          final room = client.getRoomById(roomId)!;
+        for (final conversation in conversationSelectionNotifier.value) {
+          final room = client.getRoomById(conversation.roomId)!;
           if (room.isFavourite == makeFavorite) continue;
-          await client.getRoomById(roomId)!.setFavourite(makeFavorite);
+          await client
+              .getRoomById(conversation.roomId)!
+              .setFavourite(makeFavorite);
         }
       },
     );
-    cancelAction();
+    toggleSelectMode();
   }
 
-  Future<void> toggleMuted() async {
+  void toggleMuted() async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
@@ -332,14 +322,16 @@ class ChatListController extends State<ChatList>
             ? PushRuleState.mentionsOnly
             : PushRuleState.notify;
         final client = Matrix.of(context).client;
-        for (final roomId in selectedRoomIds) {
-          final room = client.getRoomById(roomId)!;
+        for (final conversation in conversationSelectionNotifier.value) {
+          final room = client.getRoomById(conversation.roomId)!;
           if (room.pushRuleState == newState) continue;
-          await client.getRoomById(roomId)!.setPushRuleState(newState);
+          await client
+              .getRoomById(conversation.roomId)!
+              .setPushRuleState(newState);
         }
       },
     );
-    cancelAction();
+    toggleSelectMode();
   }
 
   Future<void> archiveAction() async {
@@ -385,12 +377,12 @@ class ChatListController extends State<ChatList>
 
   Future<void> _archiveSelectedRooms() async {
     final client = Matrix.of(context).client;
-    while (selectedRoomIds.isNotEmpty) {
-      final roomId = selectedRoomIds.first;
+    while (conversationSelectionNotifier.value.isNotEmpty) {
+      final conversation = conversationSelectionNotifier.value.first;
       try {
-        await client.getRoomById(roomId)!.leave();
+        await client.getRoomById(conversation.roomId)!.leave();
       } finally {
-        toggleSelection(roomId);
+        toggleSelection(conversation.roomId);
       }
     }
   }
@@ -420,8 +412,8 @@ class ChatListController extends State<ChatList>
       future: () async {
         final space = Matrix.of(context).client.getRoomById(selectedSpace)!;
         if (space.canSendDefaultStates) {
-          for (final roomId in selectedRoomIds) {
-            await space.setSpaceChild(roomId);
+          for (final conversation in conversationSelectionNotifier.value) {
+            await space.setSpaceChild(conversation.roomId);
           }
         }
       },
@@ -435,21 +427,31 @@ class ChatListController extends State<ChatList>
       );
     }
 
-    setState(() => selectedRoomIds.clear());
+    conversationSelectionNotifier.value.clear();
   }
 
-  bool get anySelectedRoomNotMarkedUnread => selectedRoomIds.any(
-        (roomId) =>
-            !Matrix.of(context).client.getRoomById(roomId)!.markedUnread,
+  bool get anySelectedRoomNotMarkedUnread =>
+      conversationSelectionNotifier.value.any(
+        (conversation) => !Matrix.of(context)
+            .client
+            .getRoomById(conversation.roomId)!
+            .markedUnread,
       );
 
-  bool get anySelectedRoomNotFavorite => selectedRoomIds.any(
-        (roomId) => !Matrix.of(context).client.getRoomById(roomId)!.isFavourite,
+  bool get anySelectedRoomNotFavorite =>
+      conversationSelectionNotifier.value.any(
+        (conversation) => !Matrix.of(context)
+            .client
+            .getRoomById(conversation.roomId)!
+            .isFavourite,
       );
 
-  bool get anySelectedRoomNotMuted => selectedRoomIds.any(
-        (roomId) =>
-            Matrix.of(context).client.getRoomById(roomId)!.pushRuleState ==
+  bool get anySelectedRoomNotMuted => conversationSelectionNotifier.value.any(
+        (conversation) =>
+            Matrix.of(context)
+                .client
+                .getRoomById(conversation.roomId)!
+                .pushRuleState ==
             PushRuleState.notify,
       );
 
@@ -501,10 +503,6 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  void cancelAction() {
-    setState(() => selectedRoomIds.clear());
-  }
-
   void setActiveClient(Client client) {
     context.go('/rooms');
     setState(() {
@@ -512,7 +510,7 @@ class ChatListController extends State<ChatList>
           ? ActiveFilter.messages
           : ActiveFilter.allChats;
       activeSpaceId = null;
-      selectedRoomIds.clear();
+      conversationSelectionNotifier.value.clear();
       Matrix.of(context).setActiveClient(client);
     });
     _clientStream.add(client);
@@ -521,7 +519,7 @@ class ChatListController extends State<ChatList>
   void setActiveBundle(String bundle) {
     context.go('/rooms');
     setState(() {
-      selectedRoomIds.clear();
+      conversationSelectionNotifier.value.clear();
       Matrix.of(context).activeBundle = bundle;
       if (!Matrix.of(context)
           .currentBundle!
@@ -589,12 +587,19 @@ class ChatListController extends State<ChatList>
     return Matrix.of(context).activeBundle;
   }
 
-  void resetActiveBundle() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      setState(() {
-        Matrix.of(context).activeBundle = null;
-      });
-    });
+  void _onTapBottomNavigation(
+    ChatListBottomNavigatorBar chatListBottomNavigatorBar,
+  ) async {
+    switch (chatListBottomNavigatorBar) {
+      case ChatListBottomNavigatorBar.read:
+        return toggleUnread();
+      case ChatListBottomNavigatorBar.mute:
+        return toggleMuted();
+      case ChatListBottomNavigatorBar.pin:
+        return toggleFavouriteRoom();
+      case ChatListBottomNavigatorBar.more:
+        return;
+    }
   }
 
   @override
@@ -603,6 +608,7 @@ class ChatListController extends State<ChatList>
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
       onOpenSearchPage: widget.onOpenSearchPage,
+      onTapBottomNavigation: _onTapBottomNavigation,
     );
   }
 
