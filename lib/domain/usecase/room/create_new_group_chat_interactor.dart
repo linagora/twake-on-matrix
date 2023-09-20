@@ -31,7 +31,12 @@ class CreateNewGroupChatInteractor {
       );
 
       if (roomId.isNotEmpty) {
-        yield Right(CreateNewGroupChatSuccess(roomId: roomId));
+        yield Right(
+          CreateNewGroupChatSuccess(
+            roomId: roomId,
+            groupName: createNewGroupChatRequest.groupName,
+          ),
+        );
       } else {
         yield Left(
           CreateNewGroupChatFailed(

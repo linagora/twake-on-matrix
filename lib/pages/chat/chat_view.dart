@@ -176,6 +176,7 @@ class ChatView extends StatelessWidget {
                                   .getStreamInstance(),
                               actions: _appBarActions(context),
                               onPushDetails: controller.onPushDetails,
+                              roomName: controller.roomName,
                             );
                           },
                         ),

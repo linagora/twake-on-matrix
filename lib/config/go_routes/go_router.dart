@@ -343,6 +343,15 @@ abstract class AppRoutes {
                   final extra = state.extra as ChatRouterInputArgument;
                   switch (extra.type) {
                     case ChatRouterInputArgumentType.draft:
+                      if (extra.data is String?) {
+                        return NoTransitionPage(
+                          child: Chat(
+                            roomId: state.pathParameters['roomid']!,
+                            key: Key(state.pathParameters['roomid']!),
+                            roomName: extra.data as String?,
+                          ),
+                        );
+                      }
                       return NoTransitionPage(
                         child: Chat(
                           roomId: state.pathParameters['roomid']!,
