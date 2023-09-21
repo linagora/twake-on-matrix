@@ -51,8 +51,10 @@ extension LocalizedBody on Event {
   bool get isVideoOrImage =>
       [MessageTypes.Image, MessageTypes.Video].contains(messageType);
 
-  bool get isContainsLink =>
-      messageType == MessageTypes.Text && text.getFirstValidUrl() != null;
+  String? get firstValidUrl =>
+      messageType == MessageTypes.Text ? text.getFirstValidUrl() : null;
+
+  bool get isContainsLink => firstValidUrl != null;
 
   void shareFile(BuildContext context) async {
     final matrixFile = await getFile(context);
