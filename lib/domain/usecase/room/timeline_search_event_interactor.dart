@@ -14,7 +14,7 @@ class TimelineSearchEventInteractor {
     String? sinceEventId,
   }) async* {
     try {
-      yield* timeline
+      final events = await timeline
           .searchEvent(
             searchFunc: searchFunc,
             requestHistoryCount: requestHistoryCount,
@@ -22,16 +22,10 @@ class TimelineSearchEventInteractor {
             limit: limit,
             sinceEventId: sinceEventId,
           )
-          .map(_convertEventToSuccess);
+          .last;
+      yield Right(TimelineSearchEventSuccess(events: events));
     } catch (e) {
       yield Left(TimelineSearchEventFailure(exception: e));
     }
-  }
-
-  Either<Failure, Success> _convertEventToSuccess(events) {
-    Logs().v(
-      'TimelineSearchEventInteractor::events ${events.length} ${events.map((event) => event.eventId)}',
-    );
-    return Right(TimelineSearchEventSuccess(events: events));
   }
 }

@@ -42,8 +42,6 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails> {
-  static const _mediaFetchLimit = 20;
-  static const _linksFetchLimit = 20;
   final invitationSelectionMobileAndTabletKey =
       const Key('InvitationSelectionMobileAndTabletKey');
 
@@ -453,7 +451,6 @@ class ChatDetailsController extends State<ChatDetails> {
         ChatDetailsPageModel(
           page: ChatDetailsPage.media,
           child: ChatDetailsMediaPage(
-            eventsListController: mediaListController,
             getTimeline: getTimeline,
             cacheMap: _mediaCacheMap,
           ),
@@ -465,7 +462,6 @@ class ChatDetailsController extends State<ChatDetails> {
         ChatDetailsPageModel(
           page: ChatDetailsPage.links,
           child: ChatDetailsLinksPage(
-            eventsListController: linksListController,
             getTimeline: getTimeline,
           ),
         ),
