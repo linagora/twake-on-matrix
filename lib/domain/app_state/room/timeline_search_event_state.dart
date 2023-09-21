@@ -14,6 +14,11 @@ class TimelineSearchEventSuccess extends Success {
 
   @override
   List<Object?> get props => [events];
+
+  @override
+  String toString() {
+    return "TimelineSearchEventSuccess ${events.length} ${events.map((event) => event.eventId)}";
+  }
 }
 
 class TimelineSearchEventFailure extends Failure {
