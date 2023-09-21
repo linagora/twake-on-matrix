@@ -1,5 +1,3 @@
-import 'package:dartz/dartz.dart';
-
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -39,11 +37,4 @@ class ChatRoomSearchFailure extends Failure {
 
   @override
   List<Object?> get props => [exception];
-}
-
-extension ChatRoomSearchEitherExtension on Either {
-  ChatRoomSearchSuccess? getSuccessOrNull() => fold(
-        (failure) => null,
-        (success) => success is ChatRoomSearchSuccess ? success : null,
-      );
 }
