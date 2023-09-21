@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
@@ -32,11 +31,4 @@ extension TimelineSearchEventSuccessExtension on TimelineSearchEventSuccess {
       events: events + other.events,
     );
   }
-}
-
-extension TimelineSearchEventEitherExtension on Either {
-  TimelineSearchEventSuccess? getSuccessOrNull() => fold(
-        (failure) => null,
-        (success) => success is TimelineSearchEventSuccess ? success : null,
-      );
 }
