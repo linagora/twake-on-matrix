@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 typedef ChatListBottomNavigatorBarIcon = Function(ChatListSelectionActions);
 
 class ChatListBottomNavigator extends StatelessWidget {
+  final List<Widget> bottomNavigationActionsWidget;
+
   const ChatListBottomNavigator({
     super.key,
-    required this.onTapBottomNavigation,
+    required this.bottomNavigationActionsWidget,
   });
-
-  final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
   @override
   Widget build(BuildContext context) {
@@ -21,44 +21,8 @@ class ChatListBottomNavigator extends StatelessWidget {
       color: Theme.of(context).colorScheme.surface,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: _getNavigationDestinations.map(
-          (item) {
-            return InkWell(
-              onTap: () => onTapBottomNavigation(item),
-              child: SizedBox(
-                width: ChatListBottomNavigatorStyle.width,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: ChatListBottomNavigatorStyle.paddingIcon,
-                      child: Icon(
-                        item.getIcon(context),
-                        size: ChatListBottomNavigatorStyle.iconSize,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      item.getTitleForMobile(context),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ).toList(),
+        children: bottomNavigationActionsWidget,
       ),
     );
-  }
-
-  List<ChatListSelectionActions> get _getNavigationDestinations {
-    return [
-      ChatListSelectionActions.read,
-      ChatListSelectionActions.mute,
-      ChatListSelectionActions.pin,
-      ChatListSelectionActions.more,
-    ];
   }
 }

@@ -1,6 +1,7 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_mixin.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -20,7 +21,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final bool isEnableSelectMode;
   final Widget? checkBoxWidget;
   final void Function()? onTap;
-  final void Function()? onLongPress;
+  final void Function()? onTapAvatar;
   final void Function()? onSecondaryTap;
 
   const ChatListItem(
@@ -30,7 +31,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.isSelectedItem = false,
     this.isEnableSelectMode = false,
     this.onTap,
-    this.onLongPress,
+    this.onTapAvatar,
     this.onSecondaryTap,
     Key? key,
   }) : super(key: key);
@@ -87,10 +88,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
       MatrixLocals(L10n.of(context)!),
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 1,
-      ),
+      padding: ChatListItemStyle.paddingConversation,
       child: Material(
         borderRadius: BorderRadius.circular(AppConfig.borderRadius),
         clipBehavior: Clip.hardEdge,
@@ -101,19 +99,18 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 : Colors.transparent,
         child: InkWell(
           onTap: () => clickAction(context),
-          // onLongPress: onLongPress,
           onSecondaryTap: onSecondaryTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: ChatListItemStyle.paddingBody,
             child: Row(
               children: [
                 if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  padding: ChatListItemStyle.paddingAvatar,
                   child: Avatar(
                     mxContent: room.avatar,
                     name: displayname,
-                    onTap: onLongPress,
+                    onTap: onTapAvatar,
                   ),
                 ),
                 Expanded(
