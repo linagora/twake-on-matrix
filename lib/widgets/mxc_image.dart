@@ -252,8 +252,8 @@ class _MxcImageState extends State<MxcImage>
               data,
               width: widget.width,
               height: widget.height,
-              cacheWidth: widget.width?.toInt(),
-              cacheHeight: widget.height?.toInt(),
+              cacheWidth: widget.event != null ? widget.width?.toInt() : null,
+              cacheHeight: widget.event != null ? widget.height?.toInt() : null,
               fit: widget.fit,
               filterQuality: FilterQuality.medium,
               errorBuilder: (context, __, ___) {

@@ -79,7 +79,7 @@ mixin ChatRoomSearchMixin {
         );
         searchStatus.value = event;
         _scrollToEvent(event);
-        canGoUp.value = event.getSuccessOrNull() != null;
+        canGoUp.value = event.getSuccessOrNull<ChatRoomSearchSuccess>() != null;
         canGoDown.value = false;
       },
     );
@@ -93,7 +93,7 @@ mixin ChatRoomSearchMixin {
   }
 
   void _scrollToEvent(Either<Failure, Success> event) {
-    final index = event.getSuccessOrNull()?.eventIndex;
+    final index = event.getSuccessOrNull<ChatRoomSearchSuccess>()?.eventIndex;
     if (index != null) {
       _scrollToIndex?.call(index);
     }
@@ -108,7 +108,8 @@ mixin ChatRoomSearchMixin {
   }
 
   void _goSearchResult(BuildContext context, {required Direction direction}) {
-    final lastSuccess = searchStatus.value.getSuccessOrNull();
+    final lastSuccess =
+        searchStatus.value.getSuccessOrNull<ChatRoomSearchSuccess>();
     final timeline = _getTimeline?.call();
     if (timeline == null || lastSuccess == null) return;
     _searchInteractor
