@@ -123,7 +123,7 @@ class ClientChooserButton extends StatelessWidget {
     int clientCount = 0;
     matrix.accountBundles.forEach((key, value) => clientCount += value.length);
     return FutureBuilder<Profile?>(
-      future: controller.fetchOwnProfile(client: matrix.client),
+      future: matrix.client.fetchOwnProfile(getFromRooms: false),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator.adaptive());
@@ -338,7 +338,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Profile?>(
-      future: widget.controller.fetchOwnProfile(client: widget.client),
+      future: widget.client.fetchOwnProfile(getFromRooms: false),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator.adaptive());
