@@ -182,13 +182,10 @@ class ChatListViewBody extends StatelessWidget {
                           ? () => controller.toggleSelection(rooms[index].id)
                           : null,
                       // onLongPress: () => controller.toggleSelection(rooms[i].id),
-                      // conversationSelectionNotifier: ValueNotifier(
-                      //   controller.conversationSelectionNotifier.value
-                      //       .firstWhereOrNull(
-                      //     (conversation) =>
-                      //         conversation.roomId.contains(rooms[i].id),
-                      //   ),
-                      // ),
+                      onSecondaryTap: () => controller.handleContextMenuAction(
+                        context,
+                        rooms[index],
+                      ),
                       checkBoxWidget: ValueListenableBuilder(
                         valueListenable:
                             controller.conversationSelectionNotifier,
