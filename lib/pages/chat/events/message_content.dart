@@ -1,3 +1,4 @@
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
@@ -213,7 +214,9 @@ class MessageContent extends StatelessWidget {
                     return HtmlMessage(
                       event: event,
                       html: html,
-                      highlightText: searchStatus.getSuccessOrNull()?.keyword,
+                      highlightText: searchStatus
+                          .getSuccessOrNull<ChatRoomSearchSuccess>()
+                          ?.keyword,
                       defaultTextStyle:
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 // color: textColor,
@@ -323,8 +326,9 @@ class MessageContent extends StatelessWidget {
                 return ValueListenableBuilder(
                   valueListenable: controller.searchStatus,
                   builder: (context, searchStatus, child) {
-                    final highlightText =
-                        searchStatus.getSuccessOrNull()?.keyword;
+                    final highlightText = searchStatus
+                        .getSuccessOrNull<ChatRoomSearchSuccess>()
+                        ?.keyword;
                     return TwakeLinkPreview(
                       text: text,
                       textStyle:

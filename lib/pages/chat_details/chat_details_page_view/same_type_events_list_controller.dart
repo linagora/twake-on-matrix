@@ -52,7 +52,8 @@ class SameTypeEventsListController {
   }
 
   void loadMore({required Future<Timeline> Function() getTimeline}) async {
-    final lastSuccess = eventsNotifier.value.getSuccessOrNull();
+    final lastSuccess =
+        eventsNotifier.value.getSuccessOrNull<TimelineSearchEventSuccess>();
     if (lastSuccess == null || lastSuccess.events.isEmpty) {
       refreshController.loadComplete();
       return;

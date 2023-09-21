@@ -1,3 +1,4 @@
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
@@ -26,7 +27,10 @@ class ChatDetailsMediaPage extends StatelessWidget {
       controller: eventsListController,
       getTimeline: getTimeline,
       builder: (context, eventsState) {
-        final events = eventsState.getSuccessOrNull()?.events ?? [];
+        final events = eventsState
+                .getSuccessOrNull<TimelineSearchEventSuccess>()
+                ?.events ??
+            [];
         return CustomScrollView(
           slivers: [
             SliverGrid.builder(
