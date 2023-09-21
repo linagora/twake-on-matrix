@@ -2696,7 +2696,8 @@
     "askToInvite": " wants you to join this chat. What do you say?",
     "select" : "Select",
     "copyMessageText" : "Copy message text",
-    "pinMessage" : "Pin message",
+    "pinThisMessage" : "Pin this message",
+    "unpinThisMessage" : "Unpin this message",
     "add": "Add",
     "addMembers": "Add members",
     "chatInfo": "Chat info",
@@ -2726,5 +2727,10 @@
     "errorPageDescription": "That page doesn't exist.",
     "errorPageButton": "Back to chat",
     "playVideo": "Play",
-    "done": "Done"
+    "done": "Done",
+    "markThisMessageAsRead": "Mark this message as read",
+    "markThisMessageAsUnRead": "Mark this message as unread",
+    "muteThisMessage": "Mute this message",
+    "unmuteThisMessage": "Unmute this message",
+    "read": "Read"
 }
