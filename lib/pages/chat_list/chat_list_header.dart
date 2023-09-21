@@ -55,7 +55,7 @@ class ChatListHeader extends StatelessWidget {
               enabled: false,
               decoration: InputDecoration(
                 filled: true,
-                contentPadding: EdgeInsetsDirectional.zero,
+                contentPadding: ChatListHeaderStyle.paddingZero,
                 fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,

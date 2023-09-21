@@ -14,4 +14,6 @@ class ChatListHeaderStyle {
     start: 16,
     end: 16,
   );
+
+  static const EdgeInsetsDirectional paddingZero = EdgeInsetsDirectional.zero;
 }

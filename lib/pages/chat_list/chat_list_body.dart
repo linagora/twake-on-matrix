@@ -181,7 +181,6 @@ class ChatListViewBody extends StatelessWidget {
                       onTap: controller.isSelectMode
                           ? () => controller.toggleSelection(rooms[index].id)
                           : null,
-                      // onLongPress: () => controller.toggleSelection(rooms[i].id),
                       onSecondaryTap: () => controller.handleContextMenuAction(
                         context,
                         rooms[index],
