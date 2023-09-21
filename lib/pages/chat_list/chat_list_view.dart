@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_stream.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -15,7 +16,6 @@ class ChatListView extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final VoidCallback? onOpenSearchPage;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
-
   const ChatListView({
     Key? key,
     required this.controller,
@@ -42,15 +42,20 @@ class ChatListView extends StatelessWidget {
           onOpenSearchPage: onOpenSearchPage,
           conversationSelectionNotifier:
               controller.conversationSelectionNotifier,
-          onClearSelection: controller.clearSelection,
+          onClearSelection: controller.onClickClearSelection,
         ),
       ),
       bottomNavigationBar: ValueListenableBuilder(
-        valueListenable: controller.selectModeNotifier,
-        builder: (context, _, __) {
-          if (controller.isSelectMode) {
+        valueListenable: controller.conversationSelectionNotifier,
+        builder: (context, conversationSelection, __) {
+          if (conversationSelection.isNotEmpty) {
             return ChatListBottomNavigator(
-              onTapBottomNavigation: onTapBottomNavigation,
+              bottomNavigationActionsWidget:
+                  controller.bottomNavigationActionsWidget(
+                paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
+                iconSize: ChatListBottomNavigatorStyle.iconSize,
+                width: ChatListBottomNavigatorStyle.width,
+              ),
             );
           } else {
             return bottomNavigationBar ?? const SizedBox();

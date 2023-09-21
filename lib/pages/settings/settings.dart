@@ -166,10 +166,11 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     }
   }
 
+  Client get client => Matrix.of(context).client;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final client = Matrix.of(context).client;
       profileFuture ??= client.getProfileFromUserId(
         client.userID!,
         cache: !profileUpdated,
@@ -181,7 +182,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void checkBootstrap() async {
-    final client = Matrix.of(context).client;
     if (!client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;

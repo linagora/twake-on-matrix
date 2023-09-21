@@ -42,24 +42,16 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
     });
   }
 
+  List<AdaptiveDestinationEnum> get destinations => [
+        AdaptiveDestinationEnum.contacts,
+        AdaptiveDestinationEnum.rooms,
+        AdaptiveDestinationEnum.settings,
+      ];
+
   void onDestinationSelected(int index) {
-    switch (index) {
-      //FIXME: NOW WE SUPPORT FOR ONLY 2 TABS
-      case 0:
-        activeNavigationBar.value = AdaptiveDestinationEnum.contacts;
-        pageController.jumpToPage(index);
-        break;
-      case 1:
-        activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
-        pageController.jumpToPage(index);
-        break;
-      case 2:
-        activeNavigationBar.value = AdaptiveDestinationEnum.settings;
-        pageController.jumpToPage(index);
-        break;
-      default:
-        break;
-    }
+    final destinationType = destinations[index];
+    activeNavigationBar.value = destinationType;
+    pageController.jumpToPage(index);
   }
 
   void clientSelected(
@@ -100,6 +92,7 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
 
   @override
   Widget build(BuildContext context) => AppScaffoldView(
+        destinations: destinations,
         activeRoomId: widget.activeRoomId,
         activeNavigationBar: activeNavigationBar,
         pageController: pageController,
