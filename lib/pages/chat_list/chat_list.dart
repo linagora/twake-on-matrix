@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:async/async.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
@@ -80,21 +79,6 @@ class ChatListController extends State<ChatList>
   bool get displayNavigationBar => false;
 
   String? activeSpaceId;
-
-  late final profileMemoizers = <Client?, AsyncMemoizer<Profile>>{};
-
-  Future<Profile?> fetchOwnProfile({required Client client}) {
-    if (!profileMemoizers.containsKey(client)) {
-      profileMemoizers[client] = AsyncMemoizer();
-    }
-    return profileMemoizers[client]!.runOnce(() async {
-      return await client.fetchOwnProfile();
-    });
-  }
-
-  void updateProfile(Client? client) {
-    profileMemoizers[client] = AsyncMemoizer<Profile>();
-  }
 
   void resetActiveSpaceId() {
     setState(() {
