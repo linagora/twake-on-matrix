@@ -3,7 +3,7 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
-typedef ChatListBottomNavigatorBarIcon = Function(ChatListBottomNavigatorBar);
+typedef ChatListBottomNavigatorBarIcon = Function(ChatListSelectionActions);
 
 class ChatListBottomNavigator extends StatelessWidget {
   const ChatListBottomNavigator({
@@ -32,13 +32,13 @@ class ChatListBottomNavigator extends StatelessWidget {
                     Padding(
                       padding: ChatListBottomNavigatorStyle.paddingIcon,
                       child: Icon(
-                        item.icon(context),
+                        item.getIcon(context),
                         size: ChatListBottomNavigatorStyle.iconSize,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     Text(
-                      item.title(context),
+                      item.getTitleForMobile(context),
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -53,12 +53,12 @@ class ChatListBottomNavigator extends StatelessWidget {
     );
   }
 
-  List<ChatListBottomNavigatorBar> get _getNavigationDestinations {
+  List<ChatListSelectionActions> get _getNavigationDestinations {
     return [
-      ChatListBottomNavigatorBar.read,
-      ChatListBottomNavigatorBar.mute,
-      ChatListBottomNavigatorBar.pin,
-      ChatListBottomNavigatorBar.more,
+      ChatListSelectionActions.read,
+      ChatListSelectionActions.mute,
+      ChatListSelectionActions.pin,
+      ChatListSelectionActions.more,
     ];
   }
 }

@@ -13,12 +13,16 @@ import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
+import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,12 +60,33 @@ class ChatListController extends State<ChatList>
         TickerProviderStateMixin,
         RouteAware,
         ComparablePresentationContactMixin,
+        PopupContextMenuActionMixin,
+        PopupMenuWidgetMixin,
         ReceiveSharingIntentMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
   bool get displayNavigationBar => false;
 
+  final responsive = getIt.get<ResponsiveUtils>();
+
   String? activeSpaceId;
+
+  late final profileMemoizers = <Client?, AsyncMemoizer<Profile>>{};
+
+  Client get client => Matrix.of(context).client;
+
+  Future<Profile?> fetchOwnProfile({required Client client}) {
+    if (!profileMemoizers.containsKey(client)) {
+      profileMemoizers[client] = AsyncMemoizer();
+    }
+    return profileMemoizers[client]!.runOnce(() async {
+      return await client.fetchOwnProfile();
+    });
+  }
+
+  void updateProfile(Client? client) {
+    profileMemoizers[client] = AsyncMemoizer<Profile>();
+  }
 
   void resetActiveSpaceId() {
     setState(() {
@@ -588,16 +613,150 @@ class ChatListController extends State<ChatList>
   }
 
   void _onTapBottomNavigation(
-    ChatListBottomNavigatorBar chatListBottomNavigatorBar,
+    ChatListSelectionActions chatListBottomNavigatorBar,
   ) async {
     switch (chatListBottomNavigatorBar) {
-      case ChatListBottomNavigatorBar.read:
-        return toggleUnread();
-      case ChatListBottomNavigatorBar.mute:
-        return toggleMuted();
-      case ChatListBottomNavigatorBar.pin:
-        return toggleFavouriteRoom();
-      case ChatListBottomNavigatorBar.more:
+      case ChatListSelectionActions.read:
+        toggleUnread();
+        toggleSelectMode();
+        return;
+      case ChatListSelectionActions.mute:
+        toggleMuted();
+        toggleSelectMode();
+        return;
+      case ChatListSelectionActions.pin:
+        toggleFavouriteRoom();
+        toggleSelectMode();
+        return;
+      case ChatListSelectionActions.more:
+        toggleSelectMode();
+        return;
+    }
+  }
+
+  String _getTitleContextMenuSelection(
+    ChatListSelectionActions chatListBottomNavigatorBar,
+    Room room,
+  ) {
+    switch (chatListBottomNavigatorBar) {
+      case ChatListSelectionActions.read:
+        if (room.markedUnread) {
+          return L10n.of(context)!.markThisMessageAsRead;
+        } else {
+          return L10n.of(context)!.markThisMessageAsUnRead;
+        }
+      case ChatListSelectionActions.mute:
+        if (room.pushRuleState == PushRuleState.notify) {
+          return L10n.of(context)!.muteThisMessage;
+        } else {
+          return L10n.of(context)!.unmuteThisMessage;
+        }
+      case ChatListSelectionActions.pin:
+        return L10n.of(context)!.pinThisMessage;
+      case ChatListSelectionActions.more:
+        return L10n.of(context)!.more;
+    }
+  }
+
+  IconData _getIconContextMenuSelection(
+    ChatListSelectionActions chatListBottomNavigatorBar,
+    Room room,
+  ) {
+    switch (chatListBottomNavigatorBar) {
+      case ChatListSelectionActions.read:
+        if (room.markedUnread) {
+          return Icons.mark_chat_read;
+        } else {
+          return Icons.mark_chat_unread;
+        }
+      case ChatListSelectionActions.mute:
+        if (room.pushRuleState == PushRuleState.notify) {
+          return Icons.volume_off;
+        } else {
+          return Icons.volume_up;
+        }
+
+      case ChatListSelectionActions.pin:
+        if (room.isFavourite) {
+          return Icons.push_pin_outlined;
+        } else {
+          return Icons.push_pin;
+        }
+      case ChatListSelectionActions.more:
+        return Icons.more_vert;
+    }
+  }
+
+  void handleContextMenuAction(
+    BuildContext context,
+    Room room,
+  ) {
+    openPopupMenuAction(
+      context,
+      context.getCurrentRelativeRectOfWidget(),
+      _popupMenuActionTile(context, room),
+    );
+  }
+
+  List<PopupMenuItem> _popupMenuActionTile(
+    BuildContext context,
+    Room room,
+  ) {
+    final listAction = [
+      ChatListSelectionActions.read,
+      ChatListSelectionActions.pin,
+      ChatListSelectionActions.mute,
+    ];
+    return listAction.map((action) {
+      return PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: popupItem(
+          context,
+          _getTitleContextMenuSelection(action, room),
+          iconAction: _getIconContextMenuSelection(action, room),
+          onCallbackAction: () => _handleClickOnContextMenuItem(
+            action,
+            room,
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  void _handleClickOnContextMenuItem(
+    ChatListSelectionActions action,
+    Room room,
+  ) async {
+    switch (action) {
+      case ChatListSelectionActions.read:
+        await showFutureLoadingDialog(
+          context: context,
+          future: () async {
+            await client.getRoomById(room.id)!.markUnread(!room.markedUnread);
+          },
+        );
+        return;
+      case ChatListSelectionActions.pin:
+        await showFutureLoadingDialog(
+          context: context,
+          future: () async {
+            await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
+          },
+        );
+        return;
+      case ChatListSelectionActions.mute:
+        await showFutureLoadingDialog(
+          context: context,
+          future: () async {
+            await client.getRoomById(room.id)!.setPushRuleState(
+                  room.pushRuleState == PushRuleState.notify
+                      ? PushRuleState.mentionsOnly
+                      : PushRuleState.notify,
+                );
+          },
+        );
+        return;
+      case ChatListSelectionActions.more:
         return;
     }
   }
