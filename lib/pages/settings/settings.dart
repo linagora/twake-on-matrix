@@ -213,7 +213,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     profileFuture ??= client.getProfileFromUserId(
       client.userID!,
       cache: !profileUpdated,
-      getFromRooms: !profileUpdated,
+      getFromRooms: false,
     );
     return SettingsView(this);
   }
