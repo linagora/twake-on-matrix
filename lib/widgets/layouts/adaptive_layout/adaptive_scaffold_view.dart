@@ -3,20 +3,17 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
-import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
-import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class AppScaffoldView extends StatelessWidget {
+  final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
   final PageController pageController;
   final Future<Profile?> fetchOwnProfile;
@@ -47,6 +44,7 @@ class AppScaffoldView extends StatelessWidget {
     required this.onCloseSearchPage,
     required this.onDestinationSelected,
     required this.onClientSelected,
+    required this.destinations,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -128,6 +126,10 @@ class AppScaffoldView extends StatelessWidget {
     );
   }
 
+  int _getActiveBottomNavigationBarIndex() {
+    return destinations.indexOf(activeNavigationBar.value);
+  }
+
   Widget _triggerPageViewBuilder({
     required AdaptiveDestinationEnum navigatorBarType,
     required Widget navigatorBarWidget,
@@ -172,19 +174,6 @@ class AppScaffoldView extends StatelessWidget {
     );
   }
 
-  int _getActiveBottomNavigationBarIndex() {
-    switch (activeNavigationBar.value) {
-      case AdaptiveDestinationEnum.contacts:
-        return 0;
-      case AdaptiveDestinationEnum.rooms:
-        return 1;
-      case AdaptiveDestinationEnum.settings:
-        return 2;
-      default:
-        return 1;
-    }
-  }
-
   Widget _primaryNavigationBarBuilder(BuildContext context) {
     final destinations = getNavigationDestinations(context);
 
@@ -200,25 +189,8 @@ class AppScaffoldView extends StatelessWidget {
   }
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
-    return [
-      NavigationDestination(
-        icon: const TwakeNavigationIcon(
-          icon: Icons.contacts_outlined,
-        ),
-        label: L10n.of(context)!.contacts,
-      ),
-      NavigationDestination(
-        icon: UnreadRoomsBadge(
-          filter: (room) => !room.isSpace && !room.isStoryRoom,
-        ),
-        label: L10n.of(context)!.chat,
-      ),
-      NavigationDestination(
-        icon: const TwakeNavigationIcon(
-          icon: Icons.settings,
-        ),
-        label: L10n.of(context)!.settings,
-      ),
-    ];
+    return destinations.map((destination) {
+      return destination.getNavigationDestination(context);
+    }).toList();
   }
 }

@@ -18,6 +18,18 @@ class ChatListItemStyle {
         : 0.0;
   }
 
+  static const EdgeInsetsDirectional paddingConversation =
+      EdgeInsetsDirectional.symmetric(
+    horizontal: 8,
+    vertical: 1,
+  );
+
+  static const EdgeInsetsDirectional paddingAvatar =
+      EdgeInsetsDirectional.only(end: 8);
+
+  static const EdgeInsetsDirectional paddingBody =
+      EdgeInsetsDirectional.symmetric(horizontal: 8);
+
   static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
   static double notificationBadgeSize(
     bool unread,

@@ -258,7 +258,7 @@ class _SpaceViewState extends State<SpaceView> {
             if (room != null && !room.isSpace) {
               return ChatListItem(
                 room,
-                onLongPress: () => _onSpaceChildContextMenu(spaceChild, room),
+                onTapAvatar: () => _onSpaceChildContextMenu(spaceChild, room),
                 activeChat: true,
               );
             }
