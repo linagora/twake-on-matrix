@@ -1,16 +1,11 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
-import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
 import 'package:matrix_link_text/link_text.dart';
 
 class TwakeLinkPreview extends StatefulWidget {
@@ -47,58 +42,19 @@ class TwakeLinkPreview extends StatefulWidget {
   State<TwakeLinkPreview> createState() => TwakeLinkPreviewController();
 }
 
-class TwakeLinkPreviewController extends State<TwakeLinkPreview> {
-  static const int _defaultPreferredPointInTime = 2000;
-
-  final GetPreviewURLInteractor _getPreviewURLInteractor =
-      getIt.get<GetPreviewURLInteractor>();
-
-  final getPreviewUrlStateNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(GetPreviewUrlInitial()));
-
+class TwakeLinkPreviewController extends State<TwakeLinkPreview>
+    with GetPreviewUrlMixin {
   String? get firstValidUrl => widget.text.getFirstValidUrl();
+
+  @override
+  String debugLabel = 'TwakeLinkPreviewController';
 
   @override
   void initState() {
     if (firstValidUrl != null) {
-      _getPreviewUrlAction();
+      getPreviewUrl(uri: widget.uri);
     }
-
     super.initState();
-  }
-
-  void _getPreviewUrlAction() {
-    _getPreviewURLInteractor
-        .execute(
-          uri: widget.uri,
-          preferredPreviewTime:
-              widget.preferredPointInTime ?? _defaultPreferredPointInTime,
-        )
-        .listen(
-          (event) => _handleGetPreviewUrlOnData(event),
-          onError: _handleGetPreviewUrlOnError,
-          onDone: _handleGetPreviewUrlOnDone,
-        );
-  }
-
-  void _handleGetPreviewUrlOnData(Either<Failure, Success> event) {
-    Logs().d('TwakeLinkPreviewController::_handleGetPreviewUrlOnData()');
-    getPreviewUrlStateNotifier.value = event;
-  }
-
-  void _handleGetPreviewUrlOnDone() {
-    Logs().d(
-      'TwakeLinkPreviewController::_handleGetPreviewUrlOnDone() - done',
-    );
-  }
-
-  void _handleGetPreviewUrlOnError(
-    dynamic error,
-    StackTrace? stackTrace,
-  ) {
-    Logs().e(
-      'TwakeLinkPreviewController::_handleGetPreviewUrlOnError() - error: $error | stackTrace: $stackTrace',
-    );
   }
 
   @override
