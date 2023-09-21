@@ -84,7 +84,7 @@ extension StringCasingExtension on String {
   }
 
   String? getFirstValidUrl() {
-    final RegExp regex = RegExp(r'https:\/\/[^\s]+');
+    final RegExp regex = RegExp(r'https:\/\/[^\s]+', caseSensitive: false);
     final List<String?> matches =
         regex.allMatches(this).map((m) => m.group(0)).toList();
 
