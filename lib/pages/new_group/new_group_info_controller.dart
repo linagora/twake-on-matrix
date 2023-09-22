@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
@@ -13,17 +14,36 @@ extension NewGroupInfoController on NewGroupController {
     });
   }
 
-  void moveToGroupChatScreen() async {
-    Logs().d('NewGroupInfoController::moveToGroupChatScreen()');
-    groupNameFocusNode.unfocus();
-    final client = Matrix.of(context).client;
-    if (avatarNotifier.value != null) {
-      uploadAvatarNewGroupChat(
+  void _handleUploadAvatarInBytes(Client client) {
+    if (avatarFilePickerNotifier.value != null) {
+      uploadAvatarNewGroupChatInBytes(
         matrixClient: client,
-        entity: avatarNotifier.value!,
+        filePickerResult: avatarFilePickerNotifier.value!,
       );
     } else {
       createNewGroup();
+    }
+  }
+
+  void _handleUploadAvatarInStream(Client client) {
+    groupNameFocusNode.unfocus();
+    if (avatarAssetEntityNotifier.value != null) {
+      uploadAvatarNewGroupChat(
+        matrixClient: client,
+        entity: avatarAssetEntityNotifier.value!,
+      );
+    } else {
+      createNewGroup();
+    }
+  }
+
+  void moveToGroupChatScreen() async {
+    Logs().d('NewGroupInfoController::moveToGroupChatScreen()');
+    final client = Matrix.of(context).client;
+    if (PlatformInfos.isMobile) {
+      _handleUploadAvatarInStream(client);
+    } else {
+      _handleUploadAvatarInBytes(client);
     }
   }
 

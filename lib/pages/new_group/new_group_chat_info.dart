@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
@@ -30,7 +31,7 @@ class NewGroupChatInfo extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(context),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: NewGroupChatInfoStyle.padding,
         child: LayoutBuilder(
           builder: (context, constraint) {
             return ConstrainedBox(
@@ -43,7 +44,7 @@ class NewGroupChatInfo extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
+                      padding: NewGroupChatInfoStyle.profilePadding,
                       child: _buildChangeProfileWidget(context),
                     ),
                     const SizedBox(height: 16.0),
@@ -75,7 +76,7 @@ class NewGroupChatInfo extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 32),
-                    _buildGroupNameTextFieid(context),
+                    _buildGroupNameTextField(context),
                     const SizedBox(height: 16),
                     Expanded(
                       child: ExpansionParticipantsList(
@@ -118,22 +119,20 @@ class NewGroupChatInfo extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
-      preferredSize:
-          Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight(context)),
+      preferredSize: const Size.fromHeight(
+        NewGroupChatInfoStyle.toolbarHeight,
+      ),
       child: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight(context),
+        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight,
         title: Row(
           children: [
             TwakeIconButton(
               icon: Icons.arrow_back,
               onTap: () => Navigator.of(context).pop(),
               tooltip: L10n.of(context)!.back,
-              paddingAll: 8.0,
-              margin: const EdgeInsets.symmetric(
-                vertical: 12.0,
-                horizontal: 8.0,
-              ),
+              paddingAll: NewGroupChatInfoStyle.backIconPaddingAll,
+              margin: NewGroupChatInfoStyle.backIconMargin,
             ),
             Text(
               L10n.of(context)!.newGroupChat,
@@ -175,57 +174,28 @@ class NewGroupChatInfo extends StatelessWidget {
       onTap: () => newGroupController.showImagesPickerAction(context: context),
       customBorder: const CircleBorder(),
       child: Container(
-        width: 56,
-        height: 56,
+        width: NewGroupChatInfoStyle.profileSize(context),
+        height: NewGroupChatInfoStyle.profileSize(context),
         decoration: BoxDecoration(
           color: LinagoraRefColors.material().neutral[80],
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: ValueListenableBuilder(
-          valueListenable: newGroupController.avatarNotifier,
-          builder: (context, value, child) {
-            if (value == null) {
-              return child!;
-            }
-            return ClipOval(
-              child: SizedBox.fromSize(
-                size: const Size.fromRadius(28),
-                child: AssetEntityImage(
-                  value,
-                  thumbnailSize: const ThumbnailSize(56, 56),
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress != null &&
-                        loadingProgress.cumulativeBytesLoaded !=
-                            loadingProgress.expectedTotalBytes) {
-                      return const Center(
-                        child: CircularProgressIndicator.adaptive(),
-                      );
-                    }
-                    return child;
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.error_outline),
-                    );
-                  },
-                ),
+        child: NewGroupChatInfoStyle.responsive.isMobile(context)
+            ? _AvatarForMobileBuilder(
+                avatarMobileNotifier:
+                    newGroupController.avatarAssetEntityNotifier,
+              )
+            : _AvatarForWebBuilder(
+                avatarWebNotifier: newGroupController.avatarFilePickerNotifier,
               ),
-            );
-          },
-          child: Icon(
-            Icons.camera_alt_outlined,
-            color: Theme.of(context).colorScheme.surface,
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildGroupNameTextFieid(BuildContext context) {
+  Widget _buildGroupNameTextField(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
       child: ValueListenableBuilder(
         valueListenable: newGroupController.createRoomStateNotifier,
         builder: (context, value, child) {
@@ -249,10 +219,103 @@ class NewGroupChatInfo extends StatelessWidget {
                     letterSpacing: -0.15,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-              contentPadding: const EdgeInsets.all(16.0),
+              contentPadding: NewGroupChatInfoStyle.contentPadding,
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _AvatarForMobileBuilder extends StatelessWidget {
+  final ValueNotifier<AssetEntity?> avatarMobileNotifier;
+
+  const _AvatarForMobileBuilder({
+    required this.avatarMobileNotifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: avatarMobileNotifier,
+      builder: (context, value, child) {
+        if (value == null) {
+          return child!;
+        }
+        return ClipOval(
+          child: SizedBox.fromSize(
+            size: const Size.fromRadius(
+              NewGroupChatInfoStyle.avatarRadiusForMobile,
+            ),
+            child: AssetEntityImage(
+              value,
+              thumbnailSize: const ThumbnailSize(
+                NewGroupChatInfoStyle.thumbnailSizeWidth,
+                NewGroupChatInfoStyle.thumbnailSizeHeight,
+              ),
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress != null &&
+                    loadingProgress.cumulativeBytesLoaded !=
+                        loadingProgress.expectedTotalBytes) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+                return child;
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Icon(Icons.error_outline),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      child: Icon(
+        Icons.camera_alt_outlined,
+        color: Theme.of(context).colorScheme.surface,
+      ),
+    );
+  }
+}
+
+class _AvatarForWebBuilder extends StatelessWidget {
+  final ValueNotifier<FilePickerResult?> avatarWebNotifier;
+
+  const _AvatarForWebBuilder({
+    required this.avatarWebNotifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: avatarWebNotifier,
+      builder: (context, value, child) {
+        if (value == null || value.files.single.bytes == null) {
+          return child!;
+        }
+        return ClipOval(
+          child: SizedBox.fromSize(
+            size:
+                const Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
+            child: Image.memory(
+              value.files.single.bytes!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Icon(Icons.error_outline),
+                );
+              },
+            ),
+          ),
+        );
+      },
+      child: Icon(
+        Icons.camera_alt_outlined,
+        color: Theme.of(context).colorScheme.surface,
       ),
     );
   }
