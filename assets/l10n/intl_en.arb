@@ -2724,5 +2724,6 @@
     "blankChatTitle": "Choose a chat or hit #EditIcon# to make one.",
     "errorPageTitle": "Something's not right",
     "errorPageDescription": "That page doesn't exist.",
-    "errorPageButton": "Back to chat"
+    "errorPageButton": "Back to chat",
+    "playVideo": "Play"
 }
