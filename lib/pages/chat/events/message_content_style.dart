@@ -48,5 +48,25 @@ class MessageContentStyle {
           displayHeight,
         );
 
+  static double videoBubbleHeight(double displayHeight) => max(
+        MessageContentStyle.imageBubbleMinHeight,
+        displayHeight,
+      );
+
   static const double letterSpacingMessageContent = -0.15;
+
+  static const double videoCenterButtonSize = 56;
+
+  static const double iconInsideVideoButtonSize = 48;
+
+  static const double strokeVideoWidth = 2;
+
+  static const Color backgroundColorCenterButton = Colors.black38;
+
+  static const BorderRadiusGeometry borderRadiusBubble =
+      BorderRadius.all(Radius.circular(12.0));
+
+  static const backgroundColorVideo = Colors.black;
+
+  static const backIconColor = Colors.white;
 }
