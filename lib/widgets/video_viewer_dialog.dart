@@ -93,7 +93,7 @@ class _VideoViewerDialogState extends State<VideoViewerDialog> {
               child: Video(
                 pauseUponEnteringBackgroundMode: true,
                 resumeUponEnteringForegroundMode: true,
-                controls: AdaptiveVideoControls,
+                controls: MaterialVideoControls,
                 controller: videoController!,
               ),
             )
