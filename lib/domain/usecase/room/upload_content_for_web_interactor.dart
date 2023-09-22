@@ -4,14 +4,9 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/exception/room/can_not_upload_content_exception.dart';
-import 'package:fluffychat/domain/repository/media/media_repository.dart';
 import 'package:matrix/matrix.dart';
 
-class UploadContentForWebInteractor {
-  final MediaRepository _mediaRepository;
-
-  UploadContentForWebInteractor(this._mediaRepository);
-
+class UploadContentInBytesInteractor {
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
     required FilePickerResult filePickerResult,
@@ -22,11 +17,11 @@ class UploadContentForWebInteractor {
         final mediaConfig = await matrixClient.getConfig();
         final maxMediaSize = mediaConfig.mUploadSize;
         final fileSize = filePickerResult.files.single.size;
-        final mimeType = MatrixFile.fromMimeType(
+        final matrixFile = MatrixFile.fromMimeType(
           bytes: filePickerResult.files.single.bytes,
           name: filePickerResult.files.single.name,
           filePath: '',
-        ).mimeType;
+        );
         Logs().d(
           'UploadContentWebInteractor::execute(): FileSized $fileSize || maxMediaSize $maxMediaSize',
         );
@@ -38,14 +33,13 @@ class UploadContentForWebInteractor {
           );
         }
 
-        final response = await _mediaRepository.uploadContentForWeb(
-          filePickerResult.files.single.bytes!,
-          contentType: mimeType,
-        );
-
-        if (response.contentUri != null) {
-          final contentUri = Uri.parse(response.contentUri!);
-          yield Right(UploadContentSuccess(uri: contentUri));
+        if (matrixFile.bytes != null) {
+          final uri = await matrixClient.uploadContent(
+            matrixFile.bytes!,
+            filename: matrixFile.name,
+            contentType: matrixFile.mimeType,
+          );
+          yield Right(UploadContentSuccess(uri: uri));
         } else {
           yield Left(
             UploadContentFailed(exception: CannotUploadContentException()),

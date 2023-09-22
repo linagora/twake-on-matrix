@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -10,6 +11,7 @@ import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -18,6 +20,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -37,10 +40,13 @@ class NewGroup extends StatefulWidget {
 class NewGroupController extends ContactsSelectionController<NewGroup>
     with CommonMediaPickerMixin, SingleImagePickerMixin {
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
+  final uploadContentWebInteractor =
+      getIt.get<UploadContentInBytesInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
   final groupNameTextEditingController = TextEditingController();
-  final avatarNotifier = ValueNotifier<AssetEntity?>(null);
+  final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
+  final avatarFilePickerNotifier = ValueNotifier<FilePickerResult?>(null);
   final createRoomStateNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
 
@@ -60,7 +66,8 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
   void dispose() {
     super.dispose();
     haveGroupNameNotifier.dispose();
-    avatarNotifier.dispose();
+    avatarAssetEntityNotifier.dispose();
+    avatarFilePickerNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
   }
 
@@ -159,6 +166,22 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
         .execute(
           matrixClient: matrixClient,
           entity: entity,
+        )
+        .listen(
+          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
+          onDone: _handleUploadAvatarNewGroupChatOnDone,
+          onError: _handleUploadAvatarNewGroupChatOnError,
+        );
+  }
+
+  void uploadAvatarNewGroupChatInBytes({
+    required Client matrixClient,
+    required FilePickerResult filePickerResult,
+  }) {
+    uploadContentWebInteractor
+        .execute(
+          matrixClient: matrixClient,
+          filePickerResult: filePickerResult,
         )
         .listen(
           (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
@@ -270,10 +293,33 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
     context.go("/rooms/$roomId");
   }
 
+  void _getImageOnWeb(
+    BuildContext context,
+  ) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+    Logs().d(
+      'NewGroupController::_getImageOnWeb(): FilePickerResult - $result',
+    );
+    if (result == null || result.files.single.bytes == null) {
+      return;
+    } else {
+      avatarFilePickerNotifier.value = result;
+      Logs().d(
+        'NewGroupController::_getImageOnWeb(): AvatarWebNotifier - ${avatarFilePickerNotifier.value}',
+      );
+    }
+  }
+
   void showImagesPickerAction({
     required BuildContext context,
   }) async {
     if (isCreatingRoom) {
+      return;
+    }
+    if (PlatformInfos.isWeb) {
+      _getImageOnWeb(context);
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission();
@@ -301,7 +347,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
         if (!imagePickerController.pickFromCamera()) {
           Navigator.pop(context);
         }
-        avatarNotifier.value = selectedAsset?.asset;
+        avatarAssetEntityNotifier.value = selectedAsset?.asset;
         imagePickerController.removeAllSelectedItem();
       }
     });
