@@ -31,12 +31,3 @@ extension FileInfoExtension on FileInfo {
     return MessageTypes.File;
   }
 }
-
-extension ImageFileInfoExtension on ImageFileInfo {
-  Map<String, dynamic> get metadata => ({
-        'mimetype': mimeType,
-        'size': fileSize,
-        'w': width?.toDouble(),
-        'h': height?.toDouble(),
-      });
-}
