@@ -92,7 +92,7 @@ extension LocalizedBody on Event {
     return room.sendingFilePlaceholders[txId];
   }
 
-  Size? getOriginalSize() {
+  Size? getOriginalResolution() {
     if (infoMap['w'] != null && infoMap['h'] != null) {
       return Size(
         double.tryParse(infoMap['w'].toString()) ?? 0,

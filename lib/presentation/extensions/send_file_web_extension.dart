@@ -1,11 +1,11 @@
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:universal_html/html.dart' as html;
 
 extension SendFileWebExtension on Room {
   Future<String?> sendFileOnWebEvent(
@@ -287,8 +287,10 @@ extension SendFileWebExtension on Room {
   ) async {
     if (originalFile.bytes == null) return null;
     try {
-      final blob = html.Blob([originalFile.bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
+      final url = originalFile.bytes?.toWebUrl();
+      if (url == null) {
+        throw Exception('Missing bytes in $originalFile');
+      }
       final result = await VideoThumbnail.thumbnailData(
         video: url,
         imageFormat: ImageFormat.JPEG,
@@ -318,8 +320,10 @@ extension SendFileWebExtension on Room {
       return null;
     }
     try {
-      final blob = html.Blob([originalFile.bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
+      final url = originalFile.bytes?.toWebUrl();
+      if (url == null) {
+        throw Exception('$originalFile is empty');
+      }
       final videoPlayerController =
           VideoPlayerController.networkUrl(Uri.parse(url));
       await videoPlayerController.initialize();
