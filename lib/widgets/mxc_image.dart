@@ -30,6 +30,9 @@ class MxcImage extends StatefulWidget {
   final ImageData? imageData;
   final bool isPreview;
 
+  /// Enable it if the image is stretched, and you don't want to resize it
+  final bool noResize;
+
   /// Cache for screen locally, if null, use global cache
   final Map<EventId, ImageData>? cacheMap;
 
@@ -53,6 +56,7 @@ class MxcImage extends StatefulWidget {
     this.imageData,
     this.isPreview = false,
     this.cacheMap,
+    this.noResize = false,
     Key? key,
   }) : super(key: key);
 
@@ -242,6 +246,7 @@ class _MxcImageState extends State<MxcImage>
 
   Widget _buildImageWidget() {
     final data = _imageData;
+    final needResize = widget.event != null && !widget.noResize;
     return data == null || data.isEmpty
         ? placeholder(context)
         : ClipRRect(
@@ -253,8 +258,8 @@ class _MxcImageState extends State<MxcImage>
               data,
               width: widget.width,
               height: widget.height,
-              cacheWidth: widget.event != null ? widget.width?.toInt() : null,
-              cacheHeight: widget.event != null ? widget.height?.toInt() : null,
+              cacheWidth: needResize ? widget.width?.toInt() : null,
+              cacheHeight: needResize ? widget.height?.toInt() : null,
               fit: widget.fit,
               filterQuality: FilterQuality.medium,
               errorBuilder: (context, __, ___) {

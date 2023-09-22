@@ -7,6 +7,7 @@ mixin PlayVideoActionMixin {
     await showDialog(
       context: context,
       useRootNavigator: PlatformInfos.isWeb,
+      useSafeArea: false,
       builder: (context) {
         return VideoViewerDialog(path: uriOrFilePath);
       },

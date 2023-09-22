@@ -1,8 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -11,6 +13,9 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/chat/events/image_bubble.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:linagora_design_flutter/extensions/duration_extension.dart';
+
+typedef DownloadVideoEventCallback = Future<String> Function(Event event);
 
 class EventVideoPlayer extends StatefulWidget {
   final Event event;
@@ -19,8 +24,18 @@ class EventVideoPlayer extends StatefulWidget {
 
   final double? height;
 
-  final Future<String> Function({required Event event})?
-      handleDownloadVideoEvent;
+  final bool rounded;
+
+  final bool showDuration;
+
+  final DownloadVideoEventCallback? handleDownloadVideoEvent;
+
+  final String? thumbnailCacheKey;
+
+  final Map<EventId, ImageData>? thumbnailCacheMap;
+
+  /// Enable it if the thumbnail image is stretched, and you don't want to resize it
+  final bool noResizeThumbnail;
 
   const EventVideoPlayer(
     this.event, {
@@ -28,6 +43,11 @@ class EventVideoPlayer extends StatefulWidget {
     this.width,
     this.height,
     this.handleDownloadVideoEvent,
+    this.rounded = true,
+    this.showDuration = false,
+    this.thumbnailCacheMap,
+    this.thumbnailCacheKey,
+    this.noResizeThumbnail = false,
   }) : super(key: key);
 
   @override
@@ -42,7 +62,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
   void _downloadAction() async {
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
-      path = await widget.handleDownloadVideoEvent?.call(event: widget.event);
+      path = await widget.handleDownloadVideoEvent?.call(widget.event);
       _downloadStateNotifier.value = DownloadVideoState.done;
     } on MatrixConnectionException catch (e) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
@@ -71,7 +91,9 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
     final height = widget.height ?? MessageContentStyle.imageHeight(context);
 
     return ClipRRect(
-      borderRadius: MessageContentStyle.borderRadiusBubble,
+      borderRadius: widget.rounded
+          ? MessageContentStyle.borderRadiusBubble
+          : BorderRadius.zero,
       child: Material(
         color: Colors.black,
         child: SizedBox(
@@ -87,6 +109,10 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                     tapToView: false,
                     width: MessageContentStyle.imageBubbleWidth(width),
                     height: MessageContentStyle.videoBubbleHeight(height),
+                    rounded: widget.rounded,
+                    thumbnailCacheKey: widget.thumbnailCacheKey,
+                    thumbnailCacheMap: widget.thumbnailCacheMap,
+                    noResizeThumbnail: widget.noResizeThumbnail,
                   ),
                 )
               else
@@ -138,6 +164,21 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                   },
                 ),
               ),
+              if (widget.showDuration)
+                Positioned(
+                  bottom: ChatDetailsMediaStyle.durationPosition,
+                  right: ChatDetailsMediaStyle.durationPosition,
+                  child: Container(
+                    padding: ChatDetailsMediaStyle.durationPadding,
+                    decoration: ChatDetailsMediaStyle.durationBoxDecoration(
+                      context,
+                    ),
+                    child: Text(
+                      widget.event.duration?.mediaTimeLength() ?? "--:--",
+                      style: ChatDetailsMediaStyle.durationTextStyle(context),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

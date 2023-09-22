@@ -90,11 +90,13 @@ class _VideoViewerDialogState extends State<VideoViewerDialog> {
                 color: MessageContentStyle.backgroundColorVideo,
               ),
               padding: VideoViewerDialogStyle.bottomPaddingVideo,
-              child: Video(
-                pauseUponEnteringBackgroundMode: true,
-                resumeUponEnteringForegroundMode: true,
-                controls: MaterialVideoControls,
-                controller: videoController!,
+              child: SafeArea(
+                child: Video(
+                  pauseUponEnteringBackgroundMode: true,
+                  resumeUponEnteringForegroundMode: true,
+                  controls: MaterialVideoControls,
+                  controller: videoController!,
+                ),
               ),
             )
           : const SizedBox(),
