@@ -35,6 +35,24 @@ class MediaAPI {
     return UploadFileResponse.fromJson(response);
   }
 
+  Future<UploadFileResponse> uploadContentForWeb(
+    List<int> file, {
+    String? contentType,
+  }) async {
+    final dioHeaders = _client.getHeaders();
+    dioHeaders[HttpHeaders.contentTypeHeader] = contentType;
+    final response = await _client
+        .postToGetBody(
+          HomeserverEndpoint.uploadMediaServicePath
+              .generateHomeserverMediaEndpoint(),
+          data: file,
+          options: Options(headers: dioHeaders),
+        )
+        .onError((error, stackTrace) => throw Exception(error));
+
+    return UploadFileResponse.fromJson(response);
+  }
+
   Future<UrlPreviewResponse> getUrlPreview({
     required Uri uri,
     int? preferredPreviewTime,
