@@ -143,10 +143,8 @@ class GetItInitializer {
       CreateNewGroupChatInteractor(),
     );
     getIt.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
-    getIt.registerSingleton<UploadContentForWebInteractor>(
-      UploadContentForWebInteractor(
-        getIt.get<MediaRepositoryImpl>(),
-      ),
+    getIt.registerSingleton<UploadContentInBytesInteractor>(
+      UploadContentInBytesInteractor(),
     );
     getIt.registerSingleton<CreateDirectChatInteractor>(
       CreateDirectChatInteractor(),
