@@ -33,6 +33,7 @@ import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart'
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
@@ -142,6 +143,11 @@ class GetItInitializer {
       CreateNewGroupChatInteractor(),
     );
     getIt.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
+    getIt.registerSingleton<UploadContentForWebInteractor>(
+      UploadContentForWebInteractor(
+        getIt.get<MediaRepositoryImpl>(),
+      ),
+    );
     getIt.registerSingleton<CreateDirectChatInteractor>(
       CreateDirectChatInteractor(),
     );

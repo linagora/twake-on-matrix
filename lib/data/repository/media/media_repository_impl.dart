@@ -1,4 +1,5 @@
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
+import 'package:fluffychat/domain/model/media/uploaded_content.dart';
 import 'package:fluffychat/domain/model/media/url_preview.dart';
 import 'package:fluffychat/domain/repository/media/media_repository.dart';
 
@@ -15,6 +16,17 @@ class MediaRepositoryImpl implements MediaRepository {
     return _mediaDataSource.getUrlPreview(
       uri: uri,
       preferredPreviewTime: preferredPreviewTime,
+    );
+  }
+
+  @override
+  Future<UploadedContent> uploadContentForWeb(
+    List<int> file, {
+    String? contentType,
+  }) {
+    return _mediaDataSource.uploadContentForWeb(
+      file,
+      contentType: contentType,
     );
   }
 }
