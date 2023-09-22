@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
-
-import 'package:fluffychat/widgets/matrix.dart';
 
 extension UiaRequestManager on MatrixState {
   Future uiaRequestHandler(UiaRequest uiaRequest) async {
@@ -22,7 +22,7 @@ extension UiaRequestManager on MatrixState {
         case AuthenticationTypes.password:
           final input = cachedPassword ??
               (await showTextInputDialog(
-                context: context,
+                context: TwakeApp.routerKey.currentContext!,
                 title: l10n.pleaseEnterYourPassword,
                 okLabel: l10n.ok,
                 cancelLabel: l10n.cancel,
@@ -63,7 +63,7 @@ extension UiaRequestManager on MatrixState {
           if (OkCancelResult.ok ==
               await showOkCancelAlertDialog(
                 useRootNavigator: false,
-                context: context,
+                context: TwakeApp.routerKey.currentContext!,
                 title: l10n.weSentYouAnEmail,
                 message: l10n.pleaseClickOnLink,
                 okLabel: l10n.iHaveClickedOnLink,
@@ -88,7 +88,7 @@ extension UiaRequestManager on MatrixState {
               await showOkCancelAlertDialog(
                 useRootNavigator: false,
                 message: l10n.pleaseFollowInstructionsOnWeb,
-                context: context,
+                context: TwakeApp.routerKey.currentContext!,
                 okLabel: l10n.next,
                 cancelLabel: l10n.cancel,
               )) {
