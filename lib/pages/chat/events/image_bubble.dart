@@ -18,10 +18,15 @@ class ImageBubble extends StatelessWidget {
   final bool animated;
   final double width;
   final double height;
+  final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final Uint8List? imageData;
   final Duration animationDuration;
+
+  final String? thumbnailCacheKey;
+  final Map<EventId, ImageData>? thumbnailCacheMap;
+  final bool noResizeThumbnail;
 
   const ImageBubble(
     this.event, {
@@ -34,9 +39,13 @@ class ImageBubble extends StatelessWidget {
     this.width = 256,
     this.height = 300,
     this.animated = false,
+    this.rounded = true,
     this.onTapSelectMode,
     this.onTapPreview,
     this.animationDuration = const Duration(milliseconds: 500),
+    this.thumbnailCacheKey,
+    this.thumbnailCacheMap,
+    this.noResizeThumbnail = false,
     Key? key,
   }) : super(key: key);
 
@@ -59,7 +68,8 @@ class ImageBubble extends StatelessWidget {
       width = (height * ratio).round();
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius:
+          rounded ? MessageContentStyle.borderRadiusBubble : BorderRadius.zero,
       child: SizedBox(
         width: this.width,
         height: this.height,
@@ -82,8 +92,10 @@ class ImageBubble extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: const Duration(seconds: 1),
         child: Container(
-          decoration: const BoxDecoration(
-            borderRadius: MessageContentStyle.borderRadiusBubble,
+          decoration: BoxDecoration(
+            borderRadius: rounded
+                ? MessageContentStyle.borderRadiusBubble
+                : BorderRadius.zero,
           ),
           constraints: maxSize
               ? BoxConstraints(
@@ -92,7 +104,9 @@ class ImageBubble extends StatelessWidget {
                 )
               : null,
           child: ClipRRect(
-            borderRadius: MessageContentStyle.borderRadiusBubble,
+            borderRadius: rounded
+                ? MessageContentStyle.borderRadiusBubble
+                : BorderRadius.zero,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -115,6 +129,9 @@ class ImageBubble extends StatelessWidget {
                   imageData: imageData,
                   isPreview: true,
                   animationDuration: animationDuration,
+                  cacheKey: thumbnailCacheKey,
+                  cacheMap: thumbnailCacheMap,
+                  noResize: noResizeThumbnail,
                 ),
               ],
             ),
