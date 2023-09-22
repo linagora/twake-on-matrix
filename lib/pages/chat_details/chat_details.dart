@@ -9,6 +9,8 @@ import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -41,7 +43,8 @@ class ChatDetails extends StatefulWidget {
   ChatDetailsController createState() => ChatDetailsController();
 }
 
-class ChatDetailsController extends State<ChatDetails> {
+class ChatDetailsController extends State<ChatDetails>
+    with HandleVideoDownloadMixin, PlayVideoActionMixin {
   final invitationSelectionMobileAndTabletKey =
       const Key('InvitationSelectionMobileAndTabletKey');
 
@@ -453,6 +456,7 @@ class ChatDetailsController extends State<ChatDetails> {
           child: ChatDetailsMediaPage(
             getTimeline: getTimeline,
             cacheMap: _mediaCacheMap,
+            handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
           ),
         ),
         const ChatDetailsPageModel(
@@ -470,6 +474,13 @@ class ChatDetailsController extends State<ChatDetails> {
           child: SizedBox.shrink(),
         ),
       ];
+
+  Future<String> _handleDownloadAndPlayVideo(Event event) {
+    return handleDownloadVideoEvent(
+      event: event,
+      playVideoAction: (path) => playVideoAction(context, path),
+    );
+  }
 
   void onTapActionsButton(ChatDetailsActions action) {
     switch (action) {

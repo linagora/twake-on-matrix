@@ -163,12 +163,12 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
             return _MessageVideoBuilder(
               event: event,
               onFileTapped: controller.onFileTapped,
-              handleDownloadVideoEvent: (({required Event event}) {
+              handleDownloadVideoEvent: (event) {
                 return controller.handleDownloadVideoEvent(
                   event: event,
                   playVideoAction: (path) => playVideoAction(context, path),
                 );
-              }),
+              },
             );
           case MessageTypes.File:
             return Column(
@@ -500,8 +500,7 @@ class _MessageVideoBuilder extends StatelessWidget {
 
   final void Function(Event event) onFileTapped;
 
-  final Future<String> Function({required Event event})
-      handleDownloadVideoEvent;
+  final DownloadVideoEventCallback handleDownloadVideoEvent;
 
   const _MessageVideoBuilder({
     required this.event,
