@@ -1,15 +1,15 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/go_routes/go_router.dart';
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
-import '../config/app_config.dart';
-import '../utils/custom_scroll_behaviour.dart';
+
 import 'matrix.dart';
 
 class TwakeApp extends StatefulWidget {
@@ -33,6 +33,7 @@ class TwakeApp extends StatefulWidget {
   static final GoRouter router = GoRouter(
     routes: AppRoutes.routes,
     debugLogDiagnostics: true,
+    navigatorKey: routerKey,
     onException: (context, state, router) {
       Logs().e('GoRouter exception: ${state.error}');
       return router.go('/error');

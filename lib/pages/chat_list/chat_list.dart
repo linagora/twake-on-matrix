@@ -486,7 +486,7 @@ class ChatListController extends State<ChatList>
         );
         if (await client.encryption?.keyManager.isCached() == false ||
             await client.encryption?.crossSigning.isCached() == false ||
-            client.isUnknownSession && !mounted) {
+            client.isUnknownSession && mounted) {
           final recoveryWords = await _getRecoveryWords();
           if (recoveryWords != null) {
             await TomBootstrapDialog(
