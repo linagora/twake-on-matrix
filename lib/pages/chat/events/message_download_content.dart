@@ -1,5 +1,4 @@
 import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -11,14 +10,12 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 
 class MessageDownloadContent extends StatelessWidget {
   final Event event;
-  final Color textColor;
-  final ChatController controller;
+  final void Function(Event event) onFileTapped;
 
   const MessageDownloadContent(
-    this.event,
-    this.textColor, {
+    this.event, {
     Key? key,
-    required this.controller,
+    required this.onFileTapped,
   }) : super(key: key);
 
   @override
@@ -32,7 +29,7 @@ class MessageDownloadContent extends StatelessWidget {
     );
     return InkWell(
       onTap: () async {
-        controller.onFileTapped(event: event);
+        onFileTapped(event);
       },
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -62,7 +59,7 @@ class MessageDownloadContent extends StatelessWidget {
                     filename,
                     maxLines: 1,
                     style: TextStyle(
-                      color: textColor,
+                      color: Theme.of(context).colorScheme.onBackground,
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,

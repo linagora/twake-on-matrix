@@ -82,8 +82,8 @@ class ImageBubble extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: const Duration(seconds: 1),
         child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+          decoration: const BoxDecoration(
+            borderRadius: MessageContentStyle.borderRadiusBubble,
           ),
           constraints: maxSize
               ? BoxConstraints(
@@ -92,7 +92,7 @@ class ImageBubble extends StatelessWidget {
                 )
               : null,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
+            borderRadius: MessageContentStyle.borderRadiusBubble,
             child: Stack(
               alignment: Alignment.center,
               children: [
