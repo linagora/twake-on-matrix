@@ -10,6 +10,7 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:media_kit/media_kit.dart';
 import 'utils/background_push.dart';
 import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
@@ -19,6 +20,7 @@ void main() async {
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
   // widget bindings are initialized already.
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
