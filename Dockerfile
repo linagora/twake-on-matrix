@@ -23,3 +23,6 @@ RUN --mount=type=ssh,required=true ./scripts/build-web.sh
 FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html
 COPY --from=web-builder /app/build/web /usr/share/nginx/html/web/
+
+# Specify the port
+EXPOSE 80
