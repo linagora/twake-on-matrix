@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
+import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -18,7 +19,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
-import 'package:fluffychat/pages/chat/events/video_player.dart';
+import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -33,7 +34,7 @@ import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
 
-class MessageContent extends StatelessWidget {
+class MessageContent extends StatelessWidget with PlayVideoActionMixin {
   final Event event;
   final Color textColor;
   final void Function(Event)? onInfoTab;
@@ -156,25 +157,18 @@ class MessageContent extends StatelessWidget {
             }
             return MessageDownloadContent(
               event,
-              textColor,
-              controller: controller,
+              onFileTapped: controller.onFileTapped,
             );
           case MessageTypes.Video:
-            final matrixFile = event.getMatrixFile();
-            if (matrixFile is MatrixVideoFile) {
-              return SendingVideoWidget(
-                key: ValueKey(event.eventId),
-                event: event,
-                matrixFile: matrixFile,
-              );
-            }
-            if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
-              return EventVideoPlayer(event);
-            }
-            return MessageDownloadContent(
-              event,
-              textColor,
-              controller: controller,
+            return _MessageVideoBuilder(
+              event: event,
+              onFileTapped: controller.onFileTapped,
+              handleDownloadVideoEvent: (({required Event event}) {
+                return controller.handleDownloadVideoEvent(
+                  event: event,
+                  playVideoAction: (path) => playVideoAction(context, path),
+                );
+              }),
             );
           case MessageTypes.File:
             return Column(
@@ -182,8 +176,7 @@ class MessageContent extends StatelessWidget {
               children: [
                 MessageDownloadContent(
                   event,
-                  textColor,
-                  controller: controller,
+                  onFileTapped: controller.onFileTapped,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -449,7 +442,7 @@ class _MessageImageBuilder extends StatelessWidget {
     final matrixFile = event.getMatrixFile();
 
     DisplayImageInfo? displayImageInfo =
-        event.getThumbnailSize()?.getDisplayImageInfo(context);
+        event.getOriginalResolution()?.getDisplayImageInfo(context);
 
     if (isSendingImageInMobile(matrixFile)) {
       final file = matrixFile as MatrixImageFile;
@@ -499,5 +492,65 @@ class _MessageImageBuilder extends StatelessWidget {
     return matrixFile != null &&
         matrixFile.filePath != null &&
         matrixFile is MatrixImageFile;
+  }
+}
+
+class _MessageVideoBuilder extends StatelessWidget {
+  final Event event;
+
+  final void Function(Event event) onFileTapped;
+
+  final Future<String> Function({required Event event})
+      handleDownloadVideoEvent;
+
+  const _MessageVideoBuilder({
+    required this.event,
+    required this.onFileTapped,
+    required this.handleDownloadVideoEvent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final matrixFile = event.getMatrixFile();
+    DisplayImageInfo? displayImageInfo = Size(
+      MessageContentStyle.imageWidth(context),
+      MessageContentStyle.imageHeight(context),
+    ).getDisplayImageInfo(context);
+
+    final thumbnailSize = event.getOriginalResolution();
+    if (thumbnailSize != null) {
+      displayImageInfo = thumbnailSize.getDisplayImageInfo(context);
+    }
+    if (isSendingVideo(matrixFile)) {
+      final file = matrixFile as MatrixVideoFile;
+      displayImageInfo = Size(
+        file.width!.toDouble(),
+        file.height!.toDouble(),
+      ).getDisplayImageInfo(context);
+      return SendingVideoWidget(
+        key: ValueKey(event.eventId),
+        event: event,
+        matrixFile: matrixFile,
+        displayImageInfo: displayImageInfo,
+      );
+    }
+    if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
+      return EventVideoPlayer(
+        event,
+        handleDownloadVideoEvent: handleDownloadVideoEvent,
+        width: displayImageInfo.size.width,
+        height: displayImageInfo.size.height,
+      );
+    }
+    return MessageDownloadContent(
+      event,
+      onFileTapped: onFileTapped,
+    );
+  }
+
+  bool isSendingVideo(MatrixFile? matrixFile) {
+    return matrixFile is MatrixVideoFile &&
+        matrixFile.width != null &&
+        matrixFile.height != null;
   }
 }
