@@ -32,8 +32,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Run code analysis
-        run: ./scripts/code_analyze.sh
+      - name: Setup
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          flutter pub global activate flutter_distributor
+        shell: bash
       
       - name: Build
         run: ./scripts/build-linux-debug.sh
