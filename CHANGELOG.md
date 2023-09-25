@@ -1703,9 +1703,35 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 - Send read receipt only on focus \[98316f1\]
 - Desktop notifications \[b05bfa6\]
 
-This CHANGELOG.md was generated with [**Changelog for Dart**](https://pub.dartlang.org/packages/changelog)
+This CHANGELOG.md was generated with [**Changelog for
+Dart**](https://pub.dartlang.org/packages/changelog)
+
+## [2.3.0+2330] - 2023-09-25
+
+### Added
+
+- Download file in all platform
+- Context menu for web
+- Search insie App
+- New group chat info
+- New selection for Chat List
+- New video player
+
+### Changed
+
+- Filter event in Chat
+- Change preview link based on Matrix API
+
+### Fixed
+
+- Show/Hide emoji picker
+- Navigator context
+- Update Thumbnail with correct size
+- Fix Delivery status
+- Improve backup process for not only mobile but also web
 
 ## [2.2.4+2330] - 2023-09-08
+
 ### Added
 
 - Chat with external contact
@@ -1720,11 +1746,12 @@ This CHANGELOG.md was generated with [**Changelog for Dart**](https://pub.dartla
 - New UI for Chat Details
 
 ### Fixed
-
 - Prepare for debug web
 - Show error message at exactly position
 - Dismiss keyboard base on the behavior
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
+
+[2.3.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.0
 
 [2.2.4+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.2.4
