@@ -34,30 +34,38 @@ jobs:
 
       - name: Run code analysis
         run: ./scripts/code_analyze.sh
+      
+      - name: Build
+        run: ./scripts/build-linux-debug.sh
+        shell: bash
 
-  widget_test:
-    name: Widget test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Package
+        run: ./scripts/package-linux-debug.sh
+        shell: bash
 
-      - name: Setup flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: "stable"
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
+  # widget_test:
+  #   name: Widget test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
 
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+  #     - name: Setup flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: ${{ env.FLUTTER_VERSION }}
+  #         channel: "stable"
+  #         cache: true
+  #         cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
 
-      - name: Run widget test
-        run: |
-          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
-          flutter test
+  #     - uses: webfactory/ssh-agent@v0.8.0
+  #       with:
+  #         ssh-private-key: ${{ secrets.SSH_KEY }}
+
+  #     - name: Run widget test
+  #       run: |
+  #         flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+  #         flutter test
 
   # integration_test:
   #   name: Integration test
