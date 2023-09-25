@@ -1,6 +1,6 @@
 #!/bin/sh -ve
 echo "Setup Linux dependencies"
-sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libjsoncpp-dev locate libfuse-dev libolm-dev
+sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libjsoncpp-dev locate libfuse-dev libolm-dev libmpv-dev mpv
 
 # Updating database of locate
 sudo updatedb
