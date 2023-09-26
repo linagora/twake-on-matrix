@@ -127,7 +127,7 @@ mixin ChatRoomSearchMixin {
           "ChatRoomSearchMixin::_goSearchResult $event",
         );
         _scrollToEvent(event);
-        if (event.getSuccessOrNull() != null) {
+        if (event.getSuccessOrNull<ChatRoomSearchSuccess>() != null) {
           searchStatus.value = event;
           switch (direction) {
             case Direction.b:
