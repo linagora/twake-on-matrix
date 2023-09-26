@@ -199,7 +199,13 @@ class ChatView extends StatelessWidget {
                               children: [
                                 const Icon(Icons.search),
                                 const SizedBox(width: 12),
-                                Text(L10n.of(context)!.search),
+                                Expanded(
+                                  child: Text(
+                                    L10n.of(context)!.search,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           )
