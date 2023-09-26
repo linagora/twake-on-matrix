@@ -177,6 +177,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                 MessageDownloadContent(
                   event,
                   onFileTapped: controller.onFileTapped,
+                  searchStatus: controller.searchStatus,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
