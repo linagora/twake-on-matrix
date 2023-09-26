@@ -1,5 +1,7 @@
 on:
   pull_request:
+    paths:
+      - "web/**"
 
 env:
   FLUTTER_VERSION: 3.10.6
