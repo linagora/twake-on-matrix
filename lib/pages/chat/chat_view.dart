@@ -22,6 +22,8 @@ import 'chat_input_row.dart';
 
 enum _EventContextAction { info, report }
 
+enum _RoomContextAction { search }
+
 class ChatView extends StatelessWidget {
   final ChatController controller;
 
@@ -185,40 +187,8 @@ class ChatView extends StatelessWidget {
                   ),
                 ),
                 actions: [
-                  ValueListenableBuilder(
-                    valueListenable: controller.isSearchingNotifier,
-                    builder: (context, isSearching, child) {
-                      if (isSearching) {
-                        return const SizedBox();
-                      }
-                      return PopupMenuButton(
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'search',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.search),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    L10n.of(context)!.search,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                        onSelected: (item) {
-                          switch (item) {
-                            case "search":
-                              return controller.toggleSearch();
-                          }
-                        },
-                      );
-                    },
-                  ),
+                  if (!controller.selectMode)
+                    _SearchMenuItem(controller: controller),
                 ],
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 4),
@@ -409,14 +379,14 @@ class ChatView extends StatelessWidget {
       );
 
   Widget _buildLeading(BuildContext context) {
+    if (controller.selectMode) {
+      return TwakeIconButton(
+        icon: Icons.close,
+        onTap: controller.clearSelectedEvents,
+        tooltip: L10n.of(context)!.close,
+      );
+    }
     if (controller.responsive.isMobile(context)) {
-      if (controller.selectMode) {
-        return TwakeIconButton(
-          icon: Icons.close,
-          onTap: controller.clearSelectedEvents,
-          tooltip: L10n.of(context)!.close,
-        );
-      }
       return _buildBackButton(context);
     }
     return ValueListenableBuilder(
@@ -426,6 +396,52 @@ class ChatView extends StatelessWidget {
           return _buildBackButton(context);
         }
         return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+class _SearchMenuItem extends StatelessWidget {
+  const _SearchMenuItem({
+    required this.controller,
+  });
+
+  final ChatController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.isSearchingNotifier,
+      builder: (context, isSearching, child) {
+        if (isSearching) {
+          return const SizedBox();
+        }
+        return PopupMenuButton(
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: _RoomContextAction.search,
+              child: Row(
+                children: [
+                  const Icon(Icons.search),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      L10n.of(context)!.search,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+          onSelected: (item) {
+            switch (item) {
+              case _RoomContextAction.search:
+                return controller.toggleSearch();
+            }
+          },
+        );
       },
     );
   }

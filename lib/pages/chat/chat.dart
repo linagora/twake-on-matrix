@@ -1146,6 +1146,7 @@ class ChatController extends State<Chat>
   }
 
   void onSelectMessage(Event event) {
+    closeSearch();
     if (!event.redacted) {
       if (selectedEvents.contains(event)) {
         setState(
