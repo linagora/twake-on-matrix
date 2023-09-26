@@ -149,7 +149,7 @@ jobs:
         run: |
           case "$RUNNER_OS" in
             Linux)
-              cp dist/*/* "twake-$GITHUB_REF_NAME-linux-amd64.AppImage";;
+              cp dist/* "twake-$GITHUB_REF_NAME-linux-amd64.AppImage";;
             macOS)
               cp dist/*/* "twake-$GITHUB_REF_NAME-macos-amd64.dmg"
               # Notarize the app
