@@ -9,6 +9,7 @@ import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dar
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
+import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
@@ -65,6 +66,7 @@ class GetItInitializer {
   }
 
   void bindingGlobal() {
+    setupDioCache();
     NetworkDI().bind();
     HiveDI().bind();
     NetworkConnectivityDI().bind();
@@ -73,6 +75,10 @@ class GetItInitializer {
 
   void bindingQueue() {
     getIt.registerFactory<Queue>(() => Queue());
+  }
+
+  void setupDioCache() {
+    DioCacheOption.instance.setUpDioHiveCache();
   }
 
   void bindingAPI() {
