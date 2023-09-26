@@ -33,6 +33,11 @@ mixin ChatRoomSearchMixin {
     initialValue: '',
   );
 
+  void closeSearch() {
+    isSearchingNotifier.value = false;
+    clearSearch();
+  }
+
   void toggleSearch() {
     isSearchingNotifier.value = !isSearchingNotifier.value;
     clearSearch();
