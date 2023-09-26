@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -29,8 +28,6 @@ void main() async {
   final firstClient = clients.firstOrNull;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
-
-  await DioCacheOption.instance.setUpDioHiveCache();
 
   GetItInitializer().setUp();
 
