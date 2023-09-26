@@ -1,8 +1,6 @@
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
-import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 
 class DioCacheOption {
   static const String _hiveBoxName = "twake_dio_cache_hive_store";
@@ -20,18 +18,10 @@ class DioCacheOption {
     return _instance;
   }
 
-  Future<String?> _getAppDirPath() async {
-    if (kIsWeb) return null;
-    final appDir = await getApplicationDocumentsDirectory();
-    Logs().d('DioCacheOption::_getAppDirPath() appDirPath ${appDir.path}');
-    return appDir.path;
-  }
-
   Future<void> setUpDioHiveCache() async {
     Logs().d('DioCacheOption::_setUpDioHiveCache() Start setup DioHiveCache');
-    final appDirPath = await _getAppDirPath();
     _hiveCacheStore = HiveCacheStore(
-      appDirPath,
+      null,
       hiveBoxName: _hiveBoxName,
     );
     Logs().d('DioCacheOption::_setUpDioHiveCache() DioHiveCache Ready');
