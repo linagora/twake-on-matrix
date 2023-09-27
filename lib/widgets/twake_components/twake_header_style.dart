@@ -10,6 +10,8 @@ class TwakeHeaderStyle {
   static const double closeIconSize = 24.0;
   static const double widthSizedBox = 16.0;
   static const double textBorderRadius = 24.0;
+  static const int flexTitle = 6;
+  static const int flexActions = 3;
 
   static bool isDesktop(BuildContext context) => responsive.isDesktop(context);
 
