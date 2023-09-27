@@ -1,6 +1,10 @@
+import 'dart:typed_data';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
+import 'package:fluffychat/utils/js_window/non_js_window.dart'
+    if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
+import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
@@ -19,20 +23,20 @@ extension SendFileWebExtension on Room {
     Map<String, dynamic>? extraContent,
   }) async {
     txid ??= client.generateUniqueTransactionId();
-    Image? img;
+    UniversalImageBitmap? imageBitmap;
     if (file.bytes != null && file is MatrixImageFile) {
-      img = decodeImage(file.bytes!);
+      imageBitmap = await convertUint8ListToBitmap(file.bytes!);
       file = MatrixImageFile(
         name: file.name,
-        width: img?.width,
-        height: img?.height,
+        width: imageBitmap?.width,
+        height: imageBitmap?.height,
         bytes: file.bytes,
       );
     }
     sendingFilePlaceholders[txid] = MatrixImageFile(
       name: file.name,
-      width: img?.width,
-      height: img?.height,
+      width: imageBitmap?.width,
+      height: imageBitmap?.height,
       bytes: file.bytes,
     );
     fakeImageEvent ??= await sendFakeImageEvent(
@@ -262,11 +266,13 @@ extension SendFileWebExtension on Room {
     try {
       final result = await FlutterImageCompress.compressWithList(
         originalFile.bytes!,
-        quality: 70,
+        quality: AppConfig.thumbnailQuality,
       );
 
-      final image = decodeImage(result);
-      final blurHash = image != null ? BlurHash.encode(image) : null;
+      final blurHash = await runBenchmarked(
+        '_generateBlurHash',
+        () => _generateBlurHash(result),
+      );
 
       return MatrixImageFile(
         bytes: result,
@@ -274,7 +280,7 @@ extension SendFileWebExtension on Room {
         mimeType: originalFile.mimeType,
         width: originalFile.width,
         height: originalFile.height,
-        blurhash: blurHash?.hash,
+        blurhash: blurHash,
       );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
@@ -296,8 +302,10 @@ extension SendFileWebExtension on Room {
         imageFormat: ImageFormat.JPEG,
         quality: AppConfig.thumbnailQuality,
       );
-      final image = decodeImage(result);
-      final blurHash = image != null ? BlurHash.encode(image) : null;
+      final blurHash = await runBenchmarked(
+        '_generateBlurHash',
+        () => _generateBlurHash(result),
+      );
 
       return MatrixImageFile(
         bytes: result,
@@ -305,7 +313,7 @@ extension SendFileWebExtension on Room {
         mimeType: originalFile.mimeType,
         width: originalFile.width,
         height: originalFile.height,
-        blurhash: blurHash?.hash,
+        blurhash: blurHash,
       );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
@@ -332,5 +340,21 @@ extension SendFileWebExtension on Room {
       Logs().e('Error while generating thumbnail', e);
       return null;
     }
+  }
+}
+
+Future<String?> _generateBlurHash(Uint8List data) async {
+  try {
+    final result = await FlutterImageCompress.compressWithList(
+      data,
+      minHeight: AppConfig.blurHashSize,
+      minWidth: AppConfig.blurHashSize,
+    );
+    final image = decodeJpg(result);
+    final blurHash = image != null ? BlurHash.encode(image) : null;
+    return blurHash?.hash;
+  } catch (e) {
+    Logs().e('_generateBlurHash::error', e);
+    return null;
   }
 }
