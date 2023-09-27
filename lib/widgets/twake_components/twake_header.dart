@@ -38,7 +38,7 @@ class TwakeHeader extends StatelessWidget
               child: Row(
                 children: [
                   Expanded(
-                    flex: 3,
+                    flex: TwakeHeaderStyle.flexActions,
                     child: Row(
                       children: [
                         InkWell(
@@ -79,7 +79,7 @@ class TwakeHeader extends StatelessWidget
                     ),
                   ),
                   Expanded(
-                    flex: 6,
+                    flex: TwakeHeaderStyle.flexTitle,
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
@@ -92,7 +92,7 @@ class TwakeHeader extends StatelessWidget
                   ),
                   if (!TwakeHeaderStyle.isDesktop(context))
                     Expanded(
-                      flex: 3,
+                      flex: TwakeHeaderStyle.flexActions,
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: InkWell(
