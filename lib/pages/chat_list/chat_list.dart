@@ -68,6 +68,10 @@ class ChatListController extends State<ChatList>
 
   bool get displayNavigationBar => false;
 
+  static const int _ascendingOrder = 1;
+
+  static const int _descendingOrder = -1;
+
   final responsive = getIt.get<ResponsiveUtils>();
 
   String? activeSpaceId;
@@ -109,7 +113,21 @@ class ChatListController extends State<ChatList>
       .client
       .rooms
       .where(getRoomFilterByActiveFilter(activeFilter))
+      .sorted(_sortListRomByTimeCreatedMessage)
+      .sorted(_sortListRoomByPinMessage)
       .toList();
+
+  int _sortListRomByTimeCreatedMessage(Room currentRoom, Room nextRoom) {
+    return nextRoom.timeCreated.compareTo(currentRoom.timeCreated);
+  }
+
+  int _sortListRoomByPinMessage(Room currentRoom, Room nextRoom) {
+    if (nextRoom.isFavourite && !currentRoom.isFavourite) {
+      return _ascendingOrder;
+    } else {
+      return _descendingOrder;
+    }
+  }
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
