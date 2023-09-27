@@ -15,14 +15,18 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:file_saver/file_saver.dart';
 
 extension MatrixFileExtension on MatrixFile {
-  void downloadFile(BuildContext context) async {
+  Future<String?> downloadFile(BuildContext context) async {
     if (PlatformInfos.isWeb) {
-      return downloadFileInWeb(context);
+      return await downloadFileInWeb(context);
     }
 
     if (PlatformInfos.isMobile) {
-      return downloadImageInMobile(context);
+      return await downloadImageInMobile(context);
     }
+
+    throw UnsupportedError(
+      'Download feature is not supported on this platform',
+    );
   }
 
   void share(BuildContext context) async {
@@ -40,7 +44,7 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  void downloadFileInWeb(BuildContext context) async {
+  Future<String> downloadFileInWeb(BuildContext context) async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
 
     final directory = await FileSaver.instance.saveFile(
@@ -53,9 +57,11 @@ extension MatrixFileExtension on MatrixFile {
     Fluttertoast.showToast(
       msg: L10n.of(context)!.downloadFileInWeb(directory),
     );
+
+    return '$directory/$name';
   }
 
-  void downloadImageInMobile(BuildContext context) async {
+  Future<String> downloadImageInMobile(BuildContext context) async {
     Logs().d(
       "MatrixFileExtension()::downloadImageInMobile()::download on Mobile",
     );
@@ -70,6 +76,8 @@ extension MatrixFileExtension on MatrixFile {
           ? L10n.of(context)!.downloadImageSuccess
           : L10n.of(context)!.downloadImageError,
     );
+
+    return result?['filePath'] ?? '';
   }
 
   FileType get filePickerFileType {

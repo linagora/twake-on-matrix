@@ -2755,5 +2755,8 @@
     "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
     "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
     "changeProfilePhoto": "Change profile photo",
-    "thisMessageHasBeenEncrypted": "This message has been encrypted"
+    "thisMessageHasBeenEncrypted": "This message has been encrypted",
+    "roomCreationFailed": "Room creation failed",
+    "errorGettingPdf": "Error getting PDF",
+    "errorPreviewingFile": "Error previewing file"
 }

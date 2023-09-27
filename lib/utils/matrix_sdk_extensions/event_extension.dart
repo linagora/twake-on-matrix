@@ -17,10 +17,10 @@ extension LocalizedBody on Event {
         future: downloadAndDecryptAttachment,
       );
 
-  void saveFile(BuildContext context) async {
+  Future<String?> saveFile(BuildContext context) async {
     final matrixFile = await getFile(context);
 
-    matrixFile.result?.downloadFile(context);
+    return await matrixFile.result?.downloadFile(context);
   }
 
   String get filename {

@@ -10,6 +10,7 @@ import 'package:fluffychat/domain/app_state/preview_file/download_file_for_previ
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
+import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
@@ -62,6 +63,7 @@ import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -511,7 +513,19 @@ class ChatController extends State<Chat>
     });
   }
 
-  void onFileTapped(Event event) async {
+  void onFileTapped(Event event) {
+    if (PlatformInfos.isWeb) {
+      onFileTappedWeb(event);
+    } else {
+      onFileTappedMobile(event);
+    }
+  }
+
+  void onFileTappedWeb(Event event) {
+    return _handlePreviewWeb(event: event);
+  }
+
+  void onFileTappedMobile(Event event) async {
     final permissionHandler = PermissionHandlerService();
     final storagePermissionStatus =
         await permissionHandler.storagePermissionStatus;
@@ -531,11 +545,11 @@ class ChatController extends State<Chat>
         );
         if (await permissionHandler.storagePermissionStatus ==
             PermissionStatus.granted) {
-          _handleDownloadFileForPreview(event: event);
+          _handleDownloadFileForPreviewMobile(event: event);
         }
         break;
       case PermissionStatus.granted:
-        _handleDownloadFileForPreview(event: event);
+        _handleDownloadFileForPreviewMobile(event: event);
         break;
       case PermissionStatus.permanentlyDenied:
         showDialog(
@@ -560,7 +574,20 @@ class ChatController extends State<Chat>
     }
   }
 
-  void _handleDownloadFileForPreview({required Event event}) async {
+  void _handlePreviewWeb({required Event event}) async {
+    if (!event.hasAttachment) {
+      Fluttertoast.showToast(msg: L10n.of(context)!.errorPreviewingFile);
+      return;
+    }
+
+    if (event.isPdfFile()) {
+      return previewPdfWeb(context, event);
+    }
+
+    downloadFileAction(context, event);
+  }
+
+  void _handleDownloadFileForPreviewMobile({required Event event}) async {
     final downloadFileForPreviewInteractor =
         getIt.get<DownloadFileForPreviewInteractor>();
     final tempDirPath = (await getTemporaryDirectory()).path;
@@ -1468,8 +1495,21 @@ class ChatController extends State<Chat>
     }
   }
 
-  void downloadFileAction(BuildContext context, Event event) =>
-      event.saveFile(context);
+  Future<String?> downloadFileAction(BuildContext context, Event event) async =>
+      await event.saveFile(context);
+
+  void previewPdfWeb(BuildContext context, Event event) async {
+    final pdf = await event.getFile(context);
+    if (pdf.result == null || event.sizeString != pdf.result?.sizeString) {
+      Fluttertoast.showToast(msg: L10n.of(context)!.errorGettingPdf);
+      return;
+    }
+
+    final blob = html.Blob([pdf.result!.bytes], 'application/pdf');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    html.window.open(url, "_blank");
+    html.Url.revokeObjectUrl(url);
+  }
 
   void handleContextMenuAction(
     BuildContext context,
