@@ -21,31 +21,14 @@ class VideoViewerDialog extends StatefulWidget {
 }
 
 class _VideoViewerDialogState extends State<VideoViewerDialog> {
-  Player? videoPlayer;
-  VideoController? videoController;
+  Player videoPlayer = Player();
+  late final VideoController videoController = VideoController(videoPlayer);
   bool isFullScreen = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await initVideoController();
-    });
-  }
-
-  Future<void> initVideoController() async {
-    videoPlayer = Player();
-    await videoPlayer?.open(Media(widget.path));
-    if (videoPlayer == null) {
-      Logs().e(
-        'VideoViewerDialog::initVideoController(): video player open failed.',
-      );
-      context.pop();
-    }
-    videoController = VideoController(videoPlayer!);
-    setState(() {
-      videoPlayer!.play();
-    });
+    videoPlayer.open(Media(widget.path));
   }
 
   @override
@@ -84,22 +67,17 @@ class _VideoViewerDialogState extends State<VideoViewerDialog> {
           )
         ],
       ),
-      child: videoController != null
-          ? Container(
-              decoration: const BoxDecoration(
-                color: MessageContentStyle.backgroundColorVideo,
-              ),
-              padding: VideoViewerDialogStyle.bottomPaddingVideo,
-              child: SafeArea(
-                child: Video(
-                  pauseUponEnteringBackgroundMode: true,
-                  resumeUponEnteringForegroundMode: true,
-                  controls: MaterialVideoControls,
-                  controller: videoController!,
-                ),
-              ),
-            )
-          : const SizedBox(),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: MessageContentStyle.backgroundColorVideo,
+        ),
+        child: Video(
+          pauseUponEnteringBackgroundMode: true,
+          resumeUponEnteringForegroundMode: true,
+          controls: MaterialVideoControls,
+          controller: videoController,
+        ),
+      ),
     );
   }
 }
