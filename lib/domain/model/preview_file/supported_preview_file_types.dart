@@ -1,3 +1,13 @@
+enum SupportedIconFileTypesEnum {
+  image,
+  doc,
+  excel,
+  powerPoint,
+  pdf,
+  zip,
+  unknown,
+}
+
 class SupportedPreviewFileTypes {
   static const imageMimeTypes = [
     'image/bmp',

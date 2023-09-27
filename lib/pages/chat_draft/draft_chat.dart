@@ -26,6 +26,7 @@ import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -238,7 +239,7 @@ class DraftChatController extends State<DraftChat>
   void onInputBarSubmitted(_) {
     sendText(
       onCreateRoomFailed: () {
-        Fluttertoast.showToast(msg: 'Create room failed');
+        Fluttertoast.showToast(msg: L10n.of(context)!.roomCreationFailed);
         FocusScope.of(context).requestFocus(inputFocus);
       },
     );
