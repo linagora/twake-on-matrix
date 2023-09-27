@@ -268,8 +268,8 @@ class ChatListController extends State<ChatList>
         tempConversationSelectionPresentation =
         conversationSelectionNotifier.value.toSet();
 
-    if (conversation != null) {
-      conversationSelectionNotifier.value.toSet().remove(conversation);
+    if (conversation != null && conversation.isSelected) {
+      tempConversationSelectionPresentation.remove(conversation);
     } else {
       tempConversationSelectionPresentation.add(
         ConversationSelectionPresentation(
