@@ -149,6 +149,7 @@ dependencies:
   media_kit_video: ^1.1.8
   media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
+  js: ^0.6.7
 dev_dependencies:
   build_runner: ^2.3.3
   dart_code_metrics: ^5.7.3
