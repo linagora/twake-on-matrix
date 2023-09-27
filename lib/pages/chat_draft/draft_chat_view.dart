@@ -100,7 +100,7 @@ class DraftChatView extends StatelessWidget {
                               tooltip: L10n.of(context)!.more,
                               margin: DraftChatViewStyle.buttonAddMoreMargin,
                               icon: Icons.add_circle_outline,
-                              onTap: () => controller.showMediaPicker(context),
+                              onTap: () => controller.onSendFileClick(context),
                             ),
                             Expanded(
                               child: Container(

@@ -59,14 +59,13 @@ mixin SendFilesMixin {
     BuildContext context, {
     Room? room,
   }) async {
-    if (room == null) {}
     final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
     final result = await FilePicker.platform.pickFiles(
       withData: true,
     );
-    if (result == null && result?.files.isEmpty == true) return;
+    if (result == null || result.files.isEmpty) return;
 
-    sendFileOnWebInteractor.execute(room: room!, filePickerResult: result!);
+    sendFileOnWebInteractor.execute(room: room!, filePickerResult: result);
   }
 
   void onPickerTypeClick({
