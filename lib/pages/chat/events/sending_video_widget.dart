@@ -92,6 +92,7 @@ class SendingVideoWidget extends StatelessWidget {
     await showDialog(
       context: context,
       useRootNavigator: false,
+      useSafeArea: false,
       builder: (context) {
         return VideoViewerDialog(path: matrixFile.filePath!);
       },
