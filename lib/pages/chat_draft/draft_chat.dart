@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
@@ -13,6 +15,7 @@ import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.da
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -243,7 +246,15 @@ class DraftChatController extends State<DraftChat>
     setState(() => inputText = text);
   }
 
-  void showMediaPicker(BuildContext context) {
+  void onSendFileClick(BuildContext context) async {
+    if (PlatformInfos.isWeb) {
+      sendFileOnWebAction(context);
+    } else {
+      _showMediaPicker(context);
+    }
+  }
+
+  void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
     );
@@ -257,6 +268,27 @@ class DraftChatController extends State<DraftChat>
       ),
       onSendTap: () => sendImages(imagePickerController),
       onCameraPicked: (_) => sendImages(imagePickerController),
+    );
+  }
+
+  @override
+  void sendFileOnWebAction(
+    BuildContext context, {
+    Room? room,
+  }) async {
+    final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
+    final result = await FilePicker.platform.pickFiles(
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+
+    _createRoom(
+      onRoomCreatedSuccess: (newRoom) {
+        sendFileOnWebInteractor.execute(
+          room: newRoom,
+          filePickerResult: result,
+        );
+      },
     );
   }
 
