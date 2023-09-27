@@ -20,13 +20,13 @@ class TwakeHeaderStyle {
   }
 
   static const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
-    end: 16,
-    start: 16,
+    end: 4,
+    start: 4,
   );
 
   static const EdgeInsetsDirectional textButtonPadding =
       EdgeInsetsDirectional.all(8);
 
-  static const EdgeInsetsDirectional closeIconPadding =
-      EdgeInsetsDirectional.only(end: 4);
+  static const EdgeInsetsDirectional counterSelectionPadding =
+      EdgeInsetsDirectional.only(start: 4);
 }
