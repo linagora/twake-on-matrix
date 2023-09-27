@@ -43,20 +43,26 @@ extension MediaTypeExtension on Event {
       'AttachmentExtension::getIcon(): mediaType: $mimeType || fileType: $fileType',
     );
     if (mimeType?.isEmpty == true || fileType == null) {
-      return ImagePaths.icFileUnKnow;
+      return ImagePaths.icFileUnknown;
     }
-    if (isDocFile()) {
-      return ImagePaths.icFileDocx;
-    } else if (isExcelFile()) {
-      return ImagePaths.icFileXlsx;
-    } else if (isPowerPointFile()) {
-      return ImagePaths.icFilePptx;
-    } else if (isPdfFile()) {
-      return ImagePaths.icFilePdf;
-    } else if (isZipFile()) {
-      return ImagePaths.icFileZip;
+
+    switch (getPreviewIconFileType()) {
+      case SupportedIconFileTypesEnum.image:
+        return ImagePaths.icFileUnknown;
+      case SupportedIconFileTypesEnum.doc:
+        return ImagePaths.icFileDocx;
+      case SupportedIconFileTypesEnum.excel:
+        return ImagePaths.icFileXlsx;
+      case SupportedIconFileTypesEnum.powerPoint:
+        return ImagePaths.icFilePptx;
+      case SupportedIconFileTypesEnum.pdf:
+        return ImagePaths.icFilePdf;
+      case SupportedIconFileTypesEnum.zip:
+        return ImagePaths.icFileZip;
+      case SupportedIconFileTypesEnum.unknown:
+      default:
+        return ImagePaths.icFileUnknown;
     }
-    return ImagePaths.icFileUnKnow;
   }
 
   String getFileType(BuildContext context) {
@@ -68,6 +74,24 @@ extension MediaTypeExtension on Event {
       }
     } else {
       return L10n.of(context)!.file.toUpperCase();
+    }
+  }
+
+  SupportedIconFileTypesEnum getPreviewIconFileType() {
+    if (isImageFile()) {
+      return SupportedIconFileTypesEnum.image;
+    } else if (isDocFile()) {
+      return SupportedIconFileTypesEnum.doc;
+    } else if (isExcelFile()) {
+      return SupportedIconFileTypesEnum.excel;
+    } else if (isPowerPointFile()) {
+      return SupportedIconFileTypesEnum.powerPoint;
+    } else if (isPdfFile()) {
+      return SupportedIconFileTypesEnum.pdf;
+    } else if (isZipFile()) {
+      return SupportedIconFileTypesEnum.zip;
+    } else {
+      return SupportedIconFileTypesEnum.unknown;
     }
   }
 }
