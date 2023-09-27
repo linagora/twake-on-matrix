@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -197,7 +198,10 @@ extension SendFileExtension on Room {
     }
 
     final blurHash = thumbnail?.filePath != null
-        ? await _generateBlurHash(thumbnail!.filePath)
+        ? await runBenchmarked(
+            '_generateBlurHash',
+            () => _generateBlurHash(thumbnail!.filePath),
+          )
         : null;
     // Send event
     final content = <String, dynamic>{
@@ -364,10 +368,24 @@ extension SendFileExtension on Room {
   }
 
   Future<String?> _generateBlurHash(String filePath) async {
-    final image = await img.decodeImageFile(filePath);
-    if (image == null) return null;
-    final blurHash = BlurHash.encode(image, numCompX: 4, numCompY: 3);
-    return blurHash.hash;
+    try {
+      final result = await FlutterImageCompress.compressWithFile(
+        filePath,
+        minHeight: AppConfig.blurHashSize,
+        minWidth: AppConfig.blurHashSize,
+      );
+      final blurHash = await compute(
+        (imageData) {
+          final image = img.decodeJpg(imageData);
+          return BlurHash.encode(image!);
+        },
+        result!,
+      );
+      return blurHash.hash;
+    } catch (e) {
+      Logs().e('_generateBlurHash::error', e);
+      return null;
+    }
   }
 
   Future<ImageFileInfo> _getThumbnailVideo(

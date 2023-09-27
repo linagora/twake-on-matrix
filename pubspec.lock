@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: twake-supported
-      resolved-ref: "516577a6ef868a3003383bbd61ff354844406537"
+      resolved-ref: "2c05a46910af126bd4c4f3e1b1c2df4b1bf7f6b2"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.2"
