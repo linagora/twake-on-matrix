@@ -1,12 +1,12 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
-import 'package:fluffychat/widgets/video_viewer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class SendingVideoWidget extends StatelessWidget {
+class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
   final Event event;
 
   final MatrixVideoFile matrixFile;
@@ -89,14 +89,7 @@ class SendingVideoWidget extends StatelessWidget {
     if (matrixFile.filePath == null) {
       return;
     }
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      useSafeArea: false,
-      builder: (context) {
-        return VideoViewerDialog(path: matrixFile.filePath!);
-      },
-    );
+    playVideoAction(context, matrixFile.filePath!);
   }
 
   void _checkSendingFileStatus() {
