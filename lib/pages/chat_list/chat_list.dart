@@ -13,11 +13,11 @@ import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/pages/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
@@ -68,10 +68,6 @@ class ChatListController extends State<ChatList>
 
   bool get displayNavigationBar => false;
 
-  static const int _ascendingOrder = 1;
-
-  static const int _descendingOrder = -1;
-
   final responsive = getIt.get<ResponsiveUtils>();
 
   String? activeSpaceId;
@@ -94,40 +90,8 @@ class ChatListController extends State<ChatList>
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
-  bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
-    switch (activeFilter) {
-      case ActiveFilter.allChats:
-        return (room) => !room.isSpace && !room.isStoryRoom;
-      case ActiveFilter.groups:
-        return (room) =>
-            !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
-      case ActiveFilter.messages:
-        return (room) =>
-            !room.isSpace && room.isDirectChat && !room.isStoryRoom;
-      case ActiveFilter.spaces:
-        return (r) => r.isSpace;
-    }
-  }
-
-  List<Room> get filteredRoomsForAll => Matrix.of(context)
-      .client
-      .rooms
-      .where(getRoomFilterByActiveFilter(activeFilter))
-      .sorted(_sortListRomByTimeCreatedMessage)
-      .sorted(_sortListRoomByPinMessage)
-      .toList();
-
-  int _sortListRomByTimeCreatedMessage(Room currentRoom, Room nextRoom) {
-    return nextRoom.timeCreated.compareTo(currentRoom.timeCreated);
-  }
-
-  int _sortListRoomByPinMessage(Room currentRoom, Room nextRoom) {
-    if (nextRoom.isFavourite && !currentRoom.isFavourite) {
-      return _ascendingOrder;
-    } else {
-      return _descendingOrder;
-    }
-  }
+  List<Room> get filteredRoomsForAll =>
+      Matrix.of(context).client.filteredRoomsForAll(activeFilter);
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
