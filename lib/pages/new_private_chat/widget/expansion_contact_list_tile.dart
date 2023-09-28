@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,12 @@ typedef OnExpansionListTileTap = void Function();
 
 class ExpansionContactListTile extends StatelessWidget {
   final PresentationContact contact;
+  final String highlightKeyword;
 
   const ExpansionContactListTile({
     super.key,
     required this.contact,
+    this.highlightKeyword = '',
   });
 
   @override
@@ -58,6 +61,7 @@ class ExpansionContactListTile extends StatelessWidget {
                                     profileDisplayName:
                                         snapshot.data?.displayName,
                                     contactDisplayName: contact.displayName,
+                                    highlightKeyword: highlightKeyword,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
@@ -88,15 +92,17 @@ class ExpansionContactListTile extends StatelessWidget {
                       ),
                     ),
                     if (contact.matrixId != null)
-                      Text(
-                        contact.matrixId!,
+                      HighlightText(
+                        text: contact.matrixId!,
+                        searchWord: highlightKeyword,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: LinagoraRefColors.material().neutral[60],
                             ),
                       ),
                     if (contact.email != null)
-                      Text(
-                        contact.email!,
+                      HighlightText(
+                        text: contact.email!,
+                        searchWord: highlightKeyword,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: LinagoraRefColors.material().neutral[60],
                             ),

@@ -1,37 +1,28 @@
+import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 
 class BuildDisplayName extends StatelessWidget {
   final String? profileDisplayName;
   final String? contactDisplayName;
+  final String highlightKeyword;
   final TextStyle? style;
   const BuildDisplayName({
     super.key,
     this.profileDisplayName,
     this.contactDisplayName,
+    this.highlightKeyword = "",
     this.style,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (profileDisplayName != null) {
-      return _DisplayName(displayName: profileDisplayName!, style: style);
-    } else if (contactDisplayName != null) {
-      return _DisplayName(displayName: contactDisplayName!, style: style);
-    } else {
+    final displayName = profileDisplayName ?? contactDisplayName;
+    if (displayName == null) {
       return const SizedBox.shrink();
     }
-  }
-}
-
-class _DisplayName extends StatelessWidget {
-  final String displayName;
-  final TextStyle? style;
-  const _DisplayName({required this.displayName, this.style});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      displayName,
+    return HighlightText(
+      text: displayName,
+      searchWord: highlightKeyword,
       style: style ??
           Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
