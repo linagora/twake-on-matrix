@@ -134,7 +134,10 @@ class ExpansionList extends StatelessWidget {
                         );
                       },
                       borderRadius: BorderRadius.circular(16.0),
-                      child: ExpansionContactListTile(contact: contact),
+                      child: ExpansionContactListTile(
+                        contact: contact,
+                        highlightKeyword: success.keyword,
+                      ),
                     );
                   },
                 );

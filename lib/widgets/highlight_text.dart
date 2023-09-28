@@ -6,6 +6,9 @@ class HighlightText extends StatelessWidget {
   final String? searchWord;
   final TextStyle? style;
   final TextStyle? highlightStyle;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final bool? softWrap;
 
   const HighlightText({
     super.key,
@@ -13,6 +16,9 @@ class HighlightText extends StatelessWidget {
     required this.searchWord,
     required this.style,
     this.highlightStyle,
+    this.maxLines,
+    this.overflow,
+    this.softWrap,
   });
 
   @override
@@ -28,9 +34,9 @@ class HighlightText extends StatelessWidget {
     );
     return Text.rich(
       TextSpan(children: spans),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      softWrap: false,
+      maxLines: maxLines,
+      overflow: overflow,
+      softWrap: softWrap,
     );
   }
 }

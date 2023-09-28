@@ -98,7 +98,7 @@ class _GroupChatInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              HighlightText(
+              _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.merge(
                       TextStyle(
@@ -130,6 +130,30 @@ class _GroupChatInformation extends StatelessWidget {
   }
 }
 
+class _SearchHighlightText extends StatelessWidget {
+  final String text;
+  final String? searchWord;
+  final TextStyle? style;
+
+  const _SearchHighlightText({
+    required this.text,
+    this.searchWord,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HighlightText(
+      text: text,
+      style: style,
+      searchWord: searchWord,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      softWrap: false,
+    );
+  }
+}
+
 class _DirectChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
   final String? searchKeyword;
@@ -155,7 +179,7 @@ class _DirectChatInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              HighlightText(
+              _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.merge(
                       TextStyle(
@@ -166,7 +190,7 @@ class _DirectChatInformation extends StatelessWidget {
                     ),
                 searchWord: searchKeyword,
               ),
-              HighlightText(
+              _SearchHighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
                 style: Theme.of(context).textTheme.bodyMedium?.merge(
                       TextStyle(
@@ -217,7 +241,7 @@ class _ContactInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              HighlightText(
+              _SearchHighlightText(
                 text: contactPresentationSearch.displayName ?? "",
                 style: Theme.of(context).textTheme.titleMedium?.merge(
                       TextStyle(
@@ -232,7 +256,7 @@ class _ContactInformation extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (contactPresentationSearch.matrixId != null)
-                    HighlightText(
+                    _SearchHighlightText(
                       text: contactPresentationSearch.matrixId ?? "",
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
                             TextStyle(
@@ -244,7 +268,7 @@ class _ContactInformation extends StatelessWidget {
                       searchWord: searchKeyword,
                     ),
                   if (contactPresentationSearch.email != null)
-                    HighlightText(
+                    _SearchHighlightText(
                       text: contactPresentationSearch.email ?? "",
                       style: Theme.of(context).textTheme.bodyMedium?.merge(
                             TextStyle(

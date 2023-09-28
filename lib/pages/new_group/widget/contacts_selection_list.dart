@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
@@ -31,17 +32,18 @@ class ContactsSelectionList extends StatelessWidget {
       valueListenable: contactsNotifier,
       builder: (context, value, child) => value.fold(
         (failure) => Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+          padding: ContactsSelectionListStyle.notFoundPadding,
           child: NoContactsFound(
             keyword: failure is GetContactsFailure ? failure.keyword : '',
           ),
         ),
         (success) {
           if (success is PresentationExternalContactSuccess) {
-            return _buildContactItem(
-              context,
+            return _ContactItem(
+              selectedContactsMapNotifier: selectedContactsMapNotifier,
+              onSelectedContact: onSelectedContact,
               contact: success.contact,
-              paddingTop: 8,
+              paddingTop: ContactsSelectionListStyle.listPaddingTop,
             );
           }
           if (success is! PresentationContactsSuccess) {
@@ -50,7 +52,7 @@ class ContactsSelectionList extends StatelessWidget {
 
           if (success.keyword.isNotEmpty && success.data.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: ContactsSelectionListStyle.notFoundPadding,
               child: NoContactsFound(
                 keyword: success.keyword,
               ),
@@ -61,27 +63,49 @@ class ContactsSelectionList extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: success.data.length,
-            itemBuilder: (context, index) => _buildContactItem(
-              context,
-              contact: success.data[index],
-              paddingTop: index == 0 ? 8.0 : 0,
-            ),
+            itemBuilder: (context, index) {
+              final contact = success.data[index];
+              final disabled = disabledContactIds.contains(
+                contact.matrixId,
+              );
+              return _ContactItem(
+                contact: contact,
+                selectedContactsMapNotifier: selectedContactsMapNotifier,
+                onSelectedContact: onSelectedContact,
+                highlightKeyword: success.keyword,
+                disabled: disabled,
+                paddingTop:
+                    index == 0 ? ContactsSelectionListStyle.listPaddingTop : 0,
+              );
+            },
           );
         },
       ),
     );
   }
+}
 
-  Widget _buildContactItem(
-    BuildContext context, {
-    required PresentationContact contact,
-    double paddingTop = 0,
-  }) {
+class _ContactItem extends StatelessWidget {
+  final PresentationContact contact;
+  final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
+  final VoidCallback? onSelectedContact;
+  final bool disabled;
+  final double paddingTop;
+  final String highlightKeyword;
+
+  const _ContactItem({
+    required this.contact,
+    required this.selectedContactsMapNotifier,
+    this.onSelectedContact,
+    this.highlightKeyword = '',
+    this.disabled = false,
+    this.paddingTop = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final contactNotifier =
         selectedContactsMapNotifier.getNotifierAtContact(contact);
-    final disabled = disabledContactIds.contains(
-      contact.matrixId,
-    );
     return InkWell(
       key: ValueKey(contact.matrixId),
       onTap: disabled
@@ -115,7 +139,7 @@ class ContactsSelectionList extends StatelessWidget {
                               context,
                               contact,
                             );
-                            onSelectedContact();
+                            onSelectedContact?.call();
                           },
                   );
                 },
@@ -123,6 +147,7 @@ class ContactsSelectionList extends StatelessWidget {
               Expanded(
                 child: ExpansionContactListTile(
                   contact: contact,
+                  highlightKeyword: highlightKeyword,
                 ),
               ),
             ],
