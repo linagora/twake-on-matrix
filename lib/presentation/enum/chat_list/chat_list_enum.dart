@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
@@ -19,7 +20,22 @@ enum ActiveFilter {
   allChats,
   groups,
   messages,
-  spaces,
+  spaces;
+
+  bool Function(Room) getRoomFilterByActiveFilter() {
+    switch (this) {
+      case ActiveFilter.allChats:
+        return (room) => !room.isSpace && !room.isStoryRoom;
+      case ActiveFilter.groups:
+        return (room) =>
+            !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
+      case ActiveFilter.messages:
+        return (room) =>
+            !room.isSpace && room.isDirectChat && !room.isStoryRoom;
+      case ActiveFilter.spaces:
+        return (r) => r.isSpace;
+    }
+  }
 }
 
 enum ChatListSelectionActions {
