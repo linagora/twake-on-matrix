@@ -158,6 +158,7 @@ class HomeserverTextField extends StatelessWidget {
       textFieldConfiguration: TextFieldConfiguration(
         onEditingComplete: () => controller.loginButtonPressed(),
         autofocus: controller.state != HomeserverState.ssoLoginServer,
+        focusNode: controller.homeserverFocusNode,
         autocorrect: false,
         enabled: true,
         controller: controller.homeserverController,

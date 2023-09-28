@@ -188,6 +188,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
   }
 
   void loginButtonPressed() async {
+    _unfocusNodeHomeserver();
     switch (state) {
       case HomeserverState.ssoLoginServer:
         await checkHomeserverAction();
@@ -200,6 +201,12 @@ class HomeserverPickerController extends State<HomeserverPicker>
         break;
     }
     setState(() {});
+  }
+
+  void _unfocusNodeHomeserver() {
+    if (homeserverFocusNode.hasFocus) {
+      homeserverFocusNode.unfocus();
+    }
   }
 
   @override
