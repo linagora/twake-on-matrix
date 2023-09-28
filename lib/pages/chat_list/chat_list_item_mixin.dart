@@ -80,7 +80,7 @@ mixin ChatListItemMixin {
                 builder: (context, snapshot) {
                   if (snapshot.data == null) return const SizedBox.shrink();
                   return Text(
-                    snapshot.data!.displayName!,
+                    snapshot.data!.calcDisplayname(),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     softWrap: false,
