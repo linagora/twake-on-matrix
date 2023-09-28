@@ -59,8 +59,10 @@ class ContactsTabBodyView extends StatelessWidget {
                                     contact: contact,
                                   );
                                 },
-                                child:
-                                    ExpansionContactListTile(contact: contact),
+                                child: ExpansionContactListTile(
+                                  contact: contact,
+                                  highlightKeyword: success.keyword,
+                                ),
                               ),
                             )
                             .toList()
