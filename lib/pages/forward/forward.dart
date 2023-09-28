@@ -9,7 +9,7 @@ import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dar
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -18,6 +18,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 
 class Forward extends StatefulWidget {
   final String? sendFromRoomId;
+
   const Forward({Key? key, this.sendFromRoomId}) : super(key: key);
 
   @override
@@ -71,26 +72,8 @@ class ForwardController extends State<Forward> {
 
   final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
 
-  bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
-    switch (activeFilter) {
-      case ActiveFilter.allChats:
-        return (room) => !room.isSpace && !room.isStoryRoom;
-      case ActiveFilter.groups:
-        return (room) =>
-            !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
-      case ActiveFilter.messages:
-        return (room) =>
-            !room.isSpace && room.isDirectChat && !room.isStoryRoom;
-      case ActiveFilter.spaces:
-        return (r) => r.isSpace;
-    }
-  }
-
-  List<Room> get filteredRoomsForAll => Matrix.of(context)
-      .client
-      .rooms
-      .where(getRoomFilterByActiveFilter(_activeFilterAllChats))
-      .toList();
+  List<Room> get filteredRoomsForAll =>
+      Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
 
   void forwardAction() async {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor

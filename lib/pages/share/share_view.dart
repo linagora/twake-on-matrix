@@ -5,7 +5,6 @@ import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -39,7 +38,7 @@ class ShareView extends StatelessWidget {
                 builder: (context, isShowRecentlyChat, child) {
                   if (isShowRecentlyChat) {
                     return RecentChatList(
-                      rooms: Matrix.of(context).client.rooms,
+                      rooms: controller.filteredRoomsForAll,
                       selectedEventsNotifier: controller.selectedRoomsNotifier,
                       onSelectedChat: (roomId) =>
                           controller.onSelectChat(roomId),

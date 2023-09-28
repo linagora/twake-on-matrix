@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/share/share_view.dart';
+import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -73,6 +75,11 @@ class ShareController extends State<Share> with SendFilesMixin {
       Matrix.of(context).shareContent = null;
     }
   }
+
+  final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
+
+  List<Room> get filteredRoomsForAll =>
+      Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
 
   @override
   Widget build(BuildContext context) {
