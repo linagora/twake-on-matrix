@@ -163,6 +163,7 @@ extension SendFileWebExtension on Room {
           'hashes': {'sha256': encryptedFile.sha256}
         },
       'info': {
+        ...thumbnail?.info ?? {},
         ...file.info,
         if (thumbnail != null && encryptedThumbnail == null)
           'thumbnail_url': thumbnailUploadResp.toString(),
@@ -182,8 +183,6 @@ extension SendFileWebExtension on Room {
             'hashes': {'sha256': encryptedThumbnail.sha256},
           },
         if (thumbnail != null) 'thumbnail_info': thumbnail.info,
-        if (thumbnail?.blurhash != null)
-          'xyz.amorgan.blurhash': thumbnail?.blurhash,
         if (duration != null) 'duration': duration,
       },
       if (extraContent != null) ...extraContent,
@@ -302,6 +301,7 @@ extension SendFileWebExtension on Room {
         imageFormat: ImageFormat.JPEG,
         quality: AppConfig.thumbnailQuality,
       );
+      final thumbnailBitmap = await convertUint8ListToBitmap(result);
       final blurHash = await runBenchmarked(
         '_generateBlurHash',
         () => _generateBlurHash(result),
@@ -311,8 +311,8 @@ extension SendFileWebExtension on Room {
         bytes: result,
         name: originalFile.name,
         mimeType: originalFile.mimeType,
-        width: originalFile.width,
-        height: originalFile.height,
+        width: thumbnailBitmap?.width,
+        height: thumbnailBitmap?.height,
         blurhash: blurHash,
       );
     } catch (e) {
