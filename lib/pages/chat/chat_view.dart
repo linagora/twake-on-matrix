@@ -149,6 +149,7 @@ class ChatView extends StatelessWidget {
                             if (isSearching) {
                               return TextField(
                                 controller: controller.searchTextController,
+                                focusNode: controller.searchFocusNode,
                                 autofocus: true,
                                 onChanged: controller.onSearchChanged,
                                 decoration: InputDecoration(

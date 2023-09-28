@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
@@ -16,6 +19,7 @@ mixin ChatRoomSearchMixin {
 
   final isSearchingNotifier = ValueNotifier(false);
   final searchTextController = TextEditingController();
+  final searchFocusNode = FocusNode();
   final searchStatus =
       ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
   final canGoUp = ValueNotifier(false);
@@ -25,13 +29,15 @@ mixin ChatRoomSearchMixin {
 
   int _historyCount = 100;
   Timeline? Function()? _getTimeline;
-  void Function(int)? _scrollToIndex;
+  Future Function(int)? _scrollToIndex;
 
   static const _debouncerDuration = Duration(milliseconds: 300);
   final _debouncer = Debouncer(
     _debouncerDuration,
     initialValue: '',
   );
+
+  var _scrollingToIndexCount = 0;
 
   void closeSearch() {
     isSearchingNotifier.value = false;
@@ -49,7 +55,7 @@ mixin ChatRoomSearchMixin {
 
   void initializeSearch({
     required Timeline? Function()? getTimeline,
-    Function(int)? scrollToIndex,
+    Future Function(int)? scrollToIndex,
     required int historyCount,
   }) {
     _scrollToIndex = scrollToIndex;
@@ -97,10 +103,17 @@ mixin ChatRoomSearchMixin {
     canGoUp.value = false;
   }
 
-  void _scrollToEvent(Either<Failure, Success> event) {
+  Future _scrollToEvent(Either<Failure, Success> event) async {
     final index = event.getSuccessOrNull<ChatRoomSearchSuccess>()?.eventIndex;
     if (index != null) {
-      _scrollToIndex?.call(index);
+      _scrollingToIndexCount++;
+      try {
+        await _scrollToIndex?.call(index);
+      } catch (e) {
+        Logs().e('ChatRoomSearchMixin::_scrollToEvent $e');
+      } finally {
+        _scrollingToIndexCount--;
+      }
     }
   }
 
@@ -157,5 +170,12 @@ mixin ChatRoomSearchMixin {
         }
       },
     );
+  }
+
+  void hideSearchKeyboardIfNeeded() {
+    if (_scrollingToIndexCount > 0 || !searchFocusNode.hasFocus || kIsWeb) {
+      return;
+    }
+    searchFocusNode.unfocus();
   }
 }

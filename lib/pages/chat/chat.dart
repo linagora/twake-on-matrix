@@ -269,6 +269,7 @@ class ChatController extends State<Chat>
       return;
     }
     hideKeyboardChatScreen();
+    hideSearchKeyboardIfNeeded();
     setReadMarker();
     if (!scrollController.hasClients) return;
     if (scrollController.position.pixels ==
