@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -73,9 +74,12 @@ class TwakeAppState extends State<TwakeApp> {
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
         routerConfig: TwakeApp.router,
-        builder: (context, child) => Matrix(
-          clients: widget.clients,
-          child: child,
+        builder: (context, child) => FToastBuilder()(
+          context,
+          Matrix(
+            clients: widget.clients,
+            child: child,
+          ),
         ),
       ),
     );
