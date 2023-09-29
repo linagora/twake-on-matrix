@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class SettingsViewStyle {
   static const double iconSize = 24.0;
 
+  static const double fontSizeAvatar = 9 * 2.5;
+
   static EdgeInsetsDirectional itemBuilderPadding =
       const EdgeInsetsDirectional.all(16.0);
 
@@ -14,7 +16,7 @@ class SettingsViewStyle {
 
   static EdgeInsetsDirectional bodySettingsScreenPadding =
       const EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
+    horizontal: 8,
   );
 
   static EdgeInsetsDirectional avatarPadding =
