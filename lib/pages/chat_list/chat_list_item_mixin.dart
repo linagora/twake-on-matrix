@@ -75,25 +75,27 @@ mixin ChatListItemMixin {
     return isGroup
         ? Row(
             children: [
-              FutureBuilder<User?>(
-                future: room.lastEvent?.fetchSenderUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) return const SizedBox.shrink();
-                  return Text(
-                    snapshot.data!.calcDisplayname(),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: Theme.of(context).textTheme.labelLarge?.merge(
-                          TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            color: unread
-                                ? Theme.of(context).colorScheme.onSurface
-                                : ChatListItemStyle.readMessageColor,
+              Expanded(
+                child: FutureBuilder<User?>(
+                  future: room.lastEvent?.fetchSenderUser(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) return const SizedBox.shrink();
+                    return Text(
+                      snapshot.data!.calcDisplayname(),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: Theme.of(context).textTheme.labelLarge?.merge(
+                            TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              color: unread
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : ChatListItemStyle.readMessageColor,
+                            ),
                           ),
-                        ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
               const Spacer()
             ],
