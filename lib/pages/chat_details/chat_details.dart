@@ -434,9 +434,9 @@ class ChatDetailsController extends State<ChatDetails>
 
   List<ChatDetailsActions> chatDetailsActionsButton() => [
         if (responsive.isDesktop(context)) ChatDetailsActions.addMembers,
-        ChatDetailsActions.mute,
+        // ChatDetailsActions.mute,
         ChatDetailsActions.search,
-        ChatDetailsActions.more,
+        // ChatDetailsActions.more,
       ];
 
   List<ChatDetailsPageModel> chatDetailsPages() => [
@@ -459,20 +459,20 @@ class ChatDetailsController extends State<ChatDetails>
             handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
           ),
         ),
-        const ChatDetailsPageModel(
-          page: ChatDetailsPage.files,
-          child: SizedBox.shrink(),
-        ),
+        // const ChatDetailsPageModel(
+        //   page: ChatDetailsPage.files,
+        //   child: SizedBox.shrink(),
+        // ),
         ChatDetailsPageModel(
           page: ChatDetailsPage.links,
           child: ChatDetailsLinksPage(
             getTimeline: getTimeline,
           ),
         ),
-        const ChatDetailsPageModel(
-          page: ChatDetailsPage.downloads,
-          child: SizedBox.shrink(),
-        ),
+        // const ChatDetailsPageModel(
+        //   page: ChatDetailsPage.downloads,
+        //   child: SizedBox.shrink(),
+        // ),
       ];
 
   Future<String> _handleDownloadAndPlayVideo(Event event) {
