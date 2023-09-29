@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
@@ -55,11 +56,17 @@ class ChatDetailsController extends State<ChatDetails>
 
   final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
 
+  Room? room;
+
   final responsive = getIt.get<ResponsiveUtils>();
 
   PageController pageController = PageController();
 
   final ValueNotifier<int> currentPage = ValueNotifier(0);
+
+  final muteNotifier = ValueNotifier<PushRuleState>(
+    PushRuleState.notify,
+  );
 
   List<User>? members;
 
@@ -69,8 +76,6 @@ class ChatDetailsController extends State<ChatDetails>
 
   bool get isMobileAndTablet =>
       responsive.isMobile(context) || responsive.isTablet(context);
-
-  Room? get room => Matrix.of(context).client.getRoomById(roomId!);
 
   Timeline? _timeline;
 
@@ -82,6 +87,13 @@ class ChatDetailsController extends State<ChatDetails>
   final Map<EventId, ImageData> _mediaCacheMap = {};
 
   int get actualMembersCount => room!.summary.actualMembersCount;
+
+  @override
+  void initState() {
+    super.initState();
+    room = Matrix.of(context).client.getRoomById(roomId!);
+    muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
+  }
 
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
@@ -434,7 +446,9 @@ class ChatDetailsController extends State<ChatDetails>
 
   List<ChatDetailsActions> chatDetailsActionsButton() => [
         if (responsive.isDesktop(context)) ChatDetailsActions.addMembers,
-        // ChatDetailsActions.mute,
+        muteNotifier.value != PushRuleState.notify
+            ? ChatDetailsActions.unmute
+            : ChatDetailsActions.mute,
         ChatDetailsActions.search,
         // ChatDetailsActions.more,
       ];
@@ -482,16 +496,23 @@ class ChatDetailsController extends State<ChatDetails>
     );
   }
 
-  void onTapActionsButton(ChatDetailsActions action) {
+  void onTapActionsButton(ChatDetailsActions action) async {
     switch (action) {
       case ChatDetailsActions.addMembers:
         openDialogInvite();
         break;
       case ChatDetailsActions.mute:
+        await room?.mute();
+        muteNotifier.value = PushRuleState.mentionsOnly;
+        break;
       case ChatDetailsActions.search:
         context.pop(ChatDetailsActions.search);
         break;
       case ChatDetailsActions.more:
+        break;
+      case ChatDetailsActions.unmute:
+        await room?.unmute();
+        muteNotifier.value = PushRuleState.notify;
         break;
     }
   }
