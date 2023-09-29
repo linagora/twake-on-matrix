@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
@@ -668,11 +669,7 @@ class ChatListController extends State<ChatList>
         await showFutureLoadingDialog(
           context: context,
           future: () async {
-            await client.getRoomById(room.id)!.setPushRuleState(
-                  room.pushRuleState == PushRuleState.notify
-                      ? PushRuleState.mentionsOnly
-                      : PushRuleState.notify,
-                );
+            await room.mute();
           },
         );
         return;
