@@ -13,6 +13,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final IconData suffixIcon;
   final IconData? leadingIcon;
   final void Function(String, SettingsProfileEnum)? onChange;
+  final VoidCallback? onCopyAction;
 
   const SettingsProfileItemBuilder({
     super.key,
@@ -24,6 +25,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     required this.suffixIcon,
     this.leadingIcon,
     this.onChange,
+    this.onCopyAction,
   });
 
   @override
@@ -68,7 +70,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                               ? () {
                                   focusNode?.requestFocus();
                                 }
-                              : () {},
+                              : onCopyAction,
                           icon: Icon(
                             suffixIcon,
                             size: SettingsProfileItemStyle.iconSize,

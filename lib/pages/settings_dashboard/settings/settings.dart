@@ -126,6 +126,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void goToSettingsProfile(Profile? profile) async {
+    settingsDashboardManagerController.optionsSelectNotifier.value =
+        SettingEnum.profile;
     context.push(
       '/rooms/profile',
       extra: profile,
@@ -133,6 +135,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void onClickToSettingsItem(SettingEnum settingEnum) {
+    settingsDashboardManagerController.optionsSelectNotifier.value =
+        settingEnum;
     switch (settingEnum) {
       case SettingEnum.chatSettings:
         context.go('/rooms/chat');
@@ -158,6 +162,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         break;
       case SettingEnum.logout:
         logoutAction();
+        break;
+      default:
         break;
     }
   }

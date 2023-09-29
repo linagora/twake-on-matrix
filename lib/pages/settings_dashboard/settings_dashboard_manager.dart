@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -30,6 +31,7 @@ class SettingsDashboardManagerController {
   }
 
   late ValueNotifier<Profile> profileNotifier;
+  late ValueNotifier<SettingEnum?> optionsSelectNotifier;
 
   bool initialized = false;
 
@@ -38,6 +40,8 @@ class SettingsDashboardManagerController {
     profileNotifier = ValueNotifier(
       Profile(userId: ''),
     );
+
+    optionsSelectNotifier = ValueNotifier(null);
   }
 
   String mxid(BuildContext context) =>
@@ -47,4 +51,7 @@ class SettingsDashboardManagerController {
       profileNotifier.value.displayName ??
       mxid(context).localpart ??
       mxid(context);
+
+  bool optionSelected(SettingEnum settingEnum) =>
+      settingEnum == optionsSelectNotifier.value;
 }
