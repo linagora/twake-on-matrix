@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import '../bootstrap/bootstrap_dialog.dart';
 import 'settings_security_view.dart';
 
 class SettingsSecurity extends StatefulWidget {
