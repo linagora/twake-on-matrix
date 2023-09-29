@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'package:fluffychat/pages/settings_stories/settings_stories.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 
