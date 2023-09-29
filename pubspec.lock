@@ -1533,8 +1533,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: upgrade-latest-matrix-sdk
-      resolved-ref: "35c7e3e4de01174f5054f95b4aa7540b3734bfcb"
+      ref: "twake-supported-0.22.4"
+      resolved-ref: "5f756700d23b76ac94ad096488732e54e4cc4e8f"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.4"
