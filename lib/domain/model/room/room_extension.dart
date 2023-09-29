@@ -37,4 +37,12 @@ extension RoomExtension on Room {
       EventTypes.Encrypted,
     ].contains(lastEvent?.type);
   }
+
+  Future<void> mute() async {
+    await setPushRuleState(PushRuleState.mentionsOnly);
+  }
+
+  Future<void> unmute() async {
+    await setPushRuleState(PushRuleState.notify);
+  }
 }
