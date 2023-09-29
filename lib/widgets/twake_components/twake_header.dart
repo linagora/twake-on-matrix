@@ -33,13 +33,13 @@ class TwakeHeader extends StatelessWidget
         builder: (context, selectMode, _) {
           return Align(
             alignment: TwakeHeaderStyle.alignment(context),
-            child: Padding(
-              padding: TwakeHeaderStyle.padding,
-              child: Row(
-                children: [
-                  if (!TwakeHeaderStyle.isDesktop(context))
-                    Expanded(
-                      flex: TwakeHeaderStyle.flexActions,
+            child: Row(
+              children: [
+                if (!TwakeHeaderStyle.isDesktop(context))
+                  Expanded(
+                    flex: TwakeHeaderStyle.flexActions,
+                    child: Padding(
+                      padding: TwakeHeaderStyle.leadingPadding,
                       child: Row(
                         children: [
                           InkWell(
@@ -82,21 +82,24 @@ class TwakeHeader extends StatelessWidget
                         ],
                       ),
                     ),
-                  Expanded(
-                    flex: TwakeHeaderStyle.flexTitle,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        L10n.of(context)!.chats,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                      ),
+                  ),
+                Expanded(
+                  flex: TwakeHeaderStyle.flexTitle,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      L10n.of(context)!.chats,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                     ),
                   ),
-                  if (!TwakeHeaderStyle.isDesktop(context))
-                    Expanded(
-                      flex: TwakeHeaderStyle.flexActions,
+                ),
+                if (!TwakeHeaderStyle.isDesktop(context))
+                  Expanded(
+                    flex: TwakeHeaderStyle.flexActions,
+                    child: Padding(
+                      padding: TwakeHeaderStyle.actionsPadding,
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: InkWell(
@@ -122,8 +125,8 @@ class TwakeHeader extends StatelessWidget
                         ),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           );
         },
