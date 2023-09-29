@@ -10,6 +10,8 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_dashboard_manager.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
@@ -25,15 +27,15 @@ import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart'
 import 'package:fluffychat/pages/login/login.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
-import 'package:fluffychat/pages/settings_3pid/settings_3pid.dart';
-import 'package:fluffychat/pages/settings_chat/settings_chat.dart';
-import 'package:fluffychat/pages/settings_emotes/settings_emotes.dart';
-import 'package:fluffychat/pages/settings_ignore_list/settings_ignore_list.dart';
-import 'package:fluffychat/pages/settings_multiple_emotes/settings_multiple_emotes.dart';
-import 'package:fluffychat/pages/settings_notifications/settings_notifications.dart';
-import 'package:fluffychat/pages/settings_security/settings_security.dart';
-import 'package:fluffychat/pages/settings_stories/settings_stories.dart';
-import 'package:fluffychat/pages/settings_style/settings_style.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_emotes/settings_emotes.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_ignore_list/settings_ignore_list.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_multiple_emotes/settings_multiple_emotes.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_up/signup.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -241,6 +243,25 @@ abstract class AppRoutes {
                   context,
                   Forward(sendFromRoomId: extra.fromRoomId),
                 );
+              },
+            ),
+            GoRoute(
+              path: 'profile',
+              pageBuilder: (context, state) => defaultPageBuilder(
+                context,
+                SettingsProfile(
+                  profile: state.extra as Profile?,
+                ),
+              ),
+              redirect: (context, state) {
+                final settingsDashboardManagerController =
+                    SettingsDashboardManagerController();
+
+                if (!settingsDashboardManagerController.initialized) {
+                  return '/rooms';
+                }
+
+                return Matrix.of(context).client.isLogged() ? null : '/home';
               },
             ),
             GoRoute(
