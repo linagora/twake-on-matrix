@@ -37,47 +37,51 @@ class TwakeHeader extends StatelessWidget
               padding: TwakeHeaderStyle.padding,
               child: Row(
                 children: [
-                  Expanded(
-                    flex: TwakeHeaderStyle.flexActions,
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: onClearSelection,
-                          borderRadius: BorderRadius.circular(
-                            TwakeHeaderStyle.closeIconSize,
+                  if (!TwakeHeaderStyle.isDesktop(context))
+                    Expanded(
+                      flex: TwakeHeaderStyle.flexActions,
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: onClearSelection,
+                            borderRadius: BorderRadius.circular(
+                              TwakeHeaderStyle.closeIconSize,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: TwakeHeaderStyle.closeIconSize,
+                              color: selectMode == SelectMode.select
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Colors.transparent,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.close,
-                            size: TwakeHeaderStyle.closeIconSize,
-                            color: selectMode == SelectMode.select
-                                ? Theme.of(context).colorScheme.onSurfaceVariant
-                                : Colors.transparent,
+                          ValueListenableBuilder(
+                            valueListenable: conversationSelectionNotifier,
+                            builder: (context, conversationSelection, _) {
+                              return Padding(
+                                padding:
+                                    TwakeHeaderStyle.counterSelectionPadding,
+                                child: Text(
+                                  conversationSelection.length.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: selectMode == SelectMode.select
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant
+                                            : Colors.transparent,
+                                      ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                        ValueListenableBuilder(
-                          valueListenable: conversationSelectionNotifier,
-                          builder: (context, conversationSelection, _) {
-                            return Padding(
-                              padding: TwakeHeaderStyle.counterSelectionPadding,
-                              child: Text(
-                                conversationSelection.length.toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                      color: selectMode == SelectMode.select
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                          : Colors.transparent,
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   Expanded(
                     flex: TwakeHeaderStyle.flexTitle,
                     child: Align(

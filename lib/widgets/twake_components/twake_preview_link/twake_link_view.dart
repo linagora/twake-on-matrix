@@ -58,18 +58,15 @@ class TwakeLinkView extends StatelessWidget {
   }
 
   Widget _buildCleanRichText(BuildContext context) {
-    return Padding(
-      padding: TwakeLinkViewStyle.paddingCleanRichText,
-      child: TwakeCleanRichText(
-        text: text,
-        childWidget: childWidget,
-        textStyle: textStyle,
-        linkStyle: linkStyle,
-        textAlign: textAlign ?? TextAlign.start,
-        onLinkTap: onLinkTap,
-        maxLines: maxLines,
-        textSpanBuilder: textSpanBuilder,
-      ),
+    return TwakeCleanRichText(
+      text: text,
+      childWidget: childWidget,
+      textStyle: textStyle,
+      linkStyle: linkStyle,
+      textAlign: textAlign ?? TextAlign.start,
+      onLinkTap: onLinkTap,
+      maxLines: maxLines,
+      textSpanBuilder: textSpanBuilder,
     );
   }
 }
