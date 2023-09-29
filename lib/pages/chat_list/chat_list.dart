@@ -321,7 +321,7 @@ class ChatListController extends State<ChatList>
       context: context,
       future: () async {
         final newState = anySelectedRoomNotMuted
-            ? PushRuleState.mentionsOnly
+            ? PushRuleState.dontNotify
             : PushRuleState.notify;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = client.getRoomById(conversation.roomId)!;

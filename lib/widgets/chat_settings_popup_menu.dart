@@ -160,7 +160,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                 await showFutureLoadingDialog(
                   context: context,
                   future: () =>
-                      widget.room.setPushRuleState(PushRuleState.mentionsOnly),
+                      widget.room.setPushRuleState(PushRuleState.dontNotify),
                 );
                 break;
               case 'unmute':

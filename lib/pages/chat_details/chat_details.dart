@@ -503,7 +503,7 @@ class ChatDetailsController extends State<ChatDetails>
         break;
       case ChatDetailsActions.mute:
         await room?.mute();
-        muteNotifier.value = PushRuleState.mentionsOnly;
+        muteNotifier.value = PushRuleState.dontNotify;
         break;
       case ChatDetailsActions.search:
         context.pop(ChatDetailsActions.search);

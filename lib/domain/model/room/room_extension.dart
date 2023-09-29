@@ -39,7 +39,7 @@ extension RoomExtension on Room {
   }
 
   Future<void> mute() async {
-    await setPushRuleState(PushRuleState.mentionsOnly);
+    await setPushRuleState(PushRuleState.dontNotify);
   }
 
   Future<void> unmute() async {
