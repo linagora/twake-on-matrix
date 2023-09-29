@@ -58,7 +58,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
+                          Expanded(
                             child: lastSenderWidget(room, isGroup, unread),
                           ),
                           const SizedBox(height: 2),
