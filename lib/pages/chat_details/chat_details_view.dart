@@ -90,21 +90,28 @@ class ChatDetailsView extends StatelessWidget {
                   context: context,
                   room: controller.room!,
                 ),
-                ActionsHeaderBuilder(
-                  actions: controller.chatDetailsActionsButton(),
-                  width: ChatDetailViewStyle.actionsHeaderWidth(context),
-                  buttonColor: !controller.isMobileAndTablet
-                      ? LinagoraRefColors.material().primary[100]
-                      : null,
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: controller.isMobileAndTablet
-                        ? LinagoraRefColors.material().neutral[90]!
-                        : Colors.transparent,
-                  ),
-                  onTap: (actions) => controller.onTapActionsButton(
-                    actions,
-                  ),
+                ValueListenableBuilder(
+                  valueListenable: controller.muteNotifier,
+                  builder: (context, pushRuleState, child) {
+                    final buttons = controller.chatDetailsActionsButton();
+
+                    return ActionsHeaderBuilder(
+                      actions: buttons,
+                      width: ChatDetailViewStyle.actionsHeaderWidth(context),
+                      buttonColor: !controller.isMobileAndTablet
+                          ? LinagoraRefColors.material().primary[100]
+                          : null,
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: controller.isMobileAndTablet
+                            ? LinagoraRefColors.material().neutral[90]!
+                            : Colors.transparent,
+                      ),
+                      onTap: (actions) => controller.onTapActionsButton(
+                        actions,
+                      ),
+                    );
+                  },
                 ),
                 Expanded(
                   child: ClipRRect(

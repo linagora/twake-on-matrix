@@ -5,6 +5,7 @@ enum ChatDetailsActions {
   addMembers,
   mute,
   search,
+  unmute,
   more;
 
   String getTitle(BuildContext context) {
@@ -13,6 +14,8 @@ enum ChatDetailsActions {
         return L10n.of(context)!.addMembers;
       case ChatDetailsActions.mute:
         return L10n.of(context)!.mute;
+      case ChatDetailsActions.unmute:
+        return L10n.of(context)!.unmute;
       case ChatDetailsActions.search:
         return L10n.of(context)!.search;
       case ChatDetailsActions.more:
@@ -30,6 +33,8 @@ enum ChatDetailsActions {
         return Icons.search;
       case ChatDetailsActions.more:
         return Icons.more_horiz;
+      case ChatDetailsActions.unmute:
+        return Icons.notifications_off;
     }
   }
 }
