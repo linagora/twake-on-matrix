@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_vie
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnOpenSearchPage = Function();
@@ -48,6 +49,7 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
       ];
 
   void onDestinationSelected(int index) {
+    _clearSettingsPage();
     final destinationType = destinations[index];
     activeNavigationBar.value = destinationType;
     pageController.jumpToPage(index);
@@ -92,6 +94,12 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
 
   void _jumpToPageByIndex() {
     pageController.jumpToPage(activeNavigationBar.value.index);
+  }
+
+  void _clearSettingsPage() {
+    if (activeNavigationBar.value == AdaptiveDestinationEnum.settings) {
+      context.go('/rooms');
+    }
   }
 
   MatrixState get matrix => Matrix.of(context);
