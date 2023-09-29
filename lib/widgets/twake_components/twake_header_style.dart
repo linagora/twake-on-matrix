@@ -21,9 +21,14 @@ class TwakeHeaderStyle {
         : AlignmentDirectional.center;
   }
 
-  static const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
-    end: 4,
-    start: 4,
+  static const EdgeInsetsDirectional actionsPadding =
+      EdgeInsetsDirectional.only(
+    end: 16,
+  );
+
+  static const EdgeInsetsDirectional leadingPadding =
+      EdgeInsetsDirectional.only(
+    start: 26,
   );
 
   static const EdgeInsetsDirectional textButtonPadding =
