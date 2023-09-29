@@ -2754,5 +2754,6 @@
     "basicInfo": "BASIC INFO",
     "editProfileDescriptions": "Update your profile with a new name, picture and a short introduction.",
     "workIdentitiesInfo": "WORK IDENTITIES INFO",
-    "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name."
+    "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
+    "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard."
 }

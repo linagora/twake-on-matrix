@@ -1,12 +1,14 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_dashboard_manager.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -215,6 +217,28 @@ class SettingsProfileController extends State<SettingsProfile> {
     settingsDashboardManagerController.profileNotifier.value = widget.profile!;
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = mxid;
+  }
+
+  void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
+    switch (settingsProfileEnum) {
+      case SettingsProfileEnum.matrixId:
+        Clipboard.setData(ClipboardData(text: mxid));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            width: SettingsProfileItemStyle.widthSnackBar(context),
+            padding: SettingsProfileItemStyle.snackBarPadding,
+            content: Text(
+              L10n.of(context)!.copiedMatrixIdToClipboard,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.background,
+                  ),
+            ),
+          ),
+        );
+        break;
+      default:
+        break;
+    }
   }
 
   @override

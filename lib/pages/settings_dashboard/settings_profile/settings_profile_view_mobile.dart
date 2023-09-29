@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 
 class SettingsProfileViewMobile extends StatelessWidget {
   final ValueNotifier<Profile> profileNotifier;
-  final String displayName;
   final Widget settingsProfileOptions;
   final VoidCallback onAvatarTap;
 
@@ -15,7 +14,6 @@ class SettingsProfileViewMobile extends StatelessWidget {
     super.key,
     required this.profileNotifier,
     required this.settingsProfileOptions,
-    required this.displayName,
     required this.onAvatarTap,
   });
 
@@ -23,7 +21,8 @@ class SettingsProfileViewMobile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: profileNotifier,
-      builder: (context, _, __) {
+      builder: (context, profile, __) {
+        final displayName = profile.displayName ?? profile.userId;
         return Column(
           children: [
             Divider(
@@ -57,8 +56,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                       mxContent: profileNotifier.value.avatarUrl,
                       name: displayName,
                       size: SettingsProfileViewMobileStyle.avatarSize,
-                      fontSize:
-                          SettingsProfileViewMobileStyle.positionedRightSize,
+                      fontSize: SettingsProfileViewMobileStyle.avatarFontSize,
                     ),
                   ),
                   Positioned(
