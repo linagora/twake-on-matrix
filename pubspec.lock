@@ -1533,11 +1533,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: twake-supported
-      resolved-ref: "2c05a46910af126bd4c4f3e1b1c2df4b1bf7f6b2"
+      ref: upgrade-latest-matrix-sdk
+      resolved-ref: "35c7e3e4de01174f5054f95b4aa7540b3734bfcb"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
-    version: "0.22.2"
+    version: "0.22.4"
   matrix_api_lite:
     dependency: transitive
     description:
