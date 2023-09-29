@@ -2,7 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/pages/settings/settings.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
