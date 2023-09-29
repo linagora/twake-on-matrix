@@ -85,7 +85,6 @@ class SettingsProfileView extends StatelessWidget {
                 return SettingsProfileViewMobile(
                   profileNotifier: controller
                       .settingsDashboardManagerController.profileNotifier,
-                  displayName: controller.displayName,
                   onAvatarTap: () => controller.setAvatarAction(),
                   settingsProfileOptions: ListView.separated(
                     shrinkWrap: true,
@@ -116,6 +115,9 @@ class SettingsProfileView extends StatelessWidget {
                           controller
                               .handleTextEditOnChange(settingsProfileEnum);
                         },
+                        onCopyAction: () => controller.copyEventsAction(
+                          controller.getListProfileMobile[index],
+                        ),
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -134,7 +136,6 @@ class SettingsProfileView extends StatelessWidget {
                 return SettingsProfileViewWeb(
                   profileNotifier: controller
                       .settingsDashboardManagerController.profileNotifier,
-                  displayName: controller.displayName,
                   basicInfoWidget: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -198,6 +199,9 @@ class SettingsProfileView extends StatelessWidget {
                           controller
                               .handleTextEditOnChange(settingsProfileEnum);
                         },
+                        onCopyAction: () => controller.copyEventsAction(
+                          controller.getListProfileWorkIdentitiesInfo[index],
+                        ),
                       );
                     },
                     separatorBuilder: (context, index) {

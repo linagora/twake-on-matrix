@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 enum SettingEnum {
+  profile,
   chatSettings,
   privacyAndSecurity,
   notificationAndSounds,
@@ -29,6 +30,8 @@ enum SettingEnum {
         return L10n.of(context)!.help;
       case SettingEnum.logout:
         return L10n.of(context)!.logout;
+      default:
+        return '';
     }
   }
 
@@ -71,6 +74,8 @@ enum SettingEnum {
         return Icons.question_mark;
       case SettingEnum.logout:
         return Icons.logout_outlined;
+      default:
+        return Icons.person_outline;
     }
   }
 

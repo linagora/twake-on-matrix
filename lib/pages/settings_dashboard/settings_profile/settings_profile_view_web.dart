@@ -8,7 +8,6 @@ import 'package:matrix/matrix.dart';
 
 class SettingsProfileViewWeb extends StatelessWidget {
   final ValueNotifier<Profile> profileNotifier;
-  final String displayName;
   final Widget basicInfoWidget;
   final Widget workIdentitiesInfoWidget;
   final VoidCallback onAvatarTap;
@@ -16,7 +15,6 @@ class SettingsProfileViewWeb extends StatelessWidget {
   const SettingsProfileViewWeb({
     super.key,
     required this.profileNotifier,
-    required this.displayName,
     required this.basicInfoWidget,
     required this.onAvatarTap,
     required this.workIdentitiesInfoWidget,
@@ -26,7 +24,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: profileNotifier,
-      builder: (context, _, __) {
+      builder: (context, profile, __) {
+        final displayName = profile.displayName ?? profile.userId;
         return Padding(
           padding: SettingsProfileViewWebStyle.paddingBody,
           child: Center(
