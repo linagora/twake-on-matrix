@@ -1706,6 +1706,16 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+## [2.3.1+2330] - 2023-09-29
+
+### Fixed
+
+- loading in search inside app
+- chat list selection
+- video player
+- focus in connect page
+- upload thumbnail and calculate blur hash
+
 ## [2.3.0+2330] - 2023-09-25
 
 ### Added
@@ -1718,12 +1728,10 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - New video player
 
 ### Changed
-
 - Filter event in Chat
 - Change preview link based on Matrix API
 
 ### Fixed
-
 - Show/Hide emoji picker
 - Navigator context
 - Update Thumbnail with correct size
@@ -1731,14 +1739,11 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Improve backup process for not only mobile but also web
 
 ## [2.2.4+2330] - 2023-09-08
-
 ### Added
-
 - Chat with external contact
 - Translation for Fr/Ru
 
 ### Changed
-
 - Support exactly image picker for user
 - Change the logic of path and navigation in web app
 - sendOnEnter by default in web
@@ -1752,6 +1757,7 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
 
-[2.3.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.0
+[2.3.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.1
 
+[2.3.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.0
 [2.2.4+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.2.4
