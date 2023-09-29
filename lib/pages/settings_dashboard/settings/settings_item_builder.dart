@@ -1,0 +1,92 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
+import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+
+class SettingsItemBuilder extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData leading;
+  final VoidCallback onTap;
+  final bool isHideTrailingIcon;
+
+  const SettingsItemBuilder({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.leading,
+    required this.onTap,
+    this.isHideTrailingIcon = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: SettingsViewStyle.itemBuilderPadding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: SettingsViewStyle.leadingItemBuilderPadding,
+              child: Icon(
+                leading,
+                size: SettingsViewStyle.iconSize,
+                color: isHideTrailingIcon
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: isHideTrailingIcon
+                                    ? Theme.of(context).colorScheme.error
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Padding(
+                          padding: SettingsViewStyle.subtitleItemBuilderPadding,
+                          child: Text(
+                            subtitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      LinagoraRefColors.material().neutral[40],
+                                ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isHideTrailingIcon)
+                    const Icon(
+                      Icons.chevron_right_outlined,
+                      size: SettingsViewStyle.iconSize,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
