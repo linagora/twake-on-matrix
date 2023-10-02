@@ -206,7 +206,7 @@ class Message extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        ownMessage || event.room.isDirectChat
+                                        hideDisplayName(ownMessage)
                                             ? const SizedBox(height: 0)
                                             : FutureBuilder<User?>(
                                                 future: event.fetchSenderUser(),
@@ -576,6 +576,9 @@ class Message extends StatelessWidget {
     );
   }
 
+  bool hideDisplayName(bool ownMessage) =>
+      ownMessage || event.room.isDirectChat || !isSameSender(nextEvent, event);
+
   Widget _menuActionsRowBuilder(BuildContext context, bool ownMessage) {
     return ValueListenableBuilder(
       valueListenable: isHover,
@@ -680,26 +683,26 @@ class Message extends StatelessWidget {
     );
   }
 
-  // Check if the sender of the current event is the same as the previous event.
-  bool isSameSender(Event? previousEvent, Event currentEvent) {
-    // If the previous event is null, it is assumed that the message is the newest.
-    if (previousEvent == null) {
+  // Check if the sender of the current event is the same as the compared event.
+  bool isSameSender(Event? comparedEvent, Event currentEvent) {
+    // If the compared event is null, it is assumed that the message is the newest.
+    if (comparedEvent == null) {
       return true;
     }
 
-    final isPreviousEventMessage = {
+    final isPreviousOrNextEventMessage = {
       EventTypes.Message,
       EventTypes.Sticker,
       EventTypes.Encrypted,
       EventTypes.Redaction,
-    }.contains(previousEvent.type);
+    }.contains(comparedEvent.type);
 
     // Ignoring events that are not messages, stickers, encrypted or redaction.
-    if (!isPreviousEventMessage) {
+    if (!isPreviousOrNextEventMessage) {
       return true;
     }
 
-    return previousEvent.senderId != currentEvent.senderId;
+    return currentEvent.senderId != comparedEvent.senderId;
   }
 }
 
