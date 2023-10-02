@@ -2754,5 +2754,6 @@
     "workIdentitiesInfo": "WORK IDENTITIES INFO",
     "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
     "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
-    "changeProfilePhoto": "Change profile photo"
+    "changeProfilePhoto": "Change profile photo",
+    "thisMessageHasBeenEncrypted": "This message has been encrypted"
 }
