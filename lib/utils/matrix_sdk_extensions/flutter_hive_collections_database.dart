@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -74,7 +75,9 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
       const FlutterSecureStorage().delete(key: cipherStorageKey);
-      await db.clear().catchError((_) {});
+      await db
+          .clear(supportDeleteCollections: !PlatformInfos.isWeb)
+          .catchError((_) {});
       await Hive.deleteFromDisk();
       rethrow;
     }

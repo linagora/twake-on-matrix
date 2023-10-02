@@ -23,9 +23,9 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
-
   // Preload first client
   final firstClient = clients.firstOrNull;
+  firstClient?.isSupportDeleteCollections = !PlatformInfos.isWeb;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
