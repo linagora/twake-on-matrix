@@ -4,6 +4,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -282,11 +283,13 @@ class DraftChatController extends State<DraftChat>
     );
     if (result == null || result.files.isEmpty) return;
 
+    final matrixFilesList =
+        result.files.map((file) => file.toMatrixFile()).toList();
     _createRoom(
       onRoomCreatedSuccess: (newRoom) {
         sendFileOnWebInteractor.execute(
           room: newRoom,
-          filePickerResult: result,
+          files: matrixFilesList,
         );
       },
     );
