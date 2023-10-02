@@ -2,7 +2,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
@@ -20,11 +20,8 @@ import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'audio_player.dart';
 import 'cute_events.dart';
@@ -58,77 +55,15 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
     required this.ownMessage,
   }) : super(key: key);
 
-  void _verifyOrRequestKey(BuildContext context) async {
-    final l10n = L10n.of(context)!;
-    if (event.content['can_request_session'] != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            event.type == EventTypes.Encrypted
-                ? l10n.needPantalaimonWarning
-                : event.calcLocalizedBodyFallback(
-                    MatrixLocals(l10n),
-                  ),
-          ),
-        ),
-      );
-      return;
-    }
-    final client = Matrix.of(context).client;
-    if (client.isUnknownSession && client.encryption!.crossSigning.enabled) {
-      final success = await BootstrapDialog(
-        client: Matrix.of(context).client,
-      ).show(context);
-      if (success != true) return;
-    }
-    event.requestKey();
-    final sender = event.senderFromMemoryOrFallback;
-    await showAdaptiveBottomSheet(
-      context: context,
-      builder: (context) => Scaffold(
-        appBar: AppBar(
-          leading: CloseButton(onPressed: Navigator.of(context).pop),
-          title: Text(
-            l10n.whyIsThisMessageEncrypted,
-            style:
-                const TextStyle(fontSize: MessageContentStyle.appBarFontSize),
-          ),
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Avatar(
-                  mxContent: sender.avatarUrl,
-                  name: sender.calcDisplayname(),
-                ),
-                title: Text(sender.calcDisplayname()),
-                subtitle: Text(event.originServerTs.localizedTime(context)),
-                trailing: const Icon(Icons.lock_outlined),
-              ),
-              const Divider(),
-              Text(
-                event.calcLocalizedBodyFallback(
-                  MatrixLocals(l10n),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
     final buttonTextColor =
         event.senderId == Matrix.of(context).client.userID ? textColor : null;
     switch (event.type) {
-      case EventTypes.Message:
       case EventTypes.Encrypted:
+        return EncryptedContent(event: event);
+      case EventTypes.Message:
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
@@ -241,12 +176,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
             continue textmessage;
           case MessageTypes.BadEncrypted:
           case EventTypes.Encrypted:
-            return _ButtonContent(
-              textColor: buttonTextColor,
-              onPressed: () => _verifyOrRequestKey(context),
-              icon: const Icon(Icons.lock_outline),
-              label: L10n.of(context)!.encrypted,
-            );
+            return EncryptedContent(event: event);
           case MessageTypes.Location:
             final geoUri =
                 Uri.tryParse(event.content.tryGet<String>('geo_uri')!);
