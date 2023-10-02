@@ -116,6 +116,7 @@ class Message extends StatelessWidget {
           }.contains(event.messageType);
           final timelineText = {
             MessageTypes.Text,
+            MessageTypes.BadEncrypted,
           }.contains(event.messageType);
           final noPadding = {
             MessageTypes.File,
@@ -577,7 +578,10 @@ class Message extends StatelessWidget {
   }
 
   bool hideDisplayName(bool ownMessage) =>
-      ownMessage || event.room.isDirectChat || !isSameSender(nextEvent, event);
+      ownMessage ||
+      event.room.isDirectChat ||
+      !isSameSender(nextEvent, event) ||
+      event.type == EventTypes.Encrypted;
 
   Widget _menuActionsRowBuilder(BuildContext context, bool ownMessage) {
     return ValueListenableBuilder(
