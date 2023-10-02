@@ -3,27 +3,21 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:matrix/matrix.dart';
 
 extension ClientExtension on Client {
-  static const int _ascendingOrder = 1;
+  static const int newerChat = -1;
 
-  static const int _descendingOrder = -1;
+  static const int olderChat = 1;
 
-  int _sortListRomByTimeCreatedMessage(Room currentRoom, Room nextRoom) {
-    return nextRoom.timeCreated.compareTo(currentRoom.timeCreated);
-  }
-
-  int _sortListRoomByPinMessage(Room currentRoom, Room nextRoom) {
-    if (nextRoom.isFavourite && !currentRoom.isFavourite) {
-      return _ascendingOrder;
-    } else {
-      return _descendingOrder;
+  int chatListItemComparator(Room room1, Room room2) {
+    if (room1.isFavourite ^ room2.isFavourite) {
+      return room1.isFavourite ? newerChat : olderChat;
     }
+    return room2.timeCreated.compareTo(room1.timeCreated);
   }
 
   List<Room> filteredRoomsForAll(ActiveFilter activeFilter) {
     return rooms
         .where(activeFilter.getRoomFilterByActiveFilter())
-        .sorted(_sortListRomByTimeCreatedMessage)
-        .sorted(_sortListRoomByPinMessage)
+        .sorted(chatListItemComparator)
         .toList();
   }
 }
