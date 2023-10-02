@@ -1426,7 +1426,8 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinMessage,
       ChatContextMenuActions.forward,
-      if (PlatformInfos.isWeb) ChatContextMenuActions.downloadFile,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatContextMenuActions.downloadFile,
     ];
     return listAction.map((action) {
       return PopupMenuItem(
