@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
@@ -64,8 +65,12 @@ mixin SendFilesMixin {
       withData: true,
     );
     if (result == null || result.files.isEmpty) return;
-
-    sendFileOnWebInteractor.execute(room: room!, filePickerResult: result);
+    final matrixFilesList =
+        result.files.map((file) => file.toMatrixFile()).toList();
+    sendFileOnWebInteractor.execute(
+      room: room!,
+      files: matrixFilesList,
+    );
   }
 
   void onPickerTypeClick({
