@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/model/download_file/download_file_for_preview_
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
@@ -145,6 +146,8 @@ class ChatController extends State<Chat>
   void onDragExited(_) => draggingNotifier.value = false;
 
   void onDragDone(DropDoneDetails details) async {
+    final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
+
     draggingNotifier.value = false;
     final bytesList = await showFutureLoadingDialog(
       context: context,
@@ -166,14 +169,7 @@ class ChatController extends State<Chat>
       );
     }
 
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendFileDialog(
-        files: matrixFiles,
-        room: room!,
-      ),
-    );
+    sendFileOnWebInteractor.execute(room: room!, files: matrixFiles);
   }
 
   bool get canSaveSelectedEvent =>
