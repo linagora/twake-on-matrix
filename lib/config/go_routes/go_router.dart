@@ -352,7 +352,7 @@ abstract class AppRoutes {
                   switch (extra.type) {
                     case ChatRouterInputArgumentType.draft:
                       if (extra.data is String?) {
-                        return NoTransitionPage(
+                        return CupertinoPage(
                           child: Chat(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(state.pathParameters['roomid']!),
@@ -360,16 +360,15 @@ abstract class AppRoutes {
                           ),
                         );
                       }
-                      return NoTransitionPage(
+                      return CupertinoPage(
                         child: Chat(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
                         ),
                       );
                     case ChatRouterInputArgumentType.share:
-                      return defaultPageBuilder(
-                        context,
-                        Chat(
+                      return CupertinoPage(
+                        child: Chat(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
                           shareFile: extra.data as MatrixFile?,
@@ -377,9 +376,8 @@ abstract class AppRoutes {
                       );
                   }
                 }
-                return defaultPageBuilder(
-                  context,
-                  Chat(
+                return CupertinoPage(
+                  child: Chat(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(state.pathParameters['roomid']!),
                   ),
