@@ -4,7 +4,6 @@ import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
@@ -24,14 +23,12 @@ class ContactsTab extends StatefulWidget {
 
 class ContactsTabController extends State<ContactsTab>
     with ComparablePresentationContactMixin, SearchContactsMixinController {
-  final scrollController = ScrollController();
   final responsive = getIt.get<ResponsiveUtils>();
 
   @override
   void initState() {
     initSearchContacts();
     _listenFocusTextEditing();
-    scrollController.addLoadMoreListener(loadMoreContacts);
     super.initState();
   }
 
@@ -83,7 +80,6 @@ class ContactsTabController extends State<ContactsTab>
   @override
   void dispose() {
     disposeSearchContacts();
-    scrollController.dispose();
     super.dispose();
   }
 
