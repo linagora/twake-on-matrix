@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
@@ -22,11 +23,11 @@ class TwakeSmartRefresher extends StatefulWidget {
 
 class TwakeRefreshController {
   final refreshNotifier = ValueNotifier(false);
-  final loadNotifier = ValueNotifier(false);
+  final loadingNotifier = ValueNotifier(false);
   final scrollController = ScrollController();
 
   bool get isRefeshing => refreshNotifier.value;
-  bool get isLoading => loadNotifier.value;
+  bool get isLoading => loadingNotifier.value;
 
   void onRefresh() {
     refreshNotifier.value = true;
@@ -37,11 +38,11 @@ class TwakeRefreshController {
   }
 
   void onLoading() {
-    loadNotifier.value = true;
+    loadingNotifier.value = true;
   }
 
   void loadComplete() {
-    loadNotifier.value = false;
+    loadingNotifier.value = false;
   }
 }
 
@@ -102,30 +103,21 @@ class _TwakeSmartRefresherView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: refreshController.refreshNotifier,
             builder: (context, refreshing, child) => SliverToBoxAdapter(
-              child: refreshing ? const _LoadingIndicator() : const SizedBox(),
+              child: refreshing
+                  ? const CenterLoadingIndicator()
+                  : const SizedBox(),
             ),
           ),
           ...slivers,
           ValueListenableBuilder(
-            valueListenable: refreshController.loadNotifier,
+            valueListenable: refreshController.loadingNotifier,
             builder: (context, loading, child) => SliverToBoxAdapter(
-              child: loading ? const _LoadingIndicator() : const SizedBox(),
+              child:
+                  loading ? const CenterLoadingIndicator() : const SizedBox(),
             ),
           )
         ],
       ),
-    );
-  }
-}
-
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16),
-      child: Center(child: CircularProgressIndicator()),
     );
   }
 }
