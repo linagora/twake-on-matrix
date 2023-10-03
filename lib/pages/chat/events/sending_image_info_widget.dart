@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
-import 'package:fluffychat/widgets/hero_dialog_route.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -31,9 +33,9 @@ class SendingImageInfoWidget extends StatelessWidget {
   void _onTap(BuildContext context) async {
     if (onTapPreview != null) {
       Navigator.of(context).push(
-        HeroDialogRoute(
+        HeroPageRoute(
           builder: (context) {
-            return InteractiveviewerGallery(
+            return InteractiveViewerGallery(
               itemBuilder: ImageViewer(
                 event,
                 filePath: matrixFile.filePath,
@@ -76,11 +78,11 @@ class SendingImageInfoWidget extends StatelessWidget {
           );
         },
         child: Material(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: MessageContentStyle.borderRadiusBubble,
           child: InkWell(
             onTap: () => _onTap(context),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: MessageContentStyle.borderRadiusBubble,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -92,8 +94,8 @@ class SendingImageInfoWidget extends StatelessWidget {
                       height: MessageContentStyle.imageBubbleHeight(
                         displayImageInfo.size.height,
                       ),
-                      child: const BlurHash(
-                        hash: MessageContentStyle.defaultBlurHash,
+                      child: BlurHash(
+                        hash: event.blurHash ?? AppConfig.defaultImageBlurHash,
                       ),
                     ),
                   Image.file(

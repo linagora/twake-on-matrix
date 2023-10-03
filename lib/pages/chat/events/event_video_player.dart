@@ -151,7 +151,11 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                           icon: Icons.play_arrow,
                           onTap: () {
                             if (path != null) {
-                              playVideoAction(context, path!);
+                              playVideoAction(
+                                context,
+                                path!,
+                                eventId: widget.event.eventId,
+                              );
                             }
                           },
                         );

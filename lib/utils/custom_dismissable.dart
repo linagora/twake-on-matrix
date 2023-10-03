@@ -29,6 +29,8 @@ class _CustomDismissibleState extends State<CustomDismissible>
   late Animation<double> _scaleAnimation;
   late Animation<Decoration> _opacityAnimation;
 
+  static const animationDuration = Duration(milliseconds: 300);
+
   double _dragExtent = 0;
   bool _dragUnderway = false;
 
@@ -39,7 +41,7 @@ class _CustomDismissibleState extends State<CustomDismissible>
     super.initState();
 
     _animateController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: animationDuration,
       vsync: this,
     );
 
@@ -71,11 +73,11 @@ class _CustomDismissibleState extends State<CustomDismissible>
     );
 
     _opacityAnimation = DecorationTween(
-      begin: const BoxDecoration(
-        color: Color(0xFF000000),
+      begin: BoxDecoration(
+        color: Colors.black.withOpacity(1.0),
       ),
-      end: const BoxDecoration(
-        color: Color(0x00000000),
+      end: BoxDecoration(
+        color: Colors.black.withOpacity(0.0),
       ),
     ).animate(_animateController);
   }
