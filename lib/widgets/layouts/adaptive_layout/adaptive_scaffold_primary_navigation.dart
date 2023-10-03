@@ -1,14 +1,14 @@
+import 'dart:async';
+
+import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/pages/chat_list/client_chooser_button_style.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
-  final ValueNotifier<Profile> profileNotifier;
+class AdaptiveScaffoldPrimaryNavigation extends StatefulWidget {
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
@@ -16,12 +16,26 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
 
   const AdaptiveScaffoldPrimaryNavigation({
     super.key,
-    required this.profileNotifier,
     required this.getNavigationRailDestinations,
     this.selectedIndex,
     this.onDestinationSelected,
     this.onSelected,
   });
+
+  @override
+  State<AdaptiveScaffoldPrimaryNavigation> createState() =>
+      _AdaptiveScaffoldPrimaryNavigationState();
+}
+
+class _AdaptiveScaffoldPrimaryNavigationState
+    extends State<AdaptiveScaffoldPrimaryNavigation> {
+  final ValueNotifier<Profile> profileNotifier = ValueNotifier(
+    Profile(userId: ''),
+  );
+
+  StreamSubscription? onAccountDataSubscription;
+
+  Client get client => Matrix.of(context).client;
 
   List<PopupMenuEntry<Object>> _bundleMenuItems(BuildContext context) {
     return <PopupMenuEntry<Object>>[
@@ -48,62 +62,47 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
     ];
   }
 
+  void _getCurrentProfile(Client client) async {
+    final profile = await client.getProfileFromUserId(
+      client.userID!,
+      getFromRooms: false,
+    );
+    Logs().d(
+      'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: $profile',
+    );
+    profileNotifier.value = profile;
+  }
+
+  void _handleOnAccountDataSubscription() {
+    onAccountDataSubscription = client.onAccountData.stream.listen((event) {
+      if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
+        profileNotifier.value = Profile.fromJson(event.content);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    _getCurrentProfile(client);
+    _handleOnAccountDataSubscription();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    onAccountDataSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      child: Container(
-        margin: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationMargin,
-        width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: NavigationRail(
-                selectedIndex: selectedIndex,
-                destinations: getNavigationRailDestinations,
-                onDestinationSelected: onDestinationSelected,
-                labelType: NavigationRailLabelType.all,
-                backgroundColor: Theme.of(context).colorScheme.surface,
-              ),
-            ),
-            Column(
-              children: [
-                const Padding(
-                  padding:
-                      AdaptiveScaffoldPrimaryNavigationStyle.dividerPadding,
-                  child: Divider(
-                    height: AdaptiveScaffoldPrimaryNavigationStyle.dividerSize,
-                    color: AdaptiveScaffoldPrimaryNavigationStyle
-                        .separatorLightColor,
-                  ),
-                ),
-                ValueListenableBuilder(
-                  valueListenable: profileNotifier,
-                  builder: (context, profile, _) {
-                    return PopupMenuButton<Object>(
-                      padding: EdgeInsets.zero,
-                      onSelected: onSelected,
-                      itemBuilder: _bundleMenuItems,
-                      child: Avatar(
-                        mxContent: profile.avatarUrl,
-                        name: profile.displayName ??
-                            Matrix.of(context).client.userID!.localpart,
-                        size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
-                        fontSize:
-                            ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
+    return AdaptiveScaffoldPrimaryNavigationView(
+      getNavigationRailDestinations: widget.getNavigationRailDestinations,
+      selectedIndex: widget.selectedIndex,
+      onDestinationSelected: widget.onDestinationSelected,
+      onSelected: widget.onSelected,
+      profileNotifier: profileNotifier,
+      itemBuilder: _bundleMenuItems,
     );
   }
 }

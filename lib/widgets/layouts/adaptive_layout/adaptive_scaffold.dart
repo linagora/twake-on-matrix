@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
-import 'package:fluffychat/presentation/mixins/fetch_profile_mixin.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -23,8 +22,7 @@ class AdaptiveScaffoldApp extends StatefulWidget {
   State<AdaptiveScaffoldApp> createState() => AdaptiveScaffoldAppController();
 }
 
-class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp>
-    with FetchProfileMixin {
+class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
@@ -94,19 +92,11 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp>
   MatrixState get matrix => Matrix.of(context);
 
   @override
-  void initState() {
-    getCurrentProfile(matrix.client);
-    handleOnAccountData(matrix.client);
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) => AppScaffoldView(
         destinations: destinations,
         activeRoomId: widget.activeRoomId,
         activeNavigationBar: activeNavigationBar,
         pageController: pageController,
-        profileNotifier: profileNotifier,
         onOpenSearchPage: _onOpenSearchPage,
         onCloseSearchPage: _onCloseSearchPage,
         onDestinationSelected: onDestinationSelected,

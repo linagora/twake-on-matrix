@@ -9,12 +9,14 @@ class SettingsProfileViewMobile extends StatelessWidget {
   final ValueNotifier<Profile> profileNotifier;
   final Widget settingsProfileOptions;
   final VoidCallback onAvatarTap;
+  final String displayName;
 
   const SettingsProfileViewMobile({
     super.key,
     required this.profileNotifier,
     required this.settingsProfileOptions,
     required this.onAvatarTap,
+    required this.displayName,
   });
 
   @override
@@ -22,7 +24,6 @@ class SettingsProfileViewMobile extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: profileNotifier,
       builder: (context, profile, __) {
-        final displayName = profile.displayName ?? profile.userId;
         return Column(
           children: [
             Divider(
