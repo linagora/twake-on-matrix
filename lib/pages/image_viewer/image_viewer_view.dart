@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -22,9 +23,8 @@ class ImageViewerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: GestureDetector(
+    return Center(
+      child: GestureDetector(
         onTap: () => controller.toggleAppbarPreview(),
         onDoubleTapDown: (details) => controller.onDoubleTapDown(details),
         onDoubleTap: () => controller.onDoubleTap(),
@@ -35,8 +35,8 @@ class ImageViewerView extends StatelessWidget {
               child: InteractiveViewer(
                 onInteractionEnd: controller.onInteractionEnds,
                 transformationController: controller.transformationController,
-                minScale: 1.0,
-                maxScale: 10.0,
+                minScale: ImageViewerStyle.minScaleInteractiveViewer,
+                maxScale: ImageViewerStyle.maxScaleInteractiveViewer,
                 child: Center(
                   child: filePath != null
                       ? Image.file(
@@ -47,6 +47,7 @@ class ImageViewerView extends StatelessWidget {
                       : FutureBuilder(
                           future: controller.widget.event
                               .downloadAndDecryptAttachment(
+                            // FIXME: change to false after https://github.com/linagora/twake-on-matrix/issues/746
                             getThumbnail: true,
                           ),
                           builder: (context, snapshot) {

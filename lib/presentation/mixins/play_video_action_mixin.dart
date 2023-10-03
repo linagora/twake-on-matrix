@@ -1,6 +1,6 @@
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/hero_dialog_route.dart';
+import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/video_viewer_desktop_theme.dart';
 import 'package:fluffychat/widgets/video_viewer_mobile_theme.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +13,9 @@ mixin PlayVideoActionMixin {
   }) async {
     if (!PlatformInfos.isWeb) {
       Navigator.of(context).push(
-        HeroDialogRoute(
+        HeroPageRoute(
           builder: (context) {
-            return InteractiveviewerGallery(
+            return InteractiveViewerGallery(
               itemBuilder: VideoViewerMobileTheme(
                 path: uriOrFilePath,
                 eventId: eventId,
