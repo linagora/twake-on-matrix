@@ -8,7 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
-  final Future<Profile?>? myProfile;
+  final ValueNotifier<Profile> profileNotifier;
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
@@ -16,7 +16,7 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
 
   const AdaptiveScaffoldPrimaryNavigation({
     super.key,
-    this.myProfile,
+    required this.profileNotifier,
     required this.getNavigationRailDestinations,
     this.selectedIndex,
     this.onDestinationSelected,
@@ -81,22 +81,16 @@ class AdaptiveScaffoldPrimaryNavigation extends StatelessWidget {
                         .separatorLightColor,
                   ),
                 ),
-                FutureBuilder<Profile?>(
-                  future: myProfile,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator.adaptive(),
-                      );
-                    }
-
+                ValueListenableBuilder(
+                  valueListenable: profileNotifier,
+                  builder: (context, profile, _) {
                     return PopupMenuButton<Object>(
                       padding: EdgeInsets.zero,
                       onSelected: onSelected,
                       itemBuilder: _bundleMenuItems,
                       child: Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
-                        name: snapshot.data?.displayName ??
+                        mxContent: profile.avatarUrl,
+                        name: profile.displayName ??
                             Matrix.of(context).client.userID!.localpart,
                         size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
                         fontSize:
