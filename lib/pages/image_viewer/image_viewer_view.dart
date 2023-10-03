@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -24,42 +23,46 @@ class ImageViewerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: controller.toggleAppbarPreview,
-            onDoubleTapDown: (details) => controller.onDoubleTapDown(details),
-            onDoubleTap: () => controller.onDoubleTap(),
-            child: InteractiveViewer(
-              transformationController: controller.transformationController,
-              minScale: 1.0,
-              maxScale: 10.0,
-              onInteractionEnd: controller.onInteractionEnds,
-              child: Center(
-                child: Hero(
-                  tag: controller.widget.event.eventId,
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: () => controller.toggleAppbarPreview(),
+        onDoubleTapDown: (details) => controller.onDoubleTapDown(details),
+        onDoubleTap: () => controller.onDoubleTap(),
+        child: Stack(
+          children: [
+            Hero(
+              tag: controller.widget.event.eventId,
+              child: InteractiveViewer(
+                onInteractionEnd: controller.onInteractionEnds,
+                transformationController: controller.transformationController,
+                minScale: 1.0,
+                maxScale: 10.0,
+                child: Center(
                   child: filePath != null
                       ? Image.file(
                           File(filePath!),
                           fit: BoxFit.contain,
                           filterQuality: FilterQuality.none,
                         )
-                      : MxcImage(
-                          event: controller.widget.event,
-                          fit: BoxFit.contain,
-                          isThumbnail: false,
-                          animated: false,
-                          imageData: imageData,
-                          isPreview: true,
+                      : FutureBuilder(
+                          future: controller.widget.event
+                              .downloadAndDecryptAttachment(
+                            getThumbnail: true,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.data == null ||
+                                snapshot.data!.bytes == null) {
+                              return const CircularProgressIndicator();
+                            }
+                            return Image.memory(snapshot.data!.bytes!);
+                          },
                         ),
                 ),
               ),
             ),
-          ),
-          _buildAppBarPreview(),
-        ],
+            _buildAppBarPreview(),
+          ],
+        ),
       ),
     );
   }
