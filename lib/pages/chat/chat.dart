@@ -135,6 +135,7 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
   FocusNode inputFocus = FocusNode();
+  FocusNode keyboardFocus = FocusNode();
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
@@ -1182,8 +1183,9 @@ class ChatController extends State<Chat>
     return index + 1;
   }
 
-  void onInputBarSubmitted(_) {
-    send();
+  void onInputBarSubmitted(_) async {
+    await send();
+    await Future.delayed(const Duration(milliseconds: 100));
     FocusScope.of(context).requestFocus(inputFocus);
   }
 

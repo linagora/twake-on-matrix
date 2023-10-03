@@ -128,6 +128,8 @@ class DraftChatView extends StatelessWidget {
                                         onSubmitted:
                                             controller.onInputBarSubmitted,
                                         focusNode: controller.inputFocus,
+                                        keyboardFocusNode:
+                                            controller.keyboardFocus,
                                         controller: controller.sendController,
                                         decoration: DraftChatViewStyle
                                             .bottomBarInputDecoration(context),

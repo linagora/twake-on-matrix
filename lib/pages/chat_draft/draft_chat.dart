@@ -51,6 +51,7 @@ class DraftChatController extends State<DraftChat>
   final AutoScrollController forwardListController = AutoScrollController();
 
   FocusNode inputFocus = FocusNode();
+  FocusNode keyboardFocus = FocusNode();
 
   bool showScrollDownButton = false;
 
