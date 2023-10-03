@@ -3,8 +3,9 @@ import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_dashboard_manager.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/fetch_profile_mixin.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -29,26 +30,28 @@ class Settings extends StatefulWidget {
   SettingsController createState() => SettingsController();
 }
 
-class SettingsController extends State<Settings> with ConnectPageMixin {
-  late SettingsDashboardManagerController settingsDashboardManagerController;
+class SettingsController extends State<Settings>
+    with ConnectPageMixin, FetchProfileMixin {
+  final List<SettingEnum> getListSettingItem = [
+    SettingEnum.chatSettings,
+    SettingEnum.privacyAndSecurity,
+    SettingEnum.notificationAndSounds,
+    SettingEnum.chatFolders,
+    SettingEnum.appLanguage,
+    SettingEnum.devices,
+    SettingEnum.help,
+    SettingEnum.logout,
+  ];
 
-  List<SettingEnum> getListSettingItem() {
-    return [
-      SettingEnum.chatSettings,
-      SettingEnum.privacyAndSecurity,
-      SettingEnum.notificationAndSounds,
-      SettingEnum.chatFolders,
-      SettingEnum.appLanguage,
-      SettingEnum.devices,
-      SettingEnum.help,
-      SettingEnum.logout,
-    ];
-  }
-
-  String get mxid => settingsDashboardManagerController.mxid(context);
+  final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
 
   String get displayName =>
-      settingsDashboardManagerController.displayName(context);
+      profileNotifier.value.displayName ??
+      client.mxid(context).localpart ??
+      client.mxid(context);
+
+  bool optionSelected(SettingEnum settingEnum) =>
+      settingEnum == optionsSelectNotifier.value;
 
   void logoutAction() async {
     final noBackup = showChatBackupBanner == true;
@@ -78,9 +81,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   @override
   void initState() {
-    settingsDashboardManagerController =
-        SettingsDashboardManagerController.instance;
-    settingsDashboardManagerController.getCurrentProfile(client);
+    getCurrentProfile(client);
+    handleOnAccountData(client);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkBootstrap();
     });
@@ -126,8 +128,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void goToSettingsProfile(Profile? profile) async {
-    settingsDashboardManagerController.optionsSelectNotifier.value =
-        SettingEnum.profile;
+    optionsSelectNotifier.value = SettingEnum.profile;
     context.push(
       '/rooms/profile',
       extra: profile,
@@ -135,8 +136,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void onClickToSettingsItem(SettingEnum settingEnum) {
-    settingsDashboardManagerController.optionsSelectNotifier.value =
-        settingEnum;
+    optionsSelectNotifier.value = settingEnum;
     switch (settingEnum) {
       case SettingEnum.chatSettings:
         context.go('/rooms/chat');

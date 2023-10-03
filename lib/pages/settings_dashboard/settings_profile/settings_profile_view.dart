@@ -83,8 +83,7 @@ class SettingsProfileView extends StatelessWidget {
               key: settingsProfileViewMobileKey,
               builder: (_) {
                 return SettingsProfileViewMobile(
-                  profileNotifier: controller
-                      .settingsDashboardManagerController.profileNotifier,
+                  profileNotifier: controller.profileNotifier,
                   onAvatarTap: () => controller.setAvatarAction(),
                   settingsProfileOptions: ListView.separated(
                     shrinkWrap: true,
@@ -134,8 +133,7 @@ class SettingsProfileView extends StatelessWidget {
               key: settingsProfileViewWebKey,
               builder: (_) {
                 return SettingsProfileViewWeb(
-                  profileNotifier: controller
-                      .settingsDashboardManagerController.profileNotifier,
+                  profileNotifier: controller.profileNotifier,
                   basicInfoWidget: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

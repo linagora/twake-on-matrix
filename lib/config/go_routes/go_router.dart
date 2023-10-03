@@ -10,7 +10,6 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_dashboard_manager.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
@@ -253,16 +252,6 @@ abstract class AppRoutes {
                   profile: state.extra as Profile?,
                 ),
               ),
-              redirect: (context, state) {
-                final settingsDashboardManagerController =
-                    SettingsDashboardManagerController();
-
-                if (!settingsDashboardManagerController.initialized) {
-                  return '/rooms';
-                }
-
-                return Matrix.of(context).client.isLogged() ? null : '/home';
-              },
             ),
             GoRoute(
               path: 'notifications',
