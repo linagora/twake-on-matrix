@@ -41,7 +41,7 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/domain/usecase/settings/upload_profile_interactor.dart';
+import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -178,8 +178,8 @@ class GetItInitializer {
     getIt.registerSingleton<TimelineSearchEventInteractor>(
       TimelineSearchEventInteractor(),
     );
-    getIt.registerSingleton<UploadProfileInteractor>(
-      UploadProfileInteractor(),
+    getIt.registerSingleton<UpdateProfileInteractor>(
+      UpdateProfileInteractor(),
     );
   }
 }
