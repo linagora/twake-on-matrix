@@ -236,9 +236,11 @@ class _MxcImageState extends State<MxcImage>
         : _buildImageWidget();
 
     if (widget.isPreview) {
-      return InkWell(
-        onTap: () => _onTap(context),
-        child: imageWidget,
+      return Material(
+        child: InkWell(
+          onTap: () => _onTap(context),
+          child: imageWidget,
+        ),
       );
     } else {
       return imageWidget;
