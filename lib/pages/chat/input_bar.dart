@@ -1,7 +1,7 @@
+import 'package:fluffychat/utils/extension/raw_key_event_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:emojis/emoji.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -23,6 +23,7 @@ class InputBar extends StatelessWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final FocusNode? focusNode;
+  final FocusNode keyboardFocusNode;
   final TextEditingController? controller;
   final InputDecoration? decoration;
   final ValueChanged<String>? onChanged;
@@ -36,6 +37,7 @@ class InputBar extends StatelessWidget {
     this.keyboardType,
     this.onSubmitted,
     this.focusNode,
+    required this.keyboardFocusNode,
     this.controller,
     this.decoration,
     this.onChanged,
@@ -302,82 +304,54 @@ class InputBar extends StatelessWidget {
     final useShortCuts = (PlatformInfos.isWeb ||
         PlatformInfos.isDesktop ||
         AppConfig.sendOnEnter);
-    return Shortcuts(
-      shortcuts: !useShortCuts
-          ? {}
-          : {
-              LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.enter):
-                  NewLineIntent(),
-              LogicalKeySet(LogicalKeyboardKey.enter): SubmitLineIntent(),
-            },
-      child: Actions(
-        actions: !useShortCuts
-            ? {}
-            : {
-                NewLineIntent: CallbackAction(
-                  onInvoke: (i) {
-                    final val = controller!.value;
-                    final selection = val.selection.start;
-                    final messageWithoutNewLine =
-                        '${controller!.text.substring(0, val.selection.start)}\n${controller!.text.substring(val.selection.end)}';
-                    controller!.value = TextEditingValue(
-                      text: messageWithoutNewLine,
-                      selection: TextSelection.fromPosition(
-                        TextPosition(offset: selection + 1),
-                      ),
-                    );
-                    return null;
-                  },
-                ),
-                SubmitLineIntent: CallbackAction(
-                  onInvoke: (i) {
-                    onSubmitted!(controller!.text);
-                    return null;
-                  },
-                ),
-              },
-        child: TypeAheadField<Map<String, String?>>(
-          direction: AxisDirection.up,
-          hideOnEmpty: true,
-          hideOnLoading: true,
-          keepSuggestionsOnSuggestionSelected: true,
-          debounceDuration: const Duration(milliseconds: 50),
-          // show suggestions after 50ms idle time (default is 300)
-          textFieldConfiguration: TextFieldConfiguration(
-            minLines: minLines,
-            maxLines: maxLines,
-            keyboardType: keyboardType!,
-            textInputAction: textInputAction,
-            autofocus: autofocus!,
-            style: InputBarStyle.getTypeAheadTextStyle(context),
-            onSubmitted: (text) {
-              // fix for library for now
-              // it sets the types for the callback incorrectly
-              onSubmitted!(text);
-            },
-            controller: controller,
-            decoration: decoration!,
-            focusNode: focusNode,
-            onChanged: (text) {
-              // fix for the library for now
-              // it sets the types for the callback incorrectly
-              onChanged!(text);
-            },
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          suggestionsCallback: getSuggestions,
-          itemBuilder: (context, suggestion) => SuggestionTile(
-            suggestion: suggestion,
-            client: Matrix.of(context).client,
-          ),
-          onSuggestionSelected: (Map<String, String?> suggestion) =>
-              insertSuggestion(context, suggestion),
-          errorBuilder: (BuildContext context, Object? error) => Container(),
-          loadingBuilder: (BuildContext context) => Container(),
-          // fix loading briefly flickering a dark box
-          noItemsFoundBuilder: (BuildContext context) =>
-              Container(), // fix loading briefly showing no suggestions
+    return RawKeyboardListener(
+      focusNode: keyboardFocusNode,
+      onKey: (event) {
+        if (useShortCuts && event.isEnter) {
+          onSubmitted?.call(controller?.text ?? '');
+        }
+      },
+      child: TypeAheadField<Map<String, String?>>(
+        direction: AxisDirection.up,
+        hideOnEmpty: true,
+        hideOnLoading: true,
+        keepSuggestionsOnSuggestionSelected: true,
+        debounceDuration: const Duration(milliseconds: 50),
+        // show suggestions after 50ms idle time (default is 300)
+        textFieldConfiguration: TextFieldConfiguration(
+          minLines: minLines,
+          maxLines: maxLines,
+          keyboardType: keyboardType!,
+          textInputAction: textInputAction,
+          autofocus: autofocus!,
+          style: InputBarStyle.getTypeAheadTextStyle(context),
+          onSubmitted: (text) {
+            // fix for library for now
+            // it sets the types for the callback incorrectly
+            onSubmitted!(text);
+          },
+          controller: controller,
+          decoration: decoration!,
+          focusNode: focusNode,
+          onChanged: (text) {
+            // fix for the library for now
+            // it sets the types for the callback incorrectly
+            onChanged!(text);
+          },
+          textCapitalization: TextCapitalization.sentences,
         ),
+        suggestionsCallback: getSuggestions,
+        itemBuilder: (context, suggestion) => SuggestionTile(
+          suggestion: suggestion,
+          client: Matrix.of(context).client,
+        ),
+        onSuggestionSelected: (Map<String, String?> suggestion) =>
+            insertSuggestion(context, suggestion),
+        errorBuilder: (BuildContext context, Object? error) => Container(),
+        loadingBuilder: (BuildContext context) => Container(),
+        // fix loading briefly flickering a dark box
+        noItemsFoundBuilder: (BuildContext context) =>
+            Container(), // fix loading briefly showing no suggestions
       ),
     );
   }
