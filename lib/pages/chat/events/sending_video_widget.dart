@@ -77,10 +77,13 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
           ),
         );
       }),
-      child: VideoWidget(
-        imageHeight: displayImageInfo.size.height,
-        imageWidth: displayImageInfo.size.width,
-        matrixFile: matrixFile,
+      child: Hero(
+        tag: event.eventId,
+        child: VideoWidget(
+          imageHeight: displayImageInfo.size.height,
+          imageWidth: displayImageInfo.size.width,
+          matrixFile: matrixFile,
+        ),
       ),
     );
   }
