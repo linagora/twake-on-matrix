@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class HeroDialogRoute<T> extends PageRoute<T> {
-  HeroDialogRoute({
+class HeroPageRoute<T> extends PageRoute<T> {
+  HeroPageRoute({
     required this.builder,
     this.onBackgroundTap,
   }) : super();
