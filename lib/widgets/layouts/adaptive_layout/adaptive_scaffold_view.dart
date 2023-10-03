@@ -16,7 +16,7 @@ class AppScaffoldView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
   final PageController pageController;
-  final Future<Profile?> fetchOwnProfile;
+  final ValueNotifier<Profile> profileNotifier;
   final OnOpenSearchPage onOpenSearchPage;
   final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
@@ -39,7 +39,7 @@ class AppScaffoldView extends StatelessWidget {
     this.activeRoomId,
     required this.activeNavigationBar,
     required this.pageController,
-    required this.fetchOwnProfile,
+    required this.profileNotifier,
     required this.onOpenSearchPage,
     required this.onCloseSearchPage,
     required this.onDestinationSelected,
@@ -178,7 +178,7 @@ class AppScaffoldView extends StatelessWidget {
     final destinations = getNavigationDestinations(context);
 
     return AdaptiveScaffoldPrimaryNavigation(
-      myProfile: fetchOwnProfile,
+      profileNotifier: profileNotifier,
       selectedIndex: activeNavigationBar.value.index,
       getNavigationRailDestinations: destinations
           .map((_) => AdaptiveScaffold.toRailDestination(_))

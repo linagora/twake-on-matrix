@@ -41,6 +41,7 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
+import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -71,6 +72,7 @@ class GetItInitializer {
     HiveDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
+    getIt.registerSingleton(TwakeEventDispatcher());
   }
 
   void bindingQueue() {

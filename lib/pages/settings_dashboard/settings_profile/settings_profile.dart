@@ -1,9 +1,14 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_dashboard_manager.dart';
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/fetch_profile_mixin.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -26,18 +31,21 @@ class SettingsProfile extends StatefulWidget {
   State<SettingsProfile> createState() => SettingsProfileController();
 }
 
-class SettingsProfileController extends State<SettingsProfile> {
-  final settingsDashboardManagerController =
-      SettingsDashboardManagerController();
+class SettingsProfileController extends State<SettingsProfile>
+    with FetchProfileMixin {
+  final TwakeEventDispatcher twakeEventDispatcher =
+      getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
 
   Client get client => Matrix.of(context).client;
 
-  String get mxid => settingsDashboardManagerController.mxid(context);
+  MatrixState get matrix => Matrix.of(context);
 
   String get displayName =>
-      settingsDashboardManagerController.displayName(context);
+      profileNotifier.value.displayName ??
+      client.mxid(context).localpart ??
+      client.mxid(context);
 
   final TextEditingController displayNameEditingController =
       TextEditingController();
@@ -51,13 +59,35 @@ class SettingsProfileController extends State<SettingsProfile> {
   List<SettingsProfileEnum> get getListProfileMobile =>
       getListProfileBasicInfo + getListProfileWorkIdentitiesInfo;
 
-  List<SettingsProfileEnum> getListProfileBasicInfo = [
+  final List<SettingsProfileEnum> getListProfileBasicInfo = [
     SettingsProfileEnum.displayName,
   ];
 
-  List<SettingsProfileEnum> getListProfileWorkIdentitiesInfo = [
+  final List<SettingsProfileEnum> getListProfileWorkIdentitiesInfo = [
     SettingsProfileEnum.matrixId
   ];
+
+  List<SheetAction<AvatarAction>> actions() => [
+        if (PlatformInfos.isMobile)
+          SheetAction(
+            key: AvatarAction.camera,
+            label: L10n.of(context)!.openCamera,
+            isDefaultAction: true,
+            icon: Icons.camera_alt_outlined,
+          ),
+        SheetAction(
+          key: AvatarAction.file,
+          label: L10n.of(context)!.openGallery,
+          icon: Icons.photo_outlined,
+        ),
+        if (profileNotifier.value.avatarUrl != null)
+          SheetAction(
+            key: AvatarAction.remove,
+            label: L10n.of(context)!.removeYourAvatar,
+            isDestructiveAction: true,
+            icon: Icons.delete_outlined,
+          ),
+      ];
 
   TextEditingController? getController(
     SettingsProfileEnum settingsProfileEnum,
@@ -81,80 +111,77 @@ class SettingsProfileController extends State<SettingsProfile> {
     }
   }
 
-  void setAvatarAction() async {
-    final actions = [
-      if (PlatformInfos.isMobile)
-        SheetAction(
-          key: AvatarAction.camera,
-          label: L10n.of(context)!.openCamera,
-          isDefaultAction: true,
-          icon: Icons.camera_alt_outlined,
-        ),
-      SheetAction(
-        key: AvatarAction.file,
-        label: L10n.of(context)!.openGallery,
-        icon: Icons.photo_outlined,
-      ),
-      if (settingsDashboardManagerController.profileNotifier.value.avatarUrl !=
-          null)
-        SheetAction(
-          key: AvatarAction.remove,
-          label: L10n.of(context)!.removeYourAvatar,
-          isDestructiveAction: true,
-          icon: Icons.delete_outlined,
-        ),
-    ];
-    final action = actions.length == 1
-        ? actions.single.key
-        : await showModalActionSheet<AvatarAction>(
-            context: context,
-            title: L10n.of(context)!.changeYourAvatar,
-            actions: actions,
-          );
-    if (action == null) return;
-    final matrix = Matrix.of(context);
-    if (action == AvatarAction.remove) {
-      final success = await showFutureLoadingDialog(
-        context: context,
-        future: () => matrix.client.setAvatar(null),
-      );
-      if (success.error == null) {
-        _getProfileFromUserId(isUpdated: true);
-      }
-      return;
+  void _handleRemoveAvatarAction() async {
+    final success = await showFutureLoadingDialog(
+      context: context,
+      future: () => matrix.client.setAvatar(null),
+    );
+    if (success.error == null) {
+      getCurrentProfile(client, isUpdated: true);
     }
+    return;
+  }
+
+  Future<MatrixFile?> _handleGetAvatarInByte() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    final pickedFile = result?.files.firstOrNull;
+    if (pickedFile == null || pickedFile.bytes == null) return null;
+    return MatrixFile(
+      bytes: pickedFile.bytes!,
+      name: pickedFile.name,
+    );
+  }
+
+  Future<MatrixFile?> _handleGetAvatarInStream(AvatarAction action) async {
+    final result = await ImagePicker().pickImage(
+      source: action == AvatarAction.camera
+          ? ImageSource.camera
+          : ImageSource.gallery,
+      imageQuality: AppConfig.imageQuality,
+    );
+    if (result == null) return null;
+    return MatrixFile(
+      bytes: await result.readAsBytes(),
+      name: result.path,
+    );
+  }
+
+  void _handleGetAvatarAction(AvatarAction action) async {
     MatrixFile file;
     if (PlatformInfos.isMobile) {
-      final result = await ImagePicker().pickImage(
-        source: action == AvatarAction.camera
-            ? ImageSource.camera
-            : ImageSource.gallery,
-        imageQuality: 50,
-      );
-      if (result == null) return;
-      file = MatrixFile(
-        bytes: await result.readAsBytes(),
-        name: result.path,
-      );
+      final matrixFile = await _handleGetAvatarInStream(action);
+      if (matrixFile == null) return;
+      file = matrixFile;
     } else {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        withData: true,
-      );
-      final pickedFile = result?.files.firstOrNull;
-      if (pickedFile == null) return;
-      file = MatrixFile(
-        bytes: pickedFile.bytes!,
-        name: pickedFile.name,
-      );
+      final matrixFile = await _handleGetAvatarInByte();
+      if (matrixFile == null) return;
+      file = matrixFile;
     }
     final success = await showFutureLoadingDialog(
       context: context,
       future: () => matrix.client.setAvatar(file),
     );
     if (success.error == null) {
-      _getProfileFromUserId(isUpdated: true);
+      getCurrentProfile(client, isUpdated: true);
     }
+  }
+
+  void setAvatarAction() async {
+    final action = actions().length == 1
+        ? actions().single.key
+        : await showModalActionSheet<AvatarAction>(
+            context: context,
+            title: L10n.of(context)!.changeYourAvatar,
+            actions: actions(),
+          );
+    if (action == null) return;
+    if (action == AvatarAction.remove) {
+      _handleRemoveAvatarAction();
+    }
+    _handleGetAvatarAction(action);
   }
 
   void setDisplayNameAction() async {
@@ -171,11 +198,13 @@ class SettingsProfileController extends State<SettingsProfile> {
     );
     if (success.error == null) {
       isEditedProfileNotifier.toggle();
-      _getProfileFromUserId(isUpdated: true);
+      getCurrentProfile(client, isUpdated: true);
     }
   }
 
-  void _getProfileFromUserId({
+  @override
+  void getCurrentProfile(
+    Client client, {
     isUpdated = false,
   }) async {
     final profile = await client.getProfileFromUserId(
@@ -184,11 +213,18 @@ class SettingsProfileController extends State<SettingsProfile> {
       getFromRooms: false,
     );
     Logs().d(
-      'SettingsProfile::_getProfileFromUserId() - avatarUrl: ${profile.avatarUrl} - displayName: ${profile.displayName} - userId: ${profile.userId}',
+      'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );
-    settingsDashboardManagerController.profileNotifier.value = profile;
+    profileNotifier.value = profile;
+    twakeEventDispatcher.sendAccountDataEvent(
+      client: client,
+      basicEvent: BasicEvent(
+        type: TwakeInappEventTypes.uploadAvatarEvent,
+        content: profile.toJson(),
+      ),
+    );
     displayNameEditingController.text = displayName;
-    matrixIdEditingController.text = mxid;
+    matrixIdEditingController.text = client.mxid(context);
   }
 
   void handleTextEditOnChange(SettingsProfileEnum settingsProfileEnum) {
@@ -205,24 +241,24 @@ class SettingsProfileController extends State<SettingsProfile> {
     isEditedProfileNotifier.value =
         displayNameEditingController.text != displayName;
     Logs().d(
-      'SettingsProfile::_listeningDisplayNameHasChange() - ${isEditedProfileNotifier.value}',
+      'SettingsProfileController::_listeningDisplayNameHasChange() - ${isEditedProfileNotifier.value}',
     );
   }
 
   void _initProfile() {
     if (widget.profile == null) {
-      _getProfileFromUserId();
+      getCurrentProfile(client);
       return;
     }
-    settingsDashboardManagerController.profileNotifier.value = widget.profile!;
+    profileNotifier.value = widget.profile!;
     displayNameEditingController.text = displayName;
-    matrixIdEditingController.text = mxid;
+    matrixIdEditingController.text = client.mxid(context);
   }
 
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
     switch (settingsProfileEnum) {
       case SettingsProfileEnum.matrixId:
-        Clipboard.setData(ClipboardData(text: mxid));
+        Clipboard.setData(ClipboardData(text: client.mxid(context)));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             width: SettingsProfileItemStyle.widthSnackBar(context),
