@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/config/app_config.dart';
@@ -8,7 +10,6 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/mixins/fetch_profile_mixin.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -31,8 +32,11 @@ class SettingsProfile extends StatefulWidget {
   State<SettingsProfile> createState() => SettingsProfileController();
 }
 
-class SettingsProfileController extends State<SettingsProfile>
-    with FetchProfileMixin {
+class SettingsProfileController extends State<SettingsProfile> {
+  final ValueNotifier<Profile> profileNotifier = ValueNotifier(
+    Profile(userId: ''),
+  );
+
   final TwakeEventDispatcher twakeEventDispatcher =
       getIt.get<TwakeEventDispatcher>();
 
@@ -117,7 +121,7 @@ class SettingsProfileController extends State<SettingsProfile>
       future: () => matrix.client.setAvatar(null),
     );
     if (success.error == null) {
-      getCurrentProfile(client, isUpdated: true);
+      _getCurrentProfile(client, isUpdated: true);
     }
     return;
   }
@@ -165,7 +169,7 @@ class SettingsProfileController extends State<SettingsProfile>
       future: () => matrix.client.setAvatar(file),
     );
     if (success.error == null) {
-      getCurrentProfile(client, isUpdated: true);
+      _getCurrentProfile(client, isUpdated: true);
     }
   }
 
@@ -184,6 +188,22 @@ class SettingsProfileController extends State<SettingsProfile>
     _handleGetAvatarAction(action);
   }
 
+  void _handleSyncProfile() async {
+    Logs().d(
+      'SettingsProfileController::_handleSyncProfile() - Syncing profile',
+    );
+    twakeEventDispatcher.sendAccountDataEvent(
+      client: client,
+      basicEvent: BasicEvent(
+        type: TwakeInappEventTypes.uploadAvatarEvent,
+        content: profileNotifier.value.toJson(),
+      ),
+    );
+    Logs().d(
+      'SettingsProfileController::_handleSyncProfile() - Syncing success',
+    );
+  }
+
   void setDisplayNameAction() async {
     if (displayNameFocusNode.hasFocus) {
       displayNameFocusNode.unfocus();
@@ -198,12 +218,11 @@ class SettingsProfileController extends State<SettingsProfile>
     );
     if (success.error == null) {
       isEditedProfileNotifier.toggle();
-      getCurrentProfile(client, isUpdated: true);
+      _getCurrentProfile(client, isUpdated: true);
     }
   }
 
-  @override
-  void getCurrentProfile(
+  void _getCurrentProfile(
     Client client, {
     isUpdated = false,
   }) async {
@@ -216,15 +235,9 @@ class SettingsProfileController extends State<SettingsProfile>
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );
     profileNotifier.value = profile;
-    twakeEventDispatcher.sendAccountDataEvent(
-      client: client,
-      basicEvent: BasicEvent(
-        type: TwakeInappEventTypes.uploadAvatarEvent,
-        content: profile.toJson(),
-      ),
-    );
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = client.mxid(context);
+    _handleSyncProfile();
   }
 
   void handleTextEditOnChange(SettingsProfileEnum settingsProfileEnum) {
@@ -247,7 +260,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _initProfile() {
     if (widget.profile == null) {
-      getCurrentProfile(client);
+      _getCurrentProfile(client);
       return;
     }
     profileNotifier.value = widget.profile!;

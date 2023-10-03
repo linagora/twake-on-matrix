@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/mixins/fetch_profile_mixin.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +32,13 @@ class Settings extends StatefulWidget {
   SettingsController createState() => SettingsController();
 }
 
-class SettingsController extends State<Settings>
-    with ConnectPageMixin, FetchProfileMixin {
+class SettingsController extends State<Settings> with ConnectPageMixin {
+  final ValueNotifier<Profile> profileNotifier = ValueNotifier(
+    Profile(userId: ''),
+  );
+
+  StreamSubscription? onAccountDataSubscription;
+
   final List<SettingEnum> getListSettingItem = [
     SettingEnum.chatSettings,
     SettingEnum.privacyAndSecurity,
@@ -79,14 +86,15 @@ class SettingsController extends State<Settings>
 
   Client get client => Matrix.of(context).client;
 
-  @override
-  void initState() {
-    getCurrentProfile(client);
-    handleOnAccountData(client);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkBootstrap();
-    });
-    super.initState();
+  void _getCurrentProfile(Client client) async {
+    final profile = await client.getProfileFromUserId(
+      client.userID!,
+      getFromRooms: false,
+    );
+    Logs().d(
+      'Settings::_getCurrentProfile() - currentProfile: $profile',
+    );
+    profileNotifier.value = profile;
   }
 
   void checkBootstrap() async {
@@ -166,6 +174,30 @@ class SettingsController extends State<Settings>
       default:
         break;
     }
+  }
+
+  void _handleOnAccountDataSubscription() {
+    onAccountDataSubscription = client.onAccountData.stream.listen((event) {
+      if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
+        profileNotifier.value = Profile.fromJson(event.content);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    _getCurrentProfile(client);
+    _handleOnAccountDataSubscription();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkBootstrap();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    onAccountDataSubscription?.cancel();
+    super.dispose();
   }
 
   @override

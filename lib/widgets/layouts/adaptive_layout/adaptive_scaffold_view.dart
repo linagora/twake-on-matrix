@@ -10,13 +10,11 @@ import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 
 class AppScaffoldView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
   final PageController pageController;
-  final ValueNotifier<Profile> profileNotifier;
   final OnOpenSearchPage onOpenSearchPage;
   final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
@@ -39,7 +37,6 @@ class AppScaffoldView extends StatelessWidget {
     this.activeRoomId,
     required this.activeNavigationBar,
     required this.pageController,
-    required this.profileNotifier,
     required this.onOpenSearchPage,
     required this.onCloseSearchPage,
     required this.onDestinationSelected,
@@ -178,7 +175,6 @@ class AppScaffoldView extends StatelessWidget {
     final destinations = getNavigationDestinations(context);
 
     return AdaptiveScaffoldPrimaryNavigation(
-      profileNotifier: profileNotifier,
       selectedIndex: activeNavigationBar.value.index,
       getNavigationRailDestinations: destinations
           .map((_) => AdaptiveScaffold.toRailDestination(_))

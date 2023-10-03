@@ -11,6 +11,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final Widget basicInfoWidget;
   final Widget workIdentitiesInfoWidget;
   final VoidCallback onAvatarTap;
+  final String displayName;
 
   const SettingsProfileViewWeb({
     super.key,
@@ -18,6 +19,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
     required this.basicInfoWidget,
     required this.onAvatarTap,
     required this.workIdentitiesInfoWidget,
+    required this.displayName,
   });
 
   @override
@@ -25,7 +27,6 @@ class SettingsProfileViewWeb extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: profileNotifier,
       builder: (context, profile, __) {
-        final displayName = profile.displayName ?? profile.userId;
         return Padding(
           padding: SettingsProfileViewWebStyle.paddingBody,
           child: Center(
