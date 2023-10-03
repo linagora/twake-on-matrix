@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
@@ -14,6 +17,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final IconData? leadingIcon;
   final void Function(String, SettingsProfileEnum)? onChange;
   final VoidCallback? onCopyAction;
+  final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
 
   const SettingsProfileItemBuilder({
     super.key,
@@ -26,6 +30,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     this.leadingIcon,
     this.onChange,
     this.onCopyAction,
+    required this.settingsProfileUIState,
   });
 
   @override
@@ -57,29 +62,35 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    TextField(
-                      onChanged: (value) =>
-                          onChange!(value, settingsProfileEnum),
-                      readOnly: !settingsProfilePresentation.isEditable,
-                      autofocus: false,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                          onPressed: settingsProfilePresentation.isEditable
-                              ? () {
-                                  focusNode?.requestFocus();
-                                }
-                              : onCopyAction,
-                          icon: Icon(
-                            suffixIcon,
-                            size: SettingsProfileItemStyle.iconSize,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                    ValueListenableBuilder(
+                      valueListenable: settingsProfileUIState,
+                      builder: (context, _, __) {
+                        return TextField(
+                          onChanged: (value) =>
+                              onChange!(value, settingsProfileEnum),
+                          readOnly: !settingsProfilePresentation.isEditable,
+                          autofocus: false,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              onPressed: settingsProfilePresentation.isEditable
+                                  ? () {
+                                      focusNode?.requestFocus();
+                                    }
+                                  : onCopyAction,
+                              icon: Icon(
+                                suffixIcon,
+                                size: SettingsProfileItemStyle.iconSize,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                            hintText: textEditingController?.text,
                           ),
-                        ),
-                        hintText: textEditingController?.text,
-                      ),
+                        );
+                      },
                     ),
                     Divider(
                       height: SettingsProfileItemStyle.dividerSize,

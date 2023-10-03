@@ -1,7 +1,7 @@
 import 'package:fluffychat/app_state/success.dart';
 
-class UploadProfileLoading extends Success {
-  const UploadProfileLoading();
+class UpdateProfileLoading extends Success {
+  const UpdateProfileLoading();
 
   @override
   List<Object?> get props => [];

@@ -9,6 +9,7 @@ class SettingsProfileViewMobileStyle {
   static const double iconEditBorderWidth = 4;
   static const double iconEditSize = 24;
   static const double dividerHeight = 2;
+  static const int thumbnailSize = 28;
 
   static EdgeInsetsDirectional padding =
       const EdgeInsetsDirectional.symmetric(vertical: 16.0);
