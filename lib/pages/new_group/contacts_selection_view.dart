@@ -59,13 +59,15 @@ class ContactsSelectionView extends StatelessWidget {
                       controller: controller.refreshController!,
                       onRefresh: controller.fetchContacts,
                       onLoading: controller.loadMoreContacts,
-                      child: ContactsSelectionList(
-                        contactsNotifier: controller.contactsNotifier!,
-                        selectedContactsMapNotifier:
-                            controller.selectedContactsMapNotifier,
-                        onSelectedContact: controller.onSelectedContact,
-                        disabledContactIds: controller.disabledContactIds,
-                      ),
+                      slivers: [
+                        ContactsSelectionList(
+                          contactsNotifier: controller.contactsNotifier!,
+                          selectedContactsMapNotifier:
+                              controller.selectedContactsMapNotifier,
+                          onSelectedContact: controller.onSelectedContact,
+                          disabledContactIds: controller.disabledContactIds,
+                        )
+                      ],
                     ),
             ),
           ),

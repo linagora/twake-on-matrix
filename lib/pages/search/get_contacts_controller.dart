@@ -7,8 +7,8 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class GetContactsController {
   SuccessConverter converter;
@@ -18,7 +18,7 @@ class GetContactsController {
   final contactsNotifier = ValueNotifier<Either<Failure, Success>>(
     const Right(GetContactsInitial()),
   );
-  final refreshController = RefreshController();
+  final refreshController = TwakeRefreshController();
   bool _isLoadMore = false;
   Success? _lastSuccess;
 
