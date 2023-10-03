@@ -10,9 +10,12 @@ class VideoViewerMobileTheme extends StatelessWidget {
   const VideoViewerMobileTheme({
     super.key,
     required this.path,
+    this.eventId,
   });
 
   final String path;
+
+  final String? eventId;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +42,14 @@ class VideoViewerMobileTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
       fullscreen: const MaterialVideoControlsThemeData(),
-      child: VideoPlayer(
-        path: path,
-      ),
+      child: eventId != null
+          ? Hero(
+              tag: eventId!,
+              child: VideoPlayer(
+                path: path,
+              ),
+            )
+          : VideoPlayer(path: path),
     );
   }
 }
