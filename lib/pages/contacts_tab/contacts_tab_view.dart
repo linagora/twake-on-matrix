@@ -27,18 +27,7 @@ class ContactsTabView extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: bottomNavigationBar,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: Colors.black.withOpacity(0.15),
-            ),
-            ContactsTabBodyView(contactsController),
-          ],
-        ),
-      ),
+      body: ContactsTabBodyView(contactsController),
     );
   }
 }
