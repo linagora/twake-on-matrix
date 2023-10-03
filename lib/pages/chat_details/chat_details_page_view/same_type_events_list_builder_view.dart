@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/same_type_events_list_controller.dart';
+import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 class SameTypeEventsListBuilderView extends StatelessWidget {
@@ -19,7 +20,9 @@ class SameTypeEventsListBuilderView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: controller.refreshing,
             builder: (context, refreshing, child) => SliverToBoxAdapter(
-              child: refreshing ? const _LoadingIndicator() : const SizedBox(),
+              child: refreshing
+                  ? const CenterLoadingIndicator()
+                  : const SizedBox(),
             ),
           ),
           ValueListenableBuilder(
@@ -30,23 +33,13 @@ class SameTypeEventsListBuilderView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: controller.loadingMore,
             builder: (context, loadingMore, child) => SliverToBoxAdapter(
-              child: loadingMore ? const _LoadingIndicator() : const SizedBox(),
+              child: loadingMore
+                  ? const CenterLoadingIndicator()
+                  : const SizedBox(),
             ),
           )
         ],
       ),
-    );
-  }
-}
-
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16),
-      child: Center(child: CircularProgressIndicator()),
     );
   }
 }
