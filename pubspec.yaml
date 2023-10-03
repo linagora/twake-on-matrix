@@ -55,7 +55,7 @@ dependencies:
   hive_flutter: ^1.1.0
   http: ^0.13.4
   image: ^4.0.15
-  image_picker: ^0.8.4+8
+  image_picker: ^1.0.4
   intl: any
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
@@ -125,7 +125,7 @@ dependencies:
   fluttertoast: ^8.2.2
   rxdart: ^0.27.7
   photo_manager: ^2.7.1
-  flutter_inappwebview: ^5.7.2+3
+  flutter_inappwebview: ^5.8.0
   tuple: ^2.0.2
   lottie: ^2.3.2
   wechat_camera_picker: ^3.8.0
