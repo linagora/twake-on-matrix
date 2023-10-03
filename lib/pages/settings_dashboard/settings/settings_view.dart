@@ -39,70 +39,66 @@ class SettingsView extends StatelessWidget {
         child: ListView(
           key: const Key('SettingsListViewContent'),
           children: <Widget>[
-            ValueListenableBuilder(
-              valueListenable: controller.profileNotifier,
-              builder: (context, profile, _) {
-                return Padding(
-                  padding: SettingsViewStyle.bodySettingsScreenPadding,
-                  child: Material(
-                    borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-                    clipBehavior: Clip.hardEdge,
-                    color: controller.optionsSelectNotifier.value ==
-                            SettingEnum.profile
-                        ? Theme.of(context).colorScheme.secondaryContainer
-                        : null,
-                    child: InkWell(
-                      onTap: () => controller.goToSettingsProfile(profile),
-                      child: Padding(
-                        padding: SettingsViewStyle.itemBuilderPadding,
-                        child: Row(
-                          children: [
-                            Padding(
+            Padding(
+              padding: SettingsViewStyle.bodySettingsScreenPadding,
+              child: Material(
+                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                clipBehavior: Clip.hardEdge,
+                color: controller.optionsSelectNotifier.value ==
+                        SettingEnum.profile
+                    ? Theme.of(context).colorScheme.secondaryContainer
+                    : null,
+                child: InkWell(
+                  onTap: () => controller.goToSettingsProfile(),
+                  child: Padding(
+                    padding: SettingsViewStyle.itemBuilderPadding,
+                    child: Row(
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: controller.avatarUriNotifier,
+                          builder: (context, avatarUrl, __) {
+                            return Padding(
                               padding: SettingsViewStyle.avatarPadding,
-                              child: Stack(
-                                children: [
-                                  Material(
-                                    elevation: Theme.of(context)
-                                            .appBarTheme
-                                            .scrolledUnderElevation ??
-                                        4,
-                                    shadowColor: Theme.of(context)
+                              child: Material(
+                                elevation: Theme.of(context)
                                         .appBarTheme
-                                        .shadowColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        color: Theme.of(context).dividerColor,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AvatarStyle.defaultSize,
-                                      ),
-                                    ),
-                                    child: Avatar(
-                                      mxContent: profile.avatarUrl,
-                                      name: controller.displayName,
-                                      size: AvatarStyle.defaultSize,
-                                      fontSize:
-                                          SettingsViewStyle.fontSizeAvatar,
-                                    ),
+                                        .scrolledUnderElevation ??
+                                    4,
+                                shadowColor:
+                                    Theme.of(context).appBarTheme.shadowColor,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color: Theme.of(context).dividerColor,
                                   ),
-                                ],
+                                  borderRadius: BorderRadius.circular(
+                                    AvatarStyle.defaultSize,
+                                  ),
+                                ),
+                                child: Avatar(
+                                  mxContent: avatarUrl,
+                                  name: controller.displayName,
+                                  size: AvatarStyle.defaultSize,
+                                  fontSize: SettingsViewStyle.fontSizeAvatar,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          profile.displayName ??
-                                              controller.displayName,
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ValueListenableBuilder(
+                                      valueListenable:
+                                          controller.displayNameNotifier,
+                                      builder: (context, displayName, _) {
+                                        return Text(
+                                          displayName ?? controller.displayName,
                                           style: Theme.of(context)
                                               .textTheme
                                               .titleLarge
@@ -113,37 +109,36 @@ class SettingsView extends StatelessWidget {
                                               ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Text(
-                                          controller.client.mxid(context),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelLarge
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .neutral[40],
-                                              ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                                        );
+                                      },
                                     ),
-                                  ),
-                                  const Icon(
-                                    Icons.chevron_right_outlined,
-                                    size: SettingsViewStyle.iconSize,
-                                  ),
-                                ],
+                                    Text(
+                                      controller.client.mxid(context),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: LinagoraRefColors.material()
+                                                .neutral[40],
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                              const Icon(
+                                Icons.chevron_right_outlined,
+                                size: SettingsViewStyle.iconSize,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
             const Divider(thickness: 1),
             Column(

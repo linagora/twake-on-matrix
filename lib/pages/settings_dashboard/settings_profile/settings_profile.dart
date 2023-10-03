@@ -1,53 +1,70 @@
-import 'dart:async';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:dartz/dartz.dart' hide State;
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
+import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class SettingsProfile extends StatefulWidget {
-  final Profile? profile;
-
   const SettingsProfile({
     super.key,
-    required this.profile,
   });
 
   @override
   State<SettingsProfile> createState() => SettingsProfileController();
 }
 
-class SettingsProfileController extends State<SettingsProfile> {
-  final ValueNotifier<Profile> profileNotifier = ValueNotifier(
-    Profile(userId: ''),
-  );
+class SettingsProfileController extends State<SettingsProfile>
+    with CommonMediaPickerMixin, SingleImagePickerMixin {
+  final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
+  final uploadContentInteractor = getIt.get<UploadContentInteractor>();
+  final uploadContentWebInteractor =
+      getIt.get<UploadContentInBytesInteractor>();
+
+  Profile? currentProfile;
+  AssetEntity? assetEntity;
+  FilePickerResult? filePickerResult;
 
   final TwakeEventDispatcher twakeEventDispatcher =
       getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
+  final ValueNotifier<Either<Failure, Success>> settingsProfileUIState =
+      ValueNotifier<Either<Failure, Success>>(Right(GetAvatarInitialUIState()));
 
   Client get client => Matrix.of(context).client;
 
-  MatrixState get matrix => Matrix.of(context);
+  bool get _hasEditedDisplayName =>
+      displayNameEditingController.text != displayName;
 
   String get displayName =>
-      profileNotifier.value.displayName ??
+      currentProfile?.displayName ??
       client.mxid(context).localpart ??
       client.mxid(context);
 
@@ -72,19 +89,14 @@ class SettingsProfileController extends State<SettingsProfile> {
   ];
 
   List<SheetAction<AvatarAction>> actions() => [
-        if (PlatformInfos.isMobile)
-          SheetAction(
-            key: AvatarAction.camera,
-            label: L10n.of(context)!.openCamera,
-            isDefaultAction: true,
-            icon: Icons.camera_alt_outlined,
-          ),
         SheetAction(
           key: AvatarAction.file,
-          label: L10n.of(context)!.openGallery,
-          icon: Icons.photo_outlined,
+          label: L10n.of(context)!.changeProfilePhoto,
+          icon: Icons.add_a_photo_outlined,
         ),
-        if (profileNotifier.value.avatarUrl != null)
+        if (currentProfile?.avatarUrl != null ||
+            assetEntity != null ||
+            filePickerResult != null)
           SheetAction(
             key: AvatarAction.remove,
             label: L10n.of(context)!.removeYourAvatar,
@@ -116,65 +128,95 @@ class SettingsProfileController extends State<SettingsProfile> {
   }
 
   void _handleRemoveAvatarAction() async {
-    final success = await showFutureLoadingDialog(
-      context: context,
-      future: () => matrix.client.setAvatar(null),
-    );
-    if (success.error == null) {
-      _getCurrentProfile(client, isUpdated: true);
+    if ((assetEntity != null || filePickerResult != null) &&
+        currentProfile?.avatarUrl == null) {
+      _clearImageInLocal();
+      return;
     }
+    TwakeLoadingDialog.showLoadingDialog(context);
+    final newProfile = Profile(
+      userId: client.userID!,
+      displayName: displayNameEditingController.text,
+      avatarUrl: null,
+    );
+    settingsProfileUIState.value =
+        Right<Failure, Success>(GetProfileUIStateSuccess(newProfile));
+    _uploadProfile(isDeleteAvatar: true);
     return;
   }
 
-  Future<MatrixFile?> _handleGetAvatarInByte() async {
+  void _getImageOnWeb(
+    BuildContext context,
+  ) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
-      withData: true,
     );
-    final pickedFile = result?.files.firstOrNull;
-    if (pickedFile == null || pickedFile.bytes == null) return null;
-    return MatrixFile(
-      bytes: pickedFile.bytes!,
-      name: pickedFile.name,
+    Logs().d(
+      'SettingsProfile::_getImageOnWeb(): FilePickerResult - $result',
     );
-  }
-
-  Future<MatrixFile?> _handleGetAvatarInStream(AvatarAction action) async {
-    final result = await ImagePicker().pickImage(
-      source: action == AvatarAction.camera
-          ? ImageSource.camera
-          : ImageSource.gallery,
-      imageQuality: AppConfig.imageQuality,
-    );
-    if (result == null) return null;
-    return MatrixFile(
-      bytes: await result.readAsBytes(),
-      name: result.path,
-    );
-  }
-
-  void _handleGetAvatarAction(AvatarAction action) async {
-    MatrixFile file;
-    if (PlatformInfos.isMobile) {
-      final matrixFile = await _handleGetAvatarInStream(action);
-      if (matrixFile == null) return;
-      file = matrixFile;
+    if (result == null || result.files.single.bytes == null) {
+      return;
     } else {
-      final matrixFile = await _handleGetAvatarInByte();
-      if (matrixFile == null) return;
-      file = matrixFile;
+      if (!isEditedProfileNotifier.value) {
+        isEditedProfileNotifier.toggle();
+      }
+      settingsProfileUIState.value = Right<Failure, Success>(
+        GetAvatarInBytesUIStateSuccess(
+          filePickerResult: result,
+        ),
+      );
+      Logs().d(
+        'SettingsProfile::_getImageOnWeb(): AvatarWebNotifier - $result',
+      );
     }
-    final success = await showFutureLoadingDialog(
-      context: context,
-      future: () => matrix.client.setAvatar(file),
+  }
+
+  void _showImagesPickerAction() async {
+    if (PlatformInfos.isWeb) {
+      _getImageOnWeb(context);
+      return;
+    }
+    final currentPermissionPhotos = await getCurrentMediaPermission();
+    final currentPermissionCamera = await getCurrentCameraPermission();
+    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+      final imagePickerController = createImagePickerController();
+      showImagePickerBottomSheet(
+        context,
+        currentPermissionPhotos,
+        currentPermissionCamera,
+        imagePickerController,
+      );
+    }
+  }
+
+  ImagePickerGridController createImagePickerController() {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.single),
     );
-    if (success.error == null) {
-      _getCurrentProfile(client, isUpdated: true);
-    }
+
+    imagePickerController.addListener(() {
+      final selectedAsset = imagePickerController.selectedAssets.firstOrNull;
+      if (selectedAsset?.asset.type == AssetType.image) {
+        if (!imagePickerController.pickFromCamera()) {
+          Navigator.pop(context);
+        }
+        settingsProfileUIState.value = Right<Failure, Success>(
+          GetAvatarInStreamUIStateSuccess(
+            assetEntity: selectedAsset?.asset,
+          ),
+        );
+        if (!isEditedProfileNotifier.value) {
+          isEditedProfileNotifier.toggle();
+        }
+        imagePickerController.removeAllSelectedItem();
+      }
+    });
+
+    return imagePickerController;
   }
 
   void setAvatarAction() async {
-    final action = actions().length == 1
+    final action = actions().isEmpty
         ? actions().single.key
         : await showModalActionSheet<AvatarAction>(
             context: context,
@@ -184,11 +226,14 @@ class SettingsProfileController extends State<SettingsProfile> {
     if (action == null) return;
     if (action == AvatarAction.remove) {
       _handleRemoveAvatarAction();
+      return;
     }
-    _handleGetAvatarAction(action);
+    _showImagesPickerAction();
   }
 
-  void _handleSyncProfile() async {
+  void _sendAccountDataEvent({
+    required Profile profile,
+  }) async {
     Logs().d(
       'SettingsProfileController::_handleSyncProfile() - Syncing profile',
     );
@@ -196,7 +241,7 @@ class SettingsProfileController extends State<SettingsProfile> {
       client: client,
       basicEvent: BasicEvent(
         type: TwakeInappEventTypes.uploadAvatarEvent,
-        content: profileNotifier.value.toJson(),
+        content: profile.toJson(),
       ),
     );
     Logs().d(
@@ -204,22 +249,168 @@ class SettingsProfileController extends State<SettingsProfile> {
     );
   }
 
-  void setDisplayNameAction() async {
-    if (displayNameFocusNode.hasFocus) {
-      displayNameFocusNode.unfocus();
+  void _setAvatarInStream() {
+    if (assetEntity != null) {
+      uploadContentInteractor
+          .execute(
+            matrixClient: client,
+            entity: assetEntity!,
+          )
+          .listen(
+            (event) => _handleUploadAvatarOnData(context, event),
+            onDone: _handleUploadAvatarOnDone,
+            onError: _handleUploadAvatarOnError,
+          );
+    } else {
+      _uploadProfile(displayName: displayNameEditingController.text);
     }
-    final matrix = Matrix.of(context);
-    final success = await showFutureLoadingDialog(
-      context: context,
-      future: () => matrix.client.setDisplayName(
-        matrix.client.userID!,
-        displayNameEditingController.text,
-      ),
+  }
+
+  void _setAvatarInBytes() {
+    if (filePickerResult != null) {
+      uploadContentWebInteractor
+          .execute(
+            matrixClient: client,
+            filePickerResult: filePickerResult!,
+          )
+          .listen(
+            (event) => _handleUploadAvatarOnData(context, event),
+            onDone: _handleUploadAvatarOnDone,
+            onError: _handleUploadAvatarOnError,
+          );
+    } else {
+      _uploadProfile(displayName: displayNameEditingController.text);
+    }
+  }
+
+  void onUploadProfileAction() {
+    displayNameFocusNode.unfocus();
+    TwakeLoadingDialog.showLoadingDialog(context);
+    if (PlatformInfos.isMobile) {
+      _setAvatarInStream();
+    } else {
+      _setAvatarInBytes();
+    }
+  }
+
+  void _clearImageInLocal() {
+    if (assetEntity != null) {
+      assetEntity = null;
+    }
+    if (filePickerResult != null) {
+      filePickerResult = null;
+    }
+  }
+
+  void _handleUploadAvatarOnDone() {
+    Logs().d(
+      'SettingsProfile::_handleUploadAvatarOnDone() - done',
     );
-    if (success.error == null) {
-      isEditedProfileNotifier.toggle();
-      _getCurrentProfile(client, isUpdated: true);
-    }
+  }
+
+  void _handleUploadAvatarOnError(
+    dynamic error,
+    StackTrace? stackTrace,
+  ) {
+    TwakeLoadingDialog.hideLoadingDialog(context);
+    Logs().e(
+      'SettingsProfile::_handleUploadAvatarOnError() - error: $error | stackTrace: $stackTrace',
+    );
+  }
+
+  void _handleUploadAvatarOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
+    Logs().d('SettingsProfile::_handleUploadAvatarOnData()');
+    event.fold(
+      (failure) {
+        Logs().e(
+          'SettingsProfile::_handleUploadAvatarOnData() - failure: $failure',
+        );
+      },
+      (success) {
+        Logs().d(
+          'SettingsProfile::_handleUploadAvatarOnData() - success: $success',
+        );
+        if (success is UploadContentSuccess) {
+          _uploadProfile(
+            avatarUr: success.uri,
+            displayName: _hasEditedDisplayName
+                ? displayNameEditingController.text
+                : null,
+          );
+        }
+      },
+    );
+  }
+
+  void _uploadProfile({
+    Uri? avatarUr,
+    String? displayName,
+    bool isDeleteAvatar = false,
+  }) async {
+    uploadProfileInteractor
+        .execute(
+          client: client,
+          avatarUrl: avatarUr,
+          isDeleteAvatar: isDeleteAvatar,
+          displayName: displayName,
+        )
+        .listen(
+          (event) => _handleUploadProfileOnData(context, event),
+          onDone: _handleUploadProfileOnDone,
+          onError: _handleUploadProfileOnError,
+        );
+  }
+
+  void _handleUploadProfileOnDone() {
+    Logs().d(
+      'SettingsProfile::_handleUploadProfileOnDone() - done',
+    );
+  }
+
+  void _handleUploadProfileOnError(
+    dynamic error,
+    StackTrace? stackTrace,
+  ) {
+    TwakeLoadingDialog.hideLoadingDialog(context);
+    Logs().e(
+      'SettingsProfile::_handleUploadProfileOnError() - error: $error | stackTrace: $stackTrace',
+    );
+  }
+
+  void _handleUploadProfileOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
+    Logs().d('SettingsProfile::_handleUploadProfileOnData()');
+    event.fold(
+      (failure) {
+        Logs().e(
+          'SettingsProfile::_handleUploadProfileOnData() - failure: $failure',
+        );
+      },
+      (success) {
+        Logs().d(
+          'SettingsProfile::_handleUploadProfileOnData() - success: $success',
+        );
+        if (success is UpdateProfileSuccess) {
+          _clearImageInLocal();
+          final newProfile = Profile(
+            userId: client.userID!,
+            displayName: success.displayName ?? displayName,
+            avatarUrl: success.avatar ?? currentProfile?.avatarUrl,
+          );
+          _sendAccountDataEvent(profile: newProfile);
+          if (!success.isDeleteAvatar) {
+            isEditedProfileNotifier.toggle();
+          }
+          _getCurrentProfile(client, isUpdated: true);
+          TwakeLoadingDialog.hideLoadingDialog(context);
+        }
+      },
+    );
   }
 
   void _getCurrentProfile(
@@ -234,10 +425,16 @@ class SettingsProfileController extends State<SettingsProfile> {
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );
-    profileNotifier.value = profile;
+    settingsProfileUIState.value =
+        Right<Failure, Success>(GetProfileUIStateSuccess(profile));
+    Logs().d(
+      'SettingsProfileController::_getCurrentProfile() - currentProfile: ${settingsProfileUIState.value}',
+    );
+    if (profile.avatarUrl == null) {
+      _clearImageInLocal();
+    }
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = client.mxid(context);
-    _handleSyncProfile();
   }
 
   void handleTextEditOnChange(SettingsProfileEnum settingsProfileEnum) {
@@ -251,21 +448,15 @@ class SettingsProfileController extends State<SettingsProfile> {
   }
 
   void _listeningDisplayNameHasChange() {
+    if (displayNameEditingController.text.isEmpty) {
+      isEditedProfileNotifier.value = false;
+      return;
+    }
     isEditedProfileNotifier.value =
         displayNameEditingController.text != displayName;
     Logs().d(
       'SettingsProfileController::_listeningDisplayNameHasChange() - ${isEditedProfileNotifier.value}',
     );
-  }
-
-  void _initProfile() {
-    if (widget.profile == null) {
-      _getCurrentProfile(client);
-      return;
-    }
-    profileNotifier.value = widget.profile!;
-    displayNameEditingController.text = displayName;
-    matrixIdEditingController.text = client.mxid(context);
   }
 
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
@@ -290,9 +481,39 @@ class SettingsProfileController extends State<SettingsProfile> {
     }
   }
 
+  void _handleViewState() {
+    settingsProfileUIState.addListener(() {
+      Logs().d(
+        "settingsProfileUIState()::_handleViewState(): ${settingsProfileUIState.value}",
+      );
+      settingsProfileUIState.value.fold(
+        (failure) => null,
+        (success) {
+          switch (success.runtimeType) {
+            case GetAvatarInStreamUIStateSuccess:
+              final uiState = success as GetAvatarInStreamUIStateSuccess;
+              assetEntity = uiState.assetEntity;
+              break;
+            case GetAvatarInBytesUIStateSuccess:
+              final uiState = success as GetAvatarInBytesUIStateSuccess;
+              filePickerResult = uiState.filePickerResult;
+              break;
+            case GetProfileUIStateSuccess:
+              final uiState = success as GetProfileUIStateSuccess;
+              currentProfile = uiState.profile;
+              break;
+            default:
+              break;
+          }
+        },
+      );
+    });
+  }
+
   @override
   void initState() {
-    _initProfile();
+    _handleViewState();
+    _getCurrentProfile(client);
     super.initState();
   }
 
@@ -301,6 +522,8 @@ class SettingsProfileController extends State<SettingsProfile> {
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();
     displayNameFocusNode.dispose();
+    settingsProfileUIState.dispose();
+    isEditedProfileNotifier.dispose();
     super.dispose();
   }
 
