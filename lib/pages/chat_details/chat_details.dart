@@ -492,7 +492,11 @@ class ChatDetailsController extends State<ChatDetails>
   Future<String> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
-      playVideoAction: (path) => playVideoAction(context, path),
+      playVideoAction: (path) => playVideoAction(
+        context,
+        path,
+        eventId: event.eventId,
+      ),
     );
   }
 

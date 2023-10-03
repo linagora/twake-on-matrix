@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/custom_disissible.dart';
+import 'package:fluffychat/utils/custom_dismissable.dart';
 import 'package:flutter/material.dart';
 
 /// A callback for the [InteractiveViewerBoundary] that is called when the scale
@@ -10,8 +10,8 @@ typedef ScaleChanged = void Function(double scale);
 ///
 /// The callbacks are called when an interaction ends by listening to the
 /// [InteractiveViewer.onInteractionEnd] callback.
-class InteractiveviewerGallery extends StatefulWidget {
-  const InteractiveviewerGallery({
+class InteractiveViewerGallery extends StatefulWidget {
+  const InteractiveViewerGallery({
     super.key,
     required this.itemBuilder,
     this.maxScale = 2.5,
@@ -32,11 +32,11 @@ class InteractiveviewerGallery extends StatefulWidget {
   final Function(DragEndDetails dragEndDetails)? handleDragEnd;
 
   @override
-  State<InteractiveviewerGallery> createState() =>
-      _InteractiveviewerGalleryState();
+  State<InteractiveViewerGallery> createState() =>
+      _InteractiveViewerGalleryState();
 }
 
-class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
+class _InteractiveViewerGalleryState extends State<InteractiveViewerGallery>
     with SingleTickerProviderStateMixin {
   TransformationController? _transformationController;
 

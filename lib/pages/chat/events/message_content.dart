@@ -166,7 +166,11 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
               handleDownloadVideoEvent: (event) {
                 return controller.handleDownloadVideoEvent(
                   event: event,
-                  playVideoAction: (path) => playVideoAction(context, path),
+                  playVideoAction: (path) => playVideoAction(
+                    context,
+                    path,
+                    eventId: event.eventId,
+                  ),
                 );
               },
             );
