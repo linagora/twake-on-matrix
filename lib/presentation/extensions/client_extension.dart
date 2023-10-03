@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 extension ClientExtension on Client {
@@ -20,4 +22,6 @@ extension ClientExtension on Client {
         .sorted(chatListItemComparator)
         .toList();
   }
+
+  String mxid(BuildContext context) => userID ?? L10n.of(context)!.user;
 }

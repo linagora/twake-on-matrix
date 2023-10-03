@@ -75,6 +75,7 @@ abstract class AppConfig {
   static const String defaultVideoBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
   static const int thumbnailQuality = 70;
   static const int blurHashSize = 32;
+  static const int imageQuality = 50;
 
   static String? issueId;
 
