@@ -5,9 +5,9 @@ import 'package:fluffychat/app_state/success_converter.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/search/get_contacts_controller.dart';
 import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
+import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 mixin class SearchContactsMixinController {
   static const _debouncerIntervalInMilliseconds = 300;
@@ -25,7 +25,7 @@ mixin class SearchContactsMixinController {
   ValueNotifier<Either<Failure, Success>>? get contactsNotifier =>
       _getContactController?.contactsNotifier;
 
-  RefreshController? get refreshController =>
+  TwakeRefreshController? get refreshController =>
       _getContactController?.refreshController;
 
   void initSearchContacts({
