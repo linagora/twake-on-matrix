@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/widgets/hero_dialog_route.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
@@ -194,15 +196,14 @@ class _MxcImageState extends State<MxcImage>
   void _onTap(BuildContext context) async {
     if (widget.onTapPreview != null) {
       widget.onTapPreview!();
-      await showGeneralDialog(
-        context: context,
-        useRootNavigator: false,
-        barrierDismissible: true,
-        barrierLabel:
-            MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        transitionDuration: const Duration(milliseconds: 200),
-        pageBuilder: (_, animationOne, animationTwo) =>
-            ImageViewer(widget.event!),
+      Navigator.of(context).push(
+        HeroDialogRoute(
+          builder: (context) {
+            return InteractiveviewerGallery(
+              itemBuilder: ImageViewer(widget.event!),
+            );
+          },
+        ),
       );
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
