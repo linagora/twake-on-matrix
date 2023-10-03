@@ -31,37 +31,41 @@ class ContactsSelectionList extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: contactsNotifier,
       builder: (context, value, child) => value.fold(
-        (failure) => Padding(
-          padding: ContactsSelectionListStyle.notFoundPadding,
-          child: NoContactsFound(
-            keyword: failure is GetContactsFailure ? failure.keyword : '',
+        (failure) => SliverToBoxAdapter(
+          child: Padding(
+            padding: ContactsSelectionListStyle.notFoundPadding,
+            child: NoContactsFound(
+              keyword: failure is GetContactsFailure ? failure.keyword : '',
+            ),
           ),
         ),
         (success) {
           if (success is PresentationExternalContactSuccess) {
-            return _ContactItem(
-              selectedContactsMapNotifier: selectedContactsMapNotifier,
-              onSelectedContact: onSelectedContact,
-              contact: success.contact,
-              paddingTop: ContactsSelectionListStyle.listPaddingTop,
+            return SliverToBoxAdapter(
+              child: _ContactItem(
+                selectedContactsMapNotifier: selectedContactsMapNotifier,
+                onSelectedContact: onSelectedContact,
+                contact: success.contact,
+                paddingTop: ContactsSelectionListStyle.listPaddingTop,
+              ),
             );
           }
           if (success is! PresentationContactsSuccess) {
-            return const LoadingContactWidget();
+            return const SliverToBoxAdapter(child: LoadingContactWidget());
           }
 
           if (success.keyword.isNotEmpty && success.data.isEmpty) {
-            return Padding(
-              padding: ContactsSelectionListStyle.notFoundPadding,
-              child: NoContactsFound(
-                keyword: success.keyword,
+            return SliverToBoxAdapter(
+              child: Padding(
+                padding: ContactsSelectionListStyle.notFoundPadding,
+                child: NoContactsFound(
+                  keyword: success.keyword,
+                ),
               ),
             );
           }
 
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+          return SliverList.builder(
             itemCount: success.data.length,
             itemBuilder: (context, index) {
               final contact = success.data[index];
