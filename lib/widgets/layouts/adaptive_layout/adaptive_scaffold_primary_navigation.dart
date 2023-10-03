@@ -76,7 +76,10 @@ class _AdaptiveScaffoldPrimaryNavigationState
   void _handleOnAccountDataSubscription() {
     onAccountDataSubscription = client.onAccountData.stream.listen((event) {
       if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
-        profileNotifier.value = Profile.fromJson(event.content);
+        final newProfile = Profile.fromJson(event.content);
+        if (newProfile.avatarUrl != profileNotifier.value.avatarUrl) {
+          profileNotifier.value = Profile.fromJson(event.content);
+        }
       }
     });
   }

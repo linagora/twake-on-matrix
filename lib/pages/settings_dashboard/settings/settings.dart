@@ -33,9 +33,8 @@ class Settings extends StatefulWidget {
 }
 
 class SettingsController extends State<Settings> with ConnectPageMixin {
-  final ValueNotifier<Profile> profileNotifier = ValueNotifier(
-    Profile(userId: ''),
-  );
+  final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
+  final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
   StreamSubscription? onAccountDataSubscription;
 
@@ -53,7 +52,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
 
   String get displayName =>
-      profileNotifier.value.displayName ??
+      displayNameNotifier.value ??
       client.mxid(context).localpart ??
       client.mxid(context);
 
@@ -94,7 +93,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     Logs().d(
       'Settings::_getCurrentProfile() - currentProfile: $profile',
     );
-    profileNotifier.value = profile;
+    avatarUriNotifier.value = profile.avatarUrl;
+    displayNameNotifier.value = profile.displayName;
   }
 
   void checkBootstrap() async {
@@ -135,12 +135,9 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     checkBootstrap();
   }
 
-  void goToSettingsProfile(Profile? profile) async {
+  void goToSettingsProfile() async {
     optionsSelectNotifier.value = SettingEnum.profile;
-    context.push(
-      '/rooms/profile',
-      extra: profile,
-    );
+    context.go('/rooms/profile');
   }
 
   void onClickToSettingsItem(SettingEnum settingEnum) {
@@ -179,7 +176,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   void _handleOnAccountDataSubscription() {
     onAccountDataSubscription = client.onAccountData.stream.listen((event) {
       if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
-        profileNotifier.value = Profile.fromJson(event.content);
+        final newProfile = Profile.fromJson(event.content);
+        if (newProfile.avatarUrl != avatarUriNotifier.value) {
+          avatarUriNotifier.value = newProfile.avatarUrl;
+        }
+        if (newProfile.displayName != displayNameNotifier.value) {
+          displayNameNotifier.value = newProfile.displayName;
+        }
       }
     });
   }
@@ -197,6 +200,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   @override
   void dispose() {
     onAccountDataSubscription?.cancel();
+    avatarUriNotifier.dispose();
+    displayNameNotifier.dispose();
     super.dispose();
   }
 

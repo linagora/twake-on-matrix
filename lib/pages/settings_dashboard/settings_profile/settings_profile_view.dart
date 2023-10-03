@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_web.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -32,7 +33,7 @@ class SettingsProfileView extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            size: 24,
+            size: SettingsProfileViewStyle.sizeIcon,
           ),
           onPressed: () => context.pop(),
         ),
@@ -49,14 +50,11 @@ class SettingsProfileView extends StatelessWidget {
               if (!edited) return const SizedBox();
               return InkWell(
                 borderRadius: BorderRadius.circular(
-                  20,
+                  SettingsProfileViewStyle.borderRadius,
                 ),
-                onTap: () => controller.setDisplayNameAction(),
+                onTap: () => controller.onUploadProfileAction(),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    vertical: 14,
-                    horizontal: 12,
-                  ),
+                  padding: SettingsProfileViewStyle.paddingTextButton,
                   child: Text(
                     L10n.of(context)!.done,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -74,7 +72,7 @@ class SettingsProfileView extends StatelessWidget {
           ? Theme.of(context).colorScheme.surface
           : null,
       body: SingleChildScrollView(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+        padding: SettingsProfileViewStyle.paddingBody,
         child: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
             const WidthPlatformBreakpoint(
@@ -83,8 +81,8 @@ class SettingsProfileView extends StatelessWidget {
               key: settingsProfileViewMobileKey,
               builder: (_) {
                 return SettingsProfileViewMobile(
-                  profileNotifier: controller.profileNotifier,
-                  displayName: controller.displayName,
+                  client: controller.client,
+                  settingsProfileUIState: controller.settingsProfileUIState,
                   onAvatarTap: () => controller.setAvatarAction(),
                   settingsProfileOptions: ListView.separated(
                     shrinkWrap: true,
@@ -95,6 +93,8 @@ class SettingsProfileView extends StatelessWidget {
                             controller.getListProfileMobile[index],
                         title: controller.getListProfileMobile[index]
                             .getTitle(context),
+                        settingsProfileUIState:
+                            controller.settingsProfileUIState,
                         settingsProfilePresentation:
                             SettingsProfilePresentation(
                           settingsProfileType: controller
@@ -134,13 +134,15 @@ class SettingsProfileView extends StatelessWidget {
               key: settingsProfileViewWebKey,
               builder: (_) {
                 return SettingsProfileViewWeb(
-                  profileNotifier: controller.profileNotifier,
-                  displayName: controller.displayName,
+                  settingsProfileUIState: controller.settingsProfileUIState,
+                  client: controller.client,
                   basicInfoWidget: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return SettingsProfileItemBuilder(
+                        settingsProfileUIState:
+                            controller.settingsProfileUIState,
                         settingsProfileEnum:
                             controller.getListProfileBasicInfo[index],
                         title: controller.getListProfileBasicInfo[index]
@@ -175,6 +177,8 @@ class SettingsProfileView extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return SettingsProfileItemBuilder(
+                        settingsProfileUIState:
+                            controller.settingsProfileUIState,
                         settingsProfileEnum:
                             controller.getListProfileWorkIdentitiesInfo[index],
                         title: controller

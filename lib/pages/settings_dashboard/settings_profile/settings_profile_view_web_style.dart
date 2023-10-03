@@ -11,6 +11,7 @@ class SettingsProfileViewWebStyle {
   static const double iconEditSize = 24;
   static const double dividerHeight = 2;
   static const double radiusCircular = 16;
+  static const double radiusImageMemory = 48;
 
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.all(32);

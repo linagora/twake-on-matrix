@@ -248,9 +248,7 @@ abstract class AppRoutes {
               path: 'profile',
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
-                SettingsProfile(
-                  profile: state.extra as Profile?,
-                ),
+                const SettingsProfile(),
               ),
             ),
             GoRoute(

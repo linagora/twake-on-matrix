@@ -1689,7 +1689,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "search": "Search for people and channels",
+    "searchForPeopleAndChannels": "Search for people and channels",
     "@search": {
         "type": "text",
         "placeholders": {}
@@ -2647,7 +2647,6 @@
     "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
     "tapToAllowAccessToYourCamera": "You can enable camera access in the Settings app to make video calls in",
     "twake": "Twake",
-    "dismiss": "Dismiss",
     "permissionAccess": "Permission access",
     "allow": "Allow",
     "explainStoragePermission": "Twake need access to your storage to preview file",
@@ -2669,7 +2668,6 @@
         }
     },
     "keyboard": "Keyboard",
-    "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
     "changeChatAvatar": "Change the Chat avatar",
     "roomAvatarMaxFileSize": "The avatar size is too large",
     "@roomAvatarMaxFileSize": {},
@@ -2755,5 +2753,6 @@
     "editProfileDescriptions": "Update your profile with a new name, picture and a short introduction.",
     "workIdentitiesInfo": "WORK IDENTITIES INFO",
     "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
-    "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard."
+    "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
+    "changeProfilePhoto": "Change profile photo"
 }
