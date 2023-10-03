@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 
@@ -29,8 +30,6 @@ class ReplyContent extends StatelessWidget {
     final timeline = this.timeline;
     final displayEvent =
         timeline != null ? replyEvent.getDisplayEvent(timeline) : replyEvent;
-    const fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
-    const fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
     if (AppConfig.renderHtml &&
         [EventTypes.Message, EventTypes.Encrypted]
             .contains(displayEvent.type) &&
@@ -45,14 +44,10 @@ class ReplyContent extends StatelessWidget {
       }
       replyBody = HtmlMessage(
         html: html!,
-        defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-              fontSize: fontSizeDisplayContent,
-              overflow: TextOverflow.ellipsis,
-            ),
+        defaultTextStyle: ReplyContentStyle.replyBodyTextStyle(context),
         maxLines: 1,
         room: displayEvent.room,
-        emoteSize: fontSizeDisplayContent * 1.5,
+        emoteSize: ReplyContentStyle.fontSizeDisplayContent * 1.5,
         event: timeline!.events.first,
         chatController: chatController,
       );
@@ -65,65 +60,53 @@ class ReplyContent extends StatelessWidget {
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onBackground,
-          fontSize: fontSizeDisplayContent,
-        ),
+        style: ReplyContentStyle.replyBodyTextStyle(context),
       );
     }
     final user = displayEvent.getUser();
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          width: 3,
-          height: fontSizeDisplayContent * 2 + 6,
-          color: ownMessage
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (user != null)
-                Text(
-                  '${user.calcDisplayname()}:',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: ownMessage
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.primary,
-                    fontSize: fontSizeDisplayName,
-                  ),
-                ),
-              if (displayEvent.getUser() == null)
-                FutureBuilder<User?>(
-                  future: displayEvent.fetchSenderUser(),
-                  builder: (context, snapshot) {
-                    return Text(
-                      '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: ownMessage
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : Theme.of(context).colorScheme.primary,
-                        fontSize: fontSizeDisplayName,
-                      ),
-                    );
-                  },
-                ),
-              replyBody,
-            ],
+    return Container(
+      padding: ReplyContentStyle.replyParentContainerPadding,
+      decoration:
+          ReplyContentStyle.replyParentContainerDecoration(context, ownMessage),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            width: ReplyContentStyle.prefixBarWidth,
+            height: ReplyContentStyle.fontSizeDisplayContent * 2,
+            decoration: ReplyContentStyle.prefixBarDecoration(context),
           ),
-        ),
-      ],
+          const SizedBox(width: ReplyContentStyle.prefixAndDisplayNameSpacing),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                if (user != null)
+                  Text(
+                    user.calcDisplayname(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ReplyContentStyle.displayNameTextStyle(context),
+                  ),
+                if (displayEvent.getUser() == null)
+                  FutureBuilder<User?>(
+                    future: displayEvent.fetchSenderUser(),
+                    builder: (context, snapshot) {
+                      return Text(
+                        '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: ReplyContentStyle.displayNameTextStyle(context),
+                      );
+                    },
+                  ),
+                replyBody,
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
