@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
+import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -46,12 +47,15 @@ class ImageViewerController extends State<ImageViewer> {
   /// Forward this image to another room.
   void forwardAction() async {
     Matrix.of(context).shareContent = widget.event.content;
-    await showDialog(
+    final result = await showDialog(
       context: context,
       useSafeArea: false,
       useRootNavigator: false,
       builder: (c) => const Forward(),
     );
+    if (result is PopResultFromForward) {
+      Navigator.of(context).pop<PopResultFromForward>();
+    }
   }
 
   void toggleAppbarPreview() {
