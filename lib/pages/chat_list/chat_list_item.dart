@@ -1,6 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_mixin.dart';
+import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
@@ -84,9 +85,13 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     }
   }
 
+  bool get _isGroupChat => !room.isDirectChat;
+
+  bool get _isMaskAsUnread => room.markedUnread;
+
   @override
   Widget build(BuildContext context) {
-    final displayname = room.getLocalizedDisplayname(
+    final displayName = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
     return Padding(
@@ -97,7 +102,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         color: isSelectedItem
             ? Theme.of(context).colorScheme.primaryContainer
             : activeChat
-                ? Theme.of(context).colorScheme.surface
+                ? Theme.of(context).colorScheme.secondaryContainer
                 : Colors.transparent,
         child: InkWell(
           onTap: () => clickAction(context),
@@ -110,10 +115,33 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                 Padding(
                   padding: ChatListItemStyle.paddingAvatar,
-                  child: Avatar(
-                    mxContent: room.avatar,
-                    name: displayname,
-                    onTap: onTapAvatar,
+                  child: Stack(
+                    children: [
+                      Avatar(
+                        mxContent: room.avatar,
+                        name: displayName,
+                        onTap: onTapAvatar,
+                      ),
+                      if (_isGroupChat)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: ChatListItemStyle.paddingIconGroup,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(
+                              Icons.group,
+                              size: ChatListItemStyle.readIconSize,
+                              color: _isMaskAsUnread
+                                  ? ChatListItemStyle.unreadMessageOfGroupColor
+                                  : LinagoraRefColors.material().tertiary[30],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Expanded(

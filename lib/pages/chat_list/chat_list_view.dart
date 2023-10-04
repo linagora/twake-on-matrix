@@ -1,5 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_body_stream.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
@@ -62,7 +62,7 @@ class ChatListView extends StatelessWidget {
           }
         },
       ),
-      body: ChatListBodyStream(controller: controller),
+      body: ChatListBodyView(controller),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: ValueListenableBuilder(
         valueListenable: controller.selectModeNotifier,
