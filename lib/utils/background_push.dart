@@ -281,6 +281,11 @@ class BackgroundPush {
         if (PlatformInfos.isIOS) {
           // Request iOS permission before getting the token
           await fcmSharedIsolate?.requestPermission();
+        } else if (Platform.isAndroid) {
+          await _flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
+              ?.requestPermission();
         }
         _pushToken = await (Platform.isIOS
             ? apnChannel.invokeMethod("getToken")
