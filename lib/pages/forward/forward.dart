@@ -10,7 +10,7 @@ import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/utils/extension/navigator_state_extension.dart';
+import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -107,7 +107,9 @@ class ForwardController extends State<Forward> {
       switch (success.runtimeType) {
         case ForwardMessageSuccess:
           final dataOnSuccess = success as ForwardMessageSuccess;
-          Navigator.of(context).popAllDialogs();
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(const PopResultFromForward());
+          }
           context.go('/rooms/${dataOnSuccess.room.id}');
           break;
         case ForwardMessageIsShareFileState:
