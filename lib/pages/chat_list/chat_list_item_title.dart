@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_list/chat_list_item_mixin.dart';
+import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -37,7 +37,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                             TextStyle(
                               overflow: TextOverflow.ellipsis,
                               letterSpacing:
-                                  ChatListItemStyle.letterSpaceDisplayname,
+                                  ChatListItemStyle.letterSpaceDisplayName,
                               color: unread
                                   ? Theme.of(context)
                                       .colorScheme
