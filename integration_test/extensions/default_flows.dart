@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:fluffychat/pages/chat_list/chat_list_body.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,7 +82,7 @@ extension DefaultFlowExtensions on WidgetTester {
     }
 
     await tester.waitFor(
-      find.byType(ChatListViewBody),
+      find.byType(ChatListBodyView),
       skipPumpAndSettle: true,
     );
   }
@@ -105,7 +105,7 @@ extension DefaultFlowExtensions on WidgetTester {
   Future<void> ensureLoggedOut() async {
     final tester = this;
     await tester.pumpAndSettle();
-    if (find.byType(ChatListViewBody).evaluate().isNotEmpty) {
+    if (find.byType(ChatListBodyView).evaluate().isNotEmpty) {
       await tester.tap(find.byTooltip('Show menu'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Settings'));
@@ -133,7 +133,7 @@ extension DefaultFlowExtensions on WidgetTester {
     await tester.pumpAndSettle();
 
     final homeserverPickerFinder = find.byType(HomeserverPicker);
-    final chatListFinder = find.byType(ChatListViewBody);
+    final chatListFinder = find.byType(ChatListBodyView);
 
     final end = DateTime.now().add(timeout);
 
