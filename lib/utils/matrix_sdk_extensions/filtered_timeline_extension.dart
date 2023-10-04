@@ -87,7 +87,6 @@ extension IsStateExtension on Event {
   bool isSomeoneChangeAvatar() {
     return stateKey != null &&
         prevContent?["membership"] == 'join' &&
-        prevContent?['avatar_url'] != null &&
         prevContent?['avatar_url'] != content['avatar_url'];
   }
 
