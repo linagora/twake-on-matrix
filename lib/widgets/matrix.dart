@@ -594,6 +594,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
     client.requestHistoryOnLimitedTimeline = !foreground;
+    backgroundPush?.clearAllNotifications();
   }
 
   void initSettings() {

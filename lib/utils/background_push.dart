@@ -198,6 +198,8 @@ class BackgroundPush {
                         "aps": {
                           "mutable-content": 1,
                           "content-available": 1,
+                          "badge": 1,
+                          "sound": "default",
                           "alert": {"loc-key": "SINGLE_UNREAD", "loc-args": []}
                         }
                       }
@@ -555,6 +557,12 @@ class BackgroundPush {
     } catch (e) {
       Logs().e('BackgroundPush::_parseMessagePayload() exception: $e');
       return PushNotificationExtensions().error();
+    }
+  }
+
+  void clearAllNotifications() {
+    if (Platform.isIOS) {
+      apnChannel.invokeMethod('clearAll');
     }
   }
 }
