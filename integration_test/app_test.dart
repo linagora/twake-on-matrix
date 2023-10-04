@@ -1,6 +1,6 @@
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_body.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 
@@ -66,7 +66,7 @@ void main() {
             500,
             scrollable: find
                 .descendant(
-                  of: find.byType(ChatListViewBody),
+                  of: find.byType(ChatListBodyView),
                   matching: find.byType(Scrollable),
                 )
                 .first,
@@ -82,7 +82,7 @@ void main() {
             500,
             scrollable: find
                 .descendant(
-                  of: find.byType(ChatListViewBody),
+                  of: find.byType(ChatListBodyView),
                   matching: find.byType(Scrollable),
                 )
                 .first,

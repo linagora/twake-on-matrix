@@ -17,8 +17,6 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/famedlysdk_store.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
@@ -68,39 +66,11 @@ class ChatListController extends State<ChatList>
         ReceiveSharingIntentMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
-  bool get displayNavigationBar => false;
-
   final responsive = getIt.get<ResponsiveUtils>();
 
-  String? activeSpaceId;
+  final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
 
-  Client get client => Matrix.of(context).client;
-
-  void resetActiveSpaceId() {
-    setState(() {
-      activeSpaceId = null;
-    });
-  }
-
-  void setActiveSpace(String? spaceId) {
-    setState(() {
-      activeSpaceId = spaceId;
-    });
-  }
-
-  ActiveFilter activeFilter = AppConfig.separateChatTypes
-      ? ActiveFilter.messages
-      : ActiveFilter.allChats;
-
-  List<Room> get filteredRoomsForAll =>
-      Matrix.of(context).client.filteredRoomsForAll(activeFilter);
-
-  bool isSearchMode = false;
-  Future<QueryPublicRoomsResponse>? publicRoomsResponse;
-  String? searchServer;
-  Timer? _coolDown;
-  SearchUserDirectoryResponse? userSearchResult;
-  QueryPublicRoomsResponse? roomSearchResult;
+  final ValueNotifier<bool> expandRoomsForPinNotifier = ValueNotifier(true);
 
   final ValueNotifier<SelectMode> selectModeNotifier =
       ValueNotifier(SelectMode.normal);
@@ -108,77 +78,88 @@ class ChatListController extends State<ChatList>
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier = ValueNotifier([]);
 
-  bool isSearching = false;
-  static const String _serverStoreNamespace = 'im.fluffychat.search.server';
-
   final TextEditingController searchChatController = TextEditingController();
 
-  void _search() async {
-    final client = Matrix.of(context).client;
-    if (!isSearching) {
-      setState(() {
-        isSearching = true;
-      });
-    }
-    SearchUserDirectoryResponse? userSearchResult;
-    QueryPublicRoomsResponse? roomSearchResult;
-    try {
-      roomSearchResult = await client.queryPublicRooms(
-        server: searchServer,
-        filter: PublicRoomQueryFilter(
-          genericSearchTerm: searchChatController.text,
-        ),
-        limit: 20,
-      );
-      userSearchResult = await client.searchUserDirectory(
-        searchChatController.text,
-        limit: 20,
-      );
-    } catch (e, s) {
-      Logs().w('Searching has crashed', e, s);
-      TwakeSnackBar.show(context, e.toLocalizedString(context));
-    }
-    if (!isSearchMode) return;
-    setState(() {
-      isSearching = false;
-      this.roomSearchResult = roomSearchResult;
-      this.userSearchResult = userSearchResult;
-    });
-  }
-
-  void onSearchEnter(String text) {
-    if (text.isEmpty) {
-      cancelSearch(unfocus: false);
-      return;
-    }
-
-    setState(() {
-      isSearchMode = true;
-    });
-    _coolDown?.cancel();
-    _coolDown = Timer(const Duration(milliseconds: 500), _search);
-  }
-
-  void cancelSearch({bool unfocus = true}) {
-    setState(() {
-      searchChatController.clear();
-      isSearchMode = false;
-      roomSearchResult = userSearchResult = null;
-      isSearching = false;
-    });
-    if (unfocus) FocusManager.instance.primaryFocus?.unfocus();
-  }
-
-  bool isTorBrowser = false;
-
-  BoxConstraints? snappingSheetContainerSize;
-
   final ScrollController scrollController = ScrollController();
-  bool scrolledToTop = true;
 
   final StreamController<Client> _clientStream = StreamController.broadcast();
 
+  String? activeSpaceId;
+
+  Future<QueryPublicRoomsResponse>? publicRoomsResponse;
+
+  SearchUserDirectoryResponse? userSearchResult;
+
+  QueryPublicRoomsResponse? roomSearchResult;
+
+  bool isTorBrowser = false;
+
+  bool waitForFirstSync = false;
+
+  bool scrolledToTop = true;
+
+  Client get client => Matrix.of(context).client;
+
+  ActiveFilter activeFilter = AppConfig.separateChatTypes
+      ? ActiveFilter.messages
+      : ActiveFilter.allChats;
+
+  List<Room> get _filteredRooms =>
+      Matrix.of(context).client.filteredRoomsForAll(activeFilter);
+
+  List<Room> get filteredRoomsForAll =>
+      _filteredRooms.where((room) => !room.isFavourite).toList();
+
+  List<Room> get filteredRoomsForPin =>
+      _filteredRooms.where((room) => room.isFavourite).toList();
+
+  bool get displayNavigationBar => false;
+
   Stream<Client> get clientStream => _clientStream.stream;
+
+  // Needs to match GroupsSpacesEntry for 'separate group' checking.
+  List<Room> get spaces =>
+      Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
+
+  String? get activeRoomId => widget.activeRoomId;
+
+  bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
+
+  bool get anySelectedRoomNotMarkedUnread =>
+      conversationSelectionNotifier.value.any(
+        (conversation) => !Matrix.of(context)
+            .client
+            .getRoomById(conversation.roomId)!
+            .markedUnread,
+      );
+
+  bool get anySelectedRoomNotFavorite =>
+      conversationSelectionNotifier.value.any(
+        (conversation) => !Matrix.of(context)
+            .client
+            .getRoomById(conversation.roomId)!
+            .isFavourite,
+      );
+
+  bool get anySelectedRoomNotMuted => conversationSelectionNotifier.value.any(
+        (conversation) =>
+            Matrix.of(context)
+                .client
+                .getRoomById(conversation.roomId)!
+                .pushRuleState ==
+            PushRuleState.notify,
+      );
+
+  bool get displayBundles =>
+      Matrix.of(context).hasComplexBundles &&
+      Matrix.of(context).accountBundles.keys.length > 1;
+
+  bool get filteredRoomsForAllIsEmpty => filteredRoomsForAll.isEmpty;
+
+  bool get filteredRoomsForPinIsEmpty => filteredRoomsForPin.isEmpty;
+
+  bool get chatListBodyIsEmpty =>
+      filteredRoomsForAllIsEmpty && filteredRoomsForPinIsEmpty;
 
   void addAccountAction() => context.go('/settings/account');
 
@@ -198,43 +179,15 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces =>
-      Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
-
-  String? get activeRoomId => widget.activeRoomId;
-
-  bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
-
-  @override
-  void initState() {
-    if (kIsWeb) {
-      BrowserContextMenu.disableContextMenu();
+  String? get secureActiveBundle {
+    if (Matrix.of(context).activeBundle == null ||
+        !Matrix.of(context)
+            .accountBundles
+            .keys
+            .contains(Matrix.of(context).activeBundle)) {
+      return Matrix.of(context).accountBundles.keys.first;
     }
-    initReceiveSharingIntent();
-
-    scrollController.addListener(_onScroll);
-    _waitForFirstSync();
-    _hackyWebRTCFixForWeb();
-    CallKeepManager().initialize();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
-        searchServer = await Store().getItem(_serverStoreNamespace);
-        Matrix.of(context).backgroundPush?.setupPush();
-      }
-    });
-
-    _checkTorBrowser();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    intentDataStreamSubscription?.cancel();
-    intentFileStreamSubscription?.cancel();
-    intentUriStreamSubscription?.cancel();
-    scrollController.removeListener(_onScroll);
-    super.dispose();
+    return Matrix.of(context).activeBundle;
   }
 
   void toggleSelection(String roomId) {
@@ -277,6 +230,18 @@ class ChatListController extends State<ChatList>
     } else {
       toggleSelectMode();
     }
+  }
+
+  void resetActiveSpaceId() {
+    setState(() {
+      activeSpaceId = null;
+    });
+  }
+
+  void setActiveSpace(String? spaceId) {
+    setState(() {
+      activeSpaceId = spaceId;
+    });
   }
 
   Future<void> toggleUnread() async {
@@ -424,33 +389,6 @@ class ChatListController extends State<ChatList>
     conversationSelectionNotifier.value.clear();
   }
 
-  bool get anySelectedRoomNotMarkedUnread =>
-      conversationSelectionNotifier.value.any(
-        (conversation) => !Matrix.of(context)
-            .client
-            .getRoomById(conversation.roomId)!
-            .markedUnread,
-      );
-
-  bool get anySelectedRoomNotFavorite =>
-      conversationSelectionNotifier.value.any(
-        (conversation) => !Matrix.of(context)
-            .client
-            .getRoomById(conversation.roomId)!
-            .isFavourite,
-      );
-
-  bool get anySelectedRoomNotMuted => conversationSelectionNotifier.value.any(
-        (conversation) =>
-            Matrix.of(context)
-                .client
-                .getRoomById(conversation.roomId)!
-                .pushRuleState ==
-            PushRuleState.notify,
-      );
-
-  bool waitForFirstSync = false;
-
   Future<void> _waitForFirstSync() async {
     await client.roomsLoading;
     await client.accountDataLoading;
@@ -563,21 +501,6 @@ class ChatListController extends State<ChatList>
           future: () => client.removeFromAccountBundle(activeBundle!),
         );
     }
-  }
-
-  bool get displayBundles =>
-      Matrix.of(context).hasComplexBundles &&
-      Matrix.of(context).accountBundles.keys.length > 1;
-
-  String? get secureActiveBundle {
-    if (Matrix.of(context).activeBundle == null ||
-        !Matrix.of(context)
-            .accountBundles
-            .keys
-            .contains(Matrix.of(context).activeBundle)) {
-      return Matrix.of(context).accountBundles.keys.first;
-    }
-    return Matrix.of(context).activeBundle;
   }
 
   void _onTapBottomNavigation(
@@ -741,16 +664,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ChatListView(
-      controller: this,
-      bottomNavigationBar: widget.bottomNavigationBar,
-      onOpenSearchPage: widget.onOpenSearchPage,
-      onTapBottomNavigation: _onTapBottomNavigation,
-    );
-  }
-
   void _hackyWebRTCFixForWeb() {
     ChatList.contextForVoip = context;
   }
@@ -772,6 +685,46 @@ class ChatListController extends State<ChatList>
 
   Future<void> dehydrate() =>
       SettingsSecurityController.dehydrateDevice(context);
+
+  @override
+  void initState() {
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+    initReceiveSharingIntent();
+
+    scrollController.addListener(_onScroll);
+    _waitForFirstSync();
+    _hackyWebRTCFixForWeb();
+    CallKeepManager().initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        Matrix.of(context).backgroundPush?.setupPush();
+      }
+    });
+
+    _checkTorBrowser();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    intentDataStreamSubscription?.cancel();
+    intentFileStreamSubscription?.cancel();
+    intentUriStreamSubscription?.cancel();
+    scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChatListView(
+      controller: this,
+      bottomNavigationBar: widget.bottomNavigationBar,
+      onOpenSearchPage: widget.onOpenSearchPage,
+      onTapBottomNavigation: _onTapBottomNavigation,
+    );
+  }
 }
 
 enum EditBundleAction { addToBundle, removeFromBundle }
