@@ -3,9 +3,15 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
-  static double get readIconSize => 20;
-  static double get mentionIconWidth => 20;
-  static Color get readMessageColor => const Color(0xFF787579);
+
+  static const double readIconSize = 20;
+
+  static const double mentionIconWidth = 20;
+
+  static const Color readMessageColor = Color(0xFF787579);
+
+  static const Color unreadMessageOfGroupColor = Color(0xFF1C1B1F);
+
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
@@ -21,16 +27,19 @@ class ChatListItemStyle {
   static const EdgeInsetsDirectional paddingConversation =
       EdgeInsetsDirectional.symmetric(
     horizontal: 8,
-    vertical: 1,
+    vertical: 2,
   );
 
   static const EdgeInsetsDirectional paddingAvatar =
       EdgeInsetsDirectional.only(end: 8);
 
-  static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.symmetric(horizontal: 8);
+  static const EdgeInsetsDirectional paddingIconGroup =
+      EdgeInsetsDirectional.all(2);
+
+  static const EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(8);
 
   static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
+
   static double notificationBadgeSize(
     bool unread,
     bool hasNewMessages,
@@ -44,5 +53,5 @@ class ChatListItemStyle {
             unreadBadgePaddingWhenMoreThanOne;
   }
 
-  static const double letterSpaceDisplayname = 0.15;
+  static const double letterSpaceDisplayName = 0.15;
 }
