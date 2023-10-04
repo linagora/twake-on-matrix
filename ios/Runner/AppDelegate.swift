@@ -33,6 +33,12 @@ let apnTokenKey = "apnToken"
             case "getInitialNoti":
                 result(self?.initialNotiInfo)
                 self?.initialNotiInfo = nil
+            case "clearAll":
+                UIApplication.shared.applicationIconBadgeNumber = 0
+                let center = UNUserNotificationCenter.current()
+                center.removeAllDeliveredNotifications()
+                center.removeAllPendingNotificationRequests()
+                result(true)
             default:
                 break
             }
