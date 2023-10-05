@@ -104,8 +104,7 @@ class ChatListController extends State<ChatList>
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
-  List<Room> get _filteredRooms =>
-      Matrix.of(context).client.filteredRoomsForAll(activeFilter);
+  List<Room> get _filteredRooms => client.filteredRoomsForAll(activeFilter);
 
   List<Room> get filteredRoomsForAll =>
       _filteredRooms.where((room) => !room.isFavourite).toList();
@@ -118,8 +117,7 @@ class ChatListController extends State<ChatList>
   Stream<Client> get clientStream => _clientStream.stream;
 
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces =>
-      Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
+  List<Room> get spaces => client.rooms.where((r) => r.isSpace).toList();
 
   String? get activeRoomId => widget.activeRoomId;
 
@@ -173,7 +171,7 @@ class ChatListController extends State<ChatList>
   }
 
   void editSpace(BuildContext context, String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    await client.getRoomById(spaceId)!.postLoad();
     if (mounted) {
       context.go('/spaces/$spaceId');
     }
@@ -328,11 +326,11 @@ class ChatListController extends State<ChatList>
     if (input == null) return;
     await showFutureLoadingDialog(
       context: context,
-      future: () => Matrix.of(context).client.setPresence(
-            Matrix.of(context).client.userID!,
-            PresenceType.online,
-            statusMsg: input.single,
-          ),
+      future: () => client.setPresence(
+        client.userID!,
+        PresenceType.online,
+        statusMsg: input.single,
+      ),
     );
   }
 
@@ -370,7 +368,7 @@ class ChatListController extends State<ChatList>
     final result = await showFutureLoadingDialog(
       context: context,
       future: () async {
-        final space = Matrix.of(context).client.getRoomById(selectedSpace)!;
+        final space = client.getRoomById(selectedSpace)!;
         if (space.canSendDefaultStates) {
           for (final conversation in conversationSelectionNotifier.value) {
             await space.setSpaceChild(conversation.roomId);
@@ -454,7 +452,7 @@ class ChatListController extends State<ChatList>
       Matrix.of(context).activeBundle = bundle;
       if (!Matrix.of(context)
           .currentBundle!
-          .any((client) => client == Matrix.of(context).client)) {
+          .any((client) => client == client)) {
         Matrix.of(context)
             .setActiveClient(Matrix.of(context).currentBundle!.first);
       }

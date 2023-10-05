@@ -12,8 +12,6 @@ class ChatListItemStyle {
 
   static const Color readMessageColor = Color(0xFF787579);
 
-  static const Color unreadMessageOfGroupColor = Color(0xFF1C1B1F);
-
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
