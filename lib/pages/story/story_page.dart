@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -91,14 +92,10 @@ class StoryPageController extends State<StoryPage> {
       await client.getRoomById(roomId)!.sendTextEvent(message);
       replyController.clear();
       replyFocus.unfocus();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.replyHasBeenSent)),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.replyHasBeenSent);
     } catch (e, s) {
       Logs().w('Unable to reply to story', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toLocalizedString(context))),
-      );
+      TwakeSnackBar.show(context, e.toLocalizedString(context));
     } finally {
       setState(() {
         replyLoading = false;
@@ -352,9 +349,7 @@ class StoryPageController extends State<StoryPage> {
     );
     _modalOpened = false;
     if (result.error != null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context)!.contentHasBeenReported)),
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
   }
 
   Future<MatrixFile> downloadAndDecryptAttachment(

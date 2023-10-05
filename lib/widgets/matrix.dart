@@ -17,6 +17,7 @@ import 'package:fluffychat/domain/repository/tom_configurations_repository.dart'
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
@@ -346,10 +347,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         _cancelSubs(c.clientName);
         widget.clients.remove(c);
         ClientManager.removeClientNameFromStore(c.clientName);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(L10n.of(context)!.oneClientLoggedOut),
-          ),
+        TwakeSnackBar.show(
+          TwakeApp.routerKey.currentContext!,
+          L10n.of(context)!.oneClientLoggedOut,
         );
 
         if (state != LoginState.loggedIn) {

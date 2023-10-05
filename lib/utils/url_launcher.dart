@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -34,9 +35,7 @@ class UrlLauncher {
     final uri = Uri.tryParse(url!);
     if (uri == null) {
       // we can't open this thing
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.cantOpenUri(url!))),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
@@ -74,9 +73,7 @@ class UrlLauncher {
       return;
     }
     if (uri.host.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.cantOpenUri(url!))),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
     // okay, we have either an http or an https URI.
