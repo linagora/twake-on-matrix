@@ -29,6 +29,7 @@ class ExpansionContactListTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
       child: FutureBuilder<Profile?>(
+        key: contact.matrixId != null ? Key(contact.matrixId!) : null,
         future:
             contact.status == ContactStatus.active ? getProfile(context) : null,
         builder: (context, snapshot) {
