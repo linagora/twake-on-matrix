@@ -11,31 +11,16 @@ mixin PlayVideoActionMixin {
     String uriOrFilePath, {
     String? eventId,
   }) async {
-    if (!PlatformInfos.isWeb) {
-      Navigator.of(context).push(
-        HeroPageRoute(
-          builder: (context) {
-            return InteractiveViewerGallery(
-              itemBuilder: VideoViewerMobileTheme(
-                path: uriOrFilePath,
-                eventId: eventId,
-              ),
-            );
-          },
-        ),
-      );
-    } else {
-      await showDialog(
-        context: context,
-        useRootNavigator: PlatformInfos.isWeb,
-        useSafeArea: false,
+    Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      HeroPageRoute(
         builder: (context) {
-          if (PlatformInfos.isWeb || PlatformInfos.isDesktop) {
-            return VideoViewerDesktopTheme(path: uriOrFilePath);
-          }
-          return VideoViewerMobileTheme(path: uriOrFilePath, eventId: eventId);
+          return InteractiveViewerGallery(
+            itemBuilder: PlatformInfos.isMobile
+                ? VideoViewerMobileTheme(path: uriOrFilePath)
+                : VideoViewerDesktopTheme(path: uriOrFilePath),
+          );
         },
-      );
-    }
+      ),
+    );
   }
 }

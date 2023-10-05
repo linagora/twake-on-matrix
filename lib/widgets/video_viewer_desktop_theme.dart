@@ -31,7 +31,12 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
-      fullscreen: const MaterialDesktopVideoControlsThemeData(),
+      fullscreen: MaterialDesktopVideoControlsThemeData(
+        seekBarColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        seekBarPositionColor: Theme.of(context).colorScheme.primary,
+        seekBarHeight: VideoViewerStyle.seekBarHeight,
+        seekBarThumbColor: Theme.of(context).colorScheme.primary,
+      ),
       child: VideoPlayer(
         path: path,
       ),
