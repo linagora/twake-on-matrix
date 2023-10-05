@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -29,9 +30,7 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
   }) async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;
     if (!room.canSendEvent(EventTypes.RoomPowerLevels)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.noPermission)),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.noPermission);
       return;
     }
     final newLevel = await showPermissionChooser(

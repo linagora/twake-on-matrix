@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,9 +19,7 @@ abstract class FluffyShare {
     await Clipboard.setData(
       ClipboardData(text: text),
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context)!.copiedToClipboard)),
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
     return;
   }
 }

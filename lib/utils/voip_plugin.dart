@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -165,13 +166,9 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
         addCallingOverlay(call.callId, call);
         try {
           if (!hasCallingAccount) {
-            ScaffoldMessenger.of(TwakeApp.routerKey.currentContext!)
-                .showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'No calling accounts found (used for native calls UI)',
-                ),
-              ),
+            TwakeSnackBar.show(
+              TwakeApp.routerKey.currentContext!,
+              'No calling accounts found (used for native calls UI)',
             );
           }
         } catch (e) {

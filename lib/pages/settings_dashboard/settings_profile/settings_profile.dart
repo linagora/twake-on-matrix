@@ -11,7 +11,6 @@ import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
@@ -22,6 +21,7 @@ import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -463,17 +463,9 @@ class SettingsProfileController extends State<SettingsProfile>
     switch (settingsProfileEnum) {
       case SettingsProfileEnum.matrixId:
         Clipboard.setData(ClipboardData(text: client.mxid(context)));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            width: SettingsProfileItemStyle.widthSnackBar(context),
-            padding: SettingsProfileItemStyle.snackBarPadding,
-            content: Text(
-              L10n.of(context)!.copiedMatrixIdToClipboard,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.background,
-                  ),
-            ),
-          ),
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.copiedMatrixIdToClipboard,
         );
         break;
       default:

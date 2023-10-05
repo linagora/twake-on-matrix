@@ -6,11 +6,11 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -157,7 +157,7 @@ mixin ChatRoomSearchMixin {
             default:
           }
         } else if (event.isLeft()) {
-          Fluttertoast.showToast(msg: L10n.of(context)!.noMoreResult);
+          TwakeSnackBar.show(context, L10n.of(context)!.noMoreResult);
           switch (direction) {
             case Direction.b:
               canGoUp.value = false;
