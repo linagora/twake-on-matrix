@@ -6,6 +6,8 @@ class ChatListItemStyle {
 
   static const double readIconSize = 20;
 
+  static const double groupIconSize = 16;
+
   static const double mentionIconWidth = 20;
 
   static const Color readMessageColor = Color(0xFF787579);
@@ -34,7 +36,7 @@ class ChatListItemStyle {
       EdgeInsetsDirectional.only(end: 8);
 
   static const EdgeInsetsDirectional paddingIconGroup =
-      EdgeInsetsDirectional.all(2);
+      EdgeInsetsDirectional.all(4);
 
   static const EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(8);
 
