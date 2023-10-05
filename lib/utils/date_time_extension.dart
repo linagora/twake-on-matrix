@@ -72,9 +72,9 @@ extension DateTimeExtension on DateTime {
           return L10n.of(context)!.sunday;
       }
     } else if (year == DateTime.now().year) {
-      return DateFormat("MMMM d").format(this);
+      return DateFormat("MMM d").format(this);
     } else {
-      return DateFormat("MMMM d, y").format(this);
+      return DateFormat("MM/dd/yyyy").format(this);
     }
     return L10n.of(context)!.dateWithYear(
       year.toString(),
