@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
@@ -66,17 +67,15 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
       _downloadStateNotifier.value = DownloadVideoState.done;
     } on MatrixConnectionException catch (e) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
+      TwakeSnackBar.show(
+        context,
+        e.toLocalizedString(context),
       );
     } catch (e, s) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
+      TwakeSnackBar.show(
+        context,
+        e.toLocalizedString(context),
       );
       Logs().w('Error while playing video', e, s);
     }

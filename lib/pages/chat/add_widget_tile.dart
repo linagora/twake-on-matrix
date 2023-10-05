@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -74,9 +75,7 @@ class AddWidgetTileState extends State<AddWidgetTile> {
       widget.room.addWidget(matrixWidget);
       Navigator.of(context).pop();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.errorAddingWidget)),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.errorAddingWidget);
     }
   }
 

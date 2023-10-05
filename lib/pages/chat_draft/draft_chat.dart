@@ -17,9 +17,9 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
@@ -239,7 +239,8 @@ class DraftChatController extends State<DraftChat>
   void onInputBarSubmitted(_) {
     sendText(
       onCreateRoomFailed: () {
-        Fluttertoast.showToast(msg: L10n.of(context)!.roomCreationFailed);
+        TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
+
         FocusScope.of(context).requestFocus(inputFocus);
       },
     );

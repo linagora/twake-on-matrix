@@ -23,6 +23,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/foundation.dart';
@@ -135,13 +136,7 @@ class ChatListController extends State<ChatList>
       );
     } catch (e, s) {
       Logs().w('Searching has crashed', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toLocalizedString(context),
-          ),
-        ),
-      );
+      TwakeSnackBar.show(context, e.toLocalizedString(context));
     }
     if (!isSearchMode) return;
     setState(() {
@@ -420,10 +415,9 @@ class ChatListController extends State<ChatList>
     );
     if (result.error == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.chatHasBeenAddedToThisSpace),
-        ),
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.chatHasBeenAddedToThisSpace,
       );
     }
 
