@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -55,9 +56,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
           .changePassword(input.last, oldPassword: input.first),
     );
     if (success.error == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.passwordHasBeenChanged)),
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.passwordHasBeenChanged);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
@@ -85,10 +86,9 @@ class InvitationSelectionController
       ),
     );
     if (success.error == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.contactHasBeenInvitedToTheGroup),
-        ),
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.contactHasBeenInvitedToTheGroup,
       );
       onCloseDialogInvite();
       inviteSuccessAction();

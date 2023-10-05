@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -91,9 +92,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
               ),
         );
         if (result.error != null) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L10n.of(context)!.contentHasBeenReported)),
-        );
+        TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
         break;
       case UserBottomSheetAction.mention:
         Navigator.of(context, rootNavigator: false).pop();

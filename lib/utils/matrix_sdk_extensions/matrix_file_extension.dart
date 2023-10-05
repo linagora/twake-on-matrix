@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -54,8 +54,9 @@ extension MatrixFileExtension on MatrixFile {
       mimeType: mimeType.toMimeTypeEnum(),
     );
 
-    Fluttertoast.showToast(
-      msg: L10n.of(context)!.downloadFileInWeb(directory),
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.downloadFileInWeb(directory),
     );
 
     return '$directory/$name';
@@ -71,8 +72,9 @@ extension MatrixFileExtension on MatrixFile {
       name: name,
     );
 
-    Fluttertoast.showToast(
-      msg: result?['isSuccess']
+    TwakeSnackBar.show(
+      context,
+      result?['isSuccess'] == true
           ? L10n.of(context)!.downloadImageSuccess
           : L10n.of(context)!.downloadImageError,
     );

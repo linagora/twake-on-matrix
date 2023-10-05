@@ -41,6 +41,7 @@ import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -49,7 +50,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -251,13 +251,7 @@ class ChatController extends State<Chat>
       try {
         await timeline!.requestHistory(historyCount: _loadHistoryCount);
       } catch (err) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              (err).toLocalizedString(context),
-            ),
-          ),
-        );
+        TwakeSnackBar.show(context, (err).toLocalizedString(context));
         rethrow;
       }
     }
@@ -576,7 +570,7 @@ class ChatController extends State<Chat>
 
   void _handlePreviewWeb({required Event event}) async {
     if (!event.hasAttachment) {
-      Fluttertoast.showToast(msg: L10n.of(context)!.errorPreviewingFile);
+      TwakeSnackBar.show(context, L10n.of(context)!.errorPreviewingFile);
       return;
     }
 
@@ -599,7 +593,7 @@ class ChatController extends State<Chat>
         .listen((event) {
       event.fold((failure) {
         if (failure is DownloadFileForPreviewFailure) {
-          Fluttertoast.showToast(msg: 'Error: ${failure.exception}');
+          TwakeSnackBar.show(context, 'Error: ${failure.exception}');
         }
       }, (success) {
         if (success is DownloadFileForPreviewSuccess) {
@@ -838,9 +832,7 @@ class ChatController extends State<Chat>
     setState(() {
       selectedEvents.clear();
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context)!.contentHasBeenReported)),
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
   }
 
   void redactEventsAction() async {
@@ -1343,9 +1335,7 @@ class ChatController extends State<Chat>
       try {
         await voipPlugin!.voip.inviteToCall(room!.id, callType);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toLocalizedString(context))),
-        );
+        TwakeSnackBar.show(context, e.toLocalizedString(context));
       }
     } else {
       await showOkAlertDialog(
@@ -1502,7 +1492,8 @@ class ChatController extends State<Chat>
   void previewPdfWeb(BuildContext context, Event event) async {
     final pdf = await event.getFile(context);
     if (pdf.result == null || event.sizeString != pdf.result?.sizeString) {
-      Fluttertoast.showToast(msg: L10n.of(context)!.errorGettingPdf);
+      TwakeSnackBar.show(context, L10n.of(context)!.errorGettingPdf);
+
       return;
     }
 

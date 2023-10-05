@@ -16,6 +16,7 @@ import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,8 +123,9 @@ class ChatDetailsController extends State<ChatDetails>
       future: () => room.setName(input.single),
     );
     if (success.error == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.displaynameHasBeenChanged)),
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.displaynameHasBeenChanged,
       );
     }
   }
@@ -202,8 +204,9 @@ class ChatDetailsController extends State<ChatDetails>
     switch (option) {
       case AliasActions.copy:
         await Clipboard.setData(ClipboardData(text: select));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L10n.of(context)!.copiedToClipboard)),
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.copiedToClipboard,
         );
         break;
       case AliasActions.delete:
@@ -278,10 +281,9 @@ class ChatDetailsController extends State<ChatDetails>
       future: () => room.setDescription(input.single),
     );
     if (success.error == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.groupDescriptionHasBeenChanged),
-        ),
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.groupDescriptionHasBeenChanged,
       );
     }
   }

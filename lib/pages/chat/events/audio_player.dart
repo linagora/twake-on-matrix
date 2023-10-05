@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -86,10 +87,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       _playAction();
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
+      TwakeSnackBar.show(
+        context,
+        e.toLocalizedString(context),
       );
     }
   }
@@ -136,10 +136,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       await audioPlayer.setAudioSource(MatrixFileAudioSource(matrixFile!));
     }
     audioPlayer.play().catchError((e, s) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.oopsSomethingWentWrong),
-        ),
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.oopsSomethingWentWrong,
       );
       Logs().w('Error while playing audio', e, s);
     });
