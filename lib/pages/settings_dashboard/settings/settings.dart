@@ -79,7 +79,12 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     final matrix = Matrix.of(context);
     await showFutureLoadingDialog(
       context: context,
-      future: () => matrix.client.logout(),
+      future: () async {
+        if (matrix.backgroundPush != null) {
+          await matrix.backgroundPush!.removeCurrentPusher();
+        }
+        return matrix.client.logout();
+      },
     );
   }
 

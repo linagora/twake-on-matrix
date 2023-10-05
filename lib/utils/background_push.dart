@@ -570,4 +570,11 @@ class BackgroundPush {
       apnChannel.invokeMethod('clearAll');
     }
   }
+
+  Future<void> removeCurrentPusher() async {
+    if (_pushToken == null) return;
+    await setupPusher(
+      oldTokens: {_pushToken},
+    );
+  }
 }
