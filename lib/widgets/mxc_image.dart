@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -196,7 +197,7 @@ class _MxcImageState extends State<MxcImage>
   void _onTap(BuildContext context) async {
     if (widget.onTapPreview != null) {
       widget.onTapPreview!();
-      Navigator.of(context).push(
+      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
