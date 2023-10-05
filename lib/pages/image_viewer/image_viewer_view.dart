@@ -70,8 +70,9 @@ class ImageViewerView extends StatelessWidget {
 
   Widget _buildAppBarPreview() {
     return Container(
+      padding: ImageViewerStyle.paddingTopAppBar,
+      height: ImageViewerStyle.appBarHeight,
       color: LinagoraSysColors.material().onTertiaryContainer.withOpacity(0.5),
-      padding: const EdgeInsets.only(top: 56),
       child: ValueListenableBuilder<bool>(
         valueListenable: controller.showAppbarPreview,
         builder: (context, showAppbar, _) {
