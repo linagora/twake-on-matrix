@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
@@ -137,7 +137,8 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                               Icons.group,
                               size: ChatListItemStyle.groupIconSize,
                               color: _isMaskAsUnread
-                                  ? ChatListItemStyle.unreadMessageOfGroupColor
+                                  ? LinagoraSysColors.material()
+                                      .onSurfaceVariant
                                   : LinagoraRefColors.material().tertiary[30],
                             ),
                           ),
