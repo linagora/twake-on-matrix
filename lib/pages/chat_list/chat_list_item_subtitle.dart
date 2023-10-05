@@ -20,8 +20,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   Widget build(BuildContext context) {
     final typingText = room.getLocalizedTypingText(context);
     final unread = room.isUnread || room.membership == Membership.invite;
-    final ownLastMessage =
-        room.lastEvent?.senderId == Matrix.of(context).client.userID;
     final isGroup = !room.isDirectChat;
     final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
       unread,
@@ -34,16 +32,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (typingText.isEmpty &&
-              ownLastMessage &&
-              room.lastEvent!.status.isSending) ...[
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-            ),
-            const SizedBox(width: 4),
-          ],
           Expanded(
             child: typingText.isNotEmpty
                 ? Column(
@@ -55,22 +43,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     ],
                   )
                 : (isGroup
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: lastSenderWidget(room, isGroup, unread),
-                          ),
-                          const SizedBox(height: 2),
-                          Flexible(
-                            child: textContentWidget(
-                              room,
-                              context,
-                              isGroup,
-                              unread,
-                            ),
-                          )
-                        ],
+                    ? chatListItemSubtitleForGroup(
+                        room: room,
+                        unread: unread,
                       )
                     : textContentWidget(room, context, isGroup, unread)),
           ),

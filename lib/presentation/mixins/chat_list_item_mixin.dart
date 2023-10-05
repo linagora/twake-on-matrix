@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
@@ -37,12 +37,23 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                letterSpacing: 0.4,
-                color: unread
-                    ? Theme.of(context).colorScheme.onSurface
-                    : LinagoraRefColors.material().neutral[50],
-              ),
+          style: unread
+              ? LinagoraTextStyle.material()
+                  .bodyMedium2
+                  .merge(
+                    FluffyThemes.fallbackTextStyle,
+                  )
+                  .copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )
+              : LinagoraTextStyle.material()
+                  .bodyMedium3
+                  .merge(
+                    FluffyThemes.fallbackTextStyle,
+                  )
+                  .copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
         );
       },
     );
@@ -85,14 +96,23 @@ mixin ChatListItemMixin {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
-                      style: Theme.of(context).textTheme.labelLarge?.merge(
-                            TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              color: unread
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : ChatListItemStyle.readMessageColor,
-                            ),
-                          ),
+                      style: unread
+                          ? LinagoraTextStyle.material()
+                              .bodyMedium2
+                              .merge(
+                                FluffyThemes.fallbackTextStyle,
+                              )
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              )
+                          : LinagoraTextStyle.material()
+                              .bodyMedium3
+                              .merge(
+                                FluffyThemes.fallbackTextStyle,
+                              )
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                     );
                   },
                 ),
@@ -101,5 +121,73 @@ mixin ChatListItemMixin {
             ],
           )
         : const SizedBox.shrink();
+  }
+
+  Widget chatListItemSubtitleForGroup({
+    required Room room,
+    required bool unread,
+  }) {
+    return FutureBuilder<User?>(
+      future: room.lastEvent?.fetchSenderUser(),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) return const SizedBox.shrink();
+        return RichText(
+          text: TextSpan(
+            text: "${snapshot.data!.calcDisplayname()}: ",
+            style: unread
+                ? LinagoraTextStyle.material()
+                    .bodyMedium2
+                    .merge(
+                      FluffyThemes.fallbackTextStyle,
+                    )
+                    .copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    )
+                : LinagoraTextStyle.material()
+                    .bodyMedium3
+                    .merge(
+                      FluffyThemes.fallbackTextStyle,
+                    )
+                    .copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+            children: [
+              TextSpan(
+                text: room.membership == Membership.invite
+                    ? L10n.of(context)!.youAreInvitedToThisChat
+                    : room.lastEvent?.calcLocalizedBodyFallback(
+                          MatrixLocals(L10n.of(context)!),
+                          hideReply: true,
+                          hideEdit: true,
+                          plaintextBody: true,
+                          removeMarkdown: true,
+                        ) ??
+                        L10n.of(context)!.emptyChat,
+                style: unread
+                    ? LinagoraTextStyle.material()
+                        .bodyMedium2
+                        .merge(
+                          FluffyThemes.fallbackTextStyle,
+                        )
+                        .copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        )
+                    : LinagoraTextStyle.material()
+                        .bodyMedium3
+                        .merge(
+                          FluffyThemes.fallbackTextStyle,
+                        )
+                        .copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+              ),
+            ],
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          softWrap: false,
+        );
+      },
+    );
   }
 }
