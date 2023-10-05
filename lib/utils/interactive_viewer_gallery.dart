@@ -1,4 +1,5 @@
 import 'package:fluffychat/utils/custom_dismissable.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 /// A callback for the [InteractiveViewerBoundary] that is called when the scale
@@ -81,7 +82,7 @@ class _InteractiveViewerGalleryState extends State<InteractiveViewerGallery>
   Widget build(BuildContext context) {
     return CustomDismissible(
       onDismissed: () => Navigator.of(context).pop(),
-      enabled: _enableDismiss,
+      enabled: _enableDismiss && !PlatformInfos.isWeb,
       child: widget.itemBuilder,
     );
   }
