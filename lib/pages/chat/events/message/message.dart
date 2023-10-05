@@ -1,12 +1,17 @@
 import 'dart:math' as math;
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/pages/chat/events/reply_content.dart';
+import 'package:fluffychat/pages/chat/events/state_message.dart';
+import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -17,12 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
-
-import '../../../config/app_config.dart';
-import 'message_content.dart';
-import 'reply_content.dart';
-import 'state_message.dart';
-import 'verification_request_content.dart';
 
 typedef OnMenuAction = Function(BuildContext, ChatHorizontalActionMenu, Event);
 
@@ -141,6 +140,11 @@ class Message extends StatelessWidget {
                   Container(
                     alignment: alignment,
                     padding: EdgeInsetsDirectional.only(
+                      top: MessageStyle.messageSpacing(
+                        displayTime,
+                        nextEvent,
+                        event,
+                      ),
                       start: 8,
                       end: selected || controller.responsive.isDesktop(context)
                           ? 8
