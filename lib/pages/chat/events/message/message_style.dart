@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:matrix/matrix.dart';
 
 class MessageStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -67,5 +68,20 @@ class MessageStyle {
       mobile:
           MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
     );
+  }
+
+  static double messageSpacing(
+    bool displayTime,
+    Event? nextEvent,
+    Event currentEvent,
+  ) {
+    // add spaces to messages only
+    if (nextEvent == null ||
+        displayTime ||
+        nextEvent.type != EventTypes.Message) {
+      return 0;
+    }
+
+    return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
   }
 }
