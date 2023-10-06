@@ -66,7 +66,5 @@ class MessageContentStyle {
   static const BorderRadiusGeometry borderRadiusBubble =
       BorderRadius.all(Radius.circular(12.0));
 
-  static const backgroundColorVideo = Colors.black;
-
   static const backIconColor = Colors.white;
 }

@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -17,7 +16,6 @@ class VideoPlayer extends StatefulWidget {
 
 class _VideoPlayerState extends State<VideoPlayer> {
   final VideoController videoController = VideoController(Player());
-  bool isFullScreen = false;
 
   @override
   void initState() {
@@ -33,15 +31,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: MessageContentStyle.backgroundColorVideo,
-      ),
-      child: Video(
-        pauseUponEnteringBackgroundMode: true,
-        resumeUponEnteringForegroundMode: true,
-        controller: videoController,
-      ),
+    return Video(
+      fill: Colors.transparent,
+      pauseUponEnteringBackgroundMode: true,
+      resumeUponEnteringForegroundMode: true,
+      controller: videoController,
     );
   }
 }
