@@ -11,6 +11,8 @@ jobs:
   deploy_preview:
     name: Deploy preview versions on pull requests
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
     permissions:
       deployments: write
       pull-requests: write
