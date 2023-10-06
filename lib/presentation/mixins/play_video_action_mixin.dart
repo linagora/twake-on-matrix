@@ -16,7 +16,10 @@ mixin PlayVideoActionMixin {
         builder: (context) {
           return InteractiveViewerGallery(
             itemBuilder: PlatformInfos.isMobile
-                ? VideoViewerMobileTheme(path: uriOrFilePath)
+                ? VideoViewerMobileTheme(
+                    path: uriOrFilePath,
+                    eventId: eventId,
+                  )
                 : VideoViewerDesktopTheme(path: uriOrFilePath),
           );
         },
