@@ -63,8 +63,6 @@ class AppScaffoldView extends StatelessWidget {
                       valueListenable: activeNavigationBar,
                       builder: (_, navigatorBar, child) {
                         switch (navigatorBar) {
-                          case AdaptiveDestinationEnum.search:
-                            return const SizedBox();
                           case AdaptiveDestinationEnum.contacts:
                           case AdaptiveDestinationEnum.rooms:
                           default:
@@ -107,11 +105,8 @@ class AppScaffoldView extends StatelessWidget {
                             _bottomNavigationBarBuilder(context),
                       ),
                     ),
-                    _triggerPageViewBuilder(
-                      navigatorBarType: AdaptiveDestinationEnum.search,
-                      navigatorBarWidget: Search(
-                        onCloseSearchPage: onCloseSearchPage,
-                      ),
+                    Search(
+                      onCloseSearchPage: onCloseSearchPage,
                     ),
                   ],
                 ),
