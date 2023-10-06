@@ -19,6 +19,7 @@ enum AdaptiveDestinationEnum {
           ),
           label: L10n.of(context)!.contacts,
         );
+      case AdaptiveDestinationEnum.search:
       case AdaptiveDestinationEnum.rooms:
         return NavigationDestination(
           icon: UnreadRoomsBadge(

@@ -70,8 +70,7 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   }
 
   void _onOpenSearchPage() {
-    activeNavigationBar.value = AdaptiveDestinationEnum.search;
-    _jumpToPageByIndex();
+    pageController.jumpToPage(AdaptiveDestinationEnum.search.index);
   }
 
   void _onCloseSearchPage() {
