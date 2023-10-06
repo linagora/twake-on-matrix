@@ -601,7 +601,7 @@ class Message extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: listHorizontalActionMenu.map((item) {
             return Padding(
-              padding: const EdgeInsetsDirectional.all(4),
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
               child: TwakeIconButton(
                 icon: item.action.getIcon(),
                 imagePath: item.action.getImagePath(),
