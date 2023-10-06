@@ -1383,7 +1383,6 @@ class ChatController extends State<Chat>
   List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
     final listAction = [
       ChatHorizontalActionMenu.reply,
-      ChatHorizontalActionMenu.forward,
       ChatHorizontalActionMenu.more,
     ];
     return listAction
