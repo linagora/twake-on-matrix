@@ -200,9 +200,6 @@ flutter:
     - family: RobotoMono
       fonts:
         - asset: fonts/Roboto/RobotoMono-Regular.ttf
-    - family: NotoEmoji
-      fonts:
-        - asset: fonts/NotoEmoji/NotoColorEmoji.ttf
     - family: Inter
       fonts:
         - asset: fonts/Inter/Inter-Thin.ttf
