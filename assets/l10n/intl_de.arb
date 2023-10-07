@@ -2890,5 +2890,23 @@
   "done": "",
   "@done": {},
   "getHelp": "",
-  "@getHelp": {}
+  "@getHelp": {},
+  "onlineMinAgo": "",
+  "@onlineMinAgo": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "onlineHourAgo": "",
+  "@onlineHourAgo": {
+    "placeholders": {
+      "hour": {}
+    }
+  },
+  "noMoreResult": "",
+  "@noMoreResult": {},
+  "noOtherDevicesFound": "",
+  "@noOtherDevicesFound": {},
+  "onlineStatus": "",
+  "@onlineStatus": {}
 }
