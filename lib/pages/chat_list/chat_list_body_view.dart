@@ -163,8 +163,7 @@ class ChatListBodyView extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _expandableTitleBuilder(
-                                      context: context,
+                                    ExpandableTitleBuilder(
                                       title: L10n.of(context)!.countPinChat(
                                         controller.filteredRoomsForPin.length,
                                       ),
@@ -194,8 +193,7 @@ class ChatListBodyView extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      _expandableTitleBuilder(
-                                        context: context,
+                                      ExpandableTitleBuilder(
                                         title: L10n.of(context)!.countAllChat(
                                           controller.filteredRoomsForAll.length,
                                         ),
@@ -226,13 +224,22 @@ class ChatListBodyView extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _expandableTitleBuilder({
-    required BuildContext context,
-    required String title,
-    required bool isExpanded,
-    VoidCallback? onTap,
-  }) {
+class ExpandableTitleBuilder extends StatelessWidget {
+  final String title;
+  final bool isExpanded;
+  final VoidCallback? onTap;
+
+  const ExpandableTitleBuilder({
+    super.key,
+    required this.title,
+    this.isExpanded = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: ChatListBodyViewStyle.paddingHorizontalExpandableTitleBuilder,
       child: Row(
