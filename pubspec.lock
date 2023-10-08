@@ -1043,11 +1043,12 @@ packages:
   flutter_typeahead:
     dependency: "direct main"
     description:
-      name: flutter_typeahead
-      sha256: f3a5f79d9a056e5108452dbec31d12bbd7f6d25e9097bf0f956e3f8d024e1747
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.7.0"
+      path: "."
+      ref: twake-supported
+      resolved-ref: "4d79401802bd3528ab1b27ff865916269bb416c8"
+      url: "https://github.com/linagora/flutter_typeahead.git"
+    source: git
+    version: "4.8.0"
   flutter_web_auth:
     dependency: "direct main"
     description:
@@ -1367,6 +1368,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  irondash_engine_context:
+    dependency: transitive
+    description:
+      name: irondash_engine_context
+      sha256: fea21bff36d44a5955beba90619f54b9169884014128ae75f50eba2db03c24a0
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
+  irondash_message_channel:
+    dependency: transitive
+    description:
+      name: irondash_message_channel
+      sha256: "500daa1fbe679f7d28a5258df3ff47dab6de352e680dc93c1ca9eae1555d8db5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   isolate:
     dependency: transitive
     description:
@@ -1883,6 +1900,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.0"
+  pixel_snap:
+    dependency: transitive
+    description:
+      name: pixel_snap
+      sha256: "5de3662b926c9bc189578cf90f9d5b350ee61bc8e20e8a91fa1dfdd26c9f5ece"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   platform:
     dependency: transitive
     description:
@@ -2425,6 +2450,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  super_clipboard:
+    dependency: "direct main"
+    description:
+      name: super_clipboard
+      sha256: "548642d62d691d2ba00850efe0f7a11ce5696e59111658abd4c6cb76b49aa61d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.4"
+  super_native_extensions:
+    dependency: transitive
+    description:
+      name: super_native_extensions
+      sha256: "3bbb95899f848617b819eec1fa00c80a617f1bd469a480b1f0c4dd383da4c5ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.4"
   sync_http:
     dependency: transitive
     description:
