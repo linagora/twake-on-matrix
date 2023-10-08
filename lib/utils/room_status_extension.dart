@@ -120,4 +120,10 @@ extension RoomStatusExtension on Room {
     }
     return lastReceipts.toList();
   }
+
+  bool isTypingText(BuildContext context) {
+    return getLocalizedTypingText(context).isNotEmpty &&
+        lastEvent?.senderId == client.userID &&
+        lastEvent!.status.isSending;
+  }
 }

@@ -87,7 +87,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   bool get _isGroupChat => !room.isDirectChat;
 
-  bool get _isMaskAsUnread =>
+  bool get _isMarkAsUnread =>
       room.isUnread || room.membership == Membership.invite;
 
   @override
@@ -129,14 +129,14 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                           right: 0,
                           child: Container(
                             padding: ChatListItemStyle.paddingIconGroup,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                             child: Icon(
                               Icons.group,
                               size: ChatListItemStyle.groupIconSize,
-                              color: _isMaskAsUnread
+                              color: _isMarkAsUnread
                                   ? LinagoraSysColors.material()
                                       .onSurfaceVariant
                                   : LinagoraRefColors.material().tertiary[30],

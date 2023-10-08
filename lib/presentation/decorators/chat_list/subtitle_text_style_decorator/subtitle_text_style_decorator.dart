@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-abstract class TextStyleDecorator
-    implements InterfaceChatListSubtitleTextStyleComponent {
-  final InterfaceChatListSubtitleTextStyleComponent interfaceTextStyleComponent;
+abstract class ChatListSubtitleTextStyleDecorator
+    implements ChatListSubtitleTextStyleComponent {
+  final ChatListSubtitleTextStyleComponent interfaceTextStyleComponent;
 
-  TextStyleDecorator(this.interfaceTextStyleComponent);
+  ChatListSubtitleTextStyleDecorator(this.interfaceTextStyleComponent);
 }
 
-class ChatListSubtitleTextStyle implements TextStyleDecorator {
-  final InterfaceChatListSubtitleTextStyleComponent
-      _interfaceTextStyleComponent;
+class ChatListSubtitleTextStyle implements ChatListSubtitleTextStyleDecorator {
+  final ChatListSubtitleTextStyleComponent _interfaceTextStyleComponent;
 
   ChatListSubtitleTextStyle(this._interfaceTextStyleComponent);
 
@@ -22,12 +21,12 @@ class ChatListSubtitleTextStyle implements TextStyleDecorator {
   }
 
   @override
-  InterfaceChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
+  ChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
       _interfaceTextStyleComponent;
 }
 
-class SubtitleReadTextStyleDecorator
-    implements InterfaceChatListSubtitleTextStyleComponent {
+class ReadChatListSubtitleTextStyleDecorator
+    implements ChatListSubtitleTextStyleComponent {
   @override
   TextStyle textStyle(Room room) {
     return LinagoraTextStyle.material().bodyMedium3.copyWith(
@@ -36,11 +35,11 @@ class SubtitleReadTextStyleDecorator
   }
 }
 
-class SubtitleUnreadTextStyleDecorator implements TextStyleDecorator {
-  final InterfaceChatListSubtitleTextStyleComponent
-      _interfaceTextStyleComponent;
+class UnreadChatListSubtitleTextStyleDecorator
+    implements ChatListSubtitleTextStyleDecorator {
+  final ChatListSubtitleTextStyleComponent _interfaceTextStyleComponent;
 
-  SubtitleUnreadTextStyleDecorator(this._interfaceTextStyleComponent);
+  UnreadChatListSubtitleTextStyleDecorator(this._interfaceTextStyleComponent);
 
   @override
   TextStyle textStyle(Room room) {
@@ -57,21 +56,20 @@ class SubtitleUnreadTextStyleDecorator implements TextStyleDecorator {
   }
 
   @override
-  InterfaceChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
+  ChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
       _interfaceTextStyleComponent;
 }
 
-class SubtitleMuteAndUnreadTextStyleDecorator implements TextStyleDecorator {
-  final InterfaceChatListSubtitleTextStyleComponent
-      _interfaceTextStyleComponent;
+class MuteChatListSubtitleTextStyleDecorator
+    implements ChatListSubtitleTextStyleDecorator {
+  final ChatListSubtitleTextStyleComponent _interfaceTextStyleComponent;
 
-  SubtitleMuteAndUnreadTextStyleDecorator(this._interfaceTextStyleComponent);
+  MuteChatListSubtitleTextStyleDecorator(this._interfaceTextStyleComponent);
 
   @override
   TextStyle textStyle(Room room) {
     final isMuted = room.pushRuleState != PushRuleState.notify;
-    final unread = room.isUnread || room.membership == Membership.invite;
-    if (isMuted && unread) {
+    if (isMuted) {
       return _interfaceTextStyleComponent.textStyle(room).merge(
             LinagoraTextStyle.material().bodyMedium2.copyWith(
                   color: LinagoraRefColors.material().tertiary[20],
@@ -83,32 +81,6 @@ class SubtitleMuteAndUnreadTextStyleDecorator implements TextStyleDecorator {
   }
 
   @override
-  InterfaceChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
-      _interfaceTextStyleComponent;
-}
-
-class SubtitleMuteAndReadTextStyleDecorator implements TextStyleDecorator {
-  final InterfaceChatListSubtitleTextStyleComponent
-      _interfaceTextStyleComponent;
-
-  SubtitleMuteAndReadTextStyleDecorator(this._interfaceTextStyleComponent);
-
-  @override
-  TextStyle textStyle(Room room) {
-    final isMuted = room.pushRuleState != PushRuleState.notify;
-    final unread = room.isUnread || room.membership == Membership.invite;
-    if (isMuted && !unread) {
-      return _interfaceTextStyleComponent.textStyle(room).merge(
-            LinagoraTextStyle.material().bodyMedium3.copyWith(
-                  color: LinagoraRefColors.material().tertiary[20],
-                ),
-          );
-    } else {
-      return _interfaceTextStyleComponent.textStyle(room);
-    }
-  }
-
-  @override
-  InterfaceChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
+  ChatListSubtitleTextStyleComponent get interfaceTextStyleComponent =>
       _interfaceTextStyleComponent;
 }
