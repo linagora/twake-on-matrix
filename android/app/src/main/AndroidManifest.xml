@@ -40,7 +40,7 @@
         android:requestLegacyExternalStorage="true"
         android:allowBackup="false"
         android:fullBackupContent="false"
-    >
+    >   
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"
@@ -139,5 +139,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <provider
+            android:name="com.superlist.super_native_extensions.DataProvider"
+            android:authorities="com.twake.twake.SuperClipboardDataProvider"
+            android:exported="true"
+            android:grantUriPermissions="true" >
+        </provider>
     </application>
 </manifest>
