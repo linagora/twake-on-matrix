@@ -1,11 +1,10 @@
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title_style.dart';
+import 'package:fluffychat/presentation/decorators/chat_list/title_text_style_decorator/title_text_style_view.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -21,11 +20,8 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
     final displayName = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
-    final typingText = room.getLocalizedTypingText(context);
     final isMuted = room.pushRuleState != PushRuleState.notify;
     final unread = room.isUnread || room.membership == Membership.invite;
-    final ownLastMessage =
-        room.lastEvent?.senderId == Matrix.of(context).client.userID;
     return Row(
       children: <Widget>[
         Expanded(
@@ -40,23 +36,8 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
-                      style: unread
-                          ? LinagoraTextStyle.material()
-                              .bodyLarge1
-                              .merge(
-                                FluffyThemes.fallbackTextStyle,
-                              )
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )
-                          : LinagoraTextStyle.material()
-                              .bodyLarge2
-                              .merge(
-                                FluffyThemes.fallbackTextStyle,
-                              )
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                      style:
+                          ChatLitTitleTextStyleView.textStyle.textStyle(room),
                     ),
                   ),
                   if (room.isFavourite)
@@ -86,9 +67,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
           padding: ChatListItemTitleStyle.paddingLeftIcon,
           child: Row(
             children: [
-              if (typingText.isEmpty &&
-                  ownLastMessage &&
-                  room.lastEvent!.status.isSending) ...[
+              if (room.isTypingText(context)) ...[
                 Icon(
                   Icons.schedule,
                   color: LinagoraRefColors.material().neutral[50],

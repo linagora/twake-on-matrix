@@ -1,8 +1,7 @@
-import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
@@ -37,23 +36,7 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: unread
-              ? LinagoraTextStyle.material()
-                  .bodyMedium2
-                  .merge(
-                    FluffyThemes.fallbackTextStyle,
-                  )
-                  .copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  )
-              : LinagoraTextStyle.material()
-                  .bodyMedium3
-                  .merge(
-                    FluffyThemes.fallbackTextStyle,
-                  )
-                  .copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+          style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
         );
       },
     );
@@ -82,7 +65,7 @@ mixin ChatListItemMixin {
     );
   }
 
-  RenderObjectWidget lastSenderWidget(Room room, bool isGroup, bool unread) {
+  RenderObjectWidget lastSenderWidget(Room room, bool isGroup) {
     return isGroup
         ? Row(
             children: [
@@ -96,23 +79,8 @@ mixin ChatListItemMixin {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
-                      style: unread
-                          ? LinagoraTextStyle.material()
-                              .bodyMedium2
-                              .merge(
-                                FluffyThemes.fallbackTextStyle,
-                              )
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )
-                          : LinagoraTextStyle.material()
-                              .bodyMedium3
-                              .merge(
-                                FluffyThemes.fallbackTextStyle,
-                              )
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                      style: ChatLitSubSubtitleTextStyleView.textStyle
+                          .textStyle(room),
                     );
                   },
                 ),
@@ -125,7 +93,6 @@ mixin ChatListItemMixin {
 
   Widget chatListItemSubtitleForGroup({
     required Room room,
-    required bool unread,
   }) {
     return FutureBuilder<User?>(
       future: room.lastEvent?.fetchSenderUser(),
@@ -134,23 +101,7 @@ mixin ChatListItemMixin {
         return RichText(
           text: TextSpan(
             text: "${snapshot.data!.calcDisplayname()}: ",
-            style: unread
-                ? LinagoraTextStyle.material()
-                    .bodyMedium2
-                    .merge(
-                      FluffyThemes.fallbackTextStyle,
-                    )
-                    .copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    )
-                : LinagoraTextStyle.material()
-                    .bodyMedium3
-                    .merge(
-                      FluffyThemes.fallbackTextStyle,
-                    )
-                    .copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+            style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
             children: [
               TextSpan(
                 text: room.membership == Membership.invite
@@ -163,23 +114,8 @@ mixin ChatListItemMixin {
                           removeMarkdown: true,
                         ) ??
                         L10n.of(context)!.emptyChat,
-                style: unread
-                    ? LinagoraTextStyle.material()
-                        .bodyMedium2
-                        .merge(
-                          FluffyThemes.fallbackTextStyle,
-                        )
-                        .copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        )
-                    : LinagoraTextStyle.material()
-                        .bodyMedium3
-                        .merge(
-                          FluffyThemes.fallbackTextStyle,
-                        )
-                        .copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                style:
+                    ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
               ),
             ],
           ),

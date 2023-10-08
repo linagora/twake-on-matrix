@@ -23,7 +23,7 @@ class ChatListViewBuilder extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return ValueListenableBuilder(
           valueListenable: controller.selectModeNotifier,
-          builder: (context, selectedRoomIds, _) {
+          builder: (context, _, __) {
             return ChatListItem(
               rooms[index],
               key: Key('chat_list_item_${rooms[index].id}'),
