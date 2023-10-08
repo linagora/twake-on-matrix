@@ -10,8 +10,6 @@ class ChatListItemStyle {
 
   static const double mentionIconWidth = 20;
 
-  static const Color readMessageColor = Color(0xFF787579);
-
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
