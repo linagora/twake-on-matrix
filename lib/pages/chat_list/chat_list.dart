@@ -58,6 +58,7 @@ class ChatList extends StatefulWidget {
 
 class ChatListController extends State<ChatList>
     with
+        AutomaticKeepAliveClientMixin,
         TickerProviderStateMixin,
         RouteAware,
         ComparablePresentationContactMixin,
@@ -716,6 +717,7 @@ class ChatListController extends State<ChatList>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
@@ -723,6 +725,9 @@ class ChatListController extends State<ChatList>
       onTapBottomNavigation: _onTapBottomNavigation,
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 enum EditBundleAction { addToBundle, removeFromBundle }
