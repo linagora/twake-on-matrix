@@ -20,6 +20,7 @@ class ContactsTabBodyView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.refreshController == null) return const SizedBox();
     return TwakeSmartRefresher(
+      onRefresh: controller.fetchContacts,
       onLoading: controller.loadMoreContacts,
       controller: controller.refreshController!,
       slivers: [
