@@ -62,13 +62,13 @@ class _TwakeSmartRefresherController extends State<TwakeSmartRefresher> {
   }
 
   Future<void> onRefresh() async {
-    if (widget.controller.isRefeshing) return;
+    if (widget.controller.isRefeshing || widget.onRefresh == null) return;
     widget.controller.onRefresh();
     widget.onRefresh?.call();
   }
 
   Future<void> onLoading() async {
-    if (widget.controller.isLoading) return;
+    if (widget.controller.isLoading || widget.onLoading == null) return;
     widget.controller.onLoading();
     await widget.onLoading!();
   }
