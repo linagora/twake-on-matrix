@@ -644,11 +644,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Stáhnout soubor",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Upravit",
   "@edit": {
     "type": "text",

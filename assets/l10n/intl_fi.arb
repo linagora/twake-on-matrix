@@ -507,11 +507,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Lataa tiedosto",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Muokkaa",
     "@edit": {
         "type": "text",

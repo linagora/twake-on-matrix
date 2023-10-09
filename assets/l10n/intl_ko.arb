@@ -290,11 +290,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "파일 다운로드",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "displaynameHasBeenChanged": "표시 이름이 변경되었습니다",
   "@displaynameHasBeenChanged": {
     "type": "text",

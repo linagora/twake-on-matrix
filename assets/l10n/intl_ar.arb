@@ -417,11 +417,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "نزِّل الملف",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "editDisplayname": "حرر الاسم العلني",
     "@editDisplayname": {
         "type": "text",

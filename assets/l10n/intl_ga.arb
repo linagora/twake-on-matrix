@@ -1260,11 +1260,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Íoslódáil comhad",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "changePassword": "Athraigh an pasfhocal",
     "@changePassword": {
         "type": "text",

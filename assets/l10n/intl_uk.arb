@@ -407,11 +407,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Завантажити файл",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editDisplayname": "Змінити показуване ім'я",
   "@editDisplayname": {
     "type": "text",

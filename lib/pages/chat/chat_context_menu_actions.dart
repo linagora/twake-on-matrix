@@ -19,7 +19,7 @@ enum ChatContextMenuActions {
       case ChatContextMenuActions.forward:
         return L10n.of(context)!.forward;
       case ChatContextMenuActions.downloadFile:
-        return L10n.of(context)!.downloadFile;
+        return L10n.of(context)!.download;
     }
   }
 

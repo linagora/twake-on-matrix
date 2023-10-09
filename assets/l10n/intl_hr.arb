@@ -634,11 +634,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Preuzmi datoteku",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Uredi",
     "@edit": {
         "type": "text",

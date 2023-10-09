@@ -427,11 +427,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Fájl letöltése",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editDisplayname": "Megjelenítési név módosítása",
   "@editDisplayname": {
     "type": "text",

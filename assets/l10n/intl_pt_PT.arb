@@ -615,11 +615,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Descarregar ficheiro",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Editar",
     "@edit": {
         "type": "text",
