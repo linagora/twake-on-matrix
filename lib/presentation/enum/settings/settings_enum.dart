@@ -10,6 +10,7 @@ enum SettingEnum {
   appLanguage,
   devices,
   help,
+  about,
   logout;
 
   String titleSettings(BuildContext context) {
@@ -28,6 +29,8 @@ enum SettingEnum {
         return L10n.of(context)!.devices;
       case SettingEnum.help:
         return L10n.of(context)!.help;
+      case SettingEnum.about:
+        return L10n.of(context)!.about;
       case SettingEnum.logout:
         return L10n.of(context)!.logout;
       default:
@@ -72,6 +75,8 @@ enum SettingEnum {
         return Icons.devices;
       case SettingEnum.help:
         return Icons.question_mark;
+      case SettingEnum.about:
+        return Icons.privacy_tip_outlined;
       case SettingEnum.logout:
         return Icons.logout_outlined;
       default:
