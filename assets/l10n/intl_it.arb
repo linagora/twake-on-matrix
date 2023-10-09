@@ -532,11 +532,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Scarica il file",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Modifica",
     "@edit": {
         "type": "text",

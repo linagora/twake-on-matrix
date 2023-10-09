@@ -644,11 +644,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Laadi fail alla",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Muuda",
   "@edit": {
     "type": "text",

@@ -582,11 +582,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Pobierz plik",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Edytuj",
   "@edit": {
     "type": "text",

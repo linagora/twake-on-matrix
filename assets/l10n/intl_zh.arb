@@ -622,11 +622,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "下载文件",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "编辑",
     "@edit": {
         "type": "text",

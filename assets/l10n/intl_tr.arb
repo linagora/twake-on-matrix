@@ -648,11 +648,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Dosyayı indir",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Düzenle",
   "@edit": {
     "type": "text",

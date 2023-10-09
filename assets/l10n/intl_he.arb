@@ -548,11 +548,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "הורד קובץ",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "ערוך",
     "@edit": {
         "type": "text",

@@ -480,11 +480,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Descargar archivo",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "editDisplayname": "Editar nombre visible",
     "@editDisplayname": {
         "type": "text",

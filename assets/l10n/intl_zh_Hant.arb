@@ -527,11 +527,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "下載文件",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "編輯",
     "@edit": {
         "type": "text",

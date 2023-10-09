@@ -407,11 +407,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Deskargatu fitxategia",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editDisplayname": "Editatu ezizena",
   "@editDisplayname": {
     "type": "text",
