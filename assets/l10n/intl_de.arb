@@ -639,11 +639,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Datei herunterladen",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Bearbeiten",
   "@edit": {
     "type": "text",

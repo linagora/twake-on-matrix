@@ -490,11 +490,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Baixa el fitxer",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Edita",
     "@edit": {
         "type": "text",

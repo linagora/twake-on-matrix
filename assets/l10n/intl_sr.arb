@@ -604,11 +604,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Преузми фајл",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Уреди",
     "@edit": {
         "type": "text",

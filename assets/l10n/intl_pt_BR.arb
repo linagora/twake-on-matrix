@@ -643,11 +643,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Baixar arquivo",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Editar",
     "@edit": {
         "type": "text",

@@ -535,11 +535,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "ファイルのダウンロード",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "編集",
   "@edit": {
     "type": "text",

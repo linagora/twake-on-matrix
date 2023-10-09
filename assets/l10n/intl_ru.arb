@@ -644,11 +644,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Скачать файл",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Редактировать",
   "@edit": {
     "type": "text",
