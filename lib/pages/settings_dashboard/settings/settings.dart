@@ -142,28 +142,42 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   void goToSettingsProfile() async {
     optionsSelectNotifier.value = SettingEnum.profile;
-    context.go('/rooms/profile');
+    final result = await context.push('/rooms/profile');
+    if (result == null) {
+      optionsSelectNotifier.value = null;
+    }
   }
 
-  void onClickToSettingsItem(SettingEnum settingEnum) {
+  void onClickToSettingsItem(SettingEnum settingEnum) async {
     optionsSelectNotifier.value = settingEnum;
     switch (settingEnum) {
       case SettingEnum.chatSettings:
-        context.go('/rooms/chat');
+        final result = await context.push('/rooms/chat');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
         break;
       case SettingEnum.privacyAndSecurity:
-        context.go('/rooms/security');
+        final result = await context.push('/rooms/security');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
         break;
       case SettingEnum.notificationAndSounds:
-        context.go('/rooms/notifications');
+        final result = await context.push('/rooms/notifications');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
         break;
       case SettingEnum.chatFolders:
         break;
       case SettingEnum.appLanguage:
         break;
       case SettingEnum.devices:
-        context.go('/rooms/devices');
-        break;
+        final result = await context.push('/rooms/devices');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
       case SettingEnum.help:
         UrlLauncher(
           context,
