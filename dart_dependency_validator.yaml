@@ -8,3 +8,4 @@ ignore:
   - tor_detector_web
   - matrix_api_lite
   - flutter_gen
+  - media_kit_libs_video

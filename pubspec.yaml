@@ -32,6 +32,8 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_foreground_task: ^3.10.0
   flutter_local_notifications: ^12.0.2
+  flutter_localizations:
+    sdk: flutter
   flutter_map: ^3.1.0
   #  flutter_matrix_html: ^1.1.0
   flutter_ringtone_player: ^3.1.1
@@ -129,6 +131,7 @@ dependencies:
       path: video_thumbnail
   media_kit: ^1.1.7
   media_kit_video: ^1.1.8
+  media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
   js: ^0.6.7
 dev_dependencies:
