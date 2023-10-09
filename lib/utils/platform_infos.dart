@@ -46,18 +46,19 @@ abstract class PlatformInfos {
       useRootNavigator: false,
       children: [
         Text('Version: $version'),
-        OutlinedButton(
-          onPressed: () => UrlLauncher(context, AppConfig.sourceCodeUrl)
-              .openUrlInAppBrowser(),
-          child: Text(L10n.of(context)!.sourceCode),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: OutlinedButton(
+            onPressed: () => UrlLauncher(context, AppConfig.sourceCodeUrl)
+                .openUrlInAppBrowser(),
+            child: Text(L10n.of(context)!.sourceCode),
+          ),
         ),
         OutlinedButton(
-          onPressed: () => UrlLauncher(context, AppConfig.emojiFontUrl)
-              .openUrlInAppBrowser(),
-          child: const Text(AppConfig.emojiFontName),
-        ),
-        OutlinedButton(
-          onPressed: () => context.go('logs'),
+          onPressed: () {
+            context.go('/logs');
+            Navigator.of(context).pop();
+          },
           child: const Text('Logs'),
         ),
       ],
