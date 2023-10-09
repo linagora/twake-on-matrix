@@ -37,29 +37,35 @@ class ChatView extends StatelessWidget {
           TwakeIconButton(
             icon: Icons.copy_outlined,
             tooltip: L10n.of(context)!.copy,
-            onTap: controller.copyEventsAction,
+            onTap: () => controller
+                .actionWithClearSelections(controller.copyEventsAction),
           ),
           if (controller.canRedactSelectedEvents)
             TwakeIconButton(
               icon: Icons.delete_outlined,
               tooltip: L10n.of(context)!.redactMessage,
-              onTap: controller.redactEventsAction,
+              onTap: () => controller
+                  .actionWithClearSelections(controller.redactEventsAction),
             ),
           TwakeIconButton(
             icon: Icons.push_pin_outlined,
-            onTap: controller.pinEvent,
             tooltip: L10n.of(context)!.pinMessage,
+            onTap: () =>
+                controller.actionWithClearSelections(controller.pinEventAction),
           ),
           if (controller.selectedEvents.length == 1)
             PopupMenuButton<_EventContextAction>(
               onSelected: (action) {
                 switch (action) {
                   case _EventContextAction.info:
-                    controller.showEventInfo();
-                    controller.clearSelectedEvents();
+                    controller.actionWithClearSelections(
+                      controller.showEventInfoAction,
+                    );
                     break;
                   case _EventContextAction.report:
-                    controller.reportEventAction();
+                    controller.actionWithClearSelections(
+                      controller.reportEventAction,
+                    );
                     break;
                 }
               },
