@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-class EncryptedContentStyle {
-  static const EdgeInsets parentPadding = EdgeInsets.symmetric(
-    horizontal: 8,
+class ButtonContentStyle {
+  static const EdgeInsets parentPadding = EdgeInsets.only(
+    left: 2,
+    right: 8,
   );
   static const EdgeInsets leadingIconPadding = EdgeInsets.all(5);
   static const double leadingIconSize = 20;
