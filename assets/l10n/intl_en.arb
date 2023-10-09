@@ -733,8 +733,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Download file",
-    "@downloadFile": {
+    "download": "Download",
+    "@download": {
         "type": "text",
         "placeholders": {}
     },

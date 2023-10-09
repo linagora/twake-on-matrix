@@ -21,11 +21,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Atsisiųsti failą",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "friday": "Penktadienis",
   "@friday": {
     "type": "text",

@@ -364,11 +364,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Unduh berkas",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "displaynameHasBeenChanged": "Nama tampilan telah diubah",
   "@displaynameHasBeenChanged": {
     "type": "text",

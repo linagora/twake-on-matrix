@@ -648,8 +648,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Télécharger le fichier",
-  "@downloadFile": {
+  "download": "Télécharger",
+  "@download": {
     "type": "text",
     "placeholders": {}
   },

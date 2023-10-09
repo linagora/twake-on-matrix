@@ -647,11 +647,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Bestand downloaden",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Wijzig",
   "@edit": {
     "type": "text",

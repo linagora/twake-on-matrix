@@ -633,11 +633,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Elŝuti dosieron",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Redakti",
     "@edit": {
         "type": "text",

@@ -494,11 +494,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "downloadFile": "Ladda ner fil",
-  "@downloadFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Ändra",
   "@edit": {
     "type": "text",

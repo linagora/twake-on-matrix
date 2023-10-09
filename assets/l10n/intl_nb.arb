@@ -501,11 +501,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Last ned fil",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "edit": "Rediger",
     "@edit": {
         "type": "text",

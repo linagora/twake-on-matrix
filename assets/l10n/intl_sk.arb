@@ -400,11 +400,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Stiahnuť súbor",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "editDisplayname": "Zmeniť prezývku",
     "@editDisplayname": {
         "type": "text",

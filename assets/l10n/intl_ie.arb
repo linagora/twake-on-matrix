@@ -725,11 +725,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "downloadFile": "Descargar li file",
-    "@downloadFile": {
-        "type": "text",
-        "placeholders": {}
-    },
     "emoteSettings": "Parametres de emotiones",
     "@emoteSettings": {
         "type": "text",
