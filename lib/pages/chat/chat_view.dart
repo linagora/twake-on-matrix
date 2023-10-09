@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_search_bottom_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
+import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
@@ -24,7 +25,7 @@ enum _EventContextAction { info, report }
 
 enum _RoomContextAction { search }
 
-class ChatView extends StatelessWidget {
+class ChatView extends StatelessWidget with MessageContentMixin {
   final ChatController controller;
 
   const ChatView(this.controller, {Key? key}) : super(key: key);
@@ -59,7 +60,10 @@ class ChatView extends StatelessWidget {
                 switch (action) {
                   case _EventContextAction.info:
                     controller.actionWithClearSelections(
-                      controller.showEventInfoAction,
+                      () => showEventInfo(
+                        context,
+                        controller.selectedEvents.single,
+                      ),
                     );
                     break;
                   case _EventContextAction.report:

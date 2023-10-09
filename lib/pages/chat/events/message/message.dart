@@ -31,7 +31,6 @@ class Message extends StatelessWidget {
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTab;
-  final void Function(Event)? onInfoTab;
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection) onSwipe;
   final void Function(bool, Event)? onHover;
@@ -49,7 +48,6 @@ class Message extends StatelessWidget {
     this.nextEvent,
     this.longPressSelect = false,
     this.onSelect,
-    this.onInfoTab,
     this.onAvatarTab,
     this.onHover,
     this.scrollToEventId,
@@ -344,8 +342,6 @@ class Message extends StatelessWidget {
                                                             displayEvent,
                                                             textColor:
                                                                 textColor,
-                                                            onInfoTab:
-                                                                onInfoTab,
                                                             endOfBubbleWidget:
                                                                 Padding(
                                                               padding:

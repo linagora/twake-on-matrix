@@ -2,10 +2,13 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
+import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
@@ -22,7 +25,6 @@ import 'package:matrix/matrix.dart' hide Visibility;
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'audio_player.dart';
 import 'cute_events.dart';
 import 'html_message.dart';
@@ -34,7 +36,6 @@ import 'sticker.dart';
 class MessageContent extends StatelessWidget with PlayVideoActionMixin {
   final Event event;
   final Color textColor;
-  final void Function(Event)? onInfoTab;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
   final void Function()? onTapPreview;
@@ -44,7 +45,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
 
   const MessageContent(
     this.event, {
-    this.onInfoTab,
     Key? key,
     required this.controller,
     required this.textColor,
@@ -58,8 +58,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
   @override
   Widget build(BuildContext context) {
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
-    final buttonTextColor =
-        event.senderId == Matrix.of(context).client.userID ? textColor : null;
     switch (event.type) {
       case EventTypes.Encrypted:
         return EncryptedContent(event: event);
@@ -220,20 +218,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
           textmessage:
           default:
             if (event.redacted) {
-              return FutureBuilder<User?>(
-                future: event.redactedBecause?.fetchSenderUser(),
-                builder: (context, snapshot) {
-                  return _ButtonContent(
-                    label: L10n.of(context)!.redactedAnEvent(
-                      snapshot.data?.calcDisplayname() ??
-                          event.senderFromMemoryOrFallback.calcDisplayname(),
-                    ),
-                    icon: const Icon(Icons.delete_outlined),
-                    textColor: buttonTextColor,
-                    onPressed: () => onInfoTab!(event),
-                  );
-                },
-              );
+              return RedactedContent(event: event);
             }
 
             final bigEmotes = event.onlyEmotes &&
@@ -297,65 +282,10 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
             );
         }
       case EventTypes.CallInvite:
-        return FutureBuilder<User?>(
-          future: event.fetchSenderUser(),
-          builder: (context, snapshot) {
-            return _ButtonContent(
-              label: L10n.of(context)!.startedACall(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
-              ),
-              icon: const Icon(Icons.phone_outlined),
-              textColor: buttonTextColor,
-              onPressed: () => onInfoTab!(event),
-            );
-          },
-        );
+        return CallInviteContent(event: event);
       default:
-        return FutureBuilder<User?>(
-          future: event.fetchSenderUser(),
-          builder: (context, snapshot) {
-            return _ButtonContent(
-              label: L10n.of(context)!.userSentUnknownEvent(
-                snapshot.data?.calcDisplayname() ??
-                    event.senderFromMemoryOrFallback.calcDisplayname(),
-                event.type,
-              ),
-              icon: const Icon(Icons.info_outlined),
-              textColor: buttonTextColor,
-              onPressed: () => onInfoTab!(event),
-            );
-          },
-        );
+        return UnknownContent(event: event);
     }
-  }
-}
-
-class _ButtonContent extends StatelessWidget {
-  final void Function() onPressed;
-  final String label;
-  final Icon icon;
-  final Color? textColor;
-
-  const _ButtonContent({
-    required this.label,
-    required this.icon,
-    required this.textColor,
-    required this.onPressed,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: icon,
-      label: Text(label, overflow: TextOverflow.ellipsis),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: textColor,
-        backgroundColor: MessageContentStyle.backgroundColorButton,
-      ),
-    );
   }
 }
 

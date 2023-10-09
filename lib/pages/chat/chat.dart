@@ -22,7 +22,6 @@ import 'package:fluffychat/pages/chat/chat_room_search_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
-import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
@@ -1284,9 +1283,6 @@ class ChatController extends State<Chat>
 
   bool get isArchived =>
       {Membership.leave, Membership.ban}.contains(room?.membership);
-
-  void showEventInfoAction([Event? event]) =>
-      (event ?? selectedEvents.single).showInfoDialog(context);
 
   void onPhoneButtonTap() async {
     // VoIP required Android SDK 21
