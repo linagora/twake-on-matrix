@@ -182,8 +182,8 @@ class MatrixLocals extends MatrixLocalizations {
   String get noPermission => l10n.noKeyForThisMessage;
 
   @override
-  String redactedAnEvent(Event redactedEvent) {
-    return l10n.redactedAnEvent(redactedEvent);
+  String redactedAnEvent(String displayName) {
+    return l10n.redactedAnEvent(displayName);
   }
 
   @override
@@ -192,8 +192,8 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
-  String removedBy(Event redactedEvent) {
-    return l10n.removedBy(redactedEvent);
+  String removedBy(String displayName) {
+    return l10n.removedBy(displayName);
   }
 
   @override
