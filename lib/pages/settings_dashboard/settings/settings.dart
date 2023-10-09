@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     SettingEnum.appLanguage,
     SettingEnum.devices,
     SettingEnum.help,
+    SettingEnum.about,
     SettingEnum.logout,
   ];
 
@@ -184,6 +186,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           AppConfig.supportUrl,
         ).openUrlInAppBrowser();
         break;
+      case SettingEnum.about:
+        PlatformInfos.showDialog(context);
       case SettingEnum.logout:
         logoutAction();
         break;
