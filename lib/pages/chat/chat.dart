@@ -1222,7 +1222,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void pinEvent() {
+  void pinEventAction() {
     final room = this.room;
     if (room == null) return;
     final pinnedEventIds = room.pinnedEventIds;
@@ -1234,7 +1234,6 @@ class ChatController extends State<Chat>
     } else {
       pinnedEventIds.addAll(selectedEventIds);
     }
-    clearSelectedEvents();
     showFutureLoadingDialog(
       context: context,
       future: () => room.setPinnedEvents(pinnedEventIds),
@@ -1287,7 +1286,7 @@ class ChatController extends State<Chat>
   bool get isArchived =>
       {Membership.leave, Membership.ban}.contains(room?.membership);
 
-  void showEventInfo([Event? event]) =>
+  void showEventInfoAction([Event? event]) =>
       (event ?? selectedEvents.single).showInfoDialog(context);
 
   void onPhoneButtonTap() async {
@@ -1473,7 +1472,7 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.pinMessage:
         onSelectMessage(event);
-        pinEvent();
+        pinEventAction();
         break;
       case ChatContextMenuActions.forward:
         onSelectMessage(event);
@@ -1543,6 +1542,11 @@ class ChatController extends State<Chat>
         default:
       }
     }
+  }
+
+  void actionWithClearSelections(Function action) {
+    action();
+    clearSelectedEvents();
   }
 
   @override
