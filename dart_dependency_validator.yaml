@@ -1,0 +1,10 @@
+# Set true if you allow pinned packages in your project.
+allow_pins: true
+# Exclude one or more paths from being scanned. Supports glob syntax.
+exclude:
+  - "app/**"
+# Ignore one or more packages.
+ignore:
+  - tor_detector_web
+  - matrix_api_lite
+  - flutter_gen

@@ -164,6 +164,7 @@ dev_dependencies:
   json_serializable: ^6.6.2
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
+  dependency_validator: ^3.0.0
 
 flutter_icons:
   android: false
