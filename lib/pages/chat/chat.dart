@@ -261,7 +261,6 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    hideKeyboardChatScreen();
     hideSearchKeyboardIfNeeded();
     setReadMarker();
     if (!scrollController.hasClients) return;
