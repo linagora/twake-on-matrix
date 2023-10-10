@@ -95,7 +95,11 @@ class AppScaffoldView extends StatelessWidget {
                     ),
                     ChatList(
                       activeRoomId: activeRoomId,
-                      bottomNavigationBar: _bottomNavigationBarBuilder(context),
+                      bottomNavigationBar: _triggerPageViewBuilder(
+                        navigatorBarType: AdaptiveDestinationEnum.rooms,
+                        navigatorBarWidget:
+                            _bottomNavigationBarBuilder(context),
+                      ),
                       onOpenSearchPage: onOpenSearchPage,
                     ),
                     _triggerPageViewBuilder(
