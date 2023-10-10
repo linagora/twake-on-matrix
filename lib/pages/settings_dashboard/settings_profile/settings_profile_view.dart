@@ -83,7 +83,11 @@ class SettingsProfileView extends StatelessWidget {
                 return SettingsProfileViewMobile(
                   client: controller.client,
                   settingsProfileUIState: controller.settingsProfileUIState,
-                  onAvatarTap: () => controller.setAvatarAction(),
+                  onTapDownAvatar: (detail, context) =>
+                      controller.onTapDownAvatar(
+                    context,
+                    detail,
+                  ),
                   settingsProfileOptions: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -213,7 +217,11 @@ class SettingsProfileView extends StatelessWidget {
                     },
                     itemCount: controller.getListProfileBasicInfo.length,
                   ),
-                  onAvatarTap: () => controller.setAvatarAction(),
+                  onTapDownAvatar: (detail, context) =>
+                      controller.onTapDownAvatar(
+                    context,
+                    detail,
+                  ),
                 );
               },
             ),

@@ -96,6 +96,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     final profile = await client.getProfileFromUserId(
       client.userID!,
       getFromRooms: false,
+      cache: false,
     );
     Logs().d(
       'Settings::_getCurrentProfile() - currentProfile: $profile',
