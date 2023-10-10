@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -59,7 +60,9 @@ class ChatEventList extends StatelessWidget {
       ),
       reverse: true,
       controller: controller.scrollController,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      keyboardDismissBehavior: PlatformInfos.isMobile
+          ? ScrollViewKeyboardDismissBehavior.manual
+          : ScrollViewKeyboardDismissBehavior.onDrag,
       childrenDelegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           // Footer to display typing indicator and read receipts:
