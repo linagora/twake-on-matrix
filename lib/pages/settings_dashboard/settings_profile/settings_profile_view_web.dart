@@ -17,7 +17,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final Widget basicInfoWidget;
   final Widget workIdentitiesInfoWidget;
   final Client client;
-  final void Function(TapDownDetails, BuildContext)? onTapDownAvatar;
+  final List<Widget>? menuChildren;
+  final MenuController? menuController;
 
   const SettingsProfileViewWeb({
     super.key,
@@ -25,7 +26,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
     required this.workIdentitiesInfoWidget,
     required this.client,
     required this.settingsProfileUIState,
-    this.onTapDownAvatar,
+    this.menuController,
+    this.menuChildren,
   });
 
   @override
@@ -154,34 +156,48 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                     .positionedBottomSize,
                                 right: SettingsProfileViewWebStyle
                                     .positionedRightSize,
-                                child: InkWell(
-                                  onTapDown: (detail) =>
-                                      onTapDownAvatar!(detail, context),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(
-                                        SettingsProfileViewWebStyle.avatarSize,
+                                child: MenuAnchor(
+                                  controller: menuController,
+                                  builder: (
+                                    BuildContext context,
+                                    MenuController menuController,
+                                    Widget? child,
+                                  ) {
+                                    return GestureDetector(
+                                      onTap: () => menuController.isOpen
+                                          ? menuController.close()
+                                          : menuController.open(),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          borderRadius: BorderRadius.circular(
+                                            SettingsProfileViewWebStyle
+                                                .avatarSize,
+                                          ),
+                                          border: Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
+                                            width: SettingsProfileViewWebStyle
+                                                .iconEditBorderWidth,
+                                          ),
+                                        ),
+                                        padding: SettingsProfileViewWebStyle
+                                            .paddingEditIcon,
+                                        child: Icon(
+                                          Icons.edit,
+                                          size: SettingsProfileViewWebStyle
+                                              .iconEditSize,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                        ),
                                       ),
-                                      border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
-                                        width: 4,
-                                      ),
-                                    ),
-                                    padding: SettingsProfileViewWebStyle
-                                        .paddingEditIcon,
-                                    child: Icon(
-                                      Icons.edit,
-                                      size: SettingsProfileViewWebStyle
-                                          .iconEditSize,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                    ),
-                                  ),
+                                    );
+                                  },
+                                  menuChildren: menuChildren ?? [],
                                 ),
                               ),
                             ],

@@ -22,7 +22,6 @@ import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
@@ -50,11 +49,12 @@ class SettingsProfileController extends State<SettingsProfile>
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin {
-  final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
       getIt.get<UploadContentInBytesInteractor>();
+
+  final MenuController menuController = MenuController();
 
   Profile? currentProfile;
   AssetEntity? assetEntity;
@@ -64,7 +64,6 @@ class SettingsProfileController extends State<SettingsProfile>
       getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState =
       ValueNotifier<Either<Failure, Success>>(Right(GetAvatarInitialUIState()));
 
@@ -72,10 +71,6 @@ class SettingsProfileController extends State<SettingsProfile>
 
   bool get _hasEditedDisplayName =>
       displayNameEditingController.text != displayName;
-
-  bool get _isWebAndDesktop =>
-      _responsiveUtils.isWebDesktop(context) ||
-      _responsiveUtils.isDesktop(context);
 
   String get displayName =>
       currentProfile?.displayName ??
@@ -108,9 +103,7 @@ class SettingsProfileController extends State<SettingsProfile>
           label: L10n.of(context)!.changeProfilePhoto,
           icon: Icons.add_a_photo_outlined,
         ),
-        if (currentProfile?.avatarUrl != null ||
-            assetEntity != null ||
-            filePickerResult != null)
+        if (currentProfile?.avatarUrl != null)
           SheetAction(
             key: AvatarAction.remove,
             label: L10n.of(context)!.removeYourAvatar,
@@ -143,8 +136,10 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _handleRemoveAvatarAction() async {
     if (assetEntity != null || filePickerResult != null) {
-      _clearImageInLocal();
       isEditedProfileNotifier.toggle();
+    }
+    if (currentProfile?.avatarUrl == null) {
+      _clearImageInLocal();
       settingsProfileUIState.value = Right<Failure, Success>(
         GetProfileUIStateSuccess(
           currentProfile!,
@@ -233,18 +228,7 @@ class SettingsProfileController extends State<SettingsProfile>
     return imagePickerController;
   }
 
-  void onTapDownAvatar(
-    BuildContext context,
-    TapDownDetails detail,
-  ) {
-    if (PlatformInfos.isWeb) {
-      _handleContextMenuAction(context, detail);
-    } else {
-      _handleSetAvatarInMobile();
-    }
-  }
-
-  void _handleSetAvatarInMobile() async {
+  void onTapAvatarInMobile() async {
     final action = actions().isEmpty
         ? actions().single.key
         : await showModalActionSheet<AvatarAction>(
@@ -260,34 +244,7 @@ class SettingsProfileController extends State<SettingsProfile>
     _showImagesPickerAction();
   }
 
-  void _handleContextMenuAction(
-    BuildContext context,
-    TapDownDetails detail,
-  ) {
-    _handleStateContextMenu();
-    final screenSize = MediaQuery.of(context).size;
-    final offset = detail.globalPosition;
-    final position = RelativeRect.fromLTRB(
-      offset.dx,
-      offset.dy - (_isWebAndDesktop ? 60 : 10),
-      screenSize.width - offset.dx,
-      screenSize.height - offset.dy,
-    );
-    openPopupMenuAction(
-      context,
-      position,
-      _popupMenuActionTile(context),
-      onClose: () {
-        _handleStateContextMenu();
-      },
-    );
-  }
-
-  void _handleStateContextMenu() {
-    openingPopupMenu.toggle();
-  }
-
-  List<PopupMenuItem> _popupMenuActionTile(
+  List<PopupMenuItem> listContextMenuBuilder(
     BuildContext context,
   ) {
     final listAction = [
@@ -301,7 +258,11 @@ class SettingsProfileController extends State<SettingsProfile>
           context,
           action.getTitle(context),
           iconAction: action.getIcon(),
-          onCallbackAction: () => _handleActionContextMenu(action),
+          isClearCurrentPage: false,
+          onCallbackAction: () {
+            menuController.close();
+            _handleActionContextMenu(action);
+          },
         ),
       );
     }).toList();

@@ -80,55 +80,58 @@ class SettingsProfileView extends StatelessWidget {
             ): SlotLayout.from(
               key: settingsProfileViewMobileKey,
               builder: (_) {
-                return SettingsProfileViewMobile(
-                  client: controller.client,
-                  settingsProfileUIState: controller.settingsProfileUIState,
-                  onTapDownAvatar: (detail, context) =>
-                      controller.onTapDownAvatar(
-                    context,
-                    detail,
-                  ),
-                  settingsProfileOptions: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return SettingsProfileItemBuilder(
-                        settingsProfileEnum:
-                            controller.getListProfileMobile[index],
-                        title: controller.getListProfileMobile[index]
-                            .getTitle(context),
-                        settingsProfileUIState:
-                            controller.settingsProfileUIState,
-                        settingsProfilePresentation:
-                            SettingsProfilePresentation(
-                          settingsProfileType: controller
-                              .getListProfileMobile[index]
-                              .getSettingsProfileType(),
-                        ),
-                        suffixIcon: controller.getListProfileMobile[index]
-                            .getTrailingIcon(),
-                        leadingIcon: controller.getListProfileMobile[index]
-                            .getLeadingIcon(),
-                        focusNode: controller.getFocusNode(
-                          controller.getListProfileMobile[index],
-                        ),
-                        textEditingController: controller.getController(
-                          controller.getListProfileMobile[index],
-                        ),
-                        onChange: (_, settingsProfileEnum) {
-                          controller
-                              .handleTextEditOnChange(settingsProfileEnum);
+                return ValueListenableBuilder(
+                  valueListenable: controller.settingsProfileUIState,
+                  builder: (context, _, __) {
+                    return SettingsProfileViewMobile(
+                      client: controller.client,
+                      settingsProfileUIState: controller.settingsProfileUIState,
+                      onTapAvatar: controller.onTapAvatarInMobile,
+                      menuChildren: controller.listContextMenuBuilder(context),
+                      menuController: controller.menuController,
+                      settingsProfileOptions: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return SettingsProfileItemBuilder(
+                            settingsProfileEnum:
+                                controller.getListProfileMobile[index],
+                            title: controller.getListProfileMobile[index]
+                                .getTitle(context),
+                            settingsProfileUIState:
+                                controller.settingsProfileUIState,
+                            settingsProfilePresentation:
+                                SettingsProfilePresentation(
+                              settingsProfileType: controller
+                                  .getListProfileMobile[index]
+                                  .getSettingsProfileType(),
+                            ),
+                            suffixIcon: controller.getListProfileMobile[index]
+                                .getTrailingIcon(),
+                            leadingIcon: controller.getListProfileMobile[index]
+                                .getLeadingIcon(),
+                            focusNode: controller.getFocusNode(
+                              controller.getListProfileMobile[index],
+                            ),
+                            textEditingController: controller.getController(
+                              controller.getListProfileMobile[index],
+                            ),
+                            onChange: (_, settingsProfileEnum) {
+                              controller
+                                  .handleTextEditOnChange(settingsProfileEnum);
+                            },
+                            onCopyAction: () => controller.copyEventsAction(
+                              controller.getListProfileMobile[index],
+                            ),
+                          );
                         },
-                        onCopyAction: () => controller.copyEventsAction(
-                          controller.getListProfileMobile[index],
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(height: 16);
-                    },
-                    itemCount: controller.getListProfileMobile.length,
-                  ),
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: 16);
+                        },
+                        itemCount: controller.getListProfileMobile.length,
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -140,6 +143,8 @@ class SettingsProfileView extends StatelessWidget {
                 return SettingsProfileViewWeb(
                   settingsProfileUIState: controller.settingsProfileUIState,
                   client: controller.client,
+                  menuChildren: controller.listContextMenuBuilder(context),
+                  menuController: controller.menuController,
                   basicInfoWidget: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -216,11 +221,6 @@ class SettingsProfileView extends StatelessWidget {
                       return const SizedBox(height: 16);
                     },
                     itemCount: controller.getListProfileBasicInfo.length,
-                  ),
-                  onTapDownAvatar: (detail, context) =>
-                      controller.onTapDownAvatar(
-                    context,
-                    detail,
                   ),
                 );
               },
