@@ -16,15 +16,19 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 class SettingsProfileViewMobile extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final Widget settingsProfileOptions;
-  final void Function(TapDownDetails, BuildContext)? onTapDownAvatar;
+  final VoidCallback? onTapAvatar;
+  final List<Widget>? menuChildren;
+  final MenuController? menuController;
   final Client client;
 
   const SettingsProfileViewMobile({
     super.key,
     required this.settingsProfileOptions,
-    required this.onTapDownAvatar,
+    required this.onTapAvatar,
     required this.settingsProfileUIState,
     required this.client,
+    this.menuChildren,
+    this.menuController,
   });
 
   @override
@@ -147,27 +151,45 @@ class SettingsProfileViewMobile extends StatelessWidget {
               Positioned(
                 bottom: SettingsProfileViewMobileStyle.positionedBottomSize,
                 right: SettingsProfileViewMobileStyle.positionedRightSize,
-                child: InkWell(
-                  onTapDown: (detail) => onTapDownAvatar!(detail, context),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(
-                        SettingsProfileViewMobileStyle.avatarSize,
+                child: MenuAnchor(
+                  controller: menuController,
+                  builder: (
+                    BuildContext context,
+                    MenuController menuController,
+                    Widget? child,
+                  ) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (PlatformInfos.isWeb) {
+                          menuController.isOpen
+                              ? menuController.close()
+                              : menuController.open();
+                        } else {
+                          onTapAvatar?.call();
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(
+                            SettingsProfileViewMobileStyle.avatarSize,
+                          ),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            width: SettingsProfileViewMobileStyle
+                                .iconEditBorderWidth,
+                          ),
+                        ),
+                        padding: SettingsProfileViewMobileStyle.editIconPadding,
+                        child: Icon(
+                          Icons.edit,
+                          size: SettingsProfileViewMobileStyle.iconEditSize,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        width:
-                            SettingsProfileViewMobileStyle.iconEditBorderWidth,
-                      ),
-                    ),
-                    padding: SettingsProfileViewMobileStyle.editIconPadding,
-                    child: Icon(
-                      Icons.edit,
-                      size: SettingsProfileViewMobileStyle.iconEditSize,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
+                    );
+                  },
+                  menuChildren: menuChildren ?? [],
                 ),
               ),
             ],

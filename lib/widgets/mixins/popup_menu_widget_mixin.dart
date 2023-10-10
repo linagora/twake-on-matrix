@@ -15,13 +15,15 @@ mixin PopupMenuWidgetMixin {
     TextStyle? styleName,
     EdgeInsets? padding,
     OnTapIconButtonCallbackAction? onCallbackAction,
+    bool isClearCurrentPage = true,
   }) {
     return InkWell(
       onTap: () {
         /// Pop the current page, snackbar, dialog or bottomsheet in the stack
         /// will close the currently open snackbar/dialog/bottomsheet AND the current page
-        TwakeApp.router.routerDelegate.pop();
-
+        if (isClearCurrentPage) {
+          TwakeApp.router.routerDelegate.pop();
+        }
         onCallbackAction!.call();
       },
       child: Padding(
