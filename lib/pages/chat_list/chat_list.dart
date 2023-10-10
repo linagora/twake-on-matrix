@@ -218,6 +218,11 @@ class ChatListController extends State<ChatList>
     _clearSelectionItem();
   }
 
+  Future<void> actionWithToggleSelectMode(Function action) async {
+    await action();
+    toggleSelectMode();
+  }
+
   void _clearSelectionItem() {
     conversationSelectionNotifier.value = [];
   }
@@ -254,7 +259,6 @@ class ChatListController extends State<ChatList>
         }
       },
     );
-    toggleSelectMode();
   }
 
   Future<void> toggleFavouriteRoom() async {
@@ -271,7 +275,6 @@ class ChatListController extends State<ChatList>
         }
       },
     );
-    toggleSelectMode();
   }
 
   Future<void> toggleMuted() async {
@@ -290,7 +293,6 @@ class ChatListController extends State<ChatList>
         }
       },
     );
-    toggleSelectMode();
   }
 
   Future<void> archiveAction() async {
@@ -506,19 +508,20 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (chatListBottomNavigatorBar) {
       case ChatListSelectionActions.read:
-        await toggleUnread();
-        toggleSelectMode();
+        await actionWithToggleSelectMode(toggleUnread);
         return;
       case ChatListSelectionActions.mute:
-        await toggleMuted();
-        toggleSelectMode();
+        await actionWithToggleSelectMode(toggleMuted);
         return;
       case ChatListSelectionActions.pin:
-        await toggleFavouriteRoom();
-        toggleSelectMode();
+        await actionWithToggleSelectMode(toggleFavouriteRoom);
         return;
       case ChatListSelectionActions.more:
-        toggleSelectMode();
+        await actionWithToggleSelectMode(
+          () => {
+            TwakeSnackBar.show(context, 'Not implemented yet'),
+          },
+        );
         return;
     }
   }
