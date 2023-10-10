@@ -149,7 +149,7 @@ class SettingsProfileController extends State<SettingsProfile>
       TwakeLoadingDialog.showLoadingDialog(context);
       final newProfile = Profile(
         userId: client.userID!,
-        displayName: displayNameEditingController.text,
+        displayName: displayName,
         avatarUrl: null,
       );
       settingsProfileUIState.value =
@@ -229,13 +229,11 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void onTapAvatarInMobile() async {
-    final action = actions().isEmpty
-        ? actions().single.key
-        : await showModalActionSheet<AvatarAction>(
-            context: context,
-            title: L10n.of(context)!.changeYourAvatar,
-            actions: actions(),
-          );
+    final action = await showModalActionSheet<AvatarAction>(
+      context: context,
+      title: L10n.of(context)!.changeYourAvatar,
+      actions: actions(),
+    );
     if (action == null) return;
     if (action == AvatarAction.remove) {
       _handleRemoveAvatarAction();
