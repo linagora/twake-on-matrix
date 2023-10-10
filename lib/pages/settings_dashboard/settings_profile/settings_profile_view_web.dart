@@ -16,16 +16,16 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final Widget basicInfoWidget;
   final Widget workIdentitiesInfoWidget;
-  final VoidCallback onAvatarTap;
   final Client client;
+  final void Function(TapDownDetails, BuildContext)? onTapDownAvatar;
 
   const SettingsProfileViewWeb({
     super.key,
     required this.basicInfoWidget,
-    required this.onAvatarTap,
     required this.workIdentitiesInfoWidget,
     required this.client,
     required this.settingsProfileUIState,
+    this.onTapDownAvatar,
   });
 
   @override
@@ -155,7 +155,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                 right: SettingsProfileViewWebStyle
                                     .positionedRightSize,
                                 child: InkWell(
-                                  onTap: onAvatarTap,
+                                  onTapDown: (detail) =>
+                                      onTapDownAvatar!(detail, context),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color:

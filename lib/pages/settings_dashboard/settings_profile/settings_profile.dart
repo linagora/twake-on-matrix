@@ -11,6 +11,7 @@ import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
@@ -21,8 +22,11 @@ import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -41,7 +45,12 @@ class SettingsProfile extends StatefulWidget {
 }
 
 class SettingsProfileController extends State<SettingsProfile>
-    with CommonMediaPickerMixin, SingleImagePickerMixin {
+    with
+        CommonMediaPickerMixin,
+        SingleImagePickerMixin,
+        PopupContextMenuActionMixin,
+        PopupMenuWidgetMixin {
+  final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
@@ -55,6 +64,7 @@ class SettingsProfileController extends State<SettingsProfile>
       getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState =
       ValueNotifier<Either<Failure, Success>>(Right(GetAvatarInitialUIState()));
 
@@ -62,6 +72,10 @@ class SettingsProfileController extends State<SettingsProfile>
 
   bool get _hasEditedDisplayName =>
       displayNameEditingController.text != displayName;
+
+  bool get _isWebAndDesktop =>
+      _responsiveUtils.isWebDesktop(context) ||
+      _responsiveUtils.isDesktop(context);
 
   String get displayName =>
       currentProfile?.displayName ??
@@ -128,21 +142,25 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleRemoveAvatarAction() async {
-    if ((assetEntity != null || filePickerResult != null) &&
-        currentProfile?.avatarUrl == null) {
+    if (assetEntity != null || filePickerResult != null) {
       _clearImageInLocal();
-      return;
+      isEditedProfileNotifier.toggle();
+      settingsProfileUIState.value = Right<Failure, Success>(
+        GetProfileUIStateSuccess(
+          currentProfile!,
+        ),
+      );
+    } else {
+      TwakeLoadingDialog.showLoadingDialog(context);
+      final newProfile = Profile(
+        userId: client.userID!,
+        displayName: displayNameEditingController.text,
+        avatarUrl: null,
+      );
+      settingsProfileUIState.value =
+          Right<Failure, Success>(GetProfileUIStateSuccess(newProfile));
+      _uploadProfile(isDeleteAvatar: true);
     }
-    TwakeLoadingDialog.showLoadingDialog(context);
-    final newProfile = Profile(
-      userId: client.userID!,
-      displayName: displayNameEditingController.text,
-      avatarUrl: null,
-    );
-    settingsProfileUIState.value =
-        Right<Failure, Success>(GetProfileUIStateSuccess(newProfile));
-    _uploadProfile(isDeleteAvatar: true);
-    return;
   }
 
   void _getImageOnWeb(
@@ -215,7 +233,18 @@ class SettingsProfileController extends State<SettingsProfile>
     return imagePickerController;
   }
 
-  void setAvatarAction() async {
+  void onTapDownAvatar(
+    BuildContext context,
+    TapDownDetails detail,
+  ) {
+    if (PlatformInfos.isWeb) {
+      _handleContextMenuAction(context, detail);
+    } else {
+      _handleSetAvatarInMobile();
+    }
+  }
+
+  void _handleSetAvatarInMobile() async {
     final action = actions().isEmpty
         ? actions().single.key
         : await showModalActionSheet<AvatarAction>(
@@ -229,6 +258,64 @@ class SettingsProfileController extends State<SettingsProfile>
       return;
     }
     _showImagesPickerAction();
+  }
+
+  void _handleContextMenuAction(
+    BuildContext context,
+    TapDownDetails detail,
+  ) {
+    _handleStateContextMenu();
+    final screenSize = MediaQuery.of(context).size;
+    final offset = detail.globalPosition;
+    final position = RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy - (_isWebAndDesktop ? 60 : 10),
+      screenSize.width - offset.dx,
+      screenSize.height - offset.dy,
+    );
+    openPopupMenuAction(
+      context,
+      position,
+      _popupMenuActionTile(context),
+      onClose: () {
+        _handleStateContextMenu();
+      },
+    );
+  }
+
+  void _handleStateContextMenu() {
+    openingPopupMenu.toggle();
+  }
+
+  List<PopupMenuItem> _popupMenuActionTile(
+    BuildContext context,
+  ) {
+    final listAction = [
+      SettingsProfileContextMenuActions.edit,
+      SettingsProfileContextMenuActions.delete,
+    ];
+    return listAction.map((action) {
+      return PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: popupItem(
+          context,
+          action.getTitle(context),
+          iconAction: action.getIcon(),
+          onCallbackAction: () => _handleActionContextMenu(action),
+        ),
+      );
+    }).toList();
+  }
+
+  void _handleActionContextMenu(SettingsProfileContextMenuActions action) {
+    switch (action) {
+      case SettingsProfileContextMenuActions.edit:
+        _showImagesPickerAction();
+        break;
+      case SettingsProfileContextMenuActions.delete:
+        _handleRemoveAvatarAction();
+        break;
+    }
   }
 
   void _sendAccountDataEvent({
@@ -294,6 +381,9 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _clearImageInLocal() {
+    Logs().d(
+      'SettingsProfile::_clearImageInLocal() - Clear image in local',
+    );
     if (assetEntity != null) {
       assetEntity = null;
     }
@@ -400,7 +490,7 @@ class SettingsProfileController extends State<SettingsProfile>
           final newProfile = Profile(
             userId: client.userID!,
             displayName: success.displayName ?? displayName,
-            avatarUrl: success.avatar ?? currentProfile?.avatarUrl,
+            avatarUrl: success.avatar,
           );
           _sendAccountDataEvent(profile: newProfile);
           if (!success.isDeleteAvatar) {
