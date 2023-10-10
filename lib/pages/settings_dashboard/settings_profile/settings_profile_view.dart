@@ -80,58 +80,53 @@ class SettingsProfileView extends StatelessWidget {
             ): SlotLayout.from(
               key: settingsProfileViewMobileKey,
               builder: (_) {
-                return ValueListenableBuilder(
-                  valueListenable: controller.settingsProfileUIState,
-                  builder: (context, _, __) {
-                    return SettingsProfileViewMobile(
-                      client: controller.client,
-                      settingsProfileUIState: controller.settingsProfileUIState,
-                      onTapAvatar: controller.onTapAvatarInMobile,
-                      menuChildren: controller.listContextMenuBuilder(context),
-                      menuController: controller.menuController,
-                      settingsProfileOptions: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return SettingsProfileItemBuilder(
-                            settingsProfileEnum:
-                                controller.getListProfileMobile[index],
-                            title: controller.getListProfileMobile[index]
-                                .getTitle(context),
-                            settingsProfileUIState:
-                                controller.settingsProfileUIState,
-                            settingsProfilePresentation:
-                                SettingsProfilePresentation(
-                              settingsProfileType: controller
-                                  .getListProfileMobile[index]
-                                  .getSettingsProfileType(),
-                            ),
-                            suffixIcon: controller.getListProfileMobile[index]
-                                .getTrailingIcon(),
-                            leadingIcon: controller.getListProfileMobile[index]
-                                .getLeadingIcon(),
-                            focusNode: controller.getFocusNode(
-                              controller.getListProfileMobile[index],
-                            ),
-                            textEditingController: controller.getController(
-                              controller.getListProfileMobile[index],
-                            ),
-                            onChange: (_, settingsProfileEnum) {
-                              controller
-                                  .handleTextEditOnChange(settingsProfileEnum);
-                            },
-                            onCopyAction: () => controller.copyEventsAction(
-                              controller.getListProfileMobile[index],
-                            ),
-                          );
+                return SettingsProfileViewMobile(
+                  client: controller.client,
+                  settingsProfileUIState: controller.settingsProfileUIState,
+                  onTapAvatar: controller.onTapAvatarInMobile,
+                  menuChildren: controller.listContextMenuBuilder(context),
+                  menuController: controller.menuController,
+                  settingsProfileOptions: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return SettingsProfileItemBuilder(
+                        settingsProfileEnum:
+                            controller.getListProfileMobile[index],
+                        title: controller.getListProfileMobile[index]
+                            .getTitle(context),
+                        settingsProfileUIState:
+                            controller.settingsProfileUIState,
+                        settingsProfilePresentation:
+                            SettingsProfilePresentation(
+                          settingsProfileType: controller
+                              .getListProfileMobile[index]
+                              .getSettingsProfileType(),
+                        ),
+                        suffixIcon: controller.getListProfileMobile[index]
+                            .getTrailingIcon(),
+                        leadingIcon: controller.getListProfileMobile[index]
+                            .getLeadingIcon(),
+                        focusNode: controller.getFocusNode(
+                          controller.getListProfileMobile[index],
+                        ),
+                        textEditingController: controller.getController(
+                          controller.getListProfileMobile[index],
+                        ),
+                        onChange: (_, settingsProfileEnum) {
+                          controller
+                              .handleTextEditOnChange(settingsProfileEnum);
                         },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(height: 16);
-                        },
-                        itemCount: controller.getListProfileMobile.length,
-                      ),
-                    );
-                  },
+                        onCopyAction: () => controller.copyEventsAction(
+                          controller.getListProfileMobile[index],
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(height: 16);
+                    },
+                    itemCount: controller.getListProfileMobile.length,
+                  ),
                 );
               },
             ),

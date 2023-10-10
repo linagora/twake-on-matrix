@@ -96,7 +96,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     final profile = await client.getProfileFromUserId(
       client.userID!,
       getFromRooms: false,
-      cache: false,
     );
     Logs().d(
       'Settings::_getCurrentProfile() - currentProfile: $profile',
@@ -224,8 +223,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   @override
   void dispose() {
     onAccountDataSubscription?.cancel();
-    avatarUriNotifier.dispose();
-    displayNameNotifier.dispose();
+    if (avatarUriNotifier.value != null) {
+      avatarUriNotifier.dispose();
+    }
+
+    if (displayNameNotifier.value != null) {
+      displayNameNotifier.dispose();
+    }
     super.dispose();
   }
 
