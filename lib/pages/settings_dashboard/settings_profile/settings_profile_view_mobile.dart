@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
@@ -15,13 +16,13 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 class SettingsProfileViewMobile extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final Widget settingsProfileOptions;
-  final VoidCallback onAvatarTap;
+  final void Function(TapDownDetails, BuildContext)? onTapDownAvatar;
   final Client client;
 
   const SettingsProfileViewMobile({
     super.key,
     required this.settingsProfileOptions,
-    required this.onAvatarTap,
+    required this.onTapDownAvatar,
     required this.settingsProfileUIState,
     required this.client,
   });
@@ -49,7 +50,8 @@ class SettingsProfileViewMobile extends StatelessWidget {
                 builder: (context, uiState, child) => uiState.fold(
                   (failure) => child!,
                   (success) {
-                    if (success is GetAvatarInStreamUIStateSuccess) {
+                    if (success is GetAvatarInStreamUIStateSuccess &&
+                        PlatformInfos.isMobile) {
                       if (success.assetEntity == null) {
                         return child!;
                       }
@@ -59,6 +61,8 @@ class SettingsProfileViewMobile extends StatelessWidget {
                             AvatarStyle.defaultSize,
                           ),
                           child: AssetEntityImage(
+                            width: AvatarStyle.defaultSize,
+                            height: AvatarStyle.defaultSize,
                             success.assetEntity!,
                             thumbnailSize: const ThumbnailSize(
                               SettingsProfileViewMobileStyle.thumbnailSize,
@@ -75,6 +79,30 @@ class SettingsProfileViewMobile extends StatelessWidget {
                               }
                               return child;
                             },
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Icon(Icons.error_outline),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    }
+                    if (success is GetAvatarInBytesUIStateSuccess &&
+                        PlatformInfos.isWeb) {
+                      if (success.filePickerResult == null ||
+                          success.filePickerResult?.files.single.bytes ==
+                              null) {
+                        return child!;
+                      }
+                      return ClipOval(
+                        child: SizedBox.fromSize(
+                          size: const Size.fromRadius(
+                            AvatarStyle.defaultSize,
+                          ),
+                          child: Image.memory(
+                            success.filePickerResult!.files.single.bytes!,
+                            fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return const Center(
                                 child: Icon(Icons.error_outline),
@@ -120,7 +148,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                 bottom: SettingsProfileViewMobileStyle.positionedBottomSize,
                 right: SettingsProfileViewMobileStyle.positionedRightSize,
                 child: InkWell(
-                  onTap: onAvatarTap,
+                  onTapDown: (detail) => onTapDownAvatar!(detail, context),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
