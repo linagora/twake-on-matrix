@@ -356,6 +356,10 @@ class BackgroundPush {
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
+      if (client.getRoomById(roomId) == null) {
+        Logs().v('[Push] Room $roomId not found, syncing...');
+        await client.waitForRoomInSync(roomId);
+      }
       TwakeApp.router.go('/rooms/$roomId');
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
