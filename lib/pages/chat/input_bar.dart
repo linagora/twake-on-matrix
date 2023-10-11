@@ -320,9 +320,10 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       },
       child: CallbackShortcuts(
         bindings: {
-          const SingleActivator(
+          SingleActivator(
             flutter.LogicalKeyboardKey.keyV,
-            meta: true,
+            meta: PlatformInfos.isMacKeyboardPlatform,
+            control: !PlatformInfos.isMacKeyboardPlatform,
           ): () async {
             if (await Clipboard.instance.isReadableImageFormat()) {
               await pasteImage(context, room!);
