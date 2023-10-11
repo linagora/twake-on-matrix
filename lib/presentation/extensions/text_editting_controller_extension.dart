@@ -1,15 +1,16 @@
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' as flutter;
 
 extension TextEdittingControllerExtension on TextEditingController {
   Future<void> pasteText() async {
     final start = selection.start;
     final end = selection.end;
+    Clipboard.instance.initReader();
     final pastedText = await Clipboard.instance.pasteText();
     if (pastedText != null) {
       if (start == -1 || end == -1) {
         text = pastedText + text;
+        selection = TextSelection.collapsed(offset: text.length);
         return;
       }
       if (start == end) {
@@ -19,6 +20,7 @@ extension TextEdittingControllerExtension on TextEditingController {
       } else {
         text = text.replaceRange(start, end, pastedText);
       }
+      selection = TextSelection.collapsed(offset: end + pastedText.length);
     }
   }
 
@@ -26,11 +28,7 @@ extension TextEdittingControllerExtension on TextEditingController {
     final start = selection.start;
     final end = selection.end;
     if (start < end) {
-      await flutter.Clipboard.setData(
-        flutter.ClipboardData(
-          text: text.substring(start, end),
-        ),
-      );
+      await Clipboard.instance.copyText(text.substring(start, end));
     }
   }
 

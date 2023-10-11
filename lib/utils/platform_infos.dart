@@ -30,10 +30,10 @@ abstract class PlatformInfos {
   static bool get platformCanRecord => (isMobile || isMacOS);
 
   static bool get isMacKeyboardPlatform =>
-      isMacOS &&
+      isMacOS ||
       (kIsWeb &&
           html.window.navigator.platform != null &&
-          html.window.navigator.platform!.contains('mac'));
+          html.window.navigator.platform!.toLowerCase().contains('mac'));
 
   static String get clientName =>
       '${AppConfig.applicationName} ${isWeb ? 'web' : Platform.operatingSystem}${kReleaseMode ? '' : 'Debug'}';

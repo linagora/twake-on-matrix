@@ -48,7 +48,6 @@ import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart' as flutter;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -780,28 +779,24 @@ class ChatController extends State<Chat>
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
       final event = selectedEvents.first;
-      final matrixFile = event.getMatrixFile() ??
-          await event.downloadAndDecryptAttachment(
-            getThumbnail: true,
-          );
-      if (event.messageType == MessageTypes.Image) {
-        if (matrixFile.filePath != null) {
-          await Clipboard.instance.copyImageAsStream(
-            File(matrixFile.filePath!),
-            mimeType: event.mimeType,
-          );
-          if (!PlatformInfos.isAndroid) {
-            TwakeSnackBar.show(context, L10n.of(context)!.copyImageSuccess);
+      if (event.messageType == MessageTypes.Image && PlatformInfos.isWeb) {
+        final matrixFile = event.getMatrixFile() ??
+            await event.downloadAndDecryptAttachment(
+              getThumbnail: true,
+            );
+        try {
+          if (matrixFile.filePath != null) {
+            await Clipboard.instance.copyImageAsStream(
+              File(matrixFile.filePath!),
+              mimeType: event.mimeType,
+            );
+          } else if (matrixFile.bytes != null) {
+            await Clipboard.instance.copyImageAsBytes(
+              matrixFile.bytes!,
+              mimeType: event.mimeType,
+            );
           }
-        } else if (matrixFile.bytes != null) {
-          await Clipboard.instance.copyImageAsBytes(
-            matrixFile.bytes!,
-            mimeType: event.mimeType,
-          );
-          if (!PlatformInfos.isAndroid) {
-            TwakeSnackBar.show(context, L10n.of(context)!.copyImageSuccess);
-          }
-        } else {
+        } catch (e) {
           TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
           Logs().e(
             'copySingleEventAction(): failed to copy file ${matrixFile.name}',
@@ -814,11 +809,7 @@ class ChatController extends State<Chat>
   }
 
   void copyEventsAction() {
-    flutter.Clipboard.setData(
-      flutter.ClipboardData(
-        text: _getSelectedEventString(),
-      ),
-    );
+    Clipboard.instance.copyText(_getSelectedEventString());
 
     showEmojiPickerNotifier.value = false;
     setState(() {
