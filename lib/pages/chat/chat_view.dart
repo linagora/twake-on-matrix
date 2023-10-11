@@ -38,7 +38,7 @@ class ChatView extends StatelessWidget {
             icon: Icons.copy_outlined,
             tooltip: L10n.of(context)!.copy,
             onTap: () => controller
-                .actionWithClearSelections(controller.copyEventsAction),
+                .actionWithClearSelections(controller.copySingleEventAction),
           ),
           if (controller.canRedactSelectedEvents)
             TwakeIconButton(
