@@ -2759,5 +2759,7 @@
   "searchSuggestion": "Вы можете искать пользователей по имени или публичному адресу сервера",
   "@searchSuggestion": {},
   "forwardTo": "Переслать...",
-  "@forwardTo": {}
+  "@forwardTo": {},
+  "noMoreResult": "Больше нет результатов",
+  "@noMoreResult": {}
 }
