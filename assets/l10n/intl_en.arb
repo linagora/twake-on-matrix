@@ -2760,5 +2760,9 @@
     "thisMessageHasBeenEncrypted": "This message has been encrypted",
     "roomCreationFailed": "Room creation failed",
     "errorGettingPdf": "Error getting PDF",
-    "errorPreviewingFile": "Error previewing file"
+    "errorPreviewingFile": "Error previewing file",
+    "paste": "Paste",
+    "cut": "Cut",
+    "pasteImageFailed": "Paste image failed",
+    "copyImageFailed": "Copy image failed"
 }
