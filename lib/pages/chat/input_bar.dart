@@ -311,47 +311,65 @@ class InputBar extends StatelessWidget {
           onSubmitted?.call(controller?.text ?? '');
         }
       },
-      child: TypeAheadField<Map<String, String?>>(
-        direction: AxisDirection.up,
-        hideOnEmpty: true,
-        hideOnLoading: true,
-        keepSuggestionsOnSuggestionSelected: true,
-        debounceDuration: const Duration(milliseconds: 50),
-        // show suggestions after 50ms idle time (default is 300)
-        textFieldConfiguration: TextFieldConfiguration(
-          minLines: minLines,
-          maxLines: maxLines,
-          keyboardType: keyboardType!,
-          textInputAction: textInputAction,
-          autofocus: autofocus!,
-          style: InputBarStyle.getTypeAheadTextStyle(context),
-          onSubmitted: (text) {
-            // fix for library for now
-            // it sets the types for the callback incorrectly
-            onSubmitted!(text);
+        child: Listener(
+          onPointerDown: (PointerDownEvent event) async {
+            if (event.kind == PointerDeviceKind.mouse &&
+                event.buttons == kSecondaryMouseButton) {
+              // FIXME: the contextMenuBuilder.editable can do this but its style in web is not customizable
+              // currently this is only solution
+              final screenSize = MediaQuery.of(context).size;
+              final offset = event.position;
+              final position = RelativeRect.fromLTRB(
+                offset.dx,
+                offset.dy,
+                screenSize.width - offset.dx,
+                screenSize.height - offset.dy,
+              );
+              final menuItem = await showMenu<InputBarContextMenu>(
+                useRootNavigator: PlatformInfos.isWeb,
+                context: context,
+                items: [
+                  PopupMenuItem(
+                    value: InputBarContextMenu.copy,
+                    child: Text(L10n.of(context)!.copy),
+                  ),
+                  PopupMenuItem(
+                    value: InputBarContextMenu.cut,
+                    child: Text(L10n.of(context)!.cut),
+                  ),
+                  PopupMenuItem(
+                    value: InputBarContextMenu.paste,
+                    child: Text(L10n.of(context)!.paste),
+                  ),
+                ],
+                position: position,
+              );
+
+              if (menuItem == null) {
+                return;
+              }
+
+              if (controller == null) {
+                return;
+              }
+
+              switch (menuItem) {
+                case InputBarContextMenu.copy:
+                  controller!.copyText();
+                  break;
+                case InputBarContextMenu.cut:
+                  controller!.cutText();
+                  break;
+                case InputBarContextMenu.paste:
+                  if (await Clipboard.instance.isReadableImageFormat()) {
+                    await pasteImage(context, room!);
+                  } else {
+                    await controller!.pasteText();
+                  }
+                  break;
+              }
+            }
           },
-          controller: controller,
-          decoration: decoration!,
-          focusNode: focusNode,
-          onChanged: (text) {
-            // fix for the library for now
-            // it sets the types for the callback incorrectly
-            onChanged!(text);
-          },
-          textCapitalization: TextCapitalization.sentences,
-        ),
-        suggestionsCallback: getSuggestions,
-        itemBuilder: (context, suggestion) => SuggestionTile(
-          suggestion: suggestion,
-          client: Matrix.of(context).client,
-        ),
-        onSuggestionSelected: (Map<String, String?> suggestion) =>
-            insertSuggestion(context, suggestion),
-        errorBuilder: (BuildContext context, Object? error) => Container(),
-        loadingBuilder: (BuildContext context) => Container(),
-        // fix loading briefly flickering a dark box
-        noItemsFoundBuilder: (BuildContext context) =>
-            Container(), // fix loading briefly showing no suggestions
       ),
     );
   }
