@@ -1,3 +1,5 @@
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -43,18 +45,18 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
       // ignore: unused_local_variable
       final scaffoldMessenger = ScaffoldMessenger.of(context);
-      // widget.room
-      //     .sendFileEvent(
-      //   file,
-      //   thumbnail: thumbnail,
-      //   shrinkImageMaxDimension: origImage ? null : 1600,
-      // )
-      //     .catchError((e) {
-      //   scaffoldMessenger.showSnackBar(
-      //     SnackBar(content: Text((e as Object).toLocalizedString(context))),
-      //   );
-      //   return null;
-      // });
+      widget.room
+          .sendFileOnWebEvent(
+        file,
+        thumbnail: thumbnail,
+        shrinkImageMaxDimension: origImage ? null : 1600,
+      )
+          .catchError((e) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text((e as Object).toLocalizedString(context))),
+        );
+        return null;
+      });
     }
     Navigator.of(context, rootNavigator: false).pop();
 
