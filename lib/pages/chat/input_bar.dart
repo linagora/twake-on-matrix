@@ -461,7 +461,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                             // FIXME: need to handle the case when in draft chat
                             return;
                           }
-
+                          await Clipboard.instance.initReader();
                           if (await Clipboard.instance
                               .isReadableImageFormat()) {
                             await pasteImage(context, room!);

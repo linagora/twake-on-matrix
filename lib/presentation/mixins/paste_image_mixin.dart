@@ -13,6 +13,7 @@ mixin PasteImageMixin {
   Future<void> pasteImage(BuildContext context, Room room) async {
     await Clipboard.instance.initReader();
     if (!(await Clipboard.instance.isReadableImageFormat())) {
+      TwakeSnackBar.show(context, L10n.of(context)!.fileFormatNotSupported);
       Logs().e('PasteImageMixin::pasteImage(): not readable image format');
       return;
     }

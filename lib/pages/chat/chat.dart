@@ -786,15 +786,21 @@ class ChatController extends State<Chat>
           );
       if (event.messageType == MessageTypes.Image) {
         if (matrixFile.filePath != null) {
-          Clipboard.instance.copyImageAsStream(
+          await Clipboard.instance.copyImageAsStream(
             File(matrixFile.filePath!),
             mimeType: event.mimeType,
           );
+          if (!PlatformInfos.isAndroid) {
+            TwakeSnackBar.show(context, L10n.of(context)!.copyImageSuccess);
+          }
         } else if (matrixFile.bytes != null) {
-          Clipboard.instance.copyImageAsBytes(
+          await Clipboard.instance.copyImageAsBytes(
             matrixFile.bytes!,
             mimeType: event.mimeType,
           );
+          if (!PlatformInfos.isAndroid) {
+            TwakeSnackBar.show(context, L10n.of(context)!.copyImageSuccess);
+          }
         } else {
           TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
           Logs().e(
