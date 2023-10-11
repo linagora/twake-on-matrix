@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/popup_menu_item_web_enum.dart';
 import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
@@ -426,65 +425,40 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                 // it sets the types for the callback incorrectly
                 onChanged!(text);
               },
-              textCapitalization: TextCapitalization.sentences,
-              contentInsertionConfiguration: ContentInsertionConfiguration(
-                onContentInserted: (keyboardInsertContent) async {
-                  if (room == null || !keyboardInsertContent.hasData) {
-                    return;
-                  }
-                  await showDialog(
-                    context: context,
-                    useRootNavigator: PlatformInfos.isWeb,
-                    builder: (context) {
-                      return SendFileDialog(
-                        room: room!,
-                        files: [
-                          MatrixImageFile(
-                            name: keyboardInsertContent.uri,
-                            bytes: keyboardInsertContent.data,
-                          )
-                        ],
+              contextMenuBuilder: !PlatformInfos.isWeb
+                  ? (
+                      BuildContext contextMenucontext,
+                      EditableTextState editableTextState,
+                    ) {
+                      return AdaptiveTextSelectionToolbar.editable(
+                        anchors: editableTextState.contextMenuAnchors,
+                        clipboardStatus: ClipboardStatus.pasteable,
+                        onPaste: !PlatformInfos.isWeb
+                            ? () async {
+                                if (room == null) {
+                                  // FIXME: need to handle the case when in draft chat
+                                  return;
+                                }
+                                editableTextState
+                                    .pasteText(SelectionChangedCause.toolbar);
+                              }
+                            : null,
+                        onCopy: () {
+                          editableTextState
+                              .copySelection(SelectionChangedCause.toolbar);
+                        },
+                        onCut: () {
+                          editableTextState
+                              .cutSelection(SelectionChangedCause.toolbar);
+                        },
+                        onSelectAll: () {
+                          editableTextState
+                              .selectAll(SelectionChangedCause.toolbar);
+                        },
                       );
-                    },
-                  );
-                },
-              ),
-              contextMenuBuilder: (
-                BuildContext contextMenucontext,
-                EditableTextState editableTextState,
-              ) {
-                return AdaptiveTextSelectionToolbar.editable(
-                  anchors: editableTextState.contextMenuAnchors,
-                  clipboardStatus: ClipboardStatus.pasteable,
-                  onPaste: !PlatformInfos.isWeb
-                      ? () async {
-                          if (room == null) {
-                            // FIXME: need to handle the case when in draft chat
-                            return;
-                          }
-                          await Clipboard.instance.initReader();
-                          if (await Clipboard.instance
-                              .isReadableImageFormat()) {
-                            await pasteImage(context, room!);
-                          } else {
-                            editableTextState
-                                .pasteText(SelectionChangedCause.toolbar);
-                          }
-                        }
-                      : null,
-                  onCopy: () {
-                    editableTextState
-                        .copySelection(SelectionChangedCause.toolbar);
-                  },
-                  onCut: () {
-                    editableTextState
-                        .cutSelection(SelectionChangedCause.toolbar);
-                  },
-                  onSelectAll: () {
-                    editableTextState.selectAll(SelectionChangedCause.toolbar);
-                  },
-                );
-              },
+                    }
+                  : null,
+              textCapitalization: TextCapitalization.sentences,
             ),
             suggestionsCallback: getSuggestions,
             itemBuilder: (context, suggestion) => SuggestionTile(
