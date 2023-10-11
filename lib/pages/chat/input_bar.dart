@@ -1,7 +1,14 @@
+import 'package:fluffychat/pages/chat/send_file_dialog.dart';
+import 'package:fluffychat/presentation/enum/chat/popup_menu_item_web_enum.dart';
+import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
+import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/extension/raw_key_event_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' as flutter;
 
 import 'package:emojis/emoji.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -15,7 +22,7 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 
 import 'command_hints.dart';
 
-class InputBar extends StatelessWidget {
+class InputBar extends StatelessWidget with PasteImageMixin {
   final Room? room;
   final int? minLines;
   final int? maxLines;
@@ -391,6 +398,107 @@ class InputBar extends StatelessWidget {
               }
             }
           },
+          child: TypeAheadField<Map<String, String?>>(
+            direction: AxisDirection.up,
+            hideOnEmpty: true,
+            hideOnLoading: true,
+            keepSuggestionsOnSuggestionSelected: true,
+            debounceDuration: const Duration(milliseconds: 50),
+            // show suggestions after 50ms idle time (default is 300)
+            textFieldConfiguration: TextFieldConfiguration(
+              minLines: minLines,
+              maxLines: maxLines,
+              keyboardType: keyboardType!,
+              textInputAction: textInputAction,
+              autofocus: autofocus!,
+              style: InputBarStyle.getTypeAheadTextStyle(context),
+              onSubmitted: (text) {
+                // fix for library for now
+                // it sets the types for the callback incorrectly
+                onSubmitted!(text);
+              },
+              controller: controller,
+              decoration: decoration!,
+              focusNode: focusNode,
+              onChanged: (text) {
+                // fix for the library for now
+                // it sets the types for the callback incorrectly
+                onChanged!(text);
+              },
+              textCapitalization: TextCapitalization.sentences,
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (keyboardInsertContent) async {
+                  if (room == null || !keyboardInsertContent.hasData) {
+                    return;
+                  }
+                  await showDialog(
+                    context: context,
+                    useRootNavigator: PlatformInfos.isWeb,
+                    builder: (context) {
+                      return SendFileDialog(
+                        room: room!,
+                        files: [
+                          MatrixImageFile(
+                            name: keyboardInsertContent.uri,
+                            bytes: keyboardInsertContent.data,
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              contextMenuBuilder: (
+                BuildContext contextMenucontext,
+                EditableTextState editableTextState,
+              ) {
+                return AdaptiveTextSelectionToolbar.editable(
+                  anchors: editableTextState.contextMenuAnchors,
+                  clipboardStatus: ClipboardStatus.pasteable,
+                  onPaste: !PlatformInfos.isWeb
+                      ? () async {
+                          if (room == null) {
+                            // FIXME: need to handle the case when in draft chat
+                            return;
+                          }
+
+                          if (await Clipboard.instance
+                              .isReadableImageFormat()) {
+                            await pasteImage(context, room!);
+                          } else {
+                            editableTextState
+                                .pasteText(SelectionChangedCause.toolbar);
+                          }
+                        }
+                      : null,
+                  onCopy: () {
+                    editableTextState
+                        .copySelection(SelectionChangedCause.toolbar);
+                  },
+                  onCut: () {
+                    editableTextState
+                        .cutSelection(SelectionChangedCause.toolbar);
+                  },
+                  onSelectAll: () {
+                    editableTextState.selectAll(SelectionChangedCause.toolbar);
+                  },
+                );
+              },
+            ),
+            suggestionsCallback: getSuggestions,
+            itemBuilder: (context, suggestion) => SuggestionTile(
+              suggestion: suggestion,
+              client: Matrix.of(context).client,
+            ),
+            onSuggestionSelected: (Map<String, String?> suggestion) =>
+                insertSuggestion(context, suggestion),
+            errorBuilder: (BuildContext context, Object? error) => Container(),
+            loadingBuilder: (BuildContext context) => Container(),
+            // fix loading briefly flickering a dark box
+            noItemsFoundBuilder: (BuildContext context) =>
+                Container(), // fix loading briefly showing no suggestions
+          ),
+        ),
       ),
     );
   }
