@@ -24,6 +24,12 @@ class Clipboard {
     Formats.svg,
   ];
 
+  Future<void> copyText(String text) async {
+    final item = DataWriterItem();
+    item.add(Formats.plainText(text));
+    await ClipboardWriter.instance.write([item]);
+  }
+
   Future<void> copyImageAsStream(File image, {String? mimeType}) async {
     final item = DataWriterItem(suggestedName: image.path);
     final imageStream = image.openRead();
@@ -31,21 +37,13 @@ class Clipboard {
     await imageStream.forEach((data) {
       item.add(getFormatFrom(mime)(Uint8List.fromList(data)));
     });
-    try {
-      await ClipboardWriter.instance.write([item]);
-    } catch (e) {
-      Logs().e('Clipboard::copyImageAsStream(): $e');
-    }
+    await ClipboardWriter.instance.write([item]);
   }
 
   Future<void> copyImageAsBytes(Uint8List data, {String? mimeType}) async {
-    try {
-      final item = DataWriterItem();
-      item.add(getFormatFrom(mimeType)(data));
-      await ClipboardWriter.instance.write([item]);
-    } catch (e) {
-      Logs().e('Clipboard::copyImageAsBytes(): $e');
-    }
+    final item = DataWriterItem();
+    item.add(getFormatFrom(mimeType)(data));
+    await ClipboardWriter.instance.write([item]);
   }
 
   Future<void> initReader() async {
@@ -53,7 +51,7 @@ class Clipboard {
   }
 
   Future<ClipboardImageInfo?> pasteImageUsingStream() async {
-    _reader ??= await ClipboardReader.readClipboard();
+    _reader = await ClipboardReader.readClipboard();
     ClipboardImageInfo? imageInfo;
 
     final readableFormats = _reader!.getFormats(allImageFormatsSupported);
@@ -90,7 +88,7 @@ class Clipboard {
   }
 
   Future<Uint8List?>? pasteImageUsingBytes() async {
-    _reader ??= await ClipboardReader.readClipboard();
+    _reader = await ClipboardReader.readClipboard();
     final readableFormats = _reader!.getFormats(allImageFormatsSupported);
     if (readableFormats.isEmpty != false &&
         readableFormats.first is! SimpleFileFormat) {
@@ -121,7 +119,7 @@ class Clipboard {
   }
 
   Future<bool> isReadableImageFormat() async {
-    _reader ??= await ClipboardReader.readClipboard();
+    _reader = await ClipboardReader.readClipboard();
     return _reader!.canProvide(Formats.png) ||
         _reader!.canProvide(Formats.jpeg) ||
         _reader!.canProvide(Formats.heic) ||
@@ -130,7 +128,7 @@ class Clipboard {
   }
 
   Future<String?> pasteText() async {
-    _reader ??= await ClipboardReader.readClipboard();
+    _reader = await ClipboardReader.readClipboard();
     String? copied;
 
     final readersFormat = _reader!.getFormats(Formats.standardFormats);

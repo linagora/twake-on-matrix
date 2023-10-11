@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -52,9 +53,7 @@ class SendFileDialogState extends State<SendFileDialog> {
         shrinkImageMaxDimension: origImage ? null : 1600,
       )
           .catchError((e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text((e as Object).toLocalizedString(context))),
-        );
+        TwakeSnackBar.show(context, (e as Object).toLocalizedString(context));
         return null;
       });
     }
@@ -93,18 +92,6 @@ class SendFileDialogState extends State<SendFileDialog> {
               fit: BoxFit.contain,
             ),
           ),
-          Row(
-            children: <Widget>[
-              Checkbox(
-                value: origImage,
-                onChanged: (v) => setState(() => origImage = v ?? false),
-              ),
-              InkWell(
-                onTap: () => setState(() => origImage = !origImage),
-                child: Text('${L10n.of(context)!.sendOriginal} ($sizeString)'),
-              ),
-            ],
-          )
         ],
       );
     } else {
