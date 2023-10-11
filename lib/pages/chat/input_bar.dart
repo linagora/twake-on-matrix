@@ -311,6 +311,27 @@ class InputBar extends StatelessWidget {
           onSubmitted?.call(controller?.text ?? '');
         }
       },
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(
+            flutter.LogicalKeyboardKey.keyV,
+            meta: true,
+          ): () async {
+            if (await Clipboard.instance.isReadableImageFormat()) {
+              await pasteImage(context, room!);
+            } else if (controller != null) {
+              await controller!.pasteText();
+            }
+          },
+          const SingleActivator(
+            flutter.LogicalKeyboardKey.keyC,
+            meta: true,
+          ): () {
+            if (controller != null) {
+              controller!.copyText();
+            }
+          },
+        },
         child: Listener(
           onPointerDown: (PointerDownEvent event) async {
             if (event.kind == PointerDeviceKind.mouse &&
@@ -373,6 +394,14 @@ class InputBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class PasteIntent extends Intent {
+  const PasteIntent();
+}
+
+class CopyIntent extends Intent {
+  const CopyIntent();
 }
 
 class NewLineIntent extends Intent {}
