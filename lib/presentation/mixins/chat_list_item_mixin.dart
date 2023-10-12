@@ -98,30 +98,26 @@ mixin ChatListItemMixin {
       future: room.lastEvent?.fetchSenderUser(),
       builder: (context, snapshot) {
         if (snapshot.data == null) return const SizedBox.shrink();
-        return RichText(
-          text: TextSpan(
-            text: "${snapshot.data!.calcDisplayname()}: ",
-            style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
-            children: [
-              TextSpan(
-                text: room.membership == Membership.invite
-                    ? L10n.of(context)!.youAreInvitedToThisChat
-                    : room.lastEvent?.calcLocalizedBodyFallback(
-                          MatrixLocals(L10n.of(context)!),
-                          hideReply: true,
-                          hideEdit: true,
-                          plaintextBody: true,
-                          removeMarkdown: true,
-                        ) ??
-                        L10n.of(context)!.emptyChat,
-                style:
-                    ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
-              ),
-            ],
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
+        final subscriptions = room.membership == Membership.invite
+            ? L10n.of(
+                context,
+              )!
+                .youAreInvitedToThisChat
+            : room.lastEvent?.calcLocalizedBodyFallback(
+                  MatrixLocals(L10n.of(context)!),
+                  hideReply: true,
+                  hideEdit: true,
+                  plaintextBody: true,
+                  removeMarkdown: true,
+                ) ??
+                L10n.of(context)!.emptyChat;
+
+        return Text(
+          "${snapshot.data!.calcDisplayname()}: $subscriptions",
           softWrap: false,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
         );
       },
     );
