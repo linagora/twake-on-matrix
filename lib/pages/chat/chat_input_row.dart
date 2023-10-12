@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_mobile.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
@@ -156,7 +155,7 @@ class ChatInputRow extends StatelessWidget {
       maxLines: 8,
       autofocus: !PlatformInfos.isMobile,
       keyboardType: TextInputType.multiline,
-      textInputAction: AppConfig.sendOnEnter ? TextInputAction.send : null,
+      textInputAction: null,
       onSubmitted: controller.onInputBarSubmitted,
       focusNode: controller.inputFocus,
       keyboardFocusNode: controller.keyboardFocus,
