@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
@@ -77,7 +78,7 @@ class AppScaffoldView extends StatelessWidget {
           ],
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+              borderRadius: AppScaffoldViewStyle.borderRadiusBody,
               child: Container(
                 decoration: BoxDecoration(
                   color: LinagoraRefColors.material().primary[100],
@@ -145,7 +146,7 @@ class AppScaffoldView extends StatelessWidget {
     return SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
         const WidthPlatformBreakpoint(
-          end: ResponsiveUtils.maxMobileWidth,
+          end: ResponsiveUtils.minDesktopWidth,
         ): SlotLayout.from(
           key: bottomNavigationKey,
           builder: (_) {
