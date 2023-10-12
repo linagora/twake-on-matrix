@@ -19,10 +19,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   @override
   Widget build(BuildContext context) {
     final typingText = room.getLocalizedTypingText(context);
-    final unread = room.isUnread || room.membership == Membership.invite;
     final isGroup = !room.isDirectChat;
     final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      unread,
+      room.isUnreadOrInvited,
       room.hasNewMessages,
       room.notificationCount > 0,
     );
@@ -44,7 +43,12 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                   ? chatListItemSubtitleForGroup(
                       room: room,
                     )
-                  : textContentWidget(room, context, isGroup, unread)),
+                  : textContentWidget(
+                      room,
+                      context,
+                      isGroup,
+                      room.isUnreadOrInvited,
+                    )),
         ),
         const SizedBox(width: 8),
         FutureBuilder<String>(
@@ -71,7 +75,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               curve: FluffyThemes.animationCurve,
               padding: const EdgeInsets.only(bottom: 4),
               height: ChatListItemStyle.mentionIconWidth,
-              width: isMentionned && unread
+              width: isMentionned && room.isUnreadOrInvited
                   ? ChatListItemStyle.mentionIconWidth
                   : 0,
               decoration: BoxDecoration(
@@ -79,7 +83,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 borderRadius: BorderRadius.circular(AppConfig.borderRadius),
               ),
               child: Center(
-                child: isMentionned && unread
+                child: isMentionned && room.isUnreadOrInvited
                     ? Text(
                         '@',
                         style: TextStyle(
@@ -104,7 +108,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           padding: const EdgeInsets.symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
-            unread,
+            room.isUnreadOrInvited,
             room.hasNewMessages,
             room.notificationCount,
           ),
