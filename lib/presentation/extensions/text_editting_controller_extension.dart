@@ -35,4 +35,9 @@ extension TextEdittingControllerExtension on TextEditingController {
   Future<void> cutText() async {
     //TO-DO:
   }
+
+  void addNewLine() {
+    text = '$text\n';
+    selection = TextSelection.collapsed(offset: text.length);
+  }
 }

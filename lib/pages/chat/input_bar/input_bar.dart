@@ -1,13 +1,12 @@
-import 'package:fluffychat/presentation/enum/chat/popup_menu_item_web_enum.dart';
-import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
+import 'package:fluffychat/pages/chat/command_hints.dart';
+import 'package:fluffychat/pages/chat/input_bar/context_menu_input_bar.dart';
+import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/extension/raw_key_event_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' as flutter;
+import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 
 import 'package:emojis/emoji.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -15,11 +14,8 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
 
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
-
-import 'command_hints.dart';
 
 class InputBar extends StatelessWidget with PasteImageMixin {
   final Room? room;
@@ -36,7 +32,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final bool? autofocus;
   final bool readOnly;
 
-  const InputBar({
+  InputBar({
     this.room,
     this.minLines,
     this.maxLines,
@@ -305,174 +301,92 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     }
   }
 
+  Future<void> handlePaste(BuildContext context) async {
+    if (await Clipboard.instance.isReadableImageFormat() && room != null) {
+      await pasteImage(context, room!);
+    } else {
+      await controller?.pasteText();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final useShortCuts = (PlatformInfos.isWeb ||
-        PlatformInfos.isDesktop ||
-        AppConfig.sendOnEnter);
-    return RawKeyboardListener(
-      focusNode: keyboardFocusNode,
-      onKey: (event) {
-        if (useShortCuts && event.isEnter) {
-          onSubmitted?.call(controller?.text ?? '');
-        }
-      },
-      child: CallbackShortcuts(
-        bindings: {
-          SingleActivator(
-            flutter.LogicalKeyboardKey.keyV,
-            meta: PlatformInfos.isMacKeyboardPlatform,
-            control: !PlatformInfos.isMacKeyboardPlatform,
-          ): () async {
-            if (await Clipboard.instance.isReadableImageFormat()) {
-              await pasteImage(context, room!);
-            } else if (controller != null) {
-              await controller!.pasteText();
-            }
-          },
-          const SingleActivator(
-            flutter.LogicalKeyboardKey.keyC,
-            meta: true,
-          ): () {
-            if (controller != null) {
-              controller!.copyText();
-            }
-          },
-        },
-        child: Listener(
-          onPointerDown: (PointerDownEvent event) async {
-            if (event.kind == PointerDeviceKind.mouse &&
-                event.buttons == kSecondaryMouseButton) {
-              // FIXME: the contextMenuBuilder.editable can do this but its style in web is not customizable
-              // currently this is only solution
-              final screenSize = MediaQuery.of(context).size;
-              final offset = event.position;
-              final position = RelativeRect.fromLTRB(
-                offset.dx,
-                offset.dy,
-                screenSize.width - offset.dx,
-                screenSize.height - offset.dy,
-              );
-              final menuItem = await showMenu<InputBarContextMenu>(
-                useRootNavigator: PlatformInfos.isWeb,
-                context: context,
-                items: [
-                  PopupMenuItem(
-                    value: InputBarContextMenu.copy,
-                    child: Text(L10n.of(context)!.copy),
-                  ),
-                  PopupMenuItem(
-                    value: InputBarContextMenu.cut,
-                    child: Text(L10n.of(context)!.cut),
-                  ),
-                  PopupMenuItem(
-                    value: InputBarContextMenu.paste,
-                    child: Text(L10n.of(context)!.paste),
-                  ),
-                ],
-                position: position,
-              );
-
-              if (menuItem == null) {
-                return;
-              }
-
-              if (controller == null) {
-                return;
-              }
-
-              switch (menuItem) {
-                case InputBarContextMenu.copy:
-                  controller!.copyText();
-                  break;
-                case InputBarContextMenu.cut:
-                  controller!.cutText();
-                  break;
-                case InputBarContextMenu.paste:
-                  if (await Clipboard.instance.isReadableImageFormat()) {
-                    await pasteImage(context, room!);
-                  } else {
-                    await controller!.pasteText();
-                  }
-                  break;
-              }
-            }
-          },
-          child: TypeAheadField<Map<String, String?>>(
-            direction: AxisDirection.up,
-            hideOnEmpty: true,
-            hideOnLoading: true,
-            keepSuggestionsOnSuggestionSelected: true,
-            debounceDuration: const Duration(milliseconds: 50),
-            // show suggestions after 50ms idle time (default is 300)
-            textFieldConfiguration: TextFieldConfiguration(
-              minLines: minLines,
-              maxLines: maxLines,
-              keyboardType: keyboardType!,
-              textInputAction: textInputAction,
-              autofocus: autofocus!,
-              style: InputBarStyle.getTypeAheadTextStyle(context),
-              onSubmitted: (text) {
-                // fix for library for now
-                // it sets the types for the callback incorrectly
-                onSubmitted!(text);
-              },
-              controller: controller,
-              decoration: decoration!,
-              focusNode: focusNode,
-              onChanged: (text) {
-                // fix for the library for now
-                // it sets the types for the callback incorrectly
-                onChanged!(text);
-              },
-              contextMenuBuilder: !PlatformInfos.isWeb
-                  ? (
-                      BuildContext contextMenucontext,
-                      EditableTextState editableTextState,
-                    ) {
-                      return AdaptiveTextSelectionToolbar.editable(
-                        anchors: editableTextState.contextMenuAnchors,
-                        clipboardStatus: ClipboardStatus.pasteable,
-                        onPaste: !PlatformInfos.isWeb
-                            ? () async {
-                                if (room == null) {
-                                  // FIXME: need to handle the case when in draft chat
-                                  return;
-                                }
-                                editableTextState
-                                    .pasteText(SelectionChangedCause.toolbar);
+    return InputBarShortcuts(
+      controller: controller,
+      room: room,
+      onSubmitted: onSubmitted,
+      handlePaste: () => handlePaste(context),
+      child: ContextMenuInputBar(
+        handlePaste: () => handlePaste(context),
+        child: TypeAheadField<Map<String, String?>>(
+          direction: AxisDirection.up,
+          hideOnEmpty: true,
+          hideOnLoading: true,
+          keepSuggestionsOnSuggestionSelected: true,
+          debounceDuration: const Duration(milliseconds: 50),
+          // show suggestions after 50ms idle time (default is 300)
+          textFieldConfiguration: TextFieldConfiguration(
+            minLines: minLines,
+            maxLines: maxLines,
+            keyboardType: keyboardType!,
+            textInputAction: textInputAction,
+            autofocus: autofocus!,
+            style: InputBarStyle.getTypeAheadTextStyle(context),
+            controller: controller,
+            decoration: decoration!,
+            focusNode: focusNode,
+            onChanged: (text) {
+              // fix for the library for now
+              // it sets the types for the callback incorrectly
+              onChanged!(text);
+            },
+            contextMenuBuilder: !PlatformInfos.isWeb
+                ? (
+                    BuildContext contextMenucontext,
+                    EditableTextState editableTextState,
+                  ) {
+                    return AdaptiveTextSelectionToolbar.editable(
+                      anchors: editableTextState.contextMenuAnchors,
+                      clipboardStatus: ClipboardStatus.pasteable,
+                      onPaste: !PlatformInfos.isWeb
+                          ? () async {
+                              if (room == null) {
+                                // FIXME: need to handle the case when in draft chat
+                                return;
                               }
-                            : null,
-                        onCopy: () {
-                          editableTextState
-                              .copySelection(SelectionChangedCause.toolbar);
-                        },
-                        onCut: () {
-                          editableTextState
-                              .cutSelection(SelectionChangedCause.toolbar);
-                        },
-                        onSelectAll: () {
-                          editableTextState
-                              .selectAll(SelectionChangedCause.toolbar);
-                        },
-                      );
-                    }
-                  : null,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            suggestionsCallback: getSuggestions,
-            itemBuilder: (context, suggestion) => SuggestionTile(
-              suggestion: suggestion,
-              client: Matrix.of(context).client,
-            ),
-            onSuggestionSelected: (Map<String, String?> suggestion) =>
-                insertSuggestion(context, suggestion),
-            errorBuilder: (BuildContext context, Object? error) => Container(),
-            loadingBuilder: (BuildContext context) => Container(),
-            // fix loading briefly flickering a dark box
-            noItemsFoundBuilder: (BuildContext context) =>
-                Container(), // fix loading briefly showing no suggestions
+                              editableTextState
+                                  .pasteText(SelectionChangedCause.toolbar);
+                            }
+                          : null,
+                      onCopy: () {
+                        editableTextState
+                            .copySelection(SelectionChangedCause.toolbar);
+                      },
+                      onCut: () {
+                        editableTextState
+                            .cutSelection(SelectionChangedCause.toolbar);
+                      },
+                      onSelectAll: () {
+                        editableTextState
+                            .selectAll(SelectionChangedCause.toolbar);
+                      },
+                    );
+                  }
+                : null,
+            textCapitalization: TextCapitalization.sentences,
           ),
+          suggestionsCallback: getSuggestions,
+          itemBuilder: (context, suggestion) => SuggestionTile(
+            suggestion: suggestion,
+            client: Matrix.of(context).client,
+          ),
+          onSuggestionSelected: (Map<String, String?> suggestion) =>
+              insertSuggestion(context, suggestion),
+          errorBuilder: (BuildContext context, Object? error) => Container(),
+          loadingBuilder: (BuildContext context) => Container(),
+          // fix loading briefly flickering a dark box
+          noItemsFoundBuilder: (BuildContext context) =>
+              Container(), // fix loading briefly showing no suggestions
         ),
       ),
     );
