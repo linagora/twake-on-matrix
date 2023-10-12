@@ -35,12 +35,9 @@ class ChatListViewBuilder extends StatelessWidget {
                 context,
                 rooms[index],
               ),
-              onLongPress: () {
-                controller.toggleSelectMode();
-                controller.toggleSelection(
-                  rooms[index].id,
-                );
-              },
+              onLongPress: () => controller.onLongPressChatListItem(
+                rooms[index],
+              ),
               checkBoxWidget: ValueListenableBuilder(
                 valueListenable: controller.conversationSelectionNotifier,
                 builder: (context, conversationSelection, __) {
