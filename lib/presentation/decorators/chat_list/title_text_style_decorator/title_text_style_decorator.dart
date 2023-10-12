@@ -70,10 +70,8 @@ class MuteChatListTitleTextStyleDecorator
   TextStyle textStyle(Room room) {
     final isMuted = room.pushRuleState != PushRuleState.notify;
     if (isMuted) {
-      return _interfaceTextStyleComponent.textStyle(room).merge(
-            LinagoraTextStyle.material().bodyLarge1.copyWith(
-                  color: LinagoraRefColors.material().tertiary[20],
-                ),
+      return _interfaceTextStyleComponent.textStyle(room).copyWith(
+            color: LinagoraRefColors.material().tertiary[20],
           );
     } else {
       return _interfaceTextStyleComponent.textStyle(room);
