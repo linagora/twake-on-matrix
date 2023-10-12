@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
+import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
@@ -37,7 +38,8 @@ class ForwardMessageInteractor {
     Room room,
   ) async* {
     final shareFile = message.tryGet<MatrixFile>('file');
-    if (message.tryGet<String>('msgtype') == 'chat.fluffy.shared_file' &&
+    if (message.tryGet<String>('msgtype') ==
+            TwakeEventTypes.shareFileEventType &&
         shareFile != null) {
       yield Right(
         ForwardMessageIsShareFileState(shareFile: shareFile, room: room),
