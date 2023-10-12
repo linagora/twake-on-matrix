@@ -16,8 +16,8 @@ import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
@@ -116,8 +116,8 @@ abstract class AppRoutes {
         context,
         !_responsive.isMobile(context) &&
                 state.fullPath?.startsWith('/rooms/settings') == false
-            ? AdaptiveScaffoldRoute(
-                body: AdaptiveScaffoldApp(
+            ? AppAdaptiveScaffold(
+                body: AppAdaptiveScaffoldBody(
                   activeRoomId: state.pathParameters['roomid'],
                 ),
                 secondaryBody: child,
@@ -132,7 +132,7 @@ abstract class AppRoutes {
             context,
             !_responsive.isMobile(context)
                 ? const ChatBlank()
-                : AdaptiveScaffoldApp(
+                : AppAdaptiveScaffoldBody(
                     activeRoomId: state.pathParameters['roomid'],
                   ),
           ),
