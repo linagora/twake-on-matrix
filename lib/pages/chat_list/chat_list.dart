@@ -10,7 +10,6 @@ import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
-import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -62,8 +61,7 @@ class ChatListController extends State<ChatList>
         RouteAware,
         ComparablePresentationContactMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin,
-        ReceiveSharingIntentMixin {
+        PopupMenuWidgetMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
   final responsive = getIt.get<ResponsiveUtils>();
@@ -713,8 +711,6 @@ class ChatListController extends State<ChatList>
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
-    initReceiveSharingIntent();
-
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
@@ -731,9 +727,6 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    intentDataStreamSubscription?.cancel();
-    intentFileStreamSubscription?.cancel();
-    intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     super.dispose();
   }
