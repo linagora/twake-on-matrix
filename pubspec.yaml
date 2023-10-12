@@ -66,7 +66,7 @@ dependencies:
   keyboard_shortcuts: ^0.1.4
   latlong2: ^0.8.1
   matrix:
-    git: 
+    git:
       url: git@github.com:linagora/matrix-dart-sdk.git
       ref: twake-supported-0.22.4
   matrix_homeserver_recommendations: ^0.3.0
@@ -269,12 +269,13 @@ dependency_overrides:
       url: https://github.com/chandrabezzo/wakelock.git
       ref: main
       path: wakelock_windows/
-  # TODO: Remove it after this PR merged
+  # TODO: Remove this part after upstream contribution is merged
   # https://github.com/Sorunome/matrix_link_text/pull/4
+  # https://github.com/Sorunome/matrix_link_text/pull/5
   matrix_link_text:
-    git: 
+    git:
       url: https://github.com/linagora/matrix_link_text.git
-      ref: feat/add-text-span-builder
+      ref: twake-supported
 
 cider:
   link_template:
