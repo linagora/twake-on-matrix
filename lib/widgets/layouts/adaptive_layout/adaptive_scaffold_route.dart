@@ -1,6 +1,7 @@
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -39,13 +40,13 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
               key: breakpointMobileKey,
               builder: (_) => secondaryBody != null
                   ? _secondaryBodyWidget(context, isWebAndDesktop: false)
-                  : _bodyWidget(isWebAndDesktop: false),
+                  : _bodyWidget(context, isWebAndDesktop: false),
             ),
             const WidthPlatformBreakpoint(
               begin: ResponsiveUtils.minTabletWidth,
             ): SlotLayout.from(
               key: breakpointWebAndDesktopKey,
-              builder: (_) => _bodyWidget(),
+              builder: (_) => _bodyWidget(context),
             )
           },
         ),
@@ -76,13 +77,12 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
     bool isWebAndDesktop = true,
   }) {
     return Padding(
-      padding: isWebAndDesktop
-          ? const EdgeInsetsDirectional.all(16)
-          : EdgeInsetsDirectional.zero,
+      padding: AdaptiveScaffoldRouteStyle.secondaryBodyWidgetPadding(
+        isWebAndDesktop,
+      ),
       child: ClipRRect(
-        borderRadius: isWebAndDesktop
-            ? const BorderRadius.all(Radius.circular(16.0))
-            : BorderRadius.zero,
+        borderRadius:
+            AdaptiveScaffoldRouteStyle.secondaryBodyBorder(isWebAndDesktop),
         child: Container(
           decoration: BoxDecoration(
             color: LinagoraRefColors.material().primary[100],
@@ -93,11 +93,15 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
     );
   }
 
-  Widget _bodyWidget({bool isWebAndDesktop = true}) {
+  Widget _bodyWidget(
+    BuildContext context, {
+    bool isWebAndDesktop = true,
+  }) {
     return Padding(
-      padding: isWebAndDesktop
-          ? const EdgeInsetsDirectional.only(bottom: 16, top: 16)
-          : EdgeInsetsDirectional.zero,
+      padding: AdaptiveScaffoldRouteStyle.bodyWidgetPadding(
+        context,
+        isWebAndDesktop,
+      ),
       child: body,
     );
   }
