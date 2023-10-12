@@ -236,9 +236,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
               );
             }
 
-            final bigEmotes = event.onlyEmotes &&
-                event.numberEmotes > 0 &&
-                event.numberEmotes <= 10;
             return FutureBuilder<String>(
               future: event.calcLocalizedBody(
                 MatrixLocals(L10n.of(context)!),
@@ -263,11 +260,10 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
-                      linkStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                        decorationColor: textColor.withAlpha(150),
-                      ),
+                      linkStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
                       childWidget: Visibility(
                         visible: false,
                         maintainSize: true,
