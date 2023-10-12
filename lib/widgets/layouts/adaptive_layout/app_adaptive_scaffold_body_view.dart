@@ -5,14 +5,14 @@ import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class AppScaffoldView extends StatelessWidget {
+class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
   final PageController pageController;
@@ -33,7 +33,7 @@ class AppScaffoldView extends StatelessWidget {
 
   static const ValueKey shellKey = ValueKey('Body');
 
-  const AppScaffoldView({
+  const AppAdaptiveScaffoldBodyView({
     Key? key,
     this.activeRoomId,
     required this.activeNavigationBar,

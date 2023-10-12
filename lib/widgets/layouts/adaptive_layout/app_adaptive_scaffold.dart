@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class AdaptiveScaffoldRoute extends StatelessWidget {
+class AppAdaptiveScaffold extends StatelessWidget {
   final Widget body;
   final Widget? secondaryBody;
   final bool? displayAppBar;
@@ -18,7 +18,7 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
 
   static const breakpointWebAndDesktopKey = Key('BreakpointWebAndDesktopKey');
 
-  const AdaptiveScaffoldRoute({
+  const AppAdaptiveScaffold({
     Key? key,
     required this.body,
     this.secondaryBody,
