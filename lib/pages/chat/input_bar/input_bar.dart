@@ -340,6 +340,13 @@ class InputBar extends StatelessWidget with PasteImageMixin {
               // it sets the types for the callback incorrectly
               onChanged!(text);
             },
+            onSubmitted: PlatformInfos.isMobile
+                ? (text) {
+                    // fix for library for now
+                    // it sets the types for the callback incorrectly
+                    onSubmitted!(text);
+                  }
+                : null,
             contextMenuBuilder: !PlatformInfos.isWeb
                 ? (
                     BuildContext contextMenucontext,
