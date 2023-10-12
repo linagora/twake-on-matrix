@@ -98,11 +98,10 @@ mixin ChatListItemMixin {
       future: room.lastEvent?.fetchSenderUser(),
       builder: (context, snapshot) {
         if (snapshot.data == null) return const SizedBox.shrink();
+        final youAreInvitedToThisChat =
+            L10n.of(context)!.youAreInvitedToThisChat;
         final subscriptions = room.membership == Membership.invite
-            ? L10n.of(
-                context,
-              )!
-                .youAreInvitedToThisChat
+            ? youAreInvitedToThisChat
             : room.lastEvent?.calcLocalizedBodyFallback(
                   MatrixLocals(L10n.of(context)!),
                   hideReply: true,
