@@ -65,12 +65,6 @@ class SettingsChatView extends StatelessWidget {
                   defaultValue: AppConfig.autoplayImages,
                 ),
               const Divider(),
-              SettingsSwitchListTile.adaptive(
-                title: L10n.of(context)!.sendOnEnter,
-                onChanged: (b) => AppConfig.sendOnEnter = b,
-                storeKey: SettingKeys.sendOnEnter,
-                defaultValue: AppConfig.sendOnEnter,
-              ),
               if (Matrix.of(context).webrtcIsSupported)
                 SettingsSwitchListTile.adaptive(
                   title: L10n.of(context)!.experimentalVideoCalls,

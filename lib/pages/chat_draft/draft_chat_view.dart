@@ -1,6 +1,5 @@
 import 'package:animations/animations.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
@@ -122,9 +121,7 @@ class DraftChatView extends StatelessWidget {
                                             DraftChatViewStyle.maxLinesInputBar,
                                         autofocus: !PlatformInfos.isMobile,
                                         keyboardType: TextInputType.multiline,
-                                        textInputAction: AppConfig.sendOnEnter
-                                            ? TextInputAction.send
-                                            : null,
+                                        textInputAction: null,
                                         onSubmitted:
                                             controller.onInputBarSubmitted,
                                         focusNode: controller.inputFocus,
