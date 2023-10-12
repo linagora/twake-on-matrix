@@ -1,3 +1,4 @@
+import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -8,12 +9,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
 mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
+  MatrixState get matrixState;
+
   StreamSubscription? intentDataStreamSubscription;
 
   StreamSubscription? intentFileStreamSubscription;
@@ -25,14 +27,14 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     final shareFile = files.first;
     final path = Uri.decodeFull(shareFile.path.replaceFirst('file://', ''));
     final file = File(path);
-    Matrix.of(context).shareContent = {
-      'msgtype': 'chat.fluffy.shared_file',
+    matrixState.shareContent = {
+      'msgtype': TwakeEventTypes.shareFileEventType,
       'file': MatrixFile(
         name: file.path,
         filePath: file.path,
       ).detectFileType,
     };
-    context.push('/share');
+    TwakeApp.router.push('/share');
   }
 
   void _processIncomingSharedText(String? text) {
@@ -43,16 +45,16 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
             !RegExp(r'\s').hasMatch(text))) {
       return _processIncomingUris(text);
     }
-    Matrix.of(context).shareContent = {
+    matrixState.shareContent = {
       'msgtype': 'm.text',
       'body': text,
     };
-    context.push('/share');
+    TwakeApp.router.push('/share');
   }
 
   void _processIncomingUris(String? text) async {
     if (text == null) return;
-    context.push('/share');
+    TwakeApp.router.push('/share');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UrlLauncher(context, text).openMatrixToUrl();
     });
