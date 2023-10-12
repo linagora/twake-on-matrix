@@ -13,7 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 
 import 'chat.dart';
-import 'input_bar.dart';
+import 'input_bar/input_bar.dart';
 
 class ChatInputRow extends StatelessWidget {
   final ChatController controller;

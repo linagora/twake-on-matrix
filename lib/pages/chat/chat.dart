@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -116,6 +117,9 @@ class ChatController extends State<Chat>
   String? get roomName => widget.roomName;
 
   String? get roomId => widget.roomId;
+
+  final composerDebouncer =
+      Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
 
   bool get isEmptyChat =>
       timeline != null &&
@@ -441,7 +445,7 @@ class ChatController extends State<Chat>
     super.dispose();
   }
 
-  TextEditingController sendController = TextEditingController();
+  final TextEditingController sendController = TextEditingController();
 
   void setSendingClient(Client? c) {
     // first cancle typing with the old sending client
@@ -487,7 +491,7 @@ class ChatController extends State<Chat>
 
     // ignore: unawaited_futures
     room!.sendTextEvent(
-      sendController.text,
+      sendController.text.trim(),
       inReplyTo: replyEvent,
       editEventId: editEvent?.eventId,
       parseCommands: parseCommands,
@@ -1230,8 +1234,8 @@ class ChatController extends State<Chat>
   }
 
   void onInputBarSubmitted(_) async {
-    await send();
     await Future.delayed(const Duration(milliseconds: 100));
+    await send();
     FocusScope.of(context).requestFocus(inputFocus);
   }
 
