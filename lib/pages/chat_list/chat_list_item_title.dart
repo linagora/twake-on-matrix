@@ -21,7 +21,6 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
       MatrixLocals(L10n.of(context)!),
     );
     final isMuted = room.pushRuleState != PushRuleState.notify;
-    final unread = room.isUnread || room.membership == Membership.invite;
     return Row(
       children: <Widget>[
         Expanded(
@@ -79,7 +78,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                 child: Text(
                   room.timeCreated.localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: unread
+                        color: room.isUnreadOrInvited
                             ? Theme.of(context).colorScheme.onSurface
                             : LinagoraRefColors.material().neutral[50],
                       ),

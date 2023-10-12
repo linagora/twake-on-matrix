@@ -87,9 +87,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   bool get _isGroupChat => !room.isDirectChat;
 
-  bool get _isMarkAsUnread =>
-      room.isUnread || room.membership == Membership.invite;
-
   @override
   Widget build(BuildContext context) {
     final displayName = room.getLocalizedDisplayname(
@@ -136,7 +133,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                             child: Icon(
                               Icons.group,
                               size: ChatListItemStyle.groupIconSize,
-                              color: _isMarkAsUnread
+                              color: room.isUnreadOrInvited
                                   ? LinagoraSysColors.material()
                                       .onSurfaceVariant
                                   : LinagoraRefColors.material().tertiary[30],

@@ -42,7 +42,9 @@ class TwakeHeader extends StatelessWidget
                     child: Row(
                       children: [
                         InkWell(
-                          onTap: onClearSelection,
+                          onTap: selectMode == SelectMode.select
+                              ? onClearSelection
+                              : null,
                           borderRadius: BorderRadius.circular(
                             TwakeHeaderStyle.closeIconSize,
                           ),

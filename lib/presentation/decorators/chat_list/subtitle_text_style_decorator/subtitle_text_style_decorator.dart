@@ -43,8 +43,7 @@ class UnreadChatListSubtitleTextStyleDecorator
 
   @override
   TextStyle textStyle(Room room) {
-    final unread = room.isUnread || room.membership == Membership.invite;
-    if (unread) {
+    if (room.isUnreadOrInvited) {
       return _interfaceTextStyleComponent.textStyle(room).merge(
             LinagoraTextStyle.material().bodyMedium2.copyWith(
                   color: LinagoraSysColors.material().onSurface,
