@@ -14,6 +14,7 @@ import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions
 import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -66,7 +67,8 @@ class Matrix extends StatefulWidget {
       Provider.of<MatrixState>(context, listen: false);
 }
 
-class MatrixState extends State<Matrix> with WidgetsBindingObserver {
+class MatrixState extends State<Matrix>
+    with WidgetsBindingObserver, ReceiveSharingIntentMixin {
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
@@ -271,6 +273,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initMatrix();
+    initReceiveSharingIntent();
     if (PlatformInfos.isWeb) {
       initConfig().then((_) => initSettings());
     } else {
@@ -648,7 +651,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
+    intentDataStreamSubscription?.cancel();
+    intentFileStreamSubscription?.cancel();
+    intentUriStreamSubscription?.cancel();
     onRoomKeyRequestSub.values.map((s) => s.cancel());
     onKeyVerificationRequestSub.values.map((s) => s.cancel());
     onLoginStateChanged.values.map((s) => s.cancel());
@@ -670,6 +675,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       child: widget.child,
     );
   }
+
+  @override
+  MatrixState get matrixState => this;
 }
 
 class FixedThreepidCreds extends ThreepidCreds {
