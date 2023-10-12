@@ -1575,8 +1575,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "feat/add-text-span-builder"
-      resolved-ref: f159e4de7db4a70fa1830cf7c4a066979aa1464d
+      ref: twake-supported
+      resolved-ref: "326f4ef15303bbbd13971912fd84e936b60e521d"
       url: "https://github.com/linagora/matrix_link_text.git"
     source: git
     version: "2.0.0"
