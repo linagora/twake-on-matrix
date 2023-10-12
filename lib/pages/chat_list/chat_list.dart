@@ -160,6 +160,9 @@ class ChatListController extends State<ChatList>
   bool get chatListBodyIsEmpty =>
       filteredRoomsForAllIsEmpty && filteredRoomsForPinIsEmpty;
 
+  bool get conversationSelectionNotifierIsEmpty =>
+      conversationSelectionNotifier.value.isEmpty;
+
   void addAccountAction() => context.go('/settings/account');
 
   void _onScroll() {
@@ -216,7 +219,6 @@ class ChatListController extends State<ChatList>
   void toggleSelectMode() {
     selectModeNotifier.value =
         isSelectMode ? SelectMode.normal : SelectMode.select;
-    _clearSelectionItem();
   }
 
   Future<void> actionWithToggleSelectMode(Function action) async {
@@ -687,6 +689,21 @@ class ChatListController extends State<ChatList>
 
   Future<void> dehydrate() =>
       SettingsSecurityController.dehydrateDevice(context);
+
+  void onLongPressChatListItem(Room room) {
+    if (!isSelectMode) {
+      toggleSelectMode();
+      _handleOnLongPressInSelectMode(room);
+    }
+  }
+
+  void _handleOnLongPressInSelectMode(Room room) {
+    if (conversationSelectionNotifierIsEmpty) {
+      toggleSelection(
+        room.id,
+      );
+    }
+  }
 
   @override
   void initState() {
