@@ -128,7 +128,7 @@ class ChatListController extends State<ChatList>
         (conversation) => !Matrix.of(context)
             .client
             .getRoomById(conversation.roomId)!
-            .markedUnread,
+            .isUnreadOrInvited,
       );
 
   bool get anySelectedRoomNotFavorite =>
