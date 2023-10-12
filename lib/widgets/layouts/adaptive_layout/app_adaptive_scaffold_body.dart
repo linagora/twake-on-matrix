@@ -2,7 +2,7 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -12,19 +12,20 @@ typedef OnCloseSearchPage = Function();
 typedef OnClientSelectedSetting = Function(Object object, BuildContext context);
 typedef OnDestinationSelected = Function(int index);
 
-class AdaptiveScaffoldApp extends StatefulWidget {
+class AppAdaptiveScaffoldBody extends StatefulWidget {
   final String? activeRoomId;
 
-  const AdaptiveScaffoldApp({
+  const AppAdaptiveScaffoldBody({
     super.key,
     this.activeRoomId,
   });
 
   @override
-  State<AdaptiveScaffoldApp> createState() => AdaptiveScaffoldAppController();
+  State<AppAdaptiveScaffoldBody> createState() =>
+      AppAdaptiveScaffoldBodyController();
 }
 
-class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
+class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
@@ -106,13 +107,13 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   }
 
   @override
-  void didUpdateWidget(covariant AdaptiveScaffoldApp oldWidget) {
+  void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
     activeRoomIdNotifier.value = widget.activeRoomId;
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  Widget build(BuildContext context) => AppScaffoldView(
+  Widget build(BuildContext context) => AppAdaptiveScaffoldBodyView(
         destinations: destinations,
         activeRoomIdNotifier: activeRoomIdNotifier,
         activeNavigationBar: activeNavigationBar,
