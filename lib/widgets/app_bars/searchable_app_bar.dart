@@ -79,7 +79,13 @@ class SearchableAppBar extends StatelessWidget {
                 if (isFullScreen == true) ...[
                   TwakeIconButton(
                     icon: Icons.arrow_back,
-                    onTap: () => context.pop(),
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/rooms');
+                      }
+                    },
                     tooltip: L10n.of(context)!.back,
                     paddingAll: 8.0,
                     margin: const EdgeInsets.symmetric(horizontal: 8.0),
