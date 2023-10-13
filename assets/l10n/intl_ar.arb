@@ -771,11 +771,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "رسالة جديدة في فلافي-شات",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "طلب تحقق جديد!",
     "@newVerificationRequest": {
         "type": "text",

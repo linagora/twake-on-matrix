@@ -1001,11 +1001,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "來自 FluffyChat 的新訊息",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "新的驗證請求！",
     "@newVerificationRequest": {
         "type": "text",

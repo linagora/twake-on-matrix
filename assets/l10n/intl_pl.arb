@@ -1011,11 +1011,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "Nowa wiadomość w FluffyChat",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Nowa prośba o weryfikację!",
   "@newVerificationRequest": {
     "type": "text",

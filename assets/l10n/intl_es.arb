@@ -874,11 +874,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Nuevo mensaje en FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "¡Nueva solicitud de verificación!",
     "@newVerificationRequest": {
         "type": "text",

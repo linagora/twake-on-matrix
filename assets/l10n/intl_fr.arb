@@ -1163,8 +1163,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nouveau message dans FluffyChat",
-  "@newMessageInFluffyChat": {
+  "newMessageInTwake": "💬 Vous avez un message chiffré",
+  "@newMessageInTwake": {
     "type": "text",
     "placeholders": {}
   },

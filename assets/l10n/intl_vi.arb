@@ -1504,8 +1504,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Tin nhắn mới trong FluffyChat",
-  "@newMessageInFluffyChat": {
+  "newMessageInTwake": "💬 Bạn có tin nhắn mới",
+  "@newMessageInTwake": {
     "type": "text",
     "placeholders": {}
   },

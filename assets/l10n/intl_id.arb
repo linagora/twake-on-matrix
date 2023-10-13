@@ -942,11 +942,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Pesan baru di FluffyChat",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newChat": "Chat baru",
   "@newChat": {
     "type": "text",

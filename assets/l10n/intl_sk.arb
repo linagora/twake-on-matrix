@@ -727,11 +727,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Nová správa v FluffyChate",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Nová žiadosť o verifikáciu!",
     "@newVerificationRequest": {
         "type": "text",

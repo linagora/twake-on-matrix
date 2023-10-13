@@ -1158,11 +1158,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 FluffyChat'te yeni mesaj",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Yeni doğrulama isteği!",
   "@newVerificationRequest": {
     "type": "text",
