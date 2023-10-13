@@ -975,11 +975,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Ny melding i FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Ny bekreftelsesforespørsel!",
     "@newVerificationRequest": {
         "type": "text",

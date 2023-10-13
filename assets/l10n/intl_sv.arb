@@ -958,11 +958,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nya meddelanden i FluffyChat",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Ny verifikationsbegäran!",
   "@newVerificationRequest": {
     "type": "text",

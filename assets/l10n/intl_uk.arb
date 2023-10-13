@@ -741,11 +741,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Нове повідомлення у FluffyChat",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Новий запит перевірки!",
   "@newVerificationRequest": {
     "type": "text",

@@ -918,11 +918,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "💬 Uusi viesti FluffyChätissä",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Uusi varmennuspyyntö!",
     "@newVerificationRequest": {
         "type": "text",

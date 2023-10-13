@@ -1127,11 +1127,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Nova poruka u FluffyChatu",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Novi zahtjev za potvrđivanje!",
     "@newVerificationRequest": {
         "type": "text",

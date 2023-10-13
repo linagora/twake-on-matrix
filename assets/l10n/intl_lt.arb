@@ -985,11 +985,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nauja žinutė FluffyChat'e",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Nauja patvirtinimo užklausa!",
   "@newVerificationRequest": {
     "type": "text",

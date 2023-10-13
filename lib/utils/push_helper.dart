@@ -48,7 +48,7 @@ Future<void> pushHelper(
     l10n ??= lookupL10n(const Locale('en'));
     flutterLocalNotificationsPlugin.show(
       0,
-      l10n.newMessageInFluffyChat,
+      l10n.newMessageInTwake,
       l10n.openAppToReadMessages,
       NotificationDetails(
         iOS: const DarwinNotificationDetails(),
@@ -151,7 +151,7 @@ Future<void> _tryPushHelper(
 
   // Calculate the body
   final body = event.type == EventTypes.Encrypted
-      ? l10n.newMessageInFluffyChat
+      ? l10n.newMessageInTwake
       : await event.calcLocalizedBody(
           matrixLocals,
           plaintextBody: true,

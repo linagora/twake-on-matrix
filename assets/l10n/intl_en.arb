@@ -1262,8 +1262,8 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "💬 New message in FluffyChat",
-    "@newMessageInFluffyChat": {
+    "newMessageInTwake": "💬 You have 1 encrypted message",
+    "@newMessageInTwake": {
         "type": "text",
         "placeholders": {}
     },
