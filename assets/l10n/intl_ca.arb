@@ -916,11 +916,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Missatge nou al FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Nova sol·licitud de verificació!",
     "@newVerificationRequest": {
         "type": "text",

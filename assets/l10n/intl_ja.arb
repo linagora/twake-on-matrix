@@ -1019,11 +1019,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 FluffyChatに新しいメッセージがあります",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "認証リクエスト！",
   "@newVerificationRequest": {
     "type": "text",

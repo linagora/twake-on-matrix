@@ -1352,11 +1352,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Teachtaireacht nua i FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "needPantalaimonWarning": "Bí ar an eolas go dteastaíonn Pantalaimon uait chun criptiú ó cheann go ceann a úsáid anois.",
     "@needPantalaimonWarning": {
         "type": "text",

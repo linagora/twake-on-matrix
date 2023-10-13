@@ -806,11 +806,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Új FluffyChat-üzenet",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Új hitelesítési kérelem!",
   "@newVerificationRequest": {
     "type": "text",
