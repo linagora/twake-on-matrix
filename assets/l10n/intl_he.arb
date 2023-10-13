@@ -1302,11 +1302,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "הודעה חדשה ב-FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "monday": "יום שני",
     "@monday": {
         "type": "text",

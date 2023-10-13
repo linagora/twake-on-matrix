@@ -1266,11 +1266,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "FluffyChat에서 새로운 메시지",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newChat": "새로운 채팅",
   "@newChat": {
     "type": "text",

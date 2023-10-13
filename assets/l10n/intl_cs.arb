@@ -1154,11 +1154,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "Nová zpráva ve FluffyChatu",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Nová žádost o ověření!",
   "@newVerificationRequest": {
     "type": "text",

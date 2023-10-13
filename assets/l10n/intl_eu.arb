@@ -746,11 +746,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Mezu berria FluffyChaten",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Egiaztaketa eskaera berria!",
   "@newVerificationRequest": {
     "type": "text",

@@ -1154,11 +1154,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nova mensaxe en FluffyChat",
-  "@newMessageInFluffyChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "newVerificationRequest": "Nova solicitude de verificación!",
   "@newVerificationRequest": {
     "type": "text",

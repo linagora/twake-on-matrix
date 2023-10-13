@@ -1133,11 +1133,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Nova mesaĝo en FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Nova kontrolpeto!",
     "@newVerificationRequest": {
         "type": "text",

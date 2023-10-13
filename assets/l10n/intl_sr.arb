@@ -1095,11 +1095,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "Нова порука — FluffyChat",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "Нови захтев за верификацију!",
     "@newVerificationRequest": {
         "type": "text",

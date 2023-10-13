@@ -1113,11 +1113,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInFluffyChat": "💬 FluffyChat 新消息",
-    "@newMessageInFluffyChat": {
-        "type": "text",
-        "placeholders": {}
-    },
     "newVerificationRequest": "新的验证请求！",
     "@newVerificationRequest": {
         "type": "text",
