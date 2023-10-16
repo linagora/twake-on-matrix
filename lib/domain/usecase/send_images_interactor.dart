@@ -27,7 +27,7 @@ class SendImagesInteractor {
         );
       }
     } catch (error) {
-      Logs().d("SendImageInteractor: execute(): $error");
+      Logs().d("SendImagesInteractor: execute(): $error");
     }
   }
 }

@@ -39,7 +39,6 @@ import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_inte
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_image_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
@@ -141,7 +140,6 @@ class GetItInitializer {
     getIt.registerFactory<GetContactsInteractor>(
       () => GetContactsInteractor(),
     );
-    getIt.registerSingleton<SendImageInteractor>(SendImageInteractor());
     getIt.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
