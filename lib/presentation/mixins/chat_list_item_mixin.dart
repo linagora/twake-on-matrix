@@ -57,7 +57,7 @@ mixin ChatListItemMixin {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-            maxLines: 1,
+            maxLines: 2,
             softWrap: true,
           ),
         ),
