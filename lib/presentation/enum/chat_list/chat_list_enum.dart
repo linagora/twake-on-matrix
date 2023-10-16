@@ -101,7 +101,11 @@ enum ChatListSelectionActions {
           return L10n.of(context)!.unmuteThisMessage;
         }
       case ChatListSelectionActions.pin:
-        return L10n.of(context)!.pinThisMessage;
+        if (room.isFavourite) {
+          return L10n.of(context)!.unpinThisMessage;
+        } else {
+          return L10n.of(context)!.pinThisMessage;
+        }
       case ChatListSelectionActions.more:
         return L10n.of(context)!.more;
     }
