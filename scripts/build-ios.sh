@@ -16,7 +16,7 @@ FLUFFYCHAT_ORIG_TEAM="4NXF6Z997G"
 ### Rotate IDs ###
 [ -n "${FLUFFYCHAT_NEW_GROUP}" ] && {
 	# App group IDs
-	sed -i "" "s/group.${FLUFFYCHAT_ORIG_GROUP}.app/group.${FLUFFYCHAT_NEW_GROUP}.app/g" "ios/FluffyChat Share/FluffyChat Share.entitlements"
+	sed -i "" "s/group.${FLUFFYCHAT_ORIG_GROUP}.app/group.${FLUFFYCHAT_NEW_GROUP}.app/g" "ios/Twake Share/Twake Share.entitlements"
 	sed -i "" "s/group.${FLUFFYCHAT_ORIG_GROUP}.app/group.${FLUFFYCHAT_NEW_GROUP}.app/g" "ios/Runner/Runner.entitlements"
 	sed -i "" "s/group.${FLUFFYCHAT_ORIG_GROUP}.app/group.${FLUFFYCHAT_NEW_GROUP}.app/g" "ios/Runner.xcodeproj/project.pbxproj"
 	# Bundle identifiers
