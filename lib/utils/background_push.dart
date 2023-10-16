@@ -343,6 +343,7 @@ class BackgroundPush {
 
   Future<void> goToRoom(String? roomId) async {
     try {
+      _clearAllNavigatorAvailable();
       Logs().v('[Push] Attempting to go to room $roomId...');
       if (_matrixState == null || roomId == null) {
         return;
@@ -580,5 +581,9 @@ class BackgroundPush {
     await setupPusher(
       oldTokens: {_pushToken},
     );
+  }
+
+  void _clearAllNavigatorAvailable() {
+    TwakeApp.router.routerDelegate.pop();
   }
 }
