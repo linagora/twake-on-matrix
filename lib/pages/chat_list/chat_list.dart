@@ -160,6 +160,10 @@ class ChatListController extends State<ChatList>
   bool get conversationSelectionNotifierIsEmpty =>
       conversationSelectionNotifier.value.isEmpty;
 
+  PushRuleState get pushRuleState => anySelectedRoomNotMuted
+      ? PushRuleState.mentionsOnly
+      : PushRuleState.notify;
+
   void addAccountAction() => context.go('/settings/account');
 
   void _onScroll() {
@@ -281,15 +285,12 @@ class ChatListController extends State<ChatList>
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        final newState = anySelectedRoomNotMuted
-            ? PushRuleState.mentionsOnly
-            : PushRuleState.notify;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = client.getRoomById(conversation.roomId)!;
-          if (room.pushRuleState == newState) continue;
+          if (room.pushRuleState == pushRuleState) continue;
           await client
               .getRoomById(conversation.roomId)!
-              .setPushRuleState(newState);
+              .setPushRuleState(pushRuleState);
         }
       },
     );
@@ -542,8 +543,10 @@ class ChatListController extends State<ChatList>
     Room room,
   ) {
     final listAction = [
-      ChatListSelectionActions.read,
-      ChatListSelectionActions.pin,
+      if (room.membership != Membership.invite) ...[
+        ChatListSelectionActions.read,
+        ChatListSelectionActions.pin,
+      ],
       ChatListSelectionActions.mute,
     ];
     return listAction.map((action) {
