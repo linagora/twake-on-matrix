@@ -30,4 +30,14 @@ extension FileInfoExtension on FileInfo {
     }
     return MessageTypes.File;
   }
+
+  FileInfo get detectFileType {
+    if (msgType == MessageTypes.Image) {
+      return ImageFileInfo(fileName, filePath, fileSize);
+    }
+    if (msgType == MessageTypes.Video) {
+      return VideoFileInfo(fileName, filePath, fileSize);
+    }
+    return FileInfo(fileName, filePath, fileSize, readStream: readStream);
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -7,12 +8,14 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 typedef TransactionId = String;
 
@@ -90,7 +93,9 @@ extension SendFileExtension on Room {
         targetPath: tempThumbnailFile.path,
       );
 
-      if (thumbnail != null && fileInfo.fileSize < thumbnail.fileSize) {
+      if (thumbnail != null &&
+          fileInfo.fileSize > 0 &&
+          fileInfo.fileSize < thumbnail.fileSize) {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
@@ -211,6 +216,7 @@ extension SendFileExtension on Room {
       'url': uploadResp.toString(),
       if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
       'info': {
+        ...thumbnail?.metadata ?? {},
         ...fileInfo.metadata,
         if (thumbnail != null && encryptedThumbnail == null)
           'thumbnail_url': thumbnailUploadResp.toString(),
@@ -351,15 +357,26 @@ extension SendFileExtension on Room {
         originalFile.filePath,
         targetPath,
         quality: AppConfig.thumbnailQuality,
+        format: CompressFormat.jpeg,
       );
       if (result == null) return null;
       final size = await result.length();
+      var width = originalFile.width;
+      var height = originalFile.height;
+      if (width == null || height == null) {
+        final imageDimension = await runBenchmarked(
+          '_calculateImageDimension',
+          () => _calculateImageDimension(result.path),
+        );
+        width = imageDimension.width.toInt();
+        height = imageDimension.height.toInt();
+      }
       return ImageFileInfo(
         result.name,
         result.path,
         size,
-        width: originalFile.width,
-        height: originalFile.height,
+        width: width,
+        height: height,
       );
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
@@ -392,12 +409,24 @@ extension SendFileExtension on Room {
     File tempThumbnailFile,
     VideoFileInfo fileInfo,
   ) async {
-    await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
+    final int fileSize;
+    if (fileInfo.imagePlaceholderBytes != null) {
+      await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes!);
+      fileSize = fileInfo.imagePlaceholderBytes!.lengthInBytes;
+    } else {
+      await VideoThumbnail.thumbnailFile(
+        video: fileInfo.filePath,
+        imageFormat: ImageFormat.JPEG,
+        quality: AppConfig.thumbnailQuality,
+        thumbnailPath: tempThumbnailFile.path,
+      );
+      fileSize = await tempThumbnailFile.length();
+    }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     final newThumbnail = ImageFileInfo(
       tempThumbnailFile.path.split("/").last,
       tempThumbnailFile.path,
-      fileInfo.imagePlaceholderBytes.lengthInBytes,
+      fileSize,
     );
     return newThumbnail;
   }
@@ -410,5 +439,21 @@ extension SendFileExtension on Room {
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![key] = value;
     await handleImageFakeSync(fakeImageEvent);
+  }
+
+  Future<Size> _calculateImageDimension(String filePath) {
+    final completer = Completer<Size>();
+    final Image image = Image.file(File(filePath));
+    image.image.resolve(const ImageConfiguration()).addListener(
+      ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) {
+          final myImage = image.image;
+          final Size size =
+              Size(myImage.width.toDouble(), myImage.height.toDouble());
+          completer.complete(size);
+        },
+      ),
+    );
+    return completer.future;
   }
 }
