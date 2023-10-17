@@ -92,7 +92,26 @@ extension SendFileExtension on Room {
         fileInfo,
         targetPath: tempThumbnailFile.path,
       );
-
+      fileInfo = ImageFileInfo(
+        fileInfo.fileName,
+        fileInfo.filePath,
+        fileInfo.fileSize,
+        width: thumbnail?.width,
+        height: thumbnail?.height,
+      );
+      storePlaceholderFileInMem(
+        fileInfo: fileInfo,
+        txid: txid,
+      );
+      fakeImageEvent = await sendFakeImagePickerFileEvent(
+        fileInfo,
+        txid: txid,
+        messageType: msgType,
+        inReplyTo: inReplyTo,
+        editEventId: editEventId,
+        shrinkImageMaxDimension: shrinkImageMaxDimension,
+        extraContent: extraContent,
+      );
       if (thumbnail != null &&
           fileInfo.fileSize > 0 &&
           fileInfo.fileSize < thumbnail.fileSize) {
