@@ -200,7 +200,10 @@ class BackgroundPush {
                           "content-available": 1,
                           "badge": 1,
                           "sound": "default",
-                          "alert": {"loc-key": "SINGLE_UNREAD", "loc-args": []}
+                          "alert": {
+                            "loc-key": "newMessageInTwake",
+                            "loc-args": []
+                          }
                         }
                       }
                     }
