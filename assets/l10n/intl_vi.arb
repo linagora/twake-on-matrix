@@ -1504,7 +1504,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInTwake": "💬 Bạn có tin nhắn mới",
+  "newMessageInTwake": "Bạn có tin nhắn mới",
   "@newMessageInTwake": {
     "type": "text",
     "placeholders": {}

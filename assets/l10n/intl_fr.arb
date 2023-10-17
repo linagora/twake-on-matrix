@@ -1163,7 +1163,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newMessageInTwake": "💬 Vous avez un message chiffré",
+  "newMessageInTwake": "Vous avez un message chiffré",
   "@newMessageInTwake": {
     "type": "text",
     "placeholders": {}
