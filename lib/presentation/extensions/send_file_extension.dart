@@ -5,6 +5,8 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
@@ -461,18 +463,10 @@ extension SendFileExtension on Room {
   }
 
   Future<Size> _calculateImageDimension(String filePath) {
-    final completer = Completer<Size>();
-    final Image image = Image.file(File(filePath));
-    image.image.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) {
-          final myImage = image.image;
-          final Size size =
-              Size(myImage.width.toDouble(), myImage.height.toDouble());
-          completer.complete(size);
-        },
-      ),
-    );
-    return completer.future;
+    return Image.file(File(filePath)).calculateImageDimension();
+  }
+
+  Future<Size> _calculateImageBytesDimension(Uint8List bytes) {
+    return Image.memory(bytes).calculateImageDimension();
   }
 }

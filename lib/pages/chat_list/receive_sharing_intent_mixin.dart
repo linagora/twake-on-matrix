@@ -1,15 +1,13 @@
 import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -25,14 +23,9 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   void _processIncomingSharedFiles(List<SharedMediaFile> files) {
     if (files.isEmpty) return;
     final shareFile = files.first;
-    final path = Uri.decodeFull(shareFile.path.replaceFirst('file://', ''));
-    final file = File(path);
     matrixState.shareContent = {
       'msgtype': TwakeEventTypes.shareFileEventType,
-      'file': MatrixFile(
-        name: file.path,
-        filePath: file.path,
-      ).detectFileType,
+      'file': shareFile.toMatrixFile(),
     };
     TwakeApp.router.go('/share');
   }
