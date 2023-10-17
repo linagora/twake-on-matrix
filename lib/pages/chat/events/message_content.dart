@@ -316,6 +316,7 @@ class _MessageImageBuilder extends StatelessWidget {
         file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
       ).getDisplayImageInfo(context);
       return SendingImageInfoWidget(
+        key: ValueKey(event.eventId),
         matrixFile: file,
         event: event,
         onTapPreview: onTapPreview,
@@ -387,10 +388,12 @@ class _MessageVideoBuilder extends StatelessWidget {
     }
     if (isSendingVideo(matrixFile)) {
       final file = matrixFile as MatrixVideoFile;
-      displayImageInfo = Size(
-        file.width!.toDouble(),
-        file.height!.toDouble(),
-      ).getDisplayImageInfo(context);
+      if (file.width != null && file.height != null) {
+        displayImageInfo = Size(
+          file.width!.toDouble(),
+          file.height!.toDouble(),
+        ).getDisplayImageInfo(context);
+      }
       return SendingVideoWidget(
         key: ValueKey(event.eventId),
         event: event,
@@ -413,8 +416,6 @@ class _MessageVideoBuilder extends StatelessWidget {
   }
 
   bool isSendingVideo(MatrixFile? matrixFile) {
-    return matrixFile is MatrixVideoFile &&
-        matrixFile.width != null &&
-        matrixFile.height != null;
+    return matrixFile is MatrixVideoFile && matrixFile.bytes != null;
   }
 }

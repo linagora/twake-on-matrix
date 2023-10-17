@@ -45,4 +45,16 @@ extension RoomExtension on Room {
   Future<void> unmute() async {
     await setPushRuleState(PushRuleState.notify);
   }
+
+  String storePlaceholderFileInMem({
+    required FileInfo fileInfo,
+    String? txid,
+  }) {
+    txid ??= client.generateUniqueTransactionId();
+    final matrixFile = MatrixFile.fromFileInfo(
+      fileInfo: fileInfo,
+    );
+    sendingFilePlaceholders[txid] = matrixFile;
+    return txid;
+  }
 }

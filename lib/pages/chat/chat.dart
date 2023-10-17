@@ -6,7 +6,6 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
@@ -322,8 +321,9 @@ class ChatController extends State<Chat>
         sendFileInteractor.execute(
           room: room!,
           fileInfos: [
-            FileInfo(shareFile!.name, shareFile!.filePath!, shareFile!.size)
-                .detectFileType,
+            FileInfo.fromMatrixFile(
+              shareFile!,
+            )
           ],
         );
       }
