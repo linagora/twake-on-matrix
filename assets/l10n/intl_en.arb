@@ -1262,7 +1262,7 @@
         "type": "text",
         "placeholders": {}
     },
-    "newMessageInTwake": "💬 You have 1 encrypted message",
+    "newMessageInTwake": "You have 1 encrypted message",
     "@newMessageInTwake": {
         "type": "text",
         "placeholders": {}
