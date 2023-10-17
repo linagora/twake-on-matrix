@@ -114,6 +114,7 @@ extension SendFileExtension on Room {
         shrinkImageMaxDimension: shrinkImageMaxDimension,
         extraContent: extraContent,
       );
+
       if (thumbnail != null &&
           fileInfo.fileSize > 0 &&
           fileInfo.fileSize < thumbnail.fileSize) {
@@ -126,6 +127,29 @@ extension SendFileExtension on Room {
         FileSendingStatus.generatingThumbnail.name,
       );
       thumbnail ??= await _getThumbnailVideo(tempThumbnailFile, fileInfo);
+      if (fileInfo.width == null || fileInfo.height == null) {
+        fileInfo = VideoFileInfo(
+          fileInfo.fileName,
+          fileInfo.filePath,
+          fileInfo.fileSize,
+          imagePlaceholderBytes: fileInfo.imagePlaceholderBytes,
+          width: thumbnail.width,
+          height: thumbnail.height,
+        );
+        storePlaceholderFileInMem(
+          fileInfo: fileInfo,
+          txid: txid,
+        );
+        fakeImageEvent = await sendFakeImagePickerFileEvent(
+          fileInfo,
+          txid: txid,
+          messageType: msgType,
+          inReplyTo: inReplyTo,
+          editEventId: editEventId,
+          shrinkImageMaxDimension: shrinkImageMaxDimension,
+          extraContent: extraContent,
+        );
+      }
     }
 
     EncryptedFileInfo? encryptedFileInfo;
@@ -431,9 +455,9 @@ extension SendFileExtension on Room {
     VideoFileInfo fileInfo,
   ) async {
     final int fileSize;
-    if (fileInfo.imagePlaceholderBytes != null) {
-      await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes!);
-      fileSize = fileInfo.imagePlaceholderBytes!.lengthInBytes;
+    if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
+      await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
+      fileSize = fileInfo.imagePlaceholderBytes.lengthInBytes;
     } else {
       await VideoThumbnail.thumbnailFile(
         video: fileInfo.filePath,
@@ -443,11 +467,23 @@ extension SendFileExtension on Room {
       );
       fileSize = await tempThumbnailFile.length();
     }
+    var width = fileInfo.width;
+    var height = fileInfo.height;
+    if (width == null || height == null) {
+      final imageDimension = await runBenchmarked(
+        '_calculateImageDimension',
+        () => _calculateImageBytesDimension(fileInfo.imagePlaceholderBytes),
+      );
+      width = imageDimension.width.toInt();
+      height = imageDimension.height.toInt();
+    }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     final newThumbnail = ImageFileInfo(
       tempThumbnailFile.path.split("/").last,
       tempThumbnailFile.path,
       fileSize,
+      width: width,
+      height: height,
     );
     return newThumbnail;
   }
