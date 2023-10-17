@@ -12,8 +12,6 @@ import 'package:fluffychat/domain/app_state/preview_file/download_file_for_previ
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
 import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
-import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
-import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -56,7 +54,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -622,21 +619,8 @@ class ChatController extends State<Chat>
   void _openDownloadedFileForPreview({
     required DownloadFileForPreviewResponse downloadFileForPreviewResponse,
   }) async {
-    final mimeType = downloadFileForPreviewResponse.mimeType;
-    final openResults = await OpenFile.open(
-      downloadFileForPreviewResponse.filePath,
-      type: mimeType,
-      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType])
-          .value,
-    );
-    Logs().d(
-      'ChatController:_openDownloadedFileForPreview(): ${openResults.message}',
-    );
-
-    if (openResults.type != ResultType.done) {
-      await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
-      return;
-    }
+    await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
+    return;
   }
 
   void openVideoCameraAction() async {
