@@ -32,6 +32,7 @@ import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -523,6 +524,9 @@ class ChatController extends State<Chat>
 
   void onFileTappedMobile(Event event) async {
     final permissionHandler = PermissionHandlerService();
+    if (await permissionHandler.noNeedStoragePermission()) {
+      return _handleDownloadFileForPreviewMobile(event: event);
+    }
     final storagePermissionStatus =
         await permissionHandler.storagePermissionStatus;
     switch (storagePermissionStatus) {
@@ -597,23 +601,16 @@ class ChatController extends State<Chat>
         if (failure is DownloadFileForPreviewFailure) {
           TwakeSnackBar.show(context, 'Error: ${failure.exception}');
         }
+        TwakeLoadingDialog.hideLoadingDialog(context);
       }, (success) {
         if (success is DownloadFileForPreviewSuccess) {
           _openDownloadedFileForPreview(
             downloadFileForPreviewResponse:
                 success.downloadFileForPreviewResponse,
           );
-          Navigator.of(context).pop();
+          TwakeLoadingDialog.hideLoadingDialog(context);
         } else if (success is DownloadFileForPreviewLoading) {
-          showDialog(
-            context: context,
-            useRootNavigator: false,
-            builder: (BuildContext context) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            },
-          );
+          TwakeLoadingDialog.showLoadingDialog(context);
         }
       });
     });
