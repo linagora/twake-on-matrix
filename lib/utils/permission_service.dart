@@ -31,6 +31,10 @@ class PermissionHandlerService {
     return (await _deviceInfoPlugin.androidInfo).version.sdkInt;
   }
 
+  Future<bool> noNeedStoragePermission() async {
+    return Platform.isAndroid && (await _getCurrentAndroidVersion() >= 33);
+  }
+
   Future<PermissionStatus> requestPermissionForCameraActions() async {
     final currentStatus = await Permission.camera.status;
     if (currentStatus == PermissionStatus.denied ||
