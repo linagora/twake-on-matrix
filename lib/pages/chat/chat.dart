@@ -620,6 +620,11 @@ class ChatController extends State<Chat>
     required DownloadFileForPreviewResponse downloadFileForPreviewResponse,
   }) async {
     final mimeType = downloadFileForPreviewResponse.mimeType;
+    if (Platform.isAndroid &&
+        SupportedPreviewFileTypes.apkMimeTypes.contains(mimeType)) {
+      await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
+      return;
+    }
     final openResults = await OpenFile.open(
       downloadFileForPreviewResponse.filePath,
       type: mimeType,
