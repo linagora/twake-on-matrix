@@ -29,6 +29,8 @@ class SupportedPreviewFileTypes {
 
   static const pdfMimeTypes = ['application/pdf', 'application/rtf'];
 
+  static const apkMimeTypes = ['application/vnd.android.package-archive'];
+
   static const xlsMimeTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.oasis.opendocument.spreadsheet',
