@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat_details/chat_details_header_view.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -79,70 +78,101 @@ class ChatDetailsView extends StatelessWidget {
               ),
             ),
           ),
-          body: SizedBox(
-            width: double.infinity,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _groupAvatarBuilder(context: context, room: controller.room!),
-                _groupNameAndInfoBuilder(
-                  context: context,
-                  room: controller.room!,
-                ),
-                ValueListenableBuilder(
-                  valueListenable: controller.muteNotifier,
-                  builder: (context, pushRuleState, child) {
-                    final buttons = controller.chatDetailsActionsButton();
+          body: NestedScrollView(
+            physics: const ClampingScrollPhysics(),
+            key: controller.nestedScrollViewState,
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverOverlapAbsorber(
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    toolbarHeight:
+                        ChatDetailViewStyle.toolbarHeightSliverAppBar,
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _groupAvatarBuilder(
+                          context: context,
+                          room: controller.room!,
+                        ),
+                        _groupNameAndInfoBuilder(
+                          context: context,
+                          room: controller.room!,
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: controller.muteNotifier,
+                          builder: (context, pushRuleState, child) {
+                            final buttons =
+                                controller.chatDetailsActionsButton();
 
-                    return ActionsHeaderBuilder(
-                      actions: buttons,
-                      width: ChatDetailViewStyle.actionsHeaderWidth(context),
-                      buttonColor: !controller.isMobileAndTablet
-                          ? LinagoraRefColors.material().primary[100]
-                          : null,
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: controller.isMobileAndTablet
-                            ? LinagoraRefColors.material().neutral[90]!
-                            : Colors.transparent,
-                      ),
-                      onTap: (actions) => controller.onTapActionsButton(
-                        actions,
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(
-                        ChatDetailViewStyle.chatDetailsPageViewWebBorderRadius,
-                      ),
+                            return ActionsHeaderBuilder(
+                              actions: buttons,
+                              width: ChatDetailViewStyle.actionsHeaderWidth(
+                                context,
+                              ),
+                              buttonColor: !controller.isMobileAndTablet
+                                  ? LinagoraRefColors.material().primary[100]
+                                  : null,
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: controller.isMobileAndTablet
+                                    ? LinagoraRefColors.material().neutral[90]!
+                                    : Colors.transparent,
+                              ),
+                              onTap: (actions) => controller.onTapActionsButton(
+                                actions,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    child: Container(
-                      width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
-                      decoration: BoxDecoration(
-                        color: LinagoraRefColors.material().primary[100],
+                    automaticallyImplyLeading: false,
+                    pinned: true,
+                    floating: true,
+                    forceElevated: innerBoxIsScrolled,
+                    bottom: TabBar(
+                      physics: const NeverScrollableScrollPhysics(),
+                      overlayColor: MaterialStateProperty.all(
+                        Colors.transparent,
                       ),
-                      child: ValueListenableBuilder(
-                        valueListenable: controller.currentPage,
-                        builder: (context, currentPage, _) {
-                          return ChatDetailsPageViewBuilder(
-                            pages: controller.chatDetailsPages(),
-                            currentIndexPageSelected: currentPage,
-                            pageController: controller.pageController,
-                            onTapGoToPage: (page) {
-                              controller.currentPage.value = page;
-                              controller.pageController.jumpToPage(page);
-                            },
-                          );
-                        },
-                      ),
+                      tabs: controller.chatDetailsPages().map((pages) {
+                        return Tab(
+                          child: Text(
+                            pages.page.getTitle(context),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        );
+                      }).toList(),
+                      controller: controller.tabController,
                     ),
                   ),
                 ),
-              ],
+              ];
+            },
+            body: ClipRRect(
+              borderRadius: BorderRadius.all(
+                Radius.circular(
+                  ChatDetailViewStyle.chatDetailsPageViewWebBorderRadius,
+                ),
+              ),
+              child: Container(
+                width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
+                padding: ChatDetailViewStyle.paddingTabBarView,
+                decoration: BoxDecoration(
+                  color: LinagoraRefColors.material().primary[100],
+                ),
+                child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  controller: controller.tabController,
+                  children: controller.chatDetailsPages().map((pages) {
+                    return pages.child;
+                  }).toList(),
+                ),
+              ),
             ),
           ),
         );
