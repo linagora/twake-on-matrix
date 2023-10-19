@@ -92,7 +92,7 @@ class ContactsAppBar extends StatelessWidget {
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
       ),

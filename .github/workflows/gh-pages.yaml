@@ -2,7 +2,7 @@ on:
   pull_request:
 
 env:
-  FLUTTER_VERSION: 3.10.6
+  FLUTTER_VERSION: 3.13.7
   LIBOLM_VERSION: 3.2.15
 
 name: Deploying on GitHub Pages

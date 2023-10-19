@@ -56,7 +56,7 @@ class InputBarShortcuts extends StatelessWidget {
           flutter.LogicalKeyboardKey.enter,
         ): () {
           onSubmitted?.call(controller?.text ?? '');
-        }
+        },
       },
       child: child,
     );

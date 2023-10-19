@@ -103,7 +103,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
         displayName:
             isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
         matrixId: Matrix.of(context).client.userID,
-      )
+      ),
     };
     newContactsList.addAll(getSelectedValidContacts(contactsList));
     return newContactsList;

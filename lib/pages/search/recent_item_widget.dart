@@ -121,7 +121,7 @@ class _GroupChatInformation extends StatelessWidget {
                         color: LinagoraRefColors.material().tertiary[30],
                       ),
                     ),
-              )
+              ),
             ],
           ),
         ),

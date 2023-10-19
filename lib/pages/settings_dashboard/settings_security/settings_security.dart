@@ -85,7 +85,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
           obscureText: true,
           maxLines: 1,
           minLines: 1,
-        )
+        ),
       ],
     );
     if (newLock != null) {
@@ -141,7 +141,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
           hintText: '******',
           minLines: 1,
           maxLines: 1,
-        )
+        ),
       ],
     );
     if (input == null) return;

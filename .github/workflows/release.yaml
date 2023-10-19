@@ -4,7 +4,7 @@ on:
       - "v*.*.*"
 
 env:
-  FLUTTER_VERSION: 3.10.6
+  FLUTTER_VERSION: 3.13.7
 
 name: Release app
 

@@ -89,7 +89,7 @@ class SearchView extends StatelessWidget {
                 );
               },
               initialItemCount: 1,
-            )
+            ),
           ],
         ),
       ),
@@ -203,7 +203,7 @@ class SearchView extends StatelessWidget {
                 );
               },
             ),
-          )
+          ),
         ],
       ),
     );

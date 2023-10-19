@@ -148,7 +148,7 @@ class ClientChooserButton extends StatelessWidget {
             KeyBoardShortcuts(
               keysToPress: {
                 LogicalKeyboardKey.controlLeft,
-                LogicalKeyboardKey.tab
+                LogicalKeyboardKey.tab,
               },
               helpLabel: L10n.of(context)!.nextAccount,
               onKeysPressed: () => _nextAccount(matrix, context),
@@ -158,7 +158,7 @@ class ClientChooserButton extends StatelessWidget {
               keysToPress: {
                 LogicalKeyboardKey.controlLeft,
                 LogicalKeyboardKey.shiftLeft,
-                LogicalKeyboardKey.tab
+                LogicalKeyboardKey.tab,
               },
               helpLabel: L10n.of(context)!.previousAccount,
               onKeysPressed: () => _previousAccount(matrix, context),
@@ -196,7 +196,7 @@ class ClientChooserButton extends StatelessWidget {
     if (index > 0 && index < 10) {
       return {
         LogicalKeyboardKey.altLeft,
-        LogicalKeyboardKey(0x00000000030 + index)
+        LogicalKeyboardKey(0x00000000030 + index),
       };
     } else {
       return null;

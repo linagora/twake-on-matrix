@@ -24,7 +24,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
             icon: Icons.close,
             onTap: () => context.pop(),
             iconColor: Theme.of(context).colorScheme.surface,
-          )
+          ),
         ],
         seekBarColor: Theme.of(context).colorScheme.onSurfaceVariant,
         seekBarPositionColor: Theme.of(context).colorScheme.primary,

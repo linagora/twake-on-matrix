@@ -60,7 +60,7 @@ class GroupChatEmptyView extends StatelessWidget {
                   color: LinagoraRefColors.material().neutral[40],
                 ),
               ),
-              const Spacer()
+              const Spacer(),
             ],
           ),
           const SizedBox(height: 8),

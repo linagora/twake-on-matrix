@@ -145,7 +145,7 @@ class SearchContactsAndChatsController {
             .listen(
               (event) => {
                 _isLoadingMore = false,
-                mapPreSearchChatToPresentation(event, isLoadMore: true)
+                mapPreSearchChatToPresentation(event, isLoadMore: true),
               },
             );
       });

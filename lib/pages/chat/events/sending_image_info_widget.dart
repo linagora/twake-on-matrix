@@ -73,7 +73,7 @@ class SendingImageInfoWidget extends StatelessWidget {
                   Icons.close,
                   color: LinagoraRefColors.material().primary[100],
                 ),
-              ]
+              ],
             ],
           );
         },
@@ -106,7 +106,7 @@ class SendingImageInfoWidget extends StatelessWidget {
                     cacheWidth: displayImageInfo.size.width.toInt(),
                     fit: BoxFit.cover,
                     filterQuality: FilterQuality.medium,
-                  )
+                  ),
                 ],
               ),
             ),

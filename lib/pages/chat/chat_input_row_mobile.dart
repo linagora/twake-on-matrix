@@ -47,7 +47,7 @@ class ChatInputRowMobile extends StatelessWidget {
             KeyBoardShortcuts(
               keysToPress: {
                 LogicalKeyboardKey.altLeft,
-                LogicalKeyboardKey.keyE
+                LogicalKeyboardKey.keyE,
               },
               onKeysPressed: onEmojiAction,
               helpLabel: L10n.of(context)!.emojis,

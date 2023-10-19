@@ -24,7 +24,7 @@ class SupportedPreviewFileTypes {
     'application/vnd.oasis.opendocument.text-master',
     'application/msword',
     'application/vnd.ms-works',
-    'docx'
+    'docx',
   ];
 
   static const pdfMimeTypes = ['application/pdf', 'application/rtf'];
@@ -37,14 +37,14 @@ class SupportedPreviewFileTypes {
     'application/vnd.oasis.opendocument.spreadsheet-template',
     'application/vnd.oasis.opendocument.chart',
     'application/vnd.oasis.opendocument.formula',
-    'application/vnd.ms-excel'
+    'application/vnd.ms-excel',
   ];
 
   static const pptMimeTypes = [
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/vnd.oasis.opendocument.presentation',
     'application/vnd.oasis.opendocument.presentation-template',
-    'application/vnd.ms-powerpoint'
+    'application/vnd.ms-powerpoint',
   ];
 
   static const zipMimeTypes = [
@@ -54,7 +54,7 @@ class SupportedPreviewFileTypes {
     'application/x-compressed',
     'application/x-zip-compressed',
     'application/java-archive',
-    'application/zip'
+    'application/zip',
   ];
 
   static const iOSSupportedTypes = {
@@ -144,7 +144,7 @@ class SupportedPreviewFileTypes {
     'docm',
     'dot',
     'dotx',
-    'dotm'
+    'dotm',
   ];
 
   static const pdfFileTypes = ['pdf'];

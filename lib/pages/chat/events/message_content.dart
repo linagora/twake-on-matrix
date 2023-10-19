@@ -119,7 +119,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: endOfBubbleWidget,
-                )
+                ),
               ],
             );
 

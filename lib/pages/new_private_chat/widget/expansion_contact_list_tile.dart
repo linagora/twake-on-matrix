@@ -82,7 +82,7 @@ class ExpansionContactListTile extends StatelessWidget {
                             TwakeChip(
                               text: L10n.of(context)!.owner,
                               textColor: Theme.of(context).colorScheme.primary,
-                            )
+                            ),
                           ],
                           const SizedBox(width: 8.0),
                           if (contact.status != null)
@@ -107,10 +107,10 @@ class ExpansionContactListTile extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: LinagoraRefColors.material().neutral[60],
                             ),
-                      )
+                      ),
                   ],
                 ),
-              )
+              ),
             ],
           );
         },
