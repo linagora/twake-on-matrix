@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 class ChatDetailViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
+  static const double toolbarHeightSliverAppBar = 300.0;
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 56 : 80;
 
@@ -20,6 +22,11 @@ class ChatDetailViewStyle {
 
   static EdgeInsetsDirectional groupNameAndInfoPadding =
       const EdgeInsetsDirectional.symmetric(horizontal: 16.0);
+
+  static EdgeInsetsDirectional paddingTabBarView =
+      const EdgeInsetsDirectional.only(
+    top: 50,
+  );
 
   static double groupAvatarSize = 96.0;
 

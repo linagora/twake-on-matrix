@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_detail
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
+import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
@@ -15,7 +16,9 @@ import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +49,14 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails>
-    with HandleVideoDownloadMixin, PlayVideoActionMixin {
+    with
+        HandleVideoDownloadMixin,
+        PlayVideoActionMixin,
+        SingleTickerProviderStateMixin {
+  static const _mediaFetchLimit = 20;
+
+  static const _linksFetchLimit = 20;
+
   final invitationSelectionMobileAndTabletKey =
       const Key('InvitationSelectionMobileAndTabletKey');
 
@@ -57,13 +67,22 @@ class ChatDetailsController extends State<ChatDetails>
 
   final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
 
+  final GlobalKey<NestedScrollViewState> nestedScrollViewState = GlobalKey();
+
+  final List<ChatDetailsPage> chatDetailsPageView = [
+    ChatDetailsPage.members,
+    ChatDetailsPage.media,
+    ChatDetailsPage.links,
+  ];
+
+  SameTypeEventsBuilderController? mediaListController;
+  SameTypeEventsBuilderController? linksListController;
+
   Room? room;
 
   final responsive = getIt.get<ResponsiveUtils>();
 
-  PageController pageController = PageController();
-
-  final ValueNotifier<int> currentPage = ValueNotifier(0);
+  TabController? tabController;
 
   final muteNotifier = ValueNotifier<PushRuleState>(
     PushRuleState.notify,
@@ -92,8 +111,56 @@ class ChatDetailsController extends State<ChatDetails>
   @override
   void initState() {
     super.initState();
+    tabController = TabController(
+      length: chatDetailsPageView.length,
+      vsync: this,
+    );
+    mediaListController = SameTypeEventsBuilderController(
+      getTimeline: getTimeline,
+      searchFunc: (event) => event.isVideoOrImage,
+      limit: _mediaFetchLimit,
+    );
+    linksListController = SameTypeEventsBuilderController(
+      getTimeline: getTimeline,
+      searchFunc: (event) => event.isContainsLink,
+      limit: _linksFetchLimit,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      nestedScrollViewState.currentState!.innerController.addListener(
+        _listenerInnerController,
+      );
+      _refreshDataInTabviewInit();
+    });
     room = Matrix.of(context).client.getRoomById(roomId!);
     muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
+  }
+
+  @override
+  void dispose() {
+    tabController?.dispose();
+    muteNotifier.dispose();
+    super.dispose();
+  }
+
+  void _listenerInnerController() {
+    Logs().d("ChatDetails::currentTab - ${tabController!.index}");
+    if (nestedScrollViewState.currentState!.innerController.shouldLoadMore) {
+      switch (chatDetailsPageView[tabController!.index]) {
+        case ChatDetailsPage.media:
+          mediaListController?.loadMore();
+          break;
+        case ChatDetailsPage.links:
+          linksListController?.loadMore();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void _refreshDataInTabviewInit() {
+    linksListController?.refresh();
+    mediaListController?.refresh();
   }
 
   void toggleDisplaySettings() =>
@@ -455,41 +522,52 @@ class ChatDetailsController extends State<ChatDetails>
         // ChatDetailsActions.more,
       ];
 
-  List<ChatDetailsPageModel> chatDetailsPages() => [
-        ChatDetailsPageModel(
-          page: ChatDetailsPage.members,
-          child: ChatDetailsMembersPage(
-            members: members ?? [],
-            actualMembersCount: actualMembersCount,
-            canRequestMoreMembers: members!.length < actualMembersCount,
-            requestMoreMembersAction: requestMoreMembersAction,
-            openDialogInvite: openDialogInvite,
-            isMobileAndTablet: isMobileAndTablet,
-          ),
-        ),
-        ChatDetailsPageModel(
-          page: ChatDetailsPage.media,
-          child: ChatDetailsMediaPage(
-            getTimeline: getTimeline,
-            cacheMap: _mediaCacheMap,
-            handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
-          ),
-        ),
-        // const ChatDetailsPageModel(
-        //   page: ChatDetailsPage.files,
-        //   child: SizedBox.shrink(),
-        // ),
-        ChatDetailsPageModel(
-          page: ChatDetailsPage.links,
-          child: ChatDetailsLinksPage(
-            getTimeline: getTimeline,
-          ),
-        ),
-        // const ChatDetailsPageModel(
-        //   page: ChatDetailsPage.downloads,
-        //   child: SizedBox.shrink(),
-        // ),
-      ];
+  List<ChatDetailsPageModel> chatDetailsPages() => chatDetailsPageView.map(
+        (page) {
+          switch (page) {
+            case ChatDetailsPage.members:
+              return ChatDetailsPageModel(
+                page: page,
+                child: ChatDetailsMembersPage(
+                  key: const PageStorageKey("members"),
+                  members: members ?? [],
+                  actualMembersCount: actualMembersCount,
+                  canRequestMoreMembers: members!.length < actualMembersCount,
+                  requestMoreMembersAction: requestMoreMembersAction,
+                  openDialogInvite: openDialogInvite,
+                  isMobileAndTablet: isMobileAndTablet,
+                ),
+              );
+            case ChatDetailsPage.media:
+              return ChatDetailsPageModel(
+                page: page,
+                child: mediaListController == null
+                    ? const SizedBox()
+                    : ChatDetailsMediaPage(
+                        key: const PageStorageKey<String>('Media'),
+                        controller: mediaListController!,
+                        cacheMap: _mediaCacheMap,
+                        handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
+                      ),
+              );
+            case ChatDetailsPage.links:
+              return ChatDetailsPageModel(
+                page: page,
+                child: linksListController == null
+                    ? const SizedBox()
+                    : ChatDetailsLinksPage(
+                        key: const PageStorageKey<String>('Links'),
+                        controller: linksListController!,
+                      ),
+              );
+            default:
+              return ChatDetailsPageModel(
+                page: page,
+                child: const SizedBox(),
+              );
+          }
+        },
+      ).toList();
 
   Future<String> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
