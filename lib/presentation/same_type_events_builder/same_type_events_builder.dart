@@ -39,7 +39,7 @@ class SameTypeEventsBuilder extends StatelessWidget {
             child:
                 loadingMore ? const CenterLoadingIndicator() : const SizedBox(),
           ),
-        )
+        ),
       ],
     );
   }
