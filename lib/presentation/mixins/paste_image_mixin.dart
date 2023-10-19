@@ -48,7 +48,7 @@ mixin PasteImageMixin {
             MatrixImageFile(
               name: imageClipboard?.fileName ?? 'copied',
               bytes: imageData,
-            )
+            ),
           ],
         );
       },

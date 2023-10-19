@@ -49,7 +49,7 @@ class ProgressDialog extends StatelessWidget {
               'Loading... Please Wait!',
               overflow: TextOverflow.ellipsis,
             ),
-          )
+          ),
         ],
       ),
     );

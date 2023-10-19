@@ -79,7 +79,7 @@ class Message extends StatelessWidget {
             EventTypes.Message,
             EventTypes.Sticker,
             EventTypes.Encrypted,
-            EventTypes.CallInvite
+            EventTypes.CallInvite,
           }.contains(event.type)) {
             if (event.type.startsWith('m.call.')) {
               return Container();
@@ -288,7 +288,7 @@ class Message extends StatelessWidget {
                                                                           'msgtype':
                                                                               'm.text',
                                                                           'body':
-                                                                              '...'
+                                                                              '...',
                                                                         },
                                                                         senderId:
                                                                             event.senderId,
@@ -485,7 +485,7 @@ class Message extends StatelessWidget {
                                   timeline,
                                   RelationshipTypes.reaction,
                                 ))
-                                  const SizedBox(height: 24)
+                                  const SizedBox(height: 24),
                               ],
                             ),
                             if (event.hasAggregatedEvents(
@@ -747,7 +747,7 @@ class ReplyIconWidget extends StatelessWidget {
           if (!isOwnMessage)
             const SizedBox(
               width: 12.0,
-            )
+            ),
         ],
       ),
     );

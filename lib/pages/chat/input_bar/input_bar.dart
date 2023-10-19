@@ -377,6 +377,9 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                         editableTextState
                             .selectAll(SelectionChangedCause.toolbar);
                       },
+                      onLiveTextInput: () {
+                        // FIXME: Need to hadle live text input
+                      },
                     );
                   }
                 : null,

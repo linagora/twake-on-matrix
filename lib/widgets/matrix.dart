@@ -259,9 +259,9 @@ class MatrixState extends State<Matrix>
   bool webHasFocus = true;
 
   String? get activeRoomId {
-    final route = TwakeApp.router.routeInformationProvider.value.location;
-    if (route == null || !route.startsWith('/rooms/')) return null;
-    return route.split('/')[2];
+    final path = TwakeApp.router.routeInformationProvider.value.uri.path;
+    if (!path.startsWith('/rooms/')) return null;
+    return path.split('/')[2];
   }
 
   final linuxNotifications =

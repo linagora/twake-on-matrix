@@ -75,7 +75,7 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                   },
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

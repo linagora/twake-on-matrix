@@ -37,7 +37,7 @@ class ChatListHeader extends StatelessWidget {
           height: ChatListHeaderStyle.searchBarContainerHeight,
           padding: ChatListHeaderStyle.searchInputPadding,
           child: _normalModeWidgets(context),
-        )
+        ),
       ],
     );
   }

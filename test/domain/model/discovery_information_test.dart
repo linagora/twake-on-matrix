@@ -12,10 +12,10 @@ void main() {
           "jitsi": {
             "preferredDomain": "jitsi.linagora.com",
             "baseUrl": "https://jitsi.linagora.com",
-            "useJwt": false
-          }
+            "useJwt": false,
+          },
         },
-        "t.domain": {"url": "tom-dev.xyz"}
+        "t.domain": {"url": "tom-dev.xyz"},
       };
 
       final actual = DiscoveryInformation.fromJson(multipleCustomizationFields);
@@ -31,15 +31,15 @@ void main() {
         "m.identity_server": {"base_url": "https://tom.tom-dev.xyz/"},
         "t.server": {
           "base_url": "https://tom.tom-dev.xyz/",
-          "server_name": "tom-dev.xyz"
+          "server_name": "tom-dev.xyz",
         },
         "m.integrations": {
           "jitsi": {
             "preferredDomain": "jitsi.linagora.com",
             "baseUrl": "https://jitsi.linagora.com",
-            "useJwt": false
-          }
-        }
+            "useJwt": false,
+          },
+        },
       };
 
       final actual = DiscoveryInformation.fromJson(multipleCustomizationFields);
@@ -58,10 +58,10 @@ void main() {
           "jitsi": {
             "preferredDomain": "jitsi.linagora.com",
             "baseUrl": "https://jitsi.linagora.com",
-            "useJwt": false
-          }
+            "useJwt": false,
+          },
         },
-        "t.domain": "tom-dev.xyz"
+        "t.domain": "tom-dev.xyz",
       };
       expect(
         () => DiscoveryInformation.fromJson(multipleCustomizationFields),

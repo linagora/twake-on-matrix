@@ -39,7 +39,7 @@ class NetworkDI extends BaseDI {
   void _bindBaseOption(GetIt get) {
     final headers = {
       HttpHeaders.acceptHeader: acceptHeaderDefault,
-      HttpHeaders.contentTypeHeader: contentTypeHeaderDefault
+      HttpHeaders.contentTypeHeader: contentTypeHeaderDefault,
     };
 
     get.registerLazySingleton<DioCacheOption>(

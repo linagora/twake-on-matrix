@@ -32,7 +32,7 @@ class ChatDetailsPageViewBuilder extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             children: pages.map((page) => page.child).toList(),
           ),
-        )
+        ),
       ],
     );
   }

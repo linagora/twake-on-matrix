@@ -95,7 +95,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                           await widget.permission.request();
                         }
                       },
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -33,7 +33,7 @@ class ArchiveView extends StatelessWidget {
                   label: Text(L10n.of(context)!.clearArchive),
                   icon: const Icon(Icons.cleaning_services_outlined),
                 ),
-              )
+              ),
           ],
         ),
         body: Builder(

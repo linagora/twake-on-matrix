@@ -94,7 +94,7 @@ class SettingsProfileController extends State<SettingsProfile>
   ];
 
   final List<SettingsProfileEnum> getListProfileWorkIdentitiesInfo = [
-    SettingsProfileEnum.matrixId
+    SettingsProfileEnum.matrixId,
   ];
 
   List<SheetAction<AvatarAction>> actions() => [

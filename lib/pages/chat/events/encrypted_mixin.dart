@@ -65,7 +65,7 @@ mixin EncryptedMixin {
                 event.calcLocalizedBodyFallback(
                   MatrixLocals(l10n),
                 ),
-              )
+              ),
             ],
           ),
         ),

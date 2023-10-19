@@ -251,7 +251,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
                       padding: SettingsProfileViewWebStyle
                           .paddingWorkIdentitiesInfoWidget,
                       child: workIdentitiesInfoWidget,
-                    )
+                    ),
                   ],
                 ),
               ),

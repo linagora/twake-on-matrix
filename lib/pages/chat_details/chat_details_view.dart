@@ -74,7 +74,7 @@ class ChatDetailsView extends StatelessWidget {
                           ),
                     ),
                   ),
-                  const SizedBox(width: 56)
+                  const SizedBox(width: 56),
                 ],
               ),
             ),

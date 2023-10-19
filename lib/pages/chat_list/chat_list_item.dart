@@ -148,7 +148,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                   child: Column(
                     children: [
                       ChatListItemTitle(room: room),
-                      ChatListItemSubtitle(room: room)
+                      ChatListItemSubtitle(room: room),
                     ],
                   ),
                 ),

@@ -103,7 +103,7 @@ class ReactionsPicker extends StatelessWidget {
                   ),
                   onTap: () =>
                       controller.pickEmojiReactionAction(allReactionEvents),
-                )
+                ),
               ],
             );
           },
