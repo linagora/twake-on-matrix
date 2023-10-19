@@ -3,7 +3,8 @@ import Social
 import MobileCoreServices
 import Photos
 
-class ShareViewController: SLComposeServiceViewController {
+@objc(ShareViewController)
+class ShareViewController: UIViewController {
     // TODO: IMPORTANT: This should be your host app bundle identifier
     var hostAppBundleIdentifier = "com.linagora.ios.twake"
     let sharedKey = "ShareKey"
@@ -29,10 +30,6 @@ class ShareViewController: SLComposeServiceViewController {
 
         // loading custom AppGroupId from Build Settings or use group.<hostAppBundleIdentifier>
         appGroupId = (Bundle.main.object(forInfoDictionaryKey: "AppGroupId") as? String) ?? "group.\(hostAppBundleIdentifier)";
-    }
-
-    override func isContentValid() -> Bool {
-        return true
     }
 
     override func viewDidLoad() {
@@ -63,15 +60,6 @@ class ShareViewController: SLComposeServiceViewController {
                 }
             }
         }
-    }
-
-    override func didSelectPost() {
-        print("didSelectPost");
-    }
-
-    override func configurationItems() -> [Any]! {
-        // To add configuration options via table cells at the bottom of the sheet, return an array of SLComposeSheetConfigurationItem here.
-        return []
     }
 
     private func handleText (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
