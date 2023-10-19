@@ -87,7 +87,7 @@ class ExpansionList extends StatelessWidget {
                   onPressed: goToNewGroupChat,
                 ),
                 const LoadingContactWidget(),
-                _GetHelpButton()
+                _GetHelpButton(),
               ],
             );
           }
@@ -175,15 +175,15 @@ class ExpansionList extends StatelessWidget {
                   onPressed: goToNewGroupChat,
                 ),
                 for (final child in expansionList) ...[child],
-                _GetHelpButton()
+                _GetHelpButton(),
               ] else ...[
                 for (final child in expansionList) ...[child],
                 _MoreListTile(),
                 _NewGroupButton(
                   onPressed: goToNewGroupChat,
                 ),
-                _GetHelpButton()
-              ]
+                _GetHelpButton(),
+              ],
             ],
           );
         },
@@ -228,7 +228,7 @@ class ExpansionList extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -274,7 +274,7 @@ class _IconTextTileButton extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                         letterSpacing: -0.15,
                       ),
-                )
+                ),
               ],
             ),
           ),

@@ -281,7 +281,7 @@ extension SendFileExtension on Room {
     await Future.wait([
       tempEncryptedFile.delete(),
       tempThumbnailFile.delete(),
-      tempEncryptedThumbnailFile.delete()
+      tempEncryptedThumbnailFile.delete(),
     ]);
     return eventId;
   }

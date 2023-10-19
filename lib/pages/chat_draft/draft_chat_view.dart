@@ -62,7 +62,7 @@ class DraftChatView extends StatelessWidget {
                   receiverId: controller.presentationContact!.matrixId!,
                   displayName: controller.presentationContact!.displayName,
                 ),
-              )
+              ),
             ],
           ),
           bottom: PreferredSize(
@@ -136,7 +136,7 @@ class DraftChatView extends StatelessWidget {
                                     KeyBoardShortcuts(
                                       keysToPress: {
                                         LogicalKeyboardKey.altLeft,
-                                        LogicalKeyboardKey.keyE
+                                        LogicalKeyboardKey.keyE,
                                       },
                                       onKeysPressed:
                                           controller.emojiPickerAction,
@@ -218,7 +218,7 @@ class DraftChatView extends StatelessWidget {
                                     );
                                   },
                                 ),
-                              )
+                              ),
                           ],
                         ),
                       ),
@@ -255,7 +255,7 @@ class DraftChatView extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),

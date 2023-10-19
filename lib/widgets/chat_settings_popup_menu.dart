@@ -109,7 +109,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
         KeyBoardShortcuts(
           keysToPress: {
             LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.keyI
+            LogicalKeyboardKey.keyI,
           },
           helpLabel: L10n.of(context)!.chatDetails,
           onKeysPressed: _showChatDetails,
@@ -118,7 +118,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
         KeyBoardShortcuts(
           keysToPress: {
             LogicalKeyboardKey.controlLeft,
-            LogicalKeyboardKey.keyW
+            LogicalKeyboardKey.keyW,
           },
           helpLabel: L10n.of(context)!.matrixWidgets,
           onKeysPressed: _showWidgets,

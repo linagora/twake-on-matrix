@@ -34,7 +34,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
               ),
             );
           },
-        )
+        ),
       },
     );
   }

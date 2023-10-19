@@ -56,10 +56,10 @@ class OthersGroupChatEmptyView extends StatelessWidget {
                         fontSize: 14,
                         color: LinagoraRefColors.material().neutral[60],
                       ),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

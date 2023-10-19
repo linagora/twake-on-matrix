@@ -115,7 +115,7 @@ class _TwakeSmartRefresherView extends StatelessWidget {
               child:
                   loading ? const CenterLoadingIndicator() : const SizedBox(),
             ),
-          )
+          ),
         ],
       ),
     );

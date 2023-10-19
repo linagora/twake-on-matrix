@@ -202,10 +202,10 @@ class BackgroundPush {
                           "sound": "default",
                           "alert": {
                             "loc-key": "newMessageInTwake",
-                            "loc-args": []
-                          }
-                        }
-                      }
+                            "loc-args": [],
+                          },
+                        },
+                      },
                     }
                   : {},
             ),

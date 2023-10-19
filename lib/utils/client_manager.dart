@@ -115,7 +115,7 @@ abstract class ClientManager {
         if (PlatformInfos.isMobile ||
             PlatformInfos.isWeb ||
             PlatformInfos.isMacOS)
-          AuthenticationTypes.sso
+          AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,

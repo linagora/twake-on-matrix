@@ -28,7 +28,7 @@ class VideoViewerMobileTheme extends StatelessWidget {
             icon: Icons.close,
             onTap: () => context.pop(),
             iconColor: Theme.of(context).colorScheme.surface,
-          )
+          ),
         ],
         bottomButtonBar: const [
           MaterialPositionIndicator(),

@@ -65,7 +65,7 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
                 InkWell(
                   onTap: () => _onPlayVideo(context),
                   child: const _PlayVideoButton(),
-                )
+                ),
               ] else if (value == SendingVideoStatus.error) ...[
                 const SizedBox(
                   width: MessageContentStyle.videoCenterButtonSize,
