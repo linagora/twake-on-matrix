@@ -125,7 +125,7 @@ class ChatDetailsController extends State<ChatDetails>
       searchFunc: (event) => event.isContainsLink,
       limit: _linksFetchLimit,
     );
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       nestedScrollViewState.currentState!.innerController.addListener(
         _listenerInnerController,
       );
@@ -143,8 +143,10 @@ class ChatDetailsController extends State<ChatDetails>
   }
 
   void _listenerInnerController() {
-    Logs().d("ChatDetails::currentTab - ${tabController!.index}");
-    if (nestedScrollViewState.currentState!.innerController.shouldLoadMore) {
+    Logs().d("ChatDetails::currentTab - ${tabController?.index}");
+    if (nestedScrollViewState.currentState?.innerController.shouldLoadMore ==
+            true &&
+        tabController?.index != null) {
       switch (chatDetailsPageView[tabController!.index]) {
         case ChatDetailsPage.media:
           mediaListController?.loadMore();
@@ -532,7 +534,8 @@ class ChatDetailsController extends State<ChatDetails>
                   key: const PageStorageKey("members"),
                   members: members ?? [],
                   actualMembersCount: actualMembersCount,
-                  canRequestMoreMembers: members!.length < actualMembersCount,
+                  canRequestMoreMembers:
+                      (members?.length ?? 0) < actualMembersCount,
                   requestMoreMembersAction: requestMoreMembersAction,
                   openDialogInvite: openDialogInvite,
                   isMobileAndTablet: isMobileAndTablet,
