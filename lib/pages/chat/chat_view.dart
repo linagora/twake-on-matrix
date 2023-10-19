@@ -446,7 +446,7 @@ class _SearchMenuItem extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
           onSelected: (item) {
             switch (item) {

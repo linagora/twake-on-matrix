@@ -37,7 +37,7 @@ class SameTypeEventsListBuilderView extends StatelessWidget {
                   ? const CenterLoadingIndicator()
                   : const SizedBox(),
             ),
-          )
+          ),
         ],
       ),
     );

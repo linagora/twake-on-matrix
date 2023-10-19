@@ -387,7 +387,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     );
                               }
                             },
-                    )
+                    ),
                   ],
                 ),
               ),

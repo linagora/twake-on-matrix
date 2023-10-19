@@ -85,7 +85,7 @@ mixin ChatListItemMixin {
                   },
                 ),
               ),
-              const Spacer()
+              const Spacer(),
             ],
           )
         : const SizedBox.shrink();

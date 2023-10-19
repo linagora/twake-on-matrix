@@ -72,7 +72,7 @@ class AppScaffoldView extends StatelessWidget {
                       },
                     );
                   },
-                )
+                ),
               },
             ),
           ],
@@ -166,7 +166,7 @@ class AppScaffoldView extends StatelessWidget {
               ),
             );
           },
-        )
+        ),
       },
     );
   }

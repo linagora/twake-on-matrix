@@ -91,7 +91,7 @@ class SearchableAppBar extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 8.0),
                   ),
                 ] else ...[
-                  const SizedBox(width: 56.0)
+                  const SizedBox(width: 56.0),
                 ],
                 Expanded(
                   child: ValueListenableBuilder(
@@ -137,7 +137,7 @@ class SearchableAppBar extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(vertical: 10.0),
                       );
                     },
-                  )
+                  ),
                 ] else ...[
                   TwakeIconButton(
                     onTap: () => context.pop(),
@@ -149,14 +149,14 @@ class SearchableAppBar extends StatelessWidget {
                       horizontal: 6.0,
                     ),
                   ),
-                ]
+                ],
               ],
             ),
             if (!isFullScreen)
               Padding(
                 padding: SearchableAppBarStyle.textFieldWebPadding,
                 child: _textFieldBuilder(context),
-              )
+              ),
           ],
         ),
       ),

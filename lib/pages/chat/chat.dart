@@ -324,7 +324,7 @@ class ChatController extends State<Chat>
           fileInfos: [
             FileInfo.fromMatrixFile(
               shareFile!,
-            )
+            ),
           ],
         );
       }
@@ -657,7 +657,7 @@ class ChatController extends State<Chat>
           MatrixVideoFile(
             bytes: bytes,
             name: file.path,
-          )
+          ),
         ],
         room: room!,
       ),

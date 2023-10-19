@@ -28,7 +28,7 @@ void main() {
         loginFlows: [
           LoginFlow(type: 'm.login.sso'),
           LoginFlow(type: 'm.login.token'),
-          LoginFlow(type: 'm.login.application_service')
+          LoginFlow(type: 'm.login.application_service'),
         ],
       );
 
@@ -63,7 +63,7 @@ void main() {
         loginFlows: [
           LoginFlow(type: 'm.login.sso'),
           LoginFlow(type: 'm.login.token'),
-          LoginFlow(type: 'm.login.application_service')
+          LoginFlow(type: 'm.login.application_service'),
         ],
       );
 
@@ -87,7 +87,7 @@ void main() {
         loginFlows: [
           LoginFlow(type: 'm.login.sso'),
           LoginFlow(type: 'm.login.token'),
-          LoginFlow(type: 'm.login.application_service')
+          LoginFlow(type: 'm.login.application_service'),
         ],
       );
 

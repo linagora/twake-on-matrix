@@ -86,7 +86,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

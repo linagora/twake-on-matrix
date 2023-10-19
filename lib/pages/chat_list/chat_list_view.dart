@@ -71,7 +71,7 @@ class ChatListView extends StatelessWidget {
           return KeyBoardShortcuts(
             keysToPress: {
               LogicalKeyboardKey.controlLeft,
-              LogicalKeyboardKey.keyN
+              LogicalKeyboardKey.keyN,
             },
             onKeysPressed: () => context.go('/rooms/newprivatechat'),
             helpLabel: L10n.of(context)!.newChat,

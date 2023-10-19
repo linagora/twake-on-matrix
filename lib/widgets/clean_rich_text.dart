@@ -37,7 +37,7 @@ class TwakeCleanRichText extends StatelessWidget {
             textSpanBuilder: textSpanBuilder,
           ),
           const WidgetSpan(child: SizedBox(width: 4)),
-          WidgetSpan(child: childWidget)
+          WidgetSpan(child: childWidget),
         ],
       ),
       textAlign: textAlign,

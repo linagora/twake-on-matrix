@@ -97,7 +97,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

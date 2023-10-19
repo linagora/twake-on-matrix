@@ -47,7 +47,7 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
             ): SlotLayout.from(
               key: breakpointWebAndDesktopKey,
               builder: (_) => _bodyWidget(context),
-            )
+            ),
           },
         ),
         bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
@@ -65,7 +65,7 @@ class AdaptiveScaffoldRoute extends StatelessWidget {
               builder: secondaryBody != null
                   ? (_) => _secondaryBodyWidget(context)
                   : AdaptiveScaffold.emptyBuilder,
-            )
+            ),
           },
         ),
       ),

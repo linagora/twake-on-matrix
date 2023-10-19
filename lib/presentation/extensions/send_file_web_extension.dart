@@ -157,10 +157,10 @@ extension SendFileWebExtension on Room {
             'ext': true,
             'k': encryptedFile.k,
             'key_ops': ['encrypt', 'decrypt'],
-            'kty': 'oct'
+            'kty': 'oct',
           },
           'iv': encryptedFile.iv,
-          'hashes': {'sha256': encryptedFile.sha256}
+          'hashes': {'sha256': encryptedFile.sha256},
         },
       'info': {
         ...thumbnail?.info ?? {},
@@ -177,7 +177,7 @@ extension SendFileWebExtension on Room {
               'ext': true,
               'k': encryptedThumbnail.k,
               'key_ops': ['encrypt', 'decrypt'],
-              'kty': 'oct'
+              'kty': 'oct',
             },
             'iv': encryptedThumbnail.iv,
             'hashes': {'sha256': encryptedThumbnail.sha256},

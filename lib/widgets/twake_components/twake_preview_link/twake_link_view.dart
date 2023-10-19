@@ -45,7 +45,7 @@ class TwakeLinkView extends StatelessWidget {
       children: [
         previewItemWidget,
         const SizedBox(height: 2),
-        _buildCleanRichText(context)
+        _buildCleanRichText(context),
       ],
     );
   }

@@ -76,7 +76,7 @@ class RecentChatList extends StatelessWidget {
                           ],
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -24,7 +24,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         PickerType.gallery,
         PickerType.documents,
         PickerType.location,
-        PickerType.contact
+        PickerType.contact,
       ];
 
   void showMediaPickerBottomSheetAction({
@@ -200,7 +200,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -235,7 +235,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                         },
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 8.0),
