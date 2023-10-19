@@ -2540,33 +2540,6 @@
   "@enterInviteLinkOrMatrixId": {},
   "reopenChat": "Chat wieder eröffnen",
   "@reopenChat": {},
-  "onlineMinAgo": "vor {min} Minuten online",
-  "@onlineMinAgo": {
-    "placeholders": {
-      "min": {}
-    }
-  },
-  "onlineHourAgo": "vor {hour} Std. {min} Min. online",
-  "@onlineHourAgo": {
-    "placeholders": {
-      "hour": {},
-      "min": {}
-    }
-  },
-  "onlineLongTimeAgo": "vor langer Zeit online",
-  "@onlineLongTimeAgo": {},
-  "noMoreResult": "Kein weiteres Ergebnis!",
-  "@noMoreResult": {},
-  "noOtherDevicesFound": "Keine anderen Geräte gefunden",
-  "@noOtherDevicesFound": {},
-  "onlineStatus": "online",
-  "@onlineStatus": {},
-  "onlineDayAgo": "vor {day} Tag online",
-  "@onlineDayAgo": {
-    "placeholders": {
-      "day": {}
-    }
-  },
   "enterGroupName": "Chatname eingeben",
   "@enterGroupName": {
     "type": "text",
