@@ -31,14 +31,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
       children: <Widget>[
         Expanded(
           child: typingText.isNotEmpty
-              ? Column(
-                  children: [
-                    Flexible(
-                      child: typingTextWidget(typingText, context),
-                    ),
-                    const Spacer(),
-                  ],
-                )
+              ? typingTextWidget(typingText, context)
               : (isGroup
                   ? chatListItemSubtitleForGroup(
                       room: room,
