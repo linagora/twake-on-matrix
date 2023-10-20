@@ -1,4 +1,4 @@
-# 1. Improve for load image first time and keep image when scrolling
+# 3. Improve for load image first time and keep image when scrolling
 
 Date: 2023-06-27
 
