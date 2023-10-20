@@ -21,8 +21,8 @@ class ReactionsPicker extends StatelessWidget {
         controller.room!.canSendDefaultMessages &&
         controller.selectedEvents.isNotEmpty;
     return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
+      duration: TwakeThemes.animationDuration,
+      curve: TwakeThemes.animationCurve,
       height: (display) ? 56 : 0,
       child: Material(
         color: Colors.transparent,

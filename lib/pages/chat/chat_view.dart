@@ -131,7 +131,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       return const SizedBox.shrink();
     }
 
-    final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
+    final bottomSheetPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 8.0;
 
     return GestureDetector(
       onTapDown: controller.setReadMarker,
@@ -273,7 +273,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                               controller.room!.membership == Membership.join)
                             Container(
                               constraints: const BoxConstraints(
-                                maxWidth: FluffyThemes.columnWidth * 2.5,
+                                maxWidth: TwakeThemes.columnWidth * 2.5,
                               ),
                               alignment: Alignment.center,
                               child: controller.room?.isAbandonedDMRoom == true
