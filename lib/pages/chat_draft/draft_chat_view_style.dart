@@ -11,7 +11,7 @@ class DraftChatViewStyle {
       responsive.isMobile(context) ? 56 : 80;
 
   static BoxConstraints get containerMaxWidthConstraints =>
-      const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5);
+      const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5);
 
   static double animatedContainerHeight(
     BuildContext context,

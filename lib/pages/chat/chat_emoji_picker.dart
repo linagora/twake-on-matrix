@@ -13,8 +13,8 @@ class ChatEmojiPicker extends StatelessWidget {
       valueListenable: controller.showEmojiPickerNotifier,
       builder: (context, showEmojiPicker, _) {
         return AnimatedContainer(
-          duration: FluffyThemes.animationDuration,
-          curve: FluffyThemes.animationCurve,
+          duration: TwakeThemes.animationDuration,
+          curve: TwakeThemes.animationCurve,
           width: MediaQuery.of(context).size.width,
           height: showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
           child: showEmojiPicker

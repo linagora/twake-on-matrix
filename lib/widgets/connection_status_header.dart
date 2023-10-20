@@ -43,8 +43,8 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
         client.prevBatch != null;
 
     return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
+      duration: TwakeThemes.animationDuration,
+      curve: TwakeThemes.animationCurve,
       height: hide ? 0 : 36,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),

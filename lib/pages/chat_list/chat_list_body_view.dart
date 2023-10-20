@@ -25,8 +25,8 @@ class ChatListBodyView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (FluffyThemes.isColumnMode(context) &&
-            FluffyThemes.getDisplayNavigationRail(context)) ...[
+        if (TwakeThemes.isColumnMode(context) &&
+            TwakeThemes.getDisplayNavigationRail(context)) ...[
           Container(
             color: Theme.of(context).dividerColor,
             width: 1,
@@ -137,8 +137,8 @@ class ChatListBodyView extends StatelessWidget {
                             height: ChatListBodyViewStyle.heightIsTorBrowser(
                               controller.isTorBrowser,
                             ),
-                            duration: FluffyThemes.animationDuration,
-                            curve: FluffyThemes.animationCurve,
+                            duration: TwakeThemes.animationDuration,
+                            curve: TwakeThemes.animationCurve,
                             clipBehavior: Clip.hardEdge,
                             decoration: const BoxDecoration(),
                             child: Material(
