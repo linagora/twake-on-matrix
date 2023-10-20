@@ -2551,7 +2551,7 @@
   },
   "onlineStatus": "онлайн",
   "@onlineStatus": {},
-  "onlineMinAgo": "был(а) в сети {min} мин. назад",
+  "onlineMinAgo": "был(а) в сети {min}м. назад",
   "@onlineMinAgo": {
     "placeholders": {
       "min": {}
@@ -2900,5 +2900,31 @@
   "settingsChatFoldersSubtitle": "Создавайте папки для разных групп чатов и быстро переключайтесь между ними.",
   "@settingsChatFoldersSubtitle": {},
   "done": "Готово",
-  "@done": {}
+  "@done": {},
+  "copyImageSuccess": "Изображение скопировано",
+  "@copyImageSuccess": {},
+  "paste": "Вставить",
+  "@paste": {},
+  "download": "Скачать",
+  "@download": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "fileFormatNotSupported": "Формат файла не поддерживается",
+  "@fileFormatNotSupported": {},
+  "newMessageInTwake": "У вас одно зашифрованное сообщение",
+  "@newMessageInTwake": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "copyImageFailed": "Не удалось скопировать изображение",
+  "@copyImageFailed": {},
+  "countPinChat": "ЗАКРЕПЛЕННЫЕ ЧАТЫ ({countPinChat})",
+  "@countPinChat": {},
+  "countAllChat": "ВСЕ ЧАТЫ ({countAllChat})",
+  "@countAllChat": {},
+  "cut": "Вырезать",
+  "@cut": {},
+  "pasteImageFailed": "Не удалось вставить изображение",
+  "@pasteImageFailed": {}
 }
