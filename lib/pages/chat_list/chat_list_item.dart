@@ -107,6 +107,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
           onSecondaryTap: onSecondaryTap,
           onLongPress: onLongPress,
           child: Container(
+            height: ChatListItemStyle.chatItemHeight,
             padding: ChatListItemStyle.paddingBody,
             child: Row(
               children: [
