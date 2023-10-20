@@ -1,4 +1,4 @@
-# 7. Instructions for naming twake events
+# 9. Instructions for naming twake events
 
 Date: 2023-10-03
 
