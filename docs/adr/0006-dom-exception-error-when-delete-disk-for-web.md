@@ -1,4 +1,4 @@
-# 0006. DOMException error when use delete disk of Hive for Web
+# 6. DOMException error when use delete disk of Hive for Web
 
 Date: 2023-09-13
 
