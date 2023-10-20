@@ -24,7 +24,7 @@ class ChatEventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
+    final horizontalPadding = TwakeThemes.isColumnMode(context) ? 8.0 : 0.0;
 
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback

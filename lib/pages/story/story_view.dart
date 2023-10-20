@@ -251,8 +251,8 @@ class StoryView extends StatelessWidget {
                 onHorizontalDragStart: controller.hold,
                 onHorizontalDragEnd: controller.unhold,
                 child: AnimatedContainer(
-                  duration: FluffyThemes.animationDuration,
-                  curve: FluffyThemes.animationCurve,
+                  duration: TwakeThemes.animationDuration,
+                  curve: TwakeThemes.animationCurve,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
                     vertical: 80,
