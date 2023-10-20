@@ -64,8 +64,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 .getAllMentionedUserIdsFromMessage(room)
                 .contains(Matrix.of(context).client.userID);
             return AnimatedContainer(
-              duration: FluffyThemes.animationDuration,
-              curve: FluffyThemes.animationCurve,
+              duration: TwakeThemes.animationDuration,
+              curve: TwakeThemes.animationCurve,
               padding: const EdgeInsets.only(bottom: 4),
               height: ChatListItemStyle.mentionIconWidth,
               width: isMentionned && room.isUnreadOrInvited
@@ -96,8 +96,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         ),
         const SizedBox(width: 4),
         AnimatedContainer(
-          duration: FluffyThemes.animationDuration,
-          curve: FluffyThemes.animationCurve,
+          duration: TwakeThemes.animationDuration,
+          curve: TwakeThemes.animationCurve,
           padding: const EdgeInsets.symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(

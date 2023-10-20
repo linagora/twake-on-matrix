@@ -32,8 +32,8 @@ class NaviRailItem extends StatelessWidget {
             left: 0,
             child: AnimatedContainer(
               width: isSelected ? 4 : 0,
-              duration: FluffyThemes.animationDuration,
-              curve: FluffyThemes.animationCurve,
+              duration: TwakeThemes.animationDuration,
+              curve: TwakeThemes.animationCurve,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
                 borderRadius: const BorderRadius.only(

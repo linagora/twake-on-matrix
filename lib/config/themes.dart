@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'app_config.dart';
 
-abstract class FluffyThemes {
+abstract class TwakeThemes {
   static const double columnWidth = 360.0;
   static const double iconSize = 24.0;
 
@@ -18,58 +19,53 @@ abstract class FluffyThemes {
   static bool getDisplayNavigationRail(BuildContext context) =>
       !(GoRouterState.of(context).path?.startsWith('/settings') == true);
 
-  static const fallbackTextStyle = TextStyle(
-    fontFamily: 'Inter',
-    fontFamilyFallback: ['Inter'],
-  );
-
   static var fallbackTextTheme = TextTheme(
-    bodyLarge: fallbackTextStyle.copyWith(
+    bodyLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: -0.15,
     ),
-    bodyMedium: fallbackTextStyle.copyWith(
+    bodyMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.25,
     ),
-    bodySmall: fallbackTextStyle.copyWith(
+    bodySmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.4,
     ),
-    labelLarge: fallbackTextStyle.copyWith(
+    labelLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),
-    labelSmall: fallbackTextStyle.copyWith(
+    labelSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    displayLarge: fallbackTextStyle.copyWith(
+    displayLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w700,
     ),
-    displayMedium: fallbackTextStyle.copyWith(
+    displayMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    displaySmall: fallbackTextStyle.copyWith(
+    displaySmall: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    headlineMedium: fallbackTextStyle.copyWith(
+    headlineMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
     ),
-    headlineSmall: fallbackTextStyle.copyWith(
+    headlineSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    titleLarge: fallbackTextStyle.copyWith(
+    titleLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
     ),
-    titleMedium: fallbackTextStyle.copyWith(
+    titleMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.15,
     ),
-    titleSmall: fallbackTextStyle.copyWith(
+    titleSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),

@@ -43,8 +43,8 @@ class HomeserverPickerView extends StatelessWidget {
             // usually forced to logout as TOR browser is non-persistent
             AnimatedContainer(
               height: controller.isTorBrowser ? 64 : 0,
-              duration: FluffyThemes.animationDuration,
-              curve: FluffyThemes.animationCurve,
+              duration: TwakeThemes.animationDuration,
+              curve: TwakeThemes.animationCurve,
               clipBehavior: Clip.hardEdge,
               decoration: const BoxDecoration(),
               child: Material(

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -117,7 +118,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         body: Center(
           child: ConstrainedBox(
             constraints:
-                const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 1.5),
+                const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 1.5),
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
@@ -140,7 +141,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   minLines: 2,
                   maxLines: 4,
                   readOnly: true,
-                  style: const TextStyle(fontFamily: 'RobotoMono'),
+                  style: GoogleFonts.robotoMono(),
                   controller: TextEditingController(text: key),
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(16),
@@ -244,7 +245,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
             body: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
-                  maxWidth: FluffyThemes.columnWidth * 1.5,
+                  maxWidth: TwakeThemes.columnWidth * 1.5,
                 ),
                 child: ListView(
                   padding: const EdgeInsets.all(16.0),
@@ -270,7 +271,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                           ? null
                           : [AutofillHints.password],
                       controller: _recoveryKeyTextEditingController,
-                      style: const TextStyle(fontFamily: 'RobotoMono'),
+                      style: GoogleFonts.robotoMono(),
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(16),
                         hintStyle: TextStyle(

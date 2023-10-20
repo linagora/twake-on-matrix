@@ -23,11 +23,11 @@ class TypingIndicators extends StatelessWidget {
       alignment: Alignment.center,
       child: AnimatedContainer(
         constraints:
-            const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
+            const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5),
         height:
             typingUsers.isEmpty ? 0 : AvatarStyle.defaultSize + bottomPadding,
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
+        duration: TwakeThemes.animationDuration,
+        curve: TwakeThemes.animationCurve,
         alignment: controller.timeline!.events.isNotEmpty &&
                 controller.timeline!.events.first.senderId ==
                     Matrix.of(context).client.userID

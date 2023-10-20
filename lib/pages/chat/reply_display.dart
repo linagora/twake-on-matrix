@@ -16,8 +16,8 @@ class ReplyDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
+      duration: TwakeThemes.animationDuration,
+      curve: TwakeThemes.animationCurve,
       height: controller.editEvent != null || controller.replyEvent != null
           ? 56
           : 0,

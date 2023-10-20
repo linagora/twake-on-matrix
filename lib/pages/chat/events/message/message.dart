@@ -653,7 +653,7 @@ class Message extends StatelessWidget {
           ? LinagoraSysColors.material().secondaryContainer
           : Theme.of(context).primaryColor.withAlpha(0),
       constraints:
-          const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
+          const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [

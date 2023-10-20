@@ -227,8 +227,8 @@ class DraftChatView extends StatelessWidget {
                             DraftChatViewStyle.containerMaxWidthConstraints,
                         alignment: Alignment.center,
                         child: AnimatedContainer(
-                          duration: FluffyThemes.animationDuration,
-                          curve: FluffyThemes.animationCurve,
+                          duration: TwakeThemes.animationDuration,
+                          curve: TwakeThemes.animationCurve,
                           width: MediaQuery.of(context).size.width,
                           height: DraftChatViewStyle.animatedContainerHeight(
                             context,
