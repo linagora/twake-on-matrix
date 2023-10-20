@@ -42,26 +42,18 @@ mixin ChatListItemMixin {
     );
   }
 
-  Row typingTextWidget(String typingText, BuildContext context) {
+  Widget typingTextWidget(String typingText, BuildContext context) {
     final displayedTypingText = "~ $typingText…";
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Flexible(
-          child: Text(
-            displayedTypingText,
-            style: Theme.of(context).textTheme.labelLarge?.merge(
-                  TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-            maxLines: 2,
-            softWrap: true,
+    return Text(
+      displayedTypingText,
+      style: Theme.of(context).textTheme.labelLarge?.merge(
+            TextStyle(
+              overflow: TextOverflow.ellipsis,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
-        ),
-      ],
+      maxLines: 2,
+      softWrap: true,
     );
   }
 

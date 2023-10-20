@@ -225,6 +225,7 @@ class ChatListController extends State<ChatList>
   Future<void> actionWithToggleSelectMode(Function action) async {
     await action();
     toggleSelectMode();
+    _clearSelectionItem();
   }
 
   void _clearSelectionItem() {
