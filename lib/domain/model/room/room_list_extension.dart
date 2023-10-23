@@ -14,7 +14,10 @@ extension RoomListExtension on List<Room> {
         .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
         .where(
           (model) =>
-              model.displayName != null && model.displayName!.contains(keyword),
+              model.displayName != null &&
+              model.displayName!.toLowerCase().contains(
+                    keyword.toLowerCase(),
+                  ),
         )
         .take(limit ?? length)
         .toList();
