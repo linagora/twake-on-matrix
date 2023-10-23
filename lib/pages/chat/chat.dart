@@ -76,16 +76,16 @@ import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
   final String roomId;
-  final Widget? sideView;
   final MatrixFile? shareFile;
   final String? roomName;
+  final VoidCallback? toggleRightPanel;
 
   const Chat({
     Key? key,
-    this.sideView,
     required this.roomId,
     this.shareFile,
     this.roomName,
+    this.toggleRightPanel,
   }) : super(key: key);
 
   @override
