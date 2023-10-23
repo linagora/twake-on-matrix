@@ -1,11 +1,11 @@
+import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
-extension NewGroupInfoController on NewGroupController {
+extension NewGroupInfoControllerExtension on NewGroupChatInfoController {
   void listenGroupNameChanged() {
     groupNameTextEditingController.addListener(() {
       groupName = groupNameTextEditingController.text;

@@ -2908,5 +2908,6 @@
     "encryptionMessage": "This feature protects your messages from being read by others, but also prevents them from being backed up on our servers. You can't disable this later.",
     "encryptionWarning": "You might lose your messages if you access Twake app on the another device.",
     "selectedUsers": "Selected users",
-    "clearAllSelected": "Clear all selected"
+    "clearAllSelected": "Clear all selected",
+    "newDirectMessage": "New direct message"
 }
