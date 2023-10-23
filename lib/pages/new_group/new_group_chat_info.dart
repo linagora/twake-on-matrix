@@ -1,425 +1,353 @@
-import 'package:dartz/dartz.dart';
-import 'package:file_picker/file_picker.dart';
+import 'dart:async';
+
+import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
+import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
+import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
-import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:matrix/matrix.dart';
+import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
+import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
+import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:fluffychat/utils/dialog/warning_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/images_picker/images_picker.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
-class NewGroupChatInfo extends StatelessWidget {
+class NewGroupChatInfo extends StatefulWidget {
   final Set<PresentationContact> contactsList;
 
-  final NewGroupController newGroupController;
-
-  const NewGroupChatInfo({
-    super.key,
-    required this.contactsList,
-    required this.newGroupController,
-  });
+  const NewGroupChatInfo({super.key, required this.contactsList});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverOverlapAbsorber(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: NewGroupChatInfoStyle.profilePadding,
-                      child: _buildChangeProfileWidget(context),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Text(
-                      L10n.of(context)!.addAPhoto,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                    ),
-                    FutureBuilder(
-                      future: newGroupController.getServerConfig(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final maxMediaSize = snapshot.data!.mUploadSize;
-                          return Text(
-                            L10n.of(context)!
-                                .maxImageSize(maxMediaSize!.bytesToMB()),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color:
-                                      LinagoraRefColors.material().neutral[40],
-                                ),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    _buildGroupNameTextField(context),
-                    const SizedBox(height: 16),
-                    _EncryptionSettingTile(
-                      enableEncryptionNotifier:
-                          newGroupController.enableEncryptionNotifier,
-                      onChanged: (value) {
-                        newGroupController.toggleEnableEncryption();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ];
-        },
-        body: Padding(
-          padding: NewGroupChatInfoStyle.padding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: ExpansionParticipantsList(
-                  newGroupController: newGroupController,
-                  contactsList: contactsList,
-                ),
-              ),
-            ],
-          ),
-        ),
+  State<StatefulWidget> createState() => NewGroupChatInfoController();
+}
+
+class NewGroupChatInfoController extends State<NewGroupChatInfo>
+    with CommonMediaPickerMixin, SingleImagePickerMixin {
+  final enableEncryptionNotifier = ValueNotifier(false);
+  final haveGroupNameNotifier = ValueNotifier(false);
+  final createRoomStateNotifier =
+      ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
+  final uploadContentInteractor = getIt.get<UploadContentInteractor>();
+  final uploadContentWebInteractor =
+      getIt.get<UploadContentInBytesInteractor>();
+  final createNewGroupChatInteractor =
+      getIt.get<CreateNewGroupChatInteractor>();
+  final groupNameTextEditingController = TextEditingController();
+  final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
+  final avatarFilePickerNotifier = ValueNotifier<FilePickerResult?>(null);
+
+  final groupNameFocusNode = FocusNode();
+  StreamSubscription? createNewGroupChatInteractorStreamSubscription;
+
+  String groupName = "";
+
+  Set<PresentationContact>? contactsList;
+
+  Future<ServerConfig> getServerConfig() async {
+    final serverConfig = await Matrix.of(context).client.getConfig();
+    return serverConfig;
+  }
+
+  void toggleEnableEncryption() {
+    enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
+  }
+
+  Future<Set<PresentationContact>> getAllContactsGroupChat({
+    bool isCustomDisplayName = true,
+  }) async {
+    final userId = Matrix.of(context).client.userID;
+    final profile =
+        await Matrix.of(context).client.getProfileFromUserId(userId!);
+    final newContactsList = {
+      PresentationContact(
+        displayName:
+            isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
+        matrixId: Matrix.of(context).client.userID,
+      )
+    };
+    newContactsList.addAll(getSelectedValidContacts(contactsList ?? {}));
+    return newContactsList;
+  }
+
+  void createNewGroup({String? urlAvatar}) {
+    final client = Matrix.of(context).client;
+    createNewGroupChatAction(
+      matrixClient: client,
+      createNewGroupChatRequest: CreateNewGroupChatRequest(
+        groupName: groupName,
+        invite: getSelectedValidContacts(contactsList ?? {})
+            .map((contact) => contact.matrixId)
+            .whereNotNull()
+            .toList(),
+        enableEncryption: enableEncryptionNotifier.value,
+        urlAvatar: urlAvatar,
       ),
-      floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: newGroupController.haveGroupNameNotifier,
-        builder: (context, value, child) {
-          if (!value) {
-            return const SizedBox.shrink();
-          }
-          return child!;
-        },
-        child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: newGroupController.createRoomStateNotifier,
-          builder: (context, value, child) {
-            if (newGroupController.isCreatingRoom) {
-              return const TwakeFloatingActionButton(
-                customIcon: SizedBox(child: CircularProgressIndicator()),
-              );
-            }
-            return TwakeFloatingActionButton(
-              icon: Icons.done,
-              onTap: () => newGroupController.moveToGroupChatScreen(),
-            );
+    );
+  }
+
+  void _handleUploadAvatarNewGroupChatOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
+    Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData()');
+    createRoomStateNotifier.value = event;
+    event.fold(
+      (failure) {
+        Logs().e(
+          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure',
+        );
+        WarningDialog.showCancelable(
+          context,
+          message: L10n.of(context)!
+              .youAreUploadingPhotosDoYouWantToCancelOrContinue,
+          acceptText: L10n.of(context)!.continueProcess,
+          onAccept: () {
+            WarningDialog.hideWarningDialog(context);
+            createNewGroup();
           },
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(
-        NewGroupChatInfoStyle.toolbarHeight,
-      ),
-      child: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight,
-        title: Row(
-          children: [
-            TwakeIconButton(
-              icon: Icons.arrow_back,
-              onTap: () => Navigator.of(context).pop(),
-              tooltip: L10n.of(context)!.back,
-              paddingAll: NewGroupChatInfoStyle.backIconPaddingAll,
-              margin: NewGroupChatInfoStyle.backIconMargin,
-            ),
-            Text(
-              L10n.of(context)!.newGroupChat,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
-        ),
-        titleSpacing: 0,
-        centerTitle: false,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  offset: const Offset(0, 1),
-                  blurRadius: 80,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  offset: const Offset(0, 1),
-                  blurRadius: 3,
-                  spreadRadius: 0.5,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChangeProfileWidget(BuildContext context) {
-    return InkWell(
-      onTap: () => newGroupController.showImagesPickerAction(context: context),
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: NewGroupChatInfoStyle.profileSize(context),
-        height: NewGroupChatInfoStyle.profileSize(context),
-        decoration: BoxDecoration(
-          color: LinagoraRefColors.material().neutral[80],
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: NewGroupChatInfoStyle.responsive.isMobile(context)
-            ? _AvatarForMobileBuilder(
-                avatarMobileNotifier:
-                    newGroupController.avatarAssetEntityNotifier,
-              )
-            : _AvatarForWebBuilder(
-                avatarWebNotifier: newGroupController.avatarFilePickerNotifier,
-              ),
-      ),
-    );
-  }
-
-  Widget _buildGroupNameTextField(BuildContext context) {
-    return Padding(
-      padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
-      child: ValueListenableBuilder(
-        valueListenable: newGroupController.createRoomStateNotifier,
-        builder: (context, value, child) {
-          return TextField(
-            controller: newGroupController.groupNameTextEditingController,
-            focusNode: newGroupController.groupNameFocusNode,
-            enabled: !newGroupController.isCreatingRoom,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.shadow),
-              ),
-              labelText: L10n.of(context)!.widgetName,
-              labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 16,
-                    letterSpacing: 0.4,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-              hintText: L10n.of(context)!.enterGroupName,
-              hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    letterSpacing: -0.15,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-              contentPadding: NewGroupChatInfoStyle.contentPadding,
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _AvatarForMobileBuilder extends StatelessWidget {
-  final ValueNotifier<AssetEntity?> avatarMobileNotifier;
-
-  const _AvatarForMobileBuilder({
-    required this.avatarMobileNotifier,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: avatarMobileNotifier,
-      builder: (context, value, child) {
-        if (value == null) {
-          return child!;
-        }
-        return ClipOval(
-          child: SizedBox.fromSize(
-            size: const Size.fromRadius(
-              NewGroupChatInfoStyle.avatarRadiusForMobile,
-            ),
-            child: AssetEntityImage(
-              value,
-              thumbnailSize: const ThumbnailSize(
-                NewGroupChatInfoStyle.thumbnailSizeWidth,
-                NewGroupChatInfoStyle.thumbnailSizeHeight,
-              ),
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress != null &&
-                    loadingProgress.cumulativeBytesLoaded !=
-                        loadingProgress.expectedTotalBytes) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                }
-                return child;
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
-              },
-            ),
-          ),
         );
       },
-      child: Icon(
-        Icons.camera_alt_outlined,
-        color: Theme.of(context).colorScheme.surface,
-      ),
+      (success) {
+        Logs().d(
+          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success',
+        );
+        if (success is UploadContentSuccess) {
+          final urlAvatar = success.uri.toString();
+          createNewGroup(urlAvatar: urlAvatar);
+        }
+      },
     );
   }
-}
 
-class _AvatarForWebBuilder extends StatelessWidget {
-  final ValueNotifier<FilePickerResult?> avatarWebNotifier;
+  void _handleUploadAvatarNewGroupChatOnDone() {
+    Logs().d(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnDone() - done',
+    );
+  }
 
-  const _AvatarForWebBuilder({
-    required this.avatarWebNotifier,
-  });
+  void _handleUploadAvatarNewGroupChatOnError(
+    dynamic error,
+    StackTrace? stackTrace,
+  ) {
+    Logs().e(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: avatarWebNotifier,
-      builder: (context, value, child) {
-        if (value == null || value.files.single.bytes == null) {
-          return child!;
-        }
-        return ClipOval(
-          child: SizedBox.fromSize(
-            size:
-                const Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
-            child: Image.memory(
-              value.files.single.bytes!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
-              },
-            ),
-          ),
+  void _handleCreateNewGroupChatChatOnData(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
+    Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData()');
+    createRoomStateNotifier.value = event;
+    event.fold(
+      (failure) {
+        Logs().e(
+          'NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure',
         );
       },
-      child: Icon(
-        Icons.camera_alt_outlined,
-        color: Theme.of(context).colorScheme.surface,
+      (success) {
+        Logs().d(
+          'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
+        );
+        if (success is CreateNewGroupChatSuccess) {
+          _goToRoom(success);
+        }
+      },
+    );
+  }
+
+  void _handleCreateNewGroupChatOnDone() {
+    Logs().d('NewGroupController::_handleCreateNewGroupChatOnDone() - done');
+  }
+
+  void _handleCreateNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
+    Logs().e(
+      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
+    );
+  }
+
+  void uploadAvatarNewGroupChat({
+    required Client matrixClient,
+    required AssetEntity entity,
+  }) {
+    uploadContentInteractor
+        .execute(
+          matrixClient: matrixClient,
+          entity: entity,
+        )
+        .listen(
+          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
+          onDone: _handleUploadAvatarNewGroupChatOnDone,
+          onError: _handleUploadAvatarNewGroupChatOnError,
+        );
+  }
+
+  void uploadAvatarNewGroupChatInBytes({
+    required Client matrixClient,
+    required FilePickerResult filePickerResult,
+  }) {
+    uploadContentWebInteractor
+        .execute(
+          matrixClient: matrixClient,
+          filePickerResult: filePickerResult,
+        )
+        .listen(
+          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
+          onDone: _handleUploadAvatarNewGroupChatOnDone,
+          onError: _handleUploadAvatarNewGroupChatOnError,
+        );
+  }
+
+  void createNewGroupChatAction({
+    required Client matrixClient,
+    required CreateNewGroupChatRequest createNewGroupChatRequest,
+  }) {
+    createNewGroupChatInteractorStreamSubscription =
+        createNewGroupChatInteractor
+            .execute(
+              matrixClient: matrixClient,
+              createNewGroupChatRequest: createNewGroupChatRequest,
+            )
+            .listen(
+              (event) => _handleCreateNewGroupChatChatOnData(context, event),
+              onDone: _handleCreateNewGroupChatOnDone,
+              onError: _handleCreateNewGroupChatOnError,
+            );
+  }
+
+  void _goToRoom(CreateNewGroupChatSuccess success) {
+    context.go(
+      "/rooms/${success.roomId}",
+      extra: ChatRouterInputArgument(
+        type: ChatRouterInputArgumentType.draft,
+        data: success.groupName,
       ),
     );
   }
-}
 
-class _EncryptionSettingTile extends StatelessWidget {
-  final ValueNotifier<bool> enableEncryptionNotifier;
+  void _getImageOnWeb(
+    BuildContext context,
+  ) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+    Logs().d(
+      'NewGroupController::_getImageOnWeb(): FilePickerResult - $result',
+    );
+    if (result == null || result.files.single.bytes == null) {
+      return;
+    } else {
+      avatarFilePickerNotifier.value = result;
+      Logs().d(
+        'NewGroupController::_getImageOnWeb(): AvatarWebNotifier - ${avatarFilePickerNotifier.value}',
+      );
+    }
+  }
 
-  final ValueChanged<bool?>? onChanged;
+  void showImagesPickerAction({
+    required BuildContext context,
+  }) async {
+    if (isCreatingRoom) {
+      return;
+    }
+    if (PlatformInfos.isWeb) {
+      _getImageOnWeb(context);
+      return;
+    }
+    final currentPermissionPhotos = await getCurrentMediaPermission();
+    final currentPermissionCamera = await getCurrentCameraPermission();
+    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+      final imagePickerController = createImagePickerController();
+      groupNameFocusNode.unfocus();
+      showImagePickerBottomSheet(
+        context,
+        currentPermissionPhotos,
+        currentPermissionCamera,
+        imagePickerController,
+      );
+    }
+  }
 
-  const _EncryptionSettingTile({
-    required this.enableEncryptionNotifier,
-    this.onChanged,
-  });
+  void _getDefaultGroupName(Set<PresentationContact> contactList) async {
+    if (contactList.length <= 3) {
+      final groupName =
+          contactList.map((contact) => contact.displayName).join(", ");
+      groupNameTextEditingController.text = groupName;
+      groupNameTextEditingController.selection = TextSelection.fromPosition(
+        TextPosition(offset: groupNameTextEditingController.text.length),
+      );
+      groupNameFocusNode.requestFocus();
+    } else {
+      groupNameTextEditingController.clear();
+    }
+  }
+
+  ImagePickerGridController createImagePickerController() {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.single),
+    );
+
+    imagePickerController.addListener(() {
+      final selectedAsset = imagePickerController.selectedAssets.firstOrNull;
+      if (selectedAsset?.asset.type == AssetType.image) {
+        if (!imagePickerController.pickFromCamera()) {
+          Navigator.pop(context);
+        }
+        avatarAssetEntityNotifier.value = selectedAsset?.asset;
+        imagePickerController.removeAllSelectedItem();
+      }
+    });
+
+    return imagePickerController;
+  }
+
+  bool get isCreatingRoom {
+    return createRoomStateNotifier.value.fold(
+          (failure) => false,
+          (success) =>
+              success is UploadContentLoading ||
+              success is CreateNewGroupChatLoading,
+        ) ??
+        false;
+  }
+
+  @override
+  void initState() {
+    listenGroupNameChanged();
+    contactsList = widget.contactsList;
+    _getDefaultGroupName(contactsList ?? {});
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    haveGroupNameNotifier.dispose();
+    avatarAssetEntityNotifier.dispose();
+    avatarFilePickerNotifier.dispose();
+    createNewGroupChatInteractorStreamSubscription?.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: NewGroupChatInfoStyle.screenPadding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: NewGroupChatInfoStyle.topScreenPadding,
-            child: Icon(
-              Icons.lock,
-            ),
-          ),
-          const SizedBox(
-            width: 8.0,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: NewGroupChatInfoStyle.topScreenPadding,
-                  child: Text(
-                    L10n.of(context)!.enableEncryption,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                const SizedBox(height: 4.0),
-                ValueListenableBuilder<bool>(
-                  valueListenable: enableEncryptionNotifier,
-                  builder: (context, isEnable, child) {
-                    return Column(
-                      children: [
-                        Text(
-                          L10n.of(context)!.encryptionMessage,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[40],
-                              ),
-                        ),
-                        AnimatedSize(
-                          alignment: Alignment.topCenter,
-                          duration: const Duration(milliseconds: 50),
-                          child: isEnable
-                              ? Text(
-                                  L10n.of(context)!.encryptionWarning,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                      ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            width: 12,
-          ),
-          ValueListenableBuilder<bool>(
-            valueListenable: enableEncryptionNotifier,
-            builder: (context, isEnable, child) {
-              return Checkbox(
-                value: isEnable,
-                onChanged: (value) => onChanged?.call(value),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+    return NewGroupChatInfoView(this);
   }
 }

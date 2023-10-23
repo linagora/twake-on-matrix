@@ -10,11 +10,13 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
@@ -199,6 +201,26 @@ abstract class AppRoutes {
                     context,
                     const NewGroup(),
                   ),
+                  routes: [
+                    GoRoute(
+                      path: 'newgroupinfo',
+                      pageBuilder: (context, state) {
+                        if (state.extra is Set<PresentationContact>) {
+                          return defaultPageBuilder(
+                            context,
+                            NewGroupChatInfo(
+                              contactsList:
+                                  state.extra as Set<PresentationContact>,
+                            ),
+                          );
+                        }
+                        return defaultPageBuilder(
+                          context,
+                          const NewGroupChatInfo(contactsList: {}),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

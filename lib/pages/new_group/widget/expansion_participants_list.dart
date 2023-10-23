@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -9,12 +8,9 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class ExpansionParticipantsList extends StatefulWidget {
   final Set<PresentationContact> contactsList;
 
-  final NewGroupController newGroupController;
-
   const ExpansionParticipantsList({
     super.key,
     required this.contactsList,
-    required this.newGroupController,
   });
 
   @override
