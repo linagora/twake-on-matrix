@@ -4,7 +4,7 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
@@ -178,7 +178,7 @@ abstract class AppRoutes {
                   pageBuilder: (context, state) {
                     return defaultPageBuilder(
                       context,
-                      Chat(
+                      ChatAdaptiveScaffold(
                         roomId: state.pathParameters['roomid']!,
                       ),
                     );
@@ -379,7 +379,7 @@ abstract class AppRoutes {
                     case ChatRouterInputArgumentType.draft:
                       if (extra.data is String?) {
                         return CupertinoPage(
-                          child: Chat(
+                          child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(state.pathParameters['roomid']!),
                             roomName: extra.data as String?,
@@ -387,14 +387,14 @@ abstract class AppRoutes {
                         );
                       }
                       return CupertinoPage(
-                        child: Chat(
+                        child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
                         ),
                       );
                     case ChatRouterInputArgumentType.share:
                       return CupertinoPage(
-                        child: Chat(
+                        child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
                           shareFile: extra.data as MatrixFile?,
@@ -403,7 +403,7 @@ abstract class AppRoutes {
                   }
                 }
                 return CupertinoPage(
-                  child: Chat(
+                  child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(state.pathParameters['roomid']!),
                   ),

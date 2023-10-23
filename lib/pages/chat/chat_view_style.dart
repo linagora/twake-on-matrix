@@ -14,6 +14,10 @@ class ChatViewStyle {
       EdgeInsetsDirectional.only(
         start: responsive.isMobile(context) ? 0 : 16,
       );
+  static EdgeInsetsDirectional paddingTrailing(BuildContext context) =>
+      EdgeInsetsDirectional.only(
+        end: responsive.isMobile(context) ? 0 : 16,
+      );
 
   static BoxDecoration searchBottomViewDecoration(BuildContext context) =>
       BoxDecoration(
