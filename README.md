@@ -47,7 +47,19 @@ Twake Chat is an open source, decentralized chat app based on the Matrix protoco
 - And much more...
 
 ## Setup
+### Rust
+Before building, please ensure that Rust is installed because the [super_clipboard](https://pub.dev/packages/super_clipboard) package requires it.
+For macOS or Linux, execute the following command in Terminal.
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+For Windows, you can use the [Rust Installer](https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe).
 
+In case you have Rust already installed, make sure to update it to latest version:
+
+```bash
+rustup update
+```
 ### Flutter
 ```bash
 flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
