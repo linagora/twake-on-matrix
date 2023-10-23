@@ -51,6 +51,9 @@ extension LocalizedBody on Event {
   bool get isVideoOrImage =>
       [MessageTypes.Image, MessageTypes.Video].contains(messageType);
 
+  bool isContains(String? searchTerm) =>
+      body.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+
   String? get firstValidUrl =>
       messageType == MessageTypes.Text ? text.getFirstValidUrl() : null;
 
