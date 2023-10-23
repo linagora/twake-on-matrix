@@ -12,7 +12,6 @@ class NewGroup extends StatefulWidget {
 }
 
 class NewGroupController extends ContactsSelectionController<NewGroup> {
-
   @override
   String getTitle(BuildContext context) {
     return L10n.of(context)!.newGroupChat;
