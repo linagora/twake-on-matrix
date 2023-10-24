@@ -1,9 +1,13 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
+import 'package:fluffychat/pages/new_group/new_group.dart';
+import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +20,10 @@ class ChatListView extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final VoidCallback? onOpenSearchPage;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
-  const ChatListView({
+
+  final responsiveUtils = getIt.get<ResponsiveUtils>();
+
+  ChatListView({
     Key? key,
     required this.controller,
     this.bottomNavigationBar,
@@ -73,13 +80,47 @@ class ChatListView extends StatelessWidget {
               LogicalKeyboardKey.controlLeft,
               LogicalKeyboardKey.keyN,
             },
-            onKeysPressed: () => context.go('/rooms/newprivatechat'),
+            onKeysPressed: () => controller.onFloatingButtonTap(),
             helpLabel: L10n.of(context)!.newChat,
-            child: TwakeFloatingActionButton(
-              icon: Icons.mode_edit_outline_outlined,
-              size: ChatListViewStyle.editIconSize,
-              onTap: () => context.go('/rooms/newprivatechat'),
-            ),
+            child: responsiveUtils.isDesktop(context) ||
+                    responsiveUtils.isTablet(context)
+                ? MenuAnchor(
+                    menuChildren: [
+                      MenuItemButton(
+                        leadingIcon: const Icon(Icons.chat),
+                        child: Text(L10n.of(context)!.newDirectMessage),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const NewPrivateChat(),
+                          ),
+                        ),
+                      ),
+                      MenuItemButton(
+                        leadingIcon: const Icon(Icons.group),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const NewGroup(),
+                          ),
+                        ),
+                        child: Text(L10n.of(context)!.newChat),
+                      ),
+                    ],
+                    style: const MenuStyle(
+                      alignment: Alignment.topLeft,
+                    ),
+                    builder: (context, menuController, child) {
+                      return TwakeFloatingActionButton(
+                        icon: Icons.mode_edit_outline_outlined,
+                        size: ChatListViewStyle.editIconSize,
+                        onTap: () => menuController.open(),
+                      );
+                    },
+                  )
+                : TwakeFloatingActionButton(
+                    icon: Icons.mode_edit_outline_outlined,
+                    size: ChatListViewStyle.editIconSize,
+                    onTap: () => context.go('/rooms/newprivatechat'),
+                  ),
           );
         },
       ),
