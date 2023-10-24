@@ -24,7 +24,7 @@
   </p>
 </div>
 
-Twake is an open source, nonprofit and cute matrix messenger app developed by [Linagora](https://linagora.com). The app is easy to use but secure and decentralized.
+Twake Chat is an open source, decentralized chat app based on the Matrix protocol. It was developed by [Linagora](https://linagora.com). Twake Chat is a good option for individuals and organizations who are looking for a secure and decentralized chat app. It is also a good choice for developers who want to build their own Matrix-based chat apps.
 
 ## Features
 
