@@ -2545,5 +2545,144 @@
   "noBackupWarning": "Attention ! Sans l'activation de la sauvegarde de la discussion, vous perdrez l'accès à vos messages chiffrés. Il est fortement recommandé d'activer la sauvegarde de la discussion avant de se déconnecter.",
   "@noBackupWarning": {},
   "fileIsTooBigForServer": "Le serveur reporte que le fichier est trop large pour être envoyé.",
-  "@fileIsTooBigForServer": {}
+  "@fileIsTooBigForServer": {},
+  "participantsCount": "Participants ({count})",
+  "@participantsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "loadingContacts": "Chargement des contacts...",
+  "@loadingContacts": {},
+  "soonThereHaveContacts": "Bientôt, il y aura des contacts",
+  "@soonThereHaveContacts": {},
+  "chatCanHave": "Le salon peut avoir :",
+  "@chatCanHave": {},
+  "welcomeToTwake": "Bienvenue sur Twake Chat, {user}",
+  "@welcomeToTwake": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "searchSuggestion": "Pour l'instant, vous pouvez effectuer une recherche en tapant le nom d'une personne ou l'adresse d'un serveur public",
+  "@searchSuggestion": {},
+  "onlineMinAgo": "en ligne il y a {min}m",
+  "@onlineMinAgo": {
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "newGroupChat": "Nouveau groupe de discussion",
+  "@newGroupChat": {},
+  "onlineHourAgo": "en ligne il y a {hour}h",
+  "@onlineHourAgo": {
+    "placeholders": {
+      "hour": {}
+    }
+  },
+  "cannotEnableKeyBackup": "Impossible d'activer la récupération du salon. Veuillez ressayer dans les paramètres.",
+  "@cannotEnableKeyBackup": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "inactive": "Non activé",
+  "@inactive": {},
+  "noMoreResult": "Plus de résultat !",
+  "@noMoreResult": {},
+  "youCreatedGroupChat": "Vous avez créé une discussion de groupe",
+  "@youCreatedGroupChat": {},
+  "searchForPeopleAndChannels": "Rechercher des personnes ou salons",
+  "@searchForPeopleAndChannels": {},
+  "noResultForKeyword": "Pas de résultat pour \"{keyword}\"",
+  "@noResultForKeyword": {
+    "placeholders": {
+      "keyword": {}
+    }
+  },
+  "multiInteractionThreadedDiscussion": "Discussions multi-interaction par fils",
+  "@multiInteractionThreadedDiscussion": {},
+  "statusDot": "⬤",
+  "@statusDot": {},
+  "onlineStatus": "en ligne",
+  "@onlineStatus": {},
+  "searchForContacts": "Recherche de contacts",
+  "@searchForContacts": {},
+  "channels": "Salons",
+  "@channels": {},
+  "back": "Revenir en arrière",
+  "@back": {},
+  "contacts": "Contacts",
+  "@contacts": {},
+  "upTo100000Members": "Jusqu'à 100 000 membres",
+  "@upTo100000Members": {},
+  "chatMessage": "Nouveau message",
+  "@chatMessage": {},
+  "shrink": "Rétrécir",
+  "@shrink": {},
+  "persistentChatHistory": "Historique des conversations persistantes",
+  "@persistentChatHistory": {},
+  "previous": "Précédent",
+  "@previous": {},
+  "owner": "Propriétaire",
+  "@owner": {},
+  "active": "Activé",
+  "@active": {},
+  "more": "Plus",
+  "@more": {},
+  "whoWouldYouLikeToAdd": "Qui voulez-vous ajouter ?",
+  "@whoWouldYouLikeToAdd": {},
+  "sendMessageGuide": "Envoyez un message ou tapez sur l'image en dessous.",
+  "@sendMessageGuide": {},
+  "noMessageHereYet": "Pas encore de message...",
+  "@noMessageHereYet": {},
+  "addAPhoto": "Ajouter une photo",
+  "@addAPhoto": {},
+  "addMember": "Ajouter des membres",
+  "@addMember": {},
+  "startNewChatMessage": "Il est agréable de discuter avec vos amis et de collaborer avec vos équipes.\nEntamons un dialogue, créons une discussion ou rejoignons une discussion existante.",
+  "@startNewChatMessage": {},
+  "searchResultNotFound2": "• Il se peut que l'utilisateur ne figure pas dans votre carnet d'adresses.\n",
+  "@searchResultNotFound2": {},
+  "serverNameWrongExplain": "L'adresse du serveur vous a été envoyée par l'administrateur de l'entreprise. Vérifiez l'e-mail d'invitation.",
+  "@serverNameWrongExplain": {},
+  "wrongServerName": "Mauvais nom de serveur",
+  "@wrongServerName": {},
+  "twakeUsers": "Utilisateurs de Twake",
+  "@twakeUsers": {},
+  "enterGroupName": "Entrer le nom du salon",
+  "@enterGroupName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "cannotUnlockBackupKey": "Impossible de déverrouiller la clé de récupération.",
+  "@cannotUnlockBackupKey": {},
+  "searchResultNotFound1": "• Assurez-vous qu'il n'y a pas de fautes de frappe dans votre recherche.\n",
+  "@searchResultNotFound1": {},
+  "expand": "Agrandir",
+  "@expand": {},
+  "searchResultNotFound4": "• Si la raison n'est pas mentionnée ci-dessus, ",
+  "@searchResultNotFound4": {},
+  "loginWithSSO": "Connectez-vous avec SSO",
+  "@loginWithSSO": {},
+  "maxImageSize": "Taille de fichier maximum : {max}MB",
+  "@maxImageSize": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "searchResultNotFound5": "demandez de l'aide.",
+  "@searchResultNotFound5": {},
+  "searchResultNotFound3": "• Vérifiez l'autorisation d'accès au contact, il se peut que l'utilisateur figure dans votre liste de contacts.\n",
+  "@searchResultNotFound3": {},
+  "cannotUploadKey": "Impossible de stocker la clé de récupération.",
+  "@cannotUploadKey": {},
+  "profile": "Profil",
+  "@profile": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "invite": "Inviter",
+  "@invite": {},
+  "getHelp": "Obtenir de l'aide",
+  "@getHelp": {}
 }
