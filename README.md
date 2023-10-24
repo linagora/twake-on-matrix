@@ -1,13 +1,30 @@
-# Twake ![Docker Pulls](https://img.shields.io/docker/pulls/linagora/twake-web)
+# Twake
+[![Contributors](https://img.shields.io/github/contributors/linagora/twake-on-matrix?label=Contributors
+)](
+  https://github.com/linagora/twake-on-matrix/graphs/contributors
+)
+[![Issues](https://img.shields.io/github/issues/linagora/twake-on-matrix?label=Issues
+)](https://github.com/linagora/twake-on-matrix/issues)
+[![Documentation](https://img.shields.io/badge/Documentation-green.svg)](docs)
+[![Android application](https://img.shields.io/badge/App-Android-blue.svg)](https://play.google.com/store/apps/dev?id=8845244706987756601)
+[![Ios application](https://img.shields.io/badge/App-iOS-red.svg)](https://apps.apple.com/gr/developer/linagora/id1110867042)
 
-![](https://github.com/linagora/twake-on-matrix/assets/6462404/76e7795e-39b6-4667-a313-4068afadb1ed)
+<br />
+<div align="center">
+  <a href="https://github.com/linagora/twake-on-matrix">
+    <img src="https://github.com/linagora/twake-on-matrix/assets/48354990/cda56167-f070-4064-90fb-81be7d20ab27">
+  </a>
 
-<p>
-  <a href="https://hosted.weblate.org/projects/linagora/twake-matrix/#repository" target="new">Translate Twake</a>
- </p>
+  <p align="center">
+    <a href="https://beta.twake.app/web/#/rooms">View Demo</a>
+    •
+    <a href="https://github.com/linagora/twake-on-matrix/issues">Report Bug</a>
+    •
+    <a href="https://hosted.weblate.org/projects/linagora/twake-matrix/#repository">Translate Twake</a>
+  </p>
+</div>
 
-
-FluffyChat is an open source, nonprofit and cute matrix messenger app. The app is easy to use but secure and decentralized.
+Twake Chat is an open source, decentralized chat app based on the Matrix protocol. It was developed by [Linagora](https://linagora.com). Twake Chat is a good option for individuals and organizations who are looking for a secure and decentralized chat app. It is also a good choice for developers who want to build their own Matrix-based chat apps.
 
 ## Features
 
@@ -32,17 +49,17 @@ FluffyChat is an open source, nonprofit and cute matrix messenger app. The app i
 ## Setup
 
 ### Flutter
-```
-  flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+```bash
+flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ### Add commit hook to format and code analyze
-```
-  bash scripts/config-pre-commit.sh
+```bash
+bash scripts/config-pre-commit.sh
 ```
 
 # Special thanks
-* <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original reposotory of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
+* <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original repository of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
 
 * <a href="https://github.com/fabiyamada">Fabiyamada</a> is a graphics designer from Brasil and has made the fluffychat logo and the banner. Big thanks for her great designs.
 
