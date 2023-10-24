@@ -36,49 +36,51 @@ class EventInfoDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(L10n.of(context)!.messageInfo),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_downward_outlined),
-          onPressed: Navigator.of(context, rootNavigator: false).pop,
-          tooltip: L10n.of(context)!.close,
+    return SelectionArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(L10n.of(context)!.messageInfo),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_downward_outlined),
+            onPressed: Navigator.of(context, rootNavigator: false).pop,
+            tooltip: L10n.of(context)!.close,
+          ),
         ),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: Avatar(
-              mxContent: event.senderFromMemoryOrFallback.avatarUrl,
-              name: event.senderFromMemoryOrFallback.calcDisplayname(),
-            ),
-            title: Text(L10n.of(context)!.sender),
-            subtitle: Text(
-              '${event.senderFromMemoryOrFallback.calcDisplayname()} [${event.senderId}]',
-            ),
-          ),
-          ListTile(
-            title: Text(L10n.of(context)!.time),
-            subtitle: Text(event.originServerTs.localizedTime(context)),
-          ),
-          ListTile(
-            title: Text(L10n.of(context)!.messageType),
-            subtitle: Text(event.humanreadableType),
-          ),
-          ListTile(title: Text('${L10n.of(context)!.sourceCode}:')),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Material(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-              color: Theme.of(context).colorScheme.surface,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8),
-                scrollDirection: Axis.horizontal,
-                child: SelectableText(prettyJson),
+        body: ListView(
+          children: [
+            ListTile(
+              leading: Avatar(
+                mxContent: event.senderFromMemoryOrFallback.avatarUrl,
+                name: event.senderFromMemoryOrFallback.calcDisplayname(),
+              ),
+              title: Text(L10n.of(context)!.sender),
+              subtitle: Text(
+                '${event.senderFromMemoryOrFallback.calcDisplayname()} [${event.senderId}]',
               ),
             ),
-          ),
-        ],
+            ListTile(
+              title: Text(L10n.of(context)!.time),
+              subtitle: Text(event.originServerTs.localizedTime(context)),
+            ),
+            ListTile(
+              title: Text(L10n.of(context)!.messageType),
+              subtitle: Text(event.humanreadableType),
+            ),
+            ListTile(title: Text('${L10n.of(context)!.sourceCode}:')),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Material(
+                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                color: Theme.of(context).colorScheme.surface,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8),
+                  scrollDirection: Axis.horizontal,
+                  child: SelectableText(prettyJson),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

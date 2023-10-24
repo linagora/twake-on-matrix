@@ -52,7 +52,7 @@ class LogViewerState extends State<LogViewer> {
         itemCount: outputEvents.length,
         itemBuilder: (context, i) => SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: SelectableText(
+          child: Text(
             outputEvents[i].toDisplayString(),
             style: TextStyle(
               color: outputEvents[i].color,

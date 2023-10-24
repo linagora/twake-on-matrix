@@ -39,6 +39,7 @@ import 'package:fluffychat/pages/sign_up/signup.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -465,7 +466,7 @@ abstract class AppRoutes {
 
   static Page defaultPageBuilder(BuildContext context, Widget child) =>
       CustomTransitionPage(
-        child: child,
+        child: SelectionArea(child: child),
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             !_responsive.isMobile(context)
                 ? FadeTransition(opacity: animation, child: child)
