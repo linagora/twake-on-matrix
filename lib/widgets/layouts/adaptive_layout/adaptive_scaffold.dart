@@ -1,4 +1,6 @@
+import 'package:fluffychat/config/inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -25,6 +27,8 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
+  final activeRoomIdNotifier = ValueNotifier<String?>(null);
+
   final PageController pageController =
       PageController(initialPage: 1, keepPage: true);
 
@@ -38,6 +42,14 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
     final destinationType = destinations[index];
     activeNavigationBar.value = destinationType;
     pageController.jumpToPage(index);
+    clearNavigatorScreen();
+  }
+
+  void clearNavigatorScreen() {
+    final navigatorContext = InnerRoutes.innerNavigatorKey.currentContext;
+    if (navigatorContext != null) {
+      navigatorContext.popInnerAll();
+    }
   }
 
   void clientSelected(
@@ -83,9 +95,21 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   MatrixState get matrix => Matrix.of(context);
 
   @override
+  void initState() {
+    activeRoomIdNotifier.value = widget.activeRoomId;
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant AdaptiveScaffoldApp oldWidget) {
+    activeRoomIdNotifier.value = widget.activeRoomId;
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) => AppScaffoldView(
         destinations: destinations,
-        activeRoomId: widget.activeRoomId,
+        activeRoomIdNotifier: activeRoomIdNotifier,
         activeNavigationBar: activeNavigationBar,
         pageController: pageController,
         onOpenSearchPage: _onOpenSearchPage,

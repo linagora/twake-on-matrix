@@ -90,16 +90,6 @@ class ResponsiveUtils {
   bool isMobileOrTablet(BuildContext context) =>
       isMobile(context) || isTablet(context);
 
-  bool mailboxDashboardOnlyHasEmailView(BuildContext context) {
-    if (PlatformInfos.isWeb) {
-      return isMobile(context) || isTablet(context);
-    } else {
-      return isPortraitMobile(context) ||
-          isLandscapeMobile(context) ||
-          isTablet(context);
-    }
-  }
-
   bool landscapeTabletSupported(BuildContext context) {
     if (PlatformInfos.isWeb) {
       return isTabletLarge(context);
@@ -109,5 +99,9 @@ class ResponsiveUtils {
               isTabletLarge(context) ||
               isDesktop(context));
     }
+  }
+
+  bool isTwoColumnLayout(BuildContext context) {
+    return isTablet(context) || isDesktop(context) || isTabletLarge(context);
   }
 }

@@ -38,7 +38,7 @@ import '../../widgets/matrix.dart';
 class ChatList extends StatefulWidget {
   static BuildContext? contextForVoip;
 
-  final String? activeRoomId;
+  final ValueNotifier<String?> activeRoomIdNotifier;
 
   final Widget? bottomNavigationBar;
 
@@ -46,7 +46,7 @@ class ChatList extends StatefulWidget {
 
   const ChatList({
     Key? key,
-    this.activeRoomId,
+    required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSearchPage,
   }) : super(key: key);
@@ -118,7 +118,7 @@ class ChatListController extends State<ChatList>
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
   List<Room> get spaces => client.rooms.where((r) => r.isSpace).toList();
 
-  String? activeRoomId;
+  ValueNotifier<String?> activeRoomIdNotifier = ValueNotifier(null);
 
   bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
 
@@ -714,8 +714,16 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void onFloatingButtonTap() {
+  void goToNewPrivateChatMobile() {
     context.go('/rooms/newprivatechat');
+  }
+
+  void goToNewGroupChatTwoColumnMode() {
+    context.pushInner('innernavigator/newgroup');
+  }
+
+  void goToNewPrivateChatTwoColumnMode() {
+    context.pushInner('innernavigator/newprivatechat');
   }
 
   @override
@@ -723,7 +731,7 @@ class ChatListController extends State<ChatList>
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
-    activeRoomId = widget.activeRoomId;
+    activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
@@ -747,7 +755,6 @@ class ChatListController extends State<ChatList>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    activeRoomId = Matrix.of(context).activeRoomId;
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
