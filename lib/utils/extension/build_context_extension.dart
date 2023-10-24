@@ -168,4 +168,20 @@ extension ContextExtensionss on BuildContext {
     );
     return position;
   }
+
+  void pushInner(String path, {Object? arguments}) {
+    Navigator.of(this).pushNamed(path, arguments: arguments);
+  }
+
+  void pushInnerReplace(String path, {Object? arguments}) {
+    Navigator.of(this).pushReplacementNamed(path, arguments: arguments);
+  }
+
+  void popInner() {
+    Navigator.of(this).pop();
+  }
+
+  void popInnerAll() {
+    Navigator.of(this).popUntil((route) => route.isFirst);
+  }
 }
