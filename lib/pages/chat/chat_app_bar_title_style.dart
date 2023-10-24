@@ -24,10 +24,12 @@ class ChatAppBarTitleStyle {
           ? Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+                overflow: TextOverflow.ellipsis,
               )
           : Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onBackground,
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+                overflow: TextOverflow.ellipsis,
               );
 
   static TextStyle? statusTextStyle(BuildContext context) =>

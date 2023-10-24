@@ -152,355 +152,376 @@ class Message extends StatelessWidget {
                       color: Colors.transparent,
                       borderRadius: MessageStyle.bubbleBorderRadius,
                       borderOnForeground: false,
-                      child: InkWell(
-                        onHover: (hover) {
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        onEnter: (event) {
                           useMouse = true;
                         },
-                        onTap: !useMouse && longPressSelect
-                            ? () {}
-                            : () => onSelect!(event),
-                        onLongPress:
-                            !longPressSelect ? null : () => onSelect!(event),
-                        borderRadius: MessageStyle.bubbleBorderRadius,
-                        hoverColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        child: Stack(
-                          alignment: ownMessage
-                              ? AlignmentDirectional.bottomStart
-                              : AlignmentDirectional.bottomEnd,
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        MessageStyle.bubbleBorderRadius,
-                                    color: ownMessage
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .primaryContainer
-                                        : Theme.of(context).colorScheme.surface,
-                                  ),
-                                  padding: noBubble
-                                      ? const EdgeInsets.symmetric(
-                                          horizontal: 16.0,
-                                        )
-                                      : EdgeInsets.only(
-                                          left: 8 * AppConfig.bubbleSizeFactor,
-                                          right: 8 * AppConfig.bubbleSizeFactor,
-                                          top: 8 * AppConfig.bubbleSizeFactor,
-                                          bottom: timelineOverlayMessage
-                                              ? 8 * AppConfig.bubbleSizeFactor
-                                              : 0 * AppConfig.bubbleSizeFactor,
-                                        ),
-                                  constraints: BoxConstraints(
-                                    maxWidth: MessageStyle.messageBubbleWidth(
-                                      context,
+                        onExit: (event) {
+                          useMouse = false;
+                        },
+                        child: InkWell(
+                          onTap: () =>
+                              !longPressSelect ? onSelect!(event) : null,
+                          onLongPress: () => longPressSelect && !useMouse
+                              ? onSelect!(event)
+                              : null,
+                          borderRadius: MessageStyle.bubbleBorderRadius,
+                          hoverColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          child: Stack(
+                            alignment: ownMessage
+                                ? AlignmentDirectional.bottomStart
+                                : AlignmentDirectional.bottomEnd,
+                            children: [
+                              Column(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          MessageStyle.bubbleBorderRadius,
+                                      color: ownMessage
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primaryContainer
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .surface,
                                     ),
-                                  ),
-                                  child: LayoutBuilder(
-                                    builder: (
-                                      context,
-                                      availableBubbleContraints,
-                                    ) =>
-                                        Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        hideDisplayName(ownMessage)
-                                            ? const SizedBox(height: 0)
-                                            : FutureBuilder<User?>(
-                                                future: event.fetchSenderUser(),
-                                                builder: (context, snapshot) {
-                                                  final displayName = snapshot
-                                                          .data
-                                                          ?.calcDisplayname() ??
-                                                      event
-                                                          .senderFromMemoryOrFallback
-                                                          .calcDisplayname();
-                                                  return Padding(
-                                                    padding: EdgeInsets.only(
-                                                      left: event.messageType ==
-                                                              MessageTypes.Image
-                                                          ? 0
-                                                          : 8.0,
-                                                      bottom: 4.0,
-                                                    ),
-                                                    child: Text(
-                                                      displayName,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .labelMedium
-                                                          ?.copyWith(
-                                                            color: Theme.of(
-                                                              context,
-                                                            )
-                                                                .colorScheme
-                                                                .primary,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                        IntrinsicHeight(
-                                          child: Stack(
-                                            alignment: Alignment.bottomRight,
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                  bottom: noPadding ||
-                                                          timelineOverlayMessage
-                                                      ? 0
-                                                      : 8,
-                                                ),
-                                                child: IntrinsicWidth(
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: <Widget>[
-                                                      if (event
-                                                              .relationshipType ==
-                                                          RelationshipTypes
-                                                              .reply)
-                                                        FutureBuilder<Event?>(
-                                                          future: event
-                                                              .getReplyEvent(
-                                                            timeline,
-                                                          ),
-                                                          builder: (
-                                                            BuildContext
+                                    padding: noBubble
+                                        ? const EdgeInsets.symmetric(
+                                            horizontal: 16.0,
+                                          )
+                                        : EdgeInsets.only(
+                                            left:
+                                                8 * AppConfig.bubbleSizeFactor,
+                                            right:
+                                                8 * AppConfig.bubbleSizeFactor,
+                                            top: 8 * AppConfig.bubbleSizeFactor,
+                                            bottom: timelineOverlayMessage
+                                                ? 8 * AppConfig.bubbleSizeFactor
+                                                : 0 *
+                                                    AppConfig.bubbleSizeFactor,
+                                          ),
+                                    constraints: BoxConstraints(
+                                      maxWidth: MessageStyle.messageBubbleWidth(
+                                        context,
+                                      ),
+                                    ),
+                                    child: LayoutBuilder(
+                                      builder: (
+                                        context,
+                                        availableBubbleContraints,
+                                      ) =>
+                                          Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          hideDisplayName(ownMessage)
+                                              ? const SizedBox(height: 0)
+                                              : FutureBuilder<User?>(
+                                                  future:
+                                                      event.fetchSenderUser(),
+                                                  builder: (context, snapshot) {
+                                                    final displayName = snapshot
+                                                            .data
+                                                            ?.calcDisplayname() ??
+                                                        event
+                                                            .senderFromMemoryOrFallback
+                                                            .calcDisplayname();
+                                                    return Padding(
+                                                      padding: EdgeInsets.only(
+                                                        left:
+                                                            event.messageType ==
+                                                                    MessageTypes
+                                                                        .Image
+                                                                ? 0
+                                                                : 8.0,
+                                                        bottom: 4.0,
+                                                      ),
+                                                      child: Text(
+                                                        displayName,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .labelMedium
+                                                            ?.copyWith(
+                                                              color: Theme.of(
                                                                 context,
-                                                            snapshot,
-                                                          ) {
-                                                            final replyEvent =
-                                                                snapshot.hasData
-                                                                    ? snapshot
-                                                                        .data!
-                                                                    : Event(
-                                                                        eventId:
-                                                                            event.relationshipEventId!,
-                                                                        content: {
-                                                                          'msgtype':
-                                                                              'm.text',
-                                                                          'body':
-                                                                              '...',
-                                                                        },
-                                                                        senderId:
-                                                                            event.senderId,
-                                                                        type:
-                                                                            'm.room.message',
-                                                                        room: event
-                                                                            .room,
-                                                                        status:
-                                                                            EventStatus.sent,
-                                                                        originServerTs:
-                                                                            DateTime.now(),
+                                                              )
+                                                                  .colorScheme
+                                                                  .primary,
+                                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                          IntrinsicHeight(
+                                            child: Stack(
+                                              alignment: Alignment.bottomRight,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                    bottom: noPadding ||
+                                                            timelineOverlayMessage
+                                                        ? 0
+                                                        : 8,
+                                                  ),
+                                                  child: IntrinsicWidth(
+                                                    child: SelectionArea(
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: <Widget>[
+                                                          if (event
+                                                                  .relationshipType ==
+                                                              RelationshipTypes
+                                                                  .reply)
+                                                            FutureBuilder<
+                                                                Event?>(
+                                                              future: event
+                                                                  .getReplyEvent(
+                                                                timeline,
+                                                              ),
+                                                              builder: (
+                                                                BuildContext
+                                                                    context,
+                                                                snapshot,
+                                                              ) {
+                                                                final replyEvent =
+                                                                    snapshot
+                                                                            .hasData
+                                                                        ? snapshot
+                                                                            .data!
+                                                                        : Event(
+                                                                            eventId:
+                                                                                event.relationshipEventId!,
+                                                                            content: {
+                                                                              'msgtype': 'm.text',
+                                                                              'body': '...',
+                                                                            },
+                                                                            senderId:
+                                                                                event.senderId,
+                                                                            type:
+                                                                                'm.room.message',
+                                                                            room:
+                                                                                event.room,
+                                                                            status:
+                                                                                EventStatus.sent,
+                                                                            originServerTs:
+                                                                                DateTime.now(),
+                                                                          );
+                                                                return InkWell(
+                                                                  onTap: () {
+                                                                    if (scrollToEventId !=
+                                                                        null) {
+                                                                      scrollToEventId!(
+                                                                        replyEvent
+                                                                            .eventId,
                                                                       );
-                                                            return InkWell(
-                                                              onTap: () {
-                                                                if (scrollToEventId !=
-                                                                    null) {
-                                                                  scrollToEventId!(
-                                                                    replyEvent
-                                                                        .eventId,
-                                                                  );
-                                                                }
+                                                                    }
+                                                                  },
+                                                                  child:
+                                                                      AbsorbPointer(
+                                                                    child:
+                                                                        Container(
+                                                                      margin: EdgeInsets
+                                                                          .symmetric(
+                                                                        vertical:
+                                                                            4.0 *
+                                                                                AppConfig.bubbleSizeFactor,
+                                                                      ),
+                                                                      child:
+                                                                          ReplyContent(
+                                                                        replyEvent,
+                                                                        ownMessage:
+                                                                            ownMessage,
+                                                                        timeline:
+                                                                            timeline,
+                                                                        chatController:
+                                                                            controller,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
                                                               },
-                                                              child:
-                                                                  AbsorbPointer(
-                                                                child:
-                                                                    Container(
-                                                                  margin: EdgeInsets
-                                                                      .symmetric(
-                                                                    vertical: 4.0 *
-                                                                        AppConfig
-                                                                            .bubbleSizeFactor,
+                                                            ),
+                                                          Stack(
+                                                            children: [
+                                                              MessageContent(
+                                                                displayEvent,
+                                                                textColor:
+                                                                    textColor,
+                                                                endOfBubbleWidget:
+                                                                    Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                    left: 8.0,
+                                                                    right: 4.0,
                                                                   ),
                                                                   child:
-                                                                      ReplyContent(
-                                                                    replyEvent,
+                                                                      MessageTime(
+                                                                    timelineOverlayMessage:
+                                                                        timelineOverlayMessage,
+                                                                    controller:
+                                                                        controller,
+                                                                    event:
+                                                                        event,
                                                                     ownMessage:
                                                                         ownMessage,
                                                                     timeline:
                                                                         timeline,
-                                                                    chatController:
-                                                                        controller,
                                                                   ),
                                                                 ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      Stack(
-                                                        children: [
-                                                          MessageContent(
-                                                            displayEvent,
-                                                            textColor:
-                                                                textColor,
-                                                            endOfBubbleWidget:
-                                                                Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                left: 8.0,
-                                                                right: 4.0,
-                                                              ),
-                                                              child:
-                                                                  MessageTime(
-                                                                timelineOverlayMessage:
-                                                                    timelineOverlayMessage,
                                                                 controller:
                                                                     controller,
-                                                                event: event,
+                                                                backgroundColor:
+                                                                    ownMessage
+                                                                        ? Theme
+                                                                                .of(
+                                                                            context,
+                                                                          )
+                                                                            .colorScheme
+                                                                            .primaryContainer
+                                                                        : Theme
+                                                                            .of(
+                                                                            context,
+                                                                          ).colorScheme.surface,
+                                                                onTapSelectMode:
+                                                                    () => controller
+                                                                            .selectMode
+                                                                        ? onSelect!(
+                                                                            event,
+                                                                          )
+                                                                        : null,
+                                                                onTapPreview:
+                                                                    !controller
+                                                                            .selectMode
+                                                                        ? () {}
+                                                                        : null,
                                                                 ownMessage:
                                                                     ownMessage,
-                                                                timeline:
-                                                                    timeline,
                                                               ),
-                                                            ),
-                                                            controller:
-                                                                controller,
-                                                            backgroundColor:
-                                                                ownMessage
-                                                                    ? Theme.of(
-                                                                        context,
-                                                                      )
-                                                                        .colorScheme
-                                                                        .primaryContainer
-                                                                    : Theme.of(
-                                                                        context,
-                                                                      )
-                                                                        .colorScheme
-                                                                        .surface,
-                                                            onTapSelectMode:
-                                                                () => controller
-                                                                        .selectMode
-                                                                    ? onSelect!(
+                                                              if (timelineOverlayMessage)
+                                                                Positioned(
+                                                                  right: 8,
+                                                                  bottom: 4.0,
+                                                                  child:
+                                                                      MessageTime(
+                                                                    timelineOverlayMessage:
+                                                                        timelineOverlayMessage,
+                                                                    controller:
+                                                                        controller,
+                                                                    event:
                                                                         event,
-                                                                      )
-                                                                    : null,
-                                                            onTapPreview:
-                                                                !controller
-                                                                        .selectMode
-                                                                    ? () {}
-                                                                    : null,
-                                                            ownMessage:
-                                                                ownMessage,
+                                                                    ownMessage:
+                                                                        ownMessage,
+                                                                    timeline:
+                                                                        timeline,
+                                                                  ),
+                                                                ),
+                                                            ],
                                                           ),
-                                                          if (timelineOverlayMessage)
-                                                            Positioned(
-                                                              right: 8,
-                                                              bottom: 4.0,
-                                                              child:
-                                                                  MessageTime(
-                                                                timelineOverlayMessage:
-                                                                    timelineOverlayMessage,
-                                                                controller:
-                                                                    controller,
-                                                                event: event,
-                                                                ownMessage:
-                                                                    ownMessage,
-                                                                timeline:
-                                                                    timeline,
+                                                          if (event
+                                                              .hasAggregatedEvents(
+                                                            timeline,
+                                                            RelationshipTypes
+                                                                .edit,
+                                                          ))
+                                                            Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .only(
+                                                                top: 4.0 *
+                                                                    AppConfig
+                                                                        .bubbleSizeFactor,
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .edit_outlined,
+                                                                    color: textColor
+                                                                        .withAlpha(
+                                                                      164,
+                                                                    ),
+                                                                    size: 14,
+                                                                  ),
+                                                                  Text(
+                                                                    ' - ${displayEvent.originServerTs.localizedTimeShort(context)}',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: textColor
+                                                                          .withAlpha(
+                                                                        164,
+                                                                      ),
+                                                                      fontSize:
+                                                                          12,
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ),
                                                         ],
                                                       ),
-                                                      if (event
-                                                          .hasAggregatedEvents(
-                                                        timeline,
-                                                        RelationshipTypes.edit,
-                                                      ))
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                            top: 4.0 *
-                                                                AppConfig
-                                                                    .bubbleSizeFactor,
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .edit_outlined,
-                                                                color: textColor
-                                                                    .withAlpha(
-                                                                  164,
-                                                                ),
-                                                                size: 14,
-                                                              ),
-                                                              Text(
-                                                                ' - ${displayEvent.originServerTs.localizedTimeShort(context)}',
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: textColor
-                                                                      .withAlpha(
-                                                                    164,
-                                                                  ),
-                                                                  fontSize: 12,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              if (timelineText)
-                                                Positioned(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                      left: 6,
-                                                      right: 8.0,
-                                                      bottom: 4.0,
-                                                    ),
-                                                    child: MessageTime(
-                                                      timelineOverlayMessage:
-                                                          timelineOverlayMessage,
-                                                      controller: controller,
-                                                      event: event,
-                                                      ownMessage: ownMessage,
-                                                      timeline: timeline,
                                                     ),
                                                   ),
                                                 ),
-                                            ],
+                                                if (timelineText)
+                                                  Positioned(
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                        left: 6,
+                                                        right: 8.0,
+                                                        bottom: 4.0,
+                                                      ),
+                                                      child: MessageTime(
+                                                        timelineOverlayMessage:
+                                                            timelineOverlayMessage,
+                                                        controller: controller,
+                                                        event: event,
+                                                        ownMessage: ownMessage,
+                                                        timeline: timeline,
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (event.hasAggregatedEvents(
-                                  timeline,
-                                  RelationshipTypes.reaction,
-                                ))
-                                  const SizedBox(height: 24),
-                              ],
-                            ),
-                            if (event.hasAggregatedEvents(
-                              timeline,
-                              RelationshipTypes.reaction,
-                            )) ...[
-                              Positioned(
-                                left: 8,
-                                right: 0,
-                                bottom: 0,
-                                child: MessageReactions(event, timeline),
+                                  if (event.hasAggregatedEvents(
+                                    timeline,
+                                    RelationshipTypes.reaction,
+                                  ))
+                                    const SizedBox(height: 24),
+                                ],
                               ),
-                              const SizedBox(width: 4),
+                              if (event.hasAggregatedEvents(
+                                timeline,
+                                RelationshipTypes.reaction,
+                              )) ...[
+                                Positioned(
+                                  left: 8,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: MessageReactions(event, timeline),
+                                ),
+                                const SizedBox(width: 4),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),

@@ -150,7 +150,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                           ?.keyword,
                       defaultTextStyle:
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                // color: textColor,
                                 fontSize: bigEmotes ? fontSize * 3 : fontSize,
                               ),
                       linkStyle: TextStyle(

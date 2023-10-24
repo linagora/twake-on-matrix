@@ -91,13 +91,12 @@ class ChatAppBarTitle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                SelectableText(
                   roomName ??
                       room!.getLocalizedDisplayname(
                         MatrixLocals(L10n.of(context)!),
                       ),
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: ChatAppBarTitleStyle.appBarTitleStyle(context),
                 ),
                 _ChatAppBarStatusContent(
