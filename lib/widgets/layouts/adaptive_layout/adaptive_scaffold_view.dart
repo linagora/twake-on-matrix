@@ -67,7 +67,12 @@ class AppScaffoldView extends StatelessWidget {
                           case AdaptiveDestinationEnum.contacts:
                           case AdaptiveDestinationEnum.rooms:
                           default:
-                            return _primaryNavigationBarBuilder(context);
+                            return _PrimaryNavigationBarBuilder(
+                              activeNavigationBar: activeNavigationBar,
+                              onDestinationSelected: onDestinationSelected,
+                              onClientSelected: onClientSelected,
+                              destinations: getNavigationDestinations(context),
+                            );
                         }
                       },
                     );
@@ -83,48 +88,95 @@ class AppScaffoldView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: LinagoraRefColors.material().primary[100],
                 ),
-                child: PageView(
-                  controller: pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _triggerPageViewBuilder(
-                      navigatorBarType: AdaptiveDestinationEnum.contacts,
-                      navigatorBarWidget: ContactsTab(
-                        bottomNavigationBar:
-                            _bottomNavigationBarBuilder(context),
-                      ),
-                    ),
-                    ChatList(
-                      activeRoomId: activeRoomId,
-                      bottomNavigationBar: _triggerPageViewBuilder(
-                        navigatorBarType: AdaptiveDestinationEnum.rooms,
-                        navigatorBarWidget:
-                            _bottomNavigationBarBuilder(context),
-                      ),
-                      onOpenSearchPage: onOpenSearchPage,
-                    ),
-                    _triggerPageViewBuilder(
-                      navigatorBarType: AdaptiveDestinationEnum.settings,
-                      navigatorBarWidget: Settings(
-                        bottomNavigationBar:
-                            _bottomNavigationBarBuilder(context),
-                      ),
-                    ),
-                    Search(
-                      onCloseSearchPage: onCloseSearchPage,
-                    ),
-                  ],
+                child: Navigator(
+                  onGenerateRoute: (settings) {
+                    return MaterialPageRoute(
+                      builder: (context) {
+                        return _PageView(
+                          activeNavigationBar: activeNavigationBar,
+                          activeRoomId: activeRoomId,
+                          onClientSelected: onClientSelected,
+                          onOpenSearchPage: onOpenSearchPage,
+                          onCloseSearchPage: onCloseSearchPage,
+                          pageController: pageController,
+                          bottomNavigationKey: bottomNavigationKey,
+                          onDestinationSelected: onDestinationSelected,
+                          destinations: destinations,
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
   }
 
-  int _getActiveBottomNavigationBarIndex() {
-    return destinations.indexOf(activeNavigationBar.value);
+  List<NavigationDestination> getNavigationDestinations(BuildContext context) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestination(context);
+    }).toList();
+  }
+}
+
+class _PageView extends StatelessWidget {
+  final List<AdaptiveDestinationEnum> destinations;
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
+  final PageController pageController;
+  final OnOpenSearchPage onOpenSearchPage;
+  final OnCloseSearchPage onCloseSearchPage;
+  final OnDestinationSelected onDestinationSelected;
+  final OnClientSelectedSetting onClientSelected;
+  final ValueKey bottomNavigationKey;
+
+  final String? activeRoomId;
+
+  const _PageView({
+    this.activeRoomId,
+    required this.activeNavigationBar,
+    required this.pageController,
+    required this.onOpenSearchPage,
+    required this.onCloseSearchPage,
+    required this.onDestinationSelected,
+    required this.onClientSelected,
+    required this.destinations,
+    required this.bottomNavigationKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView(
+      controller: pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        _triggerPageViewBuilder(
+          navigatorBarType: AdaptiveDestinationEnum.contacts,
+          navigatorBarWidget: ContactsTab(
+            bottomNavigationBar: _bottomNavigationBarBuilder(context),
+          ),
+        ),
+        ChatList(
+          activeRoomId: activeRoomId,
+          bottomNavigationBar: _triggerPageViewBuilder(
+            navigatorBarType: AdaptiveDestinationEnum.rooms,
+            navigatorBarWidget: _bottomNavigationBarBuilder(context),
+          ),
+          onOpenSearchPage: onOpenSearchPage,
+        ),
+        _triggerPageViewBuilder(
+          navigatorBarType: AdaptiveDestinationEnum.settings,
+          navigatorBarWidget: Settings(
+            bottomNavigationBar: _bottomNavigationBarBuilder(context),
+          ),
+        ),
+        Search(
+          onCloseSearchPage: onCloseSearchPage,
+        ),
+      ],
+    );
   }
 
   Widget _triggerPageViewBuilder({
@@ -171,9 +223,35 @@ class AppScaffoldView extends StatelessWidget {
     );
   }
 
-  Widget _primaryNavigationBarBuilder(BuildContext context) {
-    final destinations = getNavigationDestinations(context);
+  List<NavigationDestination> getNavigationDestinations(BuildContext context) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestination(context);
+    }).toList();
+  }
 
+  int _getActiveBottomNavigationBarIndex() {
+    return destinations.indexOf(activeNavigationBar.value);
+  }
+}
+
+class _PrimaryNavigationBarBuilder extends StatelessWidget {
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
+
+  final OnDestinationSelected onDestinationSelected;
+
+  final OnClientSelectedSetting onClientSelected;
+
+  final List<NavigationDestination> destinations;
+
+  const _PrimaryNavigationBarBuilder({
+    required this.activeNavigationBar,
+    required this.onDestinationSelected,
+    required this.onClientSelected,
+    required this.destinations,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return AdaptiveScaffoldPrimaryNavigation(
       selectedIndex: activeNavigationBar.value.index,
       getNavigationRailDestinations: destinations
@@ -182,11 +260,5 @@ class AppScaffoldView extends StatelessWidget {
       onDestinationSelected: onDestinationSelected,
       onSelected: (object) => onClientSelected(object, context),
     );
-  }
-
-  List<NavigationDestination> getNavigationDestinations(BuildContext context) {
-    return destinations.map((destination) {
-      return destination.getNavigationDestination(context);
-    }).toList();
   }
 }

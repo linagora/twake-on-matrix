@@ -22,206 +22,183 @@ class ChatListBodyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (TwakeThemes.isColumnMode(context) &&
-            TwakeThemes.getDisplayNavigationRail(context)) ...[
-          Container(
-            color: Theme.of(context).dividerColor,
-            width: 1,
+    return GestureDetector(
+      onTap: FocusManager.instance.primaryFocus?.unfocus,
+      excludeFromSemantics: true,
+      behavior: HitTestBehavior.translucent,
+      child: PageTransitionSwitcher(
+        transitionBuilder: (
+          Widget child,
+          Animation<double> primaryAnimation,
+          Animation<double> secondaryAnimation,
+        ) {
+          return SharedAxisTransition(
+            animation: primaryAnimation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.vertical,
+            fillColor: Theme.of(context).scaffoldBackgroundColor,
+            child: child,
+          );
+        },
+        child: StreamBuilder(
+          key: ValueKey(
+            controller.client.userID.toString() +
+                controller.activeFilter.toString() +
+                controller.activeSpaceId.toString(),
           ),
-        ],
-        Expanded(
-          child: GestureDetector(
-            onTap: FocusManager.instance.primaryFocus?.unfocus,
-            excludeFromSemantics: true,
-            behavior: HitTestBehavior.translucent,
-            child: PageTransitionSwitcher(
-              transitionBuilder: (
-                Widget child,
-                Animation<double> primaryAnimation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return SharedAxisTransition(
-                  animation: primaryAnimation,
-                  secondaryAnimation: secondaryAnimation,
-                  transitionType: SharedAxisTransitionType.vertical,
-                  fillColor: Theme.of(context).scaffoldBackgroundColor,
-                  child: child,
-                );
-              },
-              child: StreamBuilder(
-                key: ValueKey(
-                  controller.client.userID.toString() +
-                      controller.activeFilter.toString() +
-                      controller.activeSpaceId.toString(),
-                ),
-                stream: controller.client.onSync.stream
-                    .where((s) => s.hasRoomUpdate)
-                    .rateLimit(const Duration(seconds: 1)),
-                builder: (context, _) {
-                  if (controller.activeFilter == ActiveFilter.spaces) {
-                    return SpaceView(
-                      controller,
-                      scrollController: controller.scrollController,
-                      key: Key(controller.activeSpaceId ?? 'Spaces'),
-                    );
-                  }
-                  if (controller.waitForFirstSync &&
-                      controller.client.prevBatch != null) {
-                    if (controller.chatListBodyIsEmpty) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+          stream: controller.client.onSync.stream
+              .where((s) => s.hasRoomUpdate)
+              .rateLimit(const Duration(seconds: 1)),
+          builder: (context, _) {
+            if (controller.activeFilter == ActiveFilter.spaces) {
+              return SpaceView(
+                controller,
+                scrollController: controller.scrollController,
+                key: Key(controller.activeSpaceId ?? 'Spaces'),
+              );
+            }
+            if (controller.waitForFirstSync &&
+                controller.client.prevBatch != null) {
+              if (controller.chatListBodyIsEmpty) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: ChatListBodyViewStyle.paddingIconSkeletons,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Padding(
-                            padding: ChatListBodyViewStyle.paddingIconSkeletons,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  ImagePaths.icSkeletons,
-                                ),
-                              ],
-                            ),
+                          SvgPicture.asset(
+                            ImagePaths.icSkeletons,
                           ),
-                          Padding(
-                            padding: ChatListBodyViewStyle.paddingOwnProfile,
-                            child: FutureBuilder<Profile?>(
-                              future: controller.client
-                                  .fetchOwnProfile(getFromRooms: false),
-                              builder: (context, snapshotProfile) {
-                                if (snapshotProfile.connectionState !=
-                                    ConnectionState.done) {
-                                  return const SizedBox();
-                                }
-                                final name =
-                                    snapshotProfile.data?.displayName ?? '👋';
-                                return Column(
-                                  children: [
-                                    Text(
-                                      L10n.of(context)!.welcomeToTwake(name),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Padding(
-                                      padding: ChatListBodyViewStyle
-                                          .paddingTextStartNewChatMessage,
-                                      child: Text(
-                                        L10n.of(context)!.startNewChatMessage,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                    return SingleChildScrollView(
-                      controller: controller.scrollController,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const ConnectionStatusHeader(),
-                          AnimatedContainer(
-                            height: ChatListBodyViewStyle.heightIsTorBrowser(
-                              controller.isTorBrowser,
-                            ),
-                            duration: TwakeThemes.animationDuration,
-                            curve: TwakeThemes.animationCurve,
-                            clipBehavior: Clip.hardEdge,
-                            decoration: const BoxDecoration(),
-                            child: Material(
-                              color: Theme.of(context).colorScheme.surface,
-                              child: ListTile(
-                                leading: const Icon(Icons.vpn_key),
-                                title: Text(L10n.of(context)!.dehydrateTor),
-                                subtitle:
-                                    Text(L10n.of(context)!.dehydrateTorLong),
-                                trailing:
-                                    const Icon(Icons.chevron_right_outlined),
-                                onTap: controller.dehydrate,
-                              ),
-                            ),
-                          ),
-                          if (!controller.filteredRoomsForPinIsEmpty)
-                            ValueListenableBuilder(
-                              valueListenable:
-                                  controller.expandRoomsForPinNotifier,
-                              builder: (context, isExpanded, child) {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ExpandableTitleBuilder(
-                                      title: L10n.of(context)!.countPinChat(
-                                        controller.filteredRoomsForPin.length,
-                                      ),
-                                      isExpanded: isExpanded,
-                                      onTap: controller
-                                          .expandRoomsForPinNotifier.toggle,
-                                    ),
-                                    if (isExpanded) child!,
-                                  ],
-                                );
-                              },
-                              child: ChatListViewBuilder(
-                                controller: controller,
-                                rooms: controller.filteredRoomsForPin,
-                              ),
-                            ),
-                          if (!controller.filteredRoomsForAllIsEmpty)
-                            ValueListenableBuilder(
-                              valueListenable:
-                                  controller.expandRoomsForAllNotifier,
-                              builder: (context, isExpanded, child) {
-                                return Padding(
-                                  padding: ChatListBodyViewStyle
-                                      .paddingTopExpandableTitleBuilder,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      ExpandableTitleBuilder(
-                                        title: L10n.of(context)!.countAllChat(
-                                          controller.filteredRoomsForAll.length,
-                                        ),
-                                        isExpanded: isExpanded,
-                                        onTap: controller
-                                            .expandRoomsForAllNotifier.toggle,
-                                      ),
-                                      if (isExpanded) child!,
-                                    ],
-                                  ),
-                                );
-                              },
-                              child: ChatListViewBuilder(
-                                controller: controller,
-                                rooms: controller.filteredRoomsForAll,
-                              ),
-                            ),
                         ],
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-          ),
+                    ),
+                    Padding(
+                      padding: ChatListBodyViewStyle.paddingOwnProfile,
+                      child: FutureBuilder<Profile?>(
+                        future: controller.client
+                            .fetchOwnProfile(getFromRooms: false),
+                        builder: (context, snapshotProfile) {
+                          if (snapshotProfile.connectionState !=
+                              ConnectionState.done) {
+                            return const SizedBox();
+                          }
+                          final name =
+                              snapshotProfile.data?.displayName ?? '👋';
+                          return Column(
+                            children: [
+                              Text(
+                                L10n.of(context)!.welcomeToTwake(name),
+                                style: Theme.of(context).textTheme.titleLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                              Padding(
+                                padding: ChatListBodyViewStyle
+                                    .paddingTextStartNewChatMessage,
+                                child: Text(
+                                  L10n.of(context)!.startNewChatMessage,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return SingleChildScrollView(
+                controller: controller.scrollController,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ConnectionStatusHeader(),
+                    AnimatedContainer(
+                      height: ChatListBodyViewStyle.heightIsTorBrowser(
+                        controller.isTorBrowser,
+                      ),
+                      duration: TwakeThemes.animationDuration,
+                      curve: TwakeThemes.animationCurve,
+                      clipBehavior: Clip.hardEdge,
+                      decoration: const BoxDecoration(),
+                      child: Material(
+                        color: Theme.of(context).colorScheme.surface,
+                        child: ListTile(
+                          leading: const Icon(Icons.vpn_key),
+                          title: Text(L10n.of(context)!.dehydrateTor),
+                          subtitle: Text(L10n.of(context)!.dehydrateTorLong),
+                          trailing: const Icon(Icons.chevron_right_outlined),
+                          onTap: controller.dehydrate,
+                        ),
+                      ),
+                    ),
+                    if (!controller.filteredRoomsForPinIsEmpty)
+                      ValueListenableBuilder(
+                        valueListenable: controller.expandRoomsForPinNotifier,
+                        builder: (context, isExpanded, child) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ExpandableTitleBuilder(
+                                title: L10n.of(context)!.countPinChat(
+                                  controller.filteredRoomsForPin.length,
+                                ),
+                                isExpanded: isExpanded,
+                                onTap:
+                                    controller.expandRoomsForPinNotifier.toggle,
+                              ),
+                              if (isExpanded) child!,
+                            ],
+                          );
+                        },
+                        child: ChatListViewBuilder(
+                          controller: controller,
+                          rooms: controller.filteredRoomsForPin,
+                        ),
+                      ),
+                    if (!controller.filteredRoomsForAllIsEmpty)
+                      ValueListenableBuilder(
+                        valueListenable: controller.expandRoomsForAllNotifier,
+                        builder: (context, isExpanded, child) {
+                          return Padding(
+                            padding: ChatListBodyViewStyle
+                                .paddingTopExpandableTitleBuilder,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ExpandableTitleBuilder(
+                                  title: L10n.of(context)!.countAllChat(
+                                    controller.filteredRoomsForAll.length,
+                                  ),
+                                  isExpanded: isExpanded,
+                                  onTap: controller
+                                      .expandRoomsForAllNotifier.toggle,
+                                ),
+                                if (isExpanded) child!,
+                              ],
+                            ),
+                          );
+                        },
+                        child: ChatListViewBuilder(
+                          controller: controller,
+                          rooms: controller.filteredRoomsForAll,
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
-      ],
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -55,6 +56,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   final groupNameFocusNode = FocusNode();
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
+
+  final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   String groupName = "";
 
@@ -168,6 +171,10 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
+          if (responsiveUtils.isDesktop(context) ||
+              responsiveUtils.isTablet(context)) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
           _goToRoom(success);
         }
       },
