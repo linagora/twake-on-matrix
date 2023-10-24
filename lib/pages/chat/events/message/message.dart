@@ -14,12 +14,15 @@ import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -229,7 +232,8 @@ class Message extends StatelessWidget {
                                                       bottom: 4.0,
                                                     ),
                                                     child: Text(
-                                                      displayName,
+                                                      displayName
+                                                          .shortenDisplayName(),
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .labelMedium
@@ -240,6 +244,9 @@ class Message extends StatelessWidget {
                                                                 .colorScheme
                                                                 .primary,
                                                           ),
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.clip,
                                                     ),
                                                   );
                                                 },
@@ -256,6 +263,18 @@ class Message extends StatelessWidget {
                                                       : 8,
                                                 ),
                                                 child: IntrinsicWidth(
+                                                  stepWidth:
+                                                      _getSizeMessageBubbleWidth(
+                                                    context,
+                                                    maxWidth:
+                                                        availableBubbleContraints
+                                                            .maxWidth,
+                                                    ownMessage: ownMessage,
+                                                    hideDisplayName:
+                                                        hideDisplayName(
+                                                      ownMessage,
+                                                    ),
+                                                  ),
                                                   child: Column(
                                                     mainAxisSize:
                                                         MainAxisSize.min,
@@ -707,6 +726,82 @@ class Message extends StatelessWidget {
     }
 
     return currentEvent.senderId != comparedEvent.senderId;
+  }
+
+  TextPainter _getSizeDisplayName(
+    BuildContext context,
+    double maxWidth,
+  ) {
+    return TextPainter(
+      text: TextSpan(
+        text: event.senderFromMemoryOrFallback
+            .calcDisplayname()
+            .shortenDisplayName(),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.primary,
+            ),
+      ),
+      maxLines: 2,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: maxWidth);
+  }
+
+  TextPainter _getSizeMessageText(
+    BuildContext context,
+    double maxWidth,
+  ) {
+    return TextPainter(
+      text: TextSpan(
+        text: event.calcLocalizedBodyFallback(
+          MatrixLocals(L10n.of(context)!),
+          hideReply: true,
+        ),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.primary,
+            ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: maxWidth);
+  }
+
+  double? _getSizeMessageBubbleWidth(
+    BuildContext context, {
+    required double maxWidth,
+    bool ownMessage = false,
+    bool hideDisplayName = false,
+  }) {
+    final isNotSupportCalcSize = {
+      MessageTypes.File,
+      MessageTypes.Image,
+      MessageTypes.Video,
+    }.contains(event.messageType);
+
+    if (ownMessage || hideDisplayName) {
+      return null;
+    }
+
+    if (isNotSupportCalcSize) {
+      return null;
+    }
+    final sizeWidthDisplayName = _getSizeDisplayName(
+      context,
+      maxWidth,
+    ).width;
+
+    final sizeWidthMessageText = _getSizeMessageText(
+      context,
+      maxWidth,
+    ).width;
+
+    if (sizeWidthDisplayName > sizeWidthMessageText) {
+      return sizeWidthDisplayName;
+    } else {
+      return sizeWidthMessageText;
+    }
   }
 }
 
