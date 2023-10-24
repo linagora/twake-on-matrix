@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
+import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -33,6 +34,14 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
         '/rooms/newprivatechat/newgroup/newgroupinfo',
         extra: contactsList.toSet(),
       );
-    } else {}
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return NewGroupChatInfo(contactsList: contactsList.toSet());
+          },
+        ),
+      );
+    }
   }
 }
