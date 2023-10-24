@@ -5,13 +5,10 @@ import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
-import 'package:fluffychat/pages/new_group/new_group.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -80,28 +77,21 @@ class ChatListView extends StatelessWidget {
               LogicalKeyboardKey.controlLeft,
               LogicalKeyboardKey.keyN,
             },
-            onKeysPressed: () => controller.onFloatingButtonTap(),
+            onKeysPressed: () => controller.goToNewPrivateChatMobile(),
             helpLabel: L10n.of(context)!.newChat,
-            child: responsiveUtils.isDesktop(context) ||
-                    responsiveUtils.isTablet(context)
+            child: responsiveUtils.isTwoColumnLayout(context)
                 ? MenuAnchor(
                     menuChildren: [
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.chat),
                         child: Text(L10n.of(context)!.newDirectMessage),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const NewPrivateChat(),
-                          ),
-                        ),
+                        onPressed: () =>
+                            controller.goToNewPrivateChatTwoColumnMode(),
                       ),
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.group),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const NewGroup(),
-                          ),
-                        ),
+                        onPressed: () =>
+                            controller.goToNewGroupChatTwoColumnMode(),
                         child: Text(L10n.of(context)!.newChat),
                       ),
                     ],
@@ -119,7 +109,7 @@ class ChatListView extends StatelessWidget {
                 : TwakeFloatingActionButton(
                     icon: Icons.mode_edit_outline_outlined,
                     size: ChatListViewStyle.editIconSize,
-                    onTap: () => context.go('/rooms/newprivatechat'),
+                    onTap: controller.goToNewPrivateChatMobile,
                   ),
           );
         },
