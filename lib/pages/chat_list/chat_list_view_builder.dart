@@ -24,36 +24,42 @@ class ChatListViewBuilder extends StatelessWidget {
         return ValueListenableBuilder(
           valueListenable: controller.selectModeNotifier,
           builder: (context, _, __) {
-            return ChatListItem(
-              rooms[index],
-              key: Key('chat_list_item_${rooms[index].id}'),
-              isEnableSelectMode: controller.isSelectMode,
-              onTap: controller.isSelectMode
-                  ? () => controller.toggleSelection(rooms[index].id)
-                  : null,
-              onSecondaryTap: () => controller.handleContextMenuAction(
-                context,
-                rooms[index],
-              ),
-              onLongPress: () => controller.onLongPressChatListItem(
-                rooms[index],
-              ),
-              checkBoxWidget: ValueListenableBuilder(
-                valueListenable: controller.conversationSelectionNotifier,
-                builder: (context, conversationSelection, __) {
-                  final conversation = conversationSelection.firstWhereOrNull(
-                    (conversation) =>
-                        conversation.roomId.contains(rooms[index].id),
-                  );
-                  return Checkbox(
-                    value: conversation?.isSelected == true,
-                    onChanged: (_) {
-                      controller.toggleSelection(rooms[index].id);
+            return ValueListenableBuilder(
+              valueListenable: controller.widget.activeRoomIdNotifier,
+              builder: (context, activeRoomId, child) {
+                return ChatListItem(
+                  rooms[index],
+                  key: Key('chat_list_item_${rooms[index].id}'),
+                  isEnableSelectMode: controller.isSelectMode,
+                  onTap: controller.isSelectMode
+                      ? () => controller.toggleSelection(rooms[index].id)
+                      : null,
+                  onSecondaryTap: () => controller.handleContextMenuAction(
+                    context,
+                    rooms[index],
+                  ),
+                  onLongPress: () => controller.onLongPressChatListItem(
+                    rooms[index],
+                  ),
+                  checkBoxWidget: ValueListenableBuilder(
+                    valueListenable: controller.conversationSelectionNotifier,
+                    builder: (context, conversationSelection, __) {
+                      final conversation =
+                          conversationSelection.firstWhereOrNull(
+                        (conversation) =>
+                            conversation.roomId.contains(rooms[index].id),
+                      );
+                      return Checkbox(
+                        value: conversation?.isSelected == true,
+                        onChanged: (_) {
+                          controller.toggleSelection(rooms[index].id);
+                        },
+                      );
                     },
-                  );
-                },
-              ),
-              activeChat: controller.activeRoomId == rooms[index].id,
+                  ),
+                  activeChat: activeRoomId == rooms[index].id,
+                );
+              },
             );
           },
         );

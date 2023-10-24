@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +78,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   }) async {
     final userId = Matrix.of(context).client.userID;
     final profile =
-        await Matrix.of(context).client.getProfileFromUserId(userId!);
+        await Matrix.of(context).client.getProfileFromUserId(userId ?? '');
     final newContactsList = {
       PresentationContact(
         displayName:
@@ -171,9 +172,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          if (responsiveUtils.isDesktop(context) ||
-              responsiveUtils.isTablet(context)) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+          if (responsiveUtils.isTwoColumnLayout(context)) {
+            context.popInnerAll();
           }
           _goToRoom(success);
         }
@@ -328,12 +328,11 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   bool get isCreatingRoom {
     return createRoomStateNotifier.value.fold(
-          (failure) => false,
-          (success) =>
-              success is UploadContentLoading ||
-              success is CreateNewGroupChatLoading,
-        ) ??
-        false;
+      (failure) => false,
+      (success) =>
+          success is UploadContentLoading ||
+          success is CreateNewGroupChatLoading,
+    );
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter/scheduler.dart';
@@ -116,6 +117,7 @@ class SearchController extends State<Search>
   void goToRoomsShellBranch() {
     textEditingController.clear();
     widget.onCloseSearchPage?.call();
+    context.popInnerAll();
   }
 
   @override
