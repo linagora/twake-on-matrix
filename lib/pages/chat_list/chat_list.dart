@@ -22,6 +22,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -117,7 +118,7 @@ class ChatListController extends State<ChatList>
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
   List<Room> get spaces => client.rooms.where((r) => r.isSpace).toList();
 
-  String? get activeRoomId => widget.activeRoomId;
+  String? activeRoomId;
 
   bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
 
@@ -407,16 +408,19 @@ class ChatListController extends State<ChatList>
             await client.encryption?.crossSigning.isCached() == false ||
             client.isUnknownSession && mounted) {
           final recoveryWords = await _getRecoveryWords();
+          final appContext = TwakeApp.routerKey.currentContext;
+          final chatListContext = context;
           if (recoveryWords != null) {
             await TomBootstrapDialog(
               client: client,
               recoveryWords: recoveryWords,
-            ).show(context);
+            ).show(appContext ?? chatListContext);
           } else {
             Logs().d(
               'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap',
             );
-            await BootstrapDialog(client: client).show(context);
+            await BootstrapDialog(client: client)
+                .show(appContext ?? chatListContext);
           }
         }
       } else {
@@ -710,11 +714,16 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  void onFloatingButtonTap() {
+    context.go('/rooms/newprivatechat');
+  }
+
   @override
   void initState() {
     if (kIsWeb) {
       BrowserContextMenu.disableContextMenu();
     }
+    activeRoomId = widget.activeRoomId;
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
@@ -738,6 +747,7 @@ class ChatListController extends State<ChatList>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    activeRoomId = Matrix.of(context).activeRoomId;
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
