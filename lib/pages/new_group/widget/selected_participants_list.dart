@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list_style.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                   padding: SelectedParticipantsListStyle.paddingAll,
                   child: Wrap(
                     spacing: 8.0,
+                    runSpacing: PlatformInfos.isWeb ? 4.0 : 0.0,
                     children: contactsNotifier.contactsList.map((contact) {
                       return InputChip(
                         shape: RoundedRectangleBorder(
