@@ -4,6 +4,7 @@
         "type": "text",
         "placeholders": {}
     },
+<<<<<<< HEAD
     "yes": "Tá",
     "@yes": {
         "type": "text",
