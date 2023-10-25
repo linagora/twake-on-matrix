@@ -5,6 +5,7 @@
         "type": "text",
         "placeholders": {}
     },
+<<<<<<< HEAD
     "accept": "Accetta",
     "@accept": {
         "type": "text",
