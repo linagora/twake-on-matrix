@@ -2901,5 +2901,7 @@
     "placeholders": {
       "senderName": {}
     }
-  }
+  },
+  "basicInfo": "",
+  "@basicInfo": {}
 }
