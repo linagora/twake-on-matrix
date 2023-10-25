@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
@@ -67,6 +68,8 @@ class Message extends StatelessWidget {
   /// Indicates wheither the user may use a mouse instead
   /// of touchscreen.
   static bool useMouse = false;
+
+  static const int maxCharactersDisplayNameBubble = 68;
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +243,10 @@ class Message extends StatelessWidget {
                                                     ),
                                                     child: Text(
                                                       displayName
-                                                          .shortenDisplayName(),
+                                                          .shortenDisplayName(
+                                                        maxCharacters:
+                                                            maxCharactersDisplayNameBubble,
+                                                      ),
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .labelMedium
@@ -743,7 +749,9 @@ class Message extends StatelessWidget {
       text: TextSpan(
         text: event.senderFromMemoryOrFallback
             .calcDisplayname()
-            .shortenDisplayName(),
+            .shortenDisplayName(
+              maxCharacters: maxCharactersDisplayNameBubble,
+            ),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(
                 context,
@@ -787,13 +795,10 @@ class Message extends StatelessWidget {
       MessageTypes.Video,
     }.contains(event.messageType);
 
-    if (ownMessage || hideDisplayName) {
+    if (ownMessage || hideDisplayName || isNotSupportCalcSize) {
       return null;
     }
 
-    if (isNotSupportCalcSize) {
-      return null;
-    }
     final sizeWidthDisplayName = _getSizeDisplayName(
       context,
       maxWidth,
@@ -804,11 +809,7 @@ class Message extends StatelessWidget {
       maxWidth,
     ).width;
 
-    if (sizeWidthDisplayName > sizeWidthMessageText) {
-      return sizeWidthDisplayName;
-    } else {
-      return sizeWidthMessageText;
-    }
+    return max<double>(sizeWidthDisplayName, sizeWidthMessageText);
   }
 }
 

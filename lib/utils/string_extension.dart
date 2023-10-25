@@ -291,8 +291,10 @@ extension StringCasingExtension on String {
     return result;
   }
 
-  String shortenDisplayName() {
-    if (length < 68) return this;
-    return substring(0, 68);
+  String shortenDisplayName({
+    required int maxCharacters,
+  }) {
+    if (length < maxCharacters) return this;
+    return substring(0, maxCharacters);
   }
 }
