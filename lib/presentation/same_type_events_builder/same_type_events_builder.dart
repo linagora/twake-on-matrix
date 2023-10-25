@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 class SameTypeEventsBuilder extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
+  final ScrollController? scrollController;
 
   /// The builder must return a sliver.
   final Widget Function(BuildContext, Either<Failure, Success>, Widget?)
@@ -16,11 +17,13 @@ class SameTypeEventsBuilder extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.builder,
+    this.scrollController,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         ValueListenableBuilder(
           valueListenable: controller.refreshing,

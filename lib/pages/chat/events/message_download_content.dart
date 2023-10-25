@@ -1,30 +1,26 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
 import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-
 import 'package:matrix/matrix.dart';
-
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 
 class MessageDownloadContent extends StatelessWidget {
   final Event event;
-  final void Function(Event event) onFileTapped;
+  final void Function(Event event)? onFileTapped;
 
-  final ValueNotifier<Either<Failure, Success>>? searchStatus;
+  final ValueNotifier<String>? highlightNotifier;
+  final String? highlightText;
 
   const MessageDownloadContent(
     this.event, {
     Key? key,
-    required this.onFileTapped,
-    this.searchStatus,
+    this.onFileTapped,
+    this.highlightNotifier,
+    this.highlightText,
   }) : super(key: key);
 
   @override
@@ -37,9 +33,11 @@ class MessageDownloadContent extends StatelessWidget {
       'filename: $filename, filetype: $filetype, sizeString: $sizeString, content: ${event.content}',
     );
     return InkWell(
-      onTap: () async {
-        onFileTapped(event);
-      },
+      onTap: onFileTapped != null
+          ? () async {
+              onFileTapped?.call(event);
+            }
+          : null,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: ShapeDecoration(
@@ -64,21 +62,21 @@ class MessageDownloadContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  if (searchStatus != null) ...[
+                  if (highlightNotifier != null) ...[
                     ValueListenableBuilder(
-                      valueListenable: searchStatus!,
-                      builder: (context, searchStatusValue, child) {
-                        final success = searchStatusValue
-                            .getSuccessOrNull<ChatRoomSearchSuccess>();
-                        final searchKeyword = success?.keyword ?? '';
-                        return _FileNameWithSearchText(
+                      valueListenable: highlightNotifier!,
+                      builder: (context, highlightText, child) {
+                        return _FileNameText(
                           filename: filename,
-                          searchKeyword: searchKeyword,
+                          highlightText: highlightText,
                         );
                       },
                     ),
                   ] else ...[
-                    _FileNameText(filename: filename),
+                    _FileNameText(
+                      filename: filename,
+                      highlightText: highlightText,
+                    ),
                   ],
                   Row(
                     children: [
@@ -102,14 +100,14 @@ class MessageDownloadContent extends StatelessWidget {
   }
 }
 
-class _FileNameWithSearchText extends StatelessWidget {
-  const _FileNameWithSearchText({
+class _FileNameText extends StatelessWidget {
+  const _FileNameText({
     required this.filename,
-    required this.searchKeyword,
+    this.highlightText,
   });
 
   final String filename;
-  final String searchKeyword;
+  final String? highlightText;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +115,7 @@ class _FileNameWithSearchText extends StatelessWidget {
       maxLines: 1,
       text: TextSpan(
         children: filename.buildHighlightTextSpans(
-          searchKeyword,
+          highlightText ?? '',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onBackground,
             fontWeight: FontWeight.bold,
@@ -128,27 +126,6 @@ class _FileNameWithSearchText extends StatelessWidget {
             backgroundColor: CssColor.fromCss('gold'),
           ),
         ),
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-class _FileNameText extends StatelessWidget {
-  const _FileNameText({
-    required this.filename,
-  });
-
-  final String filename;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      filename,
-      maxLines: 1,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.onBackground,
-        fontWeight: FontWeight.bold,
       ),
       overflow: TextOverflow.ellipsis,
     );

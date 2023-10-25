@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
-import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
+import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 class SameTypeEventsBuilderController {
   final Future<Timeline> Function() getTimeline;
@@ -35,10 +34,11 @@ class SameTypeEventsBuilderController {
     this.limit,
   });
 
-  Future refresh() async {
-    if (refreshing.value) return;
+  Future refresh({bool force = false}) async {
+    if (refreshing.value && !force) return;
     refreshing.value = true;
     final timeline = await getTimeline();
+    await _searchSubscription?.cancel();
     _searchSubscription = _searchInteractor
         .execute(
           timeline: timeline,
@@ -64,6 +64,7 @@ class SameTypeEventsBuilderController {
     }
     loadingMore.value = true;
     final timeline = await getTimeline();
+    await _searchSubscription?.cancel();
     _searchSubscription = _searchInteractor
         .execute(
           timeline: timeline,
@@ -77,6 +78,10 @@ class SameTypeEventsBuilderController {
           (event) => _onLoadMoreSuccess(event, lastSuccess),
           onDone: _onLoadMoreDone,
         );
+  }
+
+  void clear() {
+    eventsNotifier.value = Right(TimelineSearchEventInitial());
   }
 
   void _onRefreshDone() {
