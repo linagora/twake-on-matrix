@@ -8,8 +8,12 @@ import 'package:flutter/material.dart';
 class InnerRoutes {
   InnerRoutes._();
 
-  static final GlobalKey<NavigatorState> innerNavigatorKey = GlobalKey(
+  static final GlobalKey<NavigatorState> innerNavigatorOneColumnKey = GlobalKey(
     debugLabel: 'innerNavigatorGlobalKey',
+  );
+
+  static final GlobalKey<NavigatorState> innerNavigatorTwoColumnKey = GlobalKey(
+    debugLabel: 'innerNavigatorTwoColumnKey',
   );
 
   static Route<dynamic> routes(String? routerName, {Object? arguments}) {

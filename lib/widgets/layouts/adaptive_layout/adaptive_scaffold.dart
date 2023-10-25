@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -32,6 +33,8 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   final PageController pageController =
       PageController(initialPage: 1, keepPage: true);
 
+  final responsiveUtils = ResponsiveUtils();
+
   List<AdaptiveDestinationEnum> get destinations => [
         AdaptiveDestinationEnum.contacts,
         AdaptiveDestinationEnum.rooms,
@@ -46,7 +49,9 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   }
 
   void clearNavigatorScreen() {
-    final navigatorContext = InnerRoutes.innerNavigatorKey.currentContext;
+    final navigatorContext = responsiveUtils.isTwoColumnLayout(context)
+        ? InnerRoutes.innerNavigatorTwoColumnKey.currentContext
+        : InnerRoutes.innerNavigatorOneColumnKey.currentContext;
     if (navigatorContext != null) {
       navigatorContext.popInnerAll();
     }
