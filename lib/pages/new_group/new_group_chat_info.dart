@@ -84,7 +84,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         displayName:
             isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
         matrixId: Matrix.of(context).client.userID,
-      )
+      ),
     };
     newContactsList.addAll(getSelectedValidContacts(contactsList ?? {}));
     return newContactsList;
@@ -172,7 +172,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          if (responsiveUtils.isTwoColumnLayout(context)) {
+          if (!PlatformInfos.isMobile) {
             context.popInnerAll();
           }
           _goToRoom(success);
