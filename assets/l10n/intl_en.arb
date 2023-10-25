@@ -2906,9 +2906,11 @@
     "newDirectMessage": "New direct message",
     "countPinnedMessage": "{count, plural, =0{Pinned Message} other{Pinned Message #{count}}}",
     "@countPinnedMessage": {
-      "type": "text",
-      "placeholders": {
-        "count": {}
-      }
-    }
+        "type": "text",
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "copyImageSuccess": "Image copied to clipboard",
+    "@copyImageSuccess": {}
 }
