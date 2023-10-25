@@ -41,7 +41,12 @@ dependencies:
   flutter_olm: ^1.2.0
   flutter_openssl_crypto: ^0.1.0
   flutter_ringtone_player: ^3.1.1
-  flutter_secure_storage: ^7.0.1
+  # FIXME: change to pub.dev package when the fix for keychain iOS releases
+  flutter_secure_storage:
+    git:
+      url: https://github.com/mogol/flutter_secure_storage.git
+      path: flutter_secure_storage
+      ref: develop
   flutter_svg: ^0.22.0
   # FIXME: change to upstream when https://github.com/AbdulRahmanAlHamali/flutter_typeahead/pull/528 is merge
   flutter_typeahead:
@@ -246,6 +251,12 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/matrix_link_text.git
       ref: twake-supported
+  # FIXME: remove it when the fix in flutter_secure_storage for iOS releases
+  flutter_secure_storage_platform_interface:
+    git:
+      url: https://github.com/mogol/flutter_secure_storage.git
+      path: flutter_secure_storage_platform_interface
+      ref: develop
 
 cider:
   link_template:
