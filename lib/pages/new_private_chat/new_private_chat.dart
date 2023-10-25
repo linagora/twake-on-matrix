@@ -1,4 +1,3 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
@@ -7,7 +6,7 @@ import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +28,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
   final isShowContactsNotifier = ValueNotifier(true);
   final scrollController = ScrollController();
 
-  final _responsiveUtil = getIt.get<ResponsiveUtils>();
-
   @override
   void initState() {
     super.initState();
@@ -47,7 +44,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
   }
 
   void goToNewGroupChat() {
-    if (_responsiveUtil.isTwoColumnLayout(context)) {
+    if (!PlatformInfos.isMobile) {
       context.pushInner('innernavigator/newgroup');
     } else {
       context.push('/rooms/newprivatechat/newgroup');

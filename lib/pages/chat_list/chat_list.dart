@@ -16,6 +16,7 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
@@ -714,16 +715,16 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void goToNewPrivateChatMobile() {
-    context.go('/rooms/newprivatechat');
+  void goToNewPrivateChat() {
+    if (PlatformInfos.isMobile) {
+      context.go('/rooms/newprivatechat');
+    } else {
+      context.pushInner('innernavigator/newprivatechat');
+    }
   }
 
   void goToNewGroupChatTwoColumnMode() {
     context.pushInner('innernavigator/newgroup');
-  }
-
-  void goToNewPrivateChatTwoColumnMode() {
-    context.pushInner('innernavigator/newprivatechat');
   }
 
   @override

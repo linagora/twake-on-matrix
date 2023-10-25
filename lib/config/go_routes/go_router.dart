@@ -17,6 +17,7 @@ import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
@@ -187,43 +188,46 @@ abstract class AppRoutes {
               ],
               redirect: loggedOutRedirect,
             ),
-            GoRoute(
-              path: 'newprivatechat',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const NewPrivateChat(),
-              ),
-              redirect: loggedOutRedirect,
-              routes: [
-                GoRoute(
-                  path: 'newgroup',
-                  pageBuilder: (context, state) => defaultPageBuilder(
+            if (PlatformInfos.isMobile)
+              GoRoute(
+                path: 'newprivatechat',
+                pageBuilder: (context, state) {
+                  return defaultPageBuilder(
                     context,
-                    const NewGroup(),
-                  ),
-                  routes: [
-                    GoRoute(
-                      path: 'newgroupinfo',
-                      pageBuilder: (context, state) {
-                        if (state.extra is Set<PresentationContact>) {
+                    const NewPrivateChat(),
+                  );
+                },
+                redirect: loggedOutRedirect,
+                routes: [
+                  GoRoute(
+                    path: 'newgroup',
+                    pageBuilder: (context, state) => defaultPageBuilder(
+                      context,
+                      const NewGroup(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'newgroupinfo',
+                        pageBuilder: (context, state) {
+                          if (state.extra is Set<PresentationContact>) {
+                            return defaultPageBuilder(
+                              context,
+                              NewGroupChatInfo(
+                                contactsList:
+                                    state.extra as Set<PresentationContact>,
+                              ),
+                            );
+                          }
                           return defaultPageBuilder(
                             context,
-                            NewGroupChatInfo(
-                              contactsList:
-                                  state.extra as Set<PresentationContact>,
-                            ),
+                            const NewGroupChatInfo(contactsList: {}),
                           );
-                        }
-                        return defaultPageBuilder(
-                          context,
-                          const NewGroupChatInfo(contactsList: {}),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             GoRoute(
               path: 'newgroup',
               pageBuilder: (context, state) => defaultPageBuilder(

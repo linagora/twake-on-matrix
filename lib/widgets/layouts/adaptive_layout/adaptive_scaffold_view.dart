@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
@@ -81,7 +82,7 @@ class AppScaffoldView extends StatelessWidget {
               },
             ),
           ],
-          if (responsiveUtils.isTwoColumnLayout(context)) ...[
+          if (!PlatformInfos.isMobile) ...[
             Expanded(
               child: ClipRRect(
                 borderRadius: AppScaffoldViewStyle.borderRadiusBody,
@@ -90,7 +91,9 @@ class AppScaffoldView extends StatelessWidget {
                     color: LinagoraRefColors.material().primary[100],
                   ),
                   child: Navigator(
-                    key: InnerRoutes.innerNavigatorKey,
+                    key: responsiveUtils.isTwoColumnLayout(context)
+                        ? InnerRoutes.innerNavigatorTwoColumnKey
+                        : InnerRoutes.innerNavigatorOneColumnKey,
                     initialRoute: 'innernavigator/rooms',
                     onGenerateRoute: (settings) {
                       if (settings.name == 'innernavigator/rooms') {
@@ -134,7 +137,7 @@ class AppScaffoldView extends StatelessWidget {
                 bottomNavigationKey: bottomNavigationKey,
               ),
             ),
-          ]
+          ],
         ],
       ),
     );

@@ -77,7 +77,7 @@ class ChatListView extends StatelessWidget {
               LogicalKeyboardKey.controlLeft,
               LogicalKeyboardKey.keyN,
             },
-            onKeysPressed: () => controller.goToNewPrivateChatMobile(),
+            onKeysPressed: () => controller.goToNewPrivateChat(),
             helpLabel: L10n.of(context)!.newChat,
             child: responsiveUtils.isTwoColumnLayout(context)
                 ? MenuAnchor(
@@ -85,8 +85,7 @@ class ChatListView extends StatelessWidget {
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.chat),
                         child: Text(L10n.of(context)!.newDirectMessage),
-                        onPressed: () =>
-                            controller.goToNewPrivateChatTwoColumnMode(),
+                        onPressed: () => controller.goToNewPrivateChat(),
                       ),
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.group),
@@ -109,7 +108,7 @@ class ChatListView extends StatelessWidget {
                 : TwakeFloatingActionButton(
                     icon: Icons.mode_edit_outline_outlined,
                     size: ChatListViewStyle.editIconSize,
-                    onTap: controller.goToNewPrivateChatMobile,
+                    onTap: controller.goToNewPrivateChat,
                   ),
           );
         },
