@@ -2901,5 +2901,7 @@
   "done": "",
   "@done": {},
   "getHelp": "",
-  "@getHelp": {}
+  "@getHelp": {},
+  "basicInfo": "",
+  "@basicInfo": {}
 }
