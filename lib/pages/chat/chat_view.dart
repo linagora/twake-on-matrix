@@ -4,7 +4,6 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
-import 'package:fluffychat/pages/chat/chat_search_bottom_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/pinned_events.dart';
@@ -152,45 +151,17 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     children: [
                       _buildLeading(context),
                       Expanded(
-                        child: ValueListenableBuilder(
-                          valueListenable: controller.isSearchingNotifier,
-                          builder: (context, isSearching, child) {
-                            if (isSearching) {
-                              return TextField(
-                                controller: controller.searchTextController,
-                                focusNode: controller.searchFocusNode,
-                                autofocus: true,
-                                onChanged: controller.onSearchChanged,
-                                decoration: InputDecoration(
-                                  hintText: L10n.of(context)!.search,
-                                  border: InputBorder.none,
-                                  suffixIcon: ValueListenableBuilder(
-                                    valueListenable:
-                                        controller.searchTextController,
-                                    builder: (context, value, child) => value
-                                            .text.isNotEmpty
-                                        ? IconButton(
-                                            onPressed: controller.clearSearch,
-                                            icon: const Icon(Icons.close),
-                                          )
-                                        : const SizedBox(),
-                                  ),
-                                ),
-                              );
-                            }
-                            return ChatAppBarTitle(
-                              selectedEvents: controller.selectedEvents,
-                              room: controller.room,
-                              isArchived: controller.isArchived,
-                              sendController: controller.sendController,
-                              connectivityResultStream: controller
-                                  .networkConnectionService
-                                  .getStreamInstance(),
-                              actions: _appBarActions(context),
-                              onPushDetails: controller.onPushDetails,
-                              roomName: controller.roomName,
-                            );
-                          },
+                        child: ChatAppBarTitle(
+                          selectedEvents: controller.selectedEvents,
+                          room: controller.room,
+                          isArchived: controller.isArchived,
+                          sendController: controller.sendController,
+                          connectivityResultStream: controller
+                              .networkConnectionService
+                              .getStreamInstance(),
+                          actions: _appBarActions(context),
+                          onPushDetails: controller.onPushDetails,
+                          roomName: controller.roomName,
                         ),
                       ),
                     ],
@@ -201,7 +172,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     Padding(
                       padding: ChatViewStyle.paddingTrailing(context),
                       child: IconButton(
-                        onPressed: controller.widget.toggleRightPanel,
+                        onPressed: controller.widget.toggleSearchPanel,
                         icon: const Icon(Icons.search),
                       ),
                     ),
@@ -270,9 +241,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             ),
                           ),
                           if (controller.room!.membership == Membership.invite)
-                            _inputMessageOrSearchBottomWidget(
-                              bottomSheetPadding,
-                            ),
+                            _inputMessageWidget(bottomSheetPadding),
                           if (controller.room!.canSendDefaultMessages &&
                               controller.room!.membership == Membership.join)
                             Container(
@@ -321,9 +290,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                                         ],
                                       ),
                                     )
-                                  : _inputMessageOrSearchBottomWidget(
-                                      bottomSheetPadding,
-                                    ),
+                                  : _inputMessageWidget(bottomSheetPadding),
                             ),
                         ],
                       ),
@@ -353,14 +320,6 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       ),
     );
   }
-
-  Widget _inputMessageOrSearchBottomWidget(double bottomSheetPadding) =>
-      ValueListenableBuilder(
-        valueListenable: controller.isSearchingNotifier,
-        builder: (context, isSearching, child) => isSearching
-            ? ChatSearchBottomView(controller: controller)
-            : _inputMessageWidget(bottomSheetPadding),
-      );
 
   Widget _inputMessageWidget(double bottomSheetPadding) {
     return Column(
@@ -406,14 +365,6 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     if (controller.responsive.isMobile(context)) {
       return _buildBackButton(context);
     }
-    return ValueListenableBuilder(
-      valueListenable: controller.isSearchingNotifier,
-      builder: (context, isSearching, child) {
-        if (isSearching) {
-          return _buildBackButton(context);
-        }
-        return const SizedBox.shrink();
-      },
-    );
+    return const SizedBox.shrink();
   }
 }

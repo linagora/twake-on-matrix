@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
@@ -21,11 +24,31 @@ class ChatAdaptiveScaffold extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ChatAdaptiveScaffold> createState() => _ChatAdaptiveScaffoldState();
+  State<ChatAdaptiveScaffold> createState() => ChatAdaptiveScaffoldController();
 }
 
-class _ChatAdaptiveScaffoldState extends State<ChatAdaptiveScaffold> {
+class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
   final showRightPanelNotifier = ValueNotifier(false);
+  final jumpToEventIdStream = StreamController<EventId>.broadcast();
+
+  void jumpToEventId(String eventId) {
+    jumpToEventIdStream.sink.add(eventId);
+  }
+
+  void toggleRightPanel({bool? forceValue}) {
+    if (forceValue != null) {
+      showRightPanelNotifier.value = forceValue;
+    } else {
+      showRightPanelNotifier.toggle();
+    }
+  }
+
+  @override
+  void dispose() {
+    jumpToEventIdStream.close();
+    showRightPanelNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +66,19 @@ class _ChatAdaptiveScaffoldState extends State<ChatAdaptiveScaffold> {
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
-                  builder: (_) => Stack(
-                    children: [
-                      body!,
+                  builder: (_) => Navigator(
+                    pages: [
+                      MaterialPage(
+                        child: body!,
+                      ),
                       if (showRightPanel)
-                        ChatSearch(
-                          roomId: widget.roomId,
-                          onBack: showRightPanelNotifier.toggle,
+                        MaterialPage(
+                          child: ChatSearch(
+                            roomId: widget.roomId,
+                            onBack: toggleRightPanel,
+                            jumpToEventId: jumpToEventId,
+                            isInStack: true,
+                          ),
                         ),
                     ],
                   ),
@@ -89,7 +118,9 @@ class _ChatAdaptiveScaffoldState extends State<ChatAdaptiveScaffold> {
                           borderRadius: BorderRadius.circular(16),
                           child: ChatSearch(
                             roomId: widget.roomId,
-                            onBack: showRightPanelNotifier.toggle,
+                            onBack: toggleRightPanel,
+                            jumpToEventId: jumpToEventId,
+                            isInStack: false,
                           ),
                         ),
                       ),
@@ -103,7 +134,8 @@ class _ChatAdaptiveScaffoldState extends State<ChatAdaptiveScaffold> {
         roomId: widget.roomId,
         shareFile: widget.shareFile,
         roomName: widget.roomName,
-        toggleRightPanel: () => showRightPanelNotifier.toggle(),
+        toggleSearchPanel: toggleRightPanel,
+        jumpToEventIdStream: jumpToEventIdStream,
       ),
     );
   }
