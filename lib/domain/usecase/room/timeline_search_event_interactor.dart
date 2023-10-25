@@ -14,16 +14,15 @@ class TimelineSearchEventInteractor {
     String? sinceEventId,
   }) async* {
     try {
-      final events = await timeline
-          .searchEvent(
-            searchFunc: searchFunc,
-            requestHistoryCount: requestHistoryCount,
-            maxHistoryRequests: maxHistoryRequests,
-            limit: limit,
-            sinceEventId: sinceEventId,
-          )
-          .last;
-      yield Right(TimelineSearchEventSuccess(events: events));
+      await for (final events in timeline.searchEvent(
+        searchFunc: searchFunc,
+        requestHistoryCount: requestHistoryCount,
+        maxHistoryRequests: maxHistoryRequests,
+        limit: limit,
+        sinceEventId: sinceEventId,
+      )) {
+        yield Right(TimelineSearchEventSuccess(events: List.from(events)));
+      }
     } catch (e) {
       yield Left(TimelineSearchEventFailure(exception: e));
     }

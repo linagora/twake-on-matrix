@@ -19,7 +19,6 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
-import 'package:fluffychat/pages/chat/chat_room_search_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
@@ -48,6 +47,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -78,14 +78,16 @@ class Chat extends StatefulWidget {
   final String roomId;
   final MatrixFile? shareFile;
   final String? roomName;
-  final VoidCallback? toggleRightPanel;
+  final void Function({bool? forceValue})? toggleSearchPanel;
+  final StreamController<EventId>? jumpToEventIdStream;
 
   const Chat({
     Key? key,
     required this.roomId,
     this.shareFile,
     this.roomName,
-    this.toggleRightPanel,
+    this.toggleSearchPanel,
+    this.jumpToEventIdStream,
   }) : super(key: key);
 
   @override
@@ -99,7 +101,6 @@ class ChatController extends State<Chat>
         SendFilesMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
-        ChatRoomSearchMixin,
         HandleVideoDownloadMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
@@ -144,10 +145,13 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
+  final highlightKeywordNotifier = ValueNotifier<String>('');
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
   bool currentlyTyping = false;
+
+  StreamSubscription<EventId>? _jumpToEventIdSubscription;
 
   void onDragEntered(_) => draggingNotifier.value = true;
 
@@ -266,7 +270,6 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    hideSearchKeyboardIfNeeded();
     setReadMarker();
     if (!scrollController.hasClients) return;
     if (scrollController.position.pixels ==
@@ -304,13 +307,10 @@ class ChatController extends State<Chat>
   void initState() {
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
+    _jumpToEventIdSubscription =
+        widget.jumpToEventIdStream?.stream.listen(scrollToEventId);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
-    initializeSearch(
-      getTimeline: () => timeline,
-      scrollToIndex: scrollToIndex,
-      historyCount: _loadHistoryCount,
-    );
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (room == null) {
@@ -389,10 +389,6 @@ class ChatController extends State<Chat>
   }
 
   void onBackPress() {
-    if (isSearchingNotifier.value) {
-      toggleSearch();
-      return;
-    }
     context.pop();
   }
 
@@ -445,8 +441,8 @@ class ChatController extends State<Chat>
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
-    disposeSearch();
     focusSuggestionController.dispose();
+    _jumpToEventIdSubscription?.cancel();
     super.dispose();
   }
 
@@ -1207,7 +1203,6 @@ class ChatController extends State<Chat>
   }
 
   void onSelectMessage(Event event) {
-    closeSearch();
     if (!event.redacted) {
       if (selectedEvents.contains(event)) {
         setState(
@@ -1578,7 +1573,7 @@ class ChatController extends State<Chat>
     if (result is ChatDetailsActions) {
       switch (result) {
         case ChatDetailsActions.search:
-          toggleSearch();
+          widget.toggleSearchPanel?.call(forceValue: true);
           break;
         default:
       }

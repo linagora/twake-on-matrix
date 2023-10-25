@@ -1,9 +1,8 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/chat_room_search_state.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
+import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
@@ -12,19 +11,17 @@ import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
-import 'package:fluffychat/pages/chat/events/event_video_player.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'audio_player.dart';
 import 'cute_events.dart';
 import 'html_message.dart';
@@ -114,7 +111,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                 MessageDownloadContent(
                   event,
                   onFileTapped: controller.onFileTapped,
-                  searchStatus: controller.searchStatus,
+                  highlightNotifier: controller.highlightKeywordNotifier,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -140,14 +137,12 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                 child: ValueListenableBuilder(
-                  valueListenable: controller.searchStatus,
-                  builder: (context, searchStatus, child) {
+                  valueListenable: controller.highlightKeywordNotifier,
+                  builder: (context, highlightText, child) {
                     return HtmlMessage(
                       event: event,
                       html: html,
-                      highlightText: searchStatus
-                          .getSuccessOrNull<ChatRoomSearchSuccess>()
-                          ?.keyword,
+                      highlightText: highlightText,
                       defaultTextStyle:
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 // color: textColor,
@@ -234,11 +229,8 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                     );
 
                 return ValueListenableBuilder(
-                  valueListenable: controller.searchStatus,
-                  builder: (context, searchStatus, child) {
-                    final highlightText = searchStatus
-                        .getSuccessOrNull<ChatRoomSearchSuccess>()
-                        ?.keyword;
+                  valueListenable: controller.highlightKeywordNotifier,
+                  builder: (context, highlightText, child) {
                     return TwakeLinkPreview(
                       text: text,
                       textStyle:
@@ -263,7 +255,7 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                       textSpanBuilder: (text, textStyle, recognizer) =>
                           TextSpan(
                         children: text?.buildHighlightTextSpans(
-                          highlightText ?? '',
+                          highlightText,
                           style: textStyle,
                           highlightStyle: textStyle?.copyWith(
                             backgroundColor: CssColor.fromCss('gold'),
