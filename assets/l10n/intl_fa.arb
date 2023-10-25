@@ -2900,5 +2900,7 @@
   "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "basicInfo": "",
+  "@basicInfo": {}
 }
