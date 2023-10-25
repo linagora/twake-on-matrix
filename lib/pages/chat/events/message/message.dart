@@ -123,6 +123,12 @@ class Message extends StatelessWidget {
             MessageTypes.Audio,
           }.contains(event.messageType);
 
+          final hideDisplayNameInBubbleChat = {
+            MessageTypes.Video,
+            MessageTypes.Image,
+            MessageTypes.File,
+          }.contains(event.messageType);
+
           final rowChildren = <Widget>[
             _placeHolderWidget(
               isSameSender(previousEvent, event),
@@ -212,7 +218,8 @@ class Message extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        hideDisplayName(ownMessage)
+                                        hideDisplayName(ownMessage) ||
+                                                hideDisplayNameInBubbleChat
                                             ? const SizedBox(height: 0)
                                             : FutureBuilder<User?>(
                                                 future: event.fetchSenderUser(),
