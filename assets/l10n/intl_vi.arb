@@ -2898,5 +2898,7 @@
   "settingsChatFoldersSubtitle": "",
   "@settingsChatFoldersSubtitle": {},
   "done": "",
-  "@done": {}
+  "@done": {},
+  "basicInfo": "",
+  "@basicInfo": {}
 }
