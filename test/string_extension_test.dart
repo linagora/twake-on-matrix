@@ -280,4 +280,54 @@ void main() {
       expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
     });
   });
+
+  group("substringToHighlight tests", () {
+    test('substringToHighlight returns the correct substring', () {
+      const text = "Hello, world!";
+      const highlightText = "world";
+      final result = text.substringToHighlight(highlightText);
+
+      expect(result, equals("...world!"));
+    });
+
+    test('substringToHighlight returns the correct substring with prefix', () {
+      const text = "Hello, world!";
+      const highlightText = "world";
+      const prefixLength = 3;
+      final result =
+          text.substringToHighlight(highlightText, prefixLength: prefixLength);
+
+      expect(result, equals("...o, world!"));
+    });
+
+    test(
+        'substringToHighlight returns an empty string if highlightText is empty',
+        () {
+      const text = "Hello, world!";
+      const highlightText = "";
+      final result = text.substringToHighlight(highlightText);
+
+      expect(result, equals("Hello, world!"));
+    });
+
+    test(
+        'substringToHighlight returns an empty string if highlightText is not found',
+        () {
+      const text = "Hello, world!";
+      const highlightText = "foo";
+      final result = text.substringToHighlight(highlightText);
+
+      expect(result, equals("Hello, world!"));
+    });
+
+    test(
+        'substringToHighlight returns the full string if highlightText is the same as text',
+        () {
+      const text = "Hello, world!";
+      const highlightText = "Hello, world!";
+      final result = text.substringToHighlight(highlightText);
+
+      expect(result, equals(text));
+    });
+  });
 }

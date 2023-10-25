@@ -1,13 +1,12 @@
-import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/domain/model/extensions/string_extension.dart';
+import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/size_string.dart';
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {
@@ -52,7 +51,10 @@ extension LocalizedBody on Event {
       [MessageTypes.Image, MessageTypes.Video].contains(messageType);
 
   bool isContains(String? searchTerm) =>
-      body.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+      plaintextBody.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+
+  bool get isSearchable =>
+      messageType == MessageTypes.Text || messageType == MessageTypes.File;
 
   String? get firstValidUrl =>
       messageType == MessageTypes.Text ? text.getFirstValidUrl() : null;
