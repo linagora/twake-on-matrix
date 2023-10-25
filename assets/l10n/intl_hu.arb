@@ -2901,5 +2901,7 @@
   "getHelp": "",
   "@getHelp": {},
   "indexedDbErrorTitle": "",
-  "@indexedDbErrorTitle": {}
+  "@indexedDbErrorTitle": {},
+  "basicInfo": "",
+  "@basicInfo": {}
 }
