@@ -8,7 +8,7 @@ class SelectedParticipantsListStyle {
 
   static const EdgeInsetsDirectional labelChipPadding =
       EdgeInsetsDirectional.only(
-    start: 8.0,
+    start: 0.0,
     top: 2.0,
     bottom: 2.0,
   );
