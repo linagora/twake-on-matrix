@@ -15,14 +15,15 @@ import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_room_search_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
@@ -449,6 +450,9 @@ class ChatController extends State<Chat>
   }
 
   final TextEditingController sendController = TextEditingController();
+
+  final FocusSuggestionController focusSuggestionController =
+      FocusSuggestionController();
 
   void setSendingClient(Client? c) {
     // first cancle typing with the old sending client

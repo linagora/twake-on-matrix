@@ -160,6 +160,7 @@ class ChatInputRow extends StatelessWidget {
       focusNode: controller.inputFocus,
       keyboardFocusNode: controller.keyboardFocus,
       controller: controller.sendController,
+      focusSuggestionController: controller.focusSuggestionController,
       decoration: InputDecoration(
         hintText: L10n.of(context)!.chatMessage,
         hintMaxLines: 1,
