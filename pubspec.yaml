@@ -48,7 +48,7 @@ dependencies:
     git:
       url: https://github.com/linagora/flutter_typeahead.git
       ref: twake-supported
-  flutter_web_auth: ^0.5.0
+  flutter_web_auth_2: ^3.0.2
   # flutter_webrtc: # Until https://github.com/flutter-webrtc/flutter-webrtc/issues/1212 is fixed
   #   git: https://github.com/radzio-it/flutter-webrtc.git
   flutter_webrtc: ^0.9.31
