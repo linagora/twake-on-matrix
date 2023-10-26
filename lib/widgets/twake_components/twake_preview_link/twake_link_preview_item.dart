@@ -34,7 +34,6 @@ class TwakeLinkPreviewItem extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (urlPreviewPresentation.imageUri != null)
             ClipRRect(
