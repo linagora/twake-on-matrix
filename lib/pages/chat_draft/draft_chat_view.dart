@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -19,7 +20,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 
 class DraftChatView extends StatelessWidget {
   const DraftChatView({
@@ -131,6 +131,8 @@ class DraftChatView extends StatelessWidget {
                                         decoration: DraftChatViewStyle
                                             .bottomBarInputDecoration(context),
                                         onChanged: controller.onInputBarChanged,
+                                        focusSuggestionController: controller
+                                            .focusSuggestionController,
                                       ),
                                     ),
                                     KeyBoardShortcuts(

@@ -1,21 +1,21 @@
+import 'package:emojis/emoji.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/context_menu_input_bar.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
+import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
-
-import 'package:emojis/emoji.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
-
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 
 class InputBar extends StatelessWidget with PasteImageMixin {
   final Room? room;
@@ -27,6 +27,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final FocusNode? focusNode;
   final FocusNode keyboardFocusNode;
   final TextEditingController? controller;
+  final FocusSuggestionController focusSuggestionController;
   final InputDecoration? decoration;
   final ValueChanged<String>? onChanged;
   final bool? autofocus;
@@ -46,6 +47,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.autofocus,
     this.textInputAction,
     this.readOnly = false,
+    required this.focusSuggestionController,
     Key? key,
   }) : super(key: key);
 
@@ -225,7 +227,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     return ret;
   }
 
-  void insertSuggestion(_, Map<String, String?> suggestion) {
+  void insertSuggestion(Map<String, String?> suggestion) {
     final replaceText =
         controller!.text.substring(0, controller!.selection.baseOffset);
     var startText = '';
@@ -309,12 +311,24 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     }
   }
 
+  void _onEnter(String text) {
+    if (focusSuggestionController.suggestions.isNotEmpty) {
+      insertSuggestion(
+        focusSuggestionController
+            .suggestions[focusSuggestionController.currentIndex.value],
+      );
+    } else {
+      onSubmitted?.call(text);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InputBarShortcuts(
       controller: controller,
+      focusSuggestionController: focusSuggestionController,
       room: room,
-      onSubmitted: onSubmitted,
+      onEnter: _onEnter,
       handlePaste: () => handlePaste(context),
       child: ContextMenuInputBar(
         handlePaste: () => handlePaste(context),
@@ -385,18 +399,30 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                 : null,
             textCapitalization: TextCapitalization.sentences,
           ),
-          suggestionsCallback: getSuggestions,
+          suggestionsCallback: (text) {
+            final suggestions = getSuggestions(text);
+            focusSuggestionController.suggestions = suggestions;
+            return suggestions;
+          },
           itemBuilder: (context, suggestion) => SuggestionTile(
             suggestion: suggestion,
             client: Matrix.of(context).client,
           ),
-          onSuggestionSelected: (Map<String, String?> suggestion) =>
-              insertSuggestion(context, suggestion),
+          onSuggestionSelected: insertSuggestion,
           errorBuilder: (BuildContext context, Object? error) => Container(),
           loadingBuilder: (BuildContext context) => Container(),
           // fix loading briefly flickering a dark box
           noItemsFoundBuilder: (BuildContext context) =>
               Container(), // fix loading briefly showing no suggestions
+          layoutArchitecture: (items, scrollController) => FocusSuggestionList(
+            items: items,
+            scrollController: scrollController,
+            focusSuggestionController: focusSuggestionController,
+          ),
+          suggestionsBoxDecoration: SuggestionsBoxDecoration(
+            borderRadius:
+                BorderRadius.circular(InputBarStyle.suggestionBorderRadius),
+          ),
         ),
       ),
     );
@@ -431,6 +457,7 @@ class SuggestionTile extends StatelessWidget {
       final command = suggestion['name']!;
       final hint = commandHint(L10n.of(context)!, command);
       return Tooltip(
+        height: InputBarStyle.suggestionSize,
         message: hint,
         waitDuration: const Duration(days: 1), // don't show on hover
         child: Container(
@@ -456,6 +483,7 @@ class SuggestionTile extends StatelessWidget {
     if (suggestion['type'] == 'emoji') {
       final label = suggestion['label']!;
       return Tooltip(
+        height: InputBarStyle.suggestionSize,
         message: label,
         waitDuration: const Duration(days: 1), // don't show on hover
         child: Container(
@@ -467,6 +495,7 @@ class SuggestionTile extends StatelessWidget {
     if (suggestion['type'] == 'emote') {
       return Container(
         padding: const EdgeInsetsDirectional.all(4.0),
+        height: InputBarStyle.suggestionSize,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -474,8 +503,8 @@ class SuggestionTile extends StatelessWidget {
               uri: suggestion['mxc'] is String
                   ? Uri.parse(suggestion['mxc'] ?? '')
                   : null,
-              width: InputBarStyle.suggestionSize,
-              height: InputBarStyle.suggestionSize,
+              width: InputBarStyle.suggestionAvatarSize,
+              height: InputBarStyle.suggestionAvatarSize,
             ),
             const SizedBox(width: 6),
             Text(suggestion['name']!),
@@ -490,7 +519,9 @@ class SuggestionTile extends StatelessWidget {
                             suggestion.tryGet<String>('pack_avatar_url') ?? '',
                           ),
                           name: suggestion.tryGet<String>('pack_display_name'),
-                          size: InputBarStyle.suggestionSize * 0.9,
+                          size: InputBarStyle.suggestionAvatarSize * 0.9,
+                          fontSize:
+                              InputBarStyle.suggestionAvatarFontSize * 0.9,
                           client: client,
                         )
                       : Text(suggestion['pack_display_name']!),
@@ -505,6 +536,7 @@ class SuggestionTile extends StatelessWidget {
       final url = Uri.parse(suggestion['avatar_url'] ?? '');
       return Container(
         padding: const EdgeInsetsDirectional.all(4.0),
+        height: InputBarStyle.suggestionSize,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -512,7 +544,8 @@ class SuggestionTile extends StatelessWidget {
               mxContent: url,
               name: suggestion.tryGet<String>('displayname') ??
                   suggestion.tryGet<String>('mxid'),
-              size: InputBarStyle.suggestionSize,
+              size: InputBarStyle.suggestionAvatarSize,
+              fontSize: InputBarStyle.suggestionAvatarFontSize,
               client: client,
             ),
             const SizedBox(width: 6),
@@ -532,7 +565,16 @@ class SuggestionTile extends StatelessWidget {
 }
 
 class InputBarStyle {
-  static const double suggestionSize = 30;
+  static const double suggestionAvatarSize = 30;
+
+  static const double suggestionAvatarFontSize = 15;
+
+  static const double suggestionSize = 50;
+
+  static const double suggestionBorderRadius = 12.0;
+
+  static const double suggestionListPadding = 8.0;
+
   static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
         fontSize: 15,
         color: Theme.of(context).brightness == Brightness.light
