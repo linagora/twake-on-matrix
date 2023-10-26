@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_e
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
@@ -20,13 +21,13 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -51,6 +52,9 @@ class DraftChatController extends State<DraftChat>
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
+
+  final FocusSuggestionController focusSuggestionController =
+      FocusSuggestionController();
 
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
