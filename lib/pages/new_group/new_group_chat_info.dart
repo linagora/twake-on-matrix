@@ -30,18 +30,13 @@ class NewGroupChatInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: Padding(
-        padding: NewGroupChatInfoStyle.padding,
-        child: LayoutBuilder(
-          builder: (context, constraint) {
-            return ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: IntrinsicHeight(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: SliverToBoxAdapter(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
                       padding: NewGroupChatInfoStyle.profilePadding,
@@ -78,17 +73,32 @@ class NewGroupChatInfo extends StatelessWidget {
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
                     const SizedBox(height: 16),
-                    Expanded(
-                      child: ExpansionParticipantsList(
-                        newGroupController: newGroupController,
-                        contactsList: contactsList,
-                      ),
+                    _EncryptionSettingTile(
+                      enableEncryptionNotifier:
+                          newGroupController.enableEncryptionNotifier,
+                      onChanged: (value) {
+                        newGroupController.toggleEnableEncryption();
+                      },
                     ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ];
+        },
+        body: Padding(
+          padding: NewGroupChatInfoStyle.padding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: ExpansionParticipantsList(
+                  newGroupController: newGroupController,
+                  contactsList: contactsList,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
@@ -316,6 +326,99 @@ class _AvatarForWebBuilder extends StatelessWidget {
       child: Icon(
         Icons.camera_alt_outlined,
         color: Theme.of(context).colorScheme.surface,
+      ),
+    );
+  }
+}
+
+class _EncryptionSettingTile extends StatelessWidget {
+  final ValueNotifier<bool> enableEncryptionNotifier;
+
+  final ValueChanged<bool?>? onChanged;
+
+  const _EncryptionSettingTile({
+    required this.enableEncryptionNotifier,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: NewGroupChatInfoStyle.screenPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: NewGroupChatInfoStyle.topScreenPadding,
+            child: Icon(
+              Icons.lock,
+            ),
+          ),
+          const SizedBox(
+            width: 8.0,
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: NewGroupChatInfoStyle.topScreenPadding,
+                  child: Text(
+                    L10n.of(context)!.enableEncryption,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                ValueListenableBuilder<bool>(
+                  valueListenable: enableEncryptionNotifier,
+                  builder: (context, isEnable, child) {
+                    return Column(
+                      children: [
+                        Text(
+                          L10n.of(context)!.encryptionMessage,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: LinagoraRefColors.material().neutral[40],
+                              ),
+                        ),
+                        AnimatedSize(
+                          alignment: Alignment.topCenter,
+                          duration: const Duration(milliseconds: 50),
+                          child: isEnable
+                              ? Text(
+                                  L10n.of(context)!.encryptionWarning,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                      ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            width: 12,
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: enableEncryptionNotifier,
+            builder: (context, isEnable, child) {
+              return Checkbox(
+                value: isEnable,
+                onChanged: (value) => onChanged?.call(value),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
