@@ -1049,14 +1049,22 @@ packages:
       url: "https://github.com/linagora/flutter_typeahead.git"
     source: git
     version: "4.8.0"
-  flutter_web_auth:
+  flutter_web_auth_2:
     dependency: "direct main"
     description:
-      name: flutter_web_auth
-      sha256: a69fa8f43b9e4d86ac72176bf747b735e7b977dd7cf215076d95b87cb05affdd
+      name: flutter_web_auth_2
+      sha256: "8a255c782b7a15fcf35e423babb04ebad2840b30eddced4e51c65e3fe8e26d96"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "3.0.2"
+  flutter_web_auth_2_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_web_auth_2_platform_interface
+      sha256: "9124824cbd21e12680bf58190e27b77f251c897e80ec81cd557ec1fde9aecabf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -2999,6 +3007,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  window_to_front:
+    dependency: transitive
+    description:
+      name: window_to_front
+      sha256: "7aef379752b7190c10479e12b5fd7c0b9d92adc96817d9e96c59937929512aee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   wkt_parser:
     dependency: transitive
     description:
