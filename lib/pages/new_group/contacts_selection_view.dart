@@ -37,9 +37,6 @@ class ContactsSelectionView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          SelectedParticipantsList(
-            contactsSelectionController: controller,
-          ),
           Expanded(
             child: ValueListenableBuilder<bool>(
               valueListenable: controller
@@ -60,6 +57,11 @@ class ContactsSelectionView extends StatelessWidget {
                       onRefresh: controller.fetchContacts,
                       onLoading: controller.loadMoreContacts,
                       slivers: [
+                        SliverToBoxAdapter(
+                          child: SelectedParticipantsList(
+                            contactsSelectionController: controller,
+                          ),
+                        ),
                         ContactsSelectionList(
                           contactsNotifier: controller.contactsNotifier!,
                           selectedContactsMapNotifier:
