@@ -54,6 +54,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
   final haveGroupNameNotifier = ValueNotifier(false);
   final groupNameFocusNode = FocusNode();
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
+  final enableEncryptionNotifier = ValueNotifier(false);
 
   String groupName = "";
 
@@ -153,7 +154,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
             .map((contact) => contact.matrixId)
             .whereNotNull()
             .toList(),
-        enableEncryption: true,
+        enableEncryption: enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
       ),
     );
@@ -370,6 +371,10 @@ class NewGroupController extends ContactsSelectionController<NewGroup>
               success is CreateNewGroupChatLoading,
         ) ??
         false;
+  }
+
+  void toggleEnableEncryption() {
+    enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
   }
 
   @override
