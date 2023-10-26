@@ -2,17 +2,24 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
 
 class SelectedContactsMapChangeNotifier extends ChangeNotifier {
-  final Map<PresentationContact, ValueNotifier<bool>> selectedContactsMap = {};
+  final selectedContactsMap = <PresentationContact, ValueNotifier<bool>>{};
   final haveSelectedContactsNotifier = ValueNotifier(false);
+  Set<PresentationContact> _selectedContactsList = {};
 
-  Iterable<PresentationContact> get contactsList => selectedContactsMap.keys
-      .where((contact) => selectedContactsMap[contact]?.value ?? false);
+  Iterable<PresentationContact> get contactsList {
+    return _selectedContactsList;
+  }
 
   void onContactTileTap(BuildContext context, PresentationContact contact) {
     final oldVal = selectedContactsMap[contact]?.value ?? false;
     final newVal = !oldVal;
     selectedContactsMap.putIfAbsent(contact, () => ValueNotifier(newVal));
     selectedContactsMap[contact]!.value = newVal;
+    if (newVal) {
+      _selectedContactsList.add(contact);
+    } else {
+      _selectedContactsList.remove(contact);
+    }
     notifyListeners();
     haveSelectedContactsNotifier.value = contactsList.isNotEmpty;
   }
@@ -26,6 +33,15 @@ class SelectedContactsMapChangeNotifier extends ChangeNotifier {
     if (selectedContactsMap.containsKey(contact)) {
       selectedContactsMap[contact]!.value = false;
     }
+    _selectedContactsList.remove(contact);
+    notifyListeners();
+  }
+
+  void unselectAllContacts() {
+    for (final contact in selectedContactsMap.keys) {
+      selectedContactsMap[contact]!.value = false;
+    }
+    _selectedContactsList = {};
     notifyListeners();
   }
 
