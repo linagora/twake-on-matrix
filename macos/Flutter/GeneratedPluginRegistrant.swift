@@ -18,7 +18,7 @@ import firebase_core
 import flutter_app_badger
 import flutter_local_notifications
 import flutter_secure_storage_macos
-import flutter_web_auth
+import flutter_web_auth_2
 import flutter_webrtc
 import geolocator_apple
 import irondash_engine_context
@@ -40,6 +40,7 @@ import url_launcher_macos
 import video_compress
 import wakelock_macos
 import wakelock_plus
+import window_to_front
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AudioSessionPlugin.register(with: registry.registrar(forPlugin: "AudioSessionPlugin"))
@@ -55,7 +56,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterAppBadgerPlugin.register(with: registry.registrar(forPlugin: "FlutterAppBadgerPlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
   FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
-  FlutterWebAuthPlugin.register(with: registry.registrar(forPlugin: "FlutterWebAuthPlugin"))
+  FlutterWebAuth2Plugin.register(with: registry.registrar(forPlugin: "FlutterWebAuth2Plugin"))
   FlutterWebRTCPlugin.register(with: registry.registrar(forPlugin: "FlutterWebRTCPlugin"))
   GeolocatorPlugin.register(with: registry.registrar(forPlugin: "GeolocatorPlugin"))
   IrondashEngineContextPlugin.register(with: registry.registrar(forPlugin: "IrondashEngineContextPlugin"))
@@ -77,4 +78,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   VideoCompressPlugin.register(with: registry.registrar(forPlugin: "VideoCompressPlugin"))
   WakelockMacosPlugin.register(with: registry.registrar(forPlugin: "WakelockMacosPlugin"))
   WakelockPlusMacosPlugin.register(with: registry.registrar(forPlugin: "WakelockPlusMacosPlugin"))
+  WindowToFrontPlugin.register(with: registry.registrar(forPlugin: "WindowToFrontPlugin"))
 }
