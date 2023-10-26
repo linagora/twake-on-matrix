@@ -290,4 +290,11 @@ extension StringCasingExtension on String {
     );
     return result;
   }
+
+  String shortenDisplayName({
+    required int maxCharacters,
+  }) {
+    if (length < maxCharacters) return this;
+    return substring(0, maxCharacters);
+  }
 }

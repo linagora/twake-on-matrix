@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -20,10 +21,12 @@ class Pill extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
+  static const int maxCharactersDisplayNameForPill = 28;
+
   @override
   Widget build(BuildContext context) {
     final user = chatController.room?.getUser(identifier);
-    final displayname = user?.displayName ?? identifier;
+    final displayName = user?.displayName ?? identifier;
     final avatarUrl =
         user?.avatarUrl?.getDownloadLink(Matrix.of(context).client);
     final avatarSize = DefaultTextStyle.of(context).style.fontSize ?? 14.0;
@@ -50,7 +53,16 @@ class Pill extends StatelessWidget {
                 backgroundImage:
                     CachedNetworkImageProvider(avatarUrl!.toString()),
               ),
-            Text(displayname, style: const TextStyle(color: Colors.white)),
+            Flexible(
+              child: Text(
+                displayName.shortenDisplayName(
+                  maxCharacters: maxCharactersDisplayNameForPill,
+                ),
+                style: const TextStyle(color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+              ),
+            ),
           ],
         ),
       ),
