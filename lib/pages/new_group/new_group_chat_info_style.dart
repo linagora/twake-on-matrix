@@ -34,4 +34,10 @@ class NewGroupChatInfoStyle {
 
   static const EdgeInsetsDirectional profilePadding =
       EdgeInsetsDirectional.only(top: 16.0);
+
+  static const EdgeInsetsDirectional screenPadding =
+      EdgeInsetsDirectional.only(start: 8.0, bottom: 8.0, end: 4.0);
+
+  static const EdgeInsetsDirectional topScreenPadding =
+      EdgeInsetsDirectional.only(top: 8.0);
 }

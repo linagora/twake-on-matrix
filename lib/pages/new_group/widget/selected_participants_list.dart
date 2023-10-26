@@ -141,7 +141,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             );
           },
