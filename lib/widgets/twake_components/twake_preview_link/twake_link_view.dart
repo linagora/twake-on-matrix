@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/clean_rich_text.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view_style.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,13 @@ class TwakeLinkView extends StatelessWidget {
       return _buildWidgetNoPreview(context);
     }
 
-    return _buildWidgetWithPreview(context, firstValidUrl!);
+    return GestureDetector(
+      onTap: () {
+        if (firstValidUrl == null) return;
+        UrlLauncher(context, firstValidUrl).launchUrl();
+      },
+      child: _buildWidgetWithPreview(context, firstValidUrl!),
+    );
   }
 
   Widget _buildWidgetWithPreview(BuildContext context, String url) {
@@ -45,7 +52,10 @@ class TwakeLinkView extends StatelessWidget {
       children: [
         previewItemWidget,
         const SizedBox(height: 2),
-        _buildCleanRichText(context),
+        Padding(
+          padding: TwakeLinkViewStyle.paddingWidgetNoPreview,
+          child: _buildCleanRichText(context),
+        ),
       ],
     );
   }
