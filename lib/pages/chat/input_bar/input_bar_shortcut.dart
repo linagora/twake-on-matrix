@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/utils/one_time_debouncer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -14,7 +15,9 @@ class InputBarShortcuts extends StatelessWidget {
 
   final VoidCallback handlePaste;
 
-  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onEnter;
+
+  final FocusSuggestionController? focusSuggestionController;
 
   InputBarShortcuts({
     super.key,
@@ -22,7 +25,8 @@ class InputBarShortcuts extends StatelessWidget {
     required this.handlePaste,
     this.room,
     this.controller,
-    this.onSubmitted,
+    this.onEnter,
+    this.focusSuggestionController,
   });
 
   final _debouncer = OneTimeDebouncer(milliseconds: 50);
@@ -55,7 +59,17 @@ class InputBarShortcuts extends StatelessWidget {
         const SingleActivator(
           flutter.LogicalKeyboardKey.enter,
         ): () {
-          onSubmitted?.call(controller?.text ?? '');
+          onEnter?.call(controller?.text ?? '');
+        },
+        const SingleActivator(
+          flutter.LogicalKeyboardKey.arrowUp,
+        ): () {
+          focusSuggestionController?.up();
+        },
+        const SingleActivator(
+          flutter.LogicalKeyboardKey.arrowDown,
+        ): () {
+          focusSuggestionController?.down();
         },
       },
       child: child,
