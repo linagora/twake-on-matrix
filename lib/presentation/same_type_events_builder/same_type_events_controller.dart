@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -22,6 +24,8 @@ class SameTypeEventsBuilderController {
   final refreshing = ValueNotifier(false);
   final loadingMore = ValueNotifier(false);
 
+  StreamSubscription? _searchSubscription;
+
   final _searchInteractor = getIt.get<TimelineSearchEventInteractor>();
   var _isEnd = true;
 
@@ -35,7 +39,7 @@ class SameTypeEventsBuilderController {
     if (refreshing.value) return;
     refreshing.value = true;
     final timeline = await getTimeline();
-    _searchInteractor
+    _searchSubscription = _searchInteractor
         .execute(
           timeline: timeline,
           searchFunc: searchFunc,
@@ -60,7 +64,7 @@ class SameTypeEventsBuilderController {
     }
     loadingMore.value = true;
     final timeline = await getTimeline();
-    _searchInteractor
+    _searchSubscription = _searchInteractor
         .execute(
           timeline: timeline,
           searchFunc: searchFunc,
@@ -109,5 +113,12 @@ class SameTypeEventsBuilderController {
 
   void _onLoadMoreDone() {
     loadingMore.value = false;
+  }
+
+  void dispose() {
+    eventsNotifier.dispose();
+    refreshing.dispose();
+    loadingMore.dispose();
+    _searchSubscription?.cancel();
   }
 }
