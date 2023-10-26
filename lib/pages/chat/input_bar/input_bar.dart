@@ -516,7 +516,13 @@ class SuggestionTile extends StatelessWidget {
               client: client,
             ),
             const SizedBox(width: 6),
-            Text(suggestion['displayname'] ?? suggestion['mxid']!),
+            Flexible(
+              child: Text(
+                suggestion['displayname'] ?? suggestion['mxid']!,
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+              ),
+            ),
           ],
         ),
       );
