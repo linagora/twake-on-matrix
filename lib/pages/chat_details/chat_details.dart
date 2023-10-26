@@ -126,7 +126,7 @@ class ChatDetailsController extends State<ChatDetails>
       limit: _linksFetchLimit,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      nestedScrollViewState.currentState!.innerController.addListener(
+      nestedScrollViewState.currentState?.innerController.addListener(
         _listenerInnerController,
       );
       _refreshDataInTabviewInit();
@@ -139,6 +139,9 @@ class ChatDetailsController extends State<ChatDetails>
   void dispose() {
     tabController?.dispose();
     muteNotifier.dispose();
+    mediaListController?.dispose();
+    linksListController?.dispose();
+    nestedScrollViewState.currentState?.innerController.dispose();
     super.dispose();
   }
 
