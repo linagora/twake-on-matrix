@@ -446,6 +446,7 @@ class ChatController extends State<Chat>
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
     disposeSearch();
+    focusSuggestionController.dispose();
     super.dispose();
   }
 
