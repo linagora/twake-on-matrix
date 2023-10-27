@@ -121,6 +121,7 @@ class DraftChatController extends State<DraftChat>
     sendController.dispose();
     forwardListController.dispose();
     inputFocus.removeListener(_inputFocusListener);
+    focusSuggestionController.dispose();
     super.dispose();
   }
 

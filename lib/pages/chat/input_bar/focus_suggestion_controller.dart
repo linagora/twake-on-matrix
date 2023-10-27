@@ -25,4 +25,8 @@ class FocusSuggestionController {
       currentIndex.value = 0;
     }
   }
+
+  void dispose() {
+    currentIndex.dispose();
+  }
 }
