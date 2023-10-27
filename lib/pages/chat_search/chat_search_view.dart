@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_style.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -17,6 +18,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -52,7 +54,10 @@ class ChatSearchView extends StatelessWidget {
                   final success = eventsState
                       .getSuccessOrNull<TimelineSearchEventSuccess>();
                   final events = success?.events ?? [];
-                  return SliverList.separated(
+                  if (events.isEmpty && controller.eventsController != null) {
+                    return _EmptyView(controller: controller);
+                  }
+                  return SliverList.builder(
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
@@ -62,10 +67,43 @@ class ChatSearchView extends StatelessWidget {
                         onTap: controller.onEventTap,
                       );
                     },
-                    separatorBuilder: (context, index) => const Divider(),
                   );
                 },
               ),
+      ),
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  const _EmptyView({
+    required this.controller,
+  });
+
+  final ChatSearchController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: ValueListenableBuilder(
+        valueListenable: controller.eventsController!.emptyNotifier,
+        builder: (context, isEmpty, child) => isEmpty
+            ? Padding(
+                padding: ChatSearchStyle.emptyPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(L10n.of(context)!.noResultsFound),
+                    const SizedBox(height: ChatSearchStyle.emptyGap),
+                    Center(
+                      child: SvgPicture.asset(
+                        ImagePaths.icNoResultsFound,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : const SizedBox(),
       ),
     );
   }
@@ -88,10 +126,13 @@ class _SearchItem extends StatelessWidget {
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
         final user = snapshot.data ?? event.senderFromMemoryOrFallback;
-        return InkWell(
-          onTap: () => onTap(event),
-          child: Padding(
-            padding: ChatSearchStyle.itemPadding,
+        return Padding(
+          padding: ChatSearchStyle.itemMargin,
+          child: InkWell(
+            hoverColor: LinagoraRefColors.material().primary[99],
+            borderRadius:
+                BorderRadius.circular(ChatSearchStyle.itemBorderRadius),
+            onTap: () => onTap(event),
             child: Row(
               children: [
                 Padding(
@@ -102,39 +143,54 @@ class _SearchItem extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              user.id == Matrix.of(context).client.userID
-                                  ? L10n.of(context)!.you
-                                  : user.calcDisplayname(),
-                              maxLines: 1,
+                  child: Container(
+                    margin: ChatSearchStyle.itemPadding,
+                    height: ChatSearchStyle.itemHeight,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: LinagoraRefColors.material().tertiary[60] ??
+                              Colors.black,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                user.id == Matrix.of(context).client.userID
+                                    ? L10n.of(context)!.you
+                                    : user.calcDisplayname(),
+                                maxLines: 1,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      color: LinagoraSysColors.material()
+                                          .onSurface,
+                                    ),
+                              ),
+                            ),
+                            Text(
+                              event.originServerTs.localizedTimeShort(context),
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodyLarge
+                                  .labelMedium
                                   ?.copyWith(
                                     color:
                                         LinagoraSysColors.material().onSurface,
                                   ),
                             ),
-                          ),
-                          Text(
-                            event.originServerTs.localizedTimeShort(context),
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
-                          ),
-                        ],
-                      ),
-                      _MessageContent(event: event, searchWord: searchWord),
-                    ],
+                          ],
+                        ),
+                        _MessageContent(event: event, searchWord: searchWord),
+                      ],
+                    ),
                   ),
                 ),
               ],

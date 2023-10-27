@@ -22,6 +22,7 @@ class SameTypeEventsBuilderController {
   );
   final refreshing = ValueNotifier(false);
   final loadingMore = ValueNotifier(false);
+  final emptyNotifier = ValueNotifier(false);
 
   StreamSubscription? _searchSubscription;
 
@@ -36,6 +37,7 @@ class SameTypeEventsBuilderController {
 
   Future refresh({bool force = false}) async {
     if (refreshing.value && !force) return;
+    emptyNotifier.value = false;
     refreshing.value = true;
     final timeline = await getTimeline();
     await _searchSubscription?.cancel();
@@ -62,6 +64,7 @@ class SameTypeEventsBuilderController {
         _isEnd) {
       return;
     }
+    emptyNotifier.value = false;
     loadingMore.value = true;
     final timeline = await getTimeline();
     await _searchSubscription?.cancel();
@@ -81,12 +84,20 @@ class SameTypeEventsBuilderController {
   }
 
   void clear() {
+    _searchSubscription?.cancel();
+    refreshing.value = false;
+    emptyNotifier.value = false;
     eventsNotifier.value = Right(TimelineSearchEventInitial());
   }
 
   void _onRefreshDone() {
     Logs().v('SameTypeEventsListController::refresh done');
     refreshing.value = false;
+    emptyNotifier.value = eventsNotifier.value
+            .getSuccessOrNull<TimelineSearchEventSuccess>()
+            ?.events
+            .isEmpty ??
+        false;
   }
 
   void _onRefreshSuccess(Either<Failure, Success> event) {

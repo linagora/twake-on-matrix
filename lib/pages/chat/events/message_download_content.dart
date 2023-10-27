@@ -34,7 +34,7 @@ class MessageDownloadContent extends StatelessWidget {
     );
     return InkWell(
       onTap: onFileTapped != null
-          ? () async {
+          ? () {
               onFileTapped?.call(event);
             }
           : null,

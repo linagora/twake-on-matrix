@@ -35,6 +35,8 @@ class ImagePaths {
   static String get icErrorPage => _getImagePath('ic_error_page.svg');
   static String get icErrorPageBackground =>
       _getImagePath('ic_error_page_background.svg');
+  static String get icNoResultsFound =>
+      _getImagePath('ic_no_results_found.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;

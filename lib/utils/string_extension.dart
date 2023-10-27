@@ -299,6 +299,7 @@ extension StringCasingExtension on String {
   }
 
   String substringToHighlight(String highlightText, {int prefixLength = 0}) {
+    if (prefixLength < 0) return this;
     final index = toLowerCase().indexOf(highlightText.toLowerCase());
     if (index > prefixLength) {
       return '...${substring(index - prefixLength)}';
