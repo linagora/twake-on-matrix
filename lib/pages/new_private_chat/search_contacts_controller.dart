@@ -83,5 +83,7 @@ mixin class SearchContactsMixinController {
     _debouncer.cancel();
     _getContactController?.dispose();
     textEditingController.dispose();
+    isSearchModeNotifier.dispose();
+    searchFocusNode.dispose();
   }
 }
