@@ -46,8 +46,10 @@ class TwakeLinkPreviewItem extends StatelessWidget {
                 height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 child: MxcImage(
+                  height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
+                  width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                   uri: urlPreviewPresentation.imageUri,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                   isThumbnail: false,
                   placeholder: (_) => const SizedBox(),
                 ),
