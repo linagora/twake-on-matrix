@@ -43,7 +43,11 @@ class ChatSearchController extends State<ChatSearch> {
 
   final inputFocus = FocusNode();
 
-  final debouncer = Debouncer(_debouncerDuration, initialValue: '');
+  final debouncer = Debouncer(
+    _debouncerDuration,
+    initialValue: '',
+    checkEquality: false,
+  );
 
   SameTypeEventsBuilderController? eventsController;
 
