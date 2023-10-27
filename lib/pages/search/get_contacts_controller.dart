@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -18,6 +20,9 @@ class GetContactsController {
   final contactsNotifier = ValueNotifier<Either<Failure, Success>>(
     const Right(GetContactsInitial()),
   );
+
+  StreamSubscription? _getContactsSubscription;
+
   final refreshController = TwakeRefreshController();
   bool _isLoadMore = false;
   Success? _lastSuccess;
@@ -26,7 +31,7 @@ class GetContactsController {
     required String keyword,
     int limit = AppConfig.fetchContactsLimit,
   }) {
-    _getContactsInteractor
+    _getContactsSubscription = _getContactsInteractor
         .execute(keyword: keyword, offset: 0, limit: limit)
         .listen((event) {
       contactsNotifier.value = event.map((success) {
@@ -52,7 +57,7 @@ class GetContactsController {
       return;
     }
     _isLoadMore = true;
-    _getContactsInteractor
+    _getContactsSubscription = _getContactsInteractor
         .execute(
       keyword: success.keyword,
       offset: success.offset,
@@ -77,5 +82,6 @@ class GetContactsController {
 
   void dispose() {
     contactsNotifier.dispose();
+    _getContactsSubscription?.cancel();
   }
 }
