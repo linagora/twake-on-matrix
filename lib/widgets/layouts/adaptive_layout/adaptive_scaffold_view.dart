@@ -49,6 +49,7 @@ class AppScaffoldView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = getIt.get<ResponsiveUtils>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Row(
         children: [
