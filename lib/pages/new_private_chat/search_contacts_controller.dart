@@ -67,6 +67,7 @@ mixin class SearchContactsMixinController {
   }
 
   void onSelectedContact() {
+    searchFocusNode.requestFocus();
     textEditingController.selection = TextSelection(
       baseOffset: 0,
       extentOffset: textEditingController.text.length,

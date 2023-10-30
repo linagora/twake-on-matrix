@@ -79,7 +79,7 @@ class ChatListView extends StatelessWidget {
             },
             onKeysPressed: () => controller.goToNewPrivateChat(),
             helpLabel: L10n.of(context)!.newChat,
-            child: responsiveUtils.isTwoColumnLayout(context)
+            child: !responsiveUtils.isSingleColumnLayout(context)
                 ? MenuAnchor(
                     menuChildren: [
                       MenuItemButton(
@@ -89,8 +89,7 @@ class ChatListView extends StatelessWidget {
                       ),
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.group),
-                        onPressed: () =>
-                            controller.goToNewGroupChatTwoColumnMode(),
+                        onPressed: () => controller.goToNewGroupChat(),
                         child: Text(L10n.of(context)!.newChat),
                       ),
                     ],

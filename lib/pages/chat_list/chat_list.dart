@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -16,7 +17,6 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
@@ -716,15 +716,19 @@ class ChatListController extends State<ChatList>
   }
 
   void goToNewPrivateChat() {
-    if (PlatformInfos.isMobile) {
+    if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.go('/rooms/newprivatechat');
     } else {
       context.pushInner('innernavigator/newprivatechat');
     }
   }
 
-  void goToNewGroupChatTwoColumnMode() {
-    context.pushInner('innernavigator/newgroup');
+  void goToNewGroupChat() {
+    if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
+      context.go('/rooms/newprivatechat/newgroup');
+    } else {
+      context.pushInner('innernavigator/newprivatechat');
+    }
   }
 
   @override
