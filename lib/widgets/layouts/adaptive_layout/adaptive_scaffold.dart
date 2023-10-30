@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/inner_routes.dart';
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -49,9 +49,9 @@ class AdaptiveScaffoldAppController extends State<AdaptiveScaffoldApp> {
   }
 
   void clearNavigatorScreen() {
-    final navigatorContext = responsiveUtils.isTwoColumnLayout(context)
-        ? InnerRoutes.innerNavigatorTwoColumnKey.currentContext
-        : InnerRoutes.innerNavigatorOneColumnKey.currentContext;
+    final navigatorContext = !responsiveUtils.isSingleColumnLayout(context)
+        ? FirstColumnInnerRoutes.innerNavigatorNotOneColumnKey.currentContext
+        : FirstColumnInnerRoutes.innerNavigatorOneColumnKey.currentContext;
     if (navigatorContext != null) {
       navigatorContext.popInnerAll();
     }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
@@ -17,7 +18,6 @@ import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route.dart';
@@ -188,7 +188,7 @@ abstract class AppRoutes {
               ],
               redirect: loggedOutRedirect,
             ),
-            if (PlatformInfos.isMobile)
+            if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn())
               GoRoute(
                 path: 'newprivatechat',
                 pageBuilder: (context, state) {

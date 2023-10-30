@@ -1,6 +1,6 @@
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +81,8 @@ class SearchableAppBar extends StatelessWidget {
                   TwakeIconButton(
                     icon: Icons.arrow_back,
                     onTap: () {
-                      if (!PlatformInfos.isMobile) {
+                      if (!FirstColumnInnerRoutes.instance
+                          .goRouteAvailableInFirstColumn()) {
                         Navigator.of(context).maybePop();
                       } else {
                         if (context.canPop()) {
