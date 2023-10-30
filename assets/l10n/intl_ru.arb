@@ -644,7 +644,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Редактировать",
+  "edit": "Править",
   "@edit": {
     "type": "text",
     "placeholders": {}
@@ -669,7 +669,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "editRoomAvatar": "Изменить аватар комнаты",
+  "editRoomAvatar": "Изменить аватар чата",
   "@editRoomAvatar": {
     "type": "text",
     "placeholders": {}
@@ -900,22 +900,22 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignore": "Игнорировать",
+  "ignore": "Заблокировать",
   "@ignore": {
     "type": "text",
     "placeholders": {}
   },
-  "ignoredUsers": "Игнорируемые пользователи",
+  "ignoredUsers": "Черный список",
   "@ignoredUsers": {
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Вы можете игнорировать пользователей, которые вам мешают. Вы не сможете получать сообщения или приглашения в комнату от пользователей из вашего личного списка игнорирования.",
+  "ignoreListDescription": "Вы можете заблокировать пользователей, которые вам мешают. Вы не сможете получать сообщения или приглашения в чаты от пользователей из вашего черного списка.",
   "@ignoreListDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "ignoreUsername": "Игнорировать имя пользователя",
+  "ignoreUsername": "Заблокировать пользователя",
   "@ignoreUsername": {
     "type": "text",
     "placeholders": {}
@@ -1465,7 +1465,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "removeAllOtherDevices": "Удалить все другие устройства",
+  "removeAllOtherDevices": "Удалить остальные устройства",
   "@removeAllOtherDevices": {
     "type": "text",
     "placeholders": {}
@@ -1487,7 +1487,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "removeYourAvatar": "Удалить свой аватар",
+  "removeYourAvatar": "Удалить аватар",
   "@removeYourAvatar": {
     "type": "text",
     "placeholders": {}
@@ -2782,7 +2782,7 @@
   "@settingsHelpSubtitle": {},
   "errorPreviewingFile": "Предварительный просмотр недоступен",
   "@errorPreviewingFile": {},
-  "unread": "Непрочитаное",
+  "unread": "Не прочтено",
   "@unread": {},
   "company": "Компания",
   "@company": {},
@@ -2798,7 +2798,7 @@
   "@markThisMessageAsRead": {},
   "downloads": "Загрузки",
   "@downloads": {},
-  "changeProfilePhoto": "Изменить фото профиля",
+  "changeProfilePhoto": "Изменить аватар",
   "@changeProfilePhoto": {},
   "errorPageButton": "Назад к чату",
   "@errorPageButton": {},
