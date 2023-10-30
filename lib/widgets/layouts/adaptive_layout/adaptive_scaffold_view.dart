@@ -92,8 +92,7 @@ class AppScaffoldView extends StatelessWidget {
                     color: LinagoraRefColors.material().primary[100],
                   ),
                   child: Navigator(
-                    key: !FirstColumnInnerRoutes.instance
-                            .goRouteAvailableInFirstColumn()
+                    key: !responsiveUtils.isSingleColumnLayout(context)
                         ? FirstColumnInnerRoutes.innerNavigatorNotOneColumnKey
                         : FirstColumnInnerRoutes.innerNavigatorOneColumnKey,
                     initialRoute: 'innernavigator/rooms',
