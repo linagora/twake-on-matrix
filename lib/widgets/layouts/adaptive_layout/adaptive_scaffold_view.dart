@@ -1,10 +1,9 @@
-import 'package:fluffychat/config/inner_routes.dart';
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold.dart';
@@ -83,7 +82,8 @@ class AppScaffoldView extends StatelessWidget {
               },
             ),
           ],
-          if (!PlatformInfos.isMobile) ...[
+          if (!FirstColumnInnerRoutes.instance
+              .goRouteAvailableInFirstColumn()) ...[
             Expanded(
               child: ClipRRect(
                 borderRadius: AppScaffoldViewStyle.borderRadiusBody,
@@ -92,9 +92,10 @@ class AppScaffoldView extends StatelessWidget {
                     color: LinagoraRefColors.material().primary[100],
                   ),
                   child: Navigator(
-                    key: responsiveUtils.isTwoColumnLayout(context)
-                        ? InnerRoutes.innerNavigatorTwoColumnKey
-                        : InnerRoutes.innerNavigatorOneColumnKey,
+                    key: !FirstColumnInnerRoutes.instance
+                            .goRouteAvailableInFirstColumn()
+                        ? FirstColumnInnerRoutes.innerNavigatorNotOneColumnKey
+                        : FirstColumnInnerRoutes.innerNavigatorOneColumnKey,
                     initialRoute: 'innernavigator/rooms',
                     onGenerateRoute: (settings) {
                       if (settings.name == 'innernavigator/rooms') {
@@ -114,7 +115,7 @@ class AppScaffoldView extends StatelessWidget {
                           },
                         );
                       } else {
-                        return InnerRoutes.routes(
+                        return FirstColumnInnerRoutes.routes(
                           settings.name,
                           arguments: settings.arguments,
                         );

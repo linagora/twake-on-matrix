@@ -172,7 +172,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          if (!PlatformInfos.isMobile) {
+          if (!responsiveUtils.isSingleColumnLayout(context)) {
             context.popInnerAll();
           }
           _goToRoom(success);

@@ -115,6 +115,7 @@ class _ContactItem extends StatelessWidget {
       onTap: disabled
           ? null
           : () {
+              onSelectedContact?.call();
               selectedContactsMapNotifier.onContactTileTap(
                 context,
                 contact,
@@ -143,7 +144,6 @@ class _ContactItem extends StatelessWidget {
                               context,
                               contact,
                             );
-                            onSelectedContact?.call();
                           },
                   );
                 },

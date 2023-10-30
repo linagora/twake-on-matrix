@@ -1,7 +1,7 @@
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -33,7 +33,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
   }
 
   void moveToNewGroupInfoScreen() async {
-    if (!PlatformInfos.isMobile) {
+    if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.pushInner(
         'innernavigator/newgroupchatinfo',
         arguments: contactsList.toSet(),
