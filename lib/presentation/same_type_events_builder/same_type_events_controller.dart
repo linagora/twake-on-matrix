@@ -24,7 +24,10 @@ class SameTypeEventsBuilderController {
   final loadingMore = ValueNotifier(false);
   final emptyNotifier = ValueNotifier(false);
 
-  StreamSubscription? _searchSubscription;
+  StreamSubscription? _refreshSubscription;
+  StreamSubscription? _loadMoreSubscription;
+  UniqueKey? _refreshKey;
+  UniqueKey? _loadMoreKey;
 
   final _searchInteractor = getIt.get<TimelineSearchEventInteractor>();
   var _isEnd = true;
@@ -40,8 +43,10 @@ class SameTypeEventsBuilderController {
     emptyNotifier.value = false;
     refreshing.value = true;
     final timeline = await getTimeline();
-    await _searchSubscription?.cancel();
-    _searchSubscription = _searchInteractor
+    await _refreshSubscription?.cancel();
+    final key = UniqueKey();
+    _refreshKey = key;
+    _refreshSubscription = _searchInteractor
         .execute(
           timeline: timeline,
           searchFunc: searchFunc,
@@ -50,7 +55,7 @@ class SameTypeEventsBuilderController {
           limit: limit,
         )
         .listen(
-          _onRefreshSuccess,
+          (events) => _onRefreshSuccess(key, events),
           onDone: _onRefreshDone,
         );
   }
@@ -67,8 +72,10 @@ class SameTypeEventsBuilderController {
     emptyNotifier.value = false;
     loadingMore.value = true;
     final timeline = await getTimeline();
-    await _searchSubscription?.cancel();
-    _searchSubscription = _searchInteractor
+    await _loadMoreSubscription?.cancel();
+    final key = UniqueKey();
+    _loadMoreKey = key;
+    _loadMoreSubscription = _searchInteractor
         .execute(
           timeline: timeline,
           searchFunc: searchFunc,
@@ -78,14 +85,18 @@ class SameTypeEventsBuilderController {
           sinceEventId: lastSuccess.events.last.eventId,
         )
         .listen(
-          (event) => _onLoadMoreSuccess(event, lastSuccess),
+          (event) => _onLoadMoreSuccess(key, event, lastSuccess),
           onDone: _onLoadMoreDone,
         );
   }
 
   void clear() {
-    _searchSubscription?.cancel();
+    _refreshSubscription?.cancel();
+    _loadMoreSubscription?.cancel();
+    _loadMoreKey = null;
+    _refreshKey = null;
     refreshing.value = false;
+    loadingMore.value = false;
     emptyNotifier.value = false;
     eventsNotifier.value = Right(TimelineSearchEventInitial());
   }
@@ -100,7 +111,8 @@ class SameTypeEventsBuilderController {
         false;
   }
 
-  void _onRefreshSuccess(Either<Failure, Success> event) {
+  void _onRefreshSuccess(UniqueKey key, Either<Failure, Success> event) {
+    if (key != _refreshKey) return;
     Logs().v('SameTypeEventsListController::refresh $event');
     eventsNotifier.value = event;
     final success = event.getSuccessOrNull<TimelineSearchEventSuccess>();
@@ -110,9 +122,11 @@ class SameTypeEventsBuilderController {
   }
 
   void _onLoadMoreSuccess(
+    UniqueKey key,
     Either<Failure, Success> event,
     TimelineSearchEventSuccess lastSuccess,
   ) {
+    if (key != _loadMoreKey) return;
     Logs().v('SameTypeEventsListController::loadMore $event');
     eventsNotifier.value = event.map(
       (success) {
@@ -135,6 +149,7 @@ class SameTypeEventsBuilderController {
     eventsNotifier.dispose();
     refreshing.dispose();
     loadingMore.dispose();
-    _searchSubscription?.cancel();
+    _refreshSubscription?.cancel();
+    _loadMoreSubscription?.cancel();
   }
 }
