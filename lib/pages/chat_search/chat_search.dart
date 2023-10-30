@@ -63,16 +63,14 @@ class ChatSearchController extends State<ChatSearch> {
     );
     scrollController.addLoadMoreListener(eventsController!.loadMore);
     textEditingController.addListener(() {
-      if (textEditingController.text.length >=
-          AppConfig.chatRoomSearchKeywordMin) {
-        debouncer.value = textEditingController.text;
+      debouncer.value = textEditingController.text;
+    });
+    debouncer.values.listen((text) {
+      if (text.length >= AppConfig.chatRoomSearchKeywordMin) {
+        eventsController?.refresh(force: true);
       } else {
         eventsController?.clear();
       }
-    });
-    debouncer.values.listen((text) {
-      eventsController?.clear();
-      eventsController?.refresh(force: true);
     });
     super.initState();
   }
