@@ -101,7 +101,7 @@ class ResponsiveUtils {
     }
   }
 
-  bool isTwoColumnLayout(BuildContext context) {
-    return isTablet(context) || isDesktop(context) || isTabletLarge(context);
+  bool isSingleColumnLayout(BuildContext context) {
+    return isMobile(context);
   }
 }

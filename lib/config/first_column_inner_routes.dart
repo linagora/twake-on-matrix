@@ -3,17 +3,23 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
-class InnerRoutes {
-  InnerRoutes._();
+class FirstColumnInnerRoutes {
+  static final _firstColumnInnerRoutes = FirstColumnInnerRoutes._();
+
+  FirstColumnInnerRoutes._();
+
+  static FirstColumnInnerRoutes get instance => _firstColumnInnerRoutes;
 
   static final GlobalKey<NavigatorState> innerNavigatorOneColumnKey = GlobalKey(
     debugLabel: 'innerNavigatorGlobalKey',
   );
 
-  static final GlobalKey<NavigatorState> innerNavigatorTwoColumnKey = GlobalKey(
-    debugLabel: 'innerNavigatorTwoColumnKey',
+  static final GlobalKey<NavigatorState> innerNavigatorNotOneColumnKey =
+      GlobalKey(
+    debugLabel: 'innerNavigatorNotOneColumnKey',
   );
 
   static Route<dynamic> routes(String? routerName, {Object? arguments}) {
@@ -51,5 +57,9 @@ class InnerRoutes {
         return widget;
       },
     );
+  }
+
+  bool goRouteAvailableInFirstColumn() {
+    return PlatformInfos.isMobile;
   }
 }
