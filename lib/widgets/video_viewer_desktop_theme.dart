@@ -4,15 +4,16 @@ import 'package:fluffychat/widgets/video_viewer_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerDesktopTheme extends StatelessWidget {
   const VideoViewerDesktopTheme({
     super.key,
-    required this.path,
+    required this.event,
   });
 
-  final String path;
+  final Event? event;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
       child: VideoPlayer(
-        path: path,
+        event: event,
       ),
     );
   }

@@ -4,12 +4,12 @@ import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/video_viewer_desktop_theme.dart';
 import 'package:fluffychat/widgets/video_viewer_mobile_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 mixin PlayVideoActionMixin {
-  void playVideoAction(
-    BuildContext context,
-    String uriOrFilePath, {
-    String? eventId,
+  void openPlayVideoAction(
+    BuildContext context, {
+    Event? event,
   }) async {
     Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
       HeroPageRoute(
@@ -17,10 +17,9 @@ mixin PlayVideoActionMixin {
           return InteractiveViewerGallery(
             itemBuilder: PlatformInfos.isMobile
                 ? VideoViewerMobileTheme(
-                    path: uriOrFilePath,
-                    eventId: eventId,
+                    event: event,
                   )
-                : VideoViewerDesktopTheme(path: uriOrFilePath),
+                : VideoViewerDesktopTheme(event: event),
           );
         },
       ),

@@ -46,7 +46,6 @@ class ChatDetailsMediaPage extends StatelessWidget {
                     )
                   : _VideoItem(
                       event: events[index],
-                      handleDownloadVideoEvent: handleDownloadVideoEvent,
                       thumbnailCacheMap: cacheMap,
                     ),
         );
@@ -83,12 +82,10 @@ class _ImageItem extends StatelessWidget {
 
 class _VideoItem extends StatelessWidget {
   final Event event;
-  final DownloadVideoEventCallback handleDownloadVideoEvent;
   final Map<EventId, ImageData>? thumbnailCacheMap;
 
   const _VideoItem({
     required this.event,
-    required this.handleDownloadVideoEvent,
     this.thumbnailCacheMap,
   });
 
@@ -96,7 +93,6 @@ class _VideoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return EventVideoPlayer(
       event,
-      handleDownloadVideoEvent: handleDownloadVideoEvent,
       rounded: false,
       showDuration: true,
       thumbnailCacheKey: event.eventId,

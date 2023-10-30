@@ -12,7 +12,6 @@ import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart'
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -49,10 +48,7 @@ class ChatDetails extends StatefulWidget {
 }
 
 class ChatDetailsController extends State<ChatDetails>
-    with
-        HandleVideoDownloadMixin,
-        PlayVideoActionMixin,
-        SingleTickerProviderStateMixin {
+    with PlayVideoActionMixin, SingleTickerProviderStateMixin {
   static const _mediaFetchLimit = 20;
 
   static const _linksFetchLimit = 20;
@@ -575,14 +571,10 @@ class ChatDetailsController extends State<ChatDetails>
         },
       ).toList();
 
-  Future<String> _handleDownloadAndPlayVideo(Event event) {
-    return handleDownloadVideoEvent(
+  void _handleDownloadAndPlayVideo(Event event) {
+    return openPlayVideoAction(
+      context,
       event: event,
-      playVideoAction: (path) => playVideoAction(
-        context,
-        path,
-        eventId: event.eventId,
-      ),
     );
   }
 

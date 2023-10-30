@@ -27,7 +27,6 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
-import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
@@ -99,8 +98,7 @@ class ChatController extends State<Chat>
         SendFilesMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
-        ChatRoomSearchMixin,
-        HandleVideoDownloadMixin {
+        ChatRoomSearchMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
