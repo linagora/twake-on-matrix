@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -89,10 +90,10 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                   builder: (_) => Padding(
                     padding: showRightPanel
-                        ? const EdgeInsetsDirectional.only(end: 16)
+                        ? ChatAdaptiveScaffoldStyle.webPaddingRight
                         : EdgeInsets.zero,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: ChatAdaptiveScaffoldStyle.borderRadius,
                       child: body!,
                     ),
                   ),
@@ -115,7 +116,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                         builder: (_) => ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: ChatAdaptiveScaffoldStyle.borderRadius,
                           child: ChatSearch(
                             roomId: widget.roomId,
                             onBack: toggleRightPanel,
