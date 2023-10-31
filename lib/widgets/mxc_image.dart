@@ -163,13 +163,15 @@ class _MxcImageState extends State<MxcImage>
 
     if (event != null) {
       if (!PlatformInfos.isWeb) {
-        final fileInfo = await event.getFileInfo();
+        final fileInfo = await event.getFileInfo(
+          getThumbnail: widget.isThumbnail,
+        );
         if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
           setState(() {
             filePath = fileInfo.filePath;
           });
+          return;
         }
-        return;
       }
 
       final matrixFile = await event.downloadAndDecryptAttachment(
@@ -248,7 +250,9 @@ class _MxcImageState extends State<MxcImage>
     if (widget.isPreview) {
       return Material(
         child: InkWell(
-          onTap: () => _onTap(context),
+          onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
+              ? () => _onTap(context)
+              : null,
           child: imageWidget,
         ),
       );
