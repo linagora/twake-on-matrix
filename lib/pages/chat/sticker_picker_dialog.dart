@@ -90,7 +90,6 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   absorbing: true,
                   child: ImageBubble(
                     fakeEvent,
-                    tapToView: false,
                     fit: BoxFit.contain,
                     width: 100,
                     height: 100,

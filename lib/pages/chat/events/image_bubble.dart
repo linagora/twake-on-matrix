@@ -10,10 +10,8 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 
 class ImageBubble extends StatelessWidget {
   final Event event;
-  final bool tapToView;
   final BoxFit fit;
   final bool maxSize;
-  final Color? backgroundColor;
   final bool thumbnailOnly;
   final bool animated;
   final double width;
@@ -31,9 +29,7 @@ class ImageBubble extends StatelessWidget {
   const ImageBubble(
     this.event, {
     this.imageData,
-    this.tapToView = true,
     this.maxSize = true,
-    this.backgroundColor,
     this.fit = BoxFit.cover,
     this.thumbnailOnly = true,
     this.width = 256,
@@ -68,8 +64,7 @@ class ImageBubble extends StatelessWidget {
       width = (height * ratio).round();
     }
     return ClipRRect(
-      borderRadius:
-          rounded ? MessageContentStyle.borderRadiusBubble : BorderRadius.zero,
+      borderRadius: BorderRadius.zero,
       child: SizedBox(
         width: this.width,
         height: this.height,
