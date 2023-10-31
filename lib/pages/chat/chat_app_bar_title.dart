@@ -1,10 +1,12 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
@@ -91,14 +93,29 @@ class ChatAppBarTitle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  roomName ??
-                      room!.getLocalizedDisplayname(
-                        MatrixLocals(L10n.of(context)!),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (room?.encrypted == true)
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: SvgPicture.asset(
+                          ImagePaths.icEncrypted,
+                          width: 20,
+                          height: 20,
+                        ),
                       ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+                    Text(
+                      roomName ??
+                          room!.getLocalizedDisplayname(
+                            MatrixLocals(L10n.of(context)!),
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+                    ),
+                  ],
                 ),
                 _ChatAppBarStatusContent(
                   connectivityResultStream: connectivityResultStream,
