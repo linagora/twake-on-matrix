@@ -37,6 +37,7 @@ class ImagePaths {
       _getImagePath('ic_error_page_background.svg');
   static String get icNoResultsFound =>
       _getImagePath('ic_no_results_found.svg');
+  static String get icEncrypted => _getImagePath('ic_encrypted.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
