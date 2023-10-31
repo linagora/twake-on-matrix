@@ -150,4 +150,14 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     await file.writeAsBytes(bytes);
     return;
   }
+
+  @override
+  Future<File?> getFileEntity(Uri mxcUri) async {
+    if (!supportsFileStoring) return null;
+    final tempDirectory = await _getFileStoreDirectory();
+    final file =
+        File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
+    if (await file.exists() == false) return null;
+    return file;
+  }
 }

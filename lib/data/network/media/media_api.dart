@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fluffychat/data/model/download_file_response.dart';
 import 'package:fluffychat/data/model/media/upload_file_json.dart';
 import 'package:fluffychat/data/model/media/url_preview_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide ProgressCallback;
 
 class MediaAPI {
   final DioClient _client =
@@ -33,6 +34,31 @@ class MediaAPI {
         .onError((error, stackTrace) => throw Exception(error));
 
     return UploadFileResponse.fromJson(response);
+  }
+
+  Future<DownloadFileResponse> downloadFileInfo({
+    required Uri uriPath,
+    required String savePath,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final response = await _client.download(
+      uriPath,
+      savePath: savePath,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return DownloadFileResponse(
+      savePath: savePath,
+      onReceiveProgress: onReceiveProgress,
+      requestOptions: response.requestOptions,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
+      data: response.data,
+      extra: response.extra,
+      headers: response.headers,
+      isRedirect: response.isRedirect,
+      redirects: response.redirects,
+    );
   }
 
   Future<UrlPreviewResponse> getUrlPreview({
