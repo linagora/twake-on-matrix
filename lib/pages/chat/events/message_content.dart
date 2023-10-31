@@ -306,6 +306,7 @@ class _MessageImageBuilder extends StatelessWidget {
       onTapSelectMode: onTapSelectMode,
       onTapPreview: onTapPreview,
       animated: true,
+      thumbnailOnly: false,
     );
   }
 
@@ -362,17 +363,11 @@ class _MessageVideoBuilder extends StatelessWidget {
         displayImageInfo: displayImageInfo,
       );
     }
-    if (PlatformInfos.isMobile || PlatformInfos.isWeb) {
-      return EventVideoPlayer(
-        event,
-        handleDownloadVideoEvent: handleDownloadVideoEvent,
-        width: displayImageInfo.size.width,
-        height: displayImageInfo.size.height,
-      );
-    }
-    return MessageDownloadContent(
+    return EventVideoPlayer(
       event,
-      onFileTapped: onFileTapped,
+      handleDownloadVideoEvent: handleDownloadVideoEvent,
+      width: displayImageInfo.size.width,
+      height: displayImageInfo.size.height,
     );
   }
 
