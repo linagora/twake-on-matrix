@@ -100,7 +100,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
           height: MessageContentStyle.videoBubbleHeight(height),
           child: Stack(
             children: [
-              const BlurHash(hash: AppConfig.defaultVideoBlurHash),
+              BlurHash(hash: blurHash),
               if (hasThumbnail)
                 Center(
                   child: ImageBubble(
@@ -112,9 +112,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                     thumbnailCacheMap: widget.thumbnailCacheMap,
                     noResizeThumbnail: widget.noResizeThumbnail,
                   ),
-                )
-              else
-                BlurHash(hash: blurHash),
+                ),
               Center(
                 child: ValueListenableBuilder<DownloadVideoState>(
                   valueListenable: _downloadStateNotifier,
