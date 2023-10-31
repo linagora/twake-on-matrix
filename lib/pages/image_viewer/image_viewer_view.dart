@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 import 'image_viewer.dart';
 
@@ -44,20 +46,7 @@ class ImageViewerView extends StatelessWidget {
                           fit: BoxFit.contain,
                           filterQuality: FilterQuality.none,
                         )
-                      : FutureBuilder(
-                          future: controller.widget.event
-                              .downloadAndDecryptAttachment(
-                            // FIXME: change to false after https://github.com/linagora/twake-on-matrix/issues/746
-                            getThumbnail: true,
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.data == null ||
-                                snapshot.data!.bytes == null) {
-                              return const CircularProgressIndicator();
-                            }
-                            return Image.memory(snapshot.data!.bytes!);
-                          },
-                        ),
+                      : _ImageWidget(event: controller.widget.event),
                 ),
               ),
             ),
@@ -134,5 +123,40 @@ class ImageViewerView extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class _ImageWidget extends StatelessWidget {
+  final Event event;
+
+  const _ImageWidget({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    if (PlatformInfos.isWeb) {
+      return FutureBuilder(
+        future: event.downloadAndDecryptAttachment(
+          getThumbnail: true,
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.data == null || snapshot.data!.bytes?.isEmpty != false) {
+            return const CircularProgressIndicator();
+          }
+          return Image.memory(snapshot.data!.bytes!);
+        },
+      );
+    } else {
+      return FutureBuilder(
+        future: event.getFileInfo(
+          getThumbnail: false,
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.data == null || snapshot.data!.fileName.isEmpty) {
+            return const CircularProgressIndicator();
+          }
+          return Image.file(File(snapshot.data!.filePath));
+        },
+      );
+    }
   }
 }

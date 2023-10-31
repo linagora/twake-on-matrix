@@ -111,4 +111,22 @@ class DioClient {
         .then((value) => value.data)
         .catchError((error) => throw (error));
   }
+
+  Future<Response<dynamic>> download(
+    Uri uriPath, {
+    required String savePath,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+    data,
+    Options? options,
+  }) async {
+    return await _dio.downloadUri(
+      uriPath,
+      savePath,
+      onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+      data: data,
+      options: options,
+    );
+  }
 }

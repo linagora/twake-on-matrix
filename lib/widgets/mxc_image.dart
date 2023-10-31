@@ -1,13 +1,14 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 typedef EventId = String;
@@ -73,6 +74,7 @@ class _MxcImageState extends State<MxcImage>
   static final Map<EventId, ImageData> _imageDataCache = {};
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
+  String? filePath;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -160,17 +162,24 @@ class _MxcImageState extends State<MxcImage>
     }
 
     if (event != null) {
-      final data = await event.downloadAndDecryptAttachment(
-        getThumbnail: widget.isThumbnail,
-      );
-      if (data.detectFileType is MatrixImageFile ||
-          data.detectFileType is MatrixVideoFile) {
-        if (!mounted) return;
-        setState(() {
-          _imageData = data.bytes;
-        });
+      if (!PlatformInfos.isWeb) {
+        final fileInfo = await event.getFileInfo();
+        if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
+          setState(() {
+            filePath = fileInfo.filePath;
+          });
+        }
         return;
       }
+
+      final matrixFile = await event.downloadAndDecryptAttachment(
+        getThumbnail: widget.isThumbnail,
+      );
+      if (!mounted) return;
+      setState(() {
+        _imageData = matrixFile.bytes;
+      });
+      return;
     }
   }
 
@@ -251,28 +260,47 @@ class _MxcImageState extends State<MxcImage>
   Widget _buildImageWidget() {
     final data = _imageData;
     final needResize = widget.event != null && !widget.noResize;
-    return data == null || data.isEmpty
+    return filePath == null && data == null
         ? placeholder(context)
         : ClipRRect(
             key: Key('${data.hashCode}'),
             borderRadius: widget.rounded
                 ? BorderRadius.circular(12.0)
                 : BorderRadius.zero,
-            child: Image.memory(
-              data,
-              width: widget.width,
-              height: widget.height,
-              cacheWidth: needResize ? widget.width?.toInt() : null,
-              cacheHeight: needResize ? widget.height?.toInt() : null,
-              fit: widget.fit,
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (context, __, ___) {
-                _isCached = false;
-                _imageData = null;
-                WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
-                return placeholder(context);
-              },
-            ),
+            child: filePath != null && filePath!.isNotEmpty
+                ? Image.file(
+                    File(filePath!),
+                    width: widget.width,
+                    height: widget.height,
+                    cacheWidth: needResize ? widget.width?.toInt() : null,
+                    cacheHeight: needResize ? widget.height?.toInt() : null,
+                    fit: widget.fit,
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: (context, __, ___) {
+                      _isCached = false;
+                      filePath = null;
+                      WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+                      return placeholder(context);
+                    },
+                  )
+                : data != null
+                    ? Image.memory(
+                        data,
+                        width: widget.width,
+                        height: widget.height,
+                        cacheWidth: needResize ? widget.width?.toInt() : null,
+                        cacheHeight: needResize ? widget.height?.toInt() : null,
+                        fit: widget.fit,
+                        filterQuality: FilterQuality.medium,
+                        errorBuilder: (context, __, ___) {
+                          _isCached = false;
+                          _imageData = null;
+                          WidgetsBinding.instance
+                              .addPostFrameCallback(_tryLoad);
+                          return placeholder(context);
+                        },
+                      )
+                    : const SizedBox.shrink(),
           );
   }
 }
