@@ -105,7 +105,6 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                 Center(
                   child: ImageBubble(
                     widget.event,
-                    tapToView: false,
                     width: MessageContentStyle.imageBubbleWidth(width),
                     height: MessageContentStyle.videoBubbleHeight(height),
                     rounded: widget.rounded,
