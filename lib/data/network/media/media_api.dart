@@ -8,7 +8,7 @@ import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:matrix/matrix.dart' hide ProgressCallback;
+import 'package:matrix/matrix.dart';
 
 class MediaAPI {
   final DioClient _client =
