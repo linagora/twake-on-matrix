@@ -154,7 +154,7 @@ extension SendFileExtension on Room {
 
     EncryptedFileInfo? encryptedFileInfo;
     EncryptedFileInfo? encryptedThumbnail;
-    if (encrypted && client.fileEncryptionEnabled) {
+    if (isRoomEncrypted()) {
       await _updateFakeSync(
         fakeImageEvent,
         fileSendingStatusKey,
@@ -192,13 +192,13 @@ extension SendFileExtension on Room {
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
-        if (uploadResp != null &&
-            encryptedThumbnail != null &&
-            thumbnail != null) {
+        if (uploadResp != null && thumbnail != null) {
           final thumbnailResponse = await mediaApi.uploadFile(
             fileInfo: FileInfo(
               thumbnail.fileName,
-              tempEncryptedThumbnailFile.path,
+              isRoomEncrypted()
+                  ? tempEncryptedThumbnailFile.path
+                  : thumbnail.filePath,
               thumbnail.fileSize,
             ),
           );
@@ -504,5 +504,9 @@ extension SendFileExtension on Room {
 
   Future<Size> _calculateImageBytesDimension(Uint8List bytes) {
     return Image.memory(bytes).calculateImageDimension();
+  }
+
+  bool isRoomEncrypted() {
+    return encrypted && client.fileEncryptionEnabled;
   }
 }

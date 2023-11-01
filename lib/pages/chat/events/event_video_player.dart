@@ -111,6 +111,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                     thumbnailCacheKey: widget.thumbnailCacheKey,
                     thumbnailCacheMap: widget.thumbnailCacheMap,
                     noResizeThumbnail: widget.noResizeThumbnail,
+                    thumbnailOnly: true,
                   ),
                 ),
               Center(
