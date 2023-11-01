@@ -1567,7 +1567,7 @@ packages:
     description:
       path: "."
       ref: "feat/support-get-store-fileEntity"
-      resolved-ref: b9502e1193226f0b1d60f97979921c2d7061e9a2
+      resolved-ref: "7655bab485acc05b240125f2f334cf1eb6f60c85"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.4"
