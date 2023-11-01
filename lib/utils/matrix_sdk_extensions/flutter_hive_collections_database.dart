@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -117,22 +118,11 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   @override
   bool get supportsFileStoring => !kIsWeb;
 
-  Future<String> _getFileStoreDirectory() async {
-    try {
-      try {
-        return (await getTemporaryDirectory()).path;
-      } catch (_) {
-        return (await getApplicationDocumentsDirectory()).path;
-      }
-    } catch (_) {
-      return (await getDownloadsDirectory())!.path;
-    }
-  }
-
   @override
   Future<Uint8List?> getFile(Uri mxcUri) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory = await _getFileStoreDirectory();
+    final tempDirectory =
+        await StorageDirectoryUtils.instance.getFileStoreDirectory();
     final file =
         File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
     if (await file.exists() == false) return null;
@@ -143,7 +133,8 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   @override
   Future storeFile(Uri mxcUri, Uint8List bytes, int time) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory = await _getFileStoreDirectory();
+    final tempDirectory =
+        await StorageDirectoryUtils.instance.getFileStoreDirectory();
     final file =
         File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
     if (await file.exists()) return;
@@ -154,7 +145,8 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   @override
   Future<File?> getFileEntity(Uri mxcUri) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory = await _getFileStoreDirectory();
+    final tempDirectory =
+        await StorageDirectoryUtils.instance.getFileStoreDirectory();
     final file =
         File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
     if (await file.exists() == false) return null;

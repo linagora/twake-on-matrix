@@ -86,7 +86,7 @@ extension SendFileWebExtension on Room {
     }
 
     EncryptedFile? encryptedFile;
-    MatrixFile? uploadFile;
+    MatrixFile uploadFile = file;
     MatrixFile? uploadThumbnail = thumbnail;
     EncryptedFile? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
@@ -108,8 +108,7 @@ extension SendFileWebExtension on Room {
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
-    while (
-        uploadResp == null && uploadFile != null && uploadFile.bytes != null) {
+    while (uploadResp == null && uploadFile.bytes != null) {
       try {
         uploadResp = await client.uploadContent(
           uploadFile.bytes!,

@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 
 extension DownloadFileExtension on Event {
   bool canContainAttachment() {
@@ -37,7 +37,7 @@ extension DownloadFileExtension on Event {
       return FileInfo(
         filename,
         attachment.path,
-        content.tryGet<int>('size') ?? attachment.lengthSync(),
+        content.tryGet<int>('size') ?? await attachment.length(),
       );
     }
 
@@ -49,7 +49,7 @@ extension DownloadFileExtension on Event {
       return FileInfo(
         filename,
         savePath,
-        content.tryGet<int>('size') ?? File(savePath).lengthSync(),
+        content.tryGet<int>('size') ?? await File(savePath).length(),
         progressCallback: downloadResponse.onReceiveProgress,
       );
     }
@@ -71,7 +71,7 @@ extension DownloadFileExtension on Event {
 
     final encryptedFile = EncryptedFileInfo.fromJson(fileMap);
 
-    if (!File(decryptedPath).existsSync()) {
+    if (!await File(decryptedPath).exists()) {
       final isSuccess = await encryptedService.decryptFile(
         fileInfo: fileInfo!,
         encryptedFileInfo: encryptedFile,
@@ -86,7 +86,7 @@ extension DownloadFileExtension on Event {
     return FileInfo(
       body,
       decryptedPath,
-      content.tryGet<int>('size') ?? File(decryptedPath).lengthSync(),
+      content.tryGet<int>('size') ?? await File(decryptedPath).length(),
       progressCallback: fileInfo?.progressCallback,
     );
   }
@@ -108,22 +108,25 @@ extension DownloadFileExtension on Event {
       throw "getFileInfo: This event hasn't any attachment or thumbnail.";
     }
 
-    final isEncrypted =
+    final isFileEncrypted =
         getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
-    if (isEncryptionDisabled(isEncrypted)) {
+    if (isEncryptionDisabled(isFileEncrypted)) {
       throw ('getFileInfo: Encryption is not enabled in your Client.');
     }
 
-    final tempDirectory = await _getFileStoreDirectory();
-
-    final decryptedPath =
-        '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}-decrypted';
-    if (File(decryptedPath).existsSync()) {
-      return FileInfo(
-        body,
-        decryptedPath,
-        content.tryGet<int>('size') ?? File(decryptedPath).lengthSync(),
-      );
+    final tempDirectory =
+        await StorageDirectoryUtils.instance.getFileStoreDirectory();
+    String? decryptedPath;
+    if (isFileEncrypted) {
+      decryptedPath =
+          '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}-decrypted';
+      if (await File(decryptedPath).exists()) {
+        return FileInfo(
+          body,
+          decryptedPath,
+          content.tryGet<int>('size') ?? await File(decryptedPath).length(),
+        );
+      }
     }
 
     final fileInfo = await downloadOrRetrieveAttachment(
@@ -131,7 +134,7 @@ extension DownloadFileExtension on Event {
       '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}',
     );
 
-    if (isEncrypted && fileInfo != null) {
+    if (isFileEncrypted && fileInfo != null && decryptedPath != null) {
       return await decryptFile(
         fileInfo,
         mxcUrl,
@@ -141,17 +144,5 @@ extension DownloadFileExtension on Event {
     }
 
     return fileInfo;
-  }
-
-  Future<String> _getFileStoreDirectory() async {
-    try {
-      try {
-        return (await getTemporaryDirectory()).path;
-      } catch (_) {
-        return (await getApplicationDocumentsDirectory()).path;
-      }
-    } catch (_) {
-      return (await getDownloadsDirectory())!.path;
-    }
   }
 }
