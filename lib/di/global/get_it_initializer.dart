@@ -43,6 +43,7 @@ import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
@@ -178,6 +179,11 @@ class GetItInitializer {
     );
     getIt.registerSingleton<UpdateProfileInteractor>(
       UpdateProfileInteractor(),
+    );
+    getIt.registerFactory<FlutterSecureStorage>(
+      () => const FlutterSecureStorage(
+        iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
@@ -34,7 +35,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
         throw MissingPluginException();
       }
 
-      const secureStorage = FlutterSecureStorage();
+      final secureStorage = getIt.get<FlutterSecureStorage>();
       final containsEncryptionKey =
           await secureStorage.read(key: cipherStorageKey) != null;
       if (!containsEncryptionKey) {
@@ -53,12 +54,14 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
       hiverCipher = HiveAesCipher(base64Url.decode(rawEncryptionKey));
     } on MissingPluginException catch (_) {
-      const FlutterSecureStorage()
+      getIt
+          .get<FlutterSecureStorage>()
           .delete(key: cipherStorageKey)
           .catchError((_) {});
       Logs().i('Hive encryption is not supported on this platform');
     } catch (e, s) {
-      const FlutterSecureStorage()
+      getIt
+          .get<FlutterSecureStorage>()
           .delete(key: cipherStorageKey)
           .catchError((_) {});
       Logs().w('Unable to init Hive encryption', e, s);
@@ -74,7 +77,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
-      const FlutterSecureStorage().delete(key: cipherStorageKey);
+      getIt.get<FlutterSecureStorage>().delete(key: cipherStorageKey);
       await db
           .clear(supportDeleteCollections: !PlatformInfos.isWeb)
           .catchError((_) {});

@@ -404,7 +404,8 @@ class MatrixState extends State<Matrix>
         ([TargetPlatform.linux].contains(Theme.of(context).platform)
                 ? SharedPreferences.getInstance()
                     .then((prefs) => prefs.getString(SettingKeys.appLockKey))
-                : const FlutterSecureStorage()
+                : getIt
+                    .get<FlutterSecureStorage>()
                     .read(key: SettingKeys.appLockKey))
             .then((lock) {
           if (lock?.isNotEmpty ?? false) {

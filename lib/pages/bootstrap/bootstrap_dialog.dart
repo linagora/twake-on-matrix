@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
@@ -90,7 +91,8 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     _recoveryKeyStored = false;
     bootstrap =
         widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
-    final key = await const FlutterSecureStorage().read(key: _secureStorageKey);
+    final key =
+        await getIt.get<FlutterSecureStorage>().read(key: _secureStorageKey);
     if (key == null) return;
     _recoveryKeyTextEditingController.text = key;
   }
@@ -188,10 +190,10 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       (_recoveryKeyCopied || _storeInSecureStorage == true)
                           ? () {
                               if (_storeInSecureStorage == true) {
-                                const FlutterSecureStorage().write(
-                                  key: _secureStorageKey,
-                                  value: key,
-                                );
+                                getIt.get<FlutterSecureStorage>().write(
+                                      key: _secureStorageKey,
+                                      value: key,
+                                    );
                               }
                               setState(() => _recoveryKeyStored = true);
                             }

@@ -60,8 +60,9 @@ Future<void> startGui(List<Client> clients) async {
   String? pin;
   if (PlatformInfos.isMobile) {
     try {
-      pin =
-          await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+      pin = await getIt
+          .get<FlutterSecureStorage>()
+          .read(key: SettingKeys.appLockKey);
     } catch (e, s) {
       Logs().d('Unable to read PIN from Secure storage', e, s);
     }

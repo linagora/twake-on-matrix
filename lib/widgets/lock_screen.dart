@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -74,7 +75,8 @@ class LockScreenState extends State<LockScreen> {
                         ? SharedPreferences.getInstance().then(
                             (prefs) => prefs.getString(SettingKeys.appLockKey),
                           )
-                        : const FlutterSecureStorage()
+                        : getIt
+                            .get<FlutterSecureStorage>()
                             .read(key: SettingKeys.appLockKey))) {
                   AppLock.of(context)!.didUnlock();
                 } else {

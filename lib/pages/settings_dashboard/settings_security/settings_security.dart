@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -61,8 +62,9 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   }
 
   void setAppLockAction() async {
-    final currentLock =
-        await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+    final currentLock = await getIt
+        .get<FlutterSecureStorage>()
+        .read(key: SettingKeys.appLockKey);
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
     }
@@ -89,7 +91,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (newLock != null) {
-      await const FlutterSecureStorage()
+      await getIt
+          .get<FlutterSecureStorage>()
           .write(key: SettingKeys.appLockKey, value: newLock.single);
       if (newLock.single.isEmpty) {
         AppLock.of(context)!.disable();
