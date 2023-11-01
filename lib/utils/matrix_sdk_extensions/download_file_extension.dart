@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -25,8 +26,9 @@ extension DownloadFileExtension on Event {
 
   Future<FileInfo?> downloadOrRetrieveAttachment(
     Uri mxcUrl,
-    String savePath,
-  ) async {
+    String savePath, {
+    ProgressCallback? progressCallback,
+  }) async {
     final database = room.client.database;
     final attachment = await database?.getFileEntity(mxcUrl);
 
@@ -44,13 +46,13 @@ extension DownloadFileExtension on Event {
     final downloadResponse = await mediaApi.downloadFileInfo(
       uriPath: downloadLink,
       savePath: savePath,
+      onReceiveProgress: progressCallback,
     );
     if (downloadResponse.statusCode == 200) {
       return FileInfo(
         filename,
         savePath,
         content.tryGet<int>('size') ?? await File(savePath).length(),
-        progressCallback: downloadResponse.onReceiveProgress,
       );
     }
     throw ('getFileInfo: Download file $filename failed');
@@ -87,12 +89,12 @@ extension DownloadFileExtension on Event {
       body,
       decryptedPath,
       content.tryGet<int>('size') ?? await File(decryptedPath).length(),
-      progressCallback: fileInfo?.progressCallback,
     );
   }
 
   Future<FileInfo?> getFileInfo({
     getThumbnail = false,
+    ProgressCallback? progressCallback,
   }) async {
     if (!canContainAttachment()) {
       throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
@@ -132,6 +134,7 @@ extension DownloadFileExtension on Event {
     final fileInfo = await downloadOrRetrieveAttachment(
       mxcUrl,
       '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}',
+      progressCallback: progressCallback,
     );
 
     if (isFileEncrypted && fileInfo != null && decryptedPath != null) {
