@@ -271,40 +271,67 @@ class _MxcImageState extends State<MxcImage>
             borderRadius: widget.rounded
                 ? BorderRadius.circular(12.0)
                 : BorderRadius.zero,
-            child: filePath != null && filePath!.isNotEmpty
-                ? Image.file(
-                    File(filePath!),
-                    width: widget.width,
-                    height: widget.height,
-                    cacheWidth: needResize ? widget.width?.toInt() : null,
-                    cacheHeight: needResize ? widget.height?.toInt() : null,
-                    fit: widget.fit,
-                    filterQuality: FilterQuality.medium,
-                    errorBuilder: (context, __, ___) {
-                      _isCached = false;
-                      filePath = null;
-                      WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
-                      return placeholder(context);
-                    },
-                  )
-                : data != null
-                    ? Image.memory(
-                        data,
-                        width: widget.width,
-                        height: widget.height,
-                        cacheWidth: needResize ? widget.width?.toInt() : null,
-                        cacheHeight: needResize ? widget.height?.toInt() : null,
-                        fit: widget.fit,
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (context, __, ___) {
-                          _isCached = false;
-                          _imageData = null;
-                          WidgetsBinding.instance
-                              .addPostFrameCallback(_tryLoad);
-                          return placeholder(context);
-                        },
-                      )
-                    : const SizedBox.shrink(),
+            child: _ImageWidget(
+              filePath: filePath,
+              data: data,
+              width: widget.width,
+              height: widget.height,
+              fit: widget.fit,
+              needResize: needResize,
+              imageErrorWidgetBuilder: (context, __, ___) {
+                _isCached = false;
+                _imageData = null;
+                WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+                return placeholder(context);
+              },
+            ),
           );
+  }
+}
+
+class _ImageWidget extends StatelessWidget {
+  final String? filePath;
+  final Uint8List? data;
+  final double? width;
+  final double? height;
+  final bool needResize;
+  final BoxFit? fit;
+  final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
+
+  const _ImageWidget({
+    this.filePath,
+    this.data,
+    this.width,
+    this.height,
+    required this.needResize,
+    this.fit,
+    required this.imageErrorWidgetBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return filePath != null && filePath!.isNotEmpty
+        ? Image.file(
+            File(filePath!),
+            width: width,
+            height: height,
+            cacheWidth: needResize ? width?.toInt() : null,
+            cacheHeight: needResize ? height?.toInt() : null,
+            fit: fit,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: imageErrorWidgetBuilder,
+          )
+        : data != null
+            ? Image.memory(
+                data!,
+                width: width,
+                height: height,
+                cacheWidth: needResize ? width?.toInt() : null,
+                cacheHeight: needResize ? height?.toInt() : null,
+                fit: fit,
+                filterQuality: FilterQuality.medium,
+                errorBuilder: imageErrorWidgetBuilder,
+              )
+            : const SizedBox.shrink();
   }
 }

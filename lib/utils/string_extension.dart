@@ -297,7 +297,7 @@ extension StringCasingExtension on String {
     if (length < maxCharacters) return this;
     return substring(0, maxCharacters);
   }
-  
+
   String substringToHighlight(String highlightText, {int prefixLength = 0}) {
     if (prefixLength < 0) return this;
     final index = toLowerCase().indexOf(highlightText.toLowerCase());
@@ -305,9 +305,5 @@ extension StringCasingExtension on String {
       return '...${substring(index - prefixLength)}';
     }
     return this;
-  }
-  
-  String getFileNameFromPath() {
-    return split('/').last;
   }
 }
