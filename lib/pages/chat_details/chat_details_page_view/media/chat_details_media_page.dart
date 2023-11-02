@@ -96,7 +96,6 @@ class _VideoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return EventVideoPlayer(
       event,
-      handleDownloadVideoEvent: handleDownloadVideoEvent,
       rounded: false,
       showDuration: true,
       thumbnailCacheKey: event.eventId,

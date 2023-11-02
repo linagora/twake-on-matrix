@@ -8,7 +8,6 @@ import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
-import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -29,7 +28,7 @@ import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
 
-class MessageContent extends StatelessWidget with PlayVideoActionMixin {
+class MessageContent extends StatelessWidget {
   final Event event;
   final Color textColor;
   final Widget endOfBubbleWidget;
@@ -92,16 +91,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
             return _MessageVideoBuilder(
               event: event,
               onFileTapped: controller.onFileTapped,
-              handleDownloadVideoEvent: (event) {
-                return controller.handleDownloadVideoEvent(
-                  event: event,
-                  playVideoAction: (path) => playVideoAction(
-                    context,
-                    path,
-                    eventId: event.eventId,
-                  ),
-                );
-              },
             );
           case MessageTypes.File:
             return Column(
@@ -328,12 +317,9 @@ class _MessageVideoBuilder extends StatelessWidget {
 
   final void Function(Event event) onFileTapped;
 
-  final DownloadVideoEventCallback handleDownloadVideoEvent;
-
   const _MessageVideoBuilder({
     required this.event,
     required this.onFileTapped,
-    required this.handleDownloadVideoEvent,
   });
 
   @override
@@ -365,7 +351,6 @@ class _MessageVideoBuilder extends StatelessWidget {
     }
     return EventVideoPlayer(
       event,
-      handleDownloadVideoEvent: handleDownloadVideoEvent,
       width: displayImageInfo.size.width,
       height: displayImageInfo.size.height,
     );

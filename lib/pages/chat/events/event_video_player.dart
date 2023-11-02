@@ -2,6 +2,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
+import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -29,8 +30,6 @@ class EventVideoPlayer extends StatefulWidget {
 
   final bool showDuration;
 
-  final DownloadVideoEventCallback? handleDownloadVideoEvent;
-
   final String? thumbnailCacheKey;
 
   final Map<EventId, ImageData>? thumbnailCacheMap;
@@ -43,7 +42,6 @@ class EventVideoPlayer extends StatefulWidget {
     Key? key,
     this.width,
     this.height,
-    this.handleDownloadVideoEvent,
     this.rounded = true,
     this.showDuration = false,
     this.thumbnailCacheMap,
@@ -56,14 +54,25 @@ class EventVideoPlayer extends StatefulWidget {
 }
 
 class EventVideoPlayerState extends State<EventVideoPlayer>
-    with PlayVideoActionMixin {
+    with HandleVideoDownloadMixin, PlayVideoActionMixin {
   final _downloadStateNotifier = ValueNotifier(DownloadVideoState.initial);
   String? path;
+  final downloadProgressNotifier = ValueNotifier(0.0);
 
   void _downloadAction() async {
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
-      path = await widget.handleDownloadVideoEvent?.call(widget.event);
+      path = await handleDownloadVideoEvent(
+        event: widget.event,
+        playVideoAction: (path) => playVideoAction(
+          context,
+          path,
+          eventId: widget.event.eventId,
+        ),
+        progressCallback: (count, total) {
+          downloadProgressNotifier.value = count / total;
+        },
+      );
       _downloadStateNotifier.value = DownloadVideoState.done;
     } on MatrixConnectionException catch (e) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
@@ -130,10 +139,16 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                             SizedBox(
                               width: MessageContentStyle.videoCenterButtonSize,
                               height: MessageContentStyle.videoCenterButtonSize,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                    LinagoraRefColors.material().primary[100],
+                              child: ValueListenableBuilder(
+                                valueListenable: downloadProgressNotifier,
+                                builder: (context, progress, child) {
+                                  return CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: LinagoraRefColors.material()
+                                        .primary[100],
+                                    value: progress,
+                                  );
+                                },
                               ),
                             ),
                           ],
