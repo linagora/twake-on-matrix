@@ -514,13 +514,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} participantes",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Criar",
     "@create": {
         "type": "text",

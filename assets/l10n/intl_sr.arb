@@ -480,13 +480,6 @@
             "error": {}
         }
     },
-    "countMembers": "учесника: {count}",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Направи",
     "@create": {
         "type": "text",

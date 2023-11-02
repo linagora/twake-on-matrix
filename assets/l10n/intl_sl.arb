@@ -536,13 +536,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} udeležencev",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Ustvari",
     "@create": {
         "type": "text",

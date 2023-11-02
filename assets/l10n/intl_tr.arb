@@ -519,13 +519,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} katılımcı",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Oluştur",
   "@create": {
     "type": "text",

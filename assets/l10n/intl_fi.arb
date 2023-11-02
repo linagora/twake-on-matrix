@@ -1076,13 +1076,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "countMembers": "{count} osallistujaa",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "changeTheHomeserver": "Vaihda kotipalvelinta",
     "@changeTheHomeserver": {
         "type": "text",

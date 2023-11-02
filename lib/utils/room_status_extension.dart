@@ -97,7 +97,7 @@ extension RoomStatusExtension on Room {
     final totalMembers =
         (summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0);
 
-    return L10n.of(context)!.membersCount(totalMembers.toString());
+    return L10n.of(context)!.countMembers(totalMembers);
   }
 
   String _getLocalizedStatusDirectChat(

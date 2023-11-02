@@ -458,13 +458,6 @@
         "type": "text",
         "description": "Usage hint for the command /unban"
     },
-    "countMembers": "{count} משתתפים",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "צור",
     "@create": {
         "type": "text",

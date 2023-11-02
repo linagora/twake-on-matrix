@@ -505,13 +505,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} sudionika",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Stvori",
     "@create": {
         "type": "text",

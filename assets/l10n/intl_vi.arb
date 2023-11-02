@@ -223,7 +223,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "countMembers": "{count} thành viên",
+  "countMembers": "{count, plural, =0{Không có thành viên} =1{1 thành viên} other{{count} thành viên}}",
   "@countMembers": {
     "type": "text",
     "placeholders": {
@@ -1032,12 +1032,6 @@
   "@pleaseEnter4Digits": {
     "type": "text",
     "placeholders": {}
-  },
-  "membersCount": "{count} Thành viên",
-  "@membersCount": {
-    "placeholders": {
-      "count": {}
-    }
   },
   "keyboard": "Bàn phím",
   "@keyboard": {},
