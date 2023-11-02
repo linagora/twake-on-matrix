@@ -19,7 +19,6 @@ import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_player.dart';
@@ -111,7 +110,6 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                 MessageDownloadContent(
                   event,
                   onFileTapped: controller.onFileTapped,
-                  highlightNotifier: controller.highlightKeywordNotifier,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -136,36 +134,30 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                   event.numberEmotes <= 10;
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                child: ValueListenableBuilder(
-                  valueListenable: controller.highlightKeywordNotifier,
-                  builder: (context, highlightText, child) {
-                    return HtmlMessage(
-                      event: event,
-                      html: html,
-                      highlightText: highlightText,
-                      defaultTextStyle:
-                          Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                // color: textColor,
-                                fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                              ),
-                      linkStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                        decoration: TextDecoration.underline,
-                        decorationColor: textColor.withAlpha(150),
-                      ),
-                      room: event.room,
-                      emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
-                      bottomWidgetSpan: Visibility(
-                        visible: false,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: endOfBubbleWidget,
-                      ),
-                      chatController: controller,
-                    );
-                  },
+                child: HtmlMessage(
+                  event: event,
+                  html: html,
+                  defaultTextStyle:
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            // color: textColor,
+                            fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                          ),
+                  linkStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
+                    decoration: TextDecoration.underline,
+                    decorationColor: textColor.withAlpha(150),
+                  ),
+                  room: event.room,
+                  emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+                  bottomWidgetSpan: Visibility(
+                    visible: false,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: endOfBubbleWidget,
+                  ),
+                  chatController: controller,
                 ),
               );
             }
@@ -227,44 +219,25 @@ class MessageContent extends StatelessWidget with PlayVideoActionMixin {
                       MatrixLocals(L10n.of(context)!),
                       hideReply: true,
                     );
-
-                return ValueListenableBuilder(
-                  valueListenable: controller.highlightKeywordNotifier,
-                  builder: (context, highlightText, child) {
-                    return TwakeLinkPreview(
-                      text: text,
-                      textStyle:
-                          Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                      linkStyle:
-                          Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                      childWidget: Visibility(
-                        visible: false,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: endOfBubbleWidget,
+                return TwakeLinkPreview(
+                  text: text,
+                  textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      uri: Uri.parse(text.getFirstValidUrl() ?? ''),
-                      ownMessage: ownMessage,
-                      onLinkTap: (url) =>
-                          UrlLauncher(context, url.toString()).launchUrl(),
-                      textSpanBuilder: (text, textStyle, recognizer) =>
-                          TextSpan(
-                        children: text?.buildHighlightTextSpans(
-                          highlightText,
-                          style: textStyle,
-                          highlightStyle: textStyle?.copyWith(
-                            backgroundColor: CssColor.fromCss('gold'),
-                          ),
-                          recognizer: recognizer,
-                        ),
+                  linkStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
-                    );
-                  },
+                  childWidget: Visibility(
+                    visible: false,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: endOfBubbleWidget,
+                  ),
+                  uri: Uri.parse(text.getFirstValidUrl() ?? ''),
+                  ownMessage: ownMessage,
+                  onLinkTap: (url) =>
+                      UrlLauncher(context, url.toString()).launchUrl(),
                 );
               },
             );

@@ -12,14 +12,12 @@ class MessageDownloadContent extends StatelessWidget {
   final Event event;
   final void Function(Event event)? onFileTapped;
 
-  final ValueNotifier<String>? highlightNotifier;
   final String? highlightText;
 
   const MessageDownloadContent(
     this.event, {
     Key? key,
     this.onFileTapped,
-    this.highlightNotifier,
     this.highlightText,
   }) : super(key: key);
 
@@ -62,22 +60,10 @@ class MessageDownloadContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  if (highlightNotifier != null) ...[
-                    ValueListenableBuilder(
-                      valueListenable: highlightNotifier!,
-                      builder: (context, highlightText, child) {
-                        return _FileNameText(
-                          filename: filename,
-                          highlightText: highlightText,
-                        );
-                      },
-                    ),
-                  ] else ...[
-                    _FileNameText(
-                      filename: filename,
-                      highlightText: highlightText,
-                    ),
-                  ],
+                  _FileNameText(
+                    filename: filename,
+                    highlightText: highlightText,
+                  ),
                   Row(
                     children: [
                       if (sizeString != null)
