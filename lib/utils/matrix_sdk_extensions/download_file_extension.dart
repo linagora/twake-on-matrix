@@ -16,7 +16,7 @@ extension DownloadFileExtension on Event {
     return status.isSending;
   }
 
-  Uri? getAttachmentOrThumbnailMxcUrl(bool getThumbnail) {
+  Uri? getAttachmentOrThumbnailMxcUrl({bool getThumbnail = false}) {
     return attachmentOrThumbnailMxcUrl(getThumbnail: getThumbnail);
   }
 
@@ -24,10 +24,15 @@ extension DownloadFileExtension on Event {
     return isEncrypted && !room.client.encryptionEnabled;
   }
 
+  int getFileSize({bool getThumbnail = false}) {
+    return getThumbnail ? thumbnailInfoMap['size'] : infoMap['size'];
+  }
+
   Future<FileInfo?> downloadOrRetrieveAttachment(
     Uri mxcUrl,
     String savePath, {
     ProgressCallback? progressCallback,
+    bool getThumbnail = false,
   }) async {
     final database = room.client.database;
     final attachment = await database?.getFileEntity(mxcUrl);
@@ -36,11 +41,16 @@ extension DownloadFileExtension on Event {
     final downloadLink = mxcUrl.getDownloadLink(room.client);
 
     if (attachment != null) {
-      return FileInfo(
-        filename,
-        attachment.path,
-        content.tryGet<int>('size') ?? await attachment.length(),
-      );
+      if (await attachment.length() ==
+          getFileSize(getThumbnail: getThumbnail)) {
+        return FileInfo(
+          filename,
+          attachment.path,
+          getFileSize(getThumbnail: getThumbnail),
+        );
+      } else {
+        await attachment.delete();
+      }
     }
 
     final downloadResponse = await mediaApi.downloadFileInfo(
@@ -105,7 +115,7 @@ extension DownloadFileExtension on Event {
       if (localFile != null) return FileInfo.fromMatrixFile(localFile);
     }
 
-    final mxcUrl = getAttachmentOrThumbnailMxcUrl(getThumbnail);
+    final mxcUrl = getAttachmentOrThumbnailMxcUrl(getThumbnail: getThumbnail);
     if (mxcUrl == null) {
       throw "getFileInfo: This event hasn't any attachment or thumbnail.";
     }
@@ -122,12 +132,19 @@ extension DownloadFileExtension on Event {
     if (isFileEncrypted) {
       decryptedPath =
           '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}-decrypted';
+      final decryptedFile = File(decryptedPath);
+
       if (await File(decryptedPath).exists()) {
-        return FileInfo(
-          body,
-          decryptedPath,
-          content.tryGet<int>('size') ?? await File(decryptedPath).length(),
-        );
+        final decryptedFileLength = await decryptedFile.length();
+        if (decryptedFileLength == getFileSize(getThumbnail: getThumbnail)) {
+          return FileInfo(
+            body,
+            decryptedPath,
+            getFileSize(getThumbnail: getThumbnail),
+          );
+        } else {
+          await decryptedFile.delete();
+        }
       }
     }
 
@@ -135,6 +152,7 @@ extension DownloadFileExtension on Event {
       mxcUrl,
       '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}',
       progressCallback: progressCallback,
+      getThumbnail: getThumbnail,
     );
 
     if (isFileEncrypted && fileInfo != null && decryptedPath != null) {
