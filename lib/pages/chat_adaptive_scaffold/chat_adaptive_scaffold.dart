@@ -67,19 +67,15 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
-                  builder: (_) => Navigator(
-                    pages: [
-                      MaterialPage(
-                        child: body!,
-                      ),
+                  builder: (_) => Stack(
+                    children: [
+                      body!,
                       if (showRightPanel)
-                        MaterialPage(
-                          child: ChatSearch(
-                            roomId: widget.roomId,
-                            onBack: toggleRightPanel,
-                            jumpToEventId: jumpToEventId,
-                            isInStack: true,
-                          ),
+                        ChatSearch(
+                          roomId: widget.roomId,
+                          onBack: toggleRightPanel,
+                          jumpToEventId: jumpToEventId,
+                          isInStack: true,
                         ),
                     ],
                   ),
