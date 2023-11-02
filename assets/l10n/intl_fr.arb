@@ -519,7 +519,7 @@
       "error": {}
     }
   },
-  "countMembers": "{count} membres",
+  "countMembers": "{count, plural, =0{no membres} =1{1 membre} other{{count} membres}}",
   "@countMembers": {
     "type": "text",
     "placeholders": {
@@ -2900,12 +2900,6 @@
   "@file": {},
   "add": "Ajouter",
   "@add": {},
-  "membersCount": "{count} Membres",
-  "@membersCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "notificationAndSounds": "Notification & Son",
   "@notificationAndSounds": {},
   "today": "Aujourd'hui",

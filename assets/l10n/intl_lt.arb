@@ -1821,13 +1821,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} dalyviai",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "createdTheChat": "💬 {username} sukūrė pokalbį",
   "@createdTheChat": {
     "type": "text",

@@ -2536,13 +2536,6 @@
   "@enterInviteLinkOrMatrixId": {},
   "noBackupWarning": "Будьте внимательны! Без резервного копирования чата вы потеряете доступ к зашифрованным сообщениям. Мы настоятельно рекомендуем включить резервное копирование чата перед выходом из системы.",
   "@noBackupWarning": {},
-  "countMembers": "{count} участников",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "onlineHourAgo": "был(а) в сети {hour} ч",
   "@onlineHourAgo": {
     "placeholders": {
@@ -2647,12 +2640,6 @@
   "@captionForImagesIsNotSupportYet": {},
   "tapToAllowAccessToYourCamera": "Вы можете включить доступ к камере в приложении \"Настройки\", чтобы совершать видеозвонки в",
   "@tapToAllowAccessToYourCamera": {},
-  "membersCount": "{count} участников",
-  "@membersCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "searchResultNotFound2": "• Этого пользователя может не быть в вашей адресной книге.\n",
   "@searchResultNotFound2": {},
   "searchResultNotFound3": "• Проверьте разрешение на доступ к контактам, пользователь может быть в вашей адресной книге.\n",

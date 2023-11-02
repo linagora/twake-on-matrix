@@ -215,13 +215,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "countMembers": "{count} rannpháirtithe",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "or": "Nó",
     "@or": {
         "type": "text",

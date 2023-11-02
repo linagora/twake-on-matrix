@@ -515,13 +515,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} účastníků",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Vytvořit",
   "@create": {
     "type": "text",

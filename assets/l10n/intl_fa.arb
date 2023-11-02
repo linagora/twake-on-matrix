@@ -729,13 +729,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "countMembers": "{count} تا شرکت کننده",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "سازید",
   "@create": {
     "type": "text",

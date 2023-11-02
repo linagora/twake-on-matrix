@@ -518,13 +518,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} personen",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Aanmaken",
   "@create": {
     "type": "text",

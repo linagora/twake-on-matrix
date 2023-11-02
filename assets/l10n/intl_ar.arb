@@ -313,13 +313,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} منتسبا",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "أنشئ",
     "@create": {
         "type": "text",

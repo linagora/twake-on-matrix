@@ -59,13 +59,6 @@
         "type": "text",
         "placeholders": {}
     },
-    "countMembers": "{count} participantes",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "createNewSpace": "Crear un spacie",
     "@createNewSpace": {
         "type": "text",
