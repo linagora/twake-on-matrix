@@ -4,7 +4,6 @@ import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:go_router/go_router.dart';
 import 'settings_security.dart';
 
 class SettingsSecurityView extends StatelessWidget {
@@ -21,32 +20,33 @@ class SettingsSecurityView extends StatelessWidget {
           withScrolling: true,
           child: Column(
             children: [
-              ListTile(
-                leading: const Icon(Icons.camera_outlined),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(L10n.of(context)!.whoCanSeeMyStories),
-                onTap: () => context.go('/stories'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.block_outlined),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(L10n.of(context)!.ignoredUsers),
-                onTap: () => context.go('/ignorelist'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.password_outlined),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(
-                  L10n.of(context)!.changePassword,
-                ),
-                onTap: controller.changePasswordAccountAction,
-              ),
-              ListTile(
-                leading: const Icon(Icons.mail_outlined),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(L10n.of(context)!.passwordRecovery),
-                onTap: () => context.go('/3pid'),
-              ),
+              // #869 Hide privacy settings for now
+              // ListTile(
+              //   leading: const Icon(Icons.camera_outlined),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(L10n.of(context)!.whoCanSeeMyStories),
+              //   onTap: () => context.go('/stories'),
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.block_outlined),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(L10n.of(context)!.ignoredUsers),
+              //   onTap: () => context.go('/ignorelist'),
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.password_outlined),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(
+              //     L10n.of(context)!.changePassword,
+              //   ),
+              //   onTap: controller.changePasswordAccountAction,
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.mail_outlined),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(L10n.of(context)!.passwordRecovery),
+              //   onTap: () => context.go('/3pid'),
+              // ),
               if (Matrix.of(context).client.encryption != null) ...{
                 const Divider(thickness: 1),
                 if (PlatformInfos.isMobile)
