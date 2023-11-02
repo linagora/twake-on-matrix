@@ -403,13 +403,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count}個參與者",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "建立",
     "@create": {
         "type": "text",

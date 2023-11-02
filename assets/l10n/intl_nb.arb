@@ -377,13 +377,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} deltagere",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Opprett",
     "@create": {
         "type": "text",

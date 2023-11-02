@@ -510,13 +510,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} Mitglieder",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Erstellen",
   "@create": {
     "type": "text",

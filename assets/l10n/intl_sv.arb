@@ -370,13 +370,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} deltagare",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Skapa",
   "@create": {
     "type": "text",

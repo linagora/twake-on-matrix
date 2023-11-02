@@ -504,13 +504,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} partoprenantoj",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Krei",
     "@create": {
         "type": "text",
