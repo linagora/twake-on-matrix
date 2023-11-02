@@ -145,7 +145,6 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
-  final highlightKeywordNotifier = ValueNotifier<String>('');
 
   Timer? typingCoolDown;
   Timer? typingTimeout;

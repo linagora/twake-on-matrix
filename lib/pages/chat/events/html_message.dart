@@ -3,7 +3,6 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/pill.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +15,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 
 class HtmlMessage extends StatelessWidget {
   final String html;
-  final String? highlightText;
   final int? maxLines;
   final Room room;
   final Event event;
@@ -29,7 +27,6 @@ class HtmlMessage extends StatelessWidget {
   const HtmlMessage({
     Key? key,
     required this.html,
-    this.highlightText,
     this.chatController,
     required this.event,
     this.maxLines,
@@ -48,7 +45,7 @@ class HtmlMessage extends StatelessWidget {
     // We do *not* do this in an AST and just with simple regex here, as riot-web tends to create
     // miss-matching tags, and this way we actually correctly identify what we want to strip and, well,
     // strip it.
-    var renderHtml = html.replaceAll(
+    final renderHtml = html.replaceAll(
       RegExp(
         '<mx-reply>.*</mx-reply>',
         caseSensitive: false,
@@ -57,9 +54,6 @@ class HtmlMessage extends StatelessWidget {
       ),
       '',
     );
-    if (highlightText != null) {
-      renderHtml = renderHtml.htmlHighlightText(highlightText);
-    }
 
     // there is no need to pre-validate the html, as we validate it while rendering
 
