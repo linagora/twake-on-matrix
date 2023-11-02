@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluffychat/utils/twake_secure_storage.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -74,7 +74,7 @@ class LockScreenState extends State<LockScreen> {
                         ? SharedPreferences.getInstance().then(
                             (prefs) => prefs.getString(SettingKeys.appLockKey),
                           )
-                        : const FlutterSecureStorage()
+                        : const TwakeSecureStorage()
                             .read(key: SettingKeys.appLockKey))) {
                   AppLock.of(context)!.didUnlock();
                 } else {

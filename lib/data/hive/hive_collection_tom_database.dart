@@ -4,7 +4,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluffychat/utils/twake_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,7 +31,7 @@ class HiveCollectionToMDatabase {
         throw MissingPluginException();
       }
 
-      const secureStorage = FlutterSecureStorage();
+      const secureStorage = TwakeSecureStorage();
       final containsEncryptionKey = await secureStorage.read(
             key: FlutterHiveCollectionsDatabase.cipherStorageKey,
           ) !=
@@ -54,12 +54,12 @@ class HiveCollectionToMDatabase {
 
       hiverCipher = HiveAesCipher(base64Url.decode(rawEncryptionKey));
     } on MissingPluginException catch (_) {
-      const FlutterSecureStorage()
+      const TwakeSecureStorage()
           .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey)
           .catchError((_) {});
       Logs().i('Hive encryption is not supported on this platform');
     } catch (e, s) {
-      const FlutterSecureStorage()
+      const TwakeSecureStorage()
           .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey)
           .catchError((_) {});
       Logs().w('Unable to init Hive encryption', e, s);
@@ -74,7 +74,7 @@ class HiveCollectionToMDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open ToM Hive.', e, s);
-      const FlutterSecureStorage()
+      const TwakeSecureStorage()
           .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
       await db.clear().catchError((_) {});
       await Hive.deleteFromDisk();

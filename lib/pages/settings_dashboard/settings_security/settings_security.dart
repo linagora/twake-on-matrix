@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluffychat/utils/twake_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
@@ -62,7 +62,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   void setAppLockAction() async {
     final currentLock =
-        await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+        await const TwakeSecureStorage().read(key: SettingKeys.appLockKey);
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
     }
@@ -89,7 +89,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (newLock != null) {
-      await const FlutterSecureStorage()
+      await const TwakeSecureStorage()
           .write(key: SettingKeys.appLockKey, value: newLock.single);
       if (newLock.single.isEmpty) {
         AppLock.of(context)!.disable();

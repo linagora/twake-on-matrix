@@ -6,7 +6,7 @@ import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluffychat/utils/twake_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matrix/encryption.dart';
@@ -90,7 +90,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     _recoveryKeyStored = false;
     bootstrap =
         widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
-    final key = await const FlutterSecureStorage().read(key: _secureStorageKey);
+    final key = await const TwakeSecureStorage().read(key: _secureStorageKey);
     if (key == null) return;
     _recoveryKeyTextEditingController.text = key;
   }
@@ -188,7 +188,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       (_recoveryKeyCopied || _storeInSecureStorage == true)
                           ? () {
                               if (_storeInSecureStorage == true) {
-                                const FlutterSecureStorage().write(
+                                const TwakeSecureStorage().write(
                                   key: _secureStorageKey,
                                   value: key,
                                 );
