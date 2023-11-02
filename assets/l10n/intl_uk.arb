@@ -313,13 +313,6 @@
       "error": {}
     }
   },
-  "countMembers": "Учасників: {count}",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Створити",
   "@create": {
     "type": "text",

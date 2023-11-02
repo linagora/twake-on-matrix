@@ -323,13 +323,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} résztvevő",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Létrehozás",
   "@create": {
     "type": "text",

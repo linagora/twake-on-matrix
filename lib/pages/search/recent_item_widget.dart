@@ -110,7 +110,7 @@ class _GroupChatInformation extends StatelessWidget {
                 searchWord: searchKeyword,
               ),
               Text(
-                L10n.of(context)!.membersCount(actualMembersCount),
+                L10n.of(context)!.countMembers(actualMembersCount),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 softWrap: false,

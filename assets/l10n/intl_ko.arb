@@ -372,13 +372,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "countMembers": "{count} 참여자",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "couldNotDecryptMessage": "메시지 복호화할 수 없음: {error}",
   "@couldNotDecryptMessage": {
     "type": "text",

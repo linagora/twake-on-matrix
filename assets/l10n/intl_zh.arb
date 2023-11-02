@@ -498,13 +498,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} 名参与者",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "创建",
     "@create": {
         "type": "text",

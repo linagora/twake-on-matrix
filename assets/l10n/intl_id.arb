@@ -466,13 +466,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "countMembers": "{count} anggota",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "couldNotDecryptMessage": "Tidak dapat mendekripsikan pesan: {error}",
   "@couldNotDecryptMessage": {
     "type": "text",

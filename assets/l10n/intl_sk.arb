@@ -306,13 +306,6 @@
             "error": {}
         }
     },
-    "countMembers": "{count} účastníkov",
-    "@countMembers": {
-        "type": "text",
-        "placeholders": {
-            "count": {}
-        }
-    },
     "create": "Vytvoriť",
     "@create": {
         "type": "text",

@@ -515,13 +515,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count} osalejat",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "Loo",
   "@create": {
     "type": "text",

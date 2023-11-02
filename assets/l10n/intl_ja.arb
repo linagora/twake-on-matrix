@@ -411,13 +411,6 @@
       "error": {}
     }
   },
-  "countMembers": "{count}名の参加者",
-  "@countMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {}
-    }
-  },
   "create": "作成",
   "@create": {
     "type": "text",

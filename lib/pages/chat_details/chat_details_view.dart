@@ -230,7 +230,7 @@ class ChatDetailsView extends StatelessWidget {
           Text(
             actualMembersCount > 1
                 ? L10n.of(context)!.countMembers(
-                    actualMembersCount.toString(),
+                    actualMembersCount,
                   )
                 : L10n.of(context)!.emptyChat,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
