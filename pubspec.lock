@@ -1542,10 +1542,10 @@ packages:
     dependency: transitive
     description:
       name: markdown
-      sha256: "01512006c8429f604eb10f9848717baeaedf99e991d14a50d540d9beff08e5c6"
+      sha256: acf35edccc0463a9d7384e437c015a3535772e09714cf60e07eeef3a15870dcd
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "7.1.1"
   matcher:
     dependency: transitive
     description:
@@ -1566,11 +1566,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "twake-supported-0.22.4"
-      resolved-ref: "1cb0e2d896f9adf8787398a7bebd5c0f6e7345e5"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: "2155b3839fe92e87649dc136484a14e513e7b20a"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
-    version: "0.22.4"
+    version: "0.22.6"
   matrix_api_lite:
     dependency: transitive
     description:
