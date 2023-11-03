@@ -89,45 +89,48 @@ class ChatDetailsView extends StatelessWidget {
                   sliver: SliverAppBar(
                     toolbarHeight:
                         ChatDetailViewStyle.toolbarHeightSliverAppBar,
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _groupAvatarBuilder(
-                          context: context,
-                          room: controller.room!,
-                        ),
-                        _groupNameAndInfoBuilder(
-                          context: context,
-                          room: controller.room!,
-                        ),
-                        ValueListenableBuilder(
-                          valueListenable: controller.muteNotifier,
-                          builder: (context, pushRuleState, child) {
-                            final buttons =
-                                controller.chatDetailsActionsButton();
-
-                            return ActionsHeaderBuilder(
-                              actions: buttons,
-                              width: ChatDetailViewStyle.actionsHeaderWidth(
-                                context,
-                              ),
-                              buttonColor: !controller.isMobileAndTablet
-                                  ? LinagoraRefColors.material().primary[100]
-                                  : null,
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: controller.isMobileAndTablet
-                                    ? LinagoraRefColors.material().neutral[90]!
-                                    : Colors.transparent,
-                              ),
-                              onTap: (actions) => controller.onTapActionsButton(
-                                actions,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                    title: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _groupAvatarBuilder(
+                            context: context,
+                            room: controller.room!,
+                          ),
+                          _groupNameAndInfoBuilder(
+                            context: context,
+                            room: controller.room!,
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: controller.muteNotifier,
+                            builder: (context, pushRuleState, child) {
+                              final buttons =
+                                  controller.chatDetailsActionsButton();
+                              return ActionsHeaderBuilder(
+                                actions: buttons,
+                                width: ChatDetailViewStyle.actionsHeaderWidth(
+                                  context,
+                                ),
+                                buttonColor: !controller.isMobileAndTablet
+                                    ? LinagoraRefColors.material().primary[100]
+                                    : null,
+                                borderSide: BorderSide(
+                                  width: 1,
+                                  color: controller.isMobileAndTablet
+                                      ? LinagoraRefColors.material()
+                                          .neutral[90]!
+                                      : Colors.transparent,
+                                ),
+                                onTap: (actions) =>
+                                    controller.onTapActionsButton(
+                                  actions,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                     automaticallyImplyLeading: false,
                     pinned: true,
