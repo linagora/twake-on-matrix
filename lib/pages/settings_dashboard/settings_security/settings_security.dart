@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
@@ -49,8 +50,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (input == null) return;
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context)
           .client
           .changePassword(input.last, oldPassword: input.first),
@@ -145,8 +145,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (input == null) return;
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.deactivateAccount(
             auth: AuthenticationPassword(
               password: input.single,
@@ -161,7 +160,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   void showBootstrapDialog(BuildContext context) async {
     await BootstrapDialog(
       client: Matrix.of(context).client,
-    ).show(context);
+    ).show();
   }
 
   Future<void> dehydrateAction() => dehydrateDevice(context);
@@ -176,8 +175,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     if (response != OkCancelResult.ok) {
       return;
     }
-    final file = await showFutureLoadingDialog(
-      context: context,
+    final file = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final export = await Matrix.of(context).client.exportDump();
         if (export == null) throw Exception('Export data is null.');

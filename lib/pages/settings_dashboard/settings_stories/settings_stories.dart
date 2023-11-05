@@ -1,6 +1,7 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -29,8 +30,7 @@ class SettingsStoriesController extends State<SettingsStories> {
       // Kick user from stories room and add to block list
       final blockList = room.client.storiesBlockList;
       blockList.add(user.id);
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           await user.kick();
           await room.client.setStoriesBlockList(blockList.toSet().toList());
@@ -45,8 +45,7 @@ class SettingsStoriesController extends State<SettingsStories> {
     // Invite user to stories room and remove from block list
     final blockList = room.client.storiesBlockList;
     blockList.remove(user.id);
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         await room.client.setStoriesBlockList(blockList);
         await room.invite(user.id);

@@ -8,14 +8,16 @@ import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -63,9 +65,15 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   void logoutAction() async {
     final noBackup = showChatBackupBanner == true;
+    final twakeContext = TwakeApp.routerKey.currentContext;
+    if (twakeContext == null) {
+      Logs().e(
+        'SettingsController()::logoutAction - Twake context is null',
+      );
+    }
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
-          context: context,
+          context: twakeContext!,
           title: L10n.of(context)!.areYouSureYouWantToLogout,
           message: L10n.of(context)!.noBackupWarning,
           isDestructiveAction: noBackup,
@@ -79,8 +87,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
     await hiveCollectionToMDatabase.clear();
     final matrix = Matrix.of(context);
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         if (matrix.backgroundPush != null) {
           await matrix.backgroundPush!.removeCurrentPusher();
@@ -138,7 +145,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     }
     await BootstrapDialog(
       client: Matrix.of(context).client,
-    ).show(context);
+    ).show();
     checkBootstrap();
   }
 
@@ -187,7 +194,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         ).openUrlInAppBrowser();
         break;
       case SettingEnum.about:
-        PlatformInfos.showDialog(context);
+        PlatformInfos.showAboutDialogFullScreen();
       case SettingEnum.logout:
         logoutAction();
         break;

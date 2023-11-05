@@ -1,10 +1,11 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
@@ -28,8 +29,7 @@ class StoriesHeader extends StatelessWidget {
     final room = Matrix.of(context).client.getRoomById(roomId);
     if (room == null) return;
     if (room.membership != Membership.join) {
-      final result = await showFutureLoadingDialog(
-        context: context,
+      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: room.join,
       );
       if (result.error != null) return;
@@ -65,20 +65,17 @@ class StoriesHeader extends StatelessWidget {
     if (action == null) return;
     switch (action) {
       case ContextualRoomAction.mute:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room.setPushRuleState(PushRuleState.dontNotify),
         );
         break;
       case ContextualRoomAction.unmute:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room.setPushRuleState(PushRuleState.notify),
         );
         break;
       case ContextualRoomAction.leave:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room.leave(),
         );
         break;

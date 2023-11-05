@@ -1,8 +1,9 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/widgets/matrix.dart';
@@ -34,8 +35,7 @@ class Settings3PidController extends State<Settings3Pid> {
     );
     if (input == null) return;
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
-    final response = await showFutureLoadingDialog(
-      context: context,
+    final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.requestTokenToRegisterEmail(
             clientSecret,
             input.single,
@@ -51,8 +51,7 @@ class Settings3PidController extends State<Settings3Pid> {
       okLabel: L10n.of(context)!.iHaveClickedOnLink,
     );
     if (ok != OkCancelResult.ok) return;
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.uiaRequestBackground(
             (auth) => Matrix.of(context).client.add3PID(
                   clientSecret,
@@ -78,8 +77,7 @@ class Settings3PidController extends State<Settings3Pid> {
         OkCancelResult.ok) {
       return;
     }
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.delete3pidFromAccount(
             identifier.address,
             identifier.medium,

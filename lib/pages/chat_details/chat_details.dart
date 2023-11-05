@@ -15,6 +15,7 @@ import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -27,7 +28,7 @@ import 'package:flutter/services.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -190,8 +191,7 @@ class ChatDetailsController extends State<ChatDetails>
       ],
     );
     if (input == null) return;
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setName(input.single),
     );
     if (success.error == null) {
@@ -208,14 +208,13 @@ class ChatDetailsController extends State<ChatDetails>
     // The current endpoint doesnt seem to be implemented in Synapse. This may
     // change in the future and then we just need to switch to this api call:
     //
-    // final aliases = await showFutureLoadingDialog(
+    // final aliases = await TwakeDialog.showFutureLoadingDialogFullScreen(
     //   context: context,
     //   future: () => room.client.requestRoomAliases(room.id),
     // );
     //
     // While this is not working we use the unstable api:
-    final aliases = await showFutureLoadingDialog(
-      context: context,
+    final aliases = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room!.client
           .request(
             RequestType.GET,
@@ -282,14 +281,12 @@ class ChatDetailsController extends State<ChatDetails>
         );
         break;
       case AliasActions.delete:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room.client.deleteRoomAlias(select),
         );
         break;
       case AliasActions.setCanonical:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room.client.setRoomStateWithKey(
             room.id,
             EventTypes.RoomCanonicalAlias,
@@ -323,8 +320,7 @@ class ChatDetailsController extends State<ChatDetails>
       ],
     );
     if (input == null) return;
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () =>
           room.client.setRoomAlias('#${input.single}:${domain!}', room.id),
     );
@@ -348,8 +344,7 @@ class ChatDetailsController extends State<ChatDetails>
       ],
     );
     if (input == null) return;
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setDescription(input.single),
     );
     if (success.error == null) {
@@ -360,8 +355,8 @@ class ChatDetailsController extends State<ChatDetails>
     }
   }
 
-  void setGuestAccessAction(GuestAccess guestAccess) => showFutureLoadingDialog(
-        context: context,
+  void setGuestAccessAction(GuestAccess guestAccess) =>
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => Matrix.of(context)
             .client
             .getRoomById(roomId!)!
@@ -369,16 +364,15 @@ class ChatDetailsController extends State<ChatDetails>
       );
 
   void setHistoryVisibilityAction(HistoryVisibility historyVisibility) =>
-      showFutureLoadingDialog(
-        context: context,
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => Matrix.of(context)
             .client
             .getRoomById(roomId!)!
             .setHistoryVisibility(historyVisibility),
       );
 
-  void setJoinRulesAction(JoinRules joinRule) => showFutureLoadingDialog(
-        context: context,
+  void setJoinRulesAction(JoinRules joinRule) =>
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => Matrix.of(context)
             .client
             .getRoomById(roomId!)!
@@ -431,8 +425,7 @@ class ChatDetailsController extends State<ChatDetails>
           );
     if (action == null) return;
     if (action == AvatarAction.remove) {
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => room!.setAvatar(null),
       );
       return;
@@ -462,16 +455,14 @@ class ChatDetailsController extends State<ChatDetails>
         name: pickedFile.name,
       );
     }
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room!.setAvatar(file),
     );
   }
 
   void requestMoreMembersAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!);
-    final participants = await showFutureLoadingDialog(
-      context: context,
+    final participants = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room!.requestParticipants(),
     );
     if (participants.error == null) {

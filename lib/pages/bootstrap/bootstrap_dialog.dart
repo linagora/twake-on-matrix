@@ -1,13 +1,14 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
@@ -19,24 +20,19 @@ import '../key_verification/key_verification_dialog.dart';
 class BootstrapDialog extends StatefulWidget {
   final bool wipe;
   final Client client;
+
   const BootstrapDialog({
     Key? key,
     this.wipe = false,
     required this.client,
   }) : super(key: key);
 
-  Future<bool?> show(BuildContext context) => PlatformInfos.isCupertinoStyle
-      ? showCupertinoDialog(
-          context: context,
-          builder: (context) => this,
-          barrierDismissible: true,
-          useRootNavigator: false,
+  Future<bool?> show() => PlatformInfos.isCupertinoStyle
+      ? TwakeDialog.showCupertinoDialogFullScreen(
+          builder: () => this,
         )
-      : showDialog(
-          context: context,
-          builder: (context) => this,
-          barrierDismissible: true,
-          useRootNavigator: false,
+      : TwakeDialog.showDialogFullScreen(
+          builder: () => this,
         );
 
   @override
@@ -344,8 +340,8 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       onPressed: _recoveryKeyInputLoading
                           ? null
                           : () async {
-                              final req = await showFutureLoadingDialog(
-                                context: context,
+                              final req = await TwakeDialog
+                                  .showFutureLoadingDialogFullScreen(
                                 future: () => widget.client
                                     .userDeviceKeys[widget.client.userID!]!
                                     .startVerification(),
@@ -380,7 +376,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                   wipe: true,
                                   wipeRecovery: true,
                                   client: widget.client,
-                                ).show(context).then(
+                                ).show().then(
                                       (value) => Navigator.of(
                                         context,
                                         rootNavigator: false,

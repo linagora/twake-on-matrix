@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
@@ -147,8 +148,8 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                   cancelLabel: L10n.of(context)!.cancel,
                 );
                 if (confirmed == OkCancelResult.ok) {
-                  final success = await showFutureLoadingDialog(
-                    context: context,
+                  final success =
+                      await TwakeDialog.showFutureLoadingDialogFullScreen(
                     future: () => widget.room.leave(),
                   );
                   if (success.error == null) {
@@ -157,15 +158,13 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                 }
                 break;
               case 'mute':
-                await showFutureLoadingDialog(
-                  context: context,
+                await TwakeDialog.showFutureLoadingDialogFullScreen(
                   future: () =>
                       widget.room.setPushRuleState(PushRuleState.mentionsOnly),
                 );
                 break;
               case 'unmute':
-                await showFutureLoadingDialog(
-                  context: context,
+                await TwakeDialog.showFutureLoadingDialogFullScreen(
                   future: () =>
                       widget.room.setPushRuleState(PushRuleState.notify),
                 );

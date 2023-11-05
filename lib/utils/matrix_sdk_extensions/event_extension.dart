@@ -1,18 +1,21 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {
-  Future<LoadingDialogResult<MatrixFile?>> getFile(BuildContext context) =>
-      showFutureLoadingDialog(
-        context: context,
+  Future<LoadingDialogResult<MatrixFile?>> getFile(
+    BuildContext context,
+  ) async =>
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: downloadAndDecryptAttachment,
       );
 

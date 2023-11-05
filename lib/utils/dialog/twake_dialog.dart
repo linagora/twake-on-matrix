@@ -3,7 +3,7 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 class TwakeDialog {
@@ -62,9 +62,10 @@ class TwakeDialog {
       Logs().e(
         'TwakeLoadingDialog()::showDialogFullScreen - Twake context is null',
       );
+      return Future.value(null);
     }
     return showDialog(
-      context: twakeContext!,
+      context: twakeContext,
       builder: (context) => builder(),
       barrierDismissible: true,
       useRootNavigator: false,
@@ -79,9 +80,10 @@ class TwakeDialog {
       Logs().e(
         'TwakeLoadingDialog()::showCupertinoDialogFullScreen - Twake context is null',
       );
+      return Future.value(null);
     }
     return showCupertinoDialog(
-      context: twakeContext!,
+      context: twakeContext,
       builder: (context) => builder(),
       barrierDismissible: true,
       useRootNavigator: false,
@@ -94,16 +96,16 @@ class ProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AlertDialog(
+    return AlertDialog(
       content: Row(
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: CircularProgressIndicator.adaptive(),
           ),
           Expanded(
             child: Text(
-              'Loading... Please Wait!',
+              L10n.of(context)!.loadingPleaseWait,
               overflow: TextOverflow.ellipsis,
             ),
           ),

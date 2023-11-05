@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:matrix/matrix.dart';
 
@@ -78,8 +79,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
         'https://www.openstreetmap.org/?mlat=${position!.latitude}&mlon=${position!.longitude}#map=16/${position!.latitude}/${position!.longitude}';
     final uri =
         'geo:${position!.latitude},${position!.longitude};u=${position!.accuracy}';
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => widget.room.sendLocation(body, uri),
     );
     Navigator.of(context, rootNavigator: false).pop();
