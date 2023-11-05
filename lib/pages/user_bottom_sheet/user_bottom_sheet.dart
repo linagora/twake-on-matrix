@@ -1,9 +1,10 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/widgets/permission_slider_dialog.dart';
@@ -82,8 +83,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
           textFields: [DialogTextField(hintText: L10n.of(context)!.reason)],
         );
         if (reason == null || reason.single.isEmpty) return;
-        final result = await showFutureLoadingDialog(
-          context: context,
+        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => Matrix.of(context).client.reportContent(
                 event.roomId!,
                 event.eventId,
@@ -100,8 +100,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         break;
       case UserBottomSheetAction.ban:
         if (await askConfirmation()) {
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.ban(),
           );
           Navigator.of(context, rootNavigator: false).pop();
@@ -109,8 +108,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         break;
       case UserBottomSheetAction.unban:
         if (await askConfirmation()) {
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.unban(),
           );
           Navigator.of(context, rootNavigator: false).pop();
@@ -118,8 +116,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         break;
       case UserBottomSheetAction.kick:
         if (await askConfirmation()) {
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.kick(),
           );
           Navigator.of(context, rootNavigator: false).pop();
@@ -132,16 +129,15 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         );
         if (newPermission != null) {
           if (newPermission == 100 && await askConfirmation() == false) break;
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.setPower(newPermission),
           );
           context.pop();
         }
         break;
       case UserBottomSheetAction.message:
-        final roomIdResult = await showFutureLoadingDialog(
-          context: context,
+        final roomIdResult =
+            await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => widget.user.startDirectChat(),
         );
         if (roomIdResult.error != null) return;
@@ -150,8 +146,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         break;
       case UserBottomSheetAction.ignore:
         if (await askConfirmation()) {
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => Matrix.of(context).client.ignoreUser(widget.user.id),
           );
         }

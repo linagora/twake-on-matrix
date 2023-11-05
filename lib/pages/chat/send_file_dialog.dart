@@ -1,10 +1,11 @@
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/size_string.dart';
@@ -36,8 +37,7 @@ class SendFileDialogState extends State<SendFileDialog> {
       MatrixImageFile? thumbnail;
       if (file is MatrixVideoFile &&
           (file.bytes?.length ?? 0) > minSizeToCompress) {
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async {
             file = await file.resizeVideo();
             thumbnail = await file.getVideoThumbnail();

@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
@@ -70,8 +71,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
   Future<void> checkInput(String input) async {
     if (input.isEmpty) return;
 
-    final valid = await showFutureLoadingDialog(
-      context: context,
+    final valid = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         // make sure the loading spinner shows before we test the keys
         await Future.delayed(const Duration(milliseconds: 100));

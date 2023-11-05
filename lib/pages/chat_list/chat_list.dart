@@ -15,6 +15,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_s
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -23,12 +24,10 @@ import 'package:fluffychat/utils/tor_stub.dart'
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -255,8 +254,7 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> toggleUnread() async {
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final markUnread = anySelectedRoomNotMarkedUnread;
         for (final conversation in conversationSelectionNotifier.value) {
@@ -269,8 +267,7 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> toggleFavouriteRoom() async {
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final makeFavorite = anySelectedRoomNotFavorite;
         for (final conversation in conversationSelectionNotifier.value) {
@@ -285,8 +282,7 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> toggleMuted() async {
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         for (final conversation in conversationSelectionNotifier.value) {
           final room = client.getRoomById(conversation.roomId)!;
@@ -309,8 +305,7 @@ class ChatListController extends State<ChatList>
         ) ==
         OkCancelResult.ok;
     if (!confirmed) return;
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => _archiveSelectedRooms(),
     );
     setState(() {});
@@ -330,8 +325,7 @@ class ChatListController extends State<ChatList>
       ],
     );
     if (input == null) return;
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => client.setPresence(
         client.userID!,
         PresenceType.online,
@@ -371,8 +365,7 @@ class ChatListController extends State<ChatList>
           .toList(),
     );
     if (selectedSpace == null) return;
-    final result = await showFutureLoadingDialog(
-      context: context,
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final space = client.getRoomById(selectedSpace)!;
         if (space.canSendDefaultStates) {
@@ -409,19 +402,16 @@ class ChatListController extends State<ChatList>
             await client.encryption?.crossSigning.isCached() == false ||
             client.isUnknownSession && mounted) {
           final recoveryWords = await _getRecoveryWords();
-          final appContext = TwakeApp.routerKey.currentContext;
-          final chatListContext = context;
           if (recoveryWords != null) {
             await TomBootstrapDialog(
               client: client,
               recoveryWords: recoveryWords,
-            ).show(appContext ?? chatListContext);
+            ).show();
           } else {
             Logs().d(
               'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap',
             );
-            await BootstrapDialog(client: client)
-                .show(appContext ?? chatListContext);
+            await BootstrapDialog(client: client).show();
           }
         }
       } else {
@@ -432,7 +422,7 @@ class ChatListController extends State<ChatList>
         await TomBootstrapDialog(
           client: client,
           wipeRecovery: recoveryWords != null,
-        ).show(context);
+        ).show();
       }
     }
     if (!mounted) return;
@@ -497,14 +487,12 @@ class ChatListController extends State<ChatList>
           textFields: [DialogTextField(hintText: l10n.bundleName)],
         );
         if (bundle == null || bundle.isEmpty || bundle.single.isEmpty) return;
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => client.setAccountBundle(bundle.single),
         );
         break;
       case EditBundleAction.removeFromBundle:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => client.removeFromAccountBundle(activeBundle!),
         );
     }
@@ -577,24 +565,21 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (action) {
       case ChatListSelectionActions.read:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async {
             await client.getRoomById(room.id)!.markUnread(!room.markedUnread);
           },
         );
         return;
       case ChatListSelectionActions.pin:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async {
             await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
           },
         );
         return;
       case ChatListSelectionActions.mute:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async {
             await client.getRoomById(room.id)!.setPushRuleState(
                   room.pushRuleState == PushRuleState.notify

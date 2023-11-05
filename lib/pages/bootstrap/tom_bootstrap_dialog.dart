@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -25,11 +26,8 @@ class TomBootstrapDialog extends StatefulWidget {
     required this.client,
   }) : super(key: key);
 
-  Future<bool?> show(BuildContext context) => showDialog(
-        context: context,
-        builder: (context) => this,
-        barrierDismissible: true,
-        useRootNavigator: false,
+  Future<bool?> show() => TwakeDialog.showDialogFullScreen(
+        builder: () => this,
       );
 
   @override
@@ -157,7 +155,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             AdaptiveFlatButton(
               label: L10n.of(context)!.next,
               onPressed: () async {
-                await BootstrapDialog(client: widget.client).show(context).then(
+                await BootstrapDialog(client: widget.client).show().then(
                       (value) => Navigator.of(context, rootNavigator: false)
                           .pop<bool>(false),
                     );

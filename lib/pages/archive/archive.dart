@@ -1,8 +1,9 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/archive/archive_view.dart';
@@ -38,8 +39,7 @@ class ArchiveController extends State<Archive> {
         OkCancelResult.ok) {
       return;
     }
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         while (archive.isNotEmpty) {
           Logs().v('Forget room ${archive.last.getLocalizedDisplayname()}');

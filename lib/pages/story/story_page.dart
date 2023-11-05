@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -293,8 +294,7 @@ class StoryPageController extends State<StoryPage> {
         OkCancelResult.ok) {
       return;
     }
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: event.redactEvent,
     );
     setState(() {
@@ -338,8 +338,7 @@ class StoryPageController extends State<StoryPage> {
       textFields: [DialogTextField(hintText: L10n.of(context)!.reason)],
     );
     if (reason == null || reason.single.isEmpty) return;
-    final result = await showFutureLoadingDialog(
-      context: context,
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.reportContent(
             roomId,
             event.eventId,
@@ -491,8 +490,8 @@ class StoryPageController extends State<StoryPage> {
         _delete();
         break;
       case PopupStoryAction.message:
-        final roomIdResult = await showFutureLoadingDialog(
-          context: context,
+        final roomIdResult =
+            await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () =>
               currentEvent!.senderFromMemoryOrFallback.startDirectChat(),
         );

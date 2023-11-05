@@ -19,7 +19,7 @@ import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
-import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -146,7 +146,7 @@ class SettingsProfileController extends State<SettingsProfile>
         ),
       );
     } else {
-      TwakeLoadingDialog.showLoadingDialog(context);
+      TwakeDialog.showLoadingDialog(context);
       final newProfile = Profile(
         userId: client.userID!,
         displayName: displayName,
@@ -331,7 +331,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void onUploadProfileAction() {
     displayNameFocusNode.unfocus();
-    TwakeLoadingDialog.showLoadingDialog(context);
+    TwakeDialog.showLoadingDialog(context);
     if (PlatformInfos.isMobile) {
       _setAvatarInStream();
     } else {
@@ -361,7 +361,7 @@ class SettingsProfileController extends State<SettingsProfile>
     dynamic error,
     StackTrace? stackTrace,
   ) {
-    TwakeLoadingDialog.hideLoadingDialog(context);
+    TwakeDialog.hideLoadingDialog(context);
     Logs().e(
       'SettingsProfile::_handleUploadAvatarOnError() - error: $error | stackTrace: $stackTrace',
     );
@@ -423,7 +423,7 @@ class SettingsProfileController extends State<SettingsProfile>
     dynamic error,
     StackTrace? stackTrace,
   ) {
-    TwakeLoadingDialog.hideLoadingDialog(context);
+    TwakeDialog.hideLoadingDialog(context);
     Logs().e(
       'SettingsProfile::_handleUploadProfileOnError() - error: $error | stackTrace: $stackTrace',
     );
@@ -456,7 +456,7 @@ class SettingsProfileController extends State<SettingsProfile>
             isEditedProfileNotifier.toggle();
           }
           _getCurrentProfile(client, isUpdated: true);
-          TwakeLoadingDialog.hideLoadingDialog(context);
+          TwakeDialog.hideLoadingDialog(context);
         }
       },
     );

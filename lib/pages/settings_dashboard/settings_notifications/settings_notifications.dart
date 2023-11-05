@@ -1,10 +1,11 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'settings_notifications_view.dart';
@@ -85,8 +86,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   }
 
   void setNotificationSetting(NotificationSettingsItem item, bool enabled) {
-    showFutureLoadingDialog(
-      context: context,
+    TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.setPushRuleEnabled(
             'global',
             item.type,
@@ -111,8 +111,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     );
     if (delete != true) return;
 
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.deletePusher(
             PusherId(
               appId: pusher.appId,
