@@ -1,8 +1,9 @@
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -42,8 +43,7 @@ mixin GoToDraftChatMixin {
         contactPresentationSearch: contactPresentationSearch,
       );
     } else {
-      showFutureLoadingDialog(
-        context: context,
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           if (contactPresentationSearch.matrixId != null &&
               contactPresentationSearch.matrixId!.isNotEmpty) {
@@ -97,8 +97,7 @@ mixin GoToDraftChatMixin {
   }) async {
     Logs()
         .d('SearchController::getContactAndRecentChatStream() - event: $user');
-    final roomIdResult = await showFutureLoadingDialog(
-      context: context,
+    final roomIdResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;

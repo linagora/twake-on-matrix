@@ -1,8 +1,9 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -77,8 +78,8 @@ class SettingsIgnoreListView extends StatelessWidget {
                         trailing: IconButton(
                           tooltip: L10n.of(context)!.delete,
                           icon: const Icon(Icons.delete_forever_outlined),
-                          onPressed: () => showFutureLoadingDialog(
-                            context: context,
+                          onPressed: () =>
+                              TwakeDialog.showFutureLoadingDialogFullScreen(
                             future: () =>
                                 client.unignoreUser(client.ignoredUsers[i]),
                           ),

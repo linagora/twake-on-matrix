@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -5,7 +6,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:punycode/punycode.dart';
@@ -126,8 +126,7 @@ class UrlLauncher {
       final servers = <String>{};
       if (room == null && roomIdOrAlias.sigil == '#') {
         // we were unable to find the room locally...so resolve it
-        final response = await showFutureLoadingDialog(
-          context: context,
+        final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
         );
         if (response.error != null) {
@@ -171,8 +170,7 @@ class UrlLauncher {
             ) ==
             OkCancelResult.ok) {
           roomId = roomIdOrAlias;
-          final response = await showFutureLoadingDialog(
-            context: context,
+          final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
               serverName: servers.isNotEmpty ? servers.toList() : null,
@@ -180,8 +178,7 @@ class UrlLauncher {
           );
           if (response.error != null) return;
           // wait for two seconds so that it probably came down /sync
-          await showFutureLoadingDialog(
-            context: context,
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => Future.delayed(const Duration(seconds: 2)),
           );
           if (event != null) {

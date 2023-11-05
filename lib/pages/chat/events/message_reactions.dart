@@ -1,9 +1,9 @@
 import 'package:fluffychat/pages/chat/events/message_reactions_style.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
@@ -109,8 +109,7 @@ class ReactionsList extends StatelessWidget {
                           relatedTo['key'] == r.key;
                     });
                     if (evt != null) {
-                      showFutureLoadingDialog(
-                        context: context,
+                      TwakeDialog.showFutureLoadingDialogFullScreen(
                         future: () => evt.redactEvent(),
                       );
                     }

@@ -1,11 +1,12 @@
 import 'dart:developer';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings_view.dart';
@@ -50,8 +51,7 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
       content[key] = newLevel;
     }
     inspect(content);
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.client.setRoomStateWithKey(
         room.id,
         EventTypes.RoomPowerLevels,
@@ -98,8 +98,7 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
             )) {
       return;
     }
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.client.upgradeRoom(roomId!, newVersion),
     ).then((_) => context.pop());
   }

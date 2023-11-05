@@ -1,7 +1,6 @@
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 
 import 'settings_ignore_list_view.dart';
 
@@ -29,8 +28,7 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
     if (controller.text.isEmpty) return;
     final userId = '@${controller.text}';
 
-    showFutureLoadingDialog(
-      context: context,
+    TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.ignoreUser(userId),
     );
     controller.clear();

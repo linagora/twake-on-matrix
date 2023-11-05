@@ -30,7 +30,7 @@ mixin EncryptedMixin {
     if (client.isUnknownSession && client.encryption!.crossSigning.enabled) {
       final success = await BootstrapDialog(
         client: Matrix.of(context).client,
-      ).show(context);
+      ).show();
       if (success != true) return;
     }
     event.requestKey();
