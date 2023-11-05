@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -177,8 +178,7 @@ class LoginController extends State<Login> {
     );
     if (input == null) return;
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
-    final response = await showFutureLoadingDialog(
-      context: context,
+    final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () =>
           Matrix.of(context).getLoginClient().requestTokenToResetPasswordEmail(
                 clientSecret,
@@ -225,8 +225,7 @@ class LoginController extends State<Login> {
         ),
       ).toJson(),
     };
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).getLoginClient().request(
             RequestType.POST,
             '/client/r0/account/password',

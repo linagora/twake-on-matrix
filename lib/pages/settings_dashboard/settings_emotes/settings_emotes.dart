@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -20,8 +21,10 @@ class EmotesSettings extends StatefulWidget {
 
 class EmotesSettingsController extends State<EmotesSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+
   Room? get room =>
       roomId != null ? Matrix.of(context).client.getRoomById(roomId!) : null;
+
   String? get stateKey => GoRouterState.of(context).pathParameters['state_key'];
 
   bool showSave = false;
@@ -43,6 +46,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   ImagePackContent? _pack;
+
   ImagePackContent? get pack {
     if (_pack != null) {
       return _pack;
@@ -57,8 +61,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     }
     final client = Matrix.of(context).client;
     if (room != null) {
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => client.setRoomStateWithKey(
           room!.id,
           'im.ponies.room_emotes',
@@ -67,8 +70,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
         ),
       );
     } else {
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => client.setAccountData(
           client.userID!,
           'im.ponies.user_emotes',
@@ -99,8 +101,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       content['rooms'][room!.id].remove(stateKey ?? '');
     }
     // and save
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => client.setAccountData(
         client.userID!,
         'im.ponies.emote_rooms',
@@ -234,8 +235,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     } catch (e, s) {
       Logs().w('Unable to create thumbnail', e, s);
     }
-    final uploadResp = await showFutureLoadingDialog(
-      context: context,
+    final uploadResp = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.uploadContent(
             file.bytes!,
             filename: file.name,

@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -89,8 +89,7 @@ class AddStoryController extends State<AddStoryPage> {
       source: ImageSource.camera,
     );
     if (picked == null) return;
-    final matrixFile = await showFutureLoadingDialog(
-      context: context,
+    final matrixFile = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final bytes = await picked.readAsBytes();
         return MatrixImageFile(
@@ -139,8 +138,7 @@ class AddStoryController extends State<AddStoryPage> {
     var storiesRoom = await client.getStoriesRoom(context);
 
     // Invite contacts if necessary
-    final undecided = await showFutureLoadingDialog(
-      context: context,
+    final undecided = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => client.getUndecidedContactsForStories(storiesRoom),
     );
     final result = undecided.result;
@@ -156,8 +154,7 @@ class AddStoryController extends State<AddStoryPage> {
     }
 
     // Post story
-    final postResult = await showFutureLoadingDialog(
-      context: context,
+    final postResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         if (storiesRoom == null) throw ('Stories room is null');
         var video = this.video?.detectFileType;

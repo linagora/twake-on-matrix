@@ -32,7 +32,7 @@ import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/dialog/twake_loading_dialog.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -52,7 +52,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -160,8 +160,7 @@ class ChatController extends State<Chat>
     final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
 
     draggingNotifier.value = false;
-    final bytesList = await showFutureLoadingDialog(
-      context: context,
+    final bytesList = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Future.wait(
         details.files.map(
           (xfile) => xfile.readAsBytes(),
@@ -221,8 +220,7 @@ class ChatController extends State<Chat>
         'Try to recreate a room with is not a DM room. This should not be possible from the UI!',
       );
     }
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final client = room.client;
         final waitForSync = client.onSync.stream
@@ -244,8 +242,7 @@ class ChatController extends State<Chat>
         'Leave room button clicked while room is null. This should not be possible from the UI!',
       );
     }
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room.leave,
     );
     if (success.error != null) return;
@@ -361,8 +358,7 @@ class ChatController extends State<Chat>
   ) async {
     switch (dialogAcceptInviteResult) {
       case DialogAcceptInviteResult.accept:
-        await showFutureLoadingDialog(
-          context: context,
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async {
             final waitForRoom = room?.client.waitForRoomInSync(
               room!.id,
@@ -603,16 +599,16 @@ class ChatController extends State<Chat>
         if (failure is DownloadFileForPreviewFailure) {
           TwakeSnackBar.show(context, 'Error: ${failure.exception}');
         }
-        TwakeLoadingDialog.hideLoadingDialog(context);
+        TwakeDialog.hideLoadingDialog(context);
       }, (success) {
         if (success is DownloadFileForPreviewSuccess) {
           _openDownloadedFileForPreview(
             downloadFileForPreviewResponse:
                 success.downloadFileForPreviewResponse,
           );
-          TwakeLoadingDialog.hideLoadingDialog(context);
+          TwakeDialog.hideLoadingDialog(context);
         } else if (success is DownloadFileForPreviewLoading) {
-          TwakeLoadingDialog.showLoadingDialog(context);
+          TwakeDialog.showLoadingDialog(context);
         }
       });
     });
@@ -857,8 +853,7 @@ class ChatController extends State<Chat>
       textFields: [DialogTextField(hintText: L10n.of(context)!.reason)],
     );
     if (reason == null || reason.single.isEmpty) return;
-    final result = await showFutureLoadingDialog(
-      context: context,
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.reportContent(
             event.roomId!,
             event.eventId,
@@ -885,8 +880,7 @@ class ChatController extends State<Chat>
         OkCancelResult.ok;
     if (!confirmed) return;
     for (final event in selectedEvents) {
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           if (event.status.isSent) {
             if (event.canRedact) {
@@ -991,8 +985,7 @@ class ChatController extends State<Chat>
     if (eventIndex == -1) {
       // event id not found...maybe we can fetch it?
       // the try...finally is here to start and close the loading dialog reliably
-      await showFutureLoadingDialog(
-        context: context,
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           // okay, we first have to fetch if the event is in the room
           try {
@@ -1073,8 +1066,7 @@ class ChatController extends State<Chat>
   }
 
   void forgetRoom() async {
-    final result = await showFutureLoadingDialog(
-      context: context,
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.forget,
     );
     if (result.error != null) return;
@@ -1183,8 +1175,7 @@ class ChatController extends State<Chat>
         )) {
       return;
     }
-    final result = await showFutureLoadingDialog(
-      context: context,
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room!.client.joinRoom(
         room!
             .getState(EventTypes.RoomTombstone)!
@@ -1192,8 +1183,7 @@ class ChatController extends State<Chat>
             .replacementRoom,
       ),
     );
-    await showFutureLoadingDialog(
-      context: context,
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.leave,
     );
     if (result.error == null) {
@@ -1253,8 +1243,7 @@ class ChatController extends State<Chat>
     if (response == OkCancelResult.ok) {
       final events = room!.pinnedEventIds
         ..removeWhere((oldEvent) => oldEvent == eventId);
-      showFutureLoadingDialog(
-        context: context,
+      TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => room!.setPinnedEvents(events),
       );
     }
@@ -1272,8 +1261,7 @@ class ChatController extends State<Chat>
     } else {
       pinnedEventIds.addAll(selectedEventIds);
     }
-    showFutureLoadingDialog(
-      context: context,
+    TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setPinnedEvents(pinnedEventIds),
     );
   }
@@ -1359,8 +1347,7 @@ class ChatController extends State<Chat>
     );
     if (callType == null) return;
 
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () =>
           Matrix.of(context).voipPlugin!.voip.requestTurnServerCredentials(),
     );

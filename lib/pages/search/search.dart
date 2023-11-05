@@ -10,16 +10,18 @@ import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter/scheduler.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class Search extends StatefulWidget {
   final VoidCallback? onCloseSearchPage;
+
   const Search({super.key, this.onCloseSearchPage});
 
   @override
@@ -106,8 +108,7 @@ class SearchController extends State<Search>
   void goToChatScreenFormRecentChat(User user) async {
     Logs()
         .d('SearchController::getContactAndRecentChatStream() - event: $user');
-    final roomIdResult = await showFutureLoadingDialog(
-      context: context,
+    final roomIdResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;

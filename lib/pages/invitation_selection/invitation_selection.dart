@@ -1,12 +1,13 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -79,8 +80,7 @@ class InvitationSelectionController
     final selectedContacts = selectedContactsMapNotifier.contactsList
         .map((contact) => contact.matrixId!)
         .toList();
-    final success = await showFutureLoadingDialog(
-      context: context,
+    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Future.wait(
         selectedContacts.map((id) => _room.invite(id)),
       ),
