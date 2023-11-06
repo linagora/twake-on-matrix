@@ -1,21 +1,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/twake_secure_storage.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'settings_security_view.dart';
 
 class SettingsSecurity extends StatefulWidget {
@@ -62,7 +61,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   void setAppLockAction() async {
     final currentLock =
-        await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+        await TwakeSecureStorage().read(key: SettingKeys.appLockKey);
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
     }
@@ -89,7 +88,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (newLock != null) {
-      await const FlutterSecureStorage()
+      await TwakeSecureStorage()
           .write(key: SettingKeys.appLockKey, value: newLock.single);
       if (newLock.single.isEmpty) {
         AppLock.of(context)!.disable();
