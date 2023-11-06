@@ -46,12 +46,13 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           //     onTap: () => controller
           //         .actionWithClearSelections(controller.redactEventsAction),
           //   ),
-          TwakeIconButton(
-            icon: Icons.push_pin_outlined,
-            tooltip: L10n.of(context)!.pinMessage,
-            onTap: () =>
-                controller.actionWithClearSelections(controller.pinEventAction),
-          ),
+          if (controller.selectedEvents.length == 1)
+            TwakeIconButton(
+              icon: Icons.push_pin_outlined,
+              tooltip: L10n.of(context)!.pinMessage,
+              onTap: () => controller
+                  .actionWithClearSelections(controller.pinEventAction),
+            ),
           if (controller.selectedEvents.length == 1)
             PopupMenuButton<_EventContextAction>(
               onSelected: (action) {
@@ -221,77 +222,92 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                         filterQuality: FilterQuality.medium,
                       ),
                     SafeArea(
-                      child: Column(
-                        children: <Widget>[
+                      child: Stack(
+                        children: [
+                          Column(
+                            children: <Widget>[
+                              if (controller.room!.pinnedEventIds.isNotEmpty)
+                                const SizedBox(
+                                  height: ChatViewStyle.pinnedMessageHintHeight,
+                                ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: controller.clearSingleSelectedEvent,
+                                  child: Builder(
+                                    builder: (context) {
+                                      if (controller.timeline == null) {
+                                        return const ChatLoadingView();
+                                      }
+                                      return ChatEventList(
+                                        controller: controller,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              if (controller.room!.membership ==
+                                  Membership.invite)
+                                _inputMessageWidget(bottomSheetPadding),
+                              if (controller.room!.canSendDefaultMessages &&
+                                  controller.room!.membership ==
+                                      Membership.join)
+                                Container(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: TwakeThemes.columnWidth * 2.5,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: controller.room?.isAbandonedDMRoom ==
+                                          true
+                                      ? Padding(
+                                          padding: EdgeInsets.only(
+                                            bottom: bottomSheetPadding,
+                                            left: bottomSheetPadding,
+                                            right: bottomSheetPadding,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              TextButton.icon(
+                                                style: TextButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                  foregroundColor:
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .error,
+                                                ),
+                                                icon: const Icon(
+                                                  Icons.archive_outlined,
+                                                ),
+                                                onPressed: controller.leaveChat,
+                                                label: Text(
+                                                  L10n.of(context)!.leave,
+                                                ),
+                                              ),
+                                              TextButton.icon(
+                                                style: TextButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                ),
+                                                icon: const Icon(
+                                                  Icons.chat_outlined,
+                                                ),
+                                                onPressed:
+                                                    controller.recreateChat,
+                                                label: Text(
+                                                  L10n.of(context)!.reopenChat,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      : _inputMessageWidget(bottomSheetPadding),
+                                ),
+                            ],
+                          ),
                           TombstoneDisplay(controller),
                           PinnedEvents(controller),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: controller.clearSingleSelectedEvent,
-                              child: Builder(
-                                builder: (context) {
-                                  if (controller.timeline == null) {
-                                    return const ChatLoadingView();
-                                  }
-                                  return ChatEventList(
-                                    controller: controller,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          if (controller.room!.membership == Membership.invite)
-                            _inputMessageWidget(bottomSheetPadding),
-                          if (controller.room!.canSendDefaultMessages &&
-                              controller.room!.membership == Membership.join)
-                            Container(
-                              constraints: const BoxConstraints(
-                                maxWidth: TwakeThemes.columnWidth * 2.5,
-                              ),
-                              alignment: Alignment.center,
-                              child: controller.room?.isAbandonedDMRoom == true
-                                  ? Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: bottomSheetPadding,
-                                        left: bottomSheetPadding,
-                                        right: bottomSheetPadding,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.all(16),
-                                              foregroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .error,
-                                            ),
-                                            icon: const Icon(
-                                              Icons.archive_outlined,
-                                            ),
-                                            onPressed: controller.leaveChat,
-                                            label: Text(
-                                              L10n.of(context)!.leave,
-                                            ),
-                                          ),
-                                          TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.all(16),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.chat_outlined,
-                                            ),
-                                            onPressed: controller.recreateChat,
-                                            label: Text(
-                                              L10n.of(context)!.reopenChat,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : _inputMessageWidget(bottomSheetPadding),
-                            ),
                         ],
                       ),
                     ),
