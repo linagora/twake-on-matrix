@@ -27,6 +27,7 @@ import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
+import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
@@ -81,7 +82,7 @@ class Chat extends StatefulWidget {
   final String roomId;
   final MatrixFile? shareFile;
   final String? roomName;
-  final void Function({bool? forceValue})? toggleSearchPanel;
+  final void Function(RightColumnType)? onChangeRightColumnType;
   final StreamController<EventId>? jumpToEventIdStream;
 
   const Chat({
@@ -89,7 +90,7 @@ class Chat extends StatefulWidget {
     required this.roomId,
     this.shareFile,
     this.roomName,
-    this.toggleSearchPanel,
+    this.onChangeRightColumnType,
     this.jumpToEventIdStream,
   }) : super(key: key);
 
@@ -1588,15 +1589,23 @@ class ChatController extends State<Chat>
   }
 
   void onPushDetails() async {
+    if (room?.directChatMatrixID != null) {
+      widget.onChangeRightColumnType?.call(RightColumnType.chatDirectDetails);
+      return;
+    }
     final result = await context.push('/rooms/${room!.id}/details');
     if (result is ChatDetailsActions) {
       switch (result) {
         case ChatDetailsActions.search:
-          widget.toggleSearchPanel?.call(forceValue: true);
+          toggleSearch();
           break;
         default:
       }
     }
+  }
+
+  void toggleSearch() {
+    widget.onChangeRightColumnType?.call(RightColumnType.search);
   }
 
   void actionWithClearSelections(Function action) {
