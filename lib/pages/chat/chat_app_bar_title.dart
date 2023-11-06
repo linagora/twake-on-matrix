@@ -106,14 +106,16 @@ class ChatAppBarTitle extends StatelessWidget {
                           height: 20,
                         ),
                       ),
-                    Text(
-                      roomName ??
-                          room!.getLocalizedDisplayname(
-                            MatrixLocals(L10n.of(context)!),
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+                    Flexible(
+                      child: Text(
+                        roomName ??
+                            room!.getLocalizedDisplayname(
+                              MatrixLocals(L10n.of(context)!),
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+                      ),
                     ),
                   ],
                 ),
