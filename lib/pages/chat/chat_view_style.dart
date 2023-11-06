@@ -7,6 +7,8 @@ class ChatViewStyle {
 
   static double get paddingVerticalActionButtons => 8.0;
 
+  static const double pinnedMessageHintHeight = 48;
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 56 : 80;
 
