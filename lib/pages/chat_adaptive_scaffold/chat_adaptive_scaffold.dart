@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
+import 'package:fluffychat/pages/chat_direct_details/chat_direct_details.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -28,26 +28,47 @@ class ChatAdaptiveScaffold extends StatefulWidget {
   State<ChatAdaptiveScaffold> createState() => ChatAdaptiveScaffoldController();
 }
 
+enum RightColumnType {
+  none,
+  search,
+  chatDirectDetails,
+}
+
+extension RightColumnTypeExtension on RightColumnType {
+  bool get isShown => this != RightColumnType.none;
+
+  String? get initialRoute => ({
+        RightColumnType.search: RightColumnRouteNames.search,
+        RightColumnType.chatDirectDetails:
+            RightColumnRouteNames.chatDirectDetails,
+      })[this];
+}
+
+class RightColumnRouteNames {
+  static const search = 'rightColumn/search';
+  static const chatDirectDetails = 'rightColumn/chatDirectDetails';
+}
+
 class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
-  final showRightPanelNotifier = ValueNotifier(false);
+  final rightColumnTypeNotifier = ValueNotifier(RightColumnType.none);
   final jumpToEventIdStream = StreamController<EventId>.broadcast();
 
   void jumpToEventId(String eventId) {
     jumpToEventIdStream.sink.add(eventId);
   }
 
-  void toggleRightPanel({bool? forceValue}) {
-    if (forceValue != null) {
-      showRightPanelNotifier.value = forceValue;
-    } else {
-      showRightPanelNotifier.toggle();
-    }
+  void hideRightColumn() {
+    rightColumnTypeNotifier.value = RightColumnType.none;
+  }
+
+  void setRightColumnType(RightColumnType type) {
+    rightColumnTypeNotifier.value = type;
   }
 
   @override
   void dispose() {
     jumpToEventIdStream.close();
-    showRightPanelNotifier.dispose();
+    rightColumnTypeNotifier.dispose();
     super.dispose();
   }
 
@@ -56,8 +77,8 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
     const breakpoint = ResponsiveUtils.minTabletWidth +
         MessageStyle.messageBubbleDesktopMaxWidth;
     return ValueListenableBuilder(
-      valueListenable: showRightPanelNotifier,
-      builder: (context, showRightPanel, body) {
+      valueListenable: rightColumnTypeNotifier,
+      builder: (context, rightColumnType, body) {
         return Container(
           color: Theme.of(context).colorScheme.surface,
           child: AdaptiveLayout(
@@ -70,11 +91,10 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                   builder: (_) => Stack(
                     children: [
                       body!,
-                      if (showRightPanel)
-                        ChatSearch(
-                          roomId: widget.roomId,
-                          onBack: toggleRightPanel,
-                          jumpToEventId: jumpToEventId,
+                      if (rightColumnType.isShown)
+                        _RightColumnNavigator(
+                          controller: this,
+                          initialRoute: rightColumnType.initialRoute,
                           isInStack: true,
                         ),
                     ],
@@ -85,7 +105,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                   builder: (_) => Padding(
-                    padding: showRightPanel
+                    padding: rightColumnType.isShown
                         ? ChatAdaptiveScaffoldStyle.webPaddingRight
                         : EdgeInsets.zero,
                     child: ClipRRect(
@@ -98,7 +118,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
             ),
             bodyRatio: 0.7,
             internalAnimations: false,
-            secondaryBody: showRightPanel
+            secondaryBody: rightColumnType.isShown
                 ? SlotLayout(
                     config: {
                       const WidthPlatformBreakpoint(
@@ -113,11 +133,10 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
                         key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                         builder: (_) => ClipRRect(
                           borderRadius: ChatAdaptiveScaffoldStyle.borderRadius,
-                          child: ChatSearch(
-                            roomId: widget.roomId,
-                            onBack: toggleRightPanel,
-                            jumpToEventId: jumpToEventId,
+                          child: _RightColumnNavigator(
+                            controller: this,
                             isInStack: false,
+                            initialRoute: rightColumnType.initialRoute,
                           ),
                         ),
                       ),
@@ -131,9 +150,46 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
         roomId: widget.roomId,
         shareFile: widget.shareFile,
         roomName: widget.roomName,
-        toggleSearchPanel: toggleRightPanel,
+        onChangeRightColumnType: setRightColumnType,
         jumpToEventIdStream: jumpToEventIdStream,
       ),
+    );
+  }
+}
+
+class _RightColumnNavigator extends StatelessWidget {
+  final ChatAdaptiveScaffoldController controller;
+  final bool isInStack;
+  final String? initialRoute;
+
+  const _RightColumnNavigator({
+    required this.controller,
+    required this.isInStack,
+    this.initialRoute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      initialRoute: initialRoute,
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case RightColumnRouteNames.search:
+            return MaterialPageRoute(
+              builder: (_) => ChatSearch(
+                roomId: controller.widget.roomId,
+                onBack: controller.hideRightColumn,
+                jumpToEventId: controller.jumpToEventId,
+                isInStack: isInStack,
+              ),
+            );
+          case RightColumnRouteNames.chatDirectDetails:
+            return MaterialPageRoute(
+              builder: (_) => const ChatDirectDetails(),
+            );
+        }
+        return MaterialPageRoute(builder: (_) => const SizedBox());
+      },
     );
   }
 }
