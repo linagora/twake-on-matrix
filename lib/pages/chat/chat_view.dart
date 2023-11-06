@@ -176,7 +176,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     Padding(
                       padding: ChatViewStyle.paddingTrailing(context),
                       child: IconButton(
-                        onPressed: controller.widget.toggleSearchPanel,
+                        onPressed: controller.toggleSearch,
                         icon: const Icon(Icons.search),
                       ),
                     ),

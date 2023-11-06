@@ -9,8 +9,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:rxdart/rxdart.dart';
@@ -51,25 +49,11 @@ class ChatAppBarTitle extends StatelessWidget {
         ],
       );
     }
-    final directChatMatrixID = room?.directChatMatrixID;
     return InkWell(
       splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      onTap: directChatMatrixID != null
-          ? () => showAdaptiveBottomSheet(
-                context: context,
-                builder: (c) => UserBottomSheet(
-                  user: room!
-                      .unsafeGetUserFromMemoryOrFallback(directChatMatrixID),
-                  outerContext: context,
-                  onMention: () => sendController.text +=
-                      '${room!.unsafeGetUserFromMemoryOrFallback(directChatMatrixID).mention} ',
-                ),
-              )
-          : isArchived
-              ? null
-              : onPushDetails,
+      onTap: isArchived ? null : onPushDetails,
       child: Row(
         children: [
           Stack(
