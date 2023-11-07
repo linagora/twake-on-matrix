@@ -9,7 +9,7 @@ mixin HandleRegistrationMixin {
     TwakeApp.router.go('/home', extra: uri);
   }
 
-  void register(String url) async {
+  void registerIOS(String url) async {
     final uri = await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: AppConfig.appOpenUrlScheme,
