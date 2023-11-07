@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
@@ -46,7 +46,7 @@ class ExpansionList extends StatelessWidget {
               height: 12,
             ),
             NoContactsFound(
-              keyword: failure is GetContactsFailure ? failure.keyword : '',
+              keyword: failure is GetContactsAllFailure ? failure.keyword : '',
             ),
             _MoreListTile(),
             _NewGroupButton(
@@ -91,7 +91,7 @@ class ExpansionList extends StatelessWidget {
               ],
             );
           }
-          if (success.data.isEmpty) {
+          if (success.tomContacts.isEmpty) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -113,7 +113,7 @@ class ExpansionList extends StatelessWidget {
             const SizedBox(
               height: 4,
             ),
-            _buildTitle(context, success.data.length),
+            _buildTitle(context, success.tomContacts.length),
             ValueListenableBuilder<bool>(
               valueListenable: isShowContactsNotifier,
               builder: ((context, isShow, child) {
@@ -123,9 +123,9 @@ class ExpansionList extends StatelessWidget {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: success.data.length,
+                  itemCount: success.tomContacts.length,
                   itemBuilder: (context, index) {
-                    final contact = success.data[index];
+                    final contact = success.tomContacts[index];
                     return InkWell(
                       onTap: () {
                         onContactTap(
@@ -152,7 +152,7 @@ class ExpansionList extends StatelessWidget {
                 return ValueListenableBuilder(
                   valueListenable: isShowContactsNotifier,
                   builder: (context, isShow, child) {
-                    if (!isShow || success.isEnd) {
+                    if (!isShow) {
                       return const SizedBox.shrink();
                     }
                     return const Padding(
