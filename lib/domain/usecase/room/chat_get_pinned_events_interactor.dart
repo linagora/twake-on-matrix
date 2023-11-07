@@ -16,14 +16,10 @@ class ChatGetPinnedEventsInteractor {
     yield Right(ChatGetPinnedEventsLoading());
     try {
       final pinnedEvents = room.pinnedEventIds;
-      final completers = pinnedEvents.map<Completer<Event?>>((id) {
-        final completer = Completer<Event?>();
-        room.getEventById(id).then((value) => completer.complete(value));
-        return completer;
-      });
       final result = await Future.wait(
-        completers.map((event) => event.future).toList(),
+        pinnedEvents.map(room.getEventById),
       );
+
       if (result.isEmpty) {
         yield Left(ChatGetPinnedEventsNoResult());
         return;
@@ -43,6 +39,11 @@ class ChatGetPinnedEventsInteractor {
     } on MatrixException catch (exception) {
       Logs().e(
         "ChatGetPinnedEventsInteractor()::execute()::MatrixException: ${exception.error}",
+      );
+      yield Left(ChatGetPinnedEventsFailure(exception: exception));
+    } catch (exception) {
+      Logs().e(
+        "ChatGetPinnedEventsInteractor()::execute()::Exception: $exception",
       );
       yield Left(ChatGetPinnedEventsFailure(exception: exception));
     }

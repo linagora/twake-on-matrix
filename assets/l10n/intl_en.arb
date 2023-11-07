@@ -2903,5 +2903,12 @@
     "encryptionWarning": "You might lose your messages if you access Twake app on the another device.",
     "selectedUsers": "Selected users",
     "clearAllSelected": "Clear all selected",
-    "newDirectMessage": "New direct message"
+    "newDirectMessage": "New direct message",
+    "countPinnedMessage": "{count, plural, =0{Pinned Message} other{Pinned Message #{count}}}",
+    "@countPinnedMessage": {
+      "type": "text",
+      "placeholders": {
+        "count": {}
+      }
+    }
 }

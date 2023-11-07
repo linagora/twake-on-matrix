@@ -180,8 +180,8 @@ class GetItInitializer {
     getIt.registerSingleton<UpdateProfileInteractor>(
       UpdateProfileInteractor(),
     );
-    getIt.registerSingleton<ChatGetPinnedEventsInteractor>(
-      ChatGetPinnedEventsInteractor(),
+    getIt.registerFactory<ChatGetPinnedEventsInteractor>(
+      () => ChatGetPinnedEventsInteractor(),
     );
   }
 }
