@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -225,6 +226,11 @@ class ChatController extends State<Chat>
   bool get canLoadMore =>
       timeline!.events.isEmpty ||
       timeline!.events.last.type != EventTypes.RoomCreate;
+
+  bool isUnpinEvent(Event event) =>
+      room?.pinnedEventIds
+          .firstWhereOrNull((eventId) => eventId == event.eventId) !=
+      null;
 
   void recreateChat() async {
     final room = this.room;
@@ -1268,17 +1274,16 @@ class ChatController extends State<Chat>
     }
   }
 
-  void pinEventAction() async {
+  void pinEventAction(Event event) async {
     final room = this.room;
     if (room == null) return;
     final pinnedEventIds = room.pinnedEventIds;
-    final selectedEventIds = selectedEvents.map((e) => e.eventId).toSet();
-    final unpin = selectedEventIds.length == 1 &&
-        pinnedEventIds.contains(selectedEventIds.single);
+    final selectedEventIds = event.eventId;
+    final unpin = isUnpinEvent(event);
     if (unpin) {
       pinnedEventIds.removeWhere(selectedEventIds.contains);
     } else {
-      pinnedEventIds.addAll(selectedEventIds);
+      pinnedEventIds.add(selectedEventIds);
     }
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setPinnedEvents(pinnedEventIds),
@@ -1286,7 +1291,7 @@ class ChatController extends State<Chat>
     pinnedEventsController.getPinnedMessageAction(
       isInitial: unpin,
       room: room,
-      eventId: selectedEventIds.last,
+      eventId: selectedEventIds,
     );
   }
 
@@ -1493,8 +1498,13 @@ class ChatController extends State<Chat>
         padding: EdgeInsets.zero,
         child: popupItem(
           context,
-          action.getTitle(context),
-          iconAction: action.getIcon(),
+          action.getTitle(
+            context,
+            unpin: isUnpinEvent(event),
+          ),
+          iconAction: action.getIcon(
+            unpin: isUnpinEvent(event),
+          ),
           onCallbackAction: () => _handleClickOnContextMenuItem(
             action,
             event,
@@ -1517,8 +1527,7 @@ class ChatController extends State<Chat>
         copySingleEventAction();
         break;
       case ChatContextMenuActions.pinMessage:
-        onSelectMessage(event);
-        pinEventAction();
+        pinEventAction(event);
         break;
       case ChatContextMenuActions.forward:
         onSelectMessage(event);
