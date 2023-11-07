@@ -5,7 +5,7 @@ import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
@@ -35,7 +35,7 @@ class ContactsSelectionList extends StatelessWidget {
           child: Padding(
             padding: ContactsSelectionListStyle.notFoundPadding,
             child: NoContactsFound(
-              keyword: failure is GetContactsFailure ? failure.keyword : '',
+              keyword: failure is GetContactsAllFailure ? failure.keyword : '',
             ),
           ),
         ),
@@ -54,7 +54,7 @@ class ContactsSelectionList extends StatelessWidget {
             return const SliverToBoxAdapter(child: LoadingContactWidget());
           }
 
-          if (success.keyword.isNotEmpty && success.data.isEmpty) {
+          if (success.keyword.isNotEmpty && success.tomContacts.isEmpty) {
             return SliverToBoxAdapter(
               child: Padding(
                 padding: ContactsSelectionListStyle.notFoundPadding,
@@ -66,9 +66,9 @@ class ContactsSelectionList extends StatelessWidget {
           }
 
           return SliverList.builder(
-            itemCount: success.data.length,
+            itemCount: success.tomContacts.length,
             itemBuilder: (context, index) {
-              final contact = success.data[index];
+              final contact = success.tomContacts[index];
               final disabled = disabledContactIds.contains(
                 contact.matrixId,
               );

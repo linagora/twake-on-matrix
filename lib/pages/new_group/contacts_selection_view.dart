@@ -49,28 +49,24 @@ class ContactsSelectionView extends StatelessWidget {
                   child: child,
                 );
               },
-              child: controller.contactsNotifier == null ||
-                      controller.refreshController == null
-                  ? null
-                  : TwakeSmartRefresher(
-                      controller: controller.refreshController!,
-                      onRefresh: controller.fetchContacts,
-                      onLoading: controller.loadMoreContacts,
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: SelectedParticipantsList(
-                            contactsSelectionController: controller,
-                          ),
-                        ),
-                        ContactsSelectionList(
-                          contactsNotifier: controller.contactsNotifier!,
-                          selectedContactsMapNotifier:
-                              controller.selectedContactsMapNotifier,
-                          onSelectedContact: controller.onSelectedContact,
-                          disabledContactIds: controller.disabledContactIds,
-                        ),
-                      ],
+              child: TwakeSmartRefresher(
+                controller: controller.refreshController,
+                onRefresh: controller.getAllContacts,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SelectedParticipantsList(
+                      contactsSelectionController: controller,
                     ),
+                  ),
+                  ContactsSelectionList(
+                    contactsNotifier: controller.contactsNotifier,
+                    selectedContactsMapNotifier:
+                        controller.selectedContactsMapNotifier,
+                    onSelectedContact: controller.onSelectedContact,
+                    disabledContactIds: controller.disabledContactIds,
+                  ),
+                ],
+              ),
             ),
           ),
           if (!controller.isFullScreen) _webActionButton(context),
