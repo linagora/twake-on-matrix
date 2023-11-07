@@ -9,7 +9,10 @@ abstract class AppConfig {
   static String get applicationName => _applicationName;
   static String? _applicationWelcomeMessage;
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
-  static String _defaultHomeserver = 'matrix.linagora.com';
+  static String _defaultHomeserver = const String.fromEnvironment(
+    'default_homeserver',
+    defaultValue: "matrix.linagora.com",
+  );
   static String get defaultHomeserver => _defaultHomeserver;
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
@@ -24,8 +27,8 @@ abstract class AppConfig {
   static String _privacyUrl = 'https://twake.app/en/privacy/';
 
   static String get privacyUrl => _privacyUrl;
-  static String get registationUrl =>
-      'https://register.tom-dev.xyz/?post_registered_redirect_url=twake.chat://registered';
+  static const String registationUrl =
+      String.fromEnvironment('registration_url');
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =

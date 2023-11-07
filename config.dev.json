@@ -1,0 +1,4 @@
+{
+  "default_homeserver": "matrix.tom-dev.xyz",
+  "registration_url": "https://register.tom-dev.xyz/?post_registered_redirect_url=twake.chat://registered"
+}
