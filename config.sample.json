@@ -1,6 +1,6 @@
 {
-  "application_name": "Twake",
-  "application_welcome_message": "Welcome to Twake!",
+  "application_name": "Twake Chat",
+  "application_welcome_message": "Welcome to Twake Chat!",
   "default_homeserver": "matrix.linagora.com",
   "privacy_url": "https://twake.app/en/privacy/",
   "render_html": true,
