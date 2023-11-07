@@ -30,17 +30,15 @@ class NewPrivateChatView extends StatelessWidget {
             : ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.only(left: 8.0, right: 10.0),
         controller: controller.scrollController,
-        child: controller.contactsNotifier == null
-            ? null
-            : ExpansionList(
-                contactsNotifier: controller.contactsNotifier!,
-                goToNewGroupChat: controller.goToNewGroupChat,
-                isSearchModeNotifier: controller.isSearchModeNotifier,
-                isShowContactsNotifier: controller.isShowContactsNotifier,
-                onContactTap: controller.onContactAction,
-                onExternalContactTap: controller.onExternalContactAction,
-                toggleContactsList: controller.toggleContactsList,
-              ),
+        child: ExpansionList(
+          contactsNotifier: controller.contactsNotifier,
+          goToNewGroupChat: controller.goToNewGroupChat,
+          isSearchModeNotifier: controller.isSearchModeNotifier,
+          isShowContactsNotifier: controller.isShowContactsNotifier,
+          onContactTap: controller.onContactAction,
+          onExternalContactTap: controller.onExternalContactAction,
+          toggleContactsList: controller.toggleContactsList,
+        ),
       ),
     );
   }
