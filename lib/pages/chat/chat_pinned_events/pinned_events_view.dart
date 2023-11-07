@@ -111,16 +111,6 @@ class PinnedEventsView extends StatelessWidget {
                             },
                             child: const SizedBox(),
                           ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Icon(
-                              Icons.list,
-                              size: PinnedEventsStyle.iconListSize,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
                         ],
                       ),
                     ),
