@@ -10,10 +10,9 @@ mixin HandleRegistrationMixin {
   }
 
   void register(String url) async {
-    final redirectUrl = '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
     final uri = await FlutterWebAuth2.authenticate(
       url: url,
-      callbackUrlScheme: Uri.parse(redirectUrl).scheme,
+      callbackUrlScheme: AppConfig.appOpenUrlScheme,
       options: const FlutterWebAuth2Options(
         intentFlags: ephemeralIntentFlags,
       ),
