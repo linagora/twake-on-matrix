@@ -1,16 +1,14 @@
 import 'package:fluffychat/app_state/success.dart';
 
 abstract class LazyLoadSuccess<T> extends Success {
-  final List<T> data;
-  final int offset;
-  final bool isEnd;
+  final List<T> tomContacts;
+  final List<T>? phonebookContacts;
 
   const LazyLoadSuccess({
-    required this.data,
-    required this.offset,
-    required this.isEnd,
+    required this.tomContacts,
+    this.phonebookContacts,
   });
 
   @override
-  List<Object?> get props => [data, offset, isEnd];
+  List<Object?> get props => [tomContacts, phonebookContacts];
 }
