@@ -9,4 +9,15 @@ mixin HandleRegistrationMixin {
     TwakeApp.router.go('/home', extra: uri);
   }
 
+  void register(String url) async {
+    final redirectUrl = '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
+    final uri = await FlutterWebAuth2.authenticate(
+      url: url,
+      callbackUrlScheme: Uri.parse(redirectUrl).scheme,
+      options: const FlutterWebAuth2Options(
+        intentFlags: ephemeralIntentFlags,
+      ),
+    );
+    handleRegistrationDone(uri);
+  }
 }
