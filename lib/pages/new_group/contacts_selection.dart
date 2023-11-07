@@ -2,13 +2,12 @@ import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
-import 'package:fluffychat/pages/new_private_chat/search_contacts_controller.dart';
+import 'package:fluffychat/presentation/mixins/contact_manager_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/cupertino.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>
-    extends State<T>
-    with SearchContactsMixinController, InviteExternalContactMixin {
+    extends State<T> with ContactManagerMixin, InviteExternalContactMixin {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
 
   String getTitle(BuildContext context);
@@ -35,7 +34,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   @override
   void dispose() {
-    disposeSearchContacts();
     super.dispose();
   }
 
