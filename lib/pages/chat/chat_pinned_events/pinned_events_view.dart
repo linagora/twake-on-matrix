@@ -61,40 +61,53 @@ class PinnedEventsView extends StatelessWidget {
                                     SizedBox(
                                       width:
                                           PinnedEventsStyle.maxWidthIndicator,
-                                      child: ListView.separated(
-                                        controller: controller
-                                            .pinnedEventsController
-                                            .pinnedMessageScrollController,
-                                        shrinkWrap: true,
-                                        itemBuilder: (_, index) {
-                                          final isCurrentPinnedEvent =
-                                              controller.pinnedEventsController
-                                                  .isCurrentPinnedEvent(
-                                            data.pinnedEvents[index]!,
-                                          );
-                                          return _PinnedEventsIndicator(
-                                            currentEvent: currentEvent,
-                                            scrollController: controller
-                                                .pinnedEventsController
-                                                .pinnedMessageScrollController,
-                                            color: LinagoraSysColors.material()
-                                                .secondary
-                                                .withOpacity(
-                                                  isCurrentPinnedEvent
-                                                      ? 1
-                                                      : 0.48,
-                                                ),
-                                            index: index,
-                                            height: PinnedEventsStyle
-                                                .calcHeightIndicator(
-                                              data.pinnedEvents.length,
-                                            ),
-                                          );
-                                        },
-                                        separatorBuilder: (_, __) {
-                                          return const SizedBox(height: 1);
-                                        },
-                                        itemCount: data.pinnedEvents.length,
+                                      child: ScrollConfiguration(
+                                        behavior:
+                                            ScrollConfiguration.of(context)
+                                                .copyWith(scrollbars: false),
+                                        child: ListView.separated(
+                                          controller: controller
+                                              .pinnedEventsController
+                                              .pinnedMessageScrollController,
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemBuilder: (_, index) {
+                                            if (data.pinnedEvents[index] ==
+                                                null) {
+                                              return const SizedBox();
+                                            }
+                                            final isCurrentPinnedEvent =
+                                                controller
+                                                    .pinnedEventsController
+                                                    .isCurrentPinnedEvent(
+                                              data.pinnedEvents[index]!,
+                                            );
+                                            return _PinnedEventsIndicator(
+                                              currentEvent: currentEvent,
+                                              scrollController: controller
+                                                  .pinnedEventsController
+                                                  .pinnedMessageScrollController,
+                                              color:
+                                                  LinagoraSysColors.material()
+                                                      .secondary
+                                                      .withOpacity(
+                                                        isCurrentPinnedEvent
+                                                            ? 1
+                                                            : 0.48,
+                                                      ),
+                                              index: index,
+                                              height: PinnedEventsStyle
+                                                  .calcHeightIndicator(
+                                                data.pinnedEvents.length,
+                                              ),
+                                            );
+                                          },
+                                          separatorBuilder: (_, __) {
+                                            return const SizedBox(height: 1);
+                                          },
+                                          itemCount: data.pinnedEvents.length,
+                                        ),
                                       ),
                                     ),
                                     _PinnedEventsContentWidget(
