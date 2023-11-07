@@ -61,6 +61,7 @@ class DraftChatView extends StatelessWidget {
                 child: _EmptyChatTitle(
                   receiverId: controller.presentationContact!.matrixId!,
                   displayName: controller.presentationContact!.displayName,
+                  onTap: controller.onPushDetails,
                 ),
               ),
             ],
@@ -269,17 +270,27 @@ class DraftChatView extends StatelessWidget {
 }
 
 class _EmptyChatTitle extends StatelessWidget {
-  const _EmptyChatTitle({required this.receiverId, this.displayName});
+  const _EmptyChatTitle({
+    required this.receiverId,
+    this.displayName,
+    this.onTap,
+  });
 
   final String receiverId;
 
   final String? displayName;
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: DraftChatViewStyle.emptyChatParentPadding,
       child: InkWell(
+        splashColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: onTap,
         child: FutureBuilder<Profile>(
           future: _getReceiverProfile(context, receiverId),
           builder: (context, snapshot) {
