@@ -15,10 +15,12 @@ import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
@@ -107,6 +109,10 @@ class ChatController extends State<Chat>
 
   final responsive = getIt.get<ResponsiveUtils>();
 
+  final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
+
+  PinnedEventsController pinnedEventsController = PinnedEventsController();
+
   Room? room;
 
   Client? sendingClient;
@@ -136,14 +142,22 @@ class ChatController extends State<Chat>
       );
 
   final AutoScrollController scrollController = AutoScrollController();
+
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
+
   final ValueNotifier<String?> focusHover = ValueNotifier(null);
+
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
+
   final ValueNotifier<bool> draggingNotifier = ValueNotifier(false);
+
   final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
+
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
+
   FocusNode inputFocus = FocusNode();
+
   FocusNode keyboardFocus = FocusNode();
 
   Timer? typingCoolDown;
@@ -325,6 +339,10 @@ class ChatController extends State<Chat>
           ],
         );
       }
+      pinnedEventsController.getPinnedMessageAction(
+        room: room!,
+        isInitial: true,
+      );
     });
   }
 
@@ -438,6 +456,7 @@ class ChatController extends State<Chat>
     inputFocus.removeListener(_inputFocusListener);
     focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
+    pinnedEventsController.dispose();
     super.dispose();
   }
 
@@ -1249,7 +1268,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void pinEventAction() {
+  void pinEventAction() async {
     final room = this.room;
     if (room == null) return;
     final pinnedEventIds = room.pinnedEventIds;
@@ -1261,8 +1280,13 @@ class ChatController extends State<Chat>
     } else {
       pinnedEventIds.addAll(selectedEventIds);
     }
-    TwakeDialog.showFutureLoadingDialogFullScreen(
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setPinnedEvents(pinnedEventIds),
+    );
+    pinnedEventsController.getPinnedMessageAction(
+      isInitial: unpin,
+      room: room,
+      eventId: selectedEventIds.last,
     );
   }
 

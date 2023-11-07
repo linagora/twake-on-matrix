@@ -6,7 +6,7 @@ import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
-import 'package:fluffychat/pages/chat/pinned_events.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
@@ -307,7 +307,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             ],
                           ),
                           TombstoneDisplay(controller),
-                          PinnedEvents(controller),
+                          PinnedEventsView(controller),
                         ],
                       ),
                     ),
