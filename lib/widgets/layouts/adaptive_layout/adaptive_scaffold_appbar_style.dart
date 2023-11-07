@@ -6,7 +6,7 @@ class AdaptiveScaffoldAppBarStyle {
   static const EdgeInsetsDirectional appBarPadding =
       EdgeInsetsDirectional.all(16);
 
-  static const double sizeWidthIcTwakeImageLogo = 170;
-  static const double sizeHeightIcTwakeImageLogo = 44;
-  static const double toolbarHeight = 80;
+  static const double sizeWidthIcTwakeImageLogo = 238.0;
+  static const double sizeHeightIcTwakeImageLogo = 44.0;
+  static const double toolbarHeight = 64.0;
 }
