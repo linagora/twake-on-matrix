@@ -12,7 +12,7 @@ class TomContactAPI {
 
   TomContactAPI();
 
-  Future<LookupMxidResponse> searchContacts(
+  Future<LookupMxidResponse> fetchContacts(
     ContactQuery query, {
     int? limit,
     int? offset,
