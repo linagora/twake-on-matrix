@@ -70,10 +70,18 @@ abstract class AppRoutes {
     ),
     GoRoute(
       path: '/home',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const HomeserverPicker(),
-      ),
+      pageBuilder: (context, state) {
+        if (state.extra is String) {
+          return defaultPageBuilder(
+            context,
+            HomeserverPicker(registrationRedirectUri: state.extra as String),
+          );
+        }
+        return defaultPageBuilder(
+          context,
+          const HomeserverPicker(),
+        );
+      },
       redirect: loggedInRedirect,
       routes: [
         GoRoute(

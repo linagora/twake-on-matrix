@@ -24,6 +24,8 @@ abstract class AppConfig {
   static String _privacyUrl = 'https://twake.app/en/privacy/';
 
   static String get privacyUrl => _privacyUrl;
+  static String get registationUrl =>
+      'https://register.tom-dev.xyz/?post_registered_redirect_url=twake.chat://registered';
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
@@ -49,6 +51,7 @@ abstract class AppConfig {
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
   static const String schemePrefix = 'matrix:';
+  static const String registrationSchemePrefix = 'twake.chat://registered';
   static const String pushNotificationsChannelId = 'twake_push';
   static const String pushNotificationsChannelName = 'Twake push channel';
   static const String pushNotificationsChannelDescription =

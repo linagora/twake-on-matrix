@@ -15,6 +15,7 @@ import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:fluffychat/presentation/mixins/handle_registration_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -68,7 +69,10 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin {
+    with
+        WidgetsBindingObserver,
+        ReceiveSharingIntentMixin,
+        HandleRegistrationMixin {
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
