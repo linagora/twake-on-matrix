@@ -9,6 +9,7 @@ import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
@@ -35,7 +36,13 @@ typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 class DraftChat extends StatefulWidget {
   final GoRouterState state;
 
-  const DraftChat({super.key, required this.state});
+  final void Function(RightColumnType)? onChangeRightColumnType;
+
+  const DraftChat({
+    super.key,
+    required this.state,
+    this.onChangeRightColumnType,
+  });
 
   @override
   State<StatefulWidget> createState() => DraftChatController();
@@ -301,6 +308,10 @@ class DraftChatController extends State<DraftChat>
         );
       },
     );
+  }
+
+  void onPushDetails() {
+    widget.onChangeRightColumnType?.call(RightColumnType.chatDirectDetails);
   }
 
   @override
