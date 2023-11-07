@@ -46,7 +46,7 @@ class _LeadingAppBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      ImagePaths.icTwakeImageLogoDark,
+      ImagePaths.icTwakeImageLogo,
       width: AdaptiveScaffoldAppBarStyle.sizeWidthIcTwakeImageLogo,
       height: AdaptiveScaffoldAppBarStyle.sizeHeightIcTwakeImageLogo,
     );
