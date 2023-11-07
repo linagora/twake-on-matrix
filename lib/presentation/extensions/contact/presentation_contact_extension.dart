@@ -25,19 +25,16 @@ extension PresentaionContactExtension on PresentationContact {
 
 extension ContactExtensionInPresentation on Contact {
   Set<PresentationContact> toPresentationContacts() {
-    final listContacts = emails
-            ?.map(
-              (email) => PresentationContact(
-                email: email,
-                displayName: displayName,
-                matrixId: matrixId,
-                status: status,
-              ),
-            )
-            .toSet() ??
-        {};
+    final listContacts = {
+      PresentationContact(
+        email: email,
+        displayName: displayName,
+        matrixId: matrixId,
+        status: status,
+      ),
+    };
 
-    if (emails == null || emails!.isEmpty) {
+    if (email == null || email!.isEmpty) {
       listContacts.add(
         PresentationContact(
           email: null,
