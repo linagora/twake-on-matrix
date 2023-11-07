@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
+import 'package:fluffychat/presentation/mixins/handle_registration_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -25,14 +26,16 @@ import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 
 class HomeserverPicker extends StatefulWidget {
-  const HomeserverPicker({Key? key}) : super(key: key);
+  final String? registrationRedirectUri;
+  const HomeserverPicker({Key? key, this.registrationRedirectUri})
+      : super(key: key);
 
   @override
   HomeserverPickerController createState() => HomeserverPickerController();
 }
 
 class HomeserverPickerController extends State<HomeserverPicker>
-    with ConnectPageMixin {
+    with ConnectPageMixin, HandleRegistrationMixin {
   HomeserverState state = HomeserverState.ssoLoginServer;
   final TextEditingController homeserverController = TextEditingController(
     text: AppConfig.defaultHomeserver,
@@ -134,7 +137,6 @@ class HomeserverPickerController extends State<HomeserverPicker>
       state = HomeserverState.loading;
       displayServerList = false;
     });
-
     try {
       homeserverController.text =
           homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
@@ -220,6 +222,16 @@ class HomeserverPickerController extends State<HomeserverPicker>
     homeserverFocusNode.addListener(_updateFocus);
     _checkTorBrowser();
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeserverPicker oldWidget) {
+    if (widget.registrationRedirectUri?.isNotEmpty == true) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+        await checkHomeserverAction();
+      });
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

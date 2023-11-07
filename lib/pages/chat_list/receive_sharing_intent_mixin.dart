@@ -47,10 +47,14 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
   void _processIncomingUris(String? text) async {
     if (text == null) return;
-    TwakeApp.router.go('/share');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, text).openMatrixToUrl();
-    });
+    if (text.startsWith(AppConfig.registrationSchemePrefix)) {
+      matrixState.handleRegistrationDone(text);
+    } else {
+      TwakeApp.router.go('/share');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UrlLauncher(context, text).openMatrixToUrl();
+      });
+    }
   }
 
   void initReceiveSharingIntent() {
