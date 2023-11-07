@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/input_bar/context_menu_input_bar.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
+import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
@@ -14,6 +15,7 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
 
@@ -535,7 +537,7 @@ class SuggestionTile extends StatelessWidget {
     if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
       final url = Uri.parse(suggestion['avatar_url'] ?? '');
       return Container(
-        padding: const EdgeInsetsDirectional.all(4.0),
+        padding: const EdgeInsetsDirectional.all(8.0),
         height: InputBarStyle.suggestionSize,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -548,12 +550,35 @@ class SuggestionTile extends StatelessWidget {
               fontSize: InputBarStyle.suggestionAvatarFontSize,
               client: client,
             ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                suggestion['displayname'] ?? suggestion['mxid']!,
-                maxLines: 1,
-                overflow: TextOverflow.clip,
+            const SizedBox(
+              width: InputBarStyle.suggestionTileAvatarTextGap,
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      suggestion['displayname'] ?? suggestion['mxid']!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                  Flexible(
+                    child: Text(
+                      maxLines: 1,
+                      suggestion['mxid']!,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: LinagoraRefColors.material().tertiary[30],
+                          ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -562,23 +587,4 @@ class SuggestionTile extends StatelessWidget {
     }
     return Container();
   }
-}
-
-class InputBarStyle {
-  static const double suggestionAvatarSize = 30;
-
-  static const double suggestionAvatarFontSize = 15;
-
-  static const double suggestionSize = 50;
-
-  static const double suggestionBorderRadius = 12.0;
-
-  static const double suggestionListPadding = 8.0;
-
-  static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
-        fontSize: 15,
-        color: Theme.of(context).brightness == Brightness.light
-            ? Colors.black
-            : Colors.white,
-      );
 }
