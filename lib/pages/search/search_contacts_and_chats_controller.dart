@@ -3,9 +3,9 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
-import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
@@ -26,7 +26,7 @@ class SearchContactsAndChatsController {
   static const minimumItemsListDisplay = 20;
   final SearchRecentChatInteractor _searchRecentChatInteractor =
       getIt.get<SearchRecentChatInteractor>();
-  final _searchContactsInteractor = getIt.get<GetContactsInteractor>();
+  final _searchContactsInteractor = getIt.get<GetAllContactsInteractor>();
   bool _isLoadingMore = false;
 
   final recentAndContactsNotifier = ValueNotifier<Either<Failure, Success>>(
@@ -36,6 +36,7 @@ class SearchContactsAndChatsController {
 
   MatrixLocalizations get _matrixLocalizations =>
       MatrixLocals(L10n.of(context)!);
+
   List<Room> get _rooms => Matrix.of(context).client.rooms;
 
   void init() {
@@ -99,7 +100,7 @@ class SearchContactsAndChatsController {
           )
         : null;
     final newEvent = event.map(
-      (success) => success is GetContactsSuccess
+      (success) => success is GetContactsAllSuccess
           ? success.toPresentation(
               oldPresentation: oldPresentation,
             )
@@ -116,8 +117,7 @@ class SearchContactsAndChatsController {
       return;
     }, (success) {
       if (!(success is GetContactAndRecentChatPresentation &&
-          !success.isEnd &&
-          success.data.length <= minimumItemsListDisplay)) {
+          success.tomContacts.length <= minimumItemsListDisplay)) {
         return;
       }
       loadMoreContacts();
@@ -128,18 +128,16 @@ class SearchContactsAndChatsController {
         return;
       }, (success) {
         if (!(success is GetContactAndRecentChatPresentation &&
-            !success.isEnd &&
             !_isLoadingMore)) {
           return;
         }
         Logs().d(
-          "SearchContactsAndChatsController::loadMoreContacts: keyword: ${success.keyword}, offset: ${success.offset}",
+          "SearchContactsAndChatsController::loadMoreContacts: keyword: ${success.keyword}",
         );
         _isLoadingMore = true;
         _searchContactsInteractor
             .execute(
               keyword: success.keyword,
-              offset: success.offset,
               limit: limitContactsPerPage,
             )
             .listen(

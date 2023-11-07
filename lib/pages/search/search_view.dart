@@ -109,17 +109,17 @@ class SearchView extends StatelessWidget {
           padding: SearchViewStyle.paddingRecentChats,
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
-          itemCount: success.data.length + (success.isEnd ? 0 : 1),
+          itemCount: success.tomContacts.length + 1,
           itemBuilder: (context, index) {
-            if (index >= success.data.length) {
+            if (index >= success.tomContacts.length) {
               return const Center(child: CircularProgressIndicator());
             }
             return RecentItemWidget(
               highlightKeyword: success.keyword,
-              presentationSearch: success.data[index],
-              key: Key('chat_recent_${success.data[index].id}'),
+              presentationSearch: success.tomContacts[index],
+              key: Key('chat_recent_${success.tomContacts[index].id}'),
               onTap: () {
-                searchController.onSearchItemTap(success.data[index]);
+                searchController.onSearchItemTap(success.tomContacts[index]);
               },
             );
           },
