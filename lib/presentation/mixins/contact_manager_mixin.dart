@@ -6,7 +6,7 @@ import 'package:fluffychat/app_state/success_converter.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
 import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
@@ -21,7 +21,7 @@ mixin class ContactManagerMixin {
   final SuccessConverter converter = PresentationContactConverter();
 
   final contactsNotifier = ValueNotifier<Either<Failure, Success>>(
-    const Right(GetContactsInitial()),
+    const Right(GetContactsAllInitial()),
   );
 
   final refreshController = TwakeRefreshController();
