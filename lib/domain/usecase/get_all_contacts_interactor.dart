@@ -7,34 +7,25 @@ import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/usecase/lazy_load_interactor.dart';
 
-class GetContactsInteractor with LazyLoadDataMixin {
+class GetAllContactsInteractor with LazyLoadDataMixin {
   final ContactRepository contactRepository = getIt.get<ContactRepository>();
 
-  GetContactsInteractor();
+  GetAllContactsInteractor();
 
   Stream<Either<Failure, Success>> execute({
     required String keyword,
-    required int offset,
     required int limit,
   }) async* {
     try {
       // FIXME: It can break the lazy load logic
       // yield const Right(GetContactsLoading());
-      final contacts = await contactRepository.searchContact(
+      final contacts = await contactRepository.fetchContact(
         query: ContactQuery(keyword: keyword),
-        offset: offset,
-        limit: limit,
-      );
-      final info = calculateLazyLoadInfo(
-        length: contacts.length,
-        offset: offset,
         limit: limit,
       );
       yield Right(
         GetContactsSuccess(
-          data: contacts,
-          offset: info.offset,
-          isEnd: info.isEnd,
+          tomContacts: contacts,
           keyword: keyword,
         ),
       );
