@@ -10,12 +10,12 @@ class TomContactsDatasourceImpl implements TomContactsDatasource {
   final TomContactAPI _tomContactAPI = getIt.get<TomContactAPI>();
 
   @override
-  Future<List<Contact>> searchContacts({
+  Future<List<Contact>> fetchContacts({
     required ContactQuery query,
     int? limit,
     int? offset,
   }) async {
-    final response = await _tomContactAPI.searchContacts(
+    final response = await _tomContactAPI.fetchContacts(
       query,
       limit: limit,
       offset: offset,
