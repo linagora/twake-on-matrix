@@ -25,7 +25,7 @@ import 'package:fluffychat/domain/repository/tom_configurations_repository.dart'
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/domain/usecase/get_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -138,8 +138,8 @@ class GetItInitializer {
     getIt.registerLazySingleton<DeleteRecoveryWordsInteractor>(
       () => DeleteRecoveryWordsInteractor(),
     );
-    getIt.registerFactory<GetContactsInteractor>(
-      () => GetContactsInteractor(),
+    getIt.registerFactory<GetAllContactsInteractor>(
+      () => GetAllContactsInteractor(),
     );
     getIt.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
