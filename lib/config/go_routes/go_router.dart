@@ -7,7 +7,7 @@ import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
@@ -248,7 +248,7 @@ abstract class AppRoutes {
               pageBuilder: (context, state) {
                 final extra = state.extra as Map<String, String>;
                 return CupertinoPage(
-                  child: DraftChat(
+                  child: DraftChatAdaptiveScaffold(
                     key: Key(extra['receiverId'] ?? ''),
                     state: state,
                   ),
