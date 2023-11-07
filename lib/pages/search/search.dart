@@ -7,7 +7,6 @@ import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_inte
 import 'package:fluffychat/mixin/comparable_presentation_search_mixin.dart';
 import 'package:fluffychat/pages/search/search_contacts_and_chats_controller.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
-import 'package:fluffychat/presentation/mixin/load_more_search_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -29,12 +28,15 @@ class Search extends StatefulWidget {
 }
 
 class SearchController extends State<Search>
-    with ComparablePresentationSearchMixin, LoadMoreSearchMixin {
+    with ComparablePresentationSearchMixin {
   static const int limitPrefetchedRecentChats = 3;
   static const int limitSearchingPrefetchedRecentContacts = 30;
   static const int limitPrefetchedRecentContacts = 5;
 
   SearchContactsAndChatsController? searchContactAndRecentChatController;
+
+  final ScrollController mainScrollController = ScrollController();
+
   final _preSearchRecentContactsInteractor =
       getIt.get<PreSearchRecentContactsInteractor>();
   final preSearchRecentContactsNotifier =
@@ -129,9 +131,6 @@ class SearchController extends State<Search>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchContactAndRecentChatController?.init();
-        listenForScrollChanged(
-          controller: searchContactAndRecentChatController,
-        );
         fetchPreSearchRecentContacts();
         textEditingController.addListener(() {
           onSearchBarChanged(textEditingController.text);
@@ -142,9 +141,6 @@ class SearchController extends State<Search>
 
   void onSearchBarChanged(String keyword) {
     searchContactAndRecentChatController?.onSearchBarChanged(keyword);
-    if (mainScrollController.hasClients) {
-      mainScrollController.jumpTo(0);
-    }
   }
 
   void onCloseSearchTapped() {
@@ -157,7 +153,6 @@ class SearchController extends State<Search>
 
   @override
   void dispose() {
-    mainScrollController.dispose();
     searchContactAndRecentChatController?.dispose();
     super.dispose();
   }
