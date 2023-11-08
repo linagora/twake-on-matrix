@@ -82,6 +82,7 @@ class ContactsTabController extends State<ContactsTab>
 
   @override
   void dispose() {
+    contactManager.textEditingController.clear();
     super.dispose();
   }
 
