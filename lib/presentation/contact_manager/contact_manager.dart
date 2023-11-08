@@ -117,13 +117,9 @@ class ContactManager {
     });
   }
 
-  void toggleSearchMode() {
-    isSearchModeNotifier.value = !isSearchModeNotifier.value;
-    if (isSearchModeNotifier.value) {
-      searchFocusNode.requestFocus();
-    } else {
-      textEditingController.clear();
-    }
+  void openSearchBar() {
+    isSearchModeNotifier.value = true;
+    searchFocusNode.requestFocus();
   }
 
   void onSelectedContact() {
@@ -134,7 +130,7 @@ class ContactManager {
     );
   }
 
-  void clearSearchBar() {
+  void closeSearchBar() {
     searchFocusNode.unfocus();
     isSearchModeNotifier.value = false;
     textEditingController.clear();
