@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
 class TwakeSecureStorage {
+  final String _iOSDuplicatedKeyExceptionCode = '-25299';
   final String _databaseBuiltKey = 'db_built_key';
 
   TwakeSecureStorage._();
@@ -45,13 +47,27 @@ class TwakeSecureStorage {
     required String key,
     required String value,
   }) async {
-    await _flutterSecureStorage.write(key: key, value: value);
-    await markDatabaseBuilt();
+    try {
+      await _flutterSecureStorage.write(key: key, value: value);
+      await markDatabaseBuilt();
+    } on PlatformException catch (e, s) {
+      Logs().e('TwakeSecureStorage::writeEncryptionKey() $e $s');
+      if (PlatformInfos.isIOS) {
+        if (_isDuplicatedIOSKeyException(e)) {
+          await delete(key: key);
+          await _flutterSecureStorage.write(key: key, value: value);
+          await markDatabaseBuilt();
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<bool> containsEncryptionKey(String key) async {
     final dbBuilt = await isDatabaseBuilt();
     if (dbBuilt) {
+      Logs()
+          .i('TwakeSecureStorage::containsEncryptionKey() database was built');
       return await _platformContainsEncryptionKey(key);
     } else {
       return false;
@@ -63,18 +79,22 @@ class TwakeSecureStorage {
       final isAvailable =
           await _flutterSecureStorage.isCupertinoProtectedDataAvailable();
       if (isAvailable) {
+        Logs().i(
+            'TwakeSecureStorage::_platformContainsEncryptionKey() Cupertino protected data is available');
         final value = await _flutterSecureStorage.read(key: key);
         return value != null;
       }
 
-      Logs().wtf('Cupertino protected data is not available');
+      Logs().i(
+          'TwakeSecureStorage::_platformContainsEncryptionKey() Cupertino protected data is not available');
       final completer = Completer<String?>();
       late StreamSubscription<bool> subscription;
       subscription = _flutterSecureStorage
           .onCupertinoProtectedDataAvailabilityChanged
           .listen((protectedDataAvailable) {
-        Logs().wtf(
-            'onCupertinoProtectedDataAvailabilityChanged: $protectedDataAvailable');
+        Logs().i(
+          'TwakeSecureStorage::_platformContainsEncryptionKey() onCupertinoProtectedDataAvailabilityChanged: $protectedDataAvailable',
+        );
         if (protectedDataAvailable) {
           completer.complete(_flutterSecureStorage.read(key: key));
           subscription.cancel();
@@ -99,12 +119,30 @@ class TwakeSecureStorage {
     required String key,
     required String? value,
   }) async {
-    await _flutterSecureStorage.write(key: key, value: value);
+    try {
+      await _flutterSecureStorage.write(key: key, value: value);
+    } on PlatformException catch (e, s) {
+      Logs().e('TwakeSecureStorage::write() $e $s');
+      if (PlatformInfos.isIOS) {
+        if (_isDuplicatedIOSKeyException(e)) {
+          await delete(key: key);
+          await _flutterSecureStorage.write(key: key, value: value);
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<void> delete({
     required String key,
   }) async {
     await _flutterSecureStorage.delete(key: key);
+  }
+
+  bool _isDuplicatedIOSKeyException(PlatformException platformException) {
+    if (platformException.code == _iOSDuplicatedKeyExceptionCode) {
+      return true;
+    }
+    return false;
   }
 }
