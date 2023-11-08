@@ -18,12 +18,11 @@ class NewPrivateChatView extends StatelessWidget {
         preferredSize: SearchableAppBarStyle.preferredSize(),
         child: SearchableAppBar(
           title: L10n.of(context)!.newChat,
-          searchModeNotifier: controller.contactManager.isSearchModeNotifier,
-          textEditingController:
-              controller.contactManager.textEditingController,
-          openSearchBar: controller.contactManager.openSearchBar,
-          closeSearchBar: controller.contactManager.closeSearchBar,
-          focusNode: controller.contactManager.searchFocusNode,
+          searchModeNotifier: controller.isSearchModeNotifier,
+          textEditingController: controller.textEditingController,
+          openSearchBar: controller.openSearchBar,
+          closeSearchBar: controller.closeSearchBar,
+          focusNode: controller.searchFocusNode,
         ),
       ),
       body: SingleChildScrollView(
@@ -33,13 +32,13 @@ class NewPrivateChatView extends StatelessWidget {
         padding: const EdgeInsets.only(left: 8.0, right: 10.0),
         controller: controller.scrollController,
         child: ExpansionList(
-          contactsNotifier: controller.contactManager.contactsNotifier,
+          presentationContactsNotifier: controller.presentationContactNotifier,
           goToNewGroupChat: controller.goToNewGroupChat,
-          isSearchModeNotifier: controller.contactManager.isSearchModeNotifier,
           isShowContactsNotifier: controller.isShowContactsNotifier,
           onContactTap: controller.onContactAction,
           onExternalContactTap: controller.onExternalContactAction,
           toggleContactsList: controller.toggleContactsList,
+          textEditingController: controller.textEditingController,
         ),
       ),
     );

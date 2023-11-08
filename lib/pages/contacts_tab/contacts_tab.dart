@@ -1,12 +1,12 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
+import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
+import 'package:fluffychat/presentation/mixins/contacts_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluffychat/presentation/contact_manager/contact_manager.dart';
 import 'package:go_router/go_router.dart';
 
 class ContactsTab extends StatefulWidget {
@@ -22,22 +22,19 @@ class ContactsTab extends StatefulWidget {
 }
 
 class ContactsTabController extends State<ContactsTab>
-    with ComparablePresentationContactMixin {
+    with ComparablePresentationContactMixin, ContactsControllerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
-
-  final contactManager = getIt.get<ContactManager>();
 
   @override
   void initState() {
-    contactManager.initSearchContacts();
+    initialFetchContacts();
     _listenFocusTextEditing();
     super.initState();
   }
 
   void _listenFocusTextEditing() {
-    contactManager.searchFocusNode.addListener(() {
-      contactManager.isSearchModeNotifier.value =
-          contactManager.searchFocusNode.hasFocus;
+    searchFocusNode.addListener(() {
+      isSearchModeNotifier.value = searchFocusNode.hasFocus;
     });
   }
 
@@ -82,7 +79,7 @@ class ContactsTabController extends State<ContactsTab>
 
   @override
   void dispose() {
-    contactManager.textEditingController.clear();
+    disposeContactsMixin();
     super.dispose();
   }
 
