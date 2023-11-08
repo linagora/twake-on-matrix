@@ -16,7 +16,6 @@ import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -34,13 +33,13 @@ typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
 class DraftChat extends StatefulWidget {
-  final GoRouterState state;
+  final PresentationContact contact;
 
   final void Function(RightColumnType)? onChangeRightColumnType;
 
   const DraftChat({
     super.key,
-    required this.state,
+    required this.contact,
     this.onChangeRightColumnType,
   });
 
@@ -51,8 +50,6 @@ class DraftChat extends StatefulWidget {
 class DraftChatController extends State<DraftChat>
     with CommonMediaPickerMixin, MediaPickerMixin, SendFilesMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
-
-  PresentationContact? presentationContact;
 
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
@@ -75,6 +72,8 @@ class DraftChatController extends State<DraftChat>
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   final isSendingNotifier = ValueNotifier(false);
+
+  PresentationContact? get presentationContact => widget.contact;
 
   void _updateScrollController() {
     if (!mounted) {
@@ -105,18 +104,6 @@ class DraftChatController extends State<DraftChat>
 
   @override
   void initState() {
-    final extra = widget.state.extra as Map<String, String>;
-    if (extra.isNotEmpty) {
-      presentationContact = PresentationContact(
-        matrixId: extra[PresentationContactConstant.receiverId],
-        email: extra[PresentationContactConstant.email],
-        displayName: extra[PresentationContactConstant.displayName],
-      );
-    } else {
-      presentationContact =
-          const PresentationContact().presentationContactEmpty;
-    }
-
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     super.initState();
