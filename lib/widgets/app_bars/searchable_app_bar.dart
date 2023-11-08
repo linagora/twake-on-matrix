@@ -14,7 +14,8 @@ class SearchableAppBar extends StatelessWidget {
   final String title;
   final String? hintText;
   final TextEditingController textEditingController;
-  final Function() toggleSearchMode;
+  final Function() openSearchBar;
+  final Function() closeSearchBar;
   final bool isFullScreen;
 
   const SearchableAppBar({
@@ -24,7 +25,8 @@ class SearchableAppBar extends StatelessWidget {
     this.hintText,
     required this.focusNode,
     required this.textEditingController,
-    required this.toggleSearchMode,
+    required this.openSearchBar,
+    required this.closeSearchBar,
     this.isFullScreen = true,
   });
 
@@ -125,7 +127,7 @@ class SearchableAppBar extends StatelessWidget {
                     builder: (context, searchModeNotifier, child) {
                       if (searchModeNotifier) {
                         return TwakeIconButton(
-                          onTap: toggleSearchMode,
+                          onTap: closeSearchBar,
                           tooltip: L10n.of(context)!.close,
                           icon: Icons.close,
                           paddingAll: 10.0,
@@ -137,7 +139,7 @@ class SearchableAppBar extends StatelessWidget {
                       }
                       return TwakeIconButton(
                         icon: Icons.search,
-                        onTap: toggleSearchMode,
+                        onTap: openSearchBar,
                         tooltip: L10n.of(context)!.search,
                         paddingAll: 10.0,
                         margin: const EdgeInsets.symmetric(vertical: 10.0),
