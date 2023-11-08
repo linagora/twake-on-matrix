@@ -1,4 +1,4 @@
 {
   "default_homeserver": "matrix.linagora.com",
-  "registration_url": "https://register.linagora.com?post_registered_redirect_url=twake.chat://registered"
+  "registration_url": ""
 }
