@@ -90,6 +90,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
   @override
   void dispose() {
     super.dispose();
+    contactManager.textEditingController.clear();
     scrollController.dispose();
   }
 

@@ -21,7 +21,8 @@ class NewPrivateChatView extends StatelessWidget {
           searchModeNotifier: controller.contactManager.isSearchModeNotifier,
           textEditingController:
               controller.contactManager.textEditingController,
-          toggleSearchMode: controller.contactManager.toggleSearchMode,
+          openSearchBar: controller.contactManager.openSearchBar,
+          closeSearchBar: controller.contactManager.closeSearchBar,
           focusNode: controller.contactManager.searchFocusNode,
         ),
       ),
