@@ -32,7 +32,8 @@ class ContactsSelectionView extends StatelessWidget {
           hintText: controller.getHintText(context),
           textEditingController:
               controller.contactManager.textEditingController,
-          toggleSearchMode: controller.contactManager.toggleSearchMode,
+          openSearchBar: controller.contactManager.openSearchBar,
+          closeSearchBar: controller.contactManager.closeSearchBar,
           isFullScreen: controller.isFullScreen,
         ),
       ),

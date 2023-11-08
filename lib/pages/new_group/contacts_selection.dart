@@ -40,6 +40,7 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   @override
   void dispose() {
+    contactManager.textEditingController.clear();
     super.dispose();
   }
 

@@ -24,7 +24,7 @@ class ContactsTabView extends StatelessWidget {
           isSearchModeNotifier:
               contactsController.contactManager.isSearchModeNotifier,
           searchFocusNode: contactsController.contactManager.searchFocusNode,
-          clearSearchBar: contactsController.contactManager.clearSearchBar,
+          clearSearchBar: contactsController.contactManager.closeSearchBar,
           textEditingController:
               contactsController.contactManager.textEditingController,
         ),
