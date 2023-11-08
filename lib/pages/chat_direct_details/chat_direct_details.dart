@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_direct_details/chat_direct_details_view.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -6,11 +7,13 @@ import 'package:matrix/matrix.dart';
 class ChatDirectDetails extends StatefulWidget {
   final VoidCallback? onBack;
   final String? roomId;
+  final PresentationContact? contact;
 
   const ChatDirectDetails({
     super.key,
     required this.onBack,
     this.roomId,
+    this.contact,
   });
 
   @override
