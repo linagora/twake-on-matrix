@@ -19,8 +19,8 @@ class ContactsTabBodyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TwakeSmartRefresher(
-      onRefresh: controller.getAllContacts,
-      controller: controller.refreshController,
+      onRefresh: controller.contactManager.getAllContacts,
+      controller: controller.contactManager.refreshController,
       slivers: [
         SliverToBoxAdapter(
           child: Divider(
@@ -35,7 +35,7 @@ class ContactsTabBodyView extends StatelessWidget {
           ),
         ),
         ValueListenableBuilder(
-          valueListenable: controller.contactsNotifier,
+          valueListenable: controller.contactManager.contactsNotifier,
           builder: (context, value, child) => value.fold(
             (failure) => const SliverToBoxAdapter(child: EmptyContactBody()),
             (success) {

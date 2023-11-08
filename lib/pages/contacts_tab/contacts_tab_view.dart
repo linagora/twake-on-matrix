@@ -21,10 +21,12 @@ class ContactsTabView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: ContactsTabViewStyle.preferredSizeAppBar,
         child: ContactsAppBar(
-          isSearchModeNotifier: contactsController.isSearchModeNotifier,
-          searchFocusNode: contactsController.searchFocusNode,
-          clearSearchBar: contactsController.clearSearchBar,
-          textEditingController: contactsController.textEditingController,
+          isSearchModeNotifier:
+              contactsController.contactManager.isSearchModeNotifier,
+          searchFocusNode: contactsController.contactManager.searchFocusNode,
+          clearSearchBar: contactsController.contactManager.clearSearchBar,
+          textEditingController:
+              contactsController.contactManager.textEditingController,
         ),
       ),
       bottomNavigationBar: bottomNavigationBar,

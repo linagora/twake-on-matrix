@@ -4,24 +4,24 @@ import 'package:fluffychat/app_state/lazy_load_success.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 
-class GetContactsAllInitial extends Initial {
-  const GetContactsAllInitial() : super();
+class GetContactsInitial extends Initial {
+  const GetContactsInitial() : super();
 
   @override
   List<Object?> get props => [];
 }
 
-class GetContactsAllLoading extends Success {
-  const GetContactsAllLoading() : super();
+class GetContactsLoading extends Success {
+  const GetContactsLoading() : super();
 
   @override
   List<Object?> get props => [];
 }
 
-class GetContactsAllSuccess extends LazyLoadSuccess<Contact> {
+class GetContactsSuccess extends LazyLoadSuccess<Contact> {
   final String keyword;
 
-  const GetContactsAllSuccess({
+  const GetContactsSuccess({
     required super.tomContacts,
     super.phonebookContacts,
     required this.keyword,
@@ -31,11 +31,11 @@ class GetContactsAllSuccess extends LazyLoadSuccess<Contact> {
   List<Object?> get props => [tomContacts, phonebookContacts, keyword];
 }
 
-class GetContactsAllFailure extends Failure {
+class GetContactsFailure extends Failure {
   final String keyword;
   final dynamic exception;
 
-  const GetContactsAllFailure({
+  const GetContactsFailure({
     required this.keyword,
     required this.exception,
   });
