@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Install setuptools so appdmg can be installed
+python3 -m pip install setuptools
+
 # Install appdmg for packaging
 echo "Installing appdmg."
 npm install -g appdmg
