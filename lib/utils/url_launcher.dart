@@ -207,7 +207,10 @@ class UrlLauncher {
       if (PlatformInfos.isMobile) {
         await browser.open(
           url: WebUri(url!),
-          settings: ChromeSafariBrowserSettings(),
+          settings: ChromeSafariBrowserSettings(
+            shareState: CustomTabsShareState.SHARE_STATE_ON,
+            barCollapsingEnabled: true,
+          ),
         );
       } else {
         launchUrlString(url!);
