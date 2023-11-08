@@ -3,7 +3,7 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
@@ -100,7 +100,7 @@ class SearchContactsAndChatsController {
           )
         : null;
     final newEvent = event.map(
-      (success) => success is GetContactsAllSuccess
+      (success) => success is GetContactsSuccess
           ? success.toPresentation(
               oldPresentation: oldPresentation,
             )
