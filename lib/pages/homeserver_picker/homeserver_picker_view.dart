@@ -111,13 +111,13 @@ class HomeserverPickerView extends StatelessWidget {
                         .openUrlInAppBrowser(),
                     child: Text(L10n.of(context)!.privacy),
                   ),
-                  if (AppConfig.registationUrl.isNotEmpty)
+                  if (AppConfig.registrationUrl.isNotEmpty)
                     TextButton(
                       onPressed: () {
                         if (PlatformInfos.isIOS) {
-                          controller.registerIOS(AppConfig.registationUrl);
+                          controller.registerIOS(AppConfig.registrationUrl);
                         } else {
-                          UrlLauncher(context, AppConfig.registationUrl)
+                          UrlLauncher(context, AppConfig.registrationUrl)
                               .openUrlInAppBrowser();
                         }
                       },

@@ -118,5 +118,10 @@
 	<true/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+			<string>teammail.mobile</string>
+			<string>twake.drive</string>
+	</array>
 </dict>
 </plist>

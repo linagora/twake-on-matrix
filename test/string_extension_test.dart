@@ -330,4 +330,34 @@ void main() {
       expect(result, equals(text));
     });
   });
+
+  group('base64DecodedString', () {
+    test('Decodes a valid base64 string', () {
+      const encodedString =
+          'aHR0cHM6Ly9wbGF5Lmdvb2dsZS5jb20vc3RvcmUvYXBwcy9kZXRhaWxzP2lkPWNvbS50d2FrZS50d2FrZQ';
+      final decodedString = encodedString.base64DecodedString();
+      expect(
+        decodedString,
+        'https://play.google.com/store/apps/details?id=com.twake.twake',
+      );
+    });
+
+    test('Decodes an empty base64 string', () {
+      const encodedString = '';
+      final decodedString = encodedString.base64DecodedString();
+      expect(decodedString, '');
+    });
+
+    test('Decodes a base64 string with padding', () {
+      const encodedString = 'YWJjZA==';
+      final decodedString = encodedString.base64DecodedString();
+      expect(decodedString, 'abcd');
+    });
+
+    test('Decodes a base64 string length not divided by 4', () {
+      const encodedString = 'YWJjZA';
+      final decodedString = encodedString.base64DecodedString();
+      expect(decodedString, 'abcd');
+    });
+  });
 }

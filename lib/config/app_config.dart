@@ -27,13 +27,15 @@ abstract class AppConfig {
   static String _privacyUrl = 'https://twake.app/en/privacy/';
 
   static String get privacyUrl => _privacyUrl;
-  static const String registationUrl =
+  static const String registrationUrl =
       String.fromEnvironment('registration_url');
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/How-to-use-end-to-end-encryption-in-FluffyChat';
   static const String appOpenUrlScheme = 'twake.chat';
+  static const String teamMailUrlScheme = 'teammail.mobile';
+  static const String twakeDriveUrlScheme = 'twake.drive';
   static String _webBaseUrl = 'https://fluffychat.im/web';
 
   static String get webBaseUrl => _webBaseUrl;

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -305,5 +308,10 @@ extension StringCasingExtension on String {
       return '...${substring(index - prefixLength)}';
     }
     return this;
+  }
+
+  String base64DecodedString() {
+    final paddingString = this + "=" * min(length % 4, 4 - length % 4);
+    return utf8.decode(base64.decode(paddingString));
   }
 }
