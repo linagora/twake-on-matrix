@@ -5,7 +5,6 @@ import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dar
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
-import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -26,14 +25,13 @@ class ContactsSelectionView extends StatelessWidget {
           isFullScreen: controller.isFullScreen,
         ),
         child: SearchableAppBar(
-          focusNode: controller.contactManager.searchFocusNode,
+          focusNode: controller.searchFocusNode,
           title: controller.getTitle(context),
-          searchModeNotifier: controller.contactManager.isSearchModeNotifier,
+          searchModeNotifier: controller.isSearchModeNotifier,
           hintText: controller.getHintText(context),
-          textEditingController:
-              controller.contactManager.textEditingController,
-          openSearchBar: controller.contactManager.openSearchBar,
-          closeSearchBar: controller.contactManager.closeSearchBar,
+          textEditingController: controller.textEditingController,
+          openSearchBar: controller.openSearchBar,
+          closeSearchBar: controller.closeSearchBar,
           isFullScreen: controller.isFullScreen,
         ),
       ),
@@ -51,9 +49,7 @@ class ContactsSelectionView extends StatelessWidget {
                   child: child,
                 );
               },
-              child: TwakeSmartRefresher(
-                controller: controller.contactManager.refreshController,
-                onRefresh: controller.contactManager.getAllContacts,
+              child: CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
                     child: SelectedParticipantsList(
@@ -61,13 +57,13 @@ class ContactsSelectionView extends StatelessWidget {
                     ),
                   ),
                   ContactsSelectionList(
-                    contactsNotifier:
-                        controller.contactManager.contactsNotifier,
+                    presentationContactNotifier:
+                        controller.presentationContactNotifier,
                     selectedContactsMapNotifier:
                         controller.selectedContactsMapNotifier,
-                    onSelectedContact:
-                        controller.contactManager.onSelectedContact,
+                    onSelectedContact: controller.onSelectedContact,
                     disabledContactIds: controller.disabledContactIds,
+                    textEditingController: controller.textEditingController,
                   ),
                 ],
               ),

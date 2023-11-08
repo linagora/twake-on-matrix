@@ -1,11 +1,13 @@
-import 'package:fluffychat/app_state/lazy_load_success.dart';
+import 'package:equatable/equatable.dart';
 
-class GetPresentationContactsSuccess<T> extends LazyLoadSuccess<T> {
+class GetPresentationContactsSuccess<T> extends Equatable {
   final String keyword;
+  final List<T> tomContacts;
+  final List<T>? phonebookContacts;
 
   const GetPresentationContactsSuccess({
-    required super.tomContacts,
-    super.phonebookContacts,
+    required this.tomContacts,
+    this.phonebookContacts,
     required this.keyword,
   });
 
@@ -14,5 +16,5 @@ class GetPresentationContactsSuccess<T> extends LazyLoadSuccess<T> {
 
   @override
   String toString() =>
-      "PresentaionSearchableSuccess tomContacts: ${tomContacts.length} - phonebookContacts: $phonebookContacts - keyword: $keyword";
+      "GetPresentationContactsSuccess(): tomContacts: ${tomContacts.length} - phonebookContacts: $phonebookContacts - keyword: $keyword";
 }
