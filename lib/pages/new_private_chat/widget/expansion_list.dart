@@ -1,193 +1,116 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 
 class ExpansionList extends StatelessWidget {
-  final ValueNotifier<Either<Failure, Success>> contactsNotifier;
+  final ValueNotifier<List<PresentationContact>> presentationContactsNotifier;
   final ValueNotifier<bool> isShowContactsNotifier;
-  final ValueNotifier<bool> isSearchModeNotifier;
   final Function() goToNewGroupChat;
   final Function() toggleContactsList;
   final Function(BuildContext context, PresentationContact contact)
       onExternalContactTap;
   final Function(BuildContext context, PresentationContact contact)
       onContactTap;
+  final TextEditingController textEditingController;
 
   const ExpansionList({
     super.key,
-    required this.contactsNotifier,
+    required this.presentationContactsNotifier,
     required this.isShowContactsNotifier,
-    required this.isSearchModeNotifier,
     required this.goToNewGroupChat,
     required this.toggleContactsList,
     required this.onExternalContactTap,
     required this.onContactTap,
+    required this.textEditingController,
   });
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: contactsNotifier,
-      builder: (context, value, child) => value.fold(
-        (failure) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 12,
-            ),
-            NoContactsFound(
-              keyword: failure is GetContactsFailure ? failure.keyword : '',
-            ),
-            _MoreListTile(),
-            _NewGroupButton(
-              onPressed: goToNewGroupChat,
-            ),
-            _GetHelpButton(),
-          ],
-        ),
-        (success) {
-          if (success is PresentationExternalContactSuccess) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 12,
-                ),
-                InkWell(
-                  child: ExpansionContactListTile(
-                    contact: success.contact,
-                  ),
-                  onTap: () {
-                    onExternalContactTap(context, success.contact);
-                  },
-                ),
-                _MoreListTile(),
-                _NewGroupButton(
-                  onPressed: goToNewGroupChat,
-                ),
-                _GetHelpButton(),
-              ],
-            );
-          }
-          if (success is! PresentationContactsSuccess) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _NewGroupButton(
-                  onPressed: goToNewGroupChat,
-                ),
-                const LoadingContactWidget(),
-                _GetHelpButton(),
-              ],
-            );
-          }
-          if (success.tomContacts.isEmpty) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 12,
-                ),
-                NoContactsFound(keyword: success.keyword),
-                _MoreListTile(),
-                _NewGroupButton(
-                  onPressed: goToNewGroupChat,
-                ),
-                _GetHelpButton(),
-              ],
-            );
-          }
-
-          final isSearchEmpty = success.keyword.isEmpty;
-          final expansionList = [
-            const SizedBox(
-              height: 4,
-            ),
-            _buildTitle(context, success.tomContacts.length),
-            ValueListenableBuilder<bool>(
-              valueListenable: isShowContactsNotifier,
-              builder: ((context, isShow, child) {
-                if (!isShow) {
-                  return const SizedBox.shrink();
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: success.tomContacts.length,
-                  itemBuilder: (context, index) {
-                    final contact = success.tomContacts[index];
-                    return InkWell(
-                      onTap: () {
-                        onContactTap(
-                          context,
-                          contact,
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(16.0),
-                      child: ExpansionContactListTile(
-                        contact: contact,
-                        highlightKeyword: success.keyword,
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
-            ValueListenableBuilder(
-              valueListenable: isSearchModeNotifier,
-              builder: (context, isSearchMode, child) {
-                if (isSearchMode) {
-                  return const SizedBox.shrink();
-                }
-                return ValueListenableBuilder(
-                  valueListenable: isShowContactsNotifier,
-                  builder: (context, isShow, child) {
-                    if (!isShow) {
-                      return const SizedBox.shrink();
-                    }
-                    return const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ];
-
+      valueListenable: presentationContactsNotifier,
+      builder: (context, presentationContacts, child) {
+        if (presentationContacts.isEmpty &&
+            textEditingController.text.isNotEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isSearchEmpty) ...[
-                _NewGroupButton(
-                  onPressed: goToNewGroupChat,
-                ),
-                for (final child in expansionList) ...[child],
-                _GetHelpButton(),
-              ] else ...[
-                for (final child in expansionList) ...[child],
-                _MoreListTile(),
-                _NewGroupButton(
-                  onPressed: goToNewGroupChat,
-                ),
-                _GetHelpButton(),
-              ],
+              const SizedBox(
+                height: 12,
+              ),
+              NoContactsFound(
+                keyword: textEditingController.text,
+              ),
+              _MoreListTile(),
+              _NewGroupButton(
+                onPressed: goToNewGroupChat,
+              ),
+              _GetHelpButton(),
             ],
           );
-        },
-      ),
+        }
+
+        final isSearchEmpty = textEditingController.text.isEmpty;
+        final expansionList = [
+          const SizedBox(
+            height: 4,
+          ),
+          _buildTitle(context, presentationContacts.length),
+          ValueListenableBuilder<bool>(
+            valueListenable: isShowContactsNotifier,
+            builder: ((context, isShow, child) {
+              if (!isShow) {
+                return const SizedBox.shrink();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: presentationContacts.length,
+                itemBuilder: (context, index) {
+                  final contact = presentationContacts[index];
+                  return InkWell(
+                    onTap: () {
+                      onContactTap(
+                        context,
+                        contact,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: ExpansionContactListTile(
+                      contact: contact,
+                      highlightKeyword: textEditingController.text,
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+        ];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isSearchEmpty) ...[
+              _NewGroupButton(
+                onPressed: goToNewGroupChat,
+              ),
+              for (final child in expansionList) ...[child],
+              _GetHelpButton(),
+            ] else ...[
+              for (final child in expansionList) ...[child],
+              _MoreListTile(),
+              _NewGroupButton(
+                onPressed: goToNewGroupChat,
+              ),
+              _GetHelpButton(),
+            ],
+          ],
+        );
+      },
     );
   }
 

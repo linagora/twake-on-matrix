@@ -2,7 +2,7 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 
 extension ContactsExtension on List<Contact> {
   List<Contact> searchContacts(String keyword) {
-    final contactMatched = where((contact) {
+    final contactsMatched = where((contact) {
       final supportedFields = [
         contact.displayName,
         contact.matrixId,
@@ -13,6 +13,6 @@ extension ContactsExtension on List<Contact> {
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
     }).toList();
-    return contactMatched;
+    return contactsMatched;
   }
 }

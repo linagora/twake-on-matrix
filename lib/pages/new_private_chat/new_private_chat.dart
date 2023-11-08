@@ -1,10 +1,8 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
-import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
+import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
+import 'package:fluffychat/presentation/mixins/contacts_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/presentation/contact_manager/contact_manager.dart';
-import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -23,19 +21,16 @@ class NewPrivateChat extends StatefulWidget {
 class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
+        ContactsControllerMixin,
         GoToDraftChatMixin,
         InviteExternalContactMixin {
   final isShowContactsNotifier = ValueNotifier(true);
   final scrollController = ScrollController();
 
-  final contactManager = getIt.get<ContactManager>();
-
   @override
   void initState() {
     super.initState();
-    contactManager.initSearchContacts(
-      converter: PresentationContactConverter(checkExternal: true),
-    );
+    initialFetchContacts();
     // FIXME: Find out solution for disable load more in search
     // searchContactsController.onSearchKeywordChanged = (searchKey) {
     //   disableLoadMoreInSearch();
@@ -90,7 +85,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
   @override
   void dispose() {
     super.dispose();
-    contactManager.textEditingController.clear();
+    disposeContactsMixin();
     scrollController.dispose();
   }
 
