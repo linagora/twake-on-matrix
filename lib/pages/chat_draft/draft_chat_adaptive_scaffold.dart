@@ -1,5 +1,7 @@
 import 'package:fluffychat/pages/chat_direct_details/chat_direct_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,7 +19,7 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChatAdaptiveScaffoldBuilder(
       bodyBuilder: (controller) => DraftChat(
-        state: state,
+        contact: _contact,
         onChangeRightColumnType: controller.setRightColumnType,
       ),
       rightBuilder: (
@@ -33,6 +35,7 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) => ChatDirectDetails(
                     onBack: controller.hideRightColumn,
+                    contact: _contact,
                   ),
                 );
             }
@@ -41,5 +44,18 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
         );
       },
     );
+  }
+
+  PresentationContact get _contact {
+    final extra = state.extra as Map<String, String>;
+    if (extra.isNotEmpty) {
+      return PresentationContact(
+        matrixId: extra[PresentationContactConstant.receiverId],
+        email: extra[PresentationContactConstant.email],
+        displayName: extra[PresentationContactConstant.displayName],
+      );
+    } else {
+      return const PresentationContact().presentationContactEmpty;
+    }
   }
 }
