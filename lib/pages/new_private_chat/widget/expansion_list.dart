@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
@@ -46,7 +46,7 @@ class ExpansionList extends StatelessWidget {
               height: 12,
             ),
             NoContactsFound(
-              keyword: failure is GetContactsAllFailure ? failure.keyword : '',
+              keyword: failure is GetContactsFailure ? failure.keyword : '',
             ),
             _MoreListTile(),
             _NewGroupButton(

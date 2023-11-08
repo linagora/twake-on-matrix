@@ -24,7 +24,6 @@ class TwakeSmartRefresher extends StatefulWidget {
 class TwakeRefreshController {
   final refreshNotifier = ValueNotifier(false);
   final loadingNotifier = ValueNotifier(false);
-  final scrollController = ScrollController();
 
   bool get isRefeshing => refreshNotifier.value;
   bool get isLoading => loadingNotifier.value;
@@ -47,7 +46,7 @@ class TwakeRefreshController {
 }
 
 class _TwakeSmartRefresherController extends State<TwakeSmartRefresher> {
-  ScrollController get scrollController => widget.controller.scrollController;
+  final scrollController = ScrollController();
 
   @override
   void initState() {
