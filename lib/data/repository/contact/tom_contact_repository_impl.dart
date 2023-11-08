@@ -10,7 +10,7 @@ class TomContactRepositoryImpl implements ContactRepository {
   TomContactRepositoryImpl();
 
   @override
-  Future<List<Contact>> fetchContact({
+  Future<List<Contact>> fetchContacts({
     required ContactQuery query,
     int? limit,
     int? offset,

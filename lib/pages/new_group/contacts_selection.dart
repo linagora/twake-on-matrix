@@ -1,18 +1,14 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
-import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
+import 'package:fluffychat/presentation/mixins/contacts_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
-import 'package:fluffychat/presentation/contact_manager/contact_manager.dart';
-import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/cupertino.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>
-    extends State<T> with InviteExternalContactMixin {
+    extends State<T> with InviteExternalContactMixin, ContactsControllerMixin {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
-
-  final contactManager = getIt.get<ContactManager>();
 
   String getTitle(BuildContext context);
 
@@ -32,15 +28,13 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   @override
   void initState() {
-    contactManager.initSearchContacts(
-      converter: PresentationContactConverter(checkExternal: true),
-    );
+    initialFetchContacts();
     super.initState();
   }
 
   @override
   void dispose() {
-    contactManager.textEditingController.clear();
+    disposeContactsMixin();
     super.dispose();
   }
 

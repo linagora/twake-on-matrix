@@ -13,24 +13,23 @@ class GetAllContactsInteractor with LazyLoadDataMixin {
   GetAllContactsInteractor();
 
   Stream<Either<Failure, Success>> execute({
-    required String keyword,
     required int limit,
   }) async* {
     try {
       // FIXME: It can break the lazy load logic
       // yield const Right(GetContactsLoading());
-      final contacts = await contactRepository.fetchContact(
-        query: ContactQuery(keyword: keyword),
+      final contacts = await contactRepository.fetchContacts(
+        query: ContactQuery(keyword: ''),
         limit: limit,
       );
       yield Right(
         GetContactsSuccess(
           tomContacts: contacts,
-          keyword: keyword,
+          keyword: '',
         ),
       );
     } catch (e) {
-      yield Left(GetContactsFailure(keyword: keyword, exception: e));
+      yield Left(GetContactsFailure(keyword: '', exception: e));
     }
   }
 }

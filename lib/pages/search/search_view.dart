@@ -4,7 +4,6 @@ import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search_state.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -12,6 +11,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SearchView extends StatelessWidget {
   final SearchController searchController;
+
   const SearchView(this.searchController, {super.key});
 
   @override
@@ -28,7 +28,6 @@ class SearchView extends StatelessWidget {
         },
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
-          controller: searchController.mainScrollController,
           slivers: [
             ValueListenableBuilder(
               valueListenable: searchController.preSearchRecentContactsNotifier,
@@ -100,31 +99,28 @@ class SearchView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: searchController
           .searchContactAndRecentChatController!.recentAndContactsNotifier,
-      builder: (context, value, emptyChild) =>
-          value.fold((failure) => emptyChild!, (success) {
-        if (success is! GetContactAndRecentChatPresentation) {
+      builder: (context, contacts, emptyChild) {
+        if (contacts.isEmpty) {
           return emptyChild!;
         }
+
         return ListView.builder(
           padding: SearchViewStyle.paddingRecentChats,
           shrinkWrap: true,
           physics: const ClampingScrollPhysics(),
-          itemCount: success.tomContacts.length + 1,
+          itemCount: contacts.length,
           itemBuilder: (context, index) {
-            if (index >= success.tomContacts.length) {
-              return const Center(child: CircularProgressIndicator());
-            }
             return RecentItemWidget(
-              highlightKeyword: success.keyword,
-              presentationSearch: success.tomContacts[index],
-              key: Key('chat_recent_${success.tomContacts[index].id}'),
+              highlightKeyword: searchController.textEditingController.text,
+              presentationSearch: contacts[index],
+              key: Key('chat_recent_${contacts[index].id}'),
               onTap: () {
-                searchController.onSearchItemTap(success.tomContacts[index]);
+                searchController.onSearchItemTap(contacts[index]);
               },
             );
           },
         );
-      }),
+      },
       child: const SizedBox(),
     );
   }
