@@ -1,6 +1,5 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/lazy_load_success.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 
@@ -18,12 +17,14 @@ class GetContactsLoading extends Success {
   List<Object?> get props => [];
 }
 
-class GetContactsSuccess extends LazyLoadSuccess<Contact> {
+class GetContactsSuccess extends Success {
   final String keyword;
+  final List<Contact> tomContacts;
+  final List<Contact>? phonebookContacts;
 
   const GetContactsSuccess({
-    required super.tomContacts,
-    super.phonebookContacts,
+    required this.tomContacts,
+    this.phonebookContacts,
     required this.keyword,
   });
 

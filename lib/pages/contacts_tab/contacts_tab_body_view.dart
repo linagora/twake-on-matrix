@@ -4,8 +4,6 @@ import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
-import 'package:fluffychat/widgets/twake_components/twake_smart_refresher.dart';
 import 'package:flutter/material.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
@@ -18,9 +16,7 @@ class ContactsTabBodyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TwakeSmartRefresher(
-      onRefresh: controller.contactManager.getAllContacts,
-      controller: controller.contactManager.refreshController,
+    return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: Divider(
@@ -35,61 +31,59 @@ class ContactsTabBodyView extends StatelessWidget {
           ),
         ),
         ValueListenableBuilder(
-          valueListenable: controller.contactManager.contactsNotifier,
-          builder: (context, value, child) => value.fold(
-            (failure) => const SliverToBoxAdapter(child: EmptyContactBody()),
-            (success) {
-              if (success is! PresentationContactsSuccess) {
-                return const SliverToBoxAdapter(
-                  child: LoadingContactWidget(),
+          valueListenable: controller.presentationContactNotifier,
+          builder: (context, presentationContact, child) {
+            if (controller.contactManager.firstSynchronizing &&
+                presentationContact.isEmpty) {
+              return const SliverToBoxAdapter(
+                child: LoadingContactWidget(),
+              );
+            }
+
+            if (presentationContact.isEmpty) {
+              if (controller.textEditingController.text.isEmpty) {
+                return const SliverToBoxAdapter(child: EmptyContactBody());
+              } else {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: ContactsTabViewStyle.padding,
+                      top: ContactsTabViewStyle.padding,
+                    ),
+                    child: NoContactsFound(
+                      keyword: controller.textEditingController.text,
+                    ),
+                  ),
                 );
               }
+            }
 
-              if (success.tomContacts.isEmpty) {
-                if (success.keyword.isEmpty) {
-                  return const SliverToBoxAdapter(child: EmptyContactBody());
-                } else {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: ContactsTabViewStyle.padding,
-                        top: ContactsTabViewStyle.padding,
-                      ),
-                      child: NoContactsFound(
-                        keyword: success.keyword,
-                      ),
-                    ),
-                  );
-                }
-              }
-
-              return SliverList.builder(
-                itemCount: success.tomContacts.length,
-                itemBuilder: (context, index) {
-                  final contact = success.tomContacts[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: ContactsTabViewStyle.padding,
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        controller.onContactTap(
-                          context: context,
-                          path: 'rooms',
-                          contact: contact,
-                        );
-                      },
-                      child: ExpansionContactListTile(
+            return SliverList.builder(
+              itemCount: presentationContact.length,
+              itemBuilder: (context, index) {
+                final contact = presentationContact[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: ContactsTabViewStyle.padding,
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      controller.onContactTap(
+                        context: context,
+                        path: 'rooms',
                         contact: contact,
-                        highlightKeyword: success.keyword,
-                      ),
+                      );
+                    },
+                    child: ExpansionContactListTile(
+                      contact: contact,
+                      highlightKeyword: controller.textEditingController.text,
                     ),
-                  );
-                },
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            );
+          },
         ),
         const SliverToBoxAdapter(
           child: SizedBox(
