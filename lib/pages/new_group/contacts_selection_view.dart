@@ -26,12 +26,13 @@ class ContactsSelectionView extends StatelessWidget {
           isFullScreen: controller.isFullScreen,
         ),
         child: SearchableAppBar(
-          focusNode: controller.searchFocusNode,
+          focusNode: controller.contactManager.searchFocusNode,
           title: controller.getTitle(context),
-          searchModeNotifier: controller.isSearchModeNotifier,
+          searchModeNotifier: controller.contactManager.isSearchModeNotifier,
           hintText: controller.getHintText(context),
-          textEditingController: controller.textEditingController,
-          toggleSearchMode: controller.toggleSearchMode,
+          textEditingController:
+              controller.contactManager.textEditingController,
+          toggleSearchMode: controller.contactManager.toggleSearchMode,
           isFullScreen: controller.isFullScreen,
         ),
       ),
@@ -50,8 +51,8 @@ class ContactsSelectionView extends StatelessWidget {
                 );
               },
               child: TwakeSmartRefresher(
-                controller: controller.refreshController,
-                onRefresh: controller.getAllContacts,
+                controller: controller.contactManager.refreshController,
+                onRefresh: controller.contactManager.getAllContacts,
                 slivers: [
                   SliverToBoxAdapter(
                     child: SelectedParticipantsList(
@@ -59,10 +60,12 @@ class ContactsSelectionView extends StatelessWidget {
                     ),
                   ),
                   ContactsSelectionList(
-                    contactsNotifier: controller.contactsNotifier,
+                    contactsNotifier:
+                        controller.contactManager.contactsNotifier,
                     selectedContactsMapNotifier:
                         controller.selectedContactsMapNotifier,
-                    onSelectedContact: controller.onSelectedContact,
+                    onSelectedContact:
+                        controller.contactManager.onSelectedContact,
                     disabledContactIds: controller.disabledContactIds,
                   ),
                 ],

@@ -1,8 +1,10 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/mixin/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/mixin/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/presentation/mixins/contact_manager_mixin.dart';
+import 'package:fluffychat/presentation/contact_manager/contact_manager.dart';
+import 'package:fluffychat/presentation/converters/presentation_contact_converter.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -22,15 +24,18 @@ class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
         GoToDraftChatMixin,
-        ContactManagerMixin,
         InviteExternalContactMixin {
   final isShowContactsNotifier = ValueNotifier(true);
   final scrollController = ScrollController();
 
+  final contactManager = getIt.get<ContactManager>();
+
   @override
   void initState() {
     super.initState();
-    initSearchExternalContacts();
+    contactManager.initSearchContacts(
+      converter: PresentationContactConverter(checkExternal: true),
+    );
     // FIXME: Find out solution for disable load more in search
     // searchContactsController.onSearchKeywordChanged = (searchKey) {
     //   disableLoadMoreInSearch();
@@ -85,7 +90,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
   @override
   void dispose() {
     super.dispose();
-    disposeSearchContacts();
     scrollController.dispose();
   }
 

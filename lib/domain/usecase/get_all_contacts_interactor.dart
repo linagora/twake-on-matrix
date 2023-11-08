@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_all_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/usecase/lazy_load_interactor.dart';
@@ -24,13 +24,13 @@ class GetAllContactsInteractor with LazyLoadDataMixin {
         limit: limit,
       );
       yield Right(
-        GetContactsAllSuccess(
+        GetContactsSuccess(
           tomContacts: contacts,
           keyword: keyword,
         ),
       );
     } catch (e) {
-      yield Left(GetContactsAllFailure(keyword: keyword, exception: e));
+      yield Left(GetContactsFailure(keyword: keyword, exception: e));
     }
   }
 }

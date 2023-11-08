@@ -38,11 +38,13 @@ import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/search_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/presentation/contact_manager/contact_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -183,5 +185,9 @@ class GetItInitializer {
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
+    getIt.registerFactory<SearchContactsInteractor>(
+      () => SearchContactsInteractor(),
+    );
+    getIt.registerSingleton<ContactManager>(ContactManager());
   }
 }

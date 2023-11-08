@@ -21,6 +21,30 @@ extension PresentaionContactExtension on PresentationContact {
 
     return false;
   }
+
+  Set<Contact> toContacts() {
+    final listContacts = {
+      Contact(
+        email: email,
+        displayName: displayName,
+        matrixId: matrixId,
+        status: status,
+      ),
+    };
+
+    if (email == null || email!.isEmpty) {
+      listContacts.add(
+        Contact(
+          email: null,
+          displayName: displayName,
+          matrixId: matrixId,
+          status: status,
+        ),
+      );
+    }
+
+    return listContacts;
+  }
 }
 
 extension ContactExtensionInPresentation on Contact {
