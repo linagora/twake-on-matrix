@@ -347,7 +347,9 @@ class _EmptyChatTitle extends StatelessWidget {
     String receiverId,
   ) async {
     try {
-      return await Matrix.of(context).client.getProfileFromUserId(receiverId);
+      return await Matrix.of(context)
+          .client
+          .getProfileFromUserId(receiverId, getFromRooms: false);
     } catch (e) {
       return Profile(
         avatarUrl: null,
