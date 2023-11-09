@@ -8,16 +8,14 @@ import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
 import 'package:linagora_design_flutter/extensions/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-import 'package:fluffychat/pages/chat_direct_details/chat_direct_details.dart';
-import 'package:fluffychat/pages/chat_direct_details/chat_direct_details_style.dart';
+import 'package:fluffychat/pages/profile_info/profile_info.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 
-class ChatDirectDetailsView extends StatelessWidget {
-  static const double maxWidth = 416;
-
-  final ChatDirectDetailsController controller;
-  const ChatDirectDetailsView(
+class ProfileInfoView extends StatelessWidget {
+  final ProfileInfoController controller;
+  const ProfileInfoView(
     this.controller, {
     super.key,
   });
@@ -44,7 +42,8 @@ class ChatDirectDetailsView extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: maxWidth),
+            constraints:
+                const BoxConstraints(maxWidth: ProfileInfoStyle.maxWidth),
             child: Builder(
               builder: (context) {
                 if (contact?.matrixId != null) {
@@ -126,7 +125,7 @@ class _Information extends StatelessWidget {
                   child: Text(
                     text,
                     style: TextStyle(
-                      fontSize: ChatDirectDetailsStyle.avatarFontSize,
+                      fontSize: ProfileInfoStyle.avatarFontSize,
                       color: AvatarStyle.defaultTextColor(true),
                       fontFamily: AvatarStyle.fontFamily,
                       fontWeight: AvatarStyle.fontWeight,
@@ -149,7 +148,7 @@ class _Information extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: ChatDirectDetailsStyle.mainPadding,
+          padding: ProfileInfoStyle.mainPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -169,17 +168,17 @@ class _Information extends StatelessWidget {
               ),
               if (email != null || phoneNumber != null)
                 Container(
-                  padding: ChatDirectDetailsStyle.emailPadding,
-                  margin: ChatDirectDetailsStyle.emailMargin,
+                  padding: ProfileInfoStyle.emailPadding,
+                  margin: ProfileInfoStyle.emailMargin,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: LinagoraRefColors.material().neutral[90] ??
                           Colors.black,
                     ),
-                    borderRadius: ChatDirectDetailsStyle.emailBorderRadius,
+                    borderRadius: ProfileInfoStyle.emailBorderRadius,
                   ),
                   child: Wrap(
-                    runSpacing: ChatDirectDetailsStyle.textSpacing,
+                    runSpacing: ProfileInfoStyle.textSpacing,
                     children: [
                       if (email != null)
                         _CopiableRow(
@@ -222,7 +221,7 @@ class _CopiableRow extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding: ChatDirectDetailsStyle.textPadding,
+            padding: ProfileInfoStyle.textPadding,
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(

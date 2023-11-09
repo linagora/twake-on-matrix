@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
+import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -95,7 +96,7 @@ class ChatAdaptiveScaffoldBuilderController
                 ),
               },
             ),
-            bodyRatio: 0.7,
+            bodyRatio: 1 - ResponsiveUtils.rightColumnRatio,
             internalAnimations: false,
             secondaryBody: rightColumnType.isShown
                 ? SlotLayout(
@@ -128,25 +129,4 @@ class ChatAdaptiveScaffoldBuilderController
       child: widget.bodyBuilder(this),
     );
   }
-}
-
-enum RightColumnType {
-  none,
-  search,
-  chatDirectDetails,
-}
-
-extension RightColumnTypeExtension on RightColumnType {
-  bool get isShown => this != RightColumnType.none;
-
-  String? get initialRoute => ({
-        RightColumnType.search: RightColumnRouteNames.search,
-        RightColumnType.chatDirectDetails:
-            RightColumnRouteNames.chatDirectDetails,
-      })[this];
-}
-
-class RightColumnRouteNames {
-  static const search = 'rightColumn/search';
-  static const chatDirectDetails = 'rightColumn/chatDirectDetails';
 }

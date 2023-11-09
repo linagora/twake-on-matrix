@@ -1,7 +1,8 @@
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
-import 'package:fluffychat/pages/chat_direct_details/chat_direct_details.dart';
+import 'package:fluffychat/pages/profile_info/profile_info.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
+import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -76,9 +77,9 @@ class _RightColumnNavigator extends StatelessWidget {
                 isInStack: isInStack,
               ),
             );
-          case RightColumnRouteNames.chatDirectDetails:
+          case RightColumnRouteNames.profileInfo:
             return MaterialPageRoute(
-              builder: (_) => ChatDirectDetails(
+              builder: (_) => ProfileInfo(
                 onBack: controller.hideRightColumn,
                 roomId: roomId,
               ),
