@@ -252,7 +252,7 @@ class SettingsProfileController extends State<SettingsProfile>
     return listAction.map((action) {
       return PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: popupItem(
+        child: popupItemByTwakeAppRouter(
           context,
           action.getTitle(context),
           iconAction: action.getIcon(),

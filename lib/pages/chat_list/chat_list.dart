@@ -546,7 +546,7 @@ class ChatListController extends State<ChatList>
     return listAction.map((action) {
       return PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: popupItem(
+        child: popupItemByNavigator(
           context,
           action.getTitleContextMenuSelection(context, room),
           iconAction: action.getIconContextMenuSelection(room),
