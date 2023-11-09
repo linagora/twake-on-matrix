@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-class ChatDirectDetailsStyle {
+class ProfileInfoStyle {
+  static const double maxWidth = 416;
+
   static const EdgeInsetsGeometry mainPadding =
       EdgeInsets.symmetric(horizontal: 20, vertical: 16);
 
