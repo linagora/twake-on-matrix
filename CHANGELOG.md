@@ -1706,6 +1706,19 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+## [2.3.7+2330] - 2023-11-09
+
+### Changed
+
+- Download file in mobile/desktop base on file stream
+- upgrade matrix sdk to 0.22.6
+- New design for pin message
+
+### Fixed
+
+- Twake dialog
+- Remove avatar
+
 ## [2.3.6+2330] - 2023-11-03
 
 ### Added
@@ -1722,16 +1735,13 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Search inside Chat
 
 ### Fixed
-
 - fix inline markdown code
 - scroll full screen GroupInfo
 - fix search with case sensitive
 - close custom tab after login
 
 ## [2.3.3+2330] - 2023-10-18
-
 ### Added
-
 - enable emoji in web
 - styling for Chat List
 - new selection in chat list
@@ -1802,8 +1812,9 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
 
-[2.3.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.6
+[2.3.7+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.7
 
+[2.3.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.6
 [2.3.3+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.3
 [2.3.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.2
 [2.3.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.1
