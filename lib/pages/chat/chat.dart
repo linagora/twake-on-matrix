@@ -1496,7 +1496,7 @@ class ChatController extends State<Chat>
     return listAction.map((action) {
       return PopupMenuItem(
         padding: EdgeInsets.zero,
-        child: popupItem(
+        child: popupItemByTwakeAppRouter(
           context,
           action.getTitle(
             context,
