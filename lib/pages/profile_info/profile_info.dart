@@ -1,15 +1,15 @@
-import 'package:fluffychat/pages/chat_direct_details/chat_direct_details_view.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_view.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class ChatDirectDetails extends StatefulWidget {
+class ProfileInfo extends StatefulWidget {
   final VoidCallback? onBack;
   final String? roomId;
   final PresentationContact? contact;
 
-  const ChatDirectDetails({
+  const ProfileInfo({
     super.key,
     required this.onBack,
     this.roomId,
@@ -17,10 +17,10 @@ class ChatDirectDetails extends StatefulWidget {
   });
 
   @override
-  State<ChatDirectDetails> createState() => ChatDirectDetailsController();
+  State<ProfileInfo> createState() => ProfileInfoController();
 }
 
-class ChatDirectDetailsController extends State<ChatDirectDetails> {
+class ProfileInfoController extends State<ProfileInfo> {
   Room? get room => widget.roomId != null
       ? Matrix.of(context).client.getRoomById(widget.roomId!)
       : null;
@@ -30,6 +30,6 @@ class ChatDirectDetailsController extends State<ChatDirectDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return ChatDirectDetailsView(this);
+    return ProfileInfoView(this);
   }
 }
