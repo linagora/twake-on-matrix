@@ -2180,5 +2180,54 @@
     }
   },
   "publish": "Publicar",
-  "@publish": {}
+  "@publish": {},
+  "hugContent": "{senderName} te abraza",
+  "@hugContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "commandHint_cuddle": "Enviar un abrazo",
+  "@commandHint_cuddle": {},
+  "supposedMxid": "Debería ser {mxid}",
+  "@supposedMxid": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "commandHint_markasgroup": "Marcar como un chat",
+  "@commandHint_markasgroup": {},
+  "updateNow": "Iniciar la actualización en segundo plano",
+  "@updateNow": {},
+  "updateAvailable": "Actualización de FluffyChat disponible",
+  "@updateAvailable": {},
+  "bubbleSize": "Tamaño de la burbuja",
+  "@bubbleSize": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "googlyEyesContent": "{senderName} te envía unos ojos saltones",
+  "@googlyEyesContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "confirmMatrixId": "Por favor, confirme su ID de Matrix para eliminar su cuenta.",
+  "@confirmMatrixId": {},
+  "commandHint_markasdm": "Marcar como un chat directo",
+  "@commandHint_markasdm": {},
+  "cuddleContent": "{senderName} te abraza",
+  "@cuddleContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "commandHint_hug": "Enviar un abrazo",
+  "@commandHint_hug": {},
+  "commandHint_googly": "Envía unos ojos saltones",
+  "@commandHint_googly": {}
 }
