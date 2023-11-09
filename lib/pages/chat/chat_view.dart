@@ -50,8 +50,11 @@ class ChatView extends StatelessWidget with MessageContentMixin {
             TwakeIconButton(
               icon: Icons.push_pin_outlined,
               tooltip: L10n.of(context)!.pinMessage,
-              onTap: () => controller
-                  .actionWithClearSelections(controller.pinEventAction),
+              onTap: () => controller.actionWithClearSelections(
+                () => controller.pinEventAction(
+                  controller.selectedEvents.single,
+                ),
+              ),
             ),
           if (controller.selectedEvents.length == 1)
             PopupMenuButton<_EventContextAction>(
