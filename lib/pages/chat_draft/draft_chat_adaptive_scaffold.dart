@@ -1,5 +1,6 @@
-import 'package:fluffychat/pages/chat_direct_details/chat_direct_details.dart';
+import 'package:fluffychat/pages/profile_info/profile_info.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
+import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
@@ -31,9 +32,9 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
           initialRoute: type.initialRoute,
           onGenerateRoute: (settings) {
             switch (settings.name) {
-              case RightColumnRouteNames.chatDirectDetails:
+              case RightColumnRouteNames.profileInfo:
                 return MaterialPageRoute(
-                  builder: (_) => ChatDirectDetails(
+                  builder: (_) => ProfileInfo(
                     onBack: controller.hideRightColumn,
                     contact: _contact,
                   ),

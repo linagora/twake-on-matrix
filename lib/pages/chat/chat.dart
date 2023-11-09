@@ -27,8 +27,8 @@ import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
-import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
+import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
@@ -1590,7 +1590,7 @@ class ChatController extends State<Chat>
 
   void onPushDetails() async {
     if (room?.directChatMatrixID != null) {
-      widget.onChangeRightColumnType?.call(RightColumnType.chatDirectDetails);
+      widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
       return;
     }
     final result = await context.push('/rooms/${room!.id}/details');
