@@ -324,7 +324,7 @@ class ChatController extends State<Chat>
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     _jumpToEventIdSubscription =
-        widget.jumpToEventIdStream?.stream.listen(scrollToEventId);
+        widget.jumpToEventIdStream?.stream.listen(scrollToEventIdAndHighlight);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
     super.initState();
@@ -1005,7 +1005,11 @@ class ChatController extends State<Chat>
     inputFocus.requestFocus();
   }
 
-  void scrollToEventId(String eventId) async {
+  void scrollToEventIdAndHighlight(String eventId) {
+    return scrollToEventId(eventId, highlight: true);
+  }
+
+  void scrollToEventId(String eventId, {bool highlight = false}) async {
     var eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
       // event id not found...maybe we can fetch it?
@@ -1050,14 +1054,21 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    await scrollToIndex(eventIndex);
+    await scrollToIndex(eventIndex, highlight: highlight);
     _updateScrollController();
   }
 
-  Future scrollToIndex(int index) => scrollController.scrollToIndex(
+  Future scrollToIndex(int index, {bool highlight = false}) async {
+    await scrollController.scrollToIndex(
+      index,
+      preferPosition: AutoScrollPosition.middle,
+    );
+    if (highlight) {
+      await scrollController.highlight(
         index,
-        preferPosition: AutoScrollPosition.middle,
       );
+    }
+  }
 
   void scrollDown() {
     if (scrollController.hasClients) {
