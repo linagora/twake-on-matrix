@@ -8,10 +8,12 @@ class ProfileInfo extends StatefulWidget {
   final VoidCallback? onBack;
   final String? roomId;
   final PresentationContact? contact;
+  final bool isInStack;
 
   const ProfileInfo({
     super.key,
     required this.onBack,
+    required this.isInStack,
     this.roomId,
     this.contact,
   });

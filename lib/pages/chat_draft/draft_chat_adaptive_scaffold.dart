@@ -37,6 +37,7 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
                   builder: (_) => ProfileInfo(
                     onBack: controller.hideRightColumn,
                     contact: _contact,
+                    isInStack: isInStack,
                   ),
                 );
             }
