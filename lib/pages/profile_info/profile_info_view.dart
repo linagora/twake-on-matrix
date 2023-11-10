@@ -26,6 +26,7 @@ class ProfileInfoView extends StatelessWidget {
     final contact = controller.widget.contact;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             Padding(
@@ -90,7 +91,7 @@ class ProfileInfoView extends StatelessWidget {
 }
 
 class _Information extends StatelessWidget {
-  static const double avatarRatio = 3 / 4;
+  static const double avatarRatio = 1;
   const _Information({
     Key? key,
     this.avatarUri,
