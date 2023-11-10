@@ -28,9 +28,14 @@ class ProfileInfoView extends StatelessWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            IconButton(
-              onPressed: controller.widget.onBack,
-              icon: const Icon(Icons.close),
+            Padding(
+              padding: ProfileInfoStyle.backIconPadding,
+              child: IconButton(
+                onPressed: controller.widget.onBack,
+                icon: controller.widget.isInStack
+                    ? const Icon(Icons.arrow_back)
+                    : const Icon(Icons.close),
+              ),
             ),
             Text(
               L10n.of(context)!.contactInfo,
@@ -143,6 +148,7 @@ class _Information extends StatelessWidget {
                 fit: BoxFit.cover,
                 placeholder: (_) => placeholder,
                 cacheKey: avatarUri.toString(),
+                noResize: true,
               );
             },
           ),
