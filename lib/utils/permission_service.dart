@@ -103,6 +103,21 @@ class PermissionHandlerService {
     return await Permission.storage.status;
   }
 
+  Future<PermissionStatus> get contactsPermissionStatus async {
+    return await Permission.contacts.status;
+  }
+
+  Future<PermissionStatus> requestContactsPermissionActions() async {
+    final currentStatus = await contactsPermissionStatus;
+    if (currentStatus == PermissionStatus.denied ||
+        currentStatus == PermissionStatus.permanentlyDenied) {
+      final newStatus = await Permission.contacts.request();
+      return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+    } else {
+      return currentStatus;
+    }
+  }
+
   void goToSettingsForPermissionActions() {
     openAppSettings();
   }
