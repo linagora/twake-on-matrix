@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
-import 'package:fluffychat/pages/profile_info/profile_info.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -64,30 +64,20 @@ class _RightColumnNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: type.initialRoute,
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case RightColumnRouteNames.search:
-            return MaterialPageRoute(
-              builder: (_) => ChatSearch(
-                roomId: roomId,
-                onBack: controller.hideRightColumn,
-                jumpToEventId: controller.jumpToEventId,
-                isInStack: isInStack,
-              ),
-            );
-          case RightColumnRouteNames.profileInfo:
-            return MaterialPageRoute(
-              builder: (_) => ProfileInfo(
-                onBack: controller.hideRightColumn,
-                roomId: roomId,
-                isInStack: isInStack,
-              ),
-            );
-        }
-        return MaterialPageRoute(builder: (_) => const SizedBox());
-      },
-    );
+    switch (type) {
+      case RightColumnType.search:
+        return ChatSearch(
+          roomId: roomId,
+          onBack: controller.hideRightColumn,
+          jumpToEventId: controller.jumpToEventId,
+          isInStack: isInStack,
+        );
+      case RightColumnType.profileInfo:
+        return ProfileInfoNavigator(
+          onBack: controller.hideRightColumn,
+          roomId: roomId,
+          isInStack: isInStack,
+        );
+    }
   }
 }

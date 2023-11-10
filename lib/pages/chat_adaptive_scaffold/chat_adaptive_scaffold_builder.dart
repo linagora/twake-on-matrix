@@ -30,7 +30,7 @@ class ChatAdaptiveScaffoldBuilder extends StatefulWidget {
 
 class ChatAdaptiveScaffoldBuilderController
     extends State<ChatAdaptiveScaffoldBuilder> {
-  final rightColumnTypeNotifier = ValueNotifier(RightColumnType.none);
+  final rightColumnTypeNotifier = ValueNotifier<RightColumnType?>(null);
   final jumpToEventIdStream = StreamController<EventId>.broadcast();
 
   void jumpToEventId(String eventId) {
@@ -38,7 +38,7 @@ class ChatAdaptiveScaffoldBuilderController
   }
 
   void hideRightColumn() {
-    rightColumnTypeNotifier.value = RightColumnType.none;
+    rightColumnTypeNotifier.value = null;
   }
 
   void setRightColumnType(RightColumnType type) {
@@ -71,7 +71,7 @@ class ChatAdaptiveScaffoldBuilderController
                   builder: (_) => Stack(
                     children: [
                       body!,
-                      if (rightColumnType.isShown)
+                      if (rightColumnType != null)
                         widget.rightBuilder(
                           this,
                           isInStack: true,
@@ -85,7 +85,7 @@ class ChatAdaptiveScaffoldBuilderController
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                   builder: (_) => Padding(
-                    padding: rightColumnType.isShown
+                    padding: rightColumnType != null
                         ? ChatAdaptiveScaffoldStyle.webPaddingRight
                         : EdgeInsets.zero,
                     child: ClipRRect(
@@ -96,9 +96,9 @@ class ChatAdaptiveScaffoldBuilderController
                 ),
               },
             ),
-            bodyRatio: 1 - ResponsiveUtils.rightColumnRatio,
+            bodyRatio: ResponsiveUtils.bodyWithRightColumnRatio,
             internalAnimations: false,
-            secondaryBody: rightColumnType.isShown
+            secondaryBody: rightColumnType != null
                 ? SlotLayout(
                     config: {
                       const WidthPlatformBreakpoint(
