@@ -19,7 +19,7 @@ class ResponsiveUtils {
   static const double defaultSizeBodyLayoutDesktop = 280;
   static const double heightBottomNavigation = 90;
 
-  static const double rightColumnRatio = 0.3;
+  static const double bodyWithRightColumnRatio = 0.7;
 
   bool isScreenWithShortestSide(BuildContext context) =>
       context.mediaQueryShortestSide < minTabletWidth;
