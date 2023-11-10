@@ -2921,5 +2921,7 @@
     "doYouReallyWantToDeclineThisInvitation": "Do you really want to decline this invitation and remove the chat? You won't be able to undo this action.",
     "@doYouReallyWantToDeclineThisInvitation": {},
     "declineAndRemove": "Decline and remove",
-    "@decline": {}
+    "@decline": {},
+    "notNow": "Not now",
+    "contactsWarningBannerTitle": "To ensure you can connect with all your friends, please allow Twake to access your device’s contacts. We appreciate your understanding."
 }
