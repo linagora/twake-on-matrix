@@ -6,6 +6,9 @@ class ProfileInfoStyle {
   static const EdgeInsetsGeometry mainPadding =
       EdgeInsets.symmetric(horizontal: 20, vertical: 16);
 
+  static const EdgeInsetsGeometry backIconPadding =
+      EdgeInsets.symmetric(vertical: 8, horizontal: 4);
+
   static const EdgeInsetsGeometry emailPadding = EdgeInsets.all(16);
 
   static const EdgeInsetsGeometry emailMargin =

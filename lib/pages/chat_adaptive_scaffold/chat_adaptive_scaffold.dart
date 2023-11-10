@@ -82,6 +82,7 @@ class _RightColumnNavigator extends StatelessWidget {
               builder: (_) => ProfileInfo(
                 onBack: controller.hideRightColumn,
                 roomId: roomId,
+                isInStack: isInStack,
               ),
             );
         }
