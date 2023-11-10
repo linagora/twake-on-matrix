@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:flutter/material.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
@@ -25,6 +26,16 @@ class ContactsTabBodyView extends StatelessWidget {
             color: Colors.black.withOpacity(0.15),
           ),
         ),
+        SliverToBoxAdapter(
+          child: ContactsWarningBannerView(
+            isShowContactsWarningBannerNotifier:
+                controller.isShowContactsWarningBannerNotifier,
+            onCloseContactsWarningBanner:
+                controller.contactsManager.closeContactsWarningBanner,
+            onGoToSettingsForPermissionActions: controller.contactsManager
+                .permissionHandlerService.goToSettingsForPermissionActions,
+          ),
+        ),
         const SliverToBoxAdapter(
           child: SizedBox(
             height: ContactsTabViewStyle.padding,
@@ -33,7 +44,7 @@ class ContactsTabBodyView extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: controller.presentationContactNotifier,
           builder: (context, presentationContact, child) {
-            if (controller.contactManager.firstSynchronizing &&
+            if (controller.contactsManager.firstSynchronizing &&
                 presentationContact.isEmpty) {
               return const SliverToBoxAdapter(
                 child: LoadingContactWidget(),
