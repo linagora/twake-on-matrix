@@ -170,6 +170,7 @@ class NetworkDI extends BaseDI {
     dioCacheCustomInterceptor.addUriSupportsCache([
       HomeserverEndpoint.getPreviewUrlServicePath
           .generateHomeserverMediaEndpoint(),
+      IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
     ]);
   }
 
