@@ -171,7 +171,7 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
 
-flutter_icons:
+flutter_launcher_icons:
   android: false
   ios: true
   remove_alpha_ios: true
@@ -181,7 +181,7 @@ flutter_icons:
 
 flutter_native_splash:
   color: "#000000"
-  image: "assets/info-logo.png"
+  image: "assets/logo.png"
   branding: "assets/branding.png"
 
 flutter:
