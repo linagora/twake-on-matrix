@@ -39,6 +39,7 @@ class NewPrivateChatView extends StatelessWidget {
           onExternalContactTap: controller.onExternalContactAction,
           toggleContactsList: controller.toggleContactsList,
           textEditingController: controller.textEditingController,
+          warningBannerNotifier: controller.warningBannerNotifier,
         ),
       ),
     );
