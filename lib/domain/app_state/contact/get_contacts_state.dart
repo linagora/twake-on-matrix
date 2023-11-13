@@ -3,15 +3,15 @@ import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 
-class GetContactsInitial extends Initial {
-  const GetContactsInitial() : super();
+class ContactsInitial extends Initial {
+  const ContactsInitial() : super();
 
   @override
   List<Object?> get props => [];
 }
 
-class GetContactsLoading extends Success {
-  const GetContactsLoading() : super();
+class ContactsLoading extends Success {
+  const ContactsLoading() : super();
 
   @override
   List<Object?> get props => [];
@@ -30,6 +30,19 @@ class GetContactsSuccess extends Success {
 
   @override
   List<Object?> get props => [tomContacts, phonebookContacts, keyword];
+}
+
+class SearchExternalContactsSuccessState extends Success {
+  final String keyword;
+
+  const SearchExternalContactsSuccessState({
+    required this.keyword,
+  });
+
+  @override
+  List<Object?> get props => [
+        keyword,
+      ];
 }
 
 class GetContactsFailure extends Failure {
