@@ -1,24 +1,15 @@
-import 'package:desktop_drop/desktop_drop.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
-import 'package:fluffychat/pages/chat/chat_event_list.dart';
-import 'package:fluffychat/pages/chat/chat_loading_view.dart';
+import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
+import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
-import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
-import 'package:fluffychat/pages/chat/reply_display.dart';
-import 'package:fluffychat/pages/chat/tombstone_display.dart';
-import 'package:fluffychat/widgets/connection_status_header.dart';
+import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
-
-import '../../utils/stream_extension.dart';
-import 'chat_emoji_picker.dart';
-import 'chat_input_row.dart';
 
 enum _EventContextAction { info, report }
 
@@ -132,8 +123,6 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       return const SizedBox.shrink();
     }
 
-    final bottomSheetPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 8.0;
-
     return GestureDetector(
       onTapDown: controller.setReadMarker,
       behavior: HitTestBehavior.opaque,
@@ -210,129 +199,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                   return const SizedBox();
                 },
               ),
-              body: DropTarget(
-                onDragDone: controller.onDragDone,
-                onDragEntered: controller.onDragEntered,
-                onDragExited: controller.onDragExited,
-                child: Stack(
-                  children: <Widget>[
-                    if (Matrix.of(context).wallpaper != null)
-                      Image.file(
-                        Matrix.of(context).wallpaper!,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        filterQuality: FilterQuality.medium,
-                      ),
-                    SafeArea(
-                      child: Stack(
-                        children: [
-                          Column(
-                            children: <Widget>[
-                              if (controller.room!.pinnedEventIds.isNotEmpty)
-                                const SizedBox(
-                                  height: ChatViewStyle.pinnedMessageHintHeight,
-                                ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: controller.clearSingleSelectedEvent,
-                                  child: Builder(
-                                    builder: (context) {
-                                      if (controller.timeline == null) {
-                                        return const ChatLoadingView();
-                                      }
-                                      return ChatEventList(
-                                        controller: controller,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              if (controller.room!.membership ==
-                                  Membership.invite)
-                                _inputMessageWidget(bottomSheetPadding),
-                              if (controller.room!.canSendDefaultMessages &&
-                                  controller.room!.membership ==
-                                      Membership.join)
-                                Container(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: TwakeThemes.columnWidth * 2.5,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: controller.room?.isAbandonedDMRoom ==
-                                          true
-                                      ? Padding(
-                                          padding: EdgeInsets.only(
-                                            bottom: bottomSheetPadding,
-                                            left: bottomSheetPadding,
-                                            right: bottomSheetPadding,
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              TextButton.icon(
-                                                style: TextButton.styleFrom(
-                                                  padding:
-                                                      const EdgeInsets.all(16),
-                                                  foregroundColor:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .error,
-                                                ),
-                                                icon: const Icon(
-                                                  Icons.archive_outlined,
-                                                ),
-                                                onPressed: controller.leaveChat,
-                                                label: Text(
-                                                  L10n.of(context)!.leave,
-                                                ),
-                                              ),
-                                              TextButton.icon(
-                                                style: TextButton.styleFrom(
-                                                  padding:
-                                                      const EdgeInsets.all(16),
-                                                ),
-                                                icon: const Icon(
-                                                  Icons.chat_outlined,
-                                                ),
-                                                onPressed:
-                                                    controller.recreateChat,
-                                                label: Text(
-                                                  L10n.of(context)!.reopenChat,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      : _inputMessageWidget(bottomSheetPadding),
-                                ),
-                            ],
-                          ),
-                          TombstoneDisplay(controller),
-                          PinnedEventsView(controller),
-                        ],
-                      ),
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: controller.draggingNotifier,
-                      builder: (context, dragging, _) {
-                        if (!dragging) return const SizedBox.shrink();
-                        return Container(
-                          color: Theme.of(context)
-                              .scaffoldBackgroundColor
-                              .withOpacity(0.9),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.upload_outlined,
-                            size: 100,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              body: _buildBody(),
             );
           },
         ),
@@ -340,29 +207,16 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     );
   }
 
-  Widget _inputMessageWidget(double bottomSheetPadding) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...[
-          const ConnectionStatusHeader(),
-          // Currently we can't support reactions
-          // ReactionsPicker(controller),
-          ReplyDisplay(controller),
-          ChatInputRow(controller),
-        ].map(
-          (widget) => Padding(
-            padding: EdgeInsets.only(
-              left: bottomSheetPadding,
-              right: bottomSheetPadding,
-            ),
-            child: widget,
-          ),
-        ),
-        SizedBox(height: bottomSheetPadding),
-        ChatEmojiPicker(controller),
-      ],
-    );
+  Widget _buildBody() {
+    if (controller.room == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (controller.room!.membership == Membership.invite) {
+      return ChatInvitationBody(controller);
+    }
+
+    return ChatViewBody(controller);
   }
 
   Widget _buildBackButton(BuildContext context) => TwakeIconButton(
