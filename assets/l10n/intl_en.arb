@@ -2756,8 +2756,6 @@
     "@yesterday": {},
     "adminPanel": "Admin Panel",
     "@adminPanel": {},
-    "rejectInvite": "No thanks, delete",
-    "@rejectInvite": {},
     "acceptInvite": "Yes please, join",
     "@acceptInvite": {},
     "askToInvite": " wants you to join this chat. What do you say?",
@@ -2913,5 +2911,15 @@
         }
     },
     "copyImageSuccess": "Image copied to clipboard",
-    "@copyImageSuccess": {}
+    "@copyImageSuccess": {},
+    "youNeedToAcceptTheInvitation": "You need to accept the invitation to start chatting",
+    "@youNeedToAcceptTheInvitation": {},
+    "hasInvitedYouToAChat": " has invited you to a chat. Accept or reject and delete the conversation?",
+    "@hasInvitedYouToAChat": {},
+    "declineTheInvitation": "Decline the invitation?",
+    "@declineTheInvitation": {},
+    "doYouReallyWantToDeclineThisInvitation": "Do you really want to decline this invitation and remove the chat? You won't be able to undo this action.",
+    "@doYouReallyWantToDeclineThisInvitation": {},
+    "declineAndRemove": "Decline and remove",
+    "@decline": {}
 }
