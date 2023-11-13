@@ -24,7 +24,7 @@ import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
-import 'package:fluffychat/pages/chat/dialog_accept_invite_widget.dart';
+import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
@@ -52,6 +52,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -335,7 +336,6 @@ class ChatController extends State<Chat>
         return context.go("/error");
       }
 
-      _askToAcceptInvitation();
       if (shareFile != null && room != null && shareFile!.filePath != null) {
         final sendFileInteractor = getIt.get<SendFileInteractor>();
         sendFileInteractor.execute(
@@ -352,56 +352,6 @@ class ChatController extends State<Chat>
         isInitial: true,
       );
     });
-  }
-
-  void _askToAcceptInvitation() async {
-    if (room?.membership != Membership.invite) return;
-
-    final result = await showDialog<DialogAcceptInviteResult>(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => DialogAcceptInviteWidget(
-        displayInviterName: _getDisplayInviterName(),
-      ),
-    );
-
-    if (result == null) return;
-
-    _actionToAcceptInvitation(result);
-  }
-
-  String _getDisplayInviterName() {
-    if (room!.isDirectChat) {
-      return room!.getLocalizedDisplayname();
-    } else {
-      return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
-          room!.getLocalizedDisplayname();
-    }
-  }
-
-  void _actionToAcceptInvitation(
-    DialogAcceptInviteResult dialogAcceptInviteResult,
-  ) async {
-    switch (dialogAcceptInviteResult) {
-      case DialogAcceptInviteResult.accept:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            final waitForRoom = room?.client.waitForRoomInSync(
-              room!.id,
-              join: true,
-            );
-            await room!.join();
-            await waitForRoom;
-          },
-        );
-        break;
-      case DialogAcceptInviteResult.reject:
-        leaveChat();
-        break;
-      case DialogAcceptInviteResult.cancel:
-        context.pop();
-        break;
-    }
   }
 
   void updateView() {
@@ -1629,6 +1579,45 @@ class ChatController extends State<Chat>
   void actionWithClearSelections(Function action) {
     action();
     clearSelectedEvents();
+  }
+
+  void onAcceptInvitation() async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        final waitForRoom = room?.client.waitForRoomInSync(
+          room!.id,
+          join: true,
+        );
+        await room?.join();
+        await waitForRoom;
+      },
+    );
+  }
+
+  void onRejectInvitation(BuildContext context) async {
+    final result = await showDialog<DialogRejectInviteResult>(
+      context: TwakeApp.routerKey.currentContext ?? context,
+      useRootNavigator: false,
+      builder: (c) => const DialogRejectInviteWidget(),
+    );
+
+    if (result == null) return;
+
+    switch (result) {
+      case DialogRejectInviteResult.cancel:
+        return;
+      case DialogRejectInviteResult.reject:
+        return leaveChat();
+    }
+  }
+
+  String get displayInviterName {
+    if (room!.isDirectChat) {
+      return room!.getLocalizedDisplayname();
+    } else {
+      return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
+          room!.getLocalizedDisplayname();
+    }
   }
 
   @override

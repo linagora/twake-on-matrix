@@ -2735,8 +2735,6 @@
       "groupName": {}
     }
   },
-  "rejectInvite": "Нет, спасибо, удалите",
-  "@rejectInvite": {},
   "participantsCount": "Участники ({count})",
   "@participantsCount": {
     "placeholders": {

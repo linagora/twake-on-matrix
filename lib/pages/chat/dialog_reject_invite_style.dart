@@ -16,5 +16,7 @@ class DialogAcceptInviteStyle {
       EdgeInsetsDirectional.symmetric(vertical: 24);
 
   static const EdgeInsetsDirectional paddingTitle =
-      EdgeInsetsDirectional.only(top: 16);
+      EdgeInsetsDirectional.only(top: 24);
+
+  static const double dialogTextWidth = 264.0;
 }

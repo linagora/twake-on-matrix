@@ -56,8 +56,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "rejectInvite": "",
-  "@rejectInvite": {},
   "obtainingLocation": "",
   "@obtainingLocation": {
     "type": "text",
