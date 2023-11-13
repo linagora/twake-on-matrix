@@ -18,16 +18,19 @@ class GetAllContactsInteractor with LazyLoadDataMixin {
     try {
       // FIXME: It can break the lazy load logic
       // yield const Right(GetContactsLoading());
-      final contacts = await contactRepository.fetchContacts(
+      yield* contactRepository
+          .fetchContacts(
         query: ContactQuery(keyword: ''),
         limit: limit,
-      );
-      yield Right(
-        GetContactsSuccess(
-          tomContacts: contacts,
-          keyword: '',
-        ),
-      );
+      )
+          .map((contacts) {
+        return Right(
+          GetContactsSuccess(
+            tomContacts: contacts,
+            keyword: '',
+          ),
+        );
+      });
     } catch (e) {
       yield Left(GetContactsFailure(keyword: '', exception: e));
     }

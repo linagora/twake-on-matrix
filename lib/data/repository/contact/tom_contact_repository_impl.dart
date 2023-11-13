@@ -10,15 +10,17 @@ class TomContactRepositoryImpl implements ContactRepository {
   TomContactRepositoryImpl();
 
   @override
-  Future<List<Contact>> fetchContacts({
+  Stream<List<Contact>> fetchContacts({
     required ContactQuery query,
     int? limit,
     int? offset,
-  }) {
-    return datasource.fetchContacts(
+  }) async* {
+    final response = await datasource.fetchContacts(
       query: query,
       limit: limit,
       offset: offset,
     );
+
+    yield response;
   }
 }
