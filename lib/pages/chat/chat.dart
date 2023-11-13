@@ -793,7 +793,10 @@ class ChatController extends State<Chat>
     if (selectedEvents.length == 1) {
       return selectedEvents.first
           .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)!));
+          .calcLocalizedBodyFallback(
+            MatrixLocals(L10n.of(context)!),
+            hideReply: true,
+          );
     }
     for (final event in selectedEvents) {
       if (copyString.isNotEmpty) copyString += '\n\n';
@@ -837,8 +840,8 @@ class ChatController extends State<Chat>
     }
   }
 
-  void copyEventsAction() {
-    Clipboard.instance.copyText(_getSelectedEventString());
+  void copyEventsAction({String? copiedText}) async {
+    await Clipboard.instance.copyText(copiedText ?? _getSelectedEventString());
 
     showEmojiPickerNotifier.value = false;
     setState(() {
