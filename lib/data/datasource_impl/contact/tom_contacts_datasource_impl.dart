@@ -4,6 +4,9 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
+import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
+import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
 import 'package:fluffychat/domain/model/extensions/contact/tom_contact_extension.dart';
 
 class TomContactsDatasourceImpl implements TomContactsDatasource {
@@ -31,5 +34,17 @@ class TomContactsDatasourceImpl implements TomContactsDatasource {
     );
 
     return contacts;
+  }
+
+  @override
+  Future<HashDetailsResponse> getHashDetails() {
+    return _tomContactAPI.getHashDetails();
+  }
+
+  @override
+  Future<LookupListMxidResponse> lookupListMxid(
+    LookupListMxidRequest request,
+  ) async {
+    return _tomContactAPI.lookupListMxid(request);
   }
 }

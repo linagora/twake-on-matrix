@@ -4,6 +4,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
+import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
+import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_response.dart';
 
@@ -42,5 +44,16 @@ class TomContactAPI {
       IdentityEndpoint.hashDetailsServicePath.generateMatrixIdentityEndpoint(),
     );
     return HashDetailsResponse.fromJson(response);
+  }
+
+  Future<LookupListMxidResponse> lookupListMxid(
+    LookupListMxidRequest request,
+  ) async {
+    final response = await _client.postToGetBody(
+      IdentityEndpoint.matchListUserIdsServicePath
+          .generateMatrixIdentityEndpoint(),
+      data: request.toJson(),
+    );
+    return LookupListMxidResponse.fromJson(response);
   }
 }
