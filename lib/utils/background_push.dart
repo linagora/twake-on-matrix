@@ -587,6 +587,10 @@ class BackgroundPush {
   }
 
   void _clearAllNavigatorAvailable() {
-    TwakeApp.router.routerDelegate.pop();
+    final canPopNavigation = TwakeApp.router.canPop();
+    Logs().d("BackgroundPush:: - Can pop other Navigation  $canPopNavigation");
+    if (canPopNavigation) {
+      TwakeApp.router.routerDelegate.pop();
+    }
   }
 }
