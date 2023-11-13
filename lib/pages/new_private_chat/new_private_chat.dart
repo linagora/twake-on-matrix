@@ -1,6 +1,6 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
-import 'package:fluffychat/presentation/mixins/contacts_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
@@ -21,7 +21,7 @@ class NewPrivateChat extends StatefulWidget {
 class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
-        ContactsControllerMixin,
+        ContactsViewControllerMixin,
         GoToDraftChatMixin,
         InviteExternalContactMixin {
   final isShowContactsNotifier = ValueNotifier(true);

@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
+import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -51,6 +52,11 @@ class ContactsSelectionView extends StatelessWidget {
               },
               child: CustomScrollView(
                 slivers: [
+                  SliverToBoxAdapter(
+                    child: ContactsWarningBannerView(
+                      warningBannerNotifier: controller.warningBannerNotifier,
+                    ),
+                  ),
                   SliverToBoxAdapter(
                     child: SelectedParticipantsList(
                       contactsSelectionController: controller,
