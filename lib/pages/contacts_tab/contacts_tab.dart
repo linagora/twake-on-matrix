@@ -1,7 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
-import 'package:fluffychat/presentation/mixins/contacts_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -22,7 +22,7 @@ class ContactsTab extends StatefulWidget {
 }
 
 class ContactsTabController extends State<ContactsTab>
-    with ComparablePresentationContactMixin, ContactsControllerMixin {
+    with ComparablePresentationContactMixin, ContactsViewControllerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
   @override

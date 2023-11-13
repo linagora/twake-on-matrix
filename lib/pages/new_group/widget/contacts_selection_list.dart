@@ -1,4 +1,11 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
+import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +15,7 @@ import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart'
 
 class ContactsSelectionList extends StatelessWidget {
   final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
-  final ValueNotifier<List<PresentationContact>> presentationContactNotifier;
+  final ValueNotifier<Either<Failure, Success>> presentationContactNotifier;
   final Function() onSelectedContact;
   final List<String> disabledContactIds;
   final TextEditingController textEditingController;
@@ -26,39 +33,73 @@ class ContactsSelectionList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: presentationContactNotifier,
-      builder: (context, presentationContact, child) {
+      builder: (context, state, child) {
         final isSearchModeEnable = textEditingController.text.isNotEmpty;
 
-        if (isSearchModeEnable && presentationContact.isEmpty) {
-          return SliverToBoxAdapter(
-            child: Padding(
-              padding: ContactsSelectionListStyle.notFoundPadding,
-              child: NoContactsFound(
-                keyword: textEditingController.text,
-              ),
-            ),
-          );
-        }
+        return state.fold(
+          (_) => child!,
+          (success) {
+            if (success is ContactsLoading) {
+              return const SliverToBoxAdapter(
+                child: LoadingContactWidget(),
+              );
+            }
 
-        return SliverList.builder(
-          itemCount: presentationContact.length,
-          itemBuilder: (context, index) {
-            final contact = presentationContact[index];
-            final disabled = disabledContactIds.contains(
-              contact.matrixId,
-            );
-            return _ContactItem(
-              contact: contact,
-              selectedContactsMapNotifier: selectedContactsMapNotifier,
-              onSelectedContact: onSelectedContact,
-              highlightKeyword: textEditingController.text,
-              disabled: disabled,
-              paddingTop:
-                  index == 0 ? ContactsSelectionListStyle.listPaddingTop : 0,
-            );
+            if (success is SearchExternalContactsSuccessState) {
+              final externalContact = PresentationContact(
+                matrixId: success.keyword,
+                displayName: success.keyword.substring(1),
+                type: ContactType.external,
+              );
+              return SliverToBoxAdapter(
+                child: _ContactItem(
+                  contact: externalContact,
+                  selectedContactsMapNotifier: selectedContactsMapNotifier,
+                  onSelectedContact: onSelectedContact,
+                  highlightKeyword: textEditingController.text,
+                  disabled: false,
+                ),
+              );
+            }
+
+            if (success is GetContactsSuccess) {
+              final contact = success.tomContacts
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (contact.isEmpty && isSearchModeEnable) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: ContactsSelectionListStyle.notFoundPadding,
+                    child: NoContactsFound(
+                      keyword: textEditingController.text,
+                    ),
+                  ),
+                );
+              }
+              return SliverList.builder(
+                itemCount: success.tomContacts.length,
+                itemBuilder: (context, index) {
+                  final disabled = disabledContactIds.contains(
+                    contact[index].matrixId,
+                  );
+                  return _ContactItem(
+                    contact: contact[index],
+                    selectedContactsMapNotifier: selectedContactsMapNotifier,
+                    onSelectedContact: onSelectedContact,
+                    highlightKeyword: textEditingController.text,
+                    disabled: disabled,
+                    paddingTop: index == 0
+                        ? ContactsSelectionListStyle.listPaddingTop
+                        : 0,
+                  );
+                },
+              );
+            }
+            return child!;
           },
         );
       },
+      child: const SliverToBoxAdapter(child: SizedBox()),
     );
   }
 }
