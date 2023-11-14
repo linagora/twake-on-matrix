@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
@@ -10,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:universal_html/js.dart' as js;
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -17,6 +17,11 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 extension LocalNotificationsExtension on MatrixState {
+  static final html.AudioElement _audioPlayer = html.AudioElement()
+    ..src = 'assets/assets/sounds/WoodenBeaver_stereo_message-new-instant.ogg'
+    ..autoplay = true
+    ..load();
+
   void showLocalNotification(EventUpdate eventUpdate) async {
     final roomId = eventUpdate.roomID;
     if (activeRoomId == roomId) {
@@ -55,16 +60,13 @@ extension LocalNotificationsExtension on MatrixState {
           method: ThumbnailMethod.crop,
         );
     if (kIsWeb) {
-      html.AudioElement()
-        ..src =
-            'assets/assets/sounds/WoodenBeaver_stereo_message-new-instant.ogg'
-        ..autoplay = true
-        ..load();
-      html.Notification(
+      _audioPlayer.play();
+      js.context.callMethod("handleNotifications", [
         title,
-        body: body,
-        icon: icon.toString(),
-      );
+        body,
+        icon,
+        eventUpdate.roomID,
+      ]);
     } else if (Platform.isLinux) {
       final appIconUrl = room.avatar?.getThumbnail(
         room.client,
