@@ -90,21 +90,21 @@ enum ChatListSelectionActions {
     switch (this) {
       case ChatListSelectionActions.read:
         if (room.markedUnread) {
-          return L10n.of(context)!.markThisMessageAsRead;
+          return L10n.of(context)!.markThisChatAsRead;
         } else {
-          return L10n.of(context)!.markThisMessageAsUnRead;
+          return L10n.of(context)!.markThisChatAsUnRead;
         }
       case ChatListSelectionActions.mute:
         if (room.pushRuleState == PushRuleState.notify) {
-          return L10n.of(context)!.muteThisMessage;
+          return L10n.of(context)!.muteThisChat;
         } else {
-          return L10n.of(context)!.unmuteThisMessage;
+          return L10n.of(context)!.unmuteThisChat;
         }
       case ChatListSelectionActions.pin:
         if (room.isFavourite) {
-          return L10n.of(context)!.unpinThisMessage;
+          return L10n.of(context)!.unpinThisChat;
         } else {
-          return L10n.of(context)!.pinThisMessage;
+          return L10n.of(context)!.pinThisChat;
         }
       case ChatListSelectionActions.more:
         return L10n.of(context)!.more;
