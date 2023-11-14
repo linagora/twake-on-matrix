@@ -2242,8 +2242,6 @@
   },
   "emojis": "Емоджі",
   "@emojis": {},
-  "pinMessage": "Прикріпити в кімнаті",
-  "@pinMessage": {},
   "confirmEventUnpin": "Ви впевнені, що бажаєте назавжди відкріпите подію?",
   "@confirmEventUnpin": {},
   "placeCall": "Здійснити виклик",

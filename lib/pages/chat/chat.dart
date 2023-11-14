@@ -1457,7 +1457,7 @@ class ChatController extends State<Chat>
     final listAction = [
       ChatContextMenuActions.select,
       ChatContextMenuActions.copyMessage,
-      ChatContextMenuActions.pinMessage,
+      ChatContextMenuActions.pinChat,
       ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -1495,7 +1495,7 @@ class ChatController extends State<Chat>
         onSelectMessage(event);
         copySingleEventAction();
         break;
-      case ChatContextMenuActions.pinMessage:
+      case ChatContextMenuActions.pinChat:
         pinEventAction(event);
         break;
       case ChatContextMenuActions.forward:

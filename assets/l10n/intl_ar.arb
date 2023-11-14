@@ -2256,8 +2256,6 @@
     "@reportUser": {},
     "openChat": "فتح المحادثة",
     "@openChat": {},
-    "pinMessage": "تثبيت في الغرفة",
-    "@pinMessage": {},
     "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟",
     "@confirmEventUnpin": {}
 }
