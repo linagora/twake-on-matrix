@@ -135,6 +135,7 @@ class ChatEventList extends StatelessWidget {
                     listHorizontalActionMenu:
                         controller.listHorizontalActionMenuBuilder(),
                     onMenuAction: controller.handleHorizontalActionMenu,
+                    focusNode: FocusNode(debugLabel: event.eventId),
                   )
                 : Container(),
           );
