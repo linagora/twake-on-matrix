@@ -1,11 +1,15 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/download_video_state.dart';
+import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
+import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +41,8 @@ class EventVideoPlayer extends StatefulWidget {
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
 
+  final bool isFullScreen;
+
   const EventVideoPlayer(
     this.event, {
     Key? key,
@@ -47,6 +53,7 @@ class EventVideoPlayer extends StatefulWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
+    this.isFullScreen = false,
   }) : super(key: key);
 
   @override
@@ -59,6 +66,16 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
   String? path;
   final downloadProgressNotifier = ValueNotifier(0.0);
 
+  @override
+  void initState() {
+    if (widget.isFullScreen) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _downloadAction();
+      });
+    }
+    super.initState();
+  }
+
   void _downloadAction() async {
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
@@ -67,7 +84,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
         playVideoAction: (path) => playVideoAction(
           context,
           path,
-          eventId: widget.event.eventId,
+          event: widget.event,
         ),
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
@@ -108,6 +125,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
           width: MessageContentStyle.imageBubbleWidth(width),
           height: MessageContentStyle.videoBubbleHeight(height),
           child: Stack(
+            alignment: Alignment.center,
             children: [
               BlurHash(hash: blurHash),
               if (hasThumbnail)
@@ -123,62 +141,23 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
                     thumbnailOnly: true,
                   ),
                 ),
-              Center(
-                child: ValueListenableBuilder<DownloadVideoState>(
-                  valueListenable: _downloadStateNotifier,
-                  builder: (context, downloadState, child) {
-                    switch (downloadState) {
-                      case DownloadVideoState.loading:
-                        return Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            _CenterVideoButton(
-                              icon: Icons.play_arrow,
-                              onTap: _downloadAction,
-                            ),
-                            SizedBox(
-                              width: MessageContentStyle.videoCenterButtonSize,
-                              height: MessageContentStyle.videoCenterButtonSize,
-                              child: ValueListenableBuilder(
-                                valueListenable: downloadProgressNotifier,
-                                builder: (context, progress, child) {
-                                  return CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: LinagoraRefColors.material()
-                                        .primary[100],
-                                    value: progress,
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
+              CenterVideoButton(
+                icon: Icons.play_arrow,
+                onTap: () {
+                  Navigator.of(context, rootNavigator: PlatformInfos.isWeb)
+                      .push(
+                    HeroPageRoute(
+                      builder: (context) {
+                        return InteractiveViewerGallery(
+                          itemBuilder: Hero(
+                            tag: widget.event.eventId,
+                            child: DownloadVideoWidget(event: widget.event),
+                          ),
                         );
-                      case DownloadVideoState.initial:
-                        return _CenterVideoButton(
-                          icon: Icons.play_arrow,
-                          onTap: _downloadAction,
-                        );
-                      case DownloadVideoState.done:
-                        return _CenterVideoButton(
-                          icon: Icons.play_arrow,
-                          onTap: () {
-                            if (path != null) {
-                              playVideoAction(
-                                context,
-                                path!,
-                                eventId: widget.event.eventId,
-                              );
-                            }
-                          },
-                        );
-                      case DownloadVideoState.failed:
-                        return _CenterVideoButton(
-                          icon: Icons.error,
-                          onTap: _downloadAction,
-                        );
-                    }
-                  },
-                ),
+                      },
+                    ),
+                  );
+                },
               ),
               if (widget.showDuration)
                 Positioned(
@@ -203,12 +182,13 @@ class EventVideoPlayerState extends State<EventVideoPlayer>
   }
 }
 
-class _CenterVideoButton extends StatelessWidget {
+class CenterVideoButton extends StatelessWidget {
   final IconData icon;
 
   final VoidCallback? onTap;
 
-  const _CenterVideoButton({
+  const CenterVideoButton({
+    super.key,
     required this.icon,
     this.onTap,
   });

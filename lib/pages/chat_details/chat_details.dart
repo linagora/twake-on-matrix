@@ -572,7 +572,7 @@ class ChatDetailsController extends State<ChatDetails>
       playVideoAction: (path) => playVideoAction(
         context,
         path,
-        eventId: event.eventId,
+        event: event,
       ),
     );
   }
