@@ -507,8 +507,6 @@
   },
   "recentChat": "",
   "@recentChat": {},
-  "muteThisMessage": "",
-  "@muteThisMessage": {},
   "youKickedAndBanned": "",
   "@youKickedAndBanned": {
     "placeholders": {
@@ -1125,8 +1123,6 @@
       "username": {}
     }
   },
-  "markThisMessageAsRead": "",
-  "@markThisMessageAsRead": {},
   "storeSecurlyOnThisDevice": "",
   "@storeSecurlyOnThisDevice": {},
   "yourChatBackupHasBeenSetUp": "",
@@ -1259,8 +1255,6 @@
   },
   "copiedMatrixIdToClipboard": "",
   "@copiedMatrixIdToClipboard": {},
-  "markThisMessageAsUnRead": "",
-  "@markThisMessageAsUnRead": {},
   "chatDetails": "",
   "@chatDetails": {
     "type": "text",
@@ -1548,8 +1542,6 @@
       "username": {}
     }
   },
-  "unpinThisMessage": "",
-  "@unpinThisMessage": {},
   "notInAChatYet": "",
   "@notInAChatYet": {},
   "changedTheRoomInvitationLink": "",
@@ -2092,15 +2084,11 @@
   "@noMessageHereYet": {},
   "clearArchive": "",
   "@clearArchive": {},
-  "unmuteThisMessage": "",
-  "@unmuteThisMessage": {},
   "appLock": "",
   "@appLock": {
     "type": "text",
     "placeholders": {}
   },
-  "pinThisMessage": "",
-  "@pinThisMessage": {},
   "commandHint_react": "",
   "@commandHint_react": {
     "type": "text",

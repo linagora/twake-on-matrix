@@ -1450,8 +1450,6 @@
   },
   "recentChat": "",
   "@recentChat": {},
-  "muteThisMessage": "",
-  "@muteThisMessage": {},
   "youKickedAndBanned": "",
   "@youKickedAndBanned": {
     "placeholders": {
@@ -1851,8 +1849,6 @@
       "username": {}
     }
   },
-  "markThisMessageAsRead": "",
-  "@markThisMessageAsRead": {},
   "storeSecurlyOnThisDevice": "",
   "@storeSecurlyOnThisDevice": {},
   "addDescription": "",
@@ -1940,8 +1936,6 @@
   "@channels": {},
   "copiedMatrixIdToClipboard": "",
   "@copiedMatrixIdToClipboard": {},
-  "markThisMessageAsUnRead": "",
-  "@markThisMessageAsUnRead": {},
   "people": "",
   "@people": {
     "type": "text",
@@ -2093,8 +2087,6 @@
       "username": {}
     }
   },
-  "unpinThisMessage": "",
-  "@unpinThisMessage": {},
   "notInAChatYet": "",
   "@notInAChatYet": {},
   "shrink": "",
@@ -2436,10 +2428,6 @@
   "@publish": {},
   "noMessageHereYet": "",
   "@noMessageHereYet": {},
-  "unmuteThisMessage": "",
-  "@unmuteThisMessage": {},
-  "pinThisMessage": "",
-  "@pinThisMessage": {},
   "pleaseEnterYourUsername": "",
   "@pleaseEnterYourUsername": {
     "type": "text",
