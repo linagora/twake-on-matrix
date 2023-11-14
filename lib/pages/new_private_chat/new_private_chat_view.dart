@@ -32,7 +32,7 @@ class NewPrivateChatView extends StatelessWidget {
         padding: const EdgeInsets.only(left: 8.0, right: 10.0),
         controller: controller.scrollController,
         child: ExpansionList(
-          presentationContactsNotifier: controller.presentationContactNotifier,
+          contactsSectionListNotifier: controller.contactsSectionListNotifier,
           goToNewGroupChat: controller.goToNewGroupChat,
           isShowContactsNotifier: controller.isShowContactsNotifier,
           onContactTap: controller.onContactAction,
