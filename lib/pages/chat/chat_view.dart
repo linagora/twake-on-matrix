@@ -49,7 +49,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           if (controller.selectedEvents.length == 1)
             TwakeIconButton(
               icon: Icons.push_pin_outlined,
-              tooltip: L10n.of(context)!.pinMessage,
+              tooltip: L10n.of(context)!.pinChat,
               onTap: () => controller.actionWithClearSelections(
                 () => controller.pinEventAction(
                   controller.selectedEvents.single,

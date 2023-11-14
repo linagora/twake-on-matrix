@@ -2241,8 +2241,6 @@
   },
   "confirmEventUnpin": "이벤트를 영구적으로 고정 해제할 것이 확실한가요?",
   "@confirmEventUnpin": {},
-  "pinMessage": "방에 고정",
-  "@pinMessage": {},
   "emojis": "이모지",
   "@emojis": {},
   "voiceCall": "음성 통화",

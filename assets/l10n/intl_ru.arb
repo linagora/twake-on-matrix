@@ -2263,8 +2263,6 @@
   "@experimentalVideoCalls": {},
   "emailOrUsername": "Адрес электронной почты или имя пользователя",
   "@emailOrUsername": {},
-  "pinMessage": "Прикрепить к комнате",
-  "@pinMessage": {},
   "confirmEventUnpin": "Вы уверены, что хотите навсегда открепить событие?",
   "@confirmEventUnpin": {},
   "switchToAccount": "Переключиться на учётную запись {number}",

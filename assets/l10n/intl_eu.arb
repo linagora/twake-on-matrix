@@ -1904,8 +1904,6 @@
   "@openGallery": {},
   "storyPrivacyWarning": "Kontuan izan jendeak bata bestea ikus dezakeela eta bata bestearekin harremanetan jar daitekeela. Zure storya 24 orduz egongo da ikusgai baina ezin da ziurtatu gailu eta zerbitzari guztietatik ezabatuko denik denbora pasatakoan.",
   "@storyPrivacyWarning": {},
-  "pinMessage": "Iltzatu gelan",
-  "@pinMessage": {},
   "reactedWith": "{sender}(e)k {reaction}(r)ekin erreakzionatu du",
   "@reactedWith": {
     "type": "text",

@@ -2244,8 +2244,6 @@
       "reaction": {}
     }
   },
-  "pinMessage": "Fixar na sala",
-  "@pinMessage": {},
   "confirmEventUnpin": "Tes a certeza de querer desafixar o evento?",
   "@confirmEventUnpin": {},
   "experimentalVideoCalls": "Chamadas de vídeo en probas",

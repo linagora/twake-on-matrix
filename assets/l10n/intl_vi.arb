@@ -1746,8 +1746,6 @@
       "reaction": {}
     }
   },
-  "pinMessage": "Ghim vào phòng",
-  "@pinMessage": {},
   "confirmEventUnpin": "Bạn có chắc chắn bỏ ghim sự kiện này vĩnh viễn không?",
   "@confirmEventUnpin": {},
   "emojis": "Biểu tượng cảm xúc",
