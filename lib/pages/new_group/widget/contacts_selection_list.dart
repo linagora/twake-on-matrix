@@ -140,6 +140,7 @@ class _ContactItem extends StatelessWidget {
                     onChanged: disabled
                         ? null
                         : (newValue) {
+                            onSelectedContact?.call();
                             selectedContactsMapNotifier.onContactTileTap(
                               context,
                               contact,

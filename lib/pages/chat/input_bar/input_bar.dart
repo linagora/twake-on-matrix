@@ -356,6 +356,10 @@ class InputBar extends StatelessWidget with PasteImageMixin {
               // it sets the types for the callback incorrectly
               onChanged!(text);
             },
+            onTap: () async {
+              await Future.delayed(const Duration(milliseconds: 100));
+              FocusScope.of(context).requestFocus(focusNode);
+            },
             onSubmitted: PlatformInfos.isMobile
                 ? (text) {
                     // fix for library for now
