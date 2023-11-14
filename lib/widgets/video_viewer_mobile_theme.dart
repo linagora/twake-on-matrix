@@ -1,21 +1,23 @@
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/video_player.dart';
 import 'package:fluffychat/widgets/video_viewer_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerMobileTheme extends StatelessWidget {
   const VideoViewerMobileTheme({
     super.key,
     required this.path,
-    this.eventId,
+    this.event,
   });
 
   final String path;
 
-  final String? eventId;
+  final Event? event;
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +44,18 @@ class VideoViewerMobileTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
       fullscreen: const MaterialVideoControlsThemeData(),
-      child: eventId != null
-          ? Hero(
-              tag: eventId!,
-              child: VideoPlayer(
-                path: path,
-              ),
+      child: event != null
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                MxcImage(event: event),
+                Hero(
+                  tag: event!.eventId,
+                  child: VideoPlayer(
+                    path: path,
+                  ),
+                ),
+              ],
             )
           : VideoPlayer(path: path),
     );

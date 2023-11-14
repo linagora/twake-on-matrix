@@ -95,7 +95,7 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
     playVideoAction(
       context,
       matrixFile.filePath!,
-      eventId: event.eventId,
+      event: event,
     );
   }
 
