@@ -2222,8 +2222,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "pinMessage": "An Raum anheften",
-  "@pinMessage": {},
   "emojis": "Emojis",
   "@emojis": {},
   "placeCall": "Anruf tätigen",

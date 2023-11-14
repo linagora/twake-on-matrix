@@ -2243,8 +2243,6 @@
     },
     "openChat": "Avaa Keskustelu",
     "@openChat": {},
-    "pinMessage": "Kiinnitä huoneeseen",
-    "@pinMessage": {},
     "confirmEventUnpin": "Haluatko varmasti irrottaa tapahtuman pysyvästi?",
     "@confirmEventUnpin": {},
     "editWidgets": "Muokkaa pienoissovelluksia",

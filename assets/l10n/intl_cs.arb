@@ -2256,8 +2256,6 @@
   "@experimentalVideoCalls": {},
   "unsupportedAndroidVersionLong": "Tato funkce vyžaduje novější verzi Android. Zkontrolujte prosím aktualizace nebo podporu Lineage OS.",
   "@unsupportedAndroidVersionLong": {},
-  "pinMessage": "Připnout zprávu do místnosti",
-  "@pinMessage": {},
   "confirmEventUnpin": "Opravdu chcete událost trvale odepnout?",
   "@confirmEventUnpin": {},
   "separateChatTypes": "Odděĺlit přímé chaty, skupiny a prostory",

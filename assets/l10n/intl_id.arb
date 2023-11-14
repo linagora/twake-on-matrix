@@ -2241,8 +2241,6 @@
   },
   "emojis": "Emoji",
   "@emojis": {},
-  "pinMessage": "Sematkan ke ruangan",
-  "@pinMessage": {},
   "confirmEventUnpin": "Apakah kamu yakin untuk melepaskan pin peristiwa ini secara permanen?",
   "@confirmEventUnpin": {},
   "unsupportedAndroidVersionLong": "Fitur ini memerlukan versi Android yang baru. Mohon periksa untuk pembaruan atau dukungan LineageOS.",

@@ -2250,8 +2250,6 @@
   "@unsupportedAndroidVersion": {},
   "unsupportedAndroidVersionLong": "Bu özellik daha yeni bir Android sürümü gerektiriyor. Lütfen güncellemelere veya LineageOS desteğine bakın.",
   "@unsupportedAndroidVersionLong": {},
-  "pinMessage": "Odaya sabitle",
-  "@pinMessage": {},
   "confirmEventUnpin": "Etkinliğin sabitlemesini kalıcı olarak kaldırmak istediğinizden emin misiniz?",
   "@confirmEventUnpin": {},
   "videoCallsBetaWarning": "Görüntülü aramaların şu anda beta aşamasında olduğunu lütfen unutmayın. Tüm platformlarda beklendiği gibi veya hiç çalışmayabilirler.",
