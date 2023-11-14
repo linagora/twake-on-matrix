@@ -2250,8 +2250,6 @@
     },
     "confirmEventUnpin": "Tem certeza que quer desafixar o evento permanentemente?",
     "@confirmEventUnpin": {},
-    "pinMessage": "Afixar à sala",
-    "@pinMessage": {},
     "voiceCall": "Chamada de voz",
     "@voiceCall": {},
     "unsupportedAndroidVersion": "Versão Android não suportada",

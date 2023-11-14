@@ -2313,8 +2313,6 @@
       "error": {}
     }
   },
-  "pinMessage": "部屋にピン留めする",
-  "@pinMessage": {},
   "previousAccount": "前のアカウント",
   "@previousAccount": {},
   "editWidgets": "ウィジェットを編集",

@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 enum ChatContextMenuActions {
   select,
   copyMessage,
-  pinMessage,
+  pinChat,
   forward,
   downloadFile;
 
@@ -17,10 +17,10 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.select;
       case ChatContextMenuActions.copyMessage:
         return L10n.of(context)!.copyMessageText;
-      case ChatContextMenuActions.pinMessage:
+      case ChatContextMenuActions.pinChat:
         return unpin
-            ? L10n.of(context)!.unpinThisMessage
-            : L10n.of(context)!.pinMessage;
+            ? L10n.of(context)!.unpinThisChat
+            : L10n.of(context)!.pinChat;
       case ChatContextMenuActions.forward:
         return L10n.of(context)!.forward;
       case ChatContextMenuActions.downloadFile:
@@ -36,7 +36,7 @@ enum ChatContextMenuActions {
         return Icons.check_circle_outline;
       case ChatContextMenuActions.copyMessage:
         return Icons.content_copy;
-      case ChatContextMenuActions.pinMessage:
+      case ChatContextMenuActions.pinChat:
         return unpin ? Icons.push_pin_outlined : Icons.push_pin;
       case ChatContextMenuActions.forward:
         return Icons.shortcut;
