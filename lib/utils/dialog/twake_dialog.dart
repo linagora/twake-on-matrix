@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:fluffychat/utils/dialog/stream_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,6 +54,28 @@ class TwakeDialog {
     return await showFutureLoadingDialog(
       context: twakeContext,
       future: future,
+    );
+  }
+
+  static void showStreamDialogFullScreen({
+    required Future Function() future,
+    required Function(StreamDialogState) listen,
+  }) async {
+    final twakeContext = TwakeApp.routerKey.currentContext;
+    if (twakeContext == null) {
+      Logs().e(
+        'TwakeLoadingDialog()::showStreamDialogFullScreen - Twake context is null',
+      );
+    }
+    await showDialog(
+      context: twakeContext!,
+      builder: (context) => StreamDialogBuilder(
+        future: future,
+        listen: listen,
+      ),
+      barrierDismissible: true,
+      barrierColor: Colors.white,
+      useRootNavigator: false,
     );
   }
 
