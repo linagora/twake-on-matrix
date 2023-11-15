@@ -40,16 +40,6 @@ class _AdaptiveScaffoldPrimaryNavigationState
   List<PopupMenuEntry<Object>> _bundleMenuItems(BuildContext context) {
     return <PopupMenuEntry<Object>>[
       PopupMenuItem(
-        value: SettingsAction.archive,
-        child: Row(
-          children: [
-            const Icon(Icons.archive_outlined),
-            const SizedBox(width: 18),
-            Text(L10n.of(context)!.archive),
-          ],
-        ),
-      ),
-      PopupMenuItem(
         value: SettingsAction.settings,
         child: Row(
           children: [
