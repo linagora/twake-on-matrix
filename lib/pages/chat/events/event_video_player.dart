@@ -83,9 +83,11 @@ class EventVideoPlayer extends StatelessWidget {
                 ),
               CenterVideoButton(
                 icon: Icons.play_arrow,
-                onTap: () {
-                  Navigator.of(context, rootNavigator: PlatformInfos.isWeb)
-                      .push(
+                onTap: () async {
+                  await Navigator.of(
+                    context,
+                    rootNavigator: PlatformInfos.isWeb,
+                  ).push(
                     HeroPageRoute(
                       builder: (context) {
                         return InteractiveViewerGallery(

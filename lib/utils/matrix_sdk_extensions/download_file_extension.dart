@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -32,6 +33,7 @@ extension DownloadFileExtension on Event {
     Uri mxcUrl,
     String savePath, {
     ProgressCallback? progressCallback,
+    CancelToken? cancelToken,
     bool getThumbnail = false,
   }) async {
     final database = room.client.database;
@@ -52,20 +54,27 @@ extension DownloadFileExtension on Event {
         await attachment.delete();
       }
     }
-
-    final downloadResponse = await mediaApi.downloadFileInfo(
-      uriPath: downloadLink,
-      savePath: savePath,
-      onReceiveProgress: progressCallback,
-    );
-    if (downloadResponse.statusCode == 200) {
-      return FileInfo(
-        filename,
-        savePath,
-        content.tryGet<int>('size') ?? await File(savePath).length(),
+    try {
+      final downloadResponse = await mediaApi.downloadFileInfo(
+        uriPath: downloadLink,
+        savePath: savePath,
+        cancelToken: cancelToken,
+        onReceiveProgress: progressCallback,
       );
+      if (downloadResponse.statusCode == 200) {
+        return FileInfo(
+          filename,
+          savePath,
+          content.tryGet<int>('size') ?? await File(savePath).length(),
+        );
+      }
+      throw ('getFileInfo: Download file $filename failed');
+    } catch (e) {
+      if (e is CancelRequestException) {
+        Logs().i("downloadOrRetrieveAttachment: user cancel the download");
+      }
     }
-    throw ('getFileInfo: Download file $filename failed');
+    return null;
   }
 
   // Decrypt the file if it's encrypted.
@@ -105,6 +114,7 @@ extension DownloadFileExtension on Event {
   Future<FileInfo?> getFileInfo({
     getThumbnail = false,
     ProgressCallback? progressCallback,
+    CancelToken? cancelToken,
   }) async {
     if (!canContainAttachment()) {
       throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
@@ -153,6 +163,7 @@ extension DownloadFileExtension on Event {
       '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}',
       progressCallback: progressCallback,
       getThumbnail: getThumbnail,
+      cancelToken: cancelToken,
     );
 
     if (isFileEncrypted && fileInfo != null && decryptedPath != null) {
