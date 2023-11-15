@@ -55,6 +55,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:future_loading_dialog/future_loading_dialog.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1059,9 +1060,12 @@ class ChatController extends State<Chat>
   }
 
   Future scrollToIndex(int index, {bool highlight = false}) async {
-    await scrollController.scrollToIndex(
-      index,
-      preferPosition: AutoScrollPosition.middle,
+    await showFutureLoadingDialog(
+      context: context,
+      future: () => scrollController.scrollToIndex(
+        index,
+        preferPosition: AutoScrollPosition.middle,
+      ),
     );
     if (highlight) {
       await scrollController.highlight(
