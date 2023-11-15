@@ -46,13 +46,6 @@ class RecentChatList extends StatelessWidget {
                     Checkbox(
                       value: selected,
                       onChanged: (value) => onSelectedChat(room.id),
-                      fillColor: MaterialStatePropertyAll(
-                        Theme.of(context).primaryColor,
-                      ),
-                      side: BorderSide(
-                        width: 2.0,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
                     ),
                     Avatar(
                       mxContent: room.avatar,
