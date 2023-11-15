@@ -1,14 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
-import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
-import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +14,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/chat/events/image_bubble.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
 typedef DownloadVideoEventCallback = Future<String> Function(Event event);
@@ -41,8 +36,6 @@ class EventVideoPlayer extends StatefulWidget {
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
 
-  final bool isFullScreen;
-
   const EventVideoPlayer(
     this.event, {
     Key? key,
@@ -53,59 +46,14 @@ class EventVideoPlayer extends StatefulWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
-    this.isFullScreen = false,
   }) : super(key: key);
 
   @override
   EventVideoPlayerState createState() => EventVideoPlayerState();
 }
 
-class EventVideoPlayerState extends State<EventVideoPlayer>
-    with HandleVideoDownloadMixin, PlayVideoActionMixin {
-  final _downloadStateNotifier = ValueNotifier(DownloadVideoState.initial);
+class EventVideoPlayerState extends State<EventVideoPlayer> {
   String? path;
-  final downloadProgressNotifier = ValueNotifier(0.0);
-
-  @override
-  void initState() {
-    if (widget.isFullScreen) {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _downloadAction();
-      });
-    }
-    super.initState();
-  }
-
-  void _downloadAction() async {
-    _downloadStateNotifier.value = DownloadVideoState.loading;
-    try {
-      path = await handleDownloadVideoEvent(
-        event: widget.event,
-        playVideoAction: (path) => playVideoAction(
-          context,
-          path,
-          event: widget.event,
-        ),
-        progressCallback: (count, total) {
-          downloadProgressNotifier.value = count / total;
-        },
-      );
-      _downloadStateNotifier.value = DownloadVideoState.done;
-    } on MatrixConnectionException catch (e) {
-      _downloadStateNotifier.value = DownloadVideoState.failed;
-      TwakeSnackBar.show(
-        context,
-        e.toLocalizedString(context),
-      );
-    } catch (e, s) {
-      _downloadStateNotifier.value = DownloadVideoState.failed;
-      TwakeSnackBar.show(
-        context,
-        e.toLocalizedString(context),
-      );
-      Logs().w('Error while playing video', e, s);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

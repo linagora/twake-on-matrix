@@ -7,9 +7,12 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/video_viewer_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class DownloadVideoWidget extends StatefulWidget {
   final Event event;
@@ -70,67 +73,80 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
     return Material(
       color: Colors.black,
       child: Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.topLeft,
         children: [
-          MxcImage(
-            event: widget.event,
-            fit: BoxFit.fitWidth,
+          TwakeIconButton(
+            margin: VideoViewerStyle.backButtonMargin(context),
+            tooltip: L10n.of(context)!.back,
+            icon: Icons.close,
+            onTap: () => Navigator.of(context).pop(),
+            iconColor: Theme.of(context).colorScheme.surface,
           ),
-          Center(
-            child: ValueListenableBuilder<DownloadVideoState>(
-              valueListenable: _downloadStateNotifier,
-              builder: (context, downloadState, child) {
-                switch (downloadState) {
-                  case DownloadVideoState.loading:
-                    return Stack(
-                      children: [
-                        CenterVideoButton(
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              MxcImage(
+                event: widget.event,
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: ValueListenableBuilder<DownloadVideoState>(
+                  valueListenable: _downloadStateNotifier,
+                  builder: (context, downloadState, child) {
+                    switch (downloadState) {
+                      case DownloadVideoState.loading:
+                        return Stack(
+                          children: [
+                            CenterVideoButton(
+                              icon: Icons.play_arrow,
+                              onTap: _downloadAction,
+                            ),
+                            SizedBox(
+                              width: MessageContentStyle.videoCenterButtonSize,
+                              height: MessageContentStyle.videoCenterButtonSize,
+                              child: ValueListenableBuilder(
+                                valueListenable: downloadProgressNotifier,
+                                builder: (context, progress, child) {
+                                  return CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: LinagoraRefColors.material()
+                                        .primary[100],
+                                    value:
+                                        PlatformInfos.isWeb ? null : progress,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      case DownloadVideoState.initial:
+                        return CenterVideoButton(
                           icon: Icons.play_arrow,
                           onTap: _downloadAction,
-                        ),
-                        SizedBox(
-                          width: MessageContentStyle.videoCenterButtonSize,
-                          height: MessageContentStyle.videoCenterButtonSize,
-                          child: ValueListenableBuilder(
-                            valueListenable: downloadProgressNotifier,
-                            builder: (context, progress, child) {
-                              return CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                    LinagoraRefColors.material().primary[100],
-                                value: PlatformInfos.isWeb ? null : progress,
+                        );
+                      case DownloadVideoState.done:
+                        return CenterVideoButton(
+                          icon: Icons.play_arrow,
+                          onTap: () {
+                            if (path != null) {
+                              playVideoAction(
+                                context,
+                                path!,
+                                event: widget.event,
                               );
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  case DownloadVideoState.initial:
-                    return CenterVideoButton(
-                      icon: Icons.play_arrow,
-                      onTap: _downloadAction,
-                    );
-                  case DownloadVideoState.done:
-                    return CenterVideoButton(
-                      icon: Icons.play_arrow,
-                      onTap: () {
-                        if (path != null) {
-                          playVideoAction(
-                            context,
-                            path!,
-                            event: widget.event,
-                          );
-                        }
-                      },
-                    );
-                  case DownloadVideoState.failed:
-                    return CenterVideoButton(
-                      icon: Icons.error,
-                      onTap: _downloadAction,
-                    );
-                }
-              },
-            ),
+                            }
+                          },
+                        );
+                      case DownloadVideoState.failed:
+                        return CenterVideoButton(
+                          icon: Icons.error,
+                          onTap: _downloadAction,
+                        );
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
