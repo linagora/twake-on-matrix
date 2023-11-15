@@ -126,14 +126,9 @@ class MessageContent extends StatelessWidget {
                 child: HtmlMessage(
                   event: event,
                   html: html,
-                  defaultTextStyle:
-                      Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            // color: textColor,
-                            fontSize: bigEmotes ? fontSize * 3 : fontSize,
-                          ),
+                  defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
                   linkStyle: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
-                    fontSize: bigEmotes ? fontSize * 3 : fontSize,
                     decoration: TextDecoration.underline,
                     decorationColor: textColor.withAlpha(150),
                   ),
