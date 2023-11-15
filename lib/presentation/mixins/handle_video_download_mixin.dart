@@ -17,6 +17,7 @@ mixin HandleVideoDownloadMixin {
     required Event event,
     void Function(String uriOrFilePath)? playVideoAction,
     ProgressCallback? progressCallback,
+    CancelToken? cancelToken,
   }) async {
     lastSelectedVideoEventId = event.eventId;
     if (PlatformInfos.isWeb) {
@@ -33,6 +34,7 @@ mixin HandleVideoDownloadMixin {
     } else {
       final videoFile = await event.getFileInfo(
         progressCallback: progressCallback,
+        cancelToken: cancelToken,
       );
       if (lastSelectedVideoEventId == event.eventId &&
           playVideoAction != null &&
