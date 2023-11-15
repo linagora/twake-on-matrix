@@ -18,7 +18,7 @@ import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
 typedef DownloadVideoEventCallback = Future<String> Function(Event event);
 
-class EventVideoPlayer extends StatefulWidget {
+class EventVideoPlayer extends StatelessWidget {
   final Event event;
 
   final double? width;
@@ -49,29 +49,21 @@ class EventVideoPlayer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  EventVideoPlayerState createState() => EventVideoPlayerState();
-}
-
-class EventVideoPlayerState extends State<EventVideoPlayer> {
-  String? path;
-
-  @override
   Widget build(BuildContext context) {
-    final hasThumbnail = widget.event.hasThumbnail;
-    final blurHash = widget.event.blurHash ?? AppConfig.defaultVideoBlurHash;
+    final hasThumbnail = event.hasThumbnail;
+    final blurHash = event.blurHash ?? AppConfig.defaultVideoBlurHash;
 
-    final width = widget.width ?? MessageContentStyle.imageWidth(context);
-    final height = widget.height ?? MessageContentStyle.imageHeight(context);
+    final imageWidth = width ?? MessageContentStyle.imageWidth(context);
+    final imageHeight = height ?? MessageContentStyle.imageHeight(context);
 
     return ClipRRect(
-      borderRadius: widget.rounded
-          ? MessageContentStyle.borderRadiusBubble
-          : BorderRadius.zero,
+      borderRadius:
+          rounded ? MessageContentStyle.borderRadiusBubble : BorderRadius.zero,
       child: Material(
         color: Colors.black,
         child: SizedBox(
-          width: MessageContentStyle.imageBubbleWidth(width),
-          height: MessageContentStyle.videoBubbleHeight(height),
+          width: MessageContentStyle.imageBubbleWidth(imageWidth),
+          height: MessageContentStyle.videoBubbleHeight(imageHeight),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -79,13 +71,13 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
               if (hasThumbnail)
                 Center(
                   child: ImageBubble(
-                    widget.event,
-                    width: MessageContentStyle.imageBubbleWidth(width),
-                    height: MessageContentStyle.videoBubbleHeight(height),
-                    rounded: widget.rounded,
-                    thumbnailCacheKey: widget.thumbnailCacheKey,
-                    thumbnailCacheMap: widget.thumbnailCacheMap,
-                    noResizeThumbnail: widget.noResizeThumbnail,
+                    event,
+                    width: MessageContentStyle.imageBubbleWidth(imageWidth),
+                    height: MessageContentStyle.videoBubbleHeight(imageHeight),
+                    rounded: rounded,
+                    thumbnailCacheKey: thumbnailCacheKey,
+                    thumbnailCacheMap: thumbnailCacheMap,
+                    noResizeThumbnail: noResizeThumbnail,
                     thumbnailOnly: true,
                   ),
                 ),
@@ -98,8 +90,8 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
                       builder: (context) {
                         return InteractiveViewerGallery(
                           itemBuilder: Hero(
-                            tag: widget.event.eventId,
-                            child: DownloadVideoWidget(event: widget.event),
+                            tag: event.eventId,
+                            child: DownloadVideoWidget(event: event),
                           ),
                         );
                       },
@@ -107,7 +99,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
                   );
                 },
               ),
-              if (widget.showDuration)
+              if (showDuration)
                 Positioned(
                   bottom: ChatDetailsMediaStyle.durationPosition,
                   right: ChatDetailsMediaStyle.durationPosition,
@@ -117,7 +109,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
                       context,
                     ),
                     child: Text(
-                      widget.event.duration?.mediaTimeLength() ?? "--:--",
+                      event.duration?.mediaTimeLength() ?? "--:--",
                       style: ChatDetailsMediaStyle.durationTextStyle(context),
                     ),
                   ),
