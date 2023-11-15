@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -28,6 +29,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
   final _downloadStateNotifier = ValueNotifier(DownloadVideoState.initial);
   String? path;
   final downloadProgressNotifier = ValueNotifier(0.0);
+  final cancelToken = CancelToken();
 
   @override
   void initState() {
@@ -35,6 +37,14 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
       _downloadAction();
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    cancelToken.cancel();
+    downloadProgressNotifier.dispose();
+    _downloadStateNotifier.dispose();
+    super.dispose();
   }
 
   void _downloadAction() async {
@@ -50,6 +60,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
         },
+        cancelToken: cancelToken,
       );
       _downloadStateNotifier.value = DownloadVideoState.done;
     } on MatrixConnectionException catch (e) {
@@ -64,7 +75,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         context,
         e.toLocalizedString(context),
       );
-      Logs().w('Error while playing video', e, s);
+      Logs().e('Error while playing video', e, s);
     }
   }
 
@@ -79,7 +90,10 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
             margin: VideoViewerStyle.backButtonMargin(context),
             tooltip: L10n.of(context)!.back,
             icon: Icons.close,
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () {
+              cancelToken.cancel();
+              Navigator.of(context).pop();
+            },
             iconColor: Theme.of(context).colorScheme.surface,
           ),
           Stack(

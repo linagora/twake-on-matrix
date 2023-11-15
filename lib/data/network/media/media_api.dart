@@ -6,6 +6,7 @@ import 'package:fluffychat/data/model/media/upload_file_json.dart';
 import 'package:fluffychat/data/model/media/url_preview_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
+import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
@@ -39,13 +40,23 @@ class MediaAPI {
   Future<DownloadFileResponse> downloadFileInfo({
     required Uri uriPath,
     required String savePath,
+    CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await _client.download(
+    final response = await _client
+        .download(
       uriPath,
       savePath: savePath,
       onReceiveProgress: onReceiveProgress,
-    );
+      cancelToken: cancelToken,
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException && error.type == DioExceptionType.cancel) {
+        throw CancelRequestException();
+      } else {
+        throw Exception(error);
+      }
+    });
 
     return DownloadFileResponse(
       savePath: savePath,
