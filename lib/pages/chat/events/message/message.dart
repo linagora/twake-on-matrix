@@ -212,42 +212,10 @@ class Message extends StatelessWidget {
                                       hideDisplayName(ownMessage) ||
                                               hideDisplayNameInBubbleChat
                                           ? const SizedBox(height: 0)
-                                          : FutureBuilder<User?>(
-                                              future: event.fetchSenderUser(),
-                                              builder: (context, snapshot) {
-                                                final displayName = snapshot
-                                                        .data
-                                                        ?.calcDisplayname() ??
-                                                    event
-                                                        .senderFromMemoryOrFallback
-                                                        .calcDisplayname();
-                                                return Padding(
-                                                  padding: EdgeInsets.only(
-                                                    left: event.messageType ==
-                                                            MessageTypes.Image
-                                                        ? 0
-                                                        : 8.0,
-                                                    bottom: 4.0,
-                                                  ),
-                                                  child: Text(
-                                                    displayName
-                                                        .shortenDisplayName(
-                                                      maxCharacters:
-                                                          maxCharactersDisplayNameBubble,
-                                                    ),
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .labelMedium
-                                                        ?.copyWith(
-                                                          color: Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary,
-                                                        ),
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.clip,
-                                                  ),
-                                                );
-                                              },
+                                          : _DisplayNameWidget(
+                                              event: event,
+                                              maxCharactersDisplayNameBubble:
+                                                  maxCharactersDisplayNameBubble,
                                             ),
                                       IntrinsicHeight(
                                         child: Stack(
@@ -282,74 +250,13 @@ class Message extends StatelessWidget {
                                                     if (event
                                                             .relationshipType ==
                                                         RelationshipTypes.reply)
-                                                      FutureBuilder<Event?>(
-                                                        future:
-                                                            event.getReplyEvent(
-                                                          timeline,
-                                                        ),
-                                                        builder: (
-                                                          BuildContext context,
-                                                          snapshot,
-                                                        ) {
-                                                          final replyEvent =
-                                                              snapshot.hasData
-                                                                  ? snapshot
-                                                                      .data!
-                                                                  : Event(
-                                                                      eventId: event
-                                                                          .relationshipEventId!,
-                                                                      content: {
-                                                                        'msgtype':
-                                                                            'm.text',
-                                                                        'body':
-                                                                            '...',
-                                                                      },
-                                                                      senderId:
-                                                                          event
-                                                                              .senderId,
-                                                                      type:
-                                                                          'm.room.message',
-                                                                      room: event
-                                                                          .room,
-                                                                      status: EventStatus
-                                                                          .sent,
-                                                                      originServerTs:
-                                                                          DateTime
-                                                                              .now(),
-                                                                    );
-                                                          return InkWell(
-                                                            onTap: () {
-                                                              if (scrollToEventId !=
-                                                                  null) {
-                                                                scrollToEventId!(
-                                                                  replyEvent
-                                                                      .eventId,
-                                                                );
-                                                              }
-                                                            },
-                                                            child:
-                                                                AbsorbPointer(
-                                                              child: Container(
-                                                                margin: EdgeInsets
-                                                                    .symmetric(
-                                                                  vertical: 4.0 *
-                                                                      AppConfig
-                                                                          .bubbleSizeFactor,
-                                                                ),
-                                                                child:
-                                                                    ReplyContent(
-                                                                  replyEvent,
-                                                                  ownMessage:
-                                                                      ownMessage,
-                                                                  timeline:
-                                                                      timeline,
-                                                                  chatController:
-                                                                      controller,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
+                                                      _ReplyContent(
+                                                        event: event,
+                                                        timeline: timeline,
+                                                        scrollToEventId:
+                                                            scrollToEventId,
+                                                        ownMessage: ownMessage,
+                                                        controller: controller,
                                                       ),
                                                     Stack(
                                                       children: [
@@ -805,6 +712,111 @@ class Message extends StatelessWidget {
     ).width;
 
     return max<double>(sizeWidthDisplayName, sizeWidthMessageText);
+  }
+}
+
+class _DisplayNameWidget extends StatelessWidget {
+  const _DisplayNameWidget({
+    required this.event,
+    required this.maxCharactersDisplayNameBubble,
+  });
+
+  final Event event;
+  final int maxCharactersDisplayNameBubble;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<User?>(
+      future: event.fetchSenderUser(),
+      builder: (context, snapshot) {
+        final displayName = snapshot.data?.calcDisplayname() ??
+            event.senderFromMemoryOrFallback.calcDisplayname();
+        return Padding(
+          padding: EdgeInsets.only(
+            left: event.messageType == MessageTypes.Image ? 0 : 8.0,
+            bottom: 4.0,
+          ),
+          child: Text(
+            displayName.shortenDisplayName(
+              maxCharacters: maxCharactersDisplayNameBubble,
+            ),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary,
+                ),
+            maxLines: 2,
+            overflow: TextOverflow.clip,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReplyContent extends StatelessWidget {
+  const _ReplyContent({
+    required this.event,
+    required this.timeline,
+    required this.scrollToEventId,
+    required this.ownMessage,
+    required this.controller,
+  });
+
+  final Event event;
+  final Timeline timeline;
+  final void Function(String p1)? scrollToEventId;
+  final bool ownMessage;
+  final ChatController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Event?>(
+      future: event.getReplyEvent(
+        timeline,
+      ),
+      builder: (
+        BuildContext context,
+        snapshot,
+      ) {
+        final replyEvent = snapshot.hasData
+            ? snapshot.data!
+            : Event(
+                eventId: event.relationshipEventId!,
+                content: {
+                  'msgtype': 'm.text',
+                  'body': '...',
+                },
+                senderId: event.senderId,
+                type: 'm.room.message',
+                room: event.room,
+                status: EventStatus.sent,
+                originServerTs: DateTime.now(),
+              );
+        return InkWell(
+          onTap: () {
+            if (scrollToEventId != null) {
+              scrollToEventId!(
+                replyEvent.eventId,
+              );
+            }
+          },
+          child: AbsorbPointer(
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                vertical: 4.0 * AppConfig.bubbleSizeFactor,
+              ),
+              child: ReplyContent(
+                replyEvent,
+                ownMessage: ownMessage,
+                timeline: timeline,
+                chatController: controller,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
