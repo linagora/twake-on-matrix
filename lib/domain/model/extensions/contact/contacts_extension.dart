@@ -11,6 +11,7 @@ extension ContactsExtension on Iterable<Contact> {
         contact.displayName,
         contact.matrixId,
         contact.email,
+        contact.phoneNumber,
       ];
       final plainTextContains = supportedFields.any(
         (field) =>

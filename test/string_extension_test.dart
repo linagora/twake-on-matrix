@@ -400,4 +400,24 @@ void main() {
       expect(input.urlSafeBase64, equals(expectedOutput));
     });
   });
+
+  group('urlSafeBase64 tests', () {
+    test('urlSafeBase64 replaces + with -', () {
+      const input = 'a+b+c';
+      const expectedOutput = 'a-b-c';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+
+    test('urlSafeBase64 replaces / with _', () {
+      const input = 'a/b/c';
+      const expectedOutput = 'a_b_c';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+
+    test('urlSafeBase64 does not modify string without + or /', () {
+      const input = 'abc123';
+      const expectedOutput = 'abc123';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+  });
 }
