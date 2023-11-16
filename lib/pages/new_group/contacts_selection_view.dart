@@ -67,8 +67,8 @@ class ContactsSelectionView extends StatelessWidget {
                     ),
                   ),
                   ContactsSelectionList(
-                    contactsSectionListNotifier:
-                        controller.contactsSectionListNotifier,
+                    presentationContactNotifier:
+                        controller.presentationContactNotifier,
                     selectedContactsMapNotifier:
                         controller.selectedContactsMapNotifier,
                     onSelectedContact: controller.onSelectedContact,
