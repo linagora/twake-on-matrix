@@ -310,13 +310,15 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     return filePath != null && filePath!.isNotEmpty
         ? Image.file(
             File(filePath!),
-            width: width,
-            height: height,
-            cacheWidth: needResize ? width?.toInt() : null,
-            cacheHeight: needResize ? height?.toInt() : null,
+            width: width!,
+            height: height!,
+            cacheWidth: needResize ? (width! * devicePixelRatio).toInt() : null,
+            cacheHeight:
+                needResize ? (height! * devicePixelRatio).toInt() : null,
             fit: fit,
             filterQuality: FilterQuality.medium,
             errorBuilder: imageErrorWidgetBuilder,
@@ -329,7 +331,7 @@ class _ImageWidget extends StatelessWidget {
                 cacheWidth: needResize ? width?.toInt() : null,
                 cacheHeight: needResize ? height?.toInt() : null,
                 fit: fit,
-                filterQuality: FilterQuality.medium,
+                filterQuality: FilterQuality.low,
                 errorBuilder: imageErrorWidgetBuilder,
               )
             : const SizedBox.shrink();
