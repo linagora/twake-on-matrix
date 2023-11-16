@@ -71,7 +71,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                             return _PrimaryNavigationBarBuilder(
                               activeNavigationBar: activeNavigationBar,
                               onDestinationSelected: onDestinationSelected,
-                              onClientSelected: onClientSelected,
                               destinations: getNavigationDestinations(context),
                             );
                         }
@@ -267,14 +266,11 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
 
   final OnDestinationSelected onDestinationSelected;
 
-  final OnClientSelectedSetting onClientSelected;
-
   final List<NavigationDestination> destinations;
 
   const _PrimaryNavigationBarBuilder({
     required this.activeNavigationBar,
     required this.onDestinationSelected,
-    required this.onClientSelected,
     required this.destinations,
   });
 
@@ -286,7 +282,6 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
           .map((_) => AdaptiveScaffold.toRailDestination(_))
           .toList(),
       onDestinationSelected: onDestinationSelected,
-      onSelected: (object) => onClientSelected(object, context),
     );
   }
 }

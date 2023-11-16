@@ -9,18 +9,14 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
-  final Function(Object)? onSelected;
   final ValueNotifier<Profile> profileNotifier;
-  final List<PopupMenuEntry<Object>> Function(BuildContext) itemBuilder;
 
   const AdaptiveScaffoldPrimaryNavigationView({
     super.key,
     required this.getNavigationRailDestinations,
     this.selectedIndex,
     this.onDestinationSelected,
-    this.onSelected,
     required this.profileNotifier,
-    required this.itemBuilder,
   });
 
   @override
@@ -59,18 +55,12 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                 ValueListenableBuilder(
                   valueListenable: profileNotifier,
                   builder: (context, profile, _) {
-                    return PopupMenuButton<Object>(
-                      padding: EdgeInsets.zero,
-                      onSelected: onSelected,
-                      itemBuilder: itemBuilder,
-                      child: Avatar(
-                        mxContent: profile.avatarUrl,
-                        name: profile.displayName ??
-                            Matrix.of(context).client.userID!.localpart,
-                        size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
-                        fontSize:
-                            ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                      ),
+                    return Avatar(
+                      mxContent: profile.avatarUrl,
+                      name: profile.displayName ??
+                          Matrix.of(context).client.userID!.localpart,
+                      size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
+                      fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
                     );
                   },
                 ),
