@@ -53,6 +53,7 @@ class SendingImageInfoWidget extends StatelessWidget {
         event.status == EventStatus.synced) {
       sendingFileProgressNotifier.value = 1;
     }
+    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     return Hero(
       tag: event.eventId,
@@ -102,10 +103,13 @@ class SendingImageInfoWidget extends StatelessWidget {
                     File(matrixFile.filePath!),
                     width: displayImageInfo.size.width,
                     height: displayImageInfo.size.height,
-                    cacheHeight: displayImageInfo.size.height.toInt(),
-                    cacheWidth: displayImageInfo.size.width.toInt(),
+                    cacheHeight:
+                        (displayImageInfo.size.height * devicePixelRatio)
+                            .toInt(),
+                    cacheWidth: (displayImageInfo.size.width * devicePixelRatio)
+                        .toInt(),
                     fit: BoxFit.cover,
-                    filterQuality: FilterQuality.medium,
+                    filterQuality: FilterQuality.low,
                   ),
                 ],
               ),
