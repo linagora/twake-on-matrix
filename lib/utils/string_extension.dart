@@ -306,4 +306,16 @@ extension StringCasingExtension on String {
     }
     return this;
   }
+
+  String msisdnSanitizer() {
+    var msisdn = trim();
+    msisdn = msisdn.replaceAll("+", "");
+    msisdn = msisdn.replaceAll(RegExp(r'[^0-9]'), '');
+    return msisdn;
+  }
+
+  /// Ref: https://spec.matrix.org/v1.6/rooms/v4/#event-ids
+  String get urlSafeBase64 {
+    return replaceAll('+', '-').replaceAll('/', '_');
+  }
 }
