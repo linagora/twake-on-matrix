@@ -15,12 +15,15 @@ class ContextMenuInputBar extends StatelessWidget {
 
   final Room? room;
 
+  final FocusNode? focusNode;
+
   const ContextMenuInputBar({
     super.key,
     required this.child,
     required this.handlePaste,
     this.controller,
     this.room,
+    this.focusNode,
   });
 
   @override
@@ -74,6 +77,7 @@ class ContextMenuInputBar extends StatelessWidget {
               handlePaste();
               break;
           }
+          FocusScope.of(context).requestFocus(focusNode);
         }
       },
       child: child,

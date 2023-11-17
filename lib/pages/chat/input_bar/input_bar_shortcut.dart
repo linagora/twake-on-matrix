@@ -42,9 +42,10 @@ class InputBarShortcuts extends StatelessWidget {
         ): () async {
           handlePaste();
         },
-        const SingleActivator(
+        SingleActivator(
           flutter.LogicalKeyboardKey.keyC,
-          meta: true,
+          meta: PlatformInfos.isMacKeyboardPlatform,
+          control: !PlatformInfos.isMacKeyboardPlatform,
         ): () {
           controller?.copyText();
         },
@@ -70,6 +71,13 @@ class InputBarShortcuts extends StatelessWidget {
           flutter.LogicalKeyboardKey.arrowDown,
         ): () {
           focusSuggestionController?.down();
+        },
+        SingleActivator(
+          flutter.LogicalKeyboardKey.keyX,
+          meta: PlatformInfos.isMacKeyboardPlatform,
+          control: !PlatformInfos.isMacKeyboardPlatform,
+        ): () {
+          controller?.cutText();
         },
       },
       child: child,
