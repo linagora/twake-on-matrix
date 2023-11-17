@@ -26,6 +26,8 @@ class ExpansionList extends StatelessWidget {
       onContactTap;
   final TextEditingController textEditingController;
   final ValueNotifier<WarningContactsBannerState> warningBannerNotifier;
+  final Function()? closeContactsWarningBanner;
+  final Function()? goToSettingsForPermissionActions;
 
   const ExpansionList({
     super.key,
@@ -37,6 +39,8 @@ class ExpansionList extends StatelessWidget {
     required this.onContactTap,
     required this.textEditingController,
     required this.warningBannerNotifier,
+    this.closeContactsWarningBanner,
+    this.goToSettingsForPermissionActions,
   });
 
   @override
@@ -186,6 +190,8 @@ class ExpansionList extends StatelessWidget {
     return ContactsWarningBannerView(
       warningBannerNotifier: warningBannerNotifier,
       isShowMargin: false,
+      closeContactsWarningBanner: closeContactsWarningBanner,
+      goToSettingsForPermissionActions: goToSettingsForPermissionActions,
     );
   }
 

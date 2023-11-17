@@ -8,7 +8,6 @@ import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 
 class PhonebookContactInteractor {
@@ -43,6 +42,11 @@ class PhonebookContactInteractor {
       };
       final chunks =
           thirdPartyIdToHashMap.values.whereNotNull().slices(lookupChunkSize);
+
+      if (chunks.isEmpty) {
+        yield Right(GetPhonebookContactsSuccess(contacts: contacts));
+        return;
+      }
 
       final int progressStep = (_progressMax - progress) ~/ chunks.length;
       final Map<String, String> hashToMatrixIdMappings = {};
@@ -86,13 +90,5 @@ class PhonebookContactInteractor {
       Logs().e('PhonebookContactInteractor::error', e);
       yield Left(GetPhonebookContactsFailure(exception: e));
     }
-  }
-
-  void addListener(VoidCallback callback) {
-    _phonebookContactRepository.addListener(callback);
-  }
-
-  void removeListener(VoidCallback callback) {
-    _phonebookContactRepository.removeListener(callback);
   }
 }

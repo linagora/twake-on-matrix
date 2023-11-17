@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
@@ -12,15 +10,5 @@ class PhonebookContactRepositoryImpl extends PhonebookContactRepository {
   @override
   Future<List<Contact>> fetchContacts() {
     return datasource.fetchContacts();
-  }
-
-  @override
-  void addListener(VoidCallback callback) {
-    datasource.addListener(callback);
-  }
-
-  @override
-  void removeListener(VoidCallback callback) {
-    datasource.removeListener(callback);
   }
 }

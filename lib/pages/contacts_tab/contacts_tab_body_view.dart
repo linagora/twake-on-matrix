@@ -187,6 +187,9 @@ class _SliverWarningBanner extends StatelessWidget {
     return SliverToBoxAdapter(
       child: ContactsWarningBannerView(
         warningBannerNotifier: controller.warningBannerNotifier,
+        closeContactsWarningBanner: controller.closeContactsWarningBanner,
+        goToSettingsForPermissionActions:
+            controller.goToSettingsForPermissionActions,
       ),
     );
   }
@@ -194,6 +197,7 @@ class _SliverWarningBanner extends StatelessWidget {
 
 class _PhonebookLoading extends StatelessWidget {
   final int progress;
+
   const _PhonebookLoading({
     required this.progress,
   });
@@ -226,6 +230,7 @@ class _Contact extends StatelessWidget {
     required this.contact,
     required this.controller,
   });
+
   final PresentationContact contact;
   final ContactsTabController controller;
 
