@@ -16,10 +16,12 @@ extension ContactsExtension on Iterable<Contact> {
         (field) =>
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
-      final phoneNumberContains = contact.phoneNumber
-              ?.msisdnSanitizer()
-              .contains(keyword.msisdnSanitizer()) ??
-          false;
+      final phoneNumberContains = keyword.msisdnSanitizer().isNotEmpty
+          ? contact.phoneNumber
+                  ?.msisdnSanitizer()
+                  .contains(keyword.msisdnSanitizer()) ??
+              false
+          : false;
       return plainTextContains || phoneNumberContains;
     });
     return contactsMatched;

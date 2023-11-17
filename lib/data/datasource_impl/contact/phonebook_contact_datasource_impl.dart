@@ -1,6 +1,5 @@
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' hide Contact;
 
 class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
@@ -26,15 +25,5 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
           ],
         )
         .toList();
-  }
-
-  @override
-  void addListener(VoidCallback callback) {
-    FlutterContacts.addListener(callback);
-  }
-
-  @override
-  void removeListener(VoidCallback callback) {
-    FlutterContacts.removeListener(callback);
   }
 }
