@@ -1,9 +1,11 @@
 import 'dart:collection';
 
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
+import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
+import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
@@ -12,6 +14,7 @@ import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
+import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
@@ -21,12 +24,13 @@ import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
+import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -107,6 +111,9 @@ class GetItInitializer {
     getIt.registerFactory<TomContactsDatasource>(
       () => TomContactsDatasourceImpl(),
     );
+    getIt.registerFactory<PhonebookContactDatasource>(
+      () => PhonebookContactDatasourceImpl(),
+    );
     getIt.registerLazySingleton(
       () => MediaDataSourceImpl(
         getIt.get<MediaAPI>(),
@@ -122,6 +129,9 @@ class GetItInitializer {
       () => RecoveryWordsRepositoryImpl(),
     );
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
+    getIt.registerFactory<PhonebookContactRepository>(
+      () => PhonebookContactRepositoryImpl(),
+    );
     getIt.registerFactory<MediaRepositoryImpl>(
       () => MediaRepositoryImpl(
         getIt.get<MediaDataSourceImpl>(),
@@ -139,8 +149,9 @@ class GetItInitializer {
     getIt.registerLazySingleton<DeleteRecoveryWordsInteractor>(
       () => DeleteRecoveryWordsInteractor(),
     );
-    getIt.registerFactory<GetAllContactsInteractor>(
-      () => GetAllContactsInteractor(),
+    );
+    getIt.registerFactory<PhonebookContactInteractor>(
+      () => PhonebookContactInteractor(),
     );
     getIt.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
