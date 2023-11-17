@@ -132,6 +132,11 @@ class NetworkDI extends BaseDI {
       () => DioClient(get.get<Dio>(instanceName: identityServerDioName)),
       instanceName: identityDioClientName,
     );
+    dio.interceptors.add(
+      get.get<MatrixDioCacheInterceptor>(
+        instanceName: memCacheDioInterceptorName,
+      ),
+    );
   }
 
   void _bindDioForHomeServer(GetIt get) {
@@ -154,11 +159,6 @@ class NetworkDI extends BaseDI {
     dio.interceptors.add(
       get.get<MatrixDioCacheInterceptor>(
         instanceName: hiveCacheDioInterceptorName,
-      ),
-    );
-    dio.interceptors.add(
-      get.get<MatrixDioCacheInterceptor>(
-        instanceName: memCacheDioInterceptorName,
       ),
     );
   }

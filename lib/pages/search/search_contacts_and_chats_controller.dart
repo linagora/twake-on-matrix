@@ -78,7 +78,9 @@ class SearchContactsAndChatsController {
     if (keyword.isEmpty) {
       return fetchPreSearchChat();
     }
-    final tomContacts = contactManger.contactsNotifier.value
+    final tomContacts = contactManger
+            .getContactsNotifier()
+            .value
             .getSuccessOrNull<GetContactsSuccess>()
             ?.contacts ??
         [];
