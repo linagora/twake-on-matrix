@@ -108,6 +108,14 @@ class ExpansionContactListTile extends StatelessWidget {
                               color: LinagoraRefColors.material().neutral[60],
                             ),
                       ),
+                    if (contact.phoneNumber != null)
+                      HighlightText(
+                        text: contact.phoneNumber!,
+                        searchWord: highlightKeyword,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: LinagoraRefColors.material().neutral[60],
+                            ),
+                      ),
                   ],
                 ),
               ),
