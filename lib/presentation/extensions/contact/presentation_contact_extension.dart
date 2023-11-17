@@ -53,6 +53,7 @@ extension ContactExtensionInPresentation on Contact {
     final listContacts = {
       PresentationContact(
         email: email,
+        phoneNumber: phoneNumber,
         displayName: displayName,
         matrixId: matrixId,
         status: status,
