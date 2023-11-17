@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -8,12 +6,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/get_tom_contacts_interactor.dart';
-import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/domain/usecase/phonebook_contact_interactor.dart';
-import 'package:fluffychat/utils/permission_service.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ContactsManager {
   static const int _lookupChunkSize = 50;
@@ -22,76 +16,67 @@ class ContactsManager {
 
   final _getTomContactsInteractor = getIt.get<GetTomContactsInteractor>();
 
-  final PermissionHandlerService _permissionHandlerService =
-      PermissionHandlerService();
-
   final _phonebookContactInteractor = getIt.get<PhonebookContactInteractor>();
 
-  ValueNotifier<Either<Failure, Success>> contactsNotifier =
+  final ValueNotifier<Either<Failure, Success>> _contactsNotifier =
       ValueNotifier(const Right(ContactsInitial()));
 
-  ValueNotifier<Either<Failure, Success>> phonebookContactsNotifier =
+  final ValueNotifier<Either<Failure, Success>> _phonebookContactsNotifier =
       ValueNotifier(const Right(GetPhonebookContactsInitial()));
 
-  ValueNotifier<WarningContactsBannerState> warningBannerNotifier =
-      ValueNotifier(WarningContactsBannerState.hide);
+  ValueNotifier<Either<Failure, Success>> getContactsNotifier() =>
+      _contactsNotifier;
 
-  ContactsManager() {
-    _phonebookContactInteractor.addListener(_fetchPhonebookContacts);
-  }
+  ValueNotifier<Either<Failure, Success>> getPhonebookContactsNotifier() =>
+      _phonebookContactsNotifier;
 
   bool get _isInitial =>
-      contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
+      _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
 
-  void initialSynchronizeContacts() async {
-    if (PlatformInfos.isMobile && !_doNotShowWarningContactsBannerAgain) {
-      await _handleRequestContactsPermission();
-    }
+  bool get isDoNotShowWarningContactsBannerAgain =>
+      _doNotShowWarningContactsBannerAgain;
+
+  set updateNotShowWarningContactsBannerAgain(bool value) {
+    _doNotShowWarningContactsBannerAgain = value;
+  }
+
+  void initialSynchronizeContacts({
+    bool isAvailableSupportPhonebookContacts = false,
+  }) async {
     if (!_isInitial) {
       return;
     }
-    _getAllContacts();
+    _getAllContacts(
+      isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
+    );
   }
 
-  Future<void> _handleRequestContactsPermission() async {
-    final currentContactsPermissionStatus =
-        await _permissionHandlerService.requestContactsPermissionActions();
-    if (currentContactsPermissionStatus == PermissionStatus.granted) {
-      warningBannerNotifier.value = WarningContactsBannerState.hide;
-    } else {
-      if (!_doNotShowWarningContactsBannerAgain) {
-        warningBannerNotifier.value = WarningContactsBannerState.display;
-      }
-    }
-  }
-
-  void _getAllContacts() {
+  void _getAllContacts({
+    bool isAvailableSupportPhonebookContacts = false,
+  }) {
     _getTomContactsInteractor
         .execute(limit: AppConfig.maxFetchContacts)
-        .listen((event) {
-      contactsNotifier.value = event;
-    }).onDone(_fetchPhonebookContacts);
+        .listen(
+          (event) => _contactsNotifier.value = event,
+        )
+        .onDone(
+          () => _fetchPhonebookContacts(
+            isAvailableSupportPhonebookContacts:
+                isAvailableSupportPhonebookContacts,
+          ),
+        );
   }
 
-  void _fetchPhonebookContacts() async {
-    if (!PlatformInfos.isMobile ||
-        await _permissionHandlerService.contactsPermissionStatus !=
-            PermissionStatus.granted) {
+  void _fetchPhonebookContacts({
+    bool isAvailableSupportPhonebookContacts = false,
+  }) async {
+    if (!isAvailableSupportPhonebookContacts) {
       return;
     }
     _phonebookContactInteractor
         .execute(lookupChunkSize: _lookupChunkSize)
-        .listen((event) {
-      phonebookContactsNotifier.value = event;
-    });
-  }
-
-  void closeContactsWarningBanner() {
-    _doNotShowWarningContactsBannerAgain = true;
-    warningBannerNotifier.value = WarningContactsBannerState.notDisplayAgain;
-  }
-
-  void goToSettingsForPermissionActions() {
-    _permissionHandlerService.goToSettingsForPermissionActions();
+        .listen(
+          (event) => _phonebookContactsNotifier.value = event,
+        );
   }
 }
