@@ -5,9 +5,9 @@ import 'package:fluffychat/presentation/model/search/presentation_search_state.d
 extension SearchRecentChatSuccessToPresentationExtension
     on SearchRecentChatSuccess {
   GetContactAndRecentChatPresentation toPresentation() {
-    final tomContacts = data.map((model) => model.toPresentation()).toList();
+    final contacts = data.map((model) => model.toPresentation()).toList();
     return GetContactAndRecentChatPresentation(
-      tomContacts: tomContacts,
+      contacts: contacts,
       keyword: keyword,
     );
   }
