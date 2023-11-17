@@ -11,6 +11,7 @@ class ProfileInfoNavigator extends StatelessWidget {
   final VoidCallback? onBack;
   final String? roomId;
   final PresentationContact? contact;
+  final String? userId;
   final bool isInStack;
 
   const ProfileInfoNavigator({
@@ -18,6 +19,7 @@ class ProfileInfoNavigator extends StatelessWidget {
     this.onBack,
     this.roomId,
     this.contact,
+    this.userId,
     required this.isInStack,
   }) : super(key: key);
 
@@ -25,6 +27,7 @@ class ProfileInfoNavigator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Navigator(
       initialRoute: ProfileInfoRoutes.profileInfo,
+      key: ValueKey(userId),
       onGenerateRoute: (settings) => MaterialPageRoute(
         builder: (context) {
           switch (settings.name) {
@@ -33,6 +36,7 @@ class ProfileInfoNavigator extends StatelessWidget {
                 onBack: onBack,
                 isInStack: isInStack,
                 roomId: roomId,
+                userId: userId,
                 contact: contact,
               );
             default:

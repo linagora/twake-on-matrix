@@ -48,6 +48,7 @@ import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -1558,7 +1559,7 @@ class ChatController extends State<Chat>
 
   void onPushDetails() async {
     if (room?.directChatMatrixID != null) {
-      widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
+      widget.onChangeRightColumnType?.call(const ProfileInfoRightColumnType());
       return;
     }
     final result = await context.push('/rooms/${room!.id}/details');
@@ -1572,8 +1573,26 @@ class ChatController extends State<Chat>
     }
   }
 
+  void onAvatarTap(Event event) {
+    openProfileInformation(event.senderId);
+  }
+
+  void openProfileInformation(String userId) {
+    widget.onChangeRightColumnType
+        ?.call(ProfileInfoRightColumnType(userId: userId));
+  }
+
+  void onPillTap(String url) {
+    final identifyParts = url.parseIdentifierIntoParts();
+    if (identifyParts != null && identifyParts.primaryIdentifier.sigil == '@') {
+      openProfileInformation(identifyParts.primaryIdentifier);
+    } else {
+      UrlLauncher(context, url).launchUrl();
+    }
+  }
+
   void toggleSearch() {
-    widget.onChangeRightColumnType?.call(RightColumnType.search);
+    widget.onChangeRightColumnType?.call(const SearchRightColumnType());
   }
 
   void actionWithClearSelections(Function action) {

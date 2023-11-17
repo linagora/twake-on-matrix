@@ -298,7 +298,7 @@ class DraftChatController extends State<DraftChat>
   }
 
   void onPushDetails() {
-    widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
+    widget.onChangeRightColumnType?.call(const ProfileInfoRightColumnType());
   }
 
   @override

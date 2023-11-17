@@ -11,8 +11,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
-import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 
 class ChatEventList extends StatelessWidget {
@@ -110,15 +108,7 @@ class ChatEventList extends StatelessWidget {
                     event,
                     onSwipe: (direction) =>
                         controller.replyAction(replyTo: event),
-                    onAvatarTab: (Event event) => showAdaptiveBottomSheet(
-                      context: context,
-                      builder: (c) => UserBottomSheet(
-                        user: event.senderFromMemoryOrFallback,
-                        outerContext: context,
-                        onMention: () => controller.sendController.text +=
-                            '${event.senderFromMemoryOrFallback.mention} ',
-                      ),
-                    ),
+                    onAvatarTab: controller.onAvatarTap,
                     onSelect: controller.onSelectMessage,
                     scrollToEventId: (String eventId) =>
                         controller.scrollToEventId(eventId),

@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 class ProfileInfo extends StatefulWidget {
   final VoidCallback? onBack;
   final String? roomId;
+  final String? userId;
   final PresentationContact? contact;
   final bool isInStack;
 
@@ -15,6 +16,7 @@ class ProfileInfo extends StatefulWidget {
     required this.onBack,
     required this.isInStack,
     this.roomId,
+    this.userId,
     this.contact,
   });
 
@@ -27,8 +29,9 @@ class ProfileInfoController extends State<ProfileInfo> {
       ? Matrix.of(context).client.getRoomById(widget.roomId!)
       : null;
 
-  User? get user =>
-      room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
+  User? get user => room?.unsafeGetUserFromMemoryOrFallback(
+        room?.directChatMatrixID ?? widget.userId ?? '',
+      );
 
   @override
   Widget build(BuildContext context) {

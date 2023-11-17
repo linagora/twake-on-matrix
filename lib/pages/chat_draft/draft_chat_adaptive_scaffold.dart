@@ -28,8 +28,8 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
         required bool isInStack,
         required RightColumnType type,
       }) {
-        switch (type) {
-          case RightColumnType.profileInfo:
+        switch (type.runtimeType) {
+          case ProfileInfoRightColumnType:
             return ProfileInfoNavigator(
               onBack: controller.hideRightColumn,
               contact: _contact,

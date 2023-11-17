@@ -64,20 +64,24 @@ class _RightColumnNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (type) {
-      case RightColumnType.search:
+    switch (type.runtimeType) {
+      case SearchRightColumnType:
         return ChatSearch(
           roomId: roomId,
           onBack: controller.hideRightColumn,
           jumpToEventId: controller.jumpToEventId,
           isInStack: isInStack,
         );
-      case RightColumnType.profileInfo:
+      case ProfileInfoRightColumnType:
+        final profileInfoType = type as ProfileInfoRightColumnType;
         return ProfileInfoNavigator(
           onBack: controller.hideRightColumn,
           roomId: roomId,
+          userId: profileInfoType.userId,
           isInStack: isInStack,
         );
+      default:
+        return const SizedBox.shrink();
     }
   }
 }
