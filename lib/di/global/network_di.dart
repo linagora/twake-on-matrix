@@ -181,13 +181,4 @@ class NetworkDI extends BaseDI {
       IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
     ]);
   }
-
-  void _bindMethodSupportMemCache(GetIt get) {
-    final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>(
-      instanceName: memCacheDioInterceptorName,
-    );
-    dioCacheCustomInterceptor.addUriSupportsCache([
-      IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
-    ]);
-  }
 }

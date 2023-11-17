@@ -30,6 +30,14 @@ class ContactsManager {
   ValueNotifier<Either<Failure, Success>> getPhonebookContactsNotifier() =>
       _phonebookContactsNotifier;
 
+  @visibleForTesting
+  void setContactsNotifier(Either<Failure, Success> value) =>
+      _contactsNotifier.value = value;
+
+  @visibleForTesting
+  void setPhonebookContactsNotifier(Either<Failure, Success> value) =>
+      _phonebookContactsNotifier.value = value;
+
   bool get _isInitial =>
       _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
 
