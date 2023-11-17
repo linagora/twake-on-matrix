@@ -27,7 +27,7 @@ class DioCacheOption {
     Logs().d('DioCacheOption::_setUpDioHiveCache() DioHiveCache Ready');
   }
 
-  CacheOptions getCacheOptions() {
+  CacheOptions getHiveCacheOptions() {
     return CacheOptions(
       store: _hiveCacheStore,
       policy: CachePolicy.forceCache,
@@ -36,6 +36,20 @@ class DioCacheOption {
       keyBuilder: (request) {
         Logs().d(
           'DioCacheOption::getCacheOptions() Request URI - ${request.uri}',
+        );
+        return request.uri.toString();
+      },
+    );
+  }
+
+  CacheOptions getMemCacheOptions() {
+    return CacheOptions(
+      store: MemCacheStore(),
+      policy: CachePolicy.forceCache,
+      hitCacheOnErrorExcept: [404],
+      keyBuilder: (request) {
+        Logs().d(
+          'DioCacheOption::getMemCacheOptions() Request URI - ${request.uri}',
         );
         return request.uri.toString();
       },
