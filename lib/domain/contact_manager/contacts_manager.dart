@@ -6,161 +6,92 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.dart';
-import 'package:fluffychat/domain/usecase/get_all_contacts_interactor.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/usecase/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
+import 'package:fluffychat/domain/usecase/phonebook_contact_interactor.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:matrix/matrix.dart';
+import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum SyncContactsState {
-  initial,
-  synchronizing,
-  synchronized,
-}
-
 class ContactsManager {
-  SyncContactsState _syncContactsState = SyncContactsState.initial;
+  static const int _lookupChunkSize = 50;
 
   bool _doNotShowWarningContactsBannerAgain = false;
 
-  final _getAllContactsInteractor = getIt.get<GetAllContactsInteractor>();
+  final _getTomContactsInteractor = getIt.get<GetTomContactsInteractor>();
 
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
 
-  Set<Contact> _tomContacts = {};
+  final _phonebookContactInteractor = getIt.get<PhonebookContactInteractor>();
 
-  Set<Contact> _phonebookContacts = {};
+  ValueNotifier<Either<Failure, Success>> contactsNotifier =
+      ValueNotifier(const Right(ContactsInitial()));
 
-  Set<Contact> get tomContacts => _tomContacts;
+  ValueNotifier<Either<Failure, Success>> phonebookContactsNotifier =
+      ValueNotifier(const Right(GetPhonebookContactsInitial()));
 
-  Set<Contact> get phonebookContacts => _phonebookContacts;
+  ValueNotifier<WarningContactsBannerState> warningBannerNotifier =
+      ValueNotifier(WarningContactsBannerState.hide);
 
-  bool get _firstSynchronizing =>
-      _syncContactsState == SyncContactsState.synchronizing ||
-      _syncContactsState == SyncContactsState.initial;
+  ContactsManager() {
+    _phonebookContactInteractor.addListener(_fetchPhonebookContacts);
+  }
 
-  bool _isExternalContact(String keyword) =>
-      keyword.isValidMatrixId && keyword.startsWith("@");
-
-  StreamController<Either<Failure, Success>> contactsStream =
-      StreamController<Either<Failure, Success>>.broadcast();
-
-  StreamController<WarningContactsBannerState> warningBannerStateStream =
-      StreamController<WarningContactsBannerState>.broadcast();
+  bool get _isInitial =>
+      contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
 
   void initialSynchronizeContacts() async {
-    if (PlatformInfos.isMobile &&
-        !_doNotShowWarningContactsBannerAgain &&
-        _firstSynchronizing) {
-      contactsStream.add(const Right(ContactsLoading()));
+    if (PlatformInfos.isMobile && !_doNotShowWarningContactsBannerAgain) {
       await _handleRequestContactsPermission();
     }
-    switch (_syncContactsState) {
-      case SyncContactsState.synchronizing:
-        break;
-      case SyncContactsState.initial:
-        _syncContactsState = SyncContactsState.synchronizing;
-        _getAllContacts();
-        break;
-      case SyncContactsState.synchronized:
-        _handleContactsHasSynchronized();
-        break;
+    if (!_isInitial) {
+      return;
     }
+    _getAllContacts();
   }
 
   Future<void> _handleRequestContactsPermission() async {
     final currentContactsPermissionStatus =
         await _permissionHandlerService.requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
-      warningBannerStateStream.add(WarningContactsBannerState.hide);
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
       if (!_doNotShowWarningContactsBannerAgain) {
-        warningBannerStateStream.add(WarningContactsBannerState.display);
+        warningBannerNotifier.value = WarningContactsBannerState.display;
       }
     }
   }
 
   void _getAllContacts() {
-    _getAllContactsInteractor
+    _getTomContactsInteractor
         .execute(limit: AppConfig.maxFetchContacts)
         .listen((event) {
-      event.fold(
-        (_) {},
-        (success) {
-          if (success is GetContactsSuccess) {
-            _tomContacts = success.tomContacts.toSet();
-            _phonebookContacts = {};
-            _syncContactsState = SyncContactsState.synchronized;
-            Logs().d(
-              "ContactManagerMixin()::getAllContacts(): TomContacts: ${_tomContacts.length}",
-            );
-            Logs().d(
-              "ContactManagerMixin()::getAllContacts(): PhonebookContacts: ${_phonebookContacts.length}",
-            );
-          }
-        },
-      );
+      contactsNotifier.value = event;
+    }).onDone(_fetchPhonebookContacts);
+  }
 
-      contactsStream.add(event);
+  void _fetchPhonebookContacts() async {
+    if (!PlatformInfos.isMobile ||
+        await _permissionHandlerService.contactsPermissionStatus !=
+            PermissionStatus.granted) {
+      return;
+    }
+    _phonebookContactInteractor
+        .execute(lookupChunkSize: _lookupChunkSize)
+        .listen((event) {
+      phonebookContactsNotifier.value = event;
     });
   }
 
   void closeContactsWarningBanner() {
     _doNotShowWarningContactsBannerAgain = true;
-    warningBannerStateStream.add(WarningContactsBannerState.notDisplayAgain);
-  }
-
-  void searchContacts(String keyword) {
-    final contactsMatched = tomContacts.toList().searchContacts(keyword);
-    if (contactsMatched.isEmpty && _isExternalContact(keyword)) {
-      contactsStream.add(
-        Right(SearchExternalContactsSuccessState(keyword: keyword)),
-      );
-    } else {
-      _handleFetchContactsSuccess(
-        tomContacts: contactsMatched,
-        phonebookContacts: [],
-      );
-    }
+    warningBannerNotifier.value = WarningContactsBannerState.notDisplayAgain;
   }
 
   void goToSettingsForPermissionActions() {
     _permissionHandlerService.goToSettingsForPermissionActions();
-  }
-
-  void _handleFetchContactsSuccess({
-    required List<Contact> tomContacts,
-    required List<Contact> phonebookContacts,
-    String keyword = '',
-  }) {
-    contactsStream.add(
-      Right(
-        GetContactsSuccess(
-          tomContacts: tomContacts,
-          phonebookContacts: phonebookContacts,
-          keyword: keyword,
-        ),
-      ),
-    );
-  }
-
-  void _handleContactsHasSynchronized() {
-    if (_doNotShowWarningContactsBannerAgain) {
-      warningBannerStateStream.add(WarningContactsBannerState.display);
-    } else {
-      warningBannerStateStream.add(WarningContactsBannerState.hide);
-    }
-    _handleFetchContactsSuccess(
-      tomContacts: _tomContacts.toList(),
-      phonebookContacts: _phonebookContacts.toList(),
-    );
-  }
-
-  void dispose() {
-    contactsStream.close();
   }
 }
