@@ -334,6 +334,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       handlePaste: () => handlePaste(context),
       child: ContextMenuInputBar(
         controller: controller,
+        focusNode: focusNode,
         handlePaste: () => handlePaste(context),
         child: TypeAheadField<Map<String, String?>>(
           direction: AxisDirection.up,
