@@ -33,7 +33,13 @@ extension TextEdittingControllerExtension on TextEditingController {
   }
 
   Future<void> cutText() async {
-    //TO-DO:
+    final start = selection.start;
+    final end = selection.end;
+    if (start < end) {
+      await Clipboard.instance.copyText(text.substring(start, end));
+      text = text.replaceRange(start, end, "");
+      selection = TextSelection.collapsed(offset: start);
+    }
   }
 
   void addNewLine() {
