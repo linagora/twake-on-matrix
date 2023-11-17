@@ -2,11 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
-import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
@@ -45,15 +44,10 @@ class ContactsSelectionList extends StatelessWidget {
               );
             }
 
-            if (success is SearchExternalContactsSuccessState) {
-              final externalContact = PresentationContact(
-                matrixId: success.keyword,
-                displayName: success.keyword.substring(1),
-                type: ContactType.external,
-              );
+            if (success is PresentationExternalContactSuccess) {
               return SliverToBoxAdapter(
                 child: _ContactItem(
-                  contact: externalContact,
+                  contact: success.contact,
                   selectedContactsMapNotifier: selectedContactsMapNotifier,
                   onSelectedContact: onSelectedContact,
                   highlightKeyword: textEditingController.text,
@@ -62,11 +56,9 @@ class ContactsSelectionList extends StatelessWidget {
               );
             }
 
-            if (success is GetContactsSuccess) {
-              final contact = success.tomContacts
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (contact.isEmpty && isSearchModeEnable) {
+            if (success is PresentationContactsSuccess) {
+              final contacts = success.contacts;
+              if (contacts.isEmpty && isSearchModeEnable) {
                 return SliverToBoxAdapter(
                   child: Padding(
                     padding: ContactsSelectionListStyle.notFoundPadding,
@@ -77,13 +69,13 @@ class ContactsSelectionList extends StatelessWidget {
                 );
               }
               return SliverList.builder(
-                itemCount: success.tomContacts.length,
+                itemCount: contacts.length,
                 itemBuilder: (context, index) {
                   final disabled = disabledContactIds.contains(
-                    contact[index].matrixId,
+                    contacts[index].matrixId,
                   );
                   return _ContactItem(
-                    contact: contact[index],
+                    contact: contacts[index],
                     selectedContactsMapNotifier: selectedContactsMapNotifier,
                     onSelectedContact: onSelectedContact,
                     highlightKeyword: textEditingController.text,
