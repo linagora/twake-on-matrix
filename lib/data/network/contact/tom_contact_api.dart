@@ -8,7 +8,7 @@ import 'package:fluffychat/domain/model/contact/lookup_mxid_response.dart';
 
 class TomContactAPI {
   final DioClient _client =
-      getIt.get<DioClient>(instanceName: NetworkDI.identityDioClientName);
+      getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName);
 
   TomContactAPI();
 

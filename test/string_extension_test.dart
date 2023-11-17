@@ -330,4 +330,74 @@ void main() {
       expect(result, equals(text));
     });
   });
+
+  group('msisdnSanitizer tests', () {
+    test('msisdnSanitizer returns the correct msisdn with leading plus', () {
+      final result = '+08030000000'.msisdnSanitizer();
+      expect(result, equals('08030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn without leading plus', () {
+      final result = '08030000000'.msisdnSanitizer();
+      expect(result, equals('08030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with special characters',
+        () {
+      final result = '+234803000#!*()%,^&0000'.msisdnSanitizer();
+      expect(result, equals('2348030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with letters', () {
+      final result = '+234803000kddskdskf0000'.msisdnSanitizer();
+      expect(result, equals('2348030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with spaces', () {
+      final result = '+234000000080 3000 00 00'.msisdnSanitizer();
+      expect(result, equals('23400000008030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with long phone code', () {
+      final result = '+234234234234 80 3000 00 00'.msisdnSanitizer();
+      expect(result, equals('2342342342348030000000'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with parentheses', () {
+      final result = '(+84) 366 6769 439'.msisdnSanitizer();
+      expect(result, equals('843666769439'));
+    });
+
+    test('msisdnSanitizer returns the correct msisdn with hyphens', () {
+      final result = '+84-366-769-439'.msisdnSanitizer();
+      expect(result, equals('84366769439'));
+    });
+
+    test(
+        'msisdnSanitizer returns the correct msisdn with hyphens and no spaces',
+        () {
+      final result = '+84-3667-69439'.msisdnSanitizer();
+      expect(result, equals('84366769439'));
+    });
+  });
+
+  group('urlSafeBase64 tests', () {
+    test('urlSafeBase64 replaces + with -', () {
+      const input = 'a+b+c';
+      const expectedOutput = 'a-b-c';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+
+    test('urlSafeBase64 replaces / with _', () {
+      const input = 'a/b/c';
+      const expectedOutput = 'a_b_c';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+
+    test('urlSafeBase64 does not modify string without + or /', () {
+      const input = 'abc123';
+      const expectedOutput = 'abc123';
+      expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+  });
 }

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
+import 'package:fluffychat/data/network/identity_endpoint.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
@@ -25,6 +26,9 @@ class NetworkDI extends BaseDI {
   static const homeServerDioName = 'homeServerName';
   static const homeDioClientName = 'homeServerDioClientName';
 
+  static const hiveCacheDioInterceptorName = 'hiveCacheDioInterceptor';
+  static const memCacheDioInterceptorName = 'memCacheDioInterceptor';
+
   static const acceptHeaderDefault = 'application/json';
   static const contentTypeHeaderDefault = 'application/json';
 
@@ -33,7 +37,8 @@ class NetworkDI extends BaseDI {
     _bindBaseOption(get);
     _bindInterceptor(get);
     _bindDio(get);
-    _bindMethodSupportCache(get);
+    _bindMethodSupportHiveCache(get);
+    _bindMethodSupportMemCache(get);
   }
 
   void _bindBaseOption(GetIt get) {
@@ -70,8 +75,15 @@ class NetworkDI extends BaseDI {
 
     get.registerSingleton(
       MatrixDioCacheInterceptor(
-        options: get.get<DioCacheOption>().getCacheOptions(),
+        options: get.get<DioCacheOption>().getHiveCacheOptions(),
       ),
+      instanceName: hiveCacheDioInterceptorName,
+    );
+    get.registerSingleton(
+      MatrixDioCacheInterceptor(
+        options: get.get<DioCacheOption>().getMemCacheOptions(),
+      ),
+      instanceName: memCacheDioInterceptorName,
     );
   }
 
@@ -139,14 +151,34 @@ class NetworkDI extends BaseDI {
       () => DioClient(get.get<Dio>(instanceName: homeServerDioName)),
       instanceName: homeDioClientName,
     );
-    dio.interceptors.add(get.get<MatrixDioCacheInterceptor>());
+    dio.interceptors.add(
+      get.get<MatrixDioCacheInterceptor>(
+        instanceName: hiveCacheDioInterceptorName,
+      ),
+    );
+    dio.interceptors.add(
+      get.get<MatrixDioCacheInterceptor>(
+        instanceName: memCacheDioInterceptorName,
+      ),
+    );
   }
 
-  void _bindMethodSupportCache(GetIt get) {
-    final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>();
+  void _bindMethodSupportHiveCache(GetIt get) {
+    final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>(
+      instanceName: hiveCacheDioInterceptorName,
+    );
     dioCacheCustomInterceptor.addUriSupportsCache([
       HomeserverEndpoint.getPreviewUrlServicePath
           .generateHomeserverMediaEndpoint(),
+    ]);
+  }
+
+  void _bindMethodSupportMemCache(GetIt get) {
+    final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>(
+      instanceName: memCacheDioInterceptorName,
+    );
+    dioCacheCustomInterceptor.addUriSupportsCache([
+      IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
     ]);
   }
 }

@@ -15,6 +15,9 @@ class PhonebookContactInteractor {
   static const int _progressStep = 10;
   static const int _progressMax = 100;
   final PhonebookContactRepository _phonebookContactRepository =
+      getIt.get<PhonebookContactRepository>();
+
+  final LookupRepository _lookupRepository = getIt.get<LookupRepository>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 50,
@@ -27,6 +30,57 @@ class PhonebookContactInteractor {
       yield Right(
         GetPhonebookContactsLoading(progress: progress += _progressStep),
       );
+
+      final hashDetails = await _lookupRepository.getHashDetails();
+      yield Right(
+        GetPhonebookContactsLoading(progress: progress += _progressStep),
+      );
+
+      final thirdPartyIdToHashMap = {
+        for (final contact in contacts)
+          contact.thirdPartyId:
+              contact.calLookupAddress(hashDetails: hashDetails),
+      };
+      final chunks =
+          thirdPartyIdToHashMap.values.whereNotNull().slices(lookupChunkSize);
+
+      final int progressStep = (_progressMax - progress) ~/ chunks.length;
+      final Map<String, String> hashToMatrixIdMappings = {};
+      final Map<String, String> hashToInactiveMatrixIdMappings = {};
+
+      for (final chunkAddresses in chunks) {
+        final response = await _lookupRepository.lookupListMxid(
+          LookupListMxidRequest(
+            addresses: chunkAddresses.toSet(),
+            algorithm: hashDetails.algorithms?.firstOrNull,
+            pepper: hashDetails.lookupPepper,
+          ),
+        );
+        hashToMatrixIdMappings.addAll(response.mappings ?? {});
+        hashToInactiveMatrixIdMappings.addAll(response.inactiveMappings ?? {});
+        yield Right(
+          GetPhonebookContactsLoading(progress: progress += progressStep),
+        );
+      }
+      final lookupContacts = contacts.map((contact) {
+        if (contact.thirdPartyId != null) {
+          final hash = thirdPartyIdToHashMap[contact.thirdPartyId];
+          if (hashToMatrixIdMappings[hash] != null) {
+            return contact.copyWith(
+              matrixId: hashToMatrixIdMappings[hash],
+              status: ContactStatus.active,
+            );
+          }
+          if (hashToInactiveMatrixIdMappings[hash] != null) {
+            return contact.copyWith(
+              matrixId: hashToInactiveMatrixIdMappings[hash],
+              status: ContactStatus.inactive,
+            );
+          }
+        }
+        return contact;
+      }).toList();
+
       yield Right(GetPhonebookContactsSuccess(contacts: lookupContacts));
     } catch (e) {
       Logs().e('PhonebookContactInteractor::error', e);
