@@ -217,28 +217,28 @@ class ExpandableTitleBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ChatListBodyViewStyle.paddingHorizontalExpandableTitleBuilder,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraRefColors.material().neutral[40],
-                ),
-          ),
-          InkWell(
-            onTap: onTap,
-            child: Padding(
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: ChatListBodyViewStyle.paddingHorizontalExpandableTitleBuilder,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: LinagoraRefColors.material().neutral[40],
+                  ),
+            ),
+            Padding(
               padding: ChatListBodyViewStyle.paddingIconExpand,
               child: Icon(
                 isExpanded ? Icons.expand_less : Icons.expand_more,
                 size: ChatListBodyViewStyle.sizeIconExpand,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:debounce_throttle/debounce_throttle.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
@@ -65,8 +67,7 @@ class SearchContactsAndChatsController {
       (event) {
         event.map((success) {
           if (success is SearchRecentChatSuccess) {
-            recentAndContactsNotifier.value =
-                success.toPresentation().tomContacts;
+            recentAndContactsNotifier.value = success.toPresentation().contacts;
           }
         });
       },
@@ -77,7 +78,10 @@ class SearchContactsAndChatsController {
     if (keyword.isEmpty) {
       return fetchPreSearchChat();
     }
-    final tomContacts = contactManger.tomContacts;
+    final tomContacts = contactManger.contactsNotifier.value
+            .getSuccessOrNull<GetContactsSuccess>()
+            ?.contacts ??
+        [];
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())
         .toList();
@@ -98,7 +102,7 @@ class SearchContactsAndChatsController {
           (success) {
             if (success is SearchRecentChatSuccess) {
               recentAndContactsNotifier.value =
-                  success.toPresentation().tomContacts +
+                  success.toPresentation().contacts +
                       recentChatPresentationSearchMatched;
             }
           },
