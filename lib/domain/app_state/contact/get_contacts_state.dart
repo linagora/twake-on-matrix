@@ -18,31 +18,14 @@ class ContactsLoading extends Success {
 }
 
 class GetContactsSuccess extends Success {
-  final String keyword;
-  final List<Contact> tomContacts;
-  final List<Contact>? phonebookContacts;
+  final List<Contact> contacts;
 
   const GetContactsSuccess({
-    required this.tomContacts,
-    this.phonebookContacts,
-    required this.keyword,
+    required this.contacts,
   });
 
   @override
-  List<Object?> get props => [tomContacts, phonebookContacts, keyword];
-}
-
-class SearchExternalContactsSuccessState extends Success {
-  final String keyword;
-
-  const SearchExternalContactsSuccessState({
-    required this.keyword,
-  });
-
-  @override
-  List<Object?> get props => [
-        keyword,
-      ];
+  List<Object?> get props => [contacts];
 }
 
 class GetContactsFailure extends Failure {

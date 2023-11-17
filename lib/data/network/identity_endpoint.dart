@@ -10,12 +10,25 @@ class IdentityEndpoint {
   static final ServicePath matchUserIdServicePath = ServicePath(
     '/lookup/match',
   );
+  static final ServicePath matchListUserIdsServicePath = ServicePath(
+    '/lookup',
+  );
+  static final ServicePath hashDetailsServicePath = ServicePath(
+    '/hash_details',
+  );
 }
 
 extension ServicePathExtensions on ServicePath {
   String generateTwakeIdentityEndpoint({
     String rootPath = IdentityEndpoint.twakeIdentityRootPath,
     String apiVersion = IdentityEndpoint.twakeIdentityAPIVersion,
+  }) {
+    return '$rootPath/$apiVersion$path';
+  }
+
+  String generateMatrixIdentityEndpoint({
+    String rootPath = IdentityEndpoint.matrixIdentityRootPath,
+    String apiVersion = IdentityEndpoint.matrixIdentityAPIVersion,
   }) {
     return '$rootPath/$apiVersion$path';
   }
