@@ -2,11 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
-import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -61,12 +60,7 @@ class ExpansionList extends StatelessWidget {
               );
             }
 
-            if (success is SearchExternalContactsSuccessState) {
-              final externalContact = PresentationContact(
-                matrixId: success.keyword,
-                displayName: success.keyword.substring(1),
-                type: ContactType.external,
-              );
+            if (success is PresentationExternalContactSuccess) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -77,12 +71,12 @@ class ExpansionList extends StatelessWidget {
                     onTap: () {
                       onContactTap(
                         context,
-                        externalContact,
+                        success.contact,
                       );
                     },
                     borderRadius: BorderRadius.circular(16.0),
                     child: ExpansionContactListTile(
-                      contact: externalContact,
+                      contact: success.contact,
                       highlightKeyword: textEditingController.text,
                     ),
                   ),
@@ -91,12 +85,10 @@ class ExpansionList extends StatelessWidget {
               );
             }
 
-            if (success is GetContactsSuccess) {
+            if (success is PresentationContactsSuccess) {
               final isSearchEmpty = textEditingController.text.isEmpty;
-              final contact = success.tomContacts
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (isSearchEmpty && contact.isEmpty) {
+              final contacts = success.contacts;
+              if (isSearchEmpty && contacts.isEmpty) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -119,7 +111,7 @@ class ExpansionList extends StatelessWidget {
                 const SizedBox(
                   height: 4,
                 ),
-                _buildTitle(context, contact.length),
+                _buildTitle(context, contacts.length),
                 ValueListenableBuilder<bool>(
                   valueListenable: isShowContactsNotifier,
                   builder: ((context, isShow, child) {
@@ -129,18 +121,18 @@ class ExpansionList extends StatelessWidget {
                     return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: contact.length,
+                      itemCount: contacts.length,
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
                             onContactTap(
                               context,
-                              contact[index],
+                              contacts[index],
                             );
                           },
                           borderRadius: BorderRadius.circular(16.0),
                           child: ExpansionContactListTile(
-                            contact: contact[index],
+                            contact: contacts[index],
                             highlightKeyword: textEditingController.text,
                           ),
                         );

@@ -4,8 +4,15 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
+import 'package:fluffychat/presentation/model/get_presentation_contacts_success.dart';
+import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -21,42 +28,83 @@ mixin class ContactsViewControllerMixin {
     const Right(ContactsInitial()),
   );
 
-  final warningBannerNotifier = ValueNotifier<WarningContactsBannerState>(
-    WarningContactsBannerState.hide,
+  final presentationPhonebookContactNotifier =
+      ValueNotifier<Either<Failure, Success>>(
+    const Right(GetPhonebookContactsInitial()),
   );
+
+  ValueNotifier<WarningContactsBannerState> get warningBannerNotifier =>
+      contactsManager.warningBannerNotifier;
 
   final FocusNode searchFocusNode = FocusNode();
 
-  final Debouncer _debouncer = Debouncer(
+  final Debouncer<String> _debouncer = Debouncer(
     const Duration(milliseconds: _debouncerIntervalInMilliseconds),
     initialValue: '',
   );
 
   final contactsManager = getIt.get<ContactsManager>();
 
-  bool get isExternalContact =>
-      textEditingController.text.isValidMatrixId &&
-      textEditingController.text.startsWith("@");
-
   void initialFetchContacts() async {
+    _refreshContacts();
     _listenContactsDataChange();
     textEditingController.addListener(() {
       _debouncer.value = textEditingController.text;
     });
 
     _debouncer.values.listen((keyword) {
-      contactsManager.searchContacts(keyword);
+      _refreshContacts();
     });
     contactsManager.initialSynchronizeContacts();
   }
 
   void _listenContactsDataChange() {
-    contactsManager.contactsStream.stream.listen(
-      (state) => presentationContactNotifier.value = state,
-    );
-    contactsManager.warningBannerStateStream.stream.listen(
-      (state) => warningBannerNotifier.value = state,
-    );
+    contactsManager.contactsNotifier.addListener(_refreshContacts);
+    contactsManager.phonebookContactsNotifier.addListener(_refreshContacts);
+  }
+
+  void _refreshContacts() {
+    final keyword = _debouncer.value;
+    if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+      presentationContactNotifier.value = Right(
+        PresentationExternalContactSuccess(
+          contact: PresentationContact(
+            matrixId: keyword,
+            displayName: keyword.substring(1),
+            type: ContactType.external,
+          ),
+        ),
+      );
+      presentationPhonebookContactNotifier.value =
+          const Right(GetPhonebookContactsInitial());
+      return;
+    }
+    presentationContactNotifier.value =
+        contactsManager.contactsNotifier.value.map((success) {
+      if (success is GetContactsSuccess) {
+        return GetPresentationContactsSuccess(
+          contacts: success.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList(),
+          keyword: keyword,
+        );
+      }
+      return success;
+    });
+    presentationPhonebookContactNotifier.value =
+        contactsManager.phonebookContactsNotifier.value.map((success) {
+      if (success is GetPhonebookContactsSuccess) {
+        return GetPresentationContactsSuccess(
+          contacts: success.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList(),
+          keyword: keyword,
+        );
+      }
+      return success;
+    });
   }
 
   void openSearchBar() {
@@ -82,5 +130,9 @@ mixin class ContactsViewControllerMixin {
     textEditingController.clear();
     searchFocusNode.dispose();
     textEditingController.dispose();
+    presentationContactNotifier.dispose();
+    presentationPhonebookContactNotifier.dispose();
+    contactsManager.contactsNotifier.removeListener(_refreshContacts);
+    contactsManager.phonebookContactsNotifier.removeListener(_refreshContacts);
   }
 }

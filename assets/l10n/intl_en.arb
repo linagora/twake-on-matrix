@@ -2912,5 +2912,8 @@
       }
     },
     "notNow": "Not now",
-    "contactsWarningBannerTitle": "To ensure you can connect with all your friends, please allow Twake to access your device’s contacts. We appreciate your understanding."
+    "contactsWarningBannerTitle": "To ensure you can connect with all your friends, please allow Twake to access your device’s contacts. We appreciate your understanding.",
+    "contactsCount": "Contacts ({count})",
+    "linagoraContactsCount": "Linagora contacts ({count})",
+    "fetchingPhonebookContacts": "Fetching contacts from device...({progress}% completed)"
 }
