@@ -252,7 +252,12 @@ class GetItInitializer {
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(ContactsManager());
+    getIt.registerSingleton<ContactsManager>(
+      ContactsManager(
+        getTomContactsInteractor: getIt.get<GetTomContactsInteractor>(),
+        phonebookContactInteractor: getIt.get<PhonebookContactInteractor>(),
+      ),
+    );
     getIt.registerLazySingleton<SaveLanguageInteractor>(
       () => SaveLanguageInteractor(
         getIt.get<LocalizationsRepository>(),
