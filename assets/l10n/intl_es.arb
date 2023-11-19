@@ -183,7 +183,7 @@
       "username": {}
     }
   },
-  "changedTheDisplaynameTo": "{username} cambió su nombre visible a: {displayname}",
+  "changedTheDisplaynameTo": "{username} cambió su nombre para mostrar a: '{displayname}'",
   "@changedTheDisplaynameTo": {
     "type": "text",
     "placeholders": {
