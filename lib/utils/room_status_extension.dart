@@ -111,7 +111,9 @@ extension RoomStatusExtension on Room {
       final lastActiveDateTime = directChatPresence.lastActiveTimestamp;
       final currentDateTime = DateTime.now();
       if (lastActiveDateTime != null) {
-        if (lastActiveDateTime.isLessThanOneHourAgo()) {
+        if (lastActiveDateTime.isLessThanOneMinuteAgo()) {
+          return L10n.of(context)!.activeNow;
+        } else if (lastActiveDateTime.isLessThanOneHourAgo()) {
           return L10n.of(context)!.onlineMinAgo(
             currentDateTime.difference(lastActiveDateTime).inMinutes,
           );
