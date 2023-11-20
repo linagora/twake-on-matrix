@@ -26,6 +26,7 @@ class ReplyContentStyle {
   }
 
   static const double prefixBarWidth = 3.0;
+  static const double prefixBarVerticalPadding = 4.0;
   static BoxDecoration prefixBarDecoration(BuildContext context) {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(2),
