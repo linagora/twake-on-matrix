@@ -77,7 +77,7 @@ class HtmlMessage extends StatelessWidget {
       shrinkToFit: true,
       maxLines: maxLines,
       onLinkTap: (url) => UrlLauncher(context, url.toString()).launchUrl(),
-      onPillTap: chatController?.onPillTap ??
+      onPillTap: chatController?.onTagTap ??
           (url) => UrlLauncher(context, url).launchUrl(),
       getMxcUrl: (
         String mxc,

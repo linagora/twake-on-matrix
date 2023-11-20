@@ -1582,7 +1582,7 @@ class ChatController extends State<Chat>
         ?.call(ProfileInfoRightColumnType(userId: userId));
   }
 
-  void onPillTap(String url) {
+  void onTagTap(String url) {
     final identifyParts = url.parseIdentifierIntoParts();
     if (identifyParts != null && identifyParts.primaryIdentifier.sigil == '@') {
       openProfileInformation(identifyParts.primaryIdentifier);
