@@ -8,7 +8,7 @@ enum SettingsProfileContextMenuActions {
   String getTitle(BuildContext context) {
     switch (this) {
       case SettingsProfileContextMenuActions.edit:
-        return L10n.of(context)!.changeProfilePhoto;
+        return L10n.of(context)!.changeProfileAvatar;
       case SettingsProfileContextMenuActions.delete:
         return L10n.of(context)!.removeYourAvatar;
     }
