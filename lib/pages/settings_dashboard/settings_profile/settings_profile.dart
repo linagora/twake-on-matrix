@@ -100,7 +100,7 @@ class SettingsProfileController extends State<SettingsProfile>
   List<SheetAction<AvatarAction>> actions() => [
         SheetAction(
           key: AvatarAction.file,
-          label: L10n.of(context)!.changeProfilePhoto,
+          label: L10n.of(context)!.changeProfileAvatar,
           icon: Icons.add_a_photo_outlined,
         ),
         if (currentProfile?.avatarUrl != null)
