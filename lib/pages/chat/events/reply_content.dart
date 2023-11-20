@@ -68,44 +68,57 @@ class ReplyContent extends StatelessWidget {
       padding: ReplyContentStyle.replyParentContainerPadding,
       decoration:
           ReplyContentStyle.replyParentContainerDecoration(context, ownMessage),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            width: ReplyContentStyle.prefixBarWidth,
-            height: ReplyContentStyle.fontSizeDisplayContent * 2,
-            decoration: ReplyContentStyle.prefixBarDecoration(context),
-          ),
-          const SizedBox(width: ReplyContentStyle.prefixAndDisplayNameSpacing),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (user != null)
-                  Text(
-                    user.calcDisplayname(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: ReplyContentStyle.displayNameTextStyle(context),
-                  ),
-                if (displayEvent.getUser() == null)
-                  FutureBuilder<User?>(
-                    future: displayEvent.fetchSenderUser(),
-                    builder: (context, snapshot) {
-                      return Text(
-                        '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: ReplyContentStyle.displayNameTextStyle(context),
-                      );
-                    },
-                  ),
-                replyBody,
-              ],
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: ReplyContentStyle.prefixBarVerticalPadding,
+              ),
+              child: Container(
+                constraints: const BoxConstraints(
+                  minHeight: ReplyContentStyle.fontSizeDisplayContent * 2,
+                ),
+                width: ReplyContentStyle.prefixBarWidth,
+                decoration: ReplyContentStyle.prefixBarDecoration(context),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(
+              width: ReplyContentStyle.prefixAndDisplayNameSpacing,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (user != null)
+                    Text(
+                      user.calcDisplayname(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReplyContentStyle.displayNameTextStyle(context),
+                    ),
+                  if (displayEvent.getUser() == null)
+                    FutureBuilder<User?>(
+                      future: displayEvent.fetchSenderUser(),
+                      builder: (context, snapshot) {
+                        return Text(
+                          '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              ReplyContentStyle.displayNameTextStyle(context),
+                        );
+                      },
+                    ),
+                  replyBody,
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
