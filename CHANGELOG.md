@@ -1706,6 +1706,27 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+## [2.4.0+2330] - 2023-11-20
+
+### Added
+
+- Translation
+- Profile Information
+- Synchronize phonebook contact with the app
+
+### Changed
+
+- new App icon
+- New tag in chat
+- Aplly new M3
+
+### Fixed
+
+- Popup with wrong context
+- Select text with mouse in web app
+- Click notification in web to open room
+- Fix cut and paste button in composer
+
 ## [2.3.7+2330] - 2023-11-09
 
 ### Changed
@@ -1720,14 +1741,11 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Remove avatar
 
 ## [2.3.6+2330] - 2023-11-03
-
 ### Added
-
 - Translate Fr,En,Ru
 - Create Chat without encryption
 
 ### Changed
-
 - upgrade flutter to 3.13.7
 - use google font
 - upgrade android 34
@@ -1812,8 +1830,9 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
 
-[2.3.7+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.7
+[2.4.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.0
 
+[2.3.7+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.7
 [2.3.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.6
 [2.3.3+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.3
 [2.3.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.2
