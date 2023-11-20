@@ -1184,8 +1184,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeProfilePhoto": "",
-  "@changeProfilePhoto": {},
   "errorPageButton": "",
   "@errorPageButton": {},
   "matrixWidgets": "",
