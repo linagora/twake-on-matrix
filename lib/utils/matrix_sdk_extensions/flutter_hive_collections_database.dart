@@ -30,7 +30,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     HiveAesCipher? hiverCipher;
     try {
       // Workaround for secure storage is calling Platform.operatingSystem on web
-      if (kIsWeb) {
+      if (kIsWeb || PlatformInfos.isIOS) {
         // ignore: unawaited_futures
         throw MissingPluginException();
       }
