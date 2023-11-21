@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +27,7 @@ class HiveCollectionToMDatabase {
     HiveAesCipher? hiverCipher;
     try {
       // Workaround for secure storage is calling Platform.operatingSystem on web
-      if (kIsWeb) {
+      if (kIsWeb || PlatformInfos.isIOS) {
         // ignore: unawaited_futures
         throw MissingPluginException();
       }
