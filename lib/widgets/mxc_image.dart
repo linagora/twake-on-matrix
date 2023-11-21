@@ -272,8 +272,8 @@ class _MxcImageState extends State<MxcImage>
             child: _ImageWidget(
               filePath: filePath,
               data: data,
-              width: widget.width ?? 256,
-              height: widget.height ?? 256,
+              width: widget.width,
+              height: widget.height,
               fit: widget.fit,
               needResize: needResize,
               imageErrorWidgetBuilder: (context, __, ___) {
@@ -290,8 +290,8 @@ class _MxcImageState extends State<MxcImage>
 class _ImageWidget extends StatelessWidget {
   final String? filePath;
   final Uint8List? data;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
   final bool needResize;
   final BoxFit? fit;
   final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
@@ -299,8 +299,8 @@ class _ImageWidget extends StatelessWidget {
   const _ImageWidget({
     this.filePath,
     this.data,
-    required this.width,
-    required this.height,
+    this.width,
+    this.height,
     required this.needResize,
     this.fit,
     required this.imageErrorWidgetBuilder,
@@ -314,9 +314,12 @@ class _ImageWidget extends StatelessWidget {
             File(filePath!),
             width: width,
             height: height,
-            cacheWidth: needResize ? (width * devicePixelRatio).toInt() : null,
-            cacheHeight:
-                needResize ? (height * devicePixelRatio).toInt() : null,
+            cacheWidth: (width != null && needResize)
+                ? (width! * devicePixelRatio).toInt()
+                : null,
+            cacheHeight: (height != null && needResize)
+                ? (height! * devicePixelRatio).toInt()
+                : null,
             fit: fit,
             filterQuality: FilterQuality.medium,
             errorBuilder: imageErrorWidgetBuilder,
@@ -326,10 +329,12 @@ class _ImageWidget extends StatelessWidget {
                 data!,
                 width: width,
                 height: height,
-                cacheWidth:
-                    needResize ? (width * devicePixelRatio).toInt() : null,
-                cacheHeight:
-                    needResize ? (height * devicePixelRatio).toInt() : null,
+                cacheWidth: (width != null && needResize)
+                    ? (width! * devicePixelRatio).toInt()
+                    : null,
+                cacheHeight: (height != null && needResize)
+                    ? (height! * devicePixelRatio).toInt()
+                    : null,
                 fit: fit,
                 filterQuality: FilterQuality.medium,
                 errorBuilder: imageErrorWidgetBuilder,
