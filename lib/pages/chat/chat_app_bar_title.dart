@@ -240,8 +240,9 @@ class _ChatAppBarTitleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? statusTextStyle =
-        ChatAppBarTitleStyle.statusTextStyle(context);
+    final TextStyle? statusTextStyle = text == L10n.of(context)!.activeNow
+        ? ChatAppBarTitleStyle.onlineStatusTextStyle(context)
+        : ChatAppBarTitleStyle.offlineStatusTextStyle(context);
 
     return Text(
       text,
@@ -262,7 +263,7 @@ class _ChatAppBarTitleTyping extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle? statusTextStyle =
-        ChatAppBarTitleStyle.statusTextStyle(context);
+        ChatAppBarTitleStyle.onlineStatusTextStyle(context);
 
     return IntrinsicWidth(
       child: Row(
