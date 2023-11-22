@@ -2,6 +2,7 @@ import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
@@ -49,7 +50,7 @@ mixin ChatListItemMixin {
       style: Theme.of(context).textTheme.labelLarge?.merge(
             TextStyle(
               overflow: TextOverflow.ellipsis,
-              color: Theme.of(context).colorScheme.primary,
+              color: LinagoraRefColors.material().secondary,
             ),
           ),
       maxLines: 2,
