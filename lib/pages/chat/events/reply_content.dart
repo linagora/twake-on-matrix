@@ -1,13 +1,15 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import '../../../config/app_config.dart';
 import 'html_message.dart';
 
 class ReplyContent extends StatelessWidget {
@@ -79,14 +81,35 @@ class ReplyContent extends StatelessWidget {
               ),
               child: Container(
                 constraints: const BoxConstraints(
-                  minHeight: ReplyContentStyle.fontSizeDisplayContent * 2,
+                  minHeight: ReplyContentStyle.replyContentSize,
                 ),
                 width: ReplyContentStyle.prefixBarWidth,
                 decoration: ReplyContentStyle.prefixBarDecoration(context),
               ),
             ),
+            const SizedBox(width: ReplyContentStyle.contentSpacing),
+            if (displayEvent.hasAttachment)
+              SizedBox(
+                width: ReplyContentStyle.replyContentSize,
+                height: ReplyContentStyle.replyContentSize,
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: ReplyContentStyle.previewedImageBorderRadius,
+                    child: MxcImage(
+                      event: displayEvent,
+                      isThumbnail: true,
+                      fit: BoxFit.contain,
+                      placeholder: (context) {
+                        return BlurHashPlaceHolder(
+                          event: displayEvent,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
             const SizedBox(
-              width: ReplyContentStyle.prefixAndDisplayNameSpacing,
+              width: ReplyContentStyle.contentSpacing,
             ),
             Expanded(
               child: Column(
@@ -119,6 +142,29 @@ class ReplyContent extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class BlurHashPlaceHolder extends StatelessWidget {
+  final Event event;
+
+  const BlurHashPlaceHolder({
+    Key? key,
+    required this.event,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final String blurHashString =
+        event.blurHash ?? AppConfig.defaultImageBlurHash;
+    return SizedBox(
+      width: ReplyContentStyle.replyContentSize,
+      height: ReplyContentStyle.replyContentSize,
+      child: BlurHash(
+        hash: blurHashString,
+        imageFit: BoxFit.cover,
       ),
     );
   }

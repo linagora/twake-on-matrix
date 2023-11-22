@@ -779,20 +779,19 @@ class _ReplyContent extends StatelessWidget {
         BuildContext context,
         snapshot,
       ) {
-        final replyEvent = snapshot.hasData
-            ? snapshot.data!
-            : Event(
-                eventId: event.relationshipEventId!,
-                content: {
-                  'msgtype': 'm.text',
-                  'body': '...',
-                },
-                senderId: event.senderId,
-                type: 'm.room.message',
-                room: event.room,
-                status: EventStatus.sent,
-                originServerTs: DateTime.now(),
-              );
+        final replyEvent = snapshot.data ??
+            Event(
+              eventId: event.relationshipEventId!,
+              content: {
+                'msgtype': 'm.text',
+                'body': '...',
+              },
+              senderId: event.senderId,
+              type: 'm.room.message',
+              room: event.room,
+              status: EventStatus.sent,
+              originServerTs: DateTime.now(),
+            );
         return InkWell(
           onTap: () {
             if (scrollToEventId != null) {
