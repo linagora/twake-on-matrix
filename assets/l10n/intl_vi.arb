@@ -2831,8 +2831,6 @@
   "@displayName": {},
   "select": "Chọn",
   "@select": {},
-  "blankChatTitle": "",
-  "@blankChatTitle": {},
   "editWorkIdentitiesDescriptions": "Chỉnh sửa định danh công việc.",
   "@editWorkIdentitiesDescriptions": {},
   "links": "Liên kết",
