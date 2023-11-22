@@ -2911,5 +2911,7 @@
   "done": "Terminé",
   "@done": {},
   "muteThisChat": "Mettre en sourdine le salon",
-  "@muteThisChat": {}
+  "@muteThisChat": {},
+  "unmuteThisChat": "Réactiver le son",
+  "@unmuteThisChat": {}
 }
