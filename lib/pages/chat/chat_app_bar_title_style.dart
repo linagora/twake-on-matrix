@@ -30,7 +30,7 @@ class ChatAppBarTitleStyle {
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
 
-  static TextStyle? statusTextStyle(BuildContext context) =>
+  static TextStyle? offlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
           ? Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: LinagoraRefColors.material().tertiary[30],
@@ -38,6 +38,17 @@ class ChatAppBarTitleStyle {
               )
           : Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: LinagoraRefColors.material().neutral[50],
+                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+              );
+
+  static TextStyle? onlineStatusTextStyle(BuildContext context) =>
+      responsive.isMobile(context)
+          ? Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: LinagoraRefColors.material().secondary,
+                letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+              )
+          : Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: LinagoraRefColors.material().secondary,
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
 }
