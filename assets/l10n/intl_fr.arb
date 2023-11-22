@@ -2909,5 +2909,7 @@
   "settingsChatFoldersSubtitle": "Créez et gérez des dossiers pour différents groupes de chats et passez rapidement de l'un à l'autre.",
   "@settingsChatFoldersSubtitle": {},
   "done": "Terminé",
-  "@done": {}
+  "@done": {},
+  "muteThisChat": "Mettre en sourdine le salon",
+  "@muteThisChat": {}
 }
