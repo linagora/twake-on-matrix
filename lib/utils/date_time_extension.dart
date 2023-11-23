@@ -127,6 +127,11 @@ extension DateTimeExtension on DateTime {
     return millisecondsSinceEpoch.toString();
   }
 
+  bool isLessThanOneMinuteAgo({DateTime? other}) {
+    other ??= DateTime.now();
+    return other.difference(this) < const Duration(minutes: 1);
+  }
+
   bool isLessThanOneHourAgo({DateTime? other}) {
     other ??= DateTime.now();
     return other.difference(this) < const Duration(hours: 1);
