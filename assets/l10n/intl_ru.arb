@@ -714,7 +714,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "enableEncryption": "Включить шифрование",
+  "enableEncryption": "Включить сквозное шифрование",
   "@enableEncryption": {
     "type": "text",
     "placeholders": {}
@@ -2686,7 +2686,7 @@
   "@gallery": {},
   "documents": "Документы",
   "@documents": {},
-  "twake": "Переделать",
+  "twake": "Twake Chat",
   "@twake": {},
   "permissionAccess": "Разрешение на доступ",
   "@permissionAccess": {},
@@ -2895,5 +2895,69 @@
   "cut": "Вырезать",
   "@cut": {},
   "pasteImageFailed": "Не удалось вставить изображение",
-  "@pasteImageFailed": {}
+  "@pasteImageFailed": {},
+  "unmuteThisChat": "Включить уведомления",
+  "@unmuteThisChat": {},
+  "markThisChatAsUnRead": "Пометить как непрочитанный",
+  "@markThisChatAsUnRead": {},
+  "muteThisChat": "Отключить уведомления",
+  "@muteThisChat": {},
+  "youNeedToAcceptTheInvitation": "Примите приглашение, чтобы начать общение",
+  "@youNeedToAcceptTheInvitation": {},
+  "fetchingPhonebookContacts": "Получение контактов с устройства...({progress}% выполнено)",
+  "@fetchingPhonebookContacts": {},
+  "changeProfileAvatar": "Изменить аватар",
+  "@changeProfileAvatar": {},
+  "countMembers": "{count, plural, =0{нет участников} =1{1 участник} other{{count} участников}}",
+  "@countMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "declineAndRemove": "Отклонить и удалить",
+  "@declineAndRemove": {},
+  "linagoraContactsCount": "Контакты Linagora ({count})",
+  "@linagoraContactsCount": {},
+  "contactsCount": "Контакты ({count})",
+  "@contactsCount": {},
+  "countPinnedMessage": "{count, plural, =0{Закрепленное сообщение} other{Закрепленное сообщение #{count}}}",
+  "@countPinnedMessage": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "pinChat": "Закрепить",
+  "@pinChat": {},
+  "encryptionWarning": "Вы можете потерять свои сообщения, если зайдете в приложение Twake на другом устройстве.",
+  "@encryptionWarning": {},
+  "pinThisChat": "Закрепить чат",
+  "@pinThisChat": {},
+  "markThisChatAsRead": "Пометить как прочитанный",
+  "@markThisChatAsRead": {},
+  "noResultsFound": "Результаты не найдены",
+  "@noResultsFound": {},
+  "unpinThisChat": "Открепить чат",
+  "@unpinThisChat": {},
+  "contactInfo": "О контакте",
+  "@contactInfo": {},
+  "newDirectMessage": "Новые личные сообщения",
+  "@newDirectMessage": {},
+  "contactsWarningBannerTitle": "Чтобы общаться со всеми своими друзьями, предоставьте Twake доступ к вышей контактной книге. Спасибо за понимание.",
+  "@contactsWarningBannerTitle": {},
+  "encryptionMessage": "Эта функция защищает ваши сообщения от прочтения другими людьми, а также не позволяет нам копировать их на наших серверах. Вы не сможете отключить ее позже.",
+  "@encryptionMessage": {},
+  "declineTheInvitation": "Отклонить приглашение?",
+  "@declineTheInvitation": {},
+  "notNow": "Не сейчас",
+  "@notNow": {},
+  "clearAllSelected": "Удалить выбранные",
+  "@clearAllSelected": {},
+  "selectedUsers": "Выбранные пользователи",
+  "@selectedUsers": {},
+  "hasInvitedYouToAChat": " пригласил(-а) вас в чат. Принять или отклонить и удалить беседу?",
+  "@hasInvitedYouToAChat": {},
+  "doYouReallyWantToDeclineThisInvitation": "Вы действительно хотите отклонить это приглашение и удалить чат? Это действие нельзя отменить.",
+  "@doYouReallyWantToDeclineThisInvitation": {}
 }
