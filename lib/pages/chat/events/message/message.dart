@@ -260,81 +260,82 @@ class Message extends StatelessWidget {
                                                       ),
                                                     Stack(
                                                       children: [
-                                                        _MultiPlatformSelectionArea(
-                                                          focusNode: focusNode,
-                                                          child: MessageContent(
-                                                            displayEvent,
-                                                            textColor:
-                                                                textColor,
-                                                            endOfBubbleWidget:
-                                                                Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                left: 8.0,
-                                                                right: 4.0,
-                                                              ),
+                                                        MessageContent(
+                                                          displayEvent,
+                                                          textColor: textColor,
+                                                          endOfBubbleWidget:
+                                                              Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                              left: 8.0,
+                                                              right: 4.0,
+                                                            ),
+                                                            child:
+                                                                SelectionContainer
+                                                                    .disabled(
                                                               child:
-                                                                  SelectionContainer
-                                                                      .disabled(
-                                                                child:
-                                                                    MessageTime(
-                                                                  timelineOverlayMessage:
-                                                                      timelineOverlayMessage,
-                                                                  controller:
-                                                                      controller,
-                                                                  event: event,
-                                                                  ownMessage:
-                                                                      ownMessage,
-                                                                  timeline:
-                                                                      timeline,
-                                                                ),
+                                                                  MessageTime(
+                                                                timelineOverlayMessage:
+                                                                    timelineOverlayMessage,
+                                                                controller:
+                                                                    controller,
+                                                                event: event,
+                                                                ownMessage:
+                                                                    ownMessage,
+                                                                timeline:
+                                                                    timeline,
                                                               ),
                                                             ),
-                                                            controller:
-                                                                controller,
-                                                            backgroundColor:
-                                                                ownMessage
-                                                                    ? Theme.of(
-                                                                        context,
-                                                                      )
-                                                                        .colorScheme
-                                                                        .primaryContainer
-                                                                    : Theme.of(
-                                                                        context,
-                                                                      )
-                                                                        .colorScheme
-                                                                        .surface,
-                                                            onTapSelectMode:
-                                                                () => controller
-                                                                        .selectMode
-                                                                    ? onSelect!(
-                                                                        event,
-                                                                      )
-                                                                    : null,
-                                                            onTapPreview:
-                                                                !controller
-                                                                        .selectMode
-                                                                    ? () {}
-                                                                    : null,
-                                                            ownMessage:
-                                                                ownMessage,
                                                           ),
+                                                          controller:
+                                                              controller,
+                                                          backgroundColor:
+                                                              ownMessage
+                                                                  ? Theme.of(
+                                                                      context,
+                                                                    )
+                                                                      .colorScheme
+                                                                      .primaryContainer
+                                                                  : Theme.of(
+                                                                      context,
+                                                                    )
+                                                                      .colorScheme
+                                                                      .surface,
+                                                          onTapSelectMode: () =>
+                                                              controller
+                                                                      .selectMode
+                                                                  ? onSelect!(
+                                                                      event,
+                                                                    )
+                                                                  : null,
+                                                          onTapPreview:
+                                                              !controller
+                                                                      .selectMode
+                                                                  ? () {}
+                                                                  : null,
+                                                          ownMessage:
+                                                              ownMessage,
                                                         ),
                                                         if (timelineOverlayMessage)
                                                           Positioned(
                                                             right: 8,
                                                             bottom: 4.0,
-                                                            child: MessageTime(
-                                                              timelineOverlayMessage:
-                                                                  timelineOverlayMessage,
-                                                              controller:
-                                                                  controller,
-                                                              event: event,
-                                                              ownMessage:
-                                                                  ownMessage,
-                                                              timeline:
-                                                                  timeline,
+                                                            child:
+                                                                SelectionContainer
+                                                                    .disabled(
+                                                              child:
+                                                                  MessageTime(
+                                                                timelineOverlayMessage:
+                                                                    timelineOverlayMessage,
+                                                                controller:
+                                                                    controller,
+                                                                event: event,
+                                                                ownMessage:
+                                                                    ownMessage,
+                                                                timeline:
+                                                                    timeline,
+                                                              ),
                                                             ),
                                                           ),
                                                       ],
@@ -383,28 +384,31 @@ class Message extends StatelessWidget {
                                             ),
                                             if (timelineText)
                                               Positioned(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    left: 6,
-                                                    right: 8.0,
-                                                    bottom: 4.0,
-                                                  ),
-                                                  child:
-                                                      _MultiPlatformSelectionMode(
-                                                    useInkWell:
-                                                        PlatformInfos.isWeb,
-                                                    longPressSelect:
-                                                        longPressSelect,
-                                                    onSelect: onSelect,
-                                                    event: event,
-                                                    child: MessageTime(
-                                                      timelineOverlayMessage:
-                                                          timelineOverlayMessage,
-                                                      controller: controller,
+                                                child:
+                                                    SelectionContainer.disabled(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                      left: 6,
+                                                      right: 8.0,
+                                                      bottom: 4.0,
+                                                    ),
+                                                    child:
+                                                        _MultiPlatformSelectionMode(
+                                                      useInkWell:
+                                                          PlatformInfos.isWeb,
+                                                      longPressSelect:
+                                                          longPressSelect,
+                                                      onSelect: onSelect,
                                                       event: event,
-                                                      ownMessage: ownMessage,
-                                                      timeline: timeline,
+                                                      child: MessageTime(
+                                                        timelineOverlayMessage:
+                                                            timelineOverlayMessage,
+                                                        controller: controller,
+                                                        event: event,
+                                                        ownMessage: ownMessage,
+                                                        timeline: timeline,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
@@ -936,31 +940,6 @@ class _MultiPlatformSelectionMode extends StatelessWidget {
         highlightColor: Colors.transparent,
         child: child,
       ),
-    );
-  }
-}
-
-class _MultiPlatformSelectionArea extends StatelessWidget {
-  final Widget child;
-
-  final FocusNode focusNode;
-
-  const _MultiPlatformSelectionArea({
-    required this.child,
-    required this.focusNode,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!PlatformInfos.isWeb) {
-      return child;
-    }
-    return SelectionArea(
-      focusNode: focusNode,
-      onSelectionChanged: (value) {
-        focusNode.requestFocus();
-      },
-      child: child,
     );
   }
 }
