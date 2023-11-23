@@ -106,7 +106,7 @@ extension RoomStatusExtension on Room {
   ) {
     if (directChatPresence != null) {
       if (directChatPresence.presence == PresenceType.online) {
-        return L10n.of(context)!.onlineStatus;
+        return L10n.of(context)!.activeNow;
       }
       final lastActiveDateTime = directChatPresence.lastActiveTimestamp;
       final currentDateTime = DateTime.now();
