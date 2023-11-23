@@ -723,7 +723,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "enableEncryption": "Activer le chiffrement",
+  "enableEncryption": "Activer le chiffrement intégral",
   "@enableEncryption": {
     "type": "text",
     "placeholders": {}
