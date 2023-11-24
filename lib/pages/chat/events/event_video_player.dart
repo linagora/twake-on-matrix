@@ -91,10 +91,7 @@ class EventVideoPlayer extends StatelessWidget {
                     HeroPageRoute(
                       builder: (context) {
                         return InteractiveViewerGallery(
-                          itemBuilder: Hero(
-                            tag: event.eventId,
-                            child: DownloadVideoWidget(event: event),
-                          ),
+                          itemBuilder: DownloadVideoWidget(event: event),
                         );
                       },
                     ),

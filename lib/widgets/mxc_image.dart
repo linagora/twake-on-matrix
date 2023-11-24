@@ -238,12 +238,19 @@ class _MxcImageState extends State<MxcImage>
 
   @override
   Widget build(BuildContext context) {
-    final imageWidget = widget.animated
+    Widget imageWidget = widget.animated
         ? AnimatedSwitcher(
             duration: widget.animationDuration,
             child: _buildImageWidget(),
           )
         : _buildImageWidget();
+
+    if (widget.event?.eventId != null) {
+      imageWidget = Hero(
+        tag: widget.event!.eventId,
+        child: imageWidget,
+      );
+    }
 
     if (widget.isPreview) {
       return Material(
