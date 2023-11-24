@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/domain/model/keychain_sharing_data.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:flutter/foundation.dart' hide Key;
@@ -151,5 +152,71 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
         File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
     if (await file.exists() == false) return null;
     return file;
+  }
+
+  @override
+  Future<void> updateClient(
+    String homeserverUrl,
+    String token,
+    String userId,
+    String? deviceId,
+    String? deviceName,
+    String? prevBatch,
+    String? olmAccount,
+  ) async {
+    if (PlatformInfos.isIOS) {
+      await KeychainSharingData(
+        homeserverUrl: homeserverUrl,
+        token: token,
+        userId: userId,
+        deviceId: deviceId,
+        deviceName: deviceName,
+        prevBatch: prevBatch,
+        olmAccount: olmAccount,
+      ).saveToKeychain();
+    }
+    return super.updateClient(
+      homeserverUrl,
+      token,
+      userId,
+      deviceId,
+      deviceName,
+      prevBatch,
+      olmAccount,
+    );
+  }
+
+  @override
+  Future<int> insertClient(
+    String name,
+    String homeserverUrl,
+    String token,
+    String userId,
+    String? deviceId,
+    String? deviceName,
+    String? prevBatch,
+    String? olmAccount,
+  ) async {
+    if (PlatformInfos.isIOS) {
+      await KeychainSharingData(
+        homeserverUrl: homeserverUrl,
+        token: token,
+        userId: userId,
+        deviceId: deviceId,
+        deviceName: deviceName,
+        prevBatch: prevBatch,
+        olmAccount: olmAccount,
+      ).saveToKeychain();
+    }
+    return super.insertClient(
+      name,
+      homeserverUrl,
+      token,
+      userId,
+      deviceId,
+      deviceName,
+      prevBatch,
+      olmAccount,
+    );
   }
 }

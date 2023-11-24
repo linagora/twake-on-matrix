@@ -11,6 +11,7 @@
 		0611A7F22A678C7700F180CC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0611A7F42A678C7700F180CC /* Localizable.strings */; };
 		0646E10A2B1084E00014B8DD /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0646E1092B1084E00014B8DD /* NotificationService.swift */; };
 		0646E10E2B1084E00014B8DD /* NSE.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 0646E1072B1084E00014B8DD /* NSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0646E1152B10A1160014B8DD /* KeychainSharingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0646E1142B10A1160014B8DD /* KeychainSharingData.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		643D9A430DCE4893FC15438F /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B16AB66899BBD65C9BFB2599 /* Pods_Runner.framework */; };
@@ -73,6 +74,7 @@
 		0646E1092B1084E00014B8DD /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		0646E10B2B1084E00014B8DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0646E1132B108CF90014B8DD /* NSE.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NSE.entitlements; sourceTree = "<group>"; };
+		0646E1142B10A1160014B8DD /* KeychainSharingData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSharingData.swift; sourceTree = "<group>"; };
 		06AAB3E12ADE390500E09F51 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		06AAB3E22ADE39B400E09F51 /* ca */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ca; path = ca.lproj/Main.strings; sourceTree = "<group>"; };
 		06AAB3E32ADE39B400E09F51 /* ca */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ca; path = ca.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 			children = (
 				0646E1132B108CF90014B8DD /* NSE.entitlements */,
 				0646E1092B1084E00014B8DD /* NotificationService.swift */,
+				0646E1142B10A1160014B8DD /* KeychainSharingData.swift */,
 				0646E10B2B1084E00014B8DD /* Info.plist */,
 			);
 			path = NSE;
@@ -592,6 +595,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0646E1152B10A1160014B8DD /* KeychainSharingData.swift in Sources */,
 				0646E10A2B1084E00014B8DD /* NotificationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

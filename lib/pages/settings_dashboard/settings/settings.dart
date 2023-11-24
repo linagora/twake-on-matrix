@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/keychain_sharing_data.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
@@ -86,6 +87,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     await tryLogoutSso(context);
     final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
     await hiveCollectionToMDatabase.clear();
+    await KeychainSharingData.deleteFromKeychain();
     final matrix = Matrix.of(context);
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
