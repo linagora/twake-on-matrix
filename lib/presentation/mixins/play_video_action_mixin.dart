@@ -11,20 +11,28 @@ mixin PlayVideoActionMixin {
     BuildContext context,
     String uriOrFilePath, {
     Event? event,
+    bool isReplacement = true,
   }) async {
-    Navigator.of(context, rootNavigator: PlatformInfos.isWeb).pushReplacement(
-      HeroPageRoute(
-        builder: (context) {
-          return InteractiveViewerGallery(
-            itemBuilder: PlatformInfos.isMobile
-                ? VideoViewerMobileTheme(
-                    path: uriOrFilePath,
-                    event: event,
-                  )
-                : VideoViewerDesktopTheme(path: uriOrFilePath),
-          );
-        },
-      ),
+    final pageRoute = HeroPageRoute(
+      builder: (context) {
+        return InteractiveViewerGallery(
+          itemBuilder: PlatformInfos.isMobile
+              ? VideoViewerMobileTheme(
+                  path: uriOrFilePath,
+                  event: event,
+                )
+              : VideoViewerDesktopTheme(path: uriOrFilePath),
+        );
+      },
     );
+    if (isReplacement) {
+      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).pushReplacement(
+        pageRoute,
+      );
+    } else {
+      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+        pageRoute,
+      );
+    }
   }
 }
