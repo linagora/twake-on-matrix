@@ -27,7 +27,13 @@ class ImageViewerView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: GestureDetector(
-        onTap: () => controller.toggleAppbarPreview(),
+        onTap: () {
+          if (PlatformInfos.isWeb) {
+            Navigator.of(context).pop();
+          } else {
+            controller.toggleAppbarPreview();
+          }
+        },
         onDoubleTapDown: (details) => controller.onDoubleTapDown(details),
         onDoubleTap: () => controller.onDoubleTap(),
         child: Stack(
