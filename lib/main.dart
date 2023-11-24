@@ -29,6 +29,10 @@ void main() async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
+  await const FlutterSecureStorage(
+    iOptions: IOSOptions(groupId: AppConfig.iOSKeychainSharingId),
+  ).write(key: 'accessToken', value: 'ABC');
+
   GetItInitializer().setUp();
 
   // If the app starts in detached mode, we assume that it is in

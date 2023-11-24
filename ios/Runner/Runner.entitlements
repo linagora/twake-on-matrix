@@ -13,5 +13,9 @@
 	<array>
 		<string>group.com.linagora.ios.twake</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.linagora.ios.twake.shared</string>
+	</array>
 </dict>
 </plist>
