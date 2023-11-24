@@ -45,6 +45,8 @@ class ImageBubble extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  static const animationSwitcherDuration = Duration(seconds: 1);
+
   Widget _buildPlaceholder(BuildContext context) {
     if (event.messageType == MessageTypes.Sticker) {
       return const Center(
@@ -82,54 +84,51 @@ class ImageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
     final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
-    return Hero(
-      tag: event.eventId,
-      child: AnimatedSwitcher(
-        duration: const Duration(seconds: 1),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: rounded
-                ? MessageContentStyle.borderRadiusBubble
-                : BorderRadius.zero,
-          ),
-          constraints: maxSize
-              ? BoxConstraints(
-                  maxWidth: bubbleWidth,
-                  maxHeight: bubbleHeight,
-                )
-              : null,
-          child: ClipRRect(
-            borderRadius: rounded
-                ? MessageContentStyle.borderRadiusBubble
-                : BorderRadius.zero,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: bubbleWidth,
-                  height: bubbleHeight,
-                  child:
-                      const BlurHash(hash: MessageContentStyle.defaultBlurHash),
-                ),
-                MxcImage(
-                  event: event,
-                  width: width,
-                  height: height,
-                  fit: fit,
-                  animated: animated,
-                  isThumbnail: thumbnailOnly,
-                  placeholder: _buildPlaceholder,
-                  onTapPreview: onTapPreview,
-                  onTapSelectMode: onTapSelectMode,
-                  imageData: imageData,
-                  isPreview: true,
-                  animationDuration: animationDuration,
-                  cacheKey: thumbnailCacheKey,
-                  cacheMap: thumbnailCacheMap,
-                  noResize: noResizeThumbnail,
-                ),
-              ],
-            ),
+    return AnimatedSwitcher(
+      duration: animationSwitcherDuration,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: rounded
+              ? MessageContentStyle.borderRadiusBubble
+              : BorderRadius.zero,
+        ),
+        constraints: maxSize
+            ? BoxConstraints(
+                maxWidth: bubbleWidth,
+                maxHeight: bubbleHeight,
+              )
+            : null,
+        child: ClipRRect(
+          borderRadius: rounded
+              ? MessageContentStyle.borderRadiusBubble
+              : BorderRadius.zero,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: bubbleWidth,
+                height: bubbleHeight,
+                child:
+                    const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+              ),
+              MxcImage(
+                event: event,
+                width: width,
+                height: height,
+                fit: fit,
+                animated: animated,
+                isThumbnail: thumbnailOnly,
+                placeholder: _buildPlaceholder,
+                onTapPreview: onTapPreview,
+                onTapSelectMode: onTapSelectMode,
+                imageData: imageData,
+                isPreview: true,
+                animationDuration: animationDuration,
+                cacheKey: thumbnailCacheKey,
+                cacheMap: thumbnailCacheMap,
+                noResize: noResizeThumbnail,
+              ),
+            ],
           ),
         ),
       ),
