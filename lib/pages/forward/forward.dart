@@ -10,8 +10,10 @@ import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -26,12 +28,11 @@ class Forward extends StatefulWidget {
   ForwardController createState() => ForwardController();
 }
 
-class ForwardController extends State<Forward> {
+class ForwardController extends State<Forward> with SearchRecentChat {
   final _forwardMessageInteractor = getIt.get<ForwardMessageInteractor>();
 
   final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
 
-  final isShowRecentlyChatsNotifier = ValueNotifier(true);
   final isSearchBarShowNotifier = ValueNotifier(false);
 
   StreamSubscription? forwardMessageInteractorStreamSubscription;
@@ -51,12 +52,19 @@ class ForwardController extends State<Forward> {
   void initState() {
     super.initState();
     sendFromRoomId = widget.sendFromRoomId;
+    _listenToSearch();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      recentlyChatsNotifier.value = filteredRoomsForAll;
+    });
   }
 
   @override
   void dispose() {
+    forwardMessageNotifier.dispose();
+    isSearchBarShowNotifier.dispose();
     recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
+    disposeSearchRecentChat();
     super.dispose();
   }
 
@@ -139,6 +147,15 @@ class ForwardController extends State<Forward> {
 
   void popScreen() {
     context.go('/rooms/${widget.sendFromRoomId}');
+  }
+
+  void _listenToSearch() {
+    searchTextEditingController.addListener(
+      () => handleSearchAction(
+        context: context,
+        filteredRoomsForAll: filteredRoomsForAll,
+      ),
+    );
   }
 
   @override
