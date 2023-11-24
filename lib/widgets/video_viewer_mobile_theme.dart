@@ -49,11 +49,8 @@ class VideoViewerMobileTheme extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 MxcImage(event: event),
-                Hero(
-                  tag: event!.eventId,
-                  child: VideoPlayer(
-                    path: path,
-                  ),
+                VideoPlayer(
+                  path: path,
                 ),
               ],
             )
