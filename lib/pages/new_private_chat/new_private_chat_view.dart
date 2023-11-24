@@ -40,6 +40,9 @@ class NewPrivateChatView extends StatelessWidget {
           toggleContactsList: controller.toggleContactsList,
           textEditingController: controller.textEditingController,
           warningBannerNotifier: controller.warningBannerNotifier,
+          closeContactsWarningBanner: controller.closeContactsWarningBanner,
+          goToSettingsForPermissionActions:
+              controller.goToSettingsForPermissionActions,
         ),
       ),
     );
