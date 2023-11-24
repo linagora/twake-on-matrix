@@ -52,8 +52,11 @@ class ForwardController extends State<Forward> with SearchRecentChat {
   void initState() {
     super.initState();
     sendFromRoomId = widget.sendFromRoomId;
-    _listenToSearch();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      listenToSearch(
+        context: context,
+        filteredRoomsForAll: filteredRoomsForAll,
+      );
       recentlyChatsNotifier.value = filteredRoomsForAll;
     });
   }
@@ -147,15 +150,6 @@ class ForwardController extends State<Forward> with SearchRecentChat {
 
   void popScreen() {
     context.go('/rooms/${widget.sendFromRoomId}');
-  }
-
-  void _listenToSearch() {
-    searchTextEditingController.addListener(
-      () => handleSearchAction(
-        context: context,
-        filteredRoomsForAll: filteredRoomsForAll,
-      ),
-    );
   }
 
   @override

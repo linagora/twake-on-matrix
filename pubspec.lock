@@ -933,16 +933,16 @@ packages:
     dependency: transitive
     description:
       name: flutter_math_fork
-      sha256: a143a3a89131b578043ecbdb5e759c1033a1b3e9174f5cd1b979d93f4a7fb41c
+      sha256: "94bee4642892a94939af0748c6a7de0ff8318feee588379dcdfea7dc5cba06c8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.7.2"
   flutter_matrix_html:
     dependency: "direct main"
     description:
       path: "."
       ref: master
-      resolved-ref: 608fb381790d068664f73e33c3277671e5e172ca
+      resolved-ref: "608fb381790d068664f73e33c3277671e5e172ca"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
