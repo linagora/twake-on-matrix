@@ -8,6 +8,7 @@ import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class ShareView extends StatelessWidget {
   const ShareView(this.controller, {super.key});
@@ -22,7 +23,7 @@ class ShareView extends StatelessWidget {
         child: SearchableAppBar(
           title: L10n.of(context)!.selectChat,
           searchModeNotifier: controller.isSearchModeNotifier,
-          textEditingController: controller.textEditingController,
+          textEditingController: controller.searchTextEditingController,
           openSearchBar: controller.toggleSearchMode,
           closeSearchBar: controller.toggleSearchMode,
           focusNode: controller.searchFocusNode,
@@ -34,12 +35,12 @@ class ShareView extends StatelessWidget {
           child: Column(
             children: [
               const RecentChatsTitle(),
-              ValueListenableBuilder<bool>(
-                valueListenable: controller.isShowRecentlyChatsNotifier,
-                builder: (context, isShowRecentlyChat, child) {
-                  if (isShowRecentlyChat) {
+              ValueListenableBuilder<List<Room>>(
+                valueListenable: controller.recentlyChatsNotifier,
+                builder: (context, rooms, child) {
+                  if (rooms.isNotEmpty) {
                     return RecentChatList(
-                      rooms: controller.filteredRoomsForAll,
+                      rooms: rooms,
                       selectedEventsNotifier: controller.selectedRoomsNotifier,
                       onSelectedChat: (roomId) =>
                           controller.onSelectChat(roomId),

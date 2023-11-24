@@ -5,10 +5,13 @@ import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -20,14 +23,11 @@ class Share extends StatefulWidget {
   State<Share> createState() => ShareController();
 }
 
-class ShareController extends State<Share> with SendFilesMixin {
+class ShareController extends State<Share>
+    with SendFilesMixin, SearchRecentChat {
   final sendFileInteractor = getIt.get<SendFileInteractor>();
 
-  final isShowRecentlyChatsNotifier = ValueNotifier(true);
-
   final isSearchModeNotifier = ValueNotifier(false);
-
-  final textEditingController = TextEditingController();
 
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
@@ -35,6 +35,28 @@ class ShareController extends State<Share> with SendFilesMixin {
   final searchFocusNode = FocusNode();
 
   final selectedRoomsNotifier = ValueNotifier(<String>[]);
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      listenToSearch(
+        context: context,
+        filteredRoomsForAll: filteredRoomsForAll,
+      );
+      recentlyChatsNotifier.value = filteredRoomsForAll;
+    });
+  }
+
+  @override
+  void dispose() {
+    isSearchModeNotifier.dispose();
+    recentChatScrollController.dispose();
+    searchFocusNode.dispose();
+    selectedRoomsNotifier.dispose();
+    disposeSearchRecentChat();
+    super.dispose();
+  }
 
   void onSelectChat(String id) {
     if (selectedRoomsNotifier.value.contains(id)) {
@@ -47,11 +69,9 @@ class ShareController extends State<Share> with SendFilesMixin {
     );
   }
 
-  void toggleRecentlyChats() {
-    isShowRecentlyChatsNotifier.value = !isShowRecentlyChatsNotifier.value;
+  void toggleSearchMode() {
+    isSearchModeNotifier.toggle();
   }
-
-  void toggleSearchMode() {}
 
   void shareTo(String roomId) async {
     final room = Room(
