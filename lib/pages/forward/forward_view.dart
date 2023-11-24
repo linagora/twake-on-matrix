@@ -15,6 +15,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class ForwardView extends StatelessWidget {
   final ForwardController controller;
@@ -30,6 +31,7 @@ class ForwardView extends StatelessWidget {
         child: _ForwardAppBar(
           isSearchBarShowNotifier: controller.isSearchBarShowNotifier,
           sendFromRoomId: controller.sendFromRoomId,
+          textEditingController: controller.searchTextEditingController,
         ),
       ),
       body: WillPopScope(
@@ -43,12 +45,12 @@ class ForwardView extends StatelessWidget {
           child: Column(
             children: [
               const RecentChatsTitle(),
-              ValueListenableBuilder<bool>(
-                valueListenable: controller.isShowRecentlyChatsNotifier,
-                builder: (context, isShowRecentlyChat, child) {
-                  if (isShowRecentlyChat) {
+              ValueListenableBuilder<List<Room>>(
+                valueListenable: controller.recentlyChatsNotifier,
+                builder: (context, rooms, child) {
+                  if (rooms.isNotEmpty) {
                     return RecentChatList(
-                      rooms: controller.filteredRoomsForAll,
+                      rooms: rooms,
                       selectedEventsNotifier: controller.selectedEventsNotifier,
                       onSelectedChat: (roomId) =>
                           controller.onSelectChat(roomId),
@@ -143,11 +145,14 @@ class _ForwardAppBar extends StatelessWidget {
   const _ForwardAppBar({
     required this.isSearchBarShowNotifier,
     this.sendFromRoomId,
+    required this.textEditingController,
   });
 
   final String? sendFromRoomId;
 
   final ValueNotifier<bool> isSearchBarShowNotifier;
+
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +186,7 @@ class _ForwardAppBar extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: TextField(
                       autofocus: true,
+                      controller: textEditingController,
                       maxLines: 1,
                       buildCounter: (
                         BuildContext context, {
