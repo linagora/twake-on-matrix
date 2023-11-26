@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
@@ -9,9 +10,11 @@ import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
+import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
 import 'package:fluffychat/data/network/contact/lookup_api.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
@@ -20,6 +23,7 @@ import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
+import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
@@ -28,6 +32,7 @@ import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
+import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
@@ -52,6 +57,7 @@ import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
+import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -85,6 +91,7 @@ class GetItInitializer {
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
     getIt.registerSingleton(TwakeEventDispatcher());
+    getIt.registerSingleton(LanguageCacheManager());
   }
 
   void bindingQueue() {
@@ -109,6 +116,11 @@ class GetItInitializer {
     getIt.registerFactory<MediaDataSource>(
       () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
     );
+    getIt.registerFactory<LocalizationsDataSource>(
+      () => LocalizationsDataSourceImpl(
+        getIt.get<LanguageCacheManager>(),
+      ),
+    );
   }
 
   void bindingDatasourceImpl() {
@@ -129,6 +141,11 @@ class GetItInitializer {
         getIt.get<MediaAPI>(),
       ),
     );
+    getIt.registerLazySingleton(
+      () => LocalizationsDataSourceImpl(
+        getIt.get<LanguageCacheManager>(),
+      ),
+    );
   }
 
   void bindingRepositories() {
@@ -146,6 +163,11 @@ class GetItInitializer {
     getIt.registerFactory<MediaRepositoryImpl>(
       () => MediaRepositoryImpl(
         getIt.get<MediaDataSourceImpl>(),
+      ),
+    );
+    getIt.registerFactory<LocalizationsRepository>(
+      () => LocalizationsRepositoryImpl(
+        getIt.get<LocalizationsDataSourceImpl>(),
       ),
     );
   }
@@ -209,5 +231,10 @@ class GetItInitializer {
       () => ChatGetPinnedEventsInteractor(),
     );
     getIt.registerSingleton<ContactsManager>(ContactsManager());
+    getIt.registerSingleton<SaveLanguageInteractor>(
+      SaveLanguageInteractor(
+        getIt.get<LocalizationsRepository>(),
+      ),
+    );
   }
 }
