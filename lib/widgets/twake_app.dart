@@ -1,12 +1,16 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/go_routes/go_router.dart';
+import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -51,6 +55,12 @@ class TwakeAppState extends State<TwakeApp> {
   void initState() {
     super.initState();
     networkConnectionService.onInit();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      LocalizationService.currentLocale.value =
+          await LocalizationService.getLocaleFromLanguage(
+        context: context,
+      );
+    });
   }
 
   @override
@@ -62,21 +72,41 @@ class TwakeAppState extends State<TwakeApp> {
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      builder: (context, themeMode, primaryColor) => MaterialApp.router(
-        restorationScopeId: 'Twake',
-        title: AppConfig.applicationName,
-        debugShowCheckedModeBanner: false,
-        themeMode: themeMode,
-        theme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
-        darkTheme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
-        scrollBehavior: CustomScrollBehavior(),
-        localizationsDelegates: L10n.localizationsDelegates,
-        supportedLocales: L10n.supportedLocales,
-        routerConfig: TwakeApp.router,
-        builder: (context, child) => Matrix(
-          clients: widget.clients,
-          child: child,
-        ),
+      builder: (context, themeMode, primaryColor) => ValueListenableBuilder(
+        valueListenable: LocalizationService.currentLocale,
+        builder: (context, local, _) {
+          return MaterialApp.router(
+            restorationScopeId: 'Twake',
+            title: AppConfig.applicationName,
+            debugShowCheckedModeBanner: false,
+            themeMode: themeMode,
+            theme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
+            darkTheme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
+            scrollBehavior: CustomScrollBehavior(),
+            localizationsDelegates: const [
+              LocaleNamesLocalizationsDelegate(),
+              L10n.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: LocalizationService.supportedLocales,
+            locale: local,
+            localeResolutionCallback: (deviceLocale, supportedLocales) {
+              for (final locale in supportedLocales) {
+                if (locale.languageCode == deviceLocale?.languageCode) {
+                  return deviceLocale;
+                }
+              }
+              return supportedLocales.first;
+            },
+            routerConfig: TwakeApp.router,
+            builder: (context, child) => Matrix(
+              clients: widget.clients,
+              child: child,
+            ),
+          );
+        },
       ),
     );
   }
