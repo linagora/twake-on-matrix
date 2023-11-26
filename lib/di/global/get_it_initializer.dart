@@ -60,6 +60,7 @@ import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -91,7 +92,8 @@ class GetItInitializer {
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
     getIt.registerSingleton(TwakeEventDispatcher());
-    getIt.registerSingleton(LanguageCacheManager());
+    getIt.registerSingleton(Store());
+    getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
   }
 
   void bindingQueue() {
@@ -141,7 +143,7 @@ class GetItInitializer {
         getIt.get<MediaAPI>(),
       ),
     );
-    getIt.registerLazySingleton(
+    getIt.registerFactory(
       () => LocalizationsDataSourceImpl(
         getIt.get<LanguageCacheManager>(),
       ),
@@ -231,8 +233,8 @@ class GetItInitializer {
       () => ChatGetPinnedEventsInteractor(),
     );
     getIt.registerSingleton<ContactsManager>(ContactsManager());
-    getIt.registerSingleton<SaveLanguageInteractor>(
-      SaveLanguageInteractor(
+    getIt.registerLazySingleton<SaveLanguageInteractor>(
+      () => SaveLanguageInteractor(
         getIt.get<LocalizationsRepository>(),
       ),
     );
