@@ -2927,5 +2927,30 @@
   "contactsCount": "Contacts ({count})",
   "linagoraContactsCount": "Linagora contacts ({count})",
   "fetchingPhonebookContacts": "Fetching contacts from device...({progress}% completed)",
-  "activeNow": "Active now"
+  "activeNow": "Active now",
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "languageVietnamese": "Vietnamese",
+  "@languageVietnamese": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "languageFrench": "French",
+  "@languageFrench": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "languageRussian": "Russian",
+  "@languageRussian": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "settingsLanguageDescription": "Set the language you use on Twake Chat"
 }
