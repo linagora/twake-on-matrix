@@ -181,12 +181,17 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.chatFolders:
         break;
       case SettingEnum.appLanguage:
+        final result = await context.push('/rooms/appLanguage');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
         break;
       case SettingEnum.devices:
         final result = await context.push('/rooms/devices');
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
+        break;
       case SettingEnum.help:
         UrlLauncher(
           context,
