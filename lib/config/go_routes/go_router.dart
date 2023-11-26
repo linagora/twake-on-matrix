@@ -12,6 +12,7 @@ import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settin
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
@@ -298,6 +299,14 @@ abstract class AppRoutes {
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
                 const DevicesSettings(),
+              ),
+              redirect: loggedOutRedirect,
+            ),
+            GoRoute(
+              path: 'appLanguage',
+              pageBuilder: (context, state) => defaultPageBuilder(
+                context,
+                const SettingsAppLanguage(),
               ),
               redirect: loggedOutRedirect,
             ),
