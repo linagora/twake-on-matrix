@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:matrix/matrix.dart';
 
@@ -6,7 +7,7 @@ class LanguageCacheManager {
   static const keyLanguageCode = 'LANGUAGE_CODE';
   static const keyCountryCode = 'COUNTRY_CODE';
 
-  final Store pres = Store();
+  final Store pres = getIt.get<Store>();
 
   Future<void> persistLanguage(Locale localeCurrent) async {
     await Future.wait([
