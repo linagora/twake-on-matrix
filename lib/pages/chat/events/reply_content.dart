@@ -89,22 +89,21 @@ class ReplyContent extends StatelessWidget {
             ),
             const SizedBox(width: ReplyContentStyle.contentSpacing),
             if (displayEvent.hasAttachment)
-              SizedBox(
-                width: ReplyContentStyle.replyContentSize,
-                height: ReplyContentStyle.replyContentSize,
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: ReplyContentStyle.previewedImageBorderRadius,
-                    child: MxcImage(
-                      event: displayEvent,
-                      isThumbnail: true,
-                      fit: BoxFit.contain,
-                      placeholder: (context) {
-                        return BlurHashPlaceHolder(
-                          event: displayEvent,
-                        );
-                      },
-                    ),
+              Center(
+                child: ClipRRect(
+                  borderRadius: ReplyContentStyle.previewedImageBorderRadius,
+                  child: MxcImage(
+                    noResize: true,
+                    event: displayEvent,
+                    width: ReplyContentStyle.replyContentSize,
+                    height: ReplyContentStyle.replyContentSize,
+                    isThumbnail: true,
+                    fit: BoxFit.cover,
+                    placeholder: (context) {
+                      return BlurHashPlaceHolder(
+                        event: displayEvent,
+                      );
+                    },
                   ),
                 ),
               ),
