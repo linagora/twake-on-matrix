@@ -101,6 +101,8 @@ class ChatController extends State<Chat>
 
   PinnedEventsController pinnedEventsController = PinnedEventsController();
 
+  static const waitForJumpToFirstUnreadEvent = Duration(seconds: 1);
+
   Room? room;
 
   Client? sendingClient;
@@ -117,6 +119,8 @@ class ChatController extends State<Chat>
 
   final composerDebouncer =
       Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
+
+  Client get client => Matrix.of(context).client;
 
   bool get isEmptyChat =>
       timeline != null &&
@@ -153,6 +157,8 @@ class ChatController extends State<Chat>
   Timer? typingCoolDown;
   Timer? typingTimeout;
   bool currentlyTyping = false;
+
+  bool isJumpingToLastReadEvent = false;
 
   StreamSubscription<EventId>? _jumpToEventIdSubscription;
 
@@ -247,7 +253,6 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    setReadMarker();
     if (!scrollController.hasClients) return;
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0) {
@@ -293,6 +298,69 @@ class ChatController extends State<Chat>
     }
   }
 
+  List<Event?> getEventsUnread() {
+    final fullyRead = room!.fullyRead;
+    final lastIndexReadEvent = timeline?.events.indexWhere(
+      (event) => fullyRead.contains(event.eventId),
+    );
+    if (lastIndexReadEvent != -1 &&
+        lastIndexReadEvent != 0 &&
+        lastIndexReadEvent != null) {
+      final afterFullyRead = timeline?.events.getRange(0, lastIndexReadEvent);
+      final unreadEvents = afterFullyRead
+          ?.where((event) => event.senderId != client.userID)
+          .toList();
+      if (unreadEvents == null || unreadEvents.isEmpty) return [];
+      Logs().d(
+        "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
+      );
+      return unreadEvents;
+    }
+
+    return [];
+  }
+
+  Event? getFirstUnreadEvent() {
+    final unreadEvents = getEventsUnread();
+    if (unreadEvents.isEmpty) return null;
+
+    return unreadEvents.last;
+  }
+
+  void handleMessageVisibilityChanged(Event event, bool visible) {
+    Logs().d(
+      'Chat::handleMessageVisibilityChanged() - isVisible $visible',
+    );
+    final unreadEvents = getEventsUnread();
+    final isUnreadEvent = unreadEvents.firstWhereOrNull(
+      (event) => event?.eventId == event?.eventId,
+    );
+
+    final activeScroll =
+        (scrollController.hasClients && scrollController.position.pixels > 0);
+    final inputBarHasChange = inputFocus.hasFocus;
+
+    if (isUnreadEvent != null && inputBarHasChange) {
+      _setReadMarkerEvent(isUnreadEvent);
+    }
+    if (activeScroll && isJumpingToLastReadEvent) return;
+
+    if (isUnreadEvent != null && visible) {
+      Logs().d(
+        'Chat::handleMessageVisibilityChanged() - Set read Event ${isUnreadEvent.eventId}',
+      );
+      _setReadMarkerEvent(isUnreadEvent);
+    }
+  }
+
+  void _setReadMarkerEvent(Event event) {
+    if (room == null) return;
+    room!.setReadMarker(
+      event.eventId,
+      mRead: event.eventId,
+    );
+  }
+
   @override
   void initState() {
     keyboardVisibilityController.onChange.listen(_keyboardListener);
@@ -322,6 +390,8 @@ class ChatController extends State<Chat>
         room: room!,
         isInitial: true,
       );
+
+      _jumpToLastMessageFullyRead();
     });
   }
 
@@ -334,16 +404,19 @@ class ChatController extends State<Chat>
     context.pop();
   }
 
+  void _jumpToLastMessageFullyRead() async {
+    await getTimeline();
+    if (room == null || room!.notificationCount <= 0) return;
+    final lastReadEvent = room!.fullyRead;
+    isJumpingToLastReadEvent = true;
+    scrollToEventId(lastReadEvent);
+  }
+
   Future<bool> getTimeline() async {
     if (timeline == null) {
       await Matrix.of(context).client.roomsLoading;
       await Matrix.of(context).client.accountDataLoading;
       timeline = await room!.getTimeline(onUpdate: updateView);
-      if (timeline!.events.isNotEmpty) {
-        if (room!.markedUnread) room!.markUnread(false);
-        setReadMarker();
-      }
-
       // when the scroll controller is attached we want to scroll to an event id, if specified
       // and update the scroll controller...which will trigger a request history, if the
       // "load more" button is visible on the screen
@@ -912,6 +985,9 @@ class ChatController extends State<Chat>
       );
     }
     setState(() {});
+    if (isJumpingToLastReadEvent) {
+      isJumpingToLastReadEvent = false;
+    }
   }
 
   void onEmojiSelected(_, Emoji? emoji) {
@@ -1153,7 +1229,6 @@ class ChatController extends State<Chat>
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('draft_$roomId', text);
     });
-    setReadMarker();
     if (text.endsWith(' ') && matrix!.hasComplexBundles) {
       final clients = currentRoomBundle;
       for (final client in clients) {
