@@ -78,7 +78,6 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
                 return TwakeLinkPreviewItem(
                   ownMessage: widget.ownMessage,
                   urlPreviewPresentation: previewLink,
-                  textStyle: widget.textStyle,
                 );
               }
               return const SizedBox();
