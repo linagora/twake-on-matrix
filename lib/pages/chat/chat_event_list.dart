@@ -16,6 +16,7 @@ import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -128,36 +129,45 @@ class ChatEventList extends StatelessWidget {
               controller: controller.scrollController,
               highlightColor: LinagoraRefColors.material().primary[99],
               child: event.isVisibleInGui
-                  ? Message(
-                      event,
-                      onSwipe: (direction) =>
-                          controller.replyAction(replyTo: event),
-                      onAvatarTab: (Event event) => showAdaptiveBottomSheet(
-                        context: context,
-                        builder: (c) => UserBottomSheet(
-                          user: event.senderFromMemoryOrFallback,
-                          outerContext: context,
-                          onMention: () => controller.sendController.text +=
-                              '${event.senderFromMemoryOrFallback.mention} ',
-                        ),
+                  ? VisibilityDetector(
+                      key: ValueKey(event.eventId),
+                      onVisibilityChanged: (visibilityInfo) =>
+                          controller.handleMessageVisibilityChanged(
+                        event,
+                        visibilityInfo.visibleFraction > 0.1,
                       ),
-                      onSelect: controller.onSelectMessage,
-                      selectMode: controller.selectMode,
-                      scrollToEventId: (String eventId) =>
-                          controller.scrollToEventId(eventId),
-                      longPressSelect: controller.selectedEvents.isEmpty,
-                      selected: controller.selectedEvents
-                          .any((e) => e.eventId == event.eventId),
-                      timeline: controller.timeline!,
-                      previousEvent: previousEvent,
-                      nextEvent: nextEvent,
-                      onHover: (isHover, event) =>
-                          controller.onHover(isHover, index, event),
-                      isHoverNotifier: controller.focusHover,
-                      listHorizontalActionMenu:
-                          controller.listHorizontalActionMenuBuilder(),
-                      onMenuAction: controller.handleHorizontalActionMenu,
-                      hideKeyboardChatScreen: controller.hideKeyboardChatScreen,
+                      child: Message(
+                        event,
+                        onSwipe: (direction) =>
+                            controller.replyAction(replyTo: event),
+                        onAvatarTab: (Event event) => showAdaptiveBottomSheet(
+                          context: context,
+                          builder: (c) => UserBottomSheet(
+                            user: event.senderFromMemoryOrFallback,
+                            outerContext: context,
+                            onMention: () => controller.sendController.text +=
+                                '${event.senderFromMemoryOrFallback.mention} ',
+                          ),
+                        ),
+                        onSelect: controller.onSelectMessage,
+                        selectMode: controller.selectMode,
+                        scrollToEventId: (String eventId) =>
+                            controller.scrollToEventId(eventId),
+                        longPressSelect: controller.selectedEvents.isEmpty,
+                        selected: controller.selectedEvents
+                            .any((e) => e.eventId == event.eventId),
+                        timeline: controller.timeline!,
+                        previousEvent: previousEvent,
+                        nextEvent: nextEvent,
+                        onHover: (isHover, event) =>
+                            controller.onHover(isHover, index, event),
+                        isHoverNotifier: controller.focusHover,
+                        listHorizontalActionMenu:
+                            controller.listHorizontalActionMenuBuilder(),
+                        onMenuAction: controller.handleHorizontalActionMenu,
+                        hideKeyboardChatScreen:
+                            controller.hideKeyboardChatScreen,
+                      ),
                     )
                   : Container(),
             );

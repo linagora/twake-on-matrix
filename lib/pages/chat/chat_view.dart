@@ -123,86 +123,82 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       return const SizedBox.shrink();
     }
 
-    return GestureDetector(
-      onTapDown: controller.setReadMarker,
-      behavior: HitTestBehavior.opaque,
-      child: StreamBuilder(
-        stream: controller.room!.onUpdate.stream
-            .rateLimit(const Duration(seconds: 1)),
-        builder: (context, snapshot) => FutureBuilder<bool>(
-          future: controller.getTimeline(),
-          builder: (BuildContext context, snapshot) {
-            return Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
-                toolbarHeight: ChatViewStyle.toolbarHeight(context),
-                surfaceTintColor: Colors.transparent,
-                titleSpacing: 0,
-                title: Padding(
-                  padding: ChatViewStyle.paddingLeading(context),
-                  child: Row(
-                    children: [
-                      _buildLeading(context),
-                      Expanded(
-                        child: ChatAppBarTitle(
-                          selectedEvents: controller.selectedEvents,
-                          room: controller.room,
-                          isArchived: controller.isArchived,
-                          sendController: controller.sendController,
-                          connectivityResultStream: controller
-                              .networkConnectionService
-                              .getStreamInstance(),
-                          actions: _appBarActions(context),
-                          onPushDetails: controller.onPushDetails,
-                          roomName: controller.roomName,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  if (!controller.selectMode)
-                    Padding(
-                      padding: ChatViewStyle.paddingTrailing(context),
-                      child: IconButton(
-                        onPressed: controller.toggleSearch,
-                        icon: const Icon(Icons.search),
+    return StreamBuilder(
+      stream: controller.room!.onUpdate.stream
+          .rateLimit(const Duration(seconds: 1)),
+      builder: (context, snapshot) => FutureBuilder<bool>(
+        future: controller.getTimeline(),
+        builder: (BuildContext context, snapshot) {
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: ChatViewStyle.toolbarHeight(context),
+              surfaceTintColor: Colors.transparent,
+              titleSpacing: 0,
+              title: Padding(
+                padding: ChatViewStyle.paddingLeading(context),
+                child: Row(
+                  children: [
+                    _buildLeading(context),
+                    Expanded(
+                      child: ChatAppBarTitle(
+                        selectedEvents: controller.selectedEvents,
+                        room: controller.room,
+                        isArchived: controller.isArchived,
+                        sendController: controller.sendController,
+                        connectivityResultStream: controller
+                            .networkConnectionService
+                            .getStreamInstance(),
+                        actions: _appBarActions(context),
+                        onPushDetails: controller.onPushDetails,
+                        roomName: controller.roomName,
                       ),
                     ),
-                ],
-                bottom: PreferredSize(
-                  preferredSize: const Size(double.infinity, 4),
-                  child: Container(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceTint
-                        .withOpacity(0.08),
-                    height: 1,
-                  ),
+                  ],
                 ),
               ),
-              floatingActionButton: ValueListenableBuilder(
-                valueListenable: controller.showScrollDownButtonNotifier,
-                builder: (context, showScrollDownButton, _) {
-                  if (showScrollDownButton &&
-                      controller.selectedEvents.isEmpty &&
-                      controller.replyEvent == null) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 56.0),
-                      child: FloatingActionButton(
-                        onPressed: controller.scrollDown,
-                        mini: true,
-                        child: const Icon(Icons.arrow_downward_outlined),
-                      ),
-                    );
-                  }
-                  return const SizedBox();
-                },
+              actions: [
+                if (!controller.selectMode)
+                  Padding(
+                    padding: ChatViewStyle.paddingTrailing(context),
+                    child: IconButton(
+                      onPressed: controller.toggleSearch,
+                      icon: const Icon(Icons.search),
+                    ),
+                  ),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size(double.infinity, 4),
+                child: Container(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceTint
+                      .withOpacity(0.08),
+                  height: 1,
+                ),
               ),
-              body: _buildBody(),
-            );
-          },
-        ),
+            ),
+            floatingActionButton: ValueListenableBuilder(
+              valueListenable: controller.showScrollDownButtonNotifier,
+              builder: (context, showScrollDownButton, _) {
+                if (showScrollDownButton &&
+                    controller.selectedEvents.isEmpty &&
+                    controller.replyEvent == null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 56.0),
+                    child: FloatingActionButton(
+                      onPressed: controller.scrollDown,
+                      mini: true,
+                      child: const Icon(Icons.arrow_downward_outlined),
+                    ),
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+            body: _buildBody(),
+          );
+        },
       ),
     );
   }
