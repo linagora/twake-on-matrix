@@ -7,6 +7,8 @@ extension UrlPreviewExtension on UrlPreview {
       description: description,
       title: titlePreview,
       imageUri: imageUri,
+      imageHeight: imageHeight,
+      imageWidth: imageWidth,
     );
   }
 }
