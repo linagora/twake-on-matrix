@@ -29,7 +29,6 @@ void main() async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
-  Logs().i("Access token: ", firstClient?.accessToken);
   GetItInitializer().setUp();
 
   // If the app starts in detached mode, we assume that it is in
