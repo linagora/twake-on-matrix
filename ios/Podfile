@@ -34,6 +34,7 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
   pod 'KeychainSwift'
+  pod 'Alamofire'
   
   target 'Twake Share' do
     inherit! :search_paths
