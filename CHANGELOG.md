@@ -1706,6 +1706,23 @@ Version 0.30.0 will be the first version with arm64 support. You can download bi
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+## [2.4.1+2330] - 2023-11-28
+
+### Added
+
+- Translation
+
+### Fixed
+
+- Force re-login again and again in iOS
+- Change the same term of profile page
+- Remove trying to load thumbnail again and again
+- Use Active instead of Online
+- Fixing cannot play sending video
+- Remove hero animation
+- Change color of Active status
+- Search in forward to screen
+
 ## [2.4.0+2330] - 2023-11-20
 
 ### Added
@@ -1721,22 +1738,18 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Aplly new M3
 
 ### Fixed
-
 - Popup with wrong context
 - Select text with mouse in web app
 - Click notification in web to open room
 - Fix cut and paste button in composer
 
 ## [2.3.7+2330] - 2023-11-09
-
 ### Changed
-
 - Download file in mobile/desktop base on file stream
 - upgrade matrix sdk to 0.22.6
 - New design for pin message
 
 ### Fixed
-
 - Twake dialog
 - Remove avatar
 
@@ -1830,8 +1843,9 @@ Dart**](https://pub.dartlang.org/packages/changelog)
 - Reduce unnecessary API request to Profile API
 - Fix the placeholder for image to reduce memory consumption
 
-[2.4.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.0
+[2.4.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.1
 
+[2.4.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.0
 [2.3.7+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.7
 [2.3.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.6
 [2.3.3+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.3
