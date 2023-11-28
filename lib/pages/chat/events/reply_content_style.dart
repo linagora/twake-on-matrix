@@ -5,6 +5,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ReplyContentStyle {
   static const double fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
   static const double fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
+  static const double replyContentSize = fontSizeDisplayContent * 2;
 
   static const EdgeInsets replyParentContainerPadding = EdgeInsets.only(
     left: 4,
@@ -34,7 +35,11 @@ class ReplyContentStyle {
     );
   }
 
-  static const double prefixAndDisplayNameSpacing = 6.0;
+  static const double contentSpacing = 6.0;
+  static const BorderRadius previewedImageBorderRadius =
+      BorderRadius.all(Radius.circular(4));
+  static const double previewedImagePlaceholderPadding = 4.0;
+
   static TextStyle? displayNameTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.titleSmall?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant,
