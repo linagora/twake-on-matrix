@@ -11,7 +11,7 @@
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.linagora.ios.twake</string>
+		<string>group.app.twake.ios.chat</string>
 	</array>
 </dict>
 </plist>

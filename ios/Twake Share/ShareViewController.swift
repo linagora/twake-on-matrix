@@ -6,7 +6,7 @@ import Photos
 @objc(ShareViewController)
 class ShareViewController: UIViewController {
     // TODO: IMPORTANT: This should be your host app bundle identifier
-    var hostAppBundleIdentifier = "com.linagora.ios.twake"
+    var hostAppBundleIdentifier = "app.twake.ios.chat"
     let sharedKey = "ShareKey"
     var appGroupId = ""
     var sharedMedia: [SharedMediaFile] = []
