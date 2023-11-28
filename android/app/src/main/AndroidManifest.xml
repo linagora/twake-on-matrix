@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-    package="com.twake.twake" android:installLocation="auto">
+    package="app.twake.android.chat" android:installLocation="auto">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -141,7 +141,7 @@
             android:value="2" />
         <provider
             android:name="com.superlist.super_native_extensions.DataProvider"
-            android:authorities="com.twake.twake.SuperClipboardDataProvider"
+            android:authorities="app.twake.android.chat.SuperClipboardDataProvider"
             android:exported="true"
             android:grantUriPermissions="true" >
         </provider>
