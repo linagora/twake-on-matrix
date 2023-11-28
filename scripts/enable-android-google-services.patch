@@ -5,7 +5,7 @@ index c4aeaf66..e88cb4b3 100644
 @@ -44,7 +44,7 @@ android {
  
      defaultConfig {
-         applicationId "com.twake.twake"
+         applicationId "app.twake.android.chat"
 -        minSdkVersion 16
 +        minSdkVersion 19
          targetSdkVersion 31
