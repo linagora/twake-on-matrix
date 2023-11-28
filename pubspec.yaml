@@ -201,10 +201,10 @@ flutter:
     - assets/google_fonts/
 
 msix_config:
-  display_name: Twake
-  publisher_display_name: Twake
+  display_name: Twake Chat
+  publisher_display_name: Twake Chat
   publisher: CN=Twake, O=Linagora, C=FR
-  identity_name: com.linagora.windows.twake
+  identity_name: app.twake.window.chat
   logo_path: assets\logo.png
   capabilities: internetClient, location, microphone, webcam
   protocol_activation: https
