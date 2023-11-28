@@ -50,13 +50,13 @@ abstract class AppConfig {
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'twake_push';
-  static const String pushNotificationsChannelName = 'Twake push channel';
+  static const String pushNotificationsChannelName = 'Twake Chat push channel';
   static const String pushNotificationsChannelDescription =
-      'Push notifications for Twake';
+      'Push notifications for Twake Chat';
   static String pushNotificationsAppId = Platform.isIOS
       ? kReleaseMode
-          ? "com.linagora.ios.twake"
-          : "com.linagora.ios.twake.sandbox"
+          ? "app.twake.ios.chat"
+          : "app.twake.ios.chat.sandbox"
       : "com.twake.twake";
   static const String pushNotificationsGatewayUrl =
       'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';

@@ -45,6 +45,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -78,12 +80,12 @@
 	<string>Record voice message and share them with your contacts on Twake.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Share motions with your contacts in Twake.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string> Save photos/videos to device on Twake.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Open photos from your gallery and share them with your contacts on Twake.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Share data with your contacts in Twake.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string> Save photos/videos to device on Twake.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -116,7 +118,5 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
 </dict>
 </plist>
