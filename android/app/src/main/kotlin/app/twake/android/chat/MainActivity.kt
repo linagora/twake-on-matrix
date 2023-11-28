@@ -1,4 +1,4 @@
-package com.twake.twake
+package app.twake.android.chat
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

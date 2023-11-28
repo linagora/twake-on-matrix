@@ -57,7 +57,7 @@ abstract class AppConfig {
       ? kReleaseMode
           ? "app.twake.ios.chat"
           : "app.twake.ios.chat.sandbox"
-      : "com.twake.twake";
+      : "app.twake.android.chat";
   static const String pushNotificationsGatewayUrl =
       'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';
   static const String pushNotificationsPusherFormat = 'event_id_only';
