@@ -219,4 +219,12 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       olmAccount,
     );
   }
+
+  @override
+  Future<void> clear({bool supportDeleteCollections = false}) async {
+    if (PlatformInfos.isIOS) {
+      await KeychainSharingData.deleteFromKeychain();
+    }
+    return super.clear(supportDeleteCollections: supportDeleteCollections);
+  }
 }
