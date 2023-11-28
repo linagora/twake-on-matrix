@@ -45,7 +45,7 @@ platform :mac do
     )
     notarize(
       package: "../twake-#{last_git_tag}-macos-amd64.dmg",
-      bundle_id: "com.linagora.macos.twake",
+      bundle_id: "app.twake.macos.chat",
       print_log: true,
       verbose: true
     )
