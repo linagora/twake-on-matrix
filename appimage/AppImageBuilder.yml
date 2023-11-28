@@ -8,8 +8,8 @@ version: 1
 AppDir:
   path: ./AppDir
   app_info:
-    id: com.linagora.linux.twake
-    name: Twake
+    id: app.twake.linux.chat
+    name: Twake Chat
     icon: twake
     version: latest
     exec: fluffychat
