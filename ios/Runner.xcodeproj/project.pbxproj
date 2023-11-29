@@ -894,8 +894,8 @@
 				MARKETING_VERSION = 0.32.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.twake.ios.chat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = chat.development.profile;
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = chat.development.profile;
+				PROVISIONING_PROFILE_SPECIFIER = chat.distribution.profile;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = chat.distribution.profile;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -954,8 +954,8 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "Twake Share/Twake Share.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				CUSTOM_GROUP_ID = group.app.twake.ios.chat;
@@ -973,8 +973,8 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = app.twake.ios.chat.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = chat.share.ext.development.profile;
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = chat.share.ext.development.profile;
+				PROVISIONING_PROFILE_SPECIFIER = chat.share.ext.distribution.profile;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = chat.share.ext.distribution.profile;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
