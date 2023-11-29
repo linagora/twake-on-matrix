@@ -204,7 +204,7 @@ msix_config:
   display_name: Twake Chat
   publisher_display_name: Twake Chat
   publisher: CN=Twake, O=Linagora, C=FR
-  identity_name: app.twake.window.chat
+  identity_name: app.twake.windows.chat
   logo_path: assets\logo.png
   capabilities: internetClient, location, microphone, webcam
   protocol_activation: https
