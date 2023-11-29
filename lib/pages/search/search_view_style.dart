@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class SearchViewStyle {
   static double get toolbarHeightSearch => 56.0;
@@ -12,4 +13,19 @@ class SearchViewStyle {
       const EdgeInsets.all(12.0);
   static EdgeInsetsGeometry get paddingRecentChats =>
       const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+
+  static const double paddingBackButton = 8.0;
+
+  static final BorderRadius borderRadiusTextField = BorderRadius.circular(24);
+
+  static EdgeInsetsGeometry get appbarPadding =>
+      const EdgeInsetsDirectional.only(
+        bottom: 0.0,
+        top: 0.0,
+      );
+
+  static TextStyle? headerTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: LinagoraRefColors.material().neutral[40],
+          );
 }
