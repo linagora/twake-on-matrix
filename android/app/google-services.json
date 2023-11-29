@@ -8,12 +8,59 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:492265884073:android:da793d03162cb7db6b5cb8",
+        "android_client_info": {
+          "package_name": "app.twake.android.chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "492265884073-g537tkljd8ilrg4c63t0s86fgk97mol7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7c2xkmUpHo9i-O0bsm2BRHnZD1LPi-sU"
+        },
+        {
+          "current_key": "AIzaSyAX6d-jWjhiYiP2RsRdWTrpKt9yCW0M5Zc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "492265884073-g537tkljd8ilrg4c63t0s86fgk97mol7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "492265884073-758idkadb1l2kh348fk84rn13su5rks6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.linagora.twake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:492265884073:android:fba0d50aace57d8d",
         "android_client_info": {
           "package_name": "com.twake.twake"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "492265884073-4s9mhnk9281tpitd9s9v35rc65iace3l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.twake.twake",
+            "certificate_hash": "48feee1175a3f98d1a08db10c70fe631eac1dfd3"
+          }
+        },
         {
           "client_id": "492265884073-e89325dclv982tp2tbjpmi57l95r1r4o.apps.googleusercontent.com",
           "client_type": 1,
@@ -28,6 +75,9 @@
         }
       ],
       "api_key": [
+        {
+          "current_key": "AIzaSyC7c2xkmUpHo9i-O0bsm2BRHnZD1LPi-sU"
+        },
         {
           "current_key": "AIzaSyAX6d-jWjhiYiP2RsRdWTrpKt9yCW0M5Zc"
         }
