@@ -1,13 +1,15 @@
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
+import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
+import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SearchView extends StatelessWidget {
   final SearchController searchController;
@@ -63,32 +65,26 @@ class SearchView extends StatelessWidget {
               }),
               child: const SliverToBoxAdapter(),
             ),
-            SliverAppBar(
-              toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
-              flexibleSpace: FlexibleSpaceBar(
-                title: _recentChatsHeaders(context),
-                titlePadding: const EdgeInsetsDirectional.only(
-                  bottom: 0.0,
-                  top: 0.0,
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              automaticallyImplyLeading: false,
-              pinned: true,
-            ),
-            SliverAnimatedList(
-              itemBuilder: (_, index, ___) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _recentChatsWidget(),
-                  ],
+            _RecentChatAndContactsHeader(searchController: searchController),
+            _recentChatsWidget(),
+            ValueListenableBuilder(
+              valueListenable:
+                  searchController.serverSearchController.serverSearchNotifier,
+              builder: ((context, searchResults, _) {
+                final messagesFound =
+                    searchResults.getSuccessOrNull<ServerSearchChatSuccess>();
+                if (messagesFound?.results == null ||
+                    messagesFound!.results!.isEmpty) {
+                  return _EmptySliverBox();
+                }
+                return _SearchHeader(
+                  header: L10n.of(context)!.messages,
+                  searchController: searchController,
+                  needShowMore: false,
                 );
-              },
-              initialItemCount: 1,
+              }),
             ),
+            ServerSearchMessagesList(searchController: searchController),
           ],
         ),
       ),
@@ -96,32 +92,46 @@ class SearchView extends StatelessWidget {
   }
 
   Widget _recentChatsWidget() {
-    return ValueListenableBuilder(
-      valueListenable: searchController
-          .searchContactAndRecentChatController!.recentAndContactsNotifier,
-      builder: (context, contacts, emptyChild) {
-        if (contacts.isEmpty) {
-          return emptyChild!;
-        }
+    return SliverToBoxAdapter(
+      child: ValueListenableBuilder(
+        valueListenable: searchController.searchContactAndRecentChatController!
+            .isShowChatsAndContactsNotifier,
+        builder: (context, isShowMore, _) {
+          return ValueListenableBuilder(
+            valueListenable: searchController
+                .searchContactAndRecentChatController!
+                .recentAndContactsNotifier,
+            builder: (context, contacts, emptyChild) {
+              if (contacts.isEmpty) {
+                return emptyChild!;
+              }
 
-        return ListView.builder(
-          padding: SearchViewStyle.paddingRecentChats,
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
-          itemCount: contacts.length,
-          itemBuilder: (context, index) {
-            return RecentItemWidget(
-              highlightKeyword: searchController.textEditingController.text,
-              presentationSearch: contacts[index],
-              key: Key('chat_recent_${contacts[index].id}'),
-              onTap: () {
-                searchController.onSearchItemTap(contacts[index]);
-              },
-            );
-          },
-        );
-      },
-      child: const SizedBox(),
+              if (searchController.isShowMore) {
+                return const SizedBox.shrink();
+              }
+
+              return ListView.builder(
+                padding: SearchViewStyle.paddingRecentChats,
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  return RecentItemWidget(
+                    highlightKeyword:
+                        searchController.textEditingController.text,
+                    presentationSearch: contacts[index],
+                    key: Key('chat_recent_${contacts[index].id}'),
+                    onTap: () {
+                      searchController.onSearchItemTap(contacts[index]);
+                    },
+                  );
+                },
+              );
+            },
+            child: const SizedBox(),
+          );
+        },
+      ),
     );
   }
 
@@ -137,7 +147,7 @@ class SearchView extends StatelessWidget {
               tooltip: L10n.of(context)!.back,
               icon: Icons.arrow_back,
               onTap: () => searchController.goToRoomsShellBranch(),
-              paddingAll: 8.0,
+              paddingAll: SearchViewStyle.paddingBackButton,
             ),
             const SizedBox(width: 4.0),
             Expanded(
@@ -155,10 +165,17 @@ class SearchView extends StatelessWidget {
                   fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: SearchViewStyle.borderRadiusTextField,
                   ),
                   hintText: L10n.of(context)!.search,
                   floatingLabelBehavior: FloatingLabelBehavior.never,
+                  suffixIcon: TwakeIconButton(
+                    tooltip: L10n.of(context)!.close,
+                    icon: Icons.close,
+                    onTap: () {
+                      searchController.textEditingController.clear();
+                    },
+                  ),
                 ),
               ),
             ),
@@ -174,8 +191,80 @@ class SearchView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _recentChatsHeaders(BuildContext context) {
+class _RecentChatAndContactsHeader extends StatelessWidget {
+  const _RecentChatAndContactsHeader({
+    required this.searchController,
+  });
+
+  final SearchController searchController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: searchController.textEditingController,
+      builder: ((context, value, _) {
+        final searchTerm = value.text;
+        return ValueListenableBuilder(
+          valueListenable: searchController
+              .searchContactAndRecentChatController!.recentAndContactsNotifier,
+          builder: (context, contacts, _) {
+            if (searchTerm.isNotEmpty && contacts.isEmpty) {
+              return _EmptySliverBox();
+            }
+            return _SearchHeader(
+              searchController: searchController,
+              header: searchTerm.isEmpty
+                  ? L10n.of(context)!.recent
+                  : L10n.of(context)!.chatsAndContacts,
+              needShowMore: value.text.isNotEmpty,
+            );
+          },
+        );
+      }),
+    );
+  }
+}
+
+class _SearchHeader extends StatelessWidget {
+  final String header;
+
+  final SearchController searchController;
+
+  final bool needShowMore;
+
+  const _SearchHeader({
+    required this.header,
+    required this.searchController,
+    this.needShowMore = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
+      flexibleSpace: FlexibleSpaceBar(
+        title: _chatsHeaders(
+          context,
+          header,
+          needShowMore: needShowMore,
+        ),
+        titlePadding: SearchViewStyle.appbarPadding,
+      ),
+      backgroundColor: Colors.transparent,
+      foregroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      automaticallyImplyLeading: false,
+      pinned: true,
+    );
+  }
+
+  Widget _chatsHeaders(
+    BuildContext context,
+    String headerText, {
+    bool needShowMore = true,
+  }) {
     return Container(
       width: double.infinity,
       height: SearchViewStyle.toolbarHeightOfSliverAppBar,
@@ -186,22 +275,42 @@ class SearchView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: ValueListenableBuilder(
-              valueListenable: searchController.textEditingController,
-              builder: (context, value, child) {
-                return Text(
-                  value.text.isEmpty
-                      ? L10n.of(context)!.recent
-                      : L10n.of(context)!.chatsAndContacts,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: LinagoraRefColors.material().neutral[40],
-                      ),
-                );
-              },
+            child: Text(
+              headerText,
+              style: SearchViewStyle.headerTextStyle(context),
             ),
           ),
+          if (needShowMore)
+            InkWell(
+              onTap: () {
+                searchController.searchContactAndRecentChatController!
+                    .toggleShowMore();
+              },
+              child: ValueListenableBuilder(
+                valueListenable: searchController
+                    .searchContactAndRecentChatController!
+                    .isShowChatsAndContactsNotifier,
+                builder: (context, isShowMore, _) {
+                  return Text(
+                    isShowMore
+                        ? L10n.of(context)!.showMore
+                        : L10n.of(context)!.showLess,
+                    style: SearchViewStyle.headerTextStyle(context),
+                  );
+                },
+              ),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _EmptySliverBox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const SliverToBoxAdapter(
+      child: SizedBox.shrink(),
     );
   }
 }
