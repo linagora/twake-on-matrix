@@ -49,7 +49,7 @@ class DioClient {
         .catchError((error) => throw error);
   }
 
-  Future<dynamic> post(
+  Future<Response<dynamic>> post(
     String path, {
     data,
     Map<String, dynamic>? queryParameters,
