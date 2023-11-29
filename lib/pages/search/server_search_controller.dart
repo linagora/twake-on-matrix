@@ -5,15 +5,14 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 
 class ServerSearchController with SearchDebouncerMixin {
   final _serverSearchInteractor = getIt.get<ServerSearchInteractor>();
 
-  final serverSearchResultNotifier = ValueNotifier<List<MatrixEvent?>?>([]);
-
-  final serverSearchResultCountNotifier = ValueNotifier<int>(0);
+  final serverSearchNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(ServerSearchInitial()),
+  );
 
   String keyword = '';
 
@@ -21,10 +20,9 @@ class ServerSearchController with SearchDebouncerMixin {
     initializeDebouncer((searchTerm) {
       if (searchTerm.isNotEmpty) {
         keyword = searchTerm;
-        searchUncryptedMessages(searchTerm);
+        searchUnencryptedMessages(searchTerm);
       } else {
-        serverSearchResultCountNotifier.value = 0;
-        serverSearchResultNotifier.value = [];
+        serverSearchNotifier.value = Right(ServerSearchInitial());
       }
     });
   }
@@ -33,33 +31,14 @@ class ServerSearchController with SearchDebouncerMixin {
     super.disposeDebouncer();
   }
 
-  void searchUncryptedMessages(String searchTerm) {
+  void searchUnencryptedMessages(String searchTerm) {
     _serverSearchInteractor
         .execute(
       searchTerm: searchTerm,
     )
         .listen((searchResult) {
-      handleServerSearch(searchResult);
+      serverSearchNotifier.value = searchResult;
     });
-  }
-
-  void handleServerSearch(Either<Failure, Success> searchResult) {
-    searchResult.fold(
-      (left) => serverSearchResultNotifier.value = [],
-      (right) {
-        if (right is ServerSearchChatSuccess) {
-          Logs().d(
-            "SearchController::handleServerSearch(): found ${right.count ?? 0} messages",
-          );
-          if (right.count != null) {
-            serverSearchResultCountNotifier.value = right.count!;
-          }
-
-          serverSearchResultNotifier.value =
-              right.results?.map((result) => result.result).toList();
-        }
-      },
-    );
   }
 
   void onSearchBarChanged(String keyword) {
