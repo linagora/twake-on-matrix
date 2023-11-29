@@ -14,7 +14,7 @@ mixin SearchDebouncerMixin {
 
     _debouncer?.values.listen((keyword) async {
       Logs().d(
-        "SearchContactAndRecentChatController::_initializeDebouncer: searchKeyword: $keyword",
+        "SearchDebouncerMixin::initializeDebouncer: $keyword",
       );
       onDebouncerChanged?.call(keyword);
     });
