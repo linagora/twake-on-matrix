@@ -5,7 +5,7 @@ storage_mode("git")
 type("development") # The default type, can be: appstore, adhoc, enterprise or development
 
 # Need to list all bundle IDs for all targets
-app_identifier(["app.twake.ios.chat", "app.twake.ios.chat.extension"])
+app_identifier(["app.twake.ios.chat", "app.twake.ios.chat.share"])
 
 # For all available options run `fastlane match --help`
 # Remove the # in the beginning of the line to enable the other options
