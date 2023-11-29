@@ -88,6 +88,10 @@ class ChatAppBarTitle extends StatelessWidget {
                           ImagePaths.icEncrypted,
                           width: 20,
                           height: 20,
+                          colorFilter: const ColorFilter.mode(
+                            ChatAppBarTitleStyle.encryptedIconColor,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     Flexible(

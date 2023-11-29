@@ -93,13 +93,15 @@ class SearchController extends State<Search>
       context.go(
         '/rooms/draftChat',
         extra: {
-          PresentationContactConstant.receiverId:
-              contactPresentationSearch.matrixId ?? '',
-          PresentationContactConstant.email:
-              contactPresentationSearch.email ?? '',
-          PresentationContactConstant.displayName:
-              contactPresentationSearch.displayName ?? '',
-          PresentationContactConstant.status: '',
+          PresentationContactConstant.contact: {
+            PresentationContactConstant.receiverId:
+                contactPresentationSearch.matrixId ?? '',
+            PresentationContactConstant.email:
+                contactPresentationSearch.email ?? '',
+            PresentationContactConstant.displayName:
+                contactPresentationSearch.displayName ?? '',
+            PresentationContactConstant.status: '',
+          },
         },
       );
     }

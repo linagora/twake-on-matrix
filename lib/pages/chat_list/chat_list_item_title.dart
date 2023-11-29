@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/title_text_style_decorator/title_text_style_view.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
@@ -39,6 +40,10 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                         ImagePaths.icEncrypted,
                         width: 20,
                         height: 20,
+                        colorFilter: const ColorFilter.mode(
+                          ChatAppBarTitleStyle.encryptedIconColor,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   Flexible(

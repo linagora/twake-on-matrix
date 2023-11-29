@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/model/draft_chat_constant.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
     return ChatAdaptiveScaffoldBuilder(
       bodyBuilder: (controller) => DraftChat(
         contact: _contact,
+        enableEncryption: _enableEncryption,
         onChangeRightColumnType: controller.setRightColumnType,
       ),
       rightBuilder: (
@@ -42,13 +44,19 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
     );
   }
 
+  bool get _enableEncryption {
+    return (state.extra
+        as Map<String, dynamic>)[DraftChatConstant.enableEncryption];
+  }
+
   PresentationContact get _contact {
-    final extra = state.extra as Map<String, String>;
-    if (extra.isNotEmpty) {
+    final contact = (state.extra
+        as Map<String, dynamic>)[PresentationContactConstant.contact];
+    if (contact.isNotEmpty) {
       return PresentationContact(
-        matrixId: extra[PresentationContactConstant.receiverId],
-        email: extra[PresentationContactConstant.email],
-        displayName: extra[PresentationContactConstant.displayName],
+        matrixId: contact[PresentationContactConstant.receiverId],
+        email: contact[PresentationContactConstant.email],
+        displayName: contact[PresentationContactConstant.displayName],
       );
     } else {
       return const PresentationContact().presentationContactEmpty;

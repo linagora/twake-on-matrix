@@ -6,8 +6,10 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ChatAppBarTitleStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static Color get currentlyActiveColor => const Color(0xFF5AD439);
-  static Color get currentlyInactiveColor => const Color(0xFF818C99);
+  static const Color currentlyActiveColor = Color(0xFF5AD439);
+  static const Color currentlyInactiveColor = Color(0xFF818C99);
+  static const Color encryptedIconColor = Color(0xFF00C853);
+
   static double get avatarFontSize => 15.0;
   static double avatarSize(BuildContext context) =>
       responsive.isMobile(context) ? 40.0 : 48.0;

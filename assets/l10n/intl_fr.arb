@@ -1158,7 +1158,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newChat": "Nouvelle discussion",
+  "newChat": "Nouvelle Discussion",
   "@newChat": {
     "type": "text",
     "placeholders": {}

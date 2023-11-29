@@ -5,4 +5,8 @@ class ChatListViewStyle {
 
   static Size preferredSizeAppBar(BuildContext context) =>
       const Size.fromHeight(120);
+
+  static const Color newEncryptedDirectMessageColor = Color(0xFF1C1B1F);
+
+  static const double menuItemButtonIconSize = 20.0;
 }

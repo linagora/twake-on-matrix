@@ -5,10 +5,12 @@ import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -77,18 +79,45 @@ class ChatListView extends StatelessWidget {
               LogicalKeyboardKey.controlLeft,
               LogicalKeyboardKey.keyN,
             },
-            onKeysPressed: () => controller.goToNewPrivateChat(),
+            onKeysPressed: () => controller.goToNewPrivateChat(context),
             helpLabel: L10n.of(context)!.newChat,
             child: !responsiveUtils.isSingleColumnLayout(context)
                 ? MenuAnchor(
                     menuChildren: [
                       MenuItemButton(
-                        leadingIcon: const Icon(Icons.chat),
-                        child: Text(L10n.of(context)!.newDirectMessage),
-                        onPressed: () => controller.goToNewPrivateChat(),
+                        leadingIcon: SvgPicture.asset(
+                          ImagePaths.icEncrypted,
+                          width: ChatListViewStyle.menuItemButtonIconSize,
+                          height: ChatListViewStyle.menuItemButtonIconSize,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        child: Text(L10n.of(context)!.newEncryptedDirectChat),
+                        onPressed: () => controller.goToNewPrivateChat(
+                          context,
+                          enableEncryption: true,
+                        ),
                       ),
                       MenuItemButton(
-                        leadingIcon: const Icon(Icons.group),
+                        leadingIcon: Icon(
+                          Icons.chat_outlined,
+                          size: ChatListViewStyle.menuItemButtonIconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        child: Text(L10n.of(context)!.newDirectChat),
+                        onPressed: () => controller.goToNewPrivateChat(
+                          context,
+                          enableEncryption: false,
+                        ),
+                      ),
+                      MenuItemButton(
+                        leadingIcon: Icon(
+                          Icons.group_outlined,
+                          size: ChatListViewStyle.menuItemButtonIconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                         onPressed: () => controller.goToNewGroupChat(),
                         child: Text(L10n.of(context)!.newChat),
                       ),
@@ -107,7 +136,10 @@ class ChatListView extends StatelessWidget {
                 : TwakeFloatingActionButton(
                     icon: Icons.mode_edit_outline_outlined,
                     size: ChatListViewStyle.editIconSize,
-                    onTap: controller.goToNewPrivateChat,
+                    onTap: () => controller.goToNewPrivateChat(
+                      context,
+                      enableEncryption: false,
+                    ),
                   ),
           );
         },

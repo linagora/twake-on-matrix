@@ -2,7 +2,9 @@ import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/presentation/model/draft_chat_constant.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
@@ -33,8 +35,13 @@ class FirstColumnInnerRoutes {
           const NewGroup(),
         );
       case 'innernavigator/newprivatechat':
+        final argumentsCast =
+            tryCast<Map<String, bool>>(arguments, fallback: null);
         return _defaultPageRoute(
-          const NewPrivateChat(),
+          NewPrivateChat(
+            enableEncryption:
+                argumentsCast?[DraftChatConstant.enableEncryption] ?? true,
+          ),
         );
       case 'innernavigator/newgroupchatinfo':
         if (arguments is Set<PresentationContact>) {

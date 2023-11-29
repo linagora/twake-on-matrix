@@ -67,10 +67,13 @@ class ContactsTabController extends State<ContactsTab>
         () => context.go(
           '/$path/draftChat',
           extra: {
-            PresentationContactConstant.receiverId: contact.matrixId ?? '',
-            PresentationContactConstant.email: contact.email ?? '',
-            PresentationContactConstant.displayName: contact.displayName ?? '',
-            PresentationContactConstant.status: '',
+            PresentationContactConstant.contact: {
+              PresentationContactConstant.receiverId: contact.matrixId ?? '',
+              PresentationContactConstant.email: contact.email ?? '',
+              PresentationContactConstant.displayName:
+                  contact.displayName ?? '',
+              PresentationContactConstant.status: '',
+            },
           },
         ),
       );

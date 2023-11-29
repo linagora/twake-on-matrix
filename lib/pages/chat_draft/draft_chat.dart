@@ -34,13 +34,14 @@ typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 
 class DraftChat extends StatefulWidget {
   final PresentationContact contact;
-
+  final bool enableEncryption;
   final void Function(RightColumnType)? onChangeRightColumnType;
 
   const DraftChat({
     super.key,
     required this.contact,
     this.onChangeRightColumnType,
+    required this.enableEncryption,
   });
 
   @override
@@ -155,7 +156,7 @@ class DraftChatController extends State<DraftChat>
         .execute(
       contactMxId: presentationContact!.matrixId!,
       client: Matrix.of(context).client,
-      enableEncryption: true,
+      enableEncryption: widget.enableEncryption,
     )
         .listen((event) {
       event.fold((failure) {

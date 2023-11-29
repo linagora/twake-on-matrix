@@ -17,8 +17,11 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:fluffychat/presentation/model/draft_chat_constant.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
@@ -193,9 +196,15 @@ abstract class AppRoutes {
               GoRoute(
                 path: 'newprivatechat',
                 pageBuilder: (context, state) {
+                  final extra =
+                      tryCast<Map<String, bool>>(state.extra, fallback: null);
+
                   return defaultPageBuilder(
                     context,
-                    const NewPrivateChat(),
+                    NewPrivateChat(
+                      enableEncryption:
+                          extra?[DraftChatConstant.enableEncryption] ?? true,
+                    ),
                   );
                 },
                 redirect: loggedOutRedirect,
@@ -240,17 +249,21 @@ abstract class AppRoutes {
             GoRoute(
               path: 'draftChat',
               redirect: (context, state) {
-                if (state.extra is! Map<String, String>) {
+                if (state.extra is! Map<String, Object>) {
                   return '${state.fullPath?.replaceAll('draftChat', '')}';
                 } else {
                   return '/rooms/draftChat';
                 }
               },
               pageBuilder: (context, state) {
-                final extra = state.extra as Map<String, String>;
+                final extra = state.extra as Map<String, dynamic>;
                 return CupertinoPage(
                   child: DraftChatAdaptiveScaffold(
-                    key: Key(extra['receiverId'] ?? ''),
+                    key: Key(
+                      extra[PresentationContactConstant.contact]
+                              ['receiverId'] ??
+                          '',
+                    ),
                     state: state,
                   ),
                 );

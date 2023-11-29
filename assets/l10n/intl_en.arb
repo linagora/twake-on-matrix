@@ -1261,7 +1261,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newChat": "New chat",
+  "newChat": "New Chat",
   "@newChat": {
     "type": "text",
     "placeholders": {}
@@ -2901,7 +2901,6 @@
   "encryptionWarning": "You might lose your messages if you access Twake app on the another device.",
   "selectedUsers": "Selected users",
   "clearAllSelected": "Clear all selected",
-  "newDirectMessage": "New direct message",
   "contactInfo": "Contact info",
   "countPinnedMessage": "{count, plural, =0{Pinned Message} other{Pinned Message #{count}}}",
   "@countPinnedMessage": {
@@ -2952,5 +2951,8 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "settingsLanguageDescription": "Set the language you use on Twake Chat"
+  "settingsLanguageDescription": "Set the language you use on Twake Chat",
+  "newEncryptedDirectChat": "New Encrypted Direct Chat",
+  "newDirectChat": "New Direct Chat",
+  "startAnEncryptedDirectChat": "Start an Encrypted Direct Chat"
 }

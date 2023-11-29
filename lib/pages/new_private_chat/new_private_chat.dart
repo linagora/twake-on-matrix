@@ -12,7 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NewPrivateChat extends StatefulWidget {
-  const NewPrivateChat({Key? key}) : super(key: key);
+  final bool enableEncryption;
+  const NewPrivateChat({
+    Key? key,
+    required this.enableEncryption,
+  }) : super(key: key);
 
   @override
   NewPrivateChatController createState() => NewPrivateChatController();
@@ -64,6 +68,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
           contact.email,
           displayName: contact.displayName,
         ),
+        enableEncryption: widget.enableEncryption,
       );
     } else {
       context.go('/rooms/$roomId');
