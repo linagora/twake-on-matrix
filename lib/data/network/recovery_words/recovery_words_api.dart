@@ -26,7 +26,9 @@ class RecoveryWordsAPI {
           data: RecoveryWordsResponse(words: recoveryWords),
         )
         .onError((error, stackTrace) => throw Exception(error));
-    return response.statusCode >= 200 && response.statusCode <= 299;
+    return response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! <= 299;
   }
 
   Future<bool> deleteRecoveryWords() async {
