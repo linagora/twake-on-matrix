@@ -19,6 +19,7 @@
 		C1005C45261071B5002F4F32 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1005C44261071B5002F4F32 /* ShareViewController.swift */; };
 		C1005C4C261071B5002F4F32 /* Twake Share.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1005C42261071B5002F4F32 /* Twake Share.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C149567C25C7274F00A16396 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C149567B25C7274F00A16396 /* GoogleService-Info.plist */; };
+		E388818A944B178F69E4431D /* Pods_Twake_Share.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB50B9422955BF92FC0FEB3C /* Pods_Twake_Share.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +136,8 @@
 		1B6C59111A74FF0BB750A10A /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		216064C73ECC2AECB9F0A1FA /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		3D818CE626126D8D1C67A3C9 /* Pods-Twake Share.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Twake Share.release.xcconfig"; path = "Target Support Files/Pods-Twake Share/Pods-Twake Share.release.xcconfig"; sourceTree = "<group>"; };
+		48F3E70A44AA65D69E70C12D /* Pods-Twake Share.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Twake Share.profile.xcconfig"; path = "Target Support Files/Pods-Twake Share/Pods-Twake Share.profile.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -146,12 +149,14 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B16AB66899BBD65C9BFB2599 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD7FC81DBDE4B0D093DEFFCB /* Pods-Twake Share.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Twake Share.debug.xcconfig"; path = "Target Support Files/Pods-Twake Share/Pods-Twake Share.debug.xcconfig"; sourceTree = "<group>"; };
 		C1005C42261071B5002F4F32 /* Twake Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Twake Share.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1005C44261071B5002F4F32 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		C1005C49261071B5002F4F32 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1005C53261072D4002F4F32 /* Twake Share.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Twake Share.entitlements"; sourceTree = "<group>"; };
 		C149567B25C7274F00A16396 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C149567D25C7276200A16396 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		DB50B9422955BF92FC0FEB3C /* Pods_Twake_Share.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Twake_Share.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA7311CF00074CB7786C33 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -168,6 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E388818A944B178F69E4431D /* Pods_Twake_Share.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				B16AB66899BBD65C9BFB2599 /* Pods_Runner.framework */,
+				DB50B9422955BF92FC0FEB3C /* Pods_Twake_Share.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -248,6 +255,9 @@
 				1B6C59111A74FF0BB750A10A /* Pods-Runner.debug.xcconfig */,
 				FDBA7311CF00074CB7786C33 /* Pods-Runner.release.xcconfig */,
 				216064C73ECC2AECB9F0A1FA /* Pods-Runner.profile.xcconfig */,
+				BD7FC81DBDE4B0D093DEFFCB /* Pods-Twake Share.debug.xcconfig */,
+				3D818CE626126D8D1C67A3C9 /* Pods-Twake Share.release.xcconfig */,
+				48F3E70A44AA65D69E70C12D /* Pods-Twake Share.profile.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -283,6 +293,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C1005C51261071B5002F4F32 /* Build configuration list for PBXNativeTarget "Twake Share" */;
 			buildPhases = (
+				265995452BC4DC2D49CADCC6 /* [CP] Check Pods Manifest.lock */,
 				C1005C3E261071B5002F4F32 /* Sources */,
 				C1005C3F261071B5002F4F32 /* Frameworks */,
 				C1005C40261071B5002F4F32 /* Resources */,
@@ -387,6 +398,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		265995452BC4DC2D49CADCC6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Twake Share-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -871,6 +904,7 @@
 		};
 		C1005C4E261071B5002F4F32 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD7FC81DBDE4B0D093DEFFCB /* Pods-Twake Share.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -911,6 +945,7 @@
 		};
 		C1005C4F261071B5002F4F32 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3D818CE626126D8D1C67A3C9 /* Pods-Twake Share.release.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -948,6 +983,7 @@
 		};
 		C1005C50261071B5002F4F32 /* Profile */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 48F3E70A44AA65D69E70C12D /* Pods-Twake Share.profile.xcconfig */;
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
