@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -27,6 +28,12 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
   final ContactsManager contactManger = getIt.get<ContactsManager>();
 
   final recentAndContactsNotifier = ValueNotifier<List<PresentationSearch>>([]);
+
+  final isShowChatsAndContactsNotifier = ValueNotifier(false);
+
+  void toggleShowMore() {
+    isShowChatsAndContactsNotifier.toggle();
+  }
 
   MatrixLocalizations get _matrixLocalizations =>
       MatrixLocals(L10n.of(context)!);

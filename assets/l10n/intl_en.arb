@@ -2953,5 +2953,7 @@
   "settingsLanguageDescription": "Set the language you use on Twake Chat",
   "sendImages": "{count, plural, =1{Send 1 image} other{Send {count} images}}",
   "enterCaption": "Enter a caption",
-  "failToSend": "Failed to send, please try again"
+  "failToSend": "Failed to send, please try again",
+  "showLess": "Show Less",
+  "showMore": "Show More"
 }

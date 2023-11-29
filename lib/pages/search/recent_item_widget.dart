@@ -229,6 +229,7 @@ class _ContactInformation extends StatelessWidget {
           builder: (context, snapshot) {
             return SizedBox(
               width: RecentItemStyle.avatarSize,
+              height: RecentItemStyle.avatarSize,
               child: Avatar(
                 mxContent: snapshot.data?.avatarUrl,
                 name: contactPresentationSearch.displayName,

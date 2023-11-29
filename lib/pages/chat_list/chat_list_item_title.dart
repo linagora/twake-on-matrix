@@ -15,7 +15,16 @@ import 'package:matrix/matrix.dart';
 class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
   final Room room;
 
-  const ChatListItemTitle({super.key, required this.room});
+  final TextStyle? textStyle;
+
+  final DateTime? originServerTs;
+
+  const ChatListItemTitle({
+    super.key,
+    required this.room,
+    this.textStyle,
+    this.originServerTs,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +56,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
-                      style:
+                      style: textStyle ??
                           ChatLitTitleTextStyleView.textStyle.textStyle(room),
                     ),
                   ),
@@ -88,7 +97,8 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               Padding(
                 padding: ChatListItemTitleStyle.paddingLeftIcon,
                 child: Text(
-                  room.timeCreated.localizedTimeShort(context),
+                  (originServerTs ?? room.timeCreated)
+                      .localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: room.isUnreadOrInvited
                             ? Theme.of(context).colorScheme.onSurface
