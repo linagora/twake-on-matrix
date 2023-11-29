@@ -1,10 +1,10 @@
-import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
@@ -14,13 +14,12 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class SearchContactsAndChatsController {
+class SearchContactsAndChatsController with SearchDebouncerMixin {
   final BuildContext context;
 
   SearchContactsAndChatsController(this.context);
 
   static const int _limitPrefetchedRecentChats = 3;
-  static const _debouncerIntervalInMilliseconds = 300;
 
   final SearchRecentChatInteractor _searchRecentChatInteractor =
       getIt.get<SearchRecentChatInteractor>();
@@ -28,7 +27,6 @@ class SearchContactsAndChatsController {
   final ContactsManager contactManger = getIt.get<ContactsManager>();
 
   final recentAndContactsNotifier = ValueNotifier<List<PresentationSearch>>([]);
-  Debouncer<String>? _debouncer;
 
   MatrixLocalizations get _matrixLocalizations =>
       MatrixLocals(L10n.of(context)!);
@@ -36,23 +34,11 @@ class SearchContactsAndChatsController {
   List<Room> get _rooms => Matrix.of(context).client.rooms;
 
   void init() {
-    _initializeDebouncer();
-    contactManger.initialSynchronizeContacts();
-    fetchPreSearchChat();
-  }
-
-  void _initializeDebouncer() {
-    _debouncer = Debouncer(
-      const Duration(milliseconds: _debouncerIntervalInMilliseconds),
-      initialValue: '',
-    );
-
-    _debouncer?.values.listen((keyword) async {
-      Logs().d(
-        "SearchContactAndRecentChatController::_initializeDebouncer: searchKeyword: $keyword",
-      );
+    initializeDebouncer((keyword) {
       _searchChatsFromLocal(keyword: keyword);
     });
+    contactManger.initialSynchronizeContacts();
+    fetchPreSearchChat();
   }
 
   void fetchPreSearchChat() {
@@ -114,11 +100,11 @@ class SearchContactsAndChatsController {
   }
 
   void onSearchBarChanged(String keyword) {
-    _debouncer?.value = keyword;
+    setDebouncerValue(keyword);
   }
 
   void dispose() {
-    _debouncer?.cancel();
+    disposeDebouncer();
     recentAndContactsNotifier.dispose();
   }
 }
