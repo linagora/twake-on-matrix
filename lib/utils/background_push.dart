@@ -23,6 +23,7 @@ import 'dart:io';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -205,6 +206,8 @@ class BackgroundPush {
                             "loc-args": [],
                           },
                         },
+                        "pusher_notification_client_identifier":
+                            client.pusherNotificationClientIdentifier,
                       },
                     }
                   : {},
