@@ -5,8 +5,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vector-im/compound-design-tokens.git",
       "state" : {
-        "revision" : "b603371c5e4ac798f4613a7388d2305100b31911",
-        "version" : "0.0.7"
+        "revision" : "387d2b7211f07761c67e849c59414a1bb803defa"
       }
     },
     {
@@ -14,8 +13,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vector-im/compound-ios",
       "state" : {
-        "branch" : "main",
-        "revision" : "0fcc7ecae868f7015789275580c4be458ad4f546"
+        "revision" : "e8c097e545a06a2ef3036af33192a07c58fafd1b"
       }
     },
     {
@@ -43,6 +41,15 @@
       "state" : {
         "revision" : "76062513434421cb6c8a1ae1d4f8368a7ebc2da3",
         "version" : "1.7.18"
+      }
+    },
+    {
+      "identity" : "element-design-tokens",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/vector-im/element-design-tokens",
+      "state" : {
+        "revision" : "63e40f10b336c136d6d05f7967e4565e37d3d760",
+        "version" : "0.0.3"
       }
     },
     {
@@ -77,8 +84,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/matrix-org/matrix-rust-components-swift",
       "state" : {
-        "branch" : "main",
-        "revision" : "42274cc2414e675b246432b037e7fa82b587fd97"
+        "revision" : "5f3a195f6a461b4d40a8a705a3af8235711f12f5",
+        "version" : "1.1.20"
       }
     },
     {
