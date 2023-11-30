@@ -1,14 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 
 class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   FlutterHiveCollectionsDatabase(
@@ -151,5 +155,80 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
         File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
     if (await file.exists() == false) return null;
     return file;
+  }
+
+  @override
+  Future<void> updateClient(
+    String homeserverUrl,
+    String token,
+    String userId,
+    String? deviceId,
+    String? deviceName,
+    String? prevBatch,
+    String? olmAccount,
+  ) async {
+    if (PlatformInfos.isIOS) {
+      final restoreToken = KeychainSharingRestoreToken(
+        session: KeychainSharingSession(
+          accessToken: token,
+          userId: userId,
+          deviceId: deviceId ?? "",
+          homeserverUrl: homeserverUrl,
+        ),
+      );
+      await KeychainSharingManager.save(restoreToken);
+    }
+    return super.updateClient(
+      homeserverUrl,
+      token,
+      userId,
+      deviceId,
+      deviceName,
+      prevBatch,
+      olmAccount,
+    );
+  }
+
+  @override
+  Future<int> insertClient(
+    String name,
+    String homeserverUrl,
+    String token,
+    String userId,
+    String? deviceId,
+    String? deviceName,
+    String? prevBatch,
+    String? olmAccount,
+  ) async {
+    if (PlatformInfos.isIOS) {
+      final restoreToken = KeychainSharingRestoreToken(
+        session: KeychainSharingSession(
+          accessToken: token,
+          userId: userId,
+          deviceId: deviceId ?? "",
+          homeserverUrl: homeserverUrl,
+        ),
+      );
+      await KeychainSharingManager.save(restoreToken);
+    }
+    return super.insertClient(
+      name,
+      homeserverUrl,
+      token,
+      userId,
+      deviceId,
+      deviceName,
+      prevBatch,
+      olmAccount,
+    );
+  }
+
+  @override
+  Future<void> clear({bool supportDeleteCollections = false}) async {
+    if (PlatformInfos.isIOS) {
+      // TODO: Should pass userId here when support multiple accounts
+      await KeychainSharingManager.delete(userId: null);
+    }
+    return super.clear(supportDeleteCollections: supportDeleteCollections);
   }
 }
