@@ -74,6 +74,10 @@ abstract class AppConfig {
   static const int thumbnailQuality = 70;
   static const int blurHashSize = 32;
   static const int imageQuality = 50;
+  static const String iOSKeychainSharingId =
+      'KUT463DS29.com.linagora.ios.twake.shared';
+  static const String iOSKeychainSharingAccount =
+      'com.linagora.ios.twake.sessions';
 
   static String? issueId;
 
