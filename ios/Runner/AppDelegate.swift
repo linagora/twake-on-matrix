@@ -57,7 +57,7 @@ let apnTokenKey = "apnToken"
                                          withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
         twakeApnChannel?.invokeMethod("willPresent", arguments: userInfo)
-        let isRemoteNotification = userInfo["aps"] != nil
+        let isRemoteNotification = userInfo["event_id"] != nil
         // Hide remote noti when in foreground, decrypted noti will show by dart
         completionHandler(isRemoteNotification ? [] : [.alert, .badge, .sound])
     }
