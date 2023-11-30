@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
+import 'package:crypto/crypto.dart';
 
 extension StringCasingExtension on String {
   String removeDiacritics() {
@@ -317,5 +320,9 @@ extension StringCasingExtension on String {
   /// Ref: https://spec.matrix.org/v1.6/rooms/v4/#event-ids
   String get urlSafeBase64 {
     return replaceAll('+', '-').replaceAll('/', '_');
+  }
+
+  String get sha256Hash {
+    return sha256.convert(utf8.encode(this)).toString();
   }
 }

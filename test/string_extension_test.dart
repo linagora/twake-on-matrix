@@ -400,4 +400,12 @@ void main() {
       expect(input.urlSafeBase64, equals(expectedOutput));
     });
   });
+
+  test('sha256Hash returns the correct SHA-256 hash', () {
+    const input = 'Hello, world!';
+    const expectedOutput =
+        '315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3';
+    final result = input.sha256Hash;
+    expect(result, equals(expectedOutput));
+  });
 }
