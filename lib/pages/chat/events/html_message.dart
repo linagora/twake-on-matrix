@@ -99,7 +99,7 @@ class HtmlMessage extends StatelessWidget {
         context: context,
         useRootNavigator: false,
         builder: (_) => ImageViewer(
-          Event(
+          event: Event(
             type: EventTypes.Message,
             content: <String, dynamic>{
               'body': mxc,
