@@ -155,7 +155,7 @@ class DraftChatController extends State<DraftChat>
         .execute(
       contactMxId: presentationContact!.matrixId!,
       client: Matrix.of(context).client,
-      enableEncryption: true,
+      enableEncryption: false,
     )
         .listen((event) {
       event.fold((failure) {

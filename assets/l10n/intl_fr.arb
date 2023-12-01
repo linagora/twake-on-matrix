@@ -2683,8 +2683,6 @@
   },
   "invite": "Inviter",
   "@invite": {},
-  "getHelp": "Obtenir de l'aide",
-  "@getHelp": {},
   "errorPageTitle": "Il y a un problème",
   "@errorPageTitle": {},
   "forwardTo": "Transmettre à...",
