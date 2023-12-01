@@ -13,7 +13,7 @@ class InputBarShortcuts extends StatelessWidget {
 
   final Room? room;
 
-  final VoidCallback handlePaste;
+  final VoidCallback? handlePaste;
 
   final ValueChanged<String>? onEnter;
 
@@ -22,7 +22,7 @@ class InputBarShortcuts extends StatelessWidget {
   InputBarShortcuts({
     super.key,
     required this.child,
-    required this.handlePaste,
+    this.handlePaste,
     this.room,
     this.controller,
     this.onEnter,
@@ -35,13 +35,14 @@ class InputBarShortcuts extends StatelessWidget {
   Widget build(BuildContext context) {
     return CallbackShortcuts(
       bindings: {
-        SingleActivator(
-          flutter.LogicalKeyboardKey.keyV,
-          meta: PlatformInfos.isMacKeyboardPlatform,
-          control: !PlatformInfos.isMacKeyboardPlatform,
-        ): () async {
-          handlePaste();
-        },
+        if (handlePaste != null)
+          SingleActivator(
+            flutter.LogicalKeyboardKey.keyV,
+            meta: PlatformInfos.isMacKeyboardPlatform,
+            control: !PlatformInfos.isMacKeyboardPlatform,
+          ): () async {
+            handlePaste!();
+          },
         SingleActivator(
           flutter.LogicalKeyboardKey.keyC,
           meta: PlatformInfos.isMacKeyboardPlatform,
