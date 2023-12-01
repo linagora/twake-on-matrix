@@ -25,6 +25,42 @@ class ImageViewerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget imageWidget;
+    if (filePath != null) {
+      imageWidget = Image.file(
+        File(filePath!),
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.none,
+      );
+    } else if (controller.widget.event != null) {
+      imageWidget = _ImageWidget(event: controller.widget.event!);
+    } else if (imageData != null) {
+      imageWidget = Image.memory(
+        imageData!,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.none,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    Widget interactiveViewer = InteractiveViewer(
+      onInteractionEnd: controller.onInteractionEnds,
+      transformationController: controller.transformationController,
+      minScale: ImageViewerStyle.minScaleInteractiveViewer,
+      maxScale: ImageViewerStyle.maxScaleInteractiveViewer,
+      child: Center(
+        child: imageWidget,
+      ),
+    );
+
+    if (controller.widget.event != null) {
+      interactiveViewer = Hero(
+        tag: controller.widget.event!.eventId,
+        child: interactiveViewer,
+      );
+    }
+
     return Center(
       child: GestureDetector(
         onTap: () {
@@ -38,24 +74,7 @@ class ImageViewerView extends StatelessWidget {
         onDoubleTap: () => controller.onDoubleTap(),
         child: Stack(
           children: [
-            Hero(
-              tag: controller.widget.event.eventId,
-              child: InteractiveViewer(
-                onInteractionEnd: controller.onInteractionEnds,
-                transformationController: controller.transformationController,
-                minScale: ImageViewerStyle.minScaleInteractiveViewer,
-                maxScale: ImageViewerStyle.maxScaleInteractiveViewer,
-                child: Center(
-                  child: filePath != null
-                      ? Image.file(
-                          File(filePath!),
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.none,
-                        )
-                      : _ImageWidget(event: controller.widget.event),
-                ),
-              ),
-            ),
+            interactiveViewer,
             _buildAppBarPreview(),
           ],
         ),
@@ -88,15 +107,16 @@ class ImageViewerView extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.save_alt,
+                    if (controller.widget.event != null)
+                      IconButton(
+                        icon: Icon(
+                          Icons.save_alt,
+                          color: LinagoraSysColors.material().onPrimary,
+                        ),
+                        onPressed: () => controller.saveFileAction(context),
                         color: LinagoraSysColors.material().onPrimary,
+                        tooltip: L10n.of(context)!.saveFile,
                       ),
-                      onPressed: () => controller.saveFileAction(context),
-                      color: LinagoraSysColors.material().onPrimary,
-                      tooltip: L10n.of(context)!.saveFile,
-                    ),
                     //FIXME: https://github.com/linagora/twake-on-matrix/issues/435
                     if (PlatformInfos.isMobile)
                       Builder(
@@ -110,15 +130,16 @@ class ImageViewerView extends StatelessWidget {
                           ),
                         ),
                       ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.shortcut,
+                    if (controller.widget.event != null)
+                      IconButton(
+                        icon: Icon(
+                          Icons.shortcut,
+                          color: LinagoraSysColors.material().onPrimary,
+                        ),
+                        onPressed: controller.forwardAction,
                         color: LinagoraSysColors.material().onPrimary,
+                        tooltip: L10n.of(context)!.share,
                       ),
-                      onPressed: controller.forwardAction,
-                      color: LinagoraSysColors.material().onPrimary,
-                      tooltip: L10n.of(context)!.share,
-                    ),
                   ],
                 ),
               ],
