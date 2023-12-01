@@ -1,11 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -55,11 +57,8 @@ class ExpansionList extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _NewGroupButton(
-                    onPressed: goToNewGroupChat,
-                  ),
+                  ..._buildResponsiveButtons(context),
                   const LoadingContactWidget(),
-                  _GetHelpButton(),
                 ],
               );
             }
@@ -68,9 +67,7 @@ class ExpansionList extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _NewGroupButton(
-                    onPressed: goToNewGroupChat,
-                  ),
+                  ..._buildResponsiveButtons(context),
                   InkWell(
                     onTap: () {
                       onContactTap(
@@ -84,7 +81,6 @@ class ExpansionList extends StatelessWidget {
                       highlightKeyword: textEditingController.text,
                     ),
                   ),
-                  _GetHelpButton(),
                 ],
               );
             }
@@ -103,10 +99,7 @@ class ExpansionList extends StatelessWidget {
                       keyword: textEditingController.text,
                     ),
                     _MoreListTile(),
-                    _NewGroupButton(
-                      onPressed: goToNewGroupChat,
-                    ),
-                    _GetHelpButton(),
+                    ..._buildResponsiveButtons(context),
                   ],
                 );
               }
@@ -154,18 +147,12 @@ class ExpansionList extends StatelessWidget {
                       height: 12,
                     ),
                     _contactsWarningBannerViewBuilder(),
-                    _NewGroupButton(
-                      onPressed: goToNewGroupChat,
-                    ),
+                    ..._buildResponsiveButtons(context),
                     for (final child in expansionList) ...[child],
-                    _GetHelpButton(),
                   ] else ...[
                     for (final child in expansionList) ...[child],
                     _MoreListTile(),
-                    _NewGroupButton(
-                      onPressed: goToNewGroupChat,
-                    ),
-                    _GetHelpButton(),
+                    ..._buildResponsiveButtons(context),
                   ],
                 ],
               );
@@ -177,10 +164,7 @@ class ExpansionList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _NewGroupButton(
-            onPressed: goToNewGroupChat,
-          ),
-          _GetHelpButton(),
+          ..._buildResponsiveButtons(context),
         ],
       ),
     );
@@ -236,6 +220,16 @@ class ExpansionList extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildResponsiveButtons(BuildContext context) {
+    if (!getIt.get<ResponsiveUtils>().isSingleColumnLayout(context)) return [];
+
+    return [
+      _NewGroupButton(
+        onPressed: goToNewGroupChat,
+      ),
+    ];
   }
 }
 
@@ -303,18 +297,6 @@ class _NewGroupButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: Icons.supervisor_account_outlined,
       text: L10n.of(context)!.newGroupChat,
-    );
-  }
-}
-
-class _GetHelpButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _IconTextTileButton(
-      context: context,
-      onPressed: () => {},
-      iconData: Icons.question_mark,
-      text: L10n.of(context)!.getHelp,
     );
   }
 }
