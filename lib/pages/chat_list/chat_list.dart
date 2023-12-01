@@ -14,6 +14,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -62,7 +63,8 @@ class ChatListController extends State<ChatList>
         RouteAware,
         ComparablePresentationContactMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin {
+        PopupMenuWidgetMixin,
+        GoToGroupChatMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
   final responsive = getIt.get<ResponsiveUtils>();
@@ -703,14 +705,6 @@ class ChatListController extends State<ChatList>
   void goToNewPrivateChat() {
     if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.go('/rooms/newprivatechat');
-    } else {
-      context.pushInner('innernavigator/newprivatechat');
-    }
-  }
-
-  void goToNewGroupChat() {
-    if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
-      context.go('/rooms/newprivatechat/newgroup');
     } else {
       context.pushInner('innernavigator/newprivatechat');
     }
