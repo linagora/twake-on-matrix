@@ -57,6 +57,7 @@ import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
@@ -237,6 +238,10 @@ class GetItInitializer {
       () => SaveLanguageInteractor(
         getIt.get<LocalizationsRepository>(),
       ),
+    );
+
+    getIt.registerLazySingleton<SendMediaOnWebWithCaptionInteractor>(
+      () => SendMediaOnWebWithCaptionInteractor(),
     );
   }
 }
