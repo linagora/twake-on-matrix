@@ -89,7 +89,7 @@ class ChatListView extends StatelessWidget {
                       ),
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.group),
-                        onPressed: () => controller.goToNewGroupChat(),
+                        onPressed: () => controller.goToNewGroupChat(context),
                         child: Text(L10n.of(context)!.newChat),
                       ),
                     ],
