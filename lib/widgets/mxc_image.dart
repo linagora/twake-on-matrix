@@ -210,7 +210,7 @@ class _MxcImageState extends State<MxcImage>
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
-              itemBuilder: ImageViewer(widget.event!),
+              itemBuilder: ImageViewer(event: widget.event!),
             );
           },
         ),

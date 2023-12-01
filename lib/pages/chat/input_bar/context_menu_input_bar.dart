@@ -11,7 +11,7 @@ class ContextMenuInputBar extends StatelessWidget {
 
   final TextEditingController? controller;
 
-  final VoidCallback handlePaste;
+  final VoidCallback? handlePaste;
 
   final Room? room;
 
@@ -74,7 +74,7 @@ class ContextMenuInputBar extends StatelessWidget {
               controller!.cutText();
               break;
             case InputBarContextMenu.paste:
-              handlePaste();
+              handlePaste?.call();
               break;
           }
           FocusScope.of(context).requestFocus(focusNode);
