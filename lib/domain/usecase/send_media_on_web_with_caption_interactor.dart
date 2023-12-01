@@ -1,17 +1,13 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/send_files/send_media_with_caption_state.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SendMediaOnWebWithCaptionInteractor {
-  Stream<Either<Failure, Success>> execute({
+  Future<void> execute({
     required Room room,
     required MatrixFile media,
     String caption = "",
-  }) async* {
+  }) async {
     try {
       final txid = room.client.generateUniqueTransactionId();
       room.sendingFilePlaceholders[txid] = media;
@@ -44,7 +40,6 @@ class SendMediaOnWebWithCaptionInteractor {
       }
     } catch (e) {
       Logs().e("SendMediaOnWebWithCaptionInteractor: $e");
-      yield Left(SendMediaWithCaptionFailed(exception: e));
     }
   }
 }
