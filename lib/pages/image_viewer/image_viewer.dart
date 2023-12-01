@@ -10,13 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class ImageViewer extends StatefulWidget {
-  final Event event;
+  final Event? event;
   final Uint8List? imageData;
   final String? filePath;
 
-  const ImageViewer(
-    this.event, {
+  const ImageViewer({
     Key? key,
+    this.event,
     this.imageData,
     this.filePath,
   }) : super(key: key);
@@ -46,7 +46,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Forward this image to another room.
   void forwardAction() async {
-    Matrix.of(context).shareContent = widget.event.content;
+    Matrix.of(context).shareContent = widget.event?.content;
     final result = await showDialog(
       context: context,
       useSafeArea: false,
@@ -63,10 +63,11 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   /// Save this file with a system call.
-  void saveFileAction(BuildContext context) => widget.event.saveFile(context);
+  void saveFileAction(BuildContext context) => widget.event?.saveFile(context);
 
   /// Save this file with a system call.
-  void shareFileAction(BuildContext context) => widget.event.shareFile(context);
+  void shareFileAction(BuildContext context) =>
+      widget.event?.shareFile(context);
 
   static const maxScaleFactor = 1.5;
 
