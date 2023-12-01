@@ -23,32 +23,30 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final Room? room;
   final int? minLines;
   final int? maxLines;
-  final TextInputType? keyboardType;
+  final TextInputType keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final FocusNode? focusNode;
-  final FocusNode keyboardFocusNode;
   final TextEditingController? controller;
   final FocusSuggestionController focusSuggestionController;
-  final InputDecoration? decoration;
+  final InputDecoration decoration;
   final ValueChanged<String>? onChanged;
-  final bool? autofocus;
-  final bool readOnly;
+  final bool autofocus;
+  final bool enablePasteImage;
 
   InputBar({
     this.room,
     this.minLines,
     this.maxLines,
-    this.keyboardType,
+    this.keyboardType = TextInputType.text,
     this.onSubmitted,
     this.focusNode,
-    required this.keyboardFocusNode,
     this.controller,
-    this.decoration,
+    this.decoration = const InputDecoration(),
     this.onChanged,
-    this.autofocus,
+    this.autofocus = false,
     this.textInputAction,
-    this.readOnly = false,
+    this.enablePasteImage = true,
     required this.focusSuggestionController,
     Key? key,
   }) : super(key: key);
@@ -331,11 +329,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       focusSuggestionController: focusSuggestionController,
       room: room,
       onEnter: _onEnter,
-      handlePaste: () => handlePaste(context),
+      handlePaste: enablePasteImage ? () => handlePaste(context) : null,
       child: ContextMenuInputBar(
         controller: controller,
         focusNode: focusNode,
-        handlePaste: () => handlePaste(context),
+        handlePaste: enablePasteImage ? () => handlePaste(context) : null,
         child: TypeAheadField<Map<String, String?>>(
           direction: AxisDirection.up,
           hideOnEmpty: true,
@@ -346,12 +344,12 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           textFieldConfiguration: TextFieldConfiguration(
             minLines: minLines,
             maxLines: maxLines,
-            keyboardType: keyboardType!,
+            keyboardType: keyboardType,
             textInputAction: textInputAction,
-            autofocus: autofocus!,
+            autofocus: autofocus,
             style: InputBarStyle.getTypeAheadTextStyle(context),
             controller: controller,
-            decoration: decoration!,
+            decoration: decoration,
             focusNode: focusNode,
             onChanged: (text) {
               // fix for the library for now

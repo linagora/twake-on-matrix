@@ -37,7 +37,7 @@ class SendingImageInfoWidget extends StatelessWidget {
           builder: (context) {
             return InteractiveViewerGallery(
               itemBuilder: ImageViewer(
-                event,
+                event: event,
                 filePath: matrixFile.filePath,
               ),
             );
