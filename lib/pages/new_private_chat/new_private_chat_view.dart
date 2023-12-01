@@ -33,7 +33,7 @@ class NewPrivateChatView extends StatelessWidget {
         controller: controller.scrollController,
         child: ExpansionList(
           presentationContactsNotifier: controller.presentationContactNotifier,
-          goToNewGroupChat: controller.goToNewGroupChat,
+          goToNewGroupChat: () => controller.goToNewGroupChat(context),
           isShowContactsNotifier: controller.isShowContactsNotifier,
           onContactTap: controller.onContactAction,
           onExternalContactTap: controller.onExternalContactAction,

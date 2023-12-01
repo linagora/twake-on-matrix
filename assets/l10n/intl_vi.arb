@@ -2733,8 +2733,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "getHelp": "Trợ giúp",
-  "@getHelp": {},
   "pleaseChooseAUsername": "Vui lòng chọn tên đăng nhập",
   "@pleaseChooseAUsername": {
     "type": "text",
