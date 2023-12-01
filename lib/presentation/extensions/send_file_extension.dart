@@ -330,11 +330,11 @@ extension SendFileExtension on Room {
         },
       ),
     );
-    await handleImageFakeSync(fakeImageEvent);
+    await handleFakeSync(fakeImageEvent);
     return fakeImageEvent;
   }
 
-  Future<void> handleImageFakeSync(
+  Future<void> handleFakeSync(
     SyncUpdate fakeImageEvent, {
     Direction? direction,
   }) async {
@@ -495,7 +495,7 @@ extension SendFileExtension on Room {
   ) async {
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![key] = value;
-    await handleImageFakeSync(fakeImageEvent);
+    await handleFakeSync(fakeImageEvent);
   }
 
   Future<Size> _calculateImageDimension(String filePath) {
@@ -508,5 +508,37 @@ extension SendFileExtension on Room {
 
   bool isRoomEncrypted() {
     return encrypted && client.fileEncryptionEnabled;
+  }
+
+  Future<void> sendFakeMessage({
+    required Map<String, Object?> content,
+    required String messageId,
+  }) async {
+    final sentDate = DateTime.now();
+    final syncUpdate = SyncUpdate(
+      nextBatch: '',
+      rooms: RoomsUpdate(
+        join: {
+          id: JoinedRoomUpdate(
+            timeline: TimelineUpdate(
+              events: [
+                MatrixEvent(
+                  content: content,
+                  type: EventTypes.Message,
+                  eventId: messageId,
+                  senderId: client.userID!,
+                  originServerTs: sentDate,
+                  unsigned: {
+                    messageSendingStatusKey: EventStatus.sending.intValue,
+                    'transaction_id': messageId,
+                  },
+                ),
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+    await handleFakeSync(syncUpdate);
   }
 }
