@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -83,8 +84,14 @@ class DraftChatView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Center(
-                      child: DirectDraftChatView(
-                        onTap: controller.inputFocus.requestFocus,
+                      child: DropTarget(
+                        onDragDone: (details) =>
+                            controller.handleDragDone(details),
+                        onDragEntered: controller.onDragEntered,
+                        onDragExited: controller.onDragExited,
+                        child: DirectDraftChatView(
+                          onTap: controller.inputFocus.requestFocus,
+                        ),
                       ),
                     ),
                   ),
