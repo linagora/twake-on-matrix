@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -7,6 +8,7 @@ import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_succe
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
@@ -16,10 +18,12 @@ import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
@@ -48,7 +52,11 @@ class DraftChat extends StatefulWidget {
 }
 
 class DraftChatController extends State<DraftChat>
-    with CommonMediaPickerMixin, MediaPickerMixin, SendFilesMixin {
+    with
+        CommonMediaPickerMixin,
+        MediaPickerMixin,
+        SendFilesMixin,
+        DragDrogFileMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   final NetworkConnectionService networkConnectionService =
@@ -75,6 +83,9 @@ class DraftChatController extends State<DraftChat>
 
   PresentationContact? get presentationContact => widget.contact;
 
+  final sendMediaWithCaptionInteractor =
+      getIt.get<SendMediaOnWebWithCaptionInteractor>();
+
   void _updateScrollController() {
     if (!mounted) {
       return;
@@ -98,6 +109,19 @@ class DraftChatController extends State<DraftChat>
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
         super.sendImages(imagePickerController, room: newRoom);
+      },
+    );
+  }
+
+  void handleDragDone(DropDoneDetails details) async {
+    return _createRoom(
+      onRoomCreatedSuccess: (newRoom) async {
+        final matrixFiles = await super.onDragDone(details);
+        sendImagesWithCaption(
+          room: newRoom,
+          context: context,
+          matrixFiles: matrixFiles,
+        );
       },
     );
   }
@@ -286,13 +310,26 @@ class DraftChatController extends State<DraftChat>
     if (result == null || result.files.isEmpty) return;
 
     final matrixFilesList =
-        result.files.map((file) => file.toMatrixFile()).toList();
+        result.files.map((file) => file.toMatrixFile().detectFileType).toList();
+
+    await sendImagesWithCaption(
+      context: context,
+      matrixFiles: [matrixFilesList.first],
+    );
+    isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        sendFileOnWebInteractor.execute(
-          room: newRoom,
-          files: matrixFilesList,
-        );
+        if (matrixFilesList.first is MatrixImageFile) {
+          sendMediaWithCaptionInteractor.execute(
+            room: newRoom,
+            media: matrixFilesList.first,
+          );
+        } else {
+          sendFileOnWebInteractor.execute(
+            room: newRoom,
+            files: matrixFilesList,
+          );
+        }
       },
     );
   }

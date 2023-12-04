@@ -5,7 +5,9 @@ import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -67,10 +69,23 @@ mixin SendFilesMixin {
     if (result == null || result.files.isEmpty) return;
     final matrixFilesList =
         result.files.map((file) => file.toMatrixFile()).toList();
-    sendFileOnWebInteractor.execute(
-      room: room!,
-      files: matrixFilesList,
-    );
+    if (matrixFilesList.first is MatrixImageFile && room != null) {
+      showDialog(
+        context: context,
+        useRootNavigator: PlatformInfos.isWeb,
+        builder: (context) {
+          return SendFileDialog(
+            room: room,
+            files: [matrixFilesList.first],
+          );
+        },
+      );
+    } else {
+      sendFileOnWebInteractor.execute(
+        room: room!,
+        files: matrixFilesList,
+      );
+    }
   }
 
   void onPickerTypeClick({

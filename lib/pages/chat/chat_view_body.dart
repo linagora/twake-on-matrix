@@ -25,7 +25,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
   @override
   Widget build(BuildContext context) {
     return DropTarget(
-      onDragDone: controller.onDragDone,
+      onDragDone: (details) => controller.handleDragDone(details),
       onDragEntered: controller.onDragEntered,
       onDragExited: controller.onDragExited,
       child: Stack(
