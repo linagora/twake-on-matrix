@@ -18,7 +18,6 @@ import 'package:fluffychat/domain/model/preview_file/supported_preview_file_type
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
@@ -48,6 +47,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -153,8 +153,6 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
-  final ValueNotifier<bool> draggingNotifier = ValueNotifier(false);
-
   final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
@@ -172,36 +170,6 @@ class ChatController extends State<Chat>
   bool currentlyTyping = false;
 
   StreamSubscription<EventId>? _jumpToEventIdSubscription;
-
-  void onDragEntered(_) => draggingNotifier.value = true;
-
-  void onDragExited(_) => draggingNotifier.value = false;
-
-  void onDragDone(DropDoneDetails details) async {
-    final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
-
-    draggingNotifier.value = false;
-    final bytesList = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Future.wait(
-        details.files.map(
-          (xfile) => xfile.readAsBytes(),
-        ),
-      ),
-    );
-    if (bytesList.error != null) return;
-
-    final matrixFiles = <MatrixFile>[];
-    for (var i = 0; i < bytesList.result!.length; i++) {
-      matrixFiles.add(
-        MatrixFile(
-          bytes: bytesList.result![i],
-          name: details.files[i].name,
-        ).detectFileType,
-      );
-    }
-
-    sendFileOnWebInteractor.execute(room: room!, files: matrixFiles);
-  }
 
   bool get canSaveSelectedEvent =>
       selectedEvents.length == 1 &&
