@@ -303,7 +303,8 @@ class _MessageImageBuilder extends StatelessWidget {
   bool isSendingImageInMobile(MatrixFile? matrixFile) {
     return matrixFile != null &&
         matrixFile.filePath != null &&
-        matrixFile is MatrixImageFile;
+        matrixFile is MatrixImageFile &&
+        !PlatformInfos.isWeb;
   }
 }
 
