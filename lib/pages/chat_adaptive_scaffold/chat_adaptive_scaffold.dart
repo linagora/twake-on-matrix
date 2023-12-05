@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_navigator.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
