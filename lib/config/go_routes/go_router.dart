@@ -6,7 +6,6 @@ import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
-import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
@@ -22,7 +21,6 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
-import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
@@ -34,7 +32,6 @@ import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.
 import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_emotes/settings_emotes.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_ignore_list/settings_ignore_list.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_multiple_emotes/settings_multiple_emotes.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
@@ -438,50 +435,50 @@ abstract class AppRoutes {
                   ),
                   redirect: loggedOutRedirect,
                 ),
-                GoRoute(
-                  path: 'details',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    ChatDetails(
-                      roomId: state.pathParameters['roomid']!,
-                    ),
-                  ),
-                  routes: [
-                    GoRoute(
-                      path: 'permissions',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        const ChatPermissionsSettings(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'multiple_emotes',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        const MultipleEmotesSettings(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'emotes',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        const EmotesSettings(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'emotes/:state_key',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        const EmotesSettings(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                  ],
-                  redirect: loggedOutRedirect,
-                ),
+                // GoRoute(
+                //   path: 'details',
+                //   pageBuilder: (context, state) => defaultPageBuilder(
+                //     context,
+                //     ChatDetails(
+                //       roomId: state.pathParameters['roomid']!,
+                //     ),
+                //   ),
+                //   routes: [
+                //     GoRoute(
+                //       path: 'permissions',
+                //       pageBuilder: (context, state) => defaultPageBuilder(
+                //         context,
+                //         const ChatPermissionsSettings(),
+                //       ),
+                //       redirect: loggedOutRedirect,
+                //     ),
+                //     GoRoute(
+                //       path: 'multiple_emotes',
+                //       pageBuilder: (context, state) => defaultPageBuilder(
+                //         context,
+                //         const MultipleEmotesSettings(),
+                //       ),
+                //       redirect: loggedOutRedirect,
+                //     ),
+                //     GoRoute(
+                //       path: 'emotes',
+                //       pageBuilder: (context, state) => defaultPageBuilder(
+                //         context,
+                //         const EmotesSettings(),
+                //       ),
+                //       redirect: loggedOutRedirect,
+                //     ),
+                //     GoRoute(
+                //       path: 'emotes/:state_key',
+                //       pageBuilder: (context, state) => defaultPageBuilder(
+                //         context,
+                //         const EmotesSettings(),
+                //       ),
+                //       redirect: loggedOutRedirect,
+                //     ),
+                //   ],
+                //   redirect: loggedOutRedirect,
+                // ),
               ],
             ),
           ],

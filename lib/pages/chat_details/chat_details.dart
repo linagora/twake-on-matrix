@@ -1,22 +1,19 @@
-import 'package:collection/collection.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_navigator.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
@@ -25,16 +22,12 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/chat_details/chat_details_view.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
@@ -42,8 +35,15 @@ enum AliasActions { copy, delete, setCanonical }
 
 class ChatDetails extends StatefulWidget {
   final String roomId;
+  final bool isInStack;
+  final VoidCallback? onBack;
 
-  const ChatDetails({super.key, required this.roomId});
+  const ChatDetails({
+    super.key,
+    required this.roomId,
+    required this.isInStack,
+    this.onBack,
+  });
 
   @override
   ChatDetailsController createState() => ChatDetailsController();
@@ -90,8 +90,6 @@ class ChatDetailsController extends State<ChatDetails>
   );
 
   List<User>? members;
-
-  bool displaySettings = false;
 
   String? get roomId => widget.roomId;
 
@@ -169,297 +167,6 @@ class ChatDetailsController extends State<ChatDetails>
     mediaListController?.refresh();
   }
 
-  void toggleDisplaySettings() =>
-      setState(() => displaySettings = !displaySettings);
-
-  void setDisplaynameAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.changeTheNameOfTheGroup,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        DialogTextField(
-          initialText: room.getLocalizedDisplayname(
-            MatrixLocals(
-              L10n.of(context)!,
-            ),
-          ),
-        ),
-      ],
-    );
-    if (input == null) return;
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room.setName(input.single),
-    );
-    if (success.error == null) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.displaynameHasBeenChanged,
-      );
-    }
-  }
-
-  void editAliases() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!);
-
-    // The current endpoint doesnt seem to be implemented in Synapse. This may
-    // change in the future and then we just need to switch to this api call:
-    //
-    // final aliases = await TwakeDialog.showFutureLoadingDialogFullScreen(
-    //   context: context,
-    //   future: () => room.client.requestRoomAliases(room.id),
-    // );
-    //
-    // While this is not working we use the unstable api:
-    final aliases = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room!.client
-          .request(
-            RequestType.GET,
-            '/client/unstable/org.matrix.msc2432/rooms/${Uri.encodeComponent(room.id)}/aliases',
-          )
-          .then((response) => List<String>.from(response['aliases'] as List)),
-    );
-    // Switch to the stable api once it is implemented.
-
-    if (aliases.error != null) return;
-    final adminMode = room!.canSendEvent('m.room.canonical_alias');
-    if (aliases.result!.isEmpty && (room.canonicalAlias.isNotEmpty)) {
-      aliases.result!.add(room.canonicalAlias);
-    }
-    if (aliases.result!.isEmpty && adminMode) {
-      return setAliasAction();
-    }
-    final select = await showConfirmationDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.editRoomAliases,
-      actions: [
-        if (adminMode)
-          AlertDialogAction(label: L10n.of(context)!.create, key: 'new'),
-        ...aliases.result!
-            .map((alias) => AlertDialogAction(key: alias, label: alias))
-            .toList(),
-      ],
-    );
-    if (select == null) return;
-    if (select == 'new') {
-      return setAliasAction();
-    }
-    final option = await showConfirmationDialog<AliasActions>(
-      context: context,
-      title: select,
-      actions: [
-        AlertDialogAction(
-          label: L10n.of(context)!.copyToClipboard,
-          key: AliasActions.copy,
-          isDefaultAction: true,
-        ),
-        if (adminMode) ...{
-          AlertDialogAction(
-            label: L10n.of(context)!.setAsCanonicalAlias,
-            key: AliasActions.setCanonical,
-            isDestructiveAction: true,
-          ),
-          AlertDialogAction(
-            label: L10n.of(context)!.delete,
-            key: AliasActions.delete,
-            isDestructiveAction: true,
-          ),
-        },
-      ],
-    );
-    if (option == null) return;
-    switch (option) {
-      case AliasActions.copy:
-        await Clipboard.setData(ClipboardData(text: select));
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.copiedToClipboard,
-        );
-        break;
-      case AliasActions.delete:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => room.client.deleteRoomAlias(select),
-        );
-        break;
-      case AliasActions.setCanonical:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => room.client.setRoomStateWithKey(
-            room.id,
-            EventTypes.RoomCanonicalAlias,
-            '',
-            {
-              'alias': select,
-            },
-          ),
-        );
-        break;
-    }
-  }
-
-  void setAliasAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
-    final domain = room.client.userID!.domain;
-
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.setInvitationLink,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        DialogTextField(
-          prefixText: '#',
-          suffixText: domain,
-          hintText: L10n.of(context)!.alias,
-          initialText: room.canonicalAlias.localpart,
-        ),
-      ],
-    );
-    if (input == null) return;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () =>
-          room.client.setRoomAlias('#${input.single}:${domain!}', room.id),
-    );
-  }
-
-  void setTopicAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.setGroupDescription,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        DialogTextField(
-          hintText: L10n.of(context)!.setGroupDescription,
-          initialText: room.topic,
-          minLines: 1,
-          maxLines: 4,
-        ),
-      ],
-    );
-    if (input == null) return;
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room.setDescription(input.single),
-    );
-    if (success.error == null) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.groupDescriptionHasBeenChanged,
-      );
-    }
-  }
-
-  void setGuestAccessAction(GuestAccess guestAccess) =>
-      TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => Matrix.of(context)
-            .client
-            .getRoomById(roomId!)!
-            .setGuestAccess(guestAccess),
-      );
-
-  void setHistoryVisibilityAction(HistoryVisibility historyVisibility) =>
-      TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => Matrix.of(context)
-            .client
-            .getRoomById(roomId!)!
-            .setHistoryVisibility(historyVisibility),
-      );
-
-  void setJoinRulesAction(JoinRules joinRule) =>
-      TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => Matrix.of(context)
-            .client
-            .getRoomById(roomId!)!
-            .setJoinRules(joinRule),
-      );
-
-  void goToEmoteSettings() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
-    // okay, we need to test if there are any emote state events other than the default one
-    // if so, we need to be directed to a selection screen for which pack we want to look at
-    // otherwise, we just open the normal one.
-    if ((room.states['im.ponies.room_emotes'] ?? <String, Event>{})
-        .keys
-        .any((String s) => s.isNotEmpty)) {
-      context.goChild('multiple_emotes');
-    } else {
-      context.goChild('emotes');
-    }
-  }
-
-  void setAvatarAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!);
-    final actions = [
-      if (PlatformInfos.isMobile)
-        SheetAction(
-          key: AvatarAction.camera,
-          label: L10n.of(context)!.openCamera,
-          isDefaultAction: true,
-          icon: Icons.camera_alt_outlined,
-        ),
-      SheetAction(
-        key: AvatarAction.file,
-        label: L10n.of(context)!.openGallery,
-        icon: Icons.photo_outlined,
-      ),
-      if (room?.avatar != null)
-        SheetAction(
-          key: AvatarAction.remove,
-          label: L10n.of(context)!.delete,
-          isDestructiveAction: true,
-          icon: Icons.delete_outlined,
-        ),
-    ];
-    final action = actions.length == 1
-        ? actions.single.key
-        : await showModalActionSheet<AvatarAction>(
-            context: context,
-            title: L10n.of(context)!.editRoomAvatar,
-            actions: actions,
-          );
-    if (action == null) return;
-    if (action == AvatarAction.remove) {
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => room!.setAvatar(null),
-      );
-      return;
-    }
-    MatrixFile file;
-    if (PlatformInfos.isMobile) {
-      final result = await ImagePicker().pickImage(
-        source: action == AvatarAction.camera
-            ? ImageSource.camera
-            : ImageSource.gallery,
-        imageQuality: 50,
-      );
-      if (result == null) return;
-      file = MatrixFile(
-        bytes: await result.readAsBytes(),
-        name: result.path,
-      );
-    } else {
-      final picked = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        withData: true,
-      );
-      final pickedFile = picked?.files.firstOrNull;
-      if (pickedFile == null) return;
-      file = MatrixFile(
-        bytes: pickedFile.bytes!,
-        name: pickedFile.name,
-      );
-    }
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room!.setAvatar(file),
-    );
-  }
-
   void requestMoreMembersAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!);
     final participants = await TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -468,14 +175,6 @@ class ChatDetailsController extends State<ChatDetails>
     if (participants.error == null) {
       setState(() => members = participants.result);
     }
-  }
-
-  static const fixedWidth = 360.0;
-
-  void onPressedClose() {
-    GoRouterState.of(context).path?.startsWith('/spaces/') == true
-        ? context.pop()
-        : context.go('/rooms/${roomId!}');
   }
 
   void openDialogInvite() {
@@ -508,15 +207,6 @@ class ChatDetailsController extends State<ChatDetails>
       },
     );
   }
-
-  List<ChatDetailsActions> chatDetailsActionsButton() => [
-        if (responsive.isDesktop(context)) ChatDetailsActions.addMembers,
-        muteNotifier.value != PushRuleState.notify
-            ? ChatDetailsActions.unmute
-            : ChatDetailsActions.mute,
-        ChatDetailsActions.search,
-        // ChatDetailsActions.more,
-      ];
 
   List<ChatDetailsPageModel> chatDetailsPages() => chatDetailsPageView.map(
         (page) {
@@ -577,25 +267,30 @@ class ChatDetailsController extends State<ChatDetails>
     );
   }
 
-  void onTapActionsButton(ChatDetailsActions action) async {
-    switch (action) {
-      case ChatDetailsActions.addMembers:
-        openDialogInvite();
-        break;
-      case ChatDetailsActions.mute:
-        await room?.mute();
-        muteNotifier.value = PushRuleState.mentionsOnly;
-        break;
-      case ChatDetailsActions.search:
-        context.pop(ChatDetailsActions.search);
-        break;
-      case ChatDetailsActions.more:
-        break;
-      case ChatDetailsActions.unmute:
-        await room?.unmute();
-        muteNotifier.value = PushRuleState.notify;
-        break;
+  void onTapAddMembers() {
+    openDialogInvite();
+  }
+
+  void onToggleNotification() async {
+    if (muteNotifier.value == PushRuleState.notify) {
+      await room?.mute();
+      muteNotifier.value = PushRuleState.mentionsOnly;
+    } else {
+      await room?.unmute();
+      muteNotifier.value = PushRuleState.notify;
     }
+  }
+
+  void onTapEditButton() {
+    Navigator.pushNamed(context, ChatDetailsRoutes.chatDetailsEdit);
+  }
+
+  void onTapInviteLink(BuildContext context, String inviteLink) async {
+    await Clipboard.setData(ClipboardData(text: inviteLink));
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.copiedToClipboard,
+    );
   }
 
   @override
@@ -603,7 +298,7 @@ class ChatDetailsController extends State<ChatDetails>
     members ??=
         Matrix.of(context).client.getRoomById(roomId!)!.getParticipants();
     return SizedBox(
-      width: fixedWidth,
+      width: ChatDetailViewStyle.fixedWidth,
       child: ChatDetailsView(this),
     );
   }
