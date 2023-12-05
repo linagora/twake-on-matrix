@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_navigator.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
@@ -78,6 +79,14 @@ class _RightColumnNavigator extends StatelessWidget {
           roomId: roomId,
           isInStack: isInStack,
         );
+      case RightColumnType.groupChatDetails:
+        return ChatDetailsNavigator(
+          onBack: controller.hideRightColumn,
+          roomId: roomId,
+          isInStack: isInStack,
+        );
+      default:
+        return const SizedBox.shrink();
     }
   }
 }

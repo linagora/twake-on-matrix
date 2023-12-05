@@ -2957,5 +2957,11 @@
   "showLess": "Show Less",
   "showMore": "Show More",
   "unreadMessages": "Unread messages",
-  "sharedMediaAndFiles": "Shared media and files"
+  "sharedMediaAndFiles": "Shared media and files",
+  "groupInformation": "Group information",
+  "linkInvite": "Link invite",
+  "noDescription": "No description",
+  "description": "Description",
+  "groupName": "Group name",
+  "descriptionHelper": "You can provide an optional description for your group."
 }
