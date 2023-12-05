@@ -42,11 +42,12 @@ import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/domain/usecase/get_tom_contacts_interactor.dart';
-import 'package:fluffychat/domain/usecase/phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -256,5 +257,8 @@ class GetItInitializer {
       () => SendMediaOnWebWithCaptionInteractor(),
     );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
+    getIt.registerFactory<LookupMatchContactInteractor>(
+      () => LookupMatchContactInteractor(),
+    );
   }
 }

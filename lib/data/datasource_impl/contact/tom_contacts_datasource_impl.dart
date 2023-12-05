@@ -4,6 +4,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 import 'package:fluffychat/domain/model/extensions/contact/tom_contact_extension.dart';
 
 class TomContactsDatasourceImpl implements TomContactsDatasource {
@@ -14,11 +15,13 @@ class TomContactsDatasourceImpl implements TomContactsDatasource {
     required ContactQuery query,
     int? limit,
     int? offset,
+    LookupMxidRequest? lookupMxidRequest,
   }) async {
     final response = await _tomContactAPI.fetchContacts(
       query,
       limit: limit,
       offset: offset,
+      lookupMxidRequest: lookupMxidRequest,
     );
 
     final contacts = response.contacts
