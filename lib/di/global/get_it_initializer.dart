@@ -56,6 +56,7 @@ import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
@@ -259,6 +260,9 @@ class GetItInitializer {
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
     getIt.registerFactory<LookupMatchContactInteractor>(
       () => LookupMatchContactInteractor(),
+    );
+    getIt.registerSingleton<UpdateGroupChatInteractor>(
+      UpdateGroupChatInteractor(),
     );
   }
 }

@@ -1,15 +1,15 @@
-import 'package:fluffychat/pages/chat_details/chat_details_header_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
+import 'package:linagora_design_flutter/extensions/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 
 class ChatDetailsView extends StatelessWidget {
   final ChatDetailsController controller;
@@ -34,48 +34,55 @@ class ChatDetailsView extends StatelessWidget {
       stream: controller.room?.onUpdate.stream,
       builder: (context, snapshot) {
         return Scaffold(
-          backgroundColor: controller.isMobileAndTablet
-              ? Theme.of(context).colorScheme.background
-              : Theme.of(context).colorScheme.surfaceVariant,
+          floatingActionButton: _AddMembersButton(controller: controller),
+          backgroundColor: LinagoraSysColors.material().onPrimary,
           appBar: AppBar(
+            backgroundColor: LinagoraSysColors.material().onPrimary,
             automaticallyImplyLeading: false,
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
+              preferredSize: const Size(double.infinity, 1),
               child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
-                  ),
-                ),
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer1,
+                height: 1,
               ),
             ),
-            backgroundColor: Theme.of(context).colorScheme.background,
-            title: Align(
-              alignment: Alignment.centerLeft,
+            title: Padding(
+              padding: ChatDetailViewStyle.navigationAppBarPadding,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TwakeIconButton(
-                    icon: Icons.arrow_back,
-                    onTap: () => context.pop(),
-                    tooltip: L10n.of(context)!.back,
-                    paddingAll: 8.0,
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                  ),
-                  Expanded(
-                    child: Text(
-                      L10n.of(context)!.chatInfo,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onBackground,
-                          ),
+                  Padding(
+                    padding: ChatDetailViewStyle.backIconPadding,
+                    child: IconButton(
+                      splashColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onPressed: controller.widget.onBack,
+                      icon: controller.widget.isInStack
+                          ? const Icon(Icons.arrow_back)
+                          : const Icon(Icons.close),
                     ),
                   ),
-                  const SizedBox(width: 56),
+                  Flexible(
+                    child: Text(
+                      L10n.of(context)!.groupInformation,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
+            actions: [
+              IconButton(
+                splashColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: controller.onTapEditButton,
+                icon: const Icon(Icons.edit_outlined),
+              ),
+            ],
           ),
           body: NestedScrollView(
             physics: const ClampingScrollPhysics(),
@@ -88,48 +95,81 @@ class ChatDetailsView extends StatelessWidget {
                   sliver: SliverAppBar(
                     toolbarHeight:
                         ChatDetailViewStyle.toolbarHeightSliverAppBar,
-                    title: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _groupAvatarBuilder(
-                            context: context,
-                            room: controller.room!,
-                          ),
-                          _groupNameAndInfoBuilder(
-                            context: context,
-                            room: controller.room!,
-                          ),
-                          ValueListenableBuilder(
-                            valueListenable: controller.muteNotifier,
-                            builder: (context, pushRuleState, child) {
-                              final buttons =
-                                  controller.chatDetailsActionsButton();
-                              return ActionsHeaderBuilder(
-                                actions: buttons,
-                                width: ChatDetailViewStyle.actionsHeaderWidth(
-                                  context,
+                    title: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _GroupInformation(
+                          avatarUri: controller.room?.avatar,
+                          displayName:
+                              controller.room?.getLocalizedDisplayname(),
+                          membersCount:
+                              controller.room?.summary.actualMembersCount,
+                        ),
+                        Padding(
+                          padding: ChatDetailViewStyle
+                              .groupDescriptionContainerPadding,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color:
+                                    LinagoraRefColors.material().neutral[90]!,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: ListView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.info_outline),
+                                  title: _TileTitleText(
+                                    title: L10n.of(context)!.groupDescription,
+                                  ),
+                                  subtitle: _TileSubtitleText(
+                                    subtitle: controller.room?.topic == null ||
+                                            controller.room!.topic.isEmpty
+                                        ? L10n.of(context)!.noDescription
+                                        : controller.room!.topic,
+                                  ),
                                 ),
-                                buttonColor: !controller.isMobileAndTablet
-                                    ? LinagoraRefColors.material().primary[100]
-                                    : null,
-                                borderSide: BorderSide(
-                                  width: 1,
-                                  color: controller.isMobileAndTablet
-                                      ? LinagoraRefColors.material()
-                                          .neutral[90]!
-                                      : Colors.transparent,
+                                ValueListenableBuilder(
+                                  valueListenable: controller.muteNotifier,
+                                  builder: (context, pushRuleState, child) {
+                                    return ListTile(
+                                      leading: const Icon(
+                                        Icons.notifications_outlined,
+                                      ),
+                                      title: _TileTitleText(
+                                        title: L10n.of(context)!.notifications,
+                                      ),
+                                      trailing: SizedBox(
+                                        width: ChatDetailViewStyle
+                                            .switchButtonWidth,
+                                        height: ChatDetailViewStyle
+                                            .switchButtonHeight,
+                                        child: FittedBox(
+                                          fit: BoxFit.fill,
+                                          child: Switch(
+                                            activeTrackColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            value: pushRuleState ==
+                                                PushRuleState.notify,
+                                            onChanged: (value) {
+                                              controller.onToggleNotification();
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                                onTap: (actions) =>
-                                    controller.onTapActionsButton(
-                                  actions,
-                                ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     automaticallyImplyLeading: false,
                     pinned: true,
@@ -140,12 +180,30 @@ class ChatDetailsView extends StatelessWidget {
                       overlayColor: MaterialStateProperty.all(
                         Colors.transparent,
                       ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorColor: Theme.of(context).colorScheme.primary,
+                      indicatorPadding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                      ),
+                      indicatorWeight: 3.0,
+                      labelStyle:
+                          Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                      unselectedLabelStyle: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                       tabs: controller.chatDetailsPages().map((pages) {
                         return Tab(
                           child: Text(
                             pages.page.getTitle(context),
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.fade,
                           ),
                         );
                       }).toList(),
@@ -181,68 +239,185 @@ class ChatDetailsView extends StatelessWidget {
       },
     );
   }
+}
 
-  Padding _groupAvatarBuilder({
-    required BuildContext context,
-    required Room room,
-  }) {
-    return Padding(
-      padding: ChatDetailViewStyle.groupAvatarPadding,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(
-          ChatDetailViewStyle.groupAvatarBorderRadius,
+class _AddMembersButton extends StatelessWidget {
+  const _AddMembersButton({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  final ChatDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => controller.onTapAddMembers(),
+      child: Container(
+        constraints: const BoxConstraints(
+          maxWidth: 156,
         ),
-        onTap: room.canSendEvent('m.room.avatar')
-            ? controller.setAvatarAction
-            : null,
-        child: Hero(
-          tag: 'content_banner',
-          child: Avatar(
-            mxContent: room.avatar,
-            name: room.getLocalizedDisplayname(
-              MatrixLocals(L10n.of(context)!),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: IntrinsicHeight(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_add_outlined,
+                  size: 18.0,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    L10n.of(context)!.addMember,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-            size: ChatDetailViewStyle.groupAvatarSize,
           ),
         ),
       ),
     );
   }
+}
 
-  Padding _groupNameAndInfoBuilder({
-    required BuildContext context,
-    required Room room,
-  }) {
-    final actualMembersCount = room.summary.actualMembersCount;
-    return Padding(
-      padding: ChatDetailViewStyle.groupNameAndInfoPadding,
-      child: Column(
-        children: [
-          Text(
-            room.getLocalizedDisplayname(
-              MatrixLocals(L10n.of(context)!),
-            ),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
+class _TileSubtitleText extends StatelessWidget {
+  const _TileSubtitleText({
+    Key? key,
+    required this.subtitle,
+  }) : super(key: key);
+
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      subtitle,
+      maxLines: 1,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Theme.of(context).colorScheme.tertiary,
           ),
-          Text(
-            actualMembersCount > 1
-                ? L10n.of(context)!.countMembers(
-                    actualMembersCount,
-                  )
-                : L10n.of(context)!.emptyChat,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: LinagoraRefColors.material().tertiary[20],
-                ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _TileTitleText extends StatelessWidget {
+  const _TileTitleText({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-        ],
-      ),
+    );
+  }
+}
+
+class _GroupInformation extends StatelessWidget {
+  const _GroupInformation({
+    Key? key,
+    this.avatarUri,
+    this.displayName,
+    this.membersCount,
+  }) : super(key: key);
+
+  final Uri? avatarUri;
+  final String? displayName;
+  final int? membersCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) => Builder(
+            builder: (context) {
+              final text = displayName?.getShortcutNameForAvatar() ?? '@';
+              final placeholder = Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: text.avatarColors,
+                    stops: RoundAvatarStyle.defaultGradientStops,
+                  ),
+                ),
+                width: constraints.maxWidth,
+                height: ChatDetailViewStyle.avatarHeight,
+                child: Center(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: ChatDetailViewStyle.avatarFontSize,
+                      color: AvatarStyle.defaultTextColor(true),
+                      fontFamily: AvatarStyle.fontFamily,
+                      fontWeight: AvatarStyle.fontWeight,
+                    ),
+                  ),
+                ),
+              );
+              if (avatarUri == null) {
+                return placeholder;
+              }
+              return MxcImage(
+                uri: avatarUri,
+                width: constraints.maxWidth,
+                height: ChatDetailViewStyle.avatarHeight,
+                fit: BoxFit.cover,
+                placeholder: (_) => placeholder,
+                cacheKey: avatarUri.toString(),
+                noResize: true,
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: ChatDetailViewStyle.mainPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                displayName ?? '',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: LinagoraSysColors.material().onSurface,
+                    ),
+                maxLines: 2,
+              ),
+              Text(
+                membersCount != null
+                    ? L10n.of(context)!.countMembers(membersCount!)
+                    : '',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
