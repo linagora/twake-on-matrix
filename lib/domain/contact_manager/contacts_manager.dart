@@ -5,8 +5,8 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
-import 'package:fluffychat/domain/usecase/get_tom_contacts_interactor.dart';
-import 'package:fluffychat/domain/usecase/phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
 import 'package:flutter/foundation.dart';
 
 class ContactsManager {
