@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ChatProfileInfoStyle {
   static const double copyIconSize = 20;
+
   static const double maxWidth = 416;
   static const double textSpacing = 8;
 

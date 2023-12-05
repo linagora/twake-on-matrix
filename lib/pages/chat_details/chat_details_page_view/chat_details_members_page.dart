@@ -26,14 +26,16 @@ class ChatDetailsMembersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _listMemberInfoMobileAndTablet(context),
         Expanded(
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
+            itemCount: members.length + (canRequestMoreMembers ? 1 : 0) + 1,
             itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return _listMemberInfoMobileAndTablet(context);
+              }
               if (index < members.length) {
-                return ParticipantListItem(members[index]);
+                return ParticipantListItem(members[index - 1]);
               }
 
               return ListTile(
