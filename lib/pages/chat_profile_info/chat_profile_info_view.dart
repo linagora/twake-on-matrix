@@ -1,3 +1,7 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -8,13 +12,14 @@ import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
 import 'package:linagora_design_flutter/extensions/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-import 'package:fluffychat/pages/profile_info/profile_info.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_style.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 
 class ProfileInfoView extends StatelessWidget {
   final ProfileInfoController controller;
+
   const ProfileInfoView(
     this.controller, {
     super.key,
@@ -27,29 +32,30 @@ class ProfileInfoView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Padding(
-              padding: ProfileInfoStyle.backIconPadding,
-              child: IconButton(
-                onPressed: controller.widget.onBack,
-                icon: controller.widget.isInStack
-                    ? const Icon(Icons.arrow_back)
-                    : const Icon(Icons.close),
-              ),
-            ),
-            Text(
-              L10n.of(context)!.contactInfo,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
+        centerTitle: false,
+        leading: Padding(
+          padding: ChatProfileInfoStyle.backIconPadding,
+          child: IconButton(
+            splashColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: controller.widget.onBack,
+            icon: controller.widget.isInStack
+                ? const Icon(Icons.arrow_back)
+                : const Icon(Icons.close),
+          ),
+        ),
+        leadingWidth: 40,
+        title: Text(
+          L10n.of(context)!.contactInfo,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
             constraints:
-                const BoxConstraints(maxWidth: ProfileInfoStyle.maxWidth),
+                const BoxConstraints(maxWidth: ChatProfileInfoStyle.maxWidth),
             child: Builder(
               builder: (context) {
                 if (contact?.matrixId != null) {
@@ -63,8 +69,8 @@ class ProfileInfoView extends StatelessWidget {
                       displayName:
                           snapshot.data?.displayName ?? contact.displayName,
                       matrixId: contact.matrixId,
-                      email: contact.email,
-                      phoneNumber: null,
+                      lookupContactNotifier: controller.lookupContactNotifier,
+                      goToProfileShared: controller.goToProfileShared,
                     ),
                   );
                 }
@@ -72,14 +78,16 @@ class ProfileInfoView extends StatelessWidget {
                   return _Information(
                     displayName: contact.displayName,
                     matrixId: contact.matrixId,
-                    email: contact.email,
-                    phoneNumber: null,
+                    lookupContactNotifier: controller.lookupContactNotifier,
+                    goToProfileShared: controller.goToProfileShared,
                   );
                 }
                 return _Information(
                   avatarUri: user?.avatarUrl,
                   displayName: user?.calcDisplayname(),
                   matrixId: user?.id,
+                  lookupContactNotifier: controller.lookupContactNotifier,
+                  goToProfileShared: controller.goToProfileShared,
                 );
               },
             ),
@@ -92,20 +100,21 @@ class ProfileInfoView extends StatelessWidget {
 
 class _Information extends StatelessWidget {
   static const double avatarRatio = 1;
+
   const _Information({
     Key? key,
     this.avatarUri,
     this.displayName,
     this.matrixId,
-    this.email,
-    this.phoneNumber,
+    required this.lookupContactNotifier,
+    this.goToProfileShared,
   }) : super(key: key);
 
   final Uri? avatarUri;
   final String? displayName;
   final String? matrixId;
-  final String? email;
-  final String? phoneNumber;
+  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
+  final Function()? goToProfileShared;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +140,7 @@ class _Information extends StatelessWidget {
                   child: Text(
                     text,
                     style: TextStyle(
-                      fontSize: ProfileInfoStyle.avatarFontSize,
+                      fontSize: ChatProfileInfoStyle.avatarFontSize,
                       color: AvatarStyle.defaultTextColor(true),
                       fontFamily: AvatarStyle.fontFamily,
                       fontWeight: AvatarStyle.fontWeight,
@@ -155,7 +164,7 @@ class _Information extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: ProfileInfoStyle.mainPadding,
+          padding: ChatProfileInfoStyle.mainPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -166,40 +175,98 @@ class _Information extends StatelessWidget {
                     ),
                 maxLines: 2,
               ),
-              Text(
-                matrixId ?? '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
-                    ),
-                maxLines: 2,
-              ),
-              if (email != null || phoneNumber != null)
-                Container(
-                  padding: ProfileInfoStyle.emailPadding,
-                  margin: ProfileInfoStyle.emailMargin,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: LinagoraRefColors.material().neutral[90] ??
-                          Colors.black,
-                    ),
-                    borderRadius: ProfileInfoStyle.emailBorderRadius,
+              Row(
+                children: [
+                  Text(
+                    matrixId ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                    maxLines: 2,
                   ),
-                  child: Wrap(
-                    runSpacing: ProfileInfoStyle.textSpacing,
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(
+                      Icons.content_copy,
+                      size: ChatProfileInfoStyle.copyIconSize,
+                      color: LinagoraRefColors.material().tertiary[40],
+                    ),
+                    color: LinagoraRefColors.material().tertiary[40],
+                    onPressed: () {
+                      Clipboard.instance.copyText(matrixId ?? '');
+                      TwakeSnackBar.show(
+                        context,
+                        L10n.of(context)!.copiedToClipboard,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              ValueListenableBuilder(
+                valueListenable: lookupContactNotifier,
+                builder: (context, contact, child) {
+                  return contact.fold(
+                    (failure) => const SizedBox.shrink(),
+                    (success) {
+                      if (success is LookupMatchContactSuccess) {
+                        return Container(
+                          padding: ChatProfileInfoStyle.emailPadding,
+                          margin: ChatProfileInfoStyle.emailMargin,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: LinagoraRefColors.material().neutral[90] ??
+                                  Colors.black,
+                            ),
+                            borderRadius:
+                                ChatProfileInfoStyle.emailBorderRadius,
+                          ),
+                          child: Wrap(
+                            runSpacing: ChatProfileInfoStyle.textSpacing,
+                            children: [
+                              if (success.contact.email != null)
+                                _CopiableRow(
+                                  icon: Icons.alternate_email,
+                                  text: success.contact.email!,
+                                ),
+                              if (success.contact.phoneNumber != null)
+                                _CopiableRow(
+                                  icon: Icons.call,
+                                  text: success.contact.phoneNumber!,
+                                ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  );
+                },
+                child: const SizedBox.shrink(),
+              ),
+              InkWell(
+                splashColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: goToProfileShared,
+                child: Padding(
+                  padding: ChatProfileInfoStyle.titleSharedMediaAndFilesPadding,
+                  child: Row(
                     children: [
-                      if (email != null)
-                        _CopiableRow(
-                          icon: Icons.alternate_email,
-                          text: email!,
-                        ),
-                      if (phoneNumber != null)
-                        _CopiableRow(
-                          icon: Icons.call,
-                          text: phoneNumber!,
-                        ),
+                      Text(
+                        L10n.of(context)!.sharedMediaAndFiles,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 18,
+                        color: LinagoraSysColors.material().onSurface,
+                      ),
                     ],
                   ),
                 ),
+              ),
             ],
           ),
         ),
@@ -224,11 +291,12 @@ class _CopiableRow extends StatelessWidget {
       children: [
         Icon(
           icon,
+          size: ChatProfileInfoStyle.copyIconSize,
           color: LinagoraSysColors.material().onSurface,
         ),
         Expanded(
           child: Padding(
-            padding: ProfileInfoStyle.textPadding,
+            padding: ChatProfileInfoStyle.textPadding,
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -240,6 +308,7 @@ class _CopiableRow extends StatelessWidget {
         IconButton(
           icon: Icon(
             Icons.content_copy,
+            size: ChatProfileInfoStyle.copyIconSize,
             color: LinagoraRefColors.material().tertiary[40],
           ),
           color: LinagoraRefColors.material().tertiary[40],

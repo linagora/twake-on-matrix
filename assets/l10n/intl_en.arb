@@ -2955,5 +2955,6 @@
   "enterCaption": "Enter a caption",
   "failToSend": "Failed to send, please try again",
   "showLess": "Show Less",
-  "showMore": "Show More"
+  "showMore": "Show More",
+  "sharedMediaAndFiles": "Shared media and files"
 }
