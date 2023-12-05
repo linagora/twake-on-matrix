@@ -16,14 +16,16 @@ class TomContactAPI {
     ContactQuery query, {
     int? limit,
     int? offset,
+    LookupMxidRequest? lookupMxidRequest,
   }) async {
-    final requestBody = LookupMxidRequest(
-      scope: ['mail', 'uid', 'mobile', 'cn', 'displayName'],
-      fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],
-      val: query.keyword,
-      limit: limit,
-      offset: offset,
-    );
+    final requestBody = lookupMxidRequest ??
+        LookupMxidRequest(
+          scope: ['mail', 'uid', 'mobile', 'cn', 'displayName'],
+          fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],
+          val: query.keyword,
+          limit: limit,
+          offset: offset,
+        );
 
     final response = await _client
         .postToGetBody(
