@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -18,14 +19,20 @@ class ProfileInfoSharedView extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
-        leading: InkWell(
-          onTap: () => Navigator.pop(context),
-          child: const Icon(
-            Icons.arrow_back,
-            size: 24,
+        leading: Padding(
+          padding: ChatProfileInfoSharedViewStyle.backIconPadding,
+          child: IconButton(
+            splashColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.arrow_back,
+              size: ChatProfileInfoSharedViewStyle.leadingSize,
+            ),
           ),
         ),
-        leadingWidth: 40,
+        leadingWidth: ChatProfileInfoSharedViewStyle.leadingWidth,
         title: Text(
           L10n.of(context)!.sharedMediaAndFiles,
           style: Theme.of(context).textTheme.titleLarge,
@@ -39,7 +46,7 @@ class ProfileInfoSharedView extends StatelessWidget {
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                toolbarHeight: 0,
+                toolbarHeight: ChatProfileInfoSharedViewStyle.toolbarHeight,
                 automaticallyImplyLeading: false,
                 pinned: true,
                 floating: true,
