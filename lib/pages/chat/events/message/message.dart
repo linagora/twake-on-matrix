@@ -110,30 +110,6 @@ class Message extends StatelessWidget {
           final rowMainAxisAlignment =
               ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
-          final displayEvent = event.getDisplayEvent(timeline);
-          final noBubble = {
-                MessageTypes.Sticker,
-              }.contains(event.messageType) &&
-              !event.redacted;
-          final timelineOverlayMessage = {
-            MessageTypes.Video,
-            MessageTypes.Image,
-          }.contains(event.messageType);
-          final timelineText = {
-            MessageTypes.Text,
-            MessageTypes.BadEncrypted,
-          }.contains(event.messageType);
-          final noPadding = {
-            MessageTypes.File,
-            MessageTypes.Audio,
-          }.contains(event.messageType);
-
-          final hideDisplayNameInBubbleChat = {
-            MessageTypes.Video,
-            MessageTypes.Image,
-            MessageTypes.File,
-          }.contains(event.messageType);
-
           final rowChildren = <Widget>[
             _placeHolderWidget(
               isSameSender(previousEvent, event),

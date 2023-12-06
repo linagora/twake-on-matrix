@@ -117,4 +117,45 @@ extension LocalizedBody on Event {
         .getParticipants()
         .firstWhereOrNull((user) => user.id == senderId);
   }
+
+  // Check if the sender of the current event is the same as the compared event.
+  bool isSameSender(Event? comparedEvent) {
+    // If the compared event is null, it is assumed that the message is the newest.
+    if (comparedEvent == null) {
+      return true;
+    }
+
+    final isPreviousOrNextEventMessage = {
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.Redaction,
+    }.contains(comparedEvent.type);
+
+    // Ignoring events that are not messages, stickers, encrypted or redaction.
+    if (!isPreviousOrNextEventMessage) {
+      return true;
+    }
+
+    return senderId != comparedEvent.senderId;
+  }
+
+  bool get isOwnMessage => senderId == room.client.userID;
+
+  bool get timelineOverlayMessage => {
+        MessageTypes.Video,
+        MessageTypes.Image,
+      }.contains(messageType);
+
+  bool get hideDisplayNameInBubbleChat => {
+        MessageTypes.Video,
+        MessageTypes.Image,
+        MessageTypes.File,
+      }.contains(messageType);
+
+  bool hideDisplayName(Event nextEvent) =>
+      isOwnMessage ||
+      room.isDirectChat ||
+      !isSameSender(nextEvent) ||
+      type == EventTypes.Encrypted;
 }

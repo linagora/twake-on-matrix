@@ -145,7 +145,10 @@ extension ContextExtensionss on BuildContext {
 
   static const double defaultMinWidth = 300;
 
-  void goChild(String path) => go('${GoRouterState.of(this).uri.path}/$path');
+  void goChild(String path, {Object? extra}) => go(
+        '${GoRouterState.of(this).uri.path}/$path',
+        extra: extra,
+      );
 
   void pushChild(String path) =>
       push('${GoRouterState.of(this).uri.path}/$path');
