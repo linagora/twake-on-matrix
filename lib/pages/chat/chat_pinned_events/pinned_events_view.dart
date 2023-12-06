@@ -1,5 +1,8 @@
 import 'package:fluffychat/domain/app_state/room/chat_get_pinned_events_state.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_style.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -119,6 +122,22 @@ class PinnedEventsView extends StatelessWidget {
                                         data.pinnedEvents.reversed.toList(),
                                       ),
                                       currentEvent: currentEvent,
+                                    ),
+                                    TwakeIconButton(
+                                      tooltip: L10n.of(context)!
+                                          .pinnedMessagesTooltip,
+                                      icon: Icons.list,
+                                      margin: const EdgeInsets.only(top: 4.0),
+                                      paddingAll: 8.0,
+                                      onTap: () {
+                                        context.pushChild(
+                                          'pinnedmessages',
+                                          extra: PinnedEventsArgument(
+                                            pinnedEvents: data.pinnedEvents,
+                                            timeline: controller.timeline,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),
