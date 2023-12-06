@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
@@ -72,14 +71,12 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
         Container(
           alignment:
               event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
-          padding: EdgeInsetsDirectional.only(
-            top: MessageStyle.messageSpacing(
-              displayTime,
-              nextEvent,
-              event,
-            ),
-            start: 8,
-            end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
+          padding: MessageStyle.paddingMessageContainer(
+            displayTime,
+            context,
+            nextEvent,
+            event,
+            selected,
           ),
           child: MultiPlatformSelectionMode(
             event: event,
@@ -104,14 +101,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                           ? const EdgeInsets.symmetric(
                               horizontal: 16.0,
                             )
-                          : EdgeInsets.only(
-                              left: 8 * AppConfig.bubbleSizeFactor,
-                              right: 8 * AppConfig.bubbleSizeFactor,
-                              top: 8 * AppConfig.bubbleSizeFactor,
-                              bottom: event.timelineOverlayMessage
-                                  ? 8 * AppConfig.bubbleSizeFactor
-                                  : 0 * AppConfig.bubbleSizeFactor,
-                            ),
+                          : MessageStyle.paddingMessageContentBuilder(event),
                       constraints: BoxConstraints(
                         maxWidth: MessageStyle.messageBubbleWidth(
                           context,
@@ -128,7 +118,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                             nextEvent != null &&
                                         event.hideDisplayName(nextEvent!) ||
                                     event.hideDisplayNameInBubbleChat
-                                ? const SizedBox(height: 0)
+                                ? const SizedBox()
                                 : DisplayNameWidget(
                                     event: event,
                                   ),
@@ -150,11 +140,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                     Positioned(
                                       child: SelectionContainer.disabled(
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 6,
-                                            right: 8.0,
-                                            bottom: 4.0,
-                                          ),
+                                          padding:
+                                              MessageStyle.paddingMessageTime,
                                           child: MultiPlatformSelectionMode(
                                             useInkWell: PlatformInfos.isWeb,
                                             longPressSelect: longPressSelect,

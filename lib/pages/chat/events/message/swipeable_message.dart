@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,12 @@ class SwipeableMessage extends StatelessWidget {
     this.onSwipe,
   });
 
+  static const maxOffset = 0.4;
+
+  static const swipeIntensity = 2.5;
+
+  static const movementDuration = Duration(milliseconds: 100);
+
   @override
   Widget build(BuildContext context) {
     if (onSwipe == null) {
@@ -24,16 +31,16 @@ class SwipeableMessage extends StatelessWidget {
     }
     return Swipeable(
       key: ValueKey(event.eventId),
-      background: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.0),
-        child: Center(
+      background: Padding(
+        padding: MessageStyle.paddingSwipeMessage,
+        child: const Center(
           child: Icon(Icons.reply_outlined),
         ),
       ),
       onOverScrollTheMaxOffset: () => HapticFeedback.heavyImpact(),
-      maxOffset: 0.4,
-      movementDuration: const Duration(milliseconds: 100),
-      swipeIntensity: 2.5,
+      maxOffset: maxOffset,
+      movementDuration: movementDuration,
+      swipeIntensity: swipeIntensity,
       direction: SwipeDirection.endToStart,
       onSwipe: onSwipe!,
       child: child,

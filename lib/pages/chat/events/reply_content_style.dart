@@ -56,4 +56,9 @@ class ReplyContentStyle {
           fontSize: fontSizeDisplayContent,
         );
   }
+
+  static EdgeInsetsDirectional get marginReplyContent =>
+      EdgeInsetsDirectional.symmetric(
+        vertical: 4.0 * AppConfig.bubbleSizeFactor,
+      );
 }
