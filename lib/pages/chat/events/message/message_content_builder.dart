@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -71,10 +71,7 @@ class MessageContentBuilder extends StatelessWidget {
                   displayEvent,
                   textColor: textColor,
                   endOfBubbleWidget: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 8.0,
-                      right: 4.0,
-                    ),
+                    padding: MessageStyle.paddingTimestamp,
                     child: SelectionContainer.disabled(
                       child: MessageTime(
                         timelineOverlayMessage: event.timelineOverlayMessage,
@@ -121,9 +118,7 @@ class MessageContentBuilder extends StatelessWidget {
               RelationshipTypes.edit,
             ))
               Padding(
-                padding: EdgeInsets.only(
-                  top: 4.0 * AppConfig.bubbleSizeFactor,
-                ),
+                padding: MessageStyle.paddingEditButton,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

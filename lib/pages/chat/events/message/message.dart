@@ -103,7 +103,7 @@ class Message extends StatelessWidget {
 
           final rowChildren = <Widget>[
             _placeHolderWidget(
-              event.isSameSender(previousEvent),
+              event.isSameSenderWith(previousEvent),
               ownMessage,
               event,
             ),

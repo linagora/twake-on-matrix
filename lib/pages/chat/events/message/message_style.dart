@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -84,4 +85,55 @@ class MessageStyle {
 
     return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
   }
+
+  static EdgeInsets paddingDisplayName(Event event) => EdgeInsets.only(
+        left: event.messageType == MessageTypes.Image ? 0 : 8.0,
+        bottom: 4.0,
+      );
+
+  static EdgeInsets get paddingTimestamp => const EdgeInsets.only(
+        left: 8.0,
+        right: 4.0,
+      );
+
+  static EdgeInsets get paddingEditButton => EdgeInsets.only(
+        top: 4.0 * AppConfig.bubbleSizeFactor,
+      );
+
+  static EdgeInsetsDirectional paddingMessageContainer(
+    bool displayTime,
+    BuildContext context,
+    Event? nextEvent,
+    Event event,
+    bool selected,
+  ) {
+    return EdgeInsetsDirectional.only(
+      top: MessageStyle.messageSpacing(
+        displayTime,
+        nextEvent,
+        event,
+      ),
+      start: 8,
+      end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
+    );
+  }
+
+  static EdgeInsets paddingMessageContentBuilder(Event event) =>
+      EdgeInsets.only(
+        left: 8 * AppConfig.bubbleSizeFactor,
+        right: 8 * AppConfig.bubbleSizeFactor,
+        top: 8 * AppConfig.bubbleSizeFactor,
+        bottom: event.timelineOverlayMessage
+            ? 8 * AppConfig.bubbleSizeFactor
+            : 0 * AppConfig.bubbleSizeFactor,
+      );
+
+  static EdgeInsets get paddingMessageTime => const EdgeInsets.only(
+        left: 6,
+        right: 8.0,
+        bottom: 4.0,
+      );
+
+  static EdgeInsetsDirectional get paddingSwipeMessage =>
+      const EdgeInsetsDirectional.symmetric(horizontal: 12.0);
 }
