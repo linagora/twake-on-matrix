@@ -142,6 +142,7 @@ class ChatEventList extends StatelessWidget {
                         ),
                       ),
                       onSelect: controller.onSelectMessage,
+                      selectMode: controller.selectMode,
                       scrollToEventId: (String eventId) =>
                           controller.scrollToEventId(eventId),
                       longPressSelect: controller.selectedEvents.isEmpty,
@@ -150,14 +151,13 @@ class ChatEventList extends StatelessWidget {
                       timeline: controller.timeline!,
                       previousEvent: previousEvent,
                       nextEvent: nextEvent,
-                      controller: controller,
                       onHover: (isHover, event) =>
                           controller.onHover(isHover, index, event),
-                      isHover: controller.focusHover,
+                      isHoverNotifier: controller.focusHover,
                       listHorizontalActionMenu:
                           controller.listHorizontalActionMenuBuilder(),
                       onMenuAction: controller.handleHorizontalActionMenu,
-                      focusNode: FocusNode(debugLabel: event.eventId),
+                      hideKeyboardChatScreen: controller.hideKeyboardChatScreen,
                     )
                   : Container(),
             );

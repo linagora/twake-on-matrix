@@ -1,6 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -23,12 +22,10 @@ class HtmlMessage extends StatelessWidget {
   final TextStyle? linkStyle;
   final double? emoteSize;
   final Widget? bottomWidgetSpan;
-  final ChatController? chatController;
 
   const HtmlMessage({
     Key? key,
     required this.html,
-    this.chatController,
     required this.event,
     this.maxLines,
     required this.room,
@@ -172,11 +169,7 @@ class HtmlMessage extends StatelessWidget {
         return {};
       },
       pillBuilder: (identifier, url, onTap, getMxcUrl) {
-        if (chatController == null) {
-          return null;
-        }
-
-        final user = chatController?.room?.getUser(identifier);
+        final user = room.getUser(identifier);
         final displayName = user?.displayName ?? identifier;
         return MentionnedUser(
           displayName: displayName,
