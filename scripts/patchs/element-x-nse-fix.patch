@@ -1,0 +1,13 @@
+diff --git a/ios/NSE/RestorationToken.swift b/ios/NSE/RestorationToken.swift
+index 4c5bf28f..353abdc4 100644
+--- a/ios/NSE/RestorationToken.swift
++++ b/ios/NSE/RestorationToken.swift
+@@ -43,7 +43,7 @@ extension MatrixRustSDK.Session: Codable {
+                          deviceId: container.decode(String.self, forKey: .deviceId),
+                          homeserverUrl: container.decode(String.self, forKey: .homeserverUrl),
+                          oidcData: container.decodeIfPresent(String.self, forKey: .oidcData),
+-                         slidingSyncProxy: container.decode(String.self, forKey: .slidingSyncProxy))
++                         slidingSyncProxy: container.decodeIfPresent(String.self, forKey: .slidingSyncProxy))
+     }
+     
+     public func encode(to encoder: Encoder) throws {
