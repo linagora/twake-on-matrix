@@ -29,11 +29,14 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 8.0 : 0.0;
 
+    final events = controller.timeline!.events
+        .where((event) => event.isVisibleInGui)
+        .toList();
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback
     final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < controller.timeline!.events.length; i++) {
-      thisEventsKeyMap[controller.timeline!.events[i].eventId] = i;
+    for (var i = 0; i < events.length; i++) {
+      thisEventsKeyMap[events[i].eventId] = i;
     }
 
     if (controller.isEmptyChat) {
@@ -73,16 +76,33 @@ class ChatEventList extends StatelessWidget {
           (BuildContext context, int index) {
             // Footer to display typing indicator and read receipts:
             if (index == 0) {
+              if (controller.timeline!.isRequestingFuture) {
+                return const Center(
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                );
+              }
+              if (controller.timeline!.canRequestFuture) {
+                Center(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                    ),
+                    onPressed: controller.requestFuture,
+                    child: Text(L10n.of(context)!.loadMore),
+                  ),
+                );
+              }
               return const SizedBox.shrink();
             }
             // Request history button or progress indicator:
-            if (index == controller.timeline!.events.length + 1) {
+            if (index == events.length + 1) {
               if (controller.timeline!.isRequestingHistory) {
                 return const Center(
                   child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                 );
               }
-              if (controller.canLoadMore) {
+              if (controller.timeline!.canRequestFuture) {
                 Center(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
@@ -96,19 +116,15 @@ class ChatEventList extends StatelessWidget {
               }
               return Container();
             }
-
+            index--;
             // The message at this index:
-            final currentEventIndex = index - 1;
-            final event = controller.timeline!.events[currentEventIndex];
-            final previousEvent = currentEventIndex > 0
-                ? controller.timeline!.events[currentEventIndex - 1]
-                : null;
-            final nextEvent = index < controller.timeline!.events.length
-                ? controller.timeline!.events[currentEventIndex + 1]
-                : null;
+            final event = events[index];
+            final previousEvent = index > 0 ? events[index - 1] : null;
+            final nextEvent =
+                index + 1 < events.length ? events[index + 1] : null;
             return AutoScrollTag(
               key: ValueKey(event.eventId),
-              index: currentEventIndex,
+              index: index,
               controller: controller.scrollController,
               highlightColor: LinagoraRefColors.material().primary[99],
               child: event.isVisibleInGui
@@ -146,7 +162,7 @@ class ChatEventList extends StatelessWidget {
                   : Container(),
             );
           },
-          childCount: controller.timeline!.events.length + 2,
+          childCount: events.length + 2,
           findChildIndexCallback: (key) =>
               controller.findChildIndexCallback(key, thisEventsKeyMap),
         ),
