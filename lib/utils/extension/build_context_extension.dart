@@ -150,8 +150,8 @@ extension ContextExtensionss on BuildContext {
         extra: extra,
       );
 
-  void pushChild(String path) =>
-      push('${GoRouterState.of(this).uri.path}/$path');
+  void pushChild(String path, {Object? extra}) =>
+      push('${GoRouterState.of(this).uri.path}/$path', extra: extra);
 
   RelativeRect getCurrentRelativeRectOfWidget() {
     final RenderBox button = findRenderObject()! as RenderBox;
