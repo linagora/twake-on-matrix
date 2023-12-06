@@ -26,7 +26,6 @@ import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/account_bundles.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
@@ -612,60 +611,14 @@ class ChatController extends State<Chat>
     );
   }
 
-  String _getSelectedEventString() {
-    var copyString = '';
-    if (selectedEvents.length == 1) {
-      return selectedEvents.first
-          .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)!),
-            hideReply: true,
-          );
-    }
-    for (final event in selectedEvents) {
-      if (copyString.isNotEmpty) copyString += '\n\n';
-      copyString += event.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)!),
-            withSenderNamePrefix: true,
-          );
-    }
-    return copyString;
-  }
-
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
-      final event = selectedEvents.first;
-      if (event.messageType == MessageTypes.Image && PlatformInfos.isWeb) {
-        final matrixFile = event.getMatrixFile() ??
-            await event.downloadAndDecryptAttachment(
-              getThumbnail: true,
-            );
-        try {
-          if (matrixFile.filePath != null) {
-            await Clipboard.instance.copyImageAsStream(
-              File(matrixFile.filePath!),
-              mimeType: event.mimeType,
-            );
-          } else if (matrixFile.bytes != null) {
-            await Clipboard.instance.copyImageAsBytes(
-              matrixFile.bytes!,
-              mimeType: event.mimeType,
-            );
-          }
-        } catch (e) {
-          TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
-          Logs().e(
-            'copySingleEventAction(): failed to copy file ${matrixFile.name}',
-          );
-        }
-      } else {
-        copyEventsAction();
-      }
+      await selectedEvents.first.copy(context, timeline!);
     }
   }
 
-  void copyEventsAction({String? copiedText}) async {
-    await Clipboard.instance.copyText(copiedText ?? _getSelectedEventString());
+  void copyEventsAction(Event event, {String? copiedText}) async {
+    await event.copyTextEvent(context, timeline!);
 
     showEmojiPickerNotifier.value = false;
     setState(() {
