@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/reply_content.dart';
+import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -50,9 +50,7 @@ class ReplyContentWidget extends StatelessWidget {
           },
           child: AbsorbPointer(
             child: Container(
-              margin: EdgeInsets.symmetric(
-                vertical: 4.0 * AppConfig.bubbleSizeFactor,
-              ),
+              margin: ReplyContentStyle.marginReplyContent,
               child: ReplyContent(
                 replyEvent,
                 ownMessage: ownMessage,

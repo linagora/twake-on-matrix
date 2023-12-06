@@ -119,7 +119,7 @@ extension LocalizedBody on Event {
   }
 
   // Check if the sender of the current event is the same as the compared event.
-  bool isSameSender(Event? comparedEvent) {
+  bool isSameSenderWith(Event? comparedEvent) {
     // If the compared event is null, it is assumed that the message is the newest.
     if (comparedEvent == null) {
       return true;
@@ -156,6 +156,6 @@ extension LocalizedBody on Event {
   bool hideDisplayName(Event nextEvent) =>
       isOwnMessage ||
       room.isDirectChat ||
-      !isSameSender(nextEvent) ||
+      !isSameSenderWith(nextEvent) ||
       type == EventTypes.Encrypted;
 }

@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -20,10 +21,7 @@ class DisplayNameWidget extends StatelessWidget {
         final displayName = snapshot.data?.calcDisplayname() ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Padding(
-          padding: EdgeInsets.only(
-            left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-            bottom: 4.0,
-          ),
+          padding: MessageStyle.paddingDisplayName(event),
           child: Text(
             displayName.shortenDisplayName(
               maxCharacters: maxCharactersDisplayNameBubble,
