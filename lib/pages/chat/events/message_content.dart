@@ -1,5 +1,4 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
@@ -15,6 +14,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -28,20 +28,19 @@ import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
 
-class MessageContent extends StatelessWidget {
+class MessageContent extends StatelessWidget
+    with HandleDownloadAndPreviewFileMixin {
   final Event event;
   final Color textColor;
   final Widget endOfBubbleWidget;
   final Color backgroundColor;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
-  final ChatController controller;
   final bool ownMessage;
 
   const MessageContent(
     this.event, {
     Key? key,
-    required this.controller,
     required this.textColor,
     required this.endOfBubbleWidget,
     required this.backgroundColor,
@@ -85,12 +84,18 @@ class MessageContent extends StatelessWidget {
             }
             return MessageDownloadContent(
               event,
-              onFileTapped: controller.onFileTapped,
+              onFileTapped: (event) => onFileTapped(
+                context: context,
+                event: event,
+              ),
             );
           case MessageTypes.Video:
             return _MessageVideoBuilder(
               event: event,
-              onFileTapped: controller.onFileTapped,
+              onFileTapped: (event) => onFileTapped(
+                context: context,
+                event: event,
+              ),
             );
           case MessageTypes.File:
             return Column(
@@ -98,7 +103,10 @@ class MessageContent extends StatelessWidget {
               children: [
                 MessageDownloadContent(
                   event,
-                  onFileTapped: controller.onFileTapped,
+                  onFileTapped: (event) => onFileTapped(
+                    context: context,
+                    event: event,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -143,7 +151,6 @@ class MessageContent extends StatelessWidget {
                     maintainState: true,
                     child: endOfBubbleWidget,
                   ),
-                  chatController: controller,
                 ),
               );
             }
