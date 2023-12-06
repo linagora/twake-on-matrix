@@ -43,7 +43,7 @@ extension MatrixRustSDK.Session: Codable {
                          deviceId: container.decode(String.self, forKey: .deviceId),
                          homeserverUrl: container.decode(String.self, forKey: .homeserverUrl),
                          oidcData: container.decodeIfPresent(String.self, forKey: .oidcData),
-                         slidingSyncProxy: container.decode(String.self, forKey: .slidingSyncProxy))
+                         slidingSyncProxy: container.decodeIfPresent(String.self, forKey: .slidingSyncProxy))
     }
     
     public func encode(to encoder: Encoder) throws {
