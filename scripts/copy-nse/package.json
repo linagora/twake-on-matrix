@@ -1,0 +1,17 @@
+{
+  "name": "copy-nse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "curlrequest": "^1.0.1",
+    "read-yaml-file": "^2.1.0",
+    "request": "^2.88.2"
+  }
+}
