@@ -158,4 +158,6 @@ extension LocalizedBody on Event {
       room.isDirectChat ||
       !isSameSenderWith(nextEvent) ||
       type == EventTypes.Encrypted;
+
+  bool get isPinned => room.pinnedEventIds.contains(eventId);
 }
