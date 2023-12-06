@@ -4,6 +4,8 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
@@ -40,6 +42,7 @@ import 'package:fluffychat/pages/sign_up/signup.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
