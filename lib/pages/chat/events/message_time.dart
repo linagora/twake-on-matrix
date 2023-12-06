@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:flutter/material.dart';
@@ -11,18 +10,18 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 class MessageTime extends StatelessWidget {
   const MessageTime({
     Key? key,
-    required this.controller,
     required this.event,
     required this.ownMessage,
     required this.timeline,
     required this.timelineOverlayMessage,
+    required this.room,
   }) : super(key: key);
 
-  final ChatController controller;
   final Event event;
   final bool ownMessage;
   final bool timelineOverlayMessage;
   final Timeline timeline;
+  final Room room;
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +59,8 @@ class MessageTime extends StatelessWidget {
             SeenByRow(
               timelineOverlayMessage: timelineOverlayMessage,
               participants: timeline.room.getParticipants(),
-              getSeenByUsers: controller.room!.getSeenByUsers(
-                controller.timeline!,
+              getSeenByUsers: room.getSeenByUsers(
+                timeline,
                 eventId: event.eventId,
               ),
               eventStatus: event.status,
