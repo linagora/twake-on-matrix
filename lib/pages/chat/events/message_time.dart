@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -50,8 +51,8 @@ class MessageTime extends StatelessWidget {
             TwakeIconButton(
               tooltip: L10n.of(context)!.pin,
               icon: Icons.push_pin_outlined,
-              size: 14.0,
-              paddingAll: 0,
+              size: MessageStyle.pushpinIconSize,
+              paddingAll: MessageStyle.paddingAllPushpin,
               margin: EdgeInsets.zero,
               iconColor: timelineOverlayMessage
                   ? Colors.white

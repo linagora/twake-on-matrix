@@ -1,11 +1,18 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
+import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -160,4 +167,54 @@ extension LocalizedBody on Event {
       type == EventTypes.Encrypted;
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
+
+  Future<bool> unpin() async {
+    if (isPinned) {
+      room.pinnedEventIds.remove(eventId);
+      await room.setPinnedEvents(room.pinnedEventIds);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> copy(BuildContext context, Timeline timeline) async {
+    if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
+      final matrixFile = getMatrixFile() ??
+          await downloadAndDecryptAttachment(
+            getThumbnail: true,
+          );
+      try {
+        if (matrixFile.filePath != null) {
+          await Clipboard.instance.copyImageAsStream(
+            File(matrixFile.filePath!),
+            mimeType: mimeType,
+          );
+        } else if (matrixFile.bytes != null) {
+          await Clipboard.instance.copyImageAsBytes(
+            matrixFile.bytes!,
+            mimeType: mimeType,
+          );
+        }
+      } catch (e) {
+        TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
+        Logs().e(
+          'copySingleEventAction(): failed to copy file ${matrixFile.name}',
+        );
+      }
+    } else {
+      copyTextEvent(context, timeline);
+    }
+  }
+
+  Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
+    await Clipboard.instance
+        .copyText(getSelectedEventString(context, timeline));
+  }
+
+  String getSelectedEventString(BuildContext context, Timeline timeline) {
+    return getDisplayEvent(timeline).calcLocalizedBodyFallback(
+      MatrixLocals(L10n.of(context)!),
+      hideReply: true,
+    );
+  }
 }

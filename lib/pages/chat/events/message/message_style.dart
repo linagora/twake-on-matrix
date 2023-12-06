@@ -140,4 +140,7 @@ class MessageStyle {
 
   static EdgeInsetsDirectional get paddingDividerUnreadMessage =>
       const EdgeInsetsDirectional.only(top: 16.0);
+  static const double pushpinIconSize = 14.0;
+
+  static const double paddingAllPushpin = 0;
 }
