@@ -1,5 +1,4 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -16,12 +15,10 @@ class ReplyContent extends StatelessWidget {
   final Event replyEvent;
   final bool ownMessage;
   final Timeline? timeline;
-  final ChatController chatController;
 
   const ReplyContent(
     this.replyEvent, {
     this.ownMessage = false,
-    required this.chatController,
     Key? key,
     this.timeline,
   }) : super(key: key);
@@ -51,7 +48,6 @@ class ReplyContent extends StatelessWidget {
         room: displayEvent.room,
         emoteSize: ReplyContentStyle.fontSizeDisplayContent * 1.5,
         event: timeline!.events.first,
-        chatController: chatController,
       );
     } else {
       replyBody = Text(

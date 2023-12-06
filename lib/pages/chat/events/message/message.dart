@@ -1,30 +1,21 @@
-import 'dart:math' as math;
-import 'dart:math';
-
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
+import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/pages/chat/events/message_content.dart';
-import 'package:fluffychat/pages/chat/events/message_reactions.dart';
-import 'package:fluffychat/pages/chat/events/message_time.dart';
-import 'package:fluffychat/pages/chat/events/reply_content.dart';
+import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
+import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -39,14 +30,14 @@ class Message extends StatelessWidget {
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
-  final ValueNotifier<String?> isHover;
+  final ValueNotifier<String?> isHoverNotifier;
   final bool longPressSelect;
   final bool selected;
   final Timeline timeline;
-  final ChatController controller;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
-  final FocusNode focusNode;
+  final bool selectMode;
+  final VoidCallback? hideKeyboardChatScreen;
 
   const Message(
     this.event, {
@@ -57,13 +48,13 @@ class Message extends StatelessWidget {
     this.onAvatarTab,
     this.onHover,
     this.scrollToEventId,
-    required this.onSwipe,
+    this.onSwipe,
     this.selected = false,
+    this.hideKeyboardChatScreen,
+    this.selectMode = true,
     required this.timeline,
-    required this.controller,
-    required this.isHover,
+    required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
-    required this.focusNode,
     Key? key,
     this.onMenuAction,
   }) : super(key: key);
@@ -72,14 +63,16 @@ class Message extends StatelessWidget {
   /// of touchscreen.
   static bool useMouse = false;
 
-  static const int maxCharactersDisplayNameBubble = 68;
+  static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   @override
   Widget build(BuildContext context) {
-    return _MultiPlatformsMessageContainer(
-      onTap: controller.hideKeyboardChatScreen,
+    return MultiPlatformsMessageContainer(
+      onTap: hideKeyboardChatScreen,
       onHover: (hover) {
-        onHover!(hover, event);
+        if (onHover != null) {
+          onHover!(hover, event);
+        }
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -102,17 +95,15 @@ class Message extends StatelessWidget {
 
           final client = Matrix.of(context).client;
           final ownMessage = event.senderId == client.userID;
-          final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
           final displayTime = event.type == EventTypes.RoomCreate ||
               nextEvent == null ||
               !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-          final textColor = Theme.of(context).colorScheme.onBackground;
           final rowMainAxisAlignment =
               ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
 
           final rowChildren = <Widget>[
             _placeHolderWidget(
-              isSameSender(previousEvent, event),
+              event.isSameSender(previousEvent),
               ownMessage,
               event,
             ),
@@ -154,11 +145,10 @@ class Message extends StatelessWidget {
                       : CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onLongPress: () =>
-                          controller.selectMode ? onSelect!(event) : null,
-                      onTap: () => controller.selectMode
+                      onLongPress: () => selectMode ? onSelect!(event) : null,
+                      onTap: () => selectMode
                           ? onSelect!(event)
-                          : controller.hideKeyboardChatScreen(),
+                          : hideKeyboardChatScreen?.call(),
                       child: Center(
                         child: Container(
                           margin: EdgeInsetsDirectional.only(
@@ -168,7 +158,7 @@ class Message extends StatelessWidget {
                             right: selected
                                 ? 0
                                 : ownMessage ||
-                                        controller.responsive.isDesktop(context)
+                                        responsiveUtils.isDesktop(context)
                                     ? 8.0
                                     : 16.0,
                             top: selected ? 0 : 1.0,
@@ -189,7 +179,7 @@ class Message extends StatelessWidget {
   }
 
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
-    if (controller.selectMode || event.room.isDirectChat) {
+    if (selectMode || event.room.isDirectChat) {
       return const SizedBox();
     }
 
@@ -225,14 +215,13 @@ class Message extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          if (controller.selectMode)
+          if (selectMode)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
                 padding: EdgeInsetsDirectional.only(
-                  start: (selected || controller.responsive.isDesktop(context))
-                      ? 16
-                      : 8,
+                  start:
+                      (selected || responsiveUtils.isDesktop(context)) ? 16 : 8,
                 ),
                 child: Icon(
                   selected ? Icons.check_circle_rounded : Icons.circle_outlined,
