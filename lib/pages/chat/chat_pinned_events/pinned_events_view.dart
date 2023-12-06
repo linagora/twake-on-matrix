@@ -127,8 +127,9 @@ class PinnedEventsView extends StatelessWidget {
                                       tooltip: L10n.of(context)!
                                           .pinnedMessagesTooltip,
                                       icon: Icons.list,
-                                      margin: const EdgeInsets.only(top: 4.0),
-                                      paddingAll: 8.0,
+                                      margin: PinnedEventsStyle.marginPinIcon,
+                                      paddingAll:
+                                          PinnedEventsStyle.paddingPinIcon,
                                       onTap: () {
                                         context.pushChild(
                                           'pinnedmessages',

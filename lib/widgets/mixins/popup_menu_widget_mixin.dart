@@ -98,6 +98,10 @@ mixin PopupMenuWidgetMixin {
                 width: iconSize ?? 20,
                 height: iconSize ?? 20,
                 fit: BoxFit.fill,
+                colorFilter: ColorFilter.mode(
+                  colorIcon ?? Colors.black,
+                  BlendMode.srcIn,
+                ),
               ),
             const SizedBox(width: 12),
             Expanded(
