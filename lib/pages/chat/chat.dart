@@ -56,7 +56,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -109,6 +108,8 @@ class ChatController extends State<Chat>
         DragDrogFileMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
+
+  static const double _isPortionAvailableToScroll = 64;
 
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -197,10 +198,6 @@ class ChatController extends State<Chat>
 
   String pendingText = '';
 
-  bool get canLoadMore =>
-      timeline!.events.isEmpty ||
-      timeline!.events.last.type != EventTypes.RoomCreate;
-
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
           .firstWhereOrNull((eventId) => eventId == event.eventId) !=
@@ -246,13 +243,19 @@ class ChatController extends State<Chat>
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   void requestHistory() async {
-    if (canLoadMore) {
-      try {
-        await timeline!.requestHistory(historyCount: _loadHistoryCount);
-      } catch (err) {
-        TwakeSnackBar.show(context, (err).toLocalizedString(context));
-        rethrow;
-      }
+    if (!timeline!.canRequestHistory) return;
+    Logs().v('Chat::requestHistory(): Requesting history...');
+    try {
+      await timeline!.requestHistory(historyCount: _loadHistoryCount);
+    } catch (err) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            (err).toLocalizedString(context),
+          ),
+        ),
+      );
+      rethrow;
     }
   }
 
@@ -262,19 +265,21 @@ class ChatController extends State<Chat>
     }
     setReadMarker();
     if (!scrollController.hasClients) return;
-    if (scrollController.position.pixels ==
-            scrollController.position.maxScrollExtent &&
-        timeline!.events.isNotEmpty &&
-        timeline!.events[timeline!.events.length - 1].type !=
-            EventTypes.RoomCreate) {
-      requestHistory();
-    }
-    if (scrollController.position.pixels > 0 &&
-        !showScrollDownButtonNotifier.value) {
+    if (timeline?.allowNewEvent == false ||
+        scrollController.position.pixels > 0) {
       showScrollDownButtonNotifier.value = true;
-    } else if (scrollController.position.pixels == 0 &&
-        showScrollDownButtonNotifier.value) {
+    } else if (scrollController.position.pixels <= 0) {
       showScrollDownButtonNotifier.value = false;
+    }
+
+    if (scrollController.position.pixels == 0 ||
+        scrollController.position.pixels == _isPortionAvailableToScroll) {
+      requestFuture();
+    } else if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent ||
+        scrollController.position.pixels + _isPortionAvailableToScroll ==
+            scrollController.position.maxScrollExtent) {
+      requestHistory();
     }
   }
 
@@ -946,49 +951,97 @@ class ChatController extends State<Chat>
     return scrollToEventId(eventId, highlight: true);
   }
 
+  Future<void>? loadTimelineFuture;
+
+  void requestFuture() async {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    if (!timeline.canRequestFuture) return;
+    Logs().v('Chat::requestFuture(): Requesting future...');
+    try {
+      await timeline.requestFuture(historyCount: _loadHistoryCount);
+    } catch (err) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            (err).toLocalizedString(context),
+          ),
+        ),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _getTimeline({
+    String? eventContextId,
+  }) async {
+    await Matrix.of(context).client.roomsLoading;
+    await Matrix.of(context).client.accountDataLoading;
+    if (eventContextId != null &&
+        (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
+      eventContextId = null;
+    }
+    try {
+      timeline = await room?.getTimeline(
+        onUpdate: updateView,
+        eventContextId: eventContextId,
+      );
+    } catch (e, s) {
+      Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
+      if (!mounted) return;
+      timeline = await room?.getTimeline(onUpdate: updateView);
+      if (!mounted) return;
+    }
+    timeline!.requestKeys(onlineKeyBackupOnly: false);
+    if (room!.markedUnread) room?.markUnread(false);
+
+    // when the scroll controller is attached we want to scroll to an event id, if specified
+    // and update the scroll controller...which will trigger a request history, if the
+    // "load more" button is visible on the screen
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        final event = GoRouterState.of(context).uri.queryParameters['event'];
+        if (event != null) {
+          scrollToEventId(event);
+        }
+      }
+    });
+
+    return;
+  }
+
+  void scrollDown() async {
+    if (timeline == null) return;
+    if (!timeline!.allowNewEvent) {
+      setState(() {
+        timeline = null;
+        loadTimelineFuture = _getTimeline().onError(
+          (e, s) {
+            Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
+          },
+        );
+      });
+      await loadTimelineFuture;
+    }
+    if (scrollController.positions.isNotEmpty) {
+      scrollController.jumpTo(0);
+    }
+  }
+
   void scrollToEventId(String eventId, {bool highlight = false}) async {
-    var eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
+    final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
-      // event id not found...maybe we can fetch it?
-      // the try...finally is here to start and close the loading dialog reliably
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () async {
-          // okay, we first have to fetch if the event is in the room
-          try {
-            final event = await timeline!.getEventById(eventId);
-            if (event == null) {
-              // event is null...meaning something is off
-              return;
-            }
-          } catch (err) {
-            if (err is MatrixException && err.errcode == 'M_NOT_FOUND') {
-              // event wasn't found, as the server gave a 404 or something
-              return;
-            }
-            rethrow;
-          }
-          // okay, we know that the event *is* in the room
-          while (eventIndex == -1) {
-            if (!canLoadMore) {
-              // we can't load any more events but still haven't found ours yet...better stop here
-              return;
-            }
-            try {
-              await timeline!.requestHistory(historyCount: _loadHistoryCount);
-            } catch (err) {
-              if (err is TimeoutException) {
-                // loading the history timed out...so let's do nothing
-                return;
-              }
-              rethrow;
-            }
-            eventIndex =
-                timeline!.events.indexWhere((e) => e.eventId == eventId);
-          }
+      timeline = null;
+      loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
+        (e, s) {
+          Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
         },
       );
-    }
-    if (!mounted) {
+      await loadTimelineFuture;
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        scrollToEventId(eventId);
+      });
+      setState(() {});
       return;
     }
     await scrollToIndex(eventIndex, highlight: highlight);
@@ -996,24 +1049,16 @@ class ChatController extends State<Chat>
   }
 
   Future scrollToIndex(int index, {bool highlight = false}) async {
-    await showFutureLoadingDialog(
-      context: context,
-      future: () => scrollController.scrollToIndex(
-        index,
-        preferPosition: AutoScrollPosition.middle,
-      ),
+    await scrollController.scrollToIndex(
+      index,
+      preferPosition: AutoScrollPosition.middle,
     );
     if (highlight) {
       await scrollController.highlight(
         index,
       );
     }
-  }
-
-  void scrollDown() {
-    if (scrollController.hasClients) {
-      scrollController.jumpTo(0);
-    }
+    setState(() {});
   }
 
   void onEmojiSelected(_, Emoji? emoji) {
