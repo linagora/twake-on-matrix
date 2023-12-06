@@ -37,7 +37,7 @@ class Message extends StatelessWidget {
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTab;
   final void Function(String)? scrollToEventId;
-  final void Function(SwipeDirection) onSwipe;
+  final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
   final ValueNotifier<String?> isHover;
   final bool longPressSelect;
@@ -144,19 +144,8 @@ class Message extends StatelessWidget {
                 StickyTimestampWidget(
                   content: event.originServerTs.relativeTime(context),
                 ),
-              Swipeable(
-                key: ValueKey(event.eventId),
-                background: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Center(
-                    child: Icon(Icons.reply_outlined),
-                  ),
-                ),
-                onOverScrollTheMaxOffset: () => HapticFeedback.heavyImpact(),
-                maxOffset: 0.4,
-                movementDuration: const Duration(milliseconds: 100),
-                swipeIntensity: 2.5,
-                direction: SwipeDirection.endToStart,
+              SwipeableMessage(
+                event: event,
                 onSwipe: onSwipe,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
