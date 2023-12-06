@@ -13,7 +13,6 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -96,18 +95,17 @@ class Message extends StatelessWidget {
             return VerificationRequestContent(event: event, timeline: timeline);
           }
 
-          final client = Matrix.of(context).client;
-          final ownMessage = event.senderId == client.userID;
           final displayTime = event.type == EventTypes.RoomCreate ||
               nextEvent == null ||
               !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-          final rowMainAxisAlignment =
-              ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
+          final rowMainAxisAlignment = event.isOwnMessage
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start;
 
           final rowChildren = <Widget>[
             _placeHolderWidget(
               event.isSameSenderWith(previousEvent),
-              ownMessage,
+              event.isOwnMessage,
               event,
             ),
             Expanded(
@@ -158,7 +156,7 @@ class Message extends StatelessWidget {
                 onSwipe: onSwipe,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: ownMessage
+                  crossAxisAlignment: event.isOwnMessage
                       ? CrossAxisAlignment.end
                       : CrossAxisAlignment.start,
                   children: [
@@ -175,7 +173,7 @@ class Message extends StatelessWidget {
                           padding: EdgeInsets.only(
                             right: selected
                                 ? 0
-                                : ownMessage ||
+                                : event.isOwnMessage ||
                                         responsiveUtils.isDesktop(context)
                                     ? 8.0
                                     : 16.0,
