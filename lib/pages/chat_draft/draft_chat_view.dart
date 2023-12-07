@@ -176,8 +176,6 @@ class DraftChatView extends StatelessWidget {
                                     if (PlatformInfos.platformCanRecord &&
                                         controller.inputText.isEmpty)
                                       Container(
-                                        height: DraftChatViewStyle
-                                            .bottomBarButtonButtonContainerHeight,
                                         alignment: Alignment.center,
                                         child: TwakeIconButton(
                                           margin: DraftChatViewStyle
@@ -196,8 +194,6 @@ class DraftChatView extends StatelessWidget {
                             if (!PlatformInfos.isMobile ||
                                 controller.inputText.isNotEmpty)
                               Container(
-                                height: DraftChatViewStyle
-                                    .bottomBarButtonButtonContainerHeight,
                                 alignment: Alignment.center,
                                 child: ValueListenableBuilder<bool>(
                                   valueListenable: controller.isSendingNotifier,
@@ -218,8 +214,7 @@ class DraftChatView extends StatelessWidget {
                                       );
                                     }
                                     return TwakeIconButton(
-                                      size: ChatInputRowStyle
-                                          .sendIconBtnSizeMobile,
+                                      size: ChatInputRowStyle.sendIconBtnSize,
                                       onTap: controller.sendText,
                                       tooltip: L10n.of(context)!.send,
                                       imagePath: ImagePaths.icSend,
