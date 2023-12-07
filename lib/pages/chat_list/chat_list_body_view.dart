@@ -12,7 +12,7 @@ import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatListBodyView extends StatelessWidget {
@@ -36,7 +36,7 @@ class ChatListBodyView extends StatelessWidget {
             animation: primaryAnimation,
             secondaryAnimation: secondaryAnimation,
             transitionType: SharedAxisTransitionType.vertical,
-            fillColor: Theme.of(context).scaffoldBackgroundColor,
+            fillColor: LinagoraSysColors.material().onPrimary,
             child: child,
           );
         },
