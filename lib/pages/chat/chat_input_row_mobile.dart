@@ -1,6 +1,5 @@
 import 'package:animations/animations.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +19,7 @@ class ChatInputRowMobile extends StatelessWidget {
     required this.onKeyboardAction,
   });
 
-  final InputBar inputBar;
+  final Widget inputBar;
   final ValueNotifier<bool> emojiPickerNotifier;
   final OnTapEmojiAction onEmojiAction;
   final OnTapKeyboardAction onKeyboardAction;
