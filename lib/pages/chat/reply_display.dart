@@ -15,40 +15,45 @@ class ReplyDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: TwakeThemes.animationDuration,
-      curve: TwakeThemes.animationCurve,
-      height: controller.editEvent != null || controller.replyEvent != null
-          ? 56
-          : 0,
-      clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(
-            width: 56,
-          ),
-          Expanded(
-            child: controller.replyEvent != null
-                ? ReplyContent(
-                    controller.replyEvent!,
-                    timeline: controller.timeline!,
-                  )
-                : _EditContent(
-                    controller.editEvent?.getDisplayEvent(controller.timeline!),
-                  ),
-          ),
-          IconButton(
-            padding: EdgeInsets.zero,
-            tooltip: L10n.of(context)!.close,
-            icon: Icon(
-              Icons.close,
-              color: Theme.of(context).colorScheme.primary,
+    return Padding(
+      padding: controller.editEvent != null || controller.replyEvent != null
+          ? const EdgeInsets.symmetric(
+              vertical: 8,
+            )
+          : EdgeInsets.zero,
+      child: AnimatedContainer(
+        duration: TwakeThemes.animationDuration,
+        curve: TwakeThemes.animationCurve,
+        height: controller.editEvent != null || controller.replyEvent != null
+            ? 56
+            : 0,
+        clipBehavior: Clip.hardEdge,
+        decoration: const BoxDecoration(),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: controller.replyEvent != null
+                  ? ReplyContent(
+                      controller.replyEvent!,
+                      timeline: controller.timeline!,
+                    )
+                  : _EditContent(
+                      controller.editEvent
+                          ?.getDisplayEvent(controller.timeline!),
+                    ),
             ),
-            onPressed: controller.cancelReplyEventAction,
-          ),
-        ],
+            IconButton(
+              padding: EdgeInsets.zero,
+              tooltip: L10n.of(context)!.close,
+              icon: Icon(
+                Icons.close,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: controller.cancelReplyEventAction,
+            ),
+          ],
+        ),
       ),
     );
   }

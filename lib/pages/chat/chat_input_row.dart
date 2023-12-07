@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat/chat_input_row_mobile.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
+import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -25,92 +26,91 @@ class ChatInputRow extends StatelessWidget {
         controller.emojiPickerType == EmojiPickerType.reaction) {
       return Container();
     }
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: controller.selectMode
-            ? <Widget>[
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: controller.selectMode
+          ? <Widget>[
+              SizedBox(
+                height: ChatInputRowStyle.chatInputRowHeight,
+                child: TextButton(
+                  onPressed: controller.forwardEventsAction,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.keyboard_arrow_left_outlined),
+                      Text(L10n.of(context)!.forward),
+                    ],
+                  ),
+                ),
+              ),
+              controller.selectedEvents.length == 1
+                  ? controller.selectedEvents.first
+                          .getDisplayEvent(controller.timeline!)
+                          .status
+                          .isSent
+                      ? SizedBox(
+                          height: ChatInputRowStyle.chatInputRowHeight,
+                          child: TextButton(
+                            onPressed: controller.replyAction,
+                            child: Row(
+                              children: <Widget>[
+                                Text(L10n.of(context)!.reply),
+                                const Icon(Icons.keyboard_arrow_right),
+                              ],
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          height: ChatInputRowStyle.chatInputRowHeight,
+                          child: TextButton(
+                            onPressed: controller.sendAgainAction,
+                            child: Row(
+                              children: <Widget>[
+                                Text(L10n.of(context)!.tryToSendAgain),
+                                const SizedBox(width: 4),
+                                SvgPicture.asset(ImagePaths.icSend),
+                              ],
+                            ),
+                          ),
+                        )
+                  : Container(),
+            ]
+          : <Widget>[
+              if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
                 SizedBox(
                   height: ChatInputRowStyle.chatInputRowHeight,
-                  child: TextButton(
-                    onPressed: controller.forwardEventsAction,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        const Icon(Icons.keyboard_arrow_left_outlined),
-                        Text(L10n.of(context)!.forward),
-                      ],
-                    ),
+                  child: TwakeIconButton(
+                    size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                    tooltip: L10n.of(context)!.more,
+                    icon: Icons.add_circle_outline,
+                    onTap: () => controller.onSendFileClick(context),
                   ),
                 ),
-                controller.selectedEvents.length == 1
-                    ? controller.selectedEvents.first
-                            .getDisplayEvent(controller.timeline!)
-                            .status
-                            .isSent
-                        ? SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeight,
-                            child: TextButton(
-                              onPressed: controller.replyAction,
-                              child: Row(
-                                children: <Widget>[
-                                  Text(L10n.of(context)!.reply),
-                                  const Icon(Icons.keyboard_arrow_right),
-                                ],
-                              ),
-                            ),
-                          )
-                        : SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeight,
-                            child: TextButton(
-                              onPressed: controller.sendAgainAction,
-                              child: Row(
-                                children: <Widget>[
-                                  Text(L10n.of(context)!.tryToSendAgain),
-                                  const SizedBox(width: 4),
-                                  SvgPicture.asset(ImagePaths.icSend),
-                                ],
-                              ),
-                            ),
-                          )
-                    : Container(),
-              ]
-            : <Widget>[
-                if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
-                  Container(
-                    margin: ChatInputRowStyle.chatInputRowMoreBtnMarginMobile,
-                    height: ChatInputRowStyle.chatInputRowHeight,
-                    child: TwakeIconButton(
-                      size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                      tooltip: L10n.of(context)!.more,
-                      icon: Icons.add_circle_outline,
-                      onTap: () => controller.onSendFileClick(context),
-                    ),
-                  ),
-                if (controller.matrix!.isMultiAccount &&
-                    controller.matrix!.hasComplexBundles &&
-                    controller.matrix!.currentBundle!.length > 1)
-                  Container(
-                    height: ChatInputRowStyle.chatInputRowHeight,
-                    alignment: Alignment.center,
-                    child: _ChatAccountPicker(controller),
-                  ),
-                Expanded(
-                  child: ChatInputRowStyle.responsiveUtils
-                          .isMobileOrTablet(context)
-                      ? _buildMobileInputRow(context)
-                      : _buildWebInputRow(context),
+              if (controller.matrix!.isMultiAccount &&
+                  controller.matrix!.hasComplexBundles &&
+                  controller.matrix!.currentBundle!.length > 1)
+                Container(
+                  height: ChatInputRowStyle.chatInputRowHeight,
+                  alignment: Alignment.center,
+                  child: _ChatAccountPicker(controller),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: controller.inputText,
-                  builder: (context, value, child) {
-                    if (!PlatformInfos.isMobile || value.isNotEmpty) {
-                      return child!;
-                    }
-                    return const SizedBox();
-                  },
+              Expanded(
+                child:
+                    ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                        ? _buildMobileInputRow(context)
+                        : _buildWebInputRow(context),
+              ),
+              ValueListenableBuilder(
+                valueListenable: controller.inputText,
+                builder: (context, value, child) {
+                  if (!PlatformInfos.isMobile || value.isNotEmpty) {
+                    return child!;
+                  }
+                  return const SizedBox();
+                },
+                child: Padding(
+                  padding: ChatInputRowStyle.sendIconPadding,
                   child: TwakeIconButton(
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
@@ -118,16 +118,22 @@ class ChatInputRow extends StatelessWidget {
                     onTap: controller.send,
                     tooltip: L10n.of(context)!.send,
                     imagePath: ImagePaths.icSend,
+                    paddingAll: 0,
                   ),
                 ),
-              ],
-      ),
+              ),
+            ],
     );
   }
 
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
-      inputBar: _buildInputBar(context),
+      inputBar: Column(
+        children: [
+          ReplyDisplay(controller),
+          _buildInputBar(context),
+        ],
+      ),
       emojiPickerNotifier: controller.showEmojiPickerNotifier,
       onEmojiAction: controller.emojiPickerAction,
       onKeyboardAction: controller.handleOnClickKeyboardAction,
@@ -136,7 +142,12 @@ class ChatInputRow extends StatelessWidget {
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
-      inputBar: _buildInputBar(context),
+      inputBar: Column(
+        children: [
+          ReplyDisplay(controller),
+          _buildInputBar(context),
+        ],
+      ),
       emojiPickerNotifier: controller.showEmojiPickerNotifier,
       onTapMoreBtn: () => controller.onSendFileClick(context),
       onEmojiAction: controller.emojiPickerAction,
