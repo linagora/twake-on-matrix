@@ -110,11 +110,11 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
-            final isLink = event.text.getFirstValidUrl() ?? '';
+            final containedLink = event.text.getFirstValidUrl() ?? '';
             if (AppConfig.renderHtml &&
                 !event.redacted &&
                 event.isRichMessage &&
-                isLink.isEmpty) {
+                containedLink.isEmpty) {
               var html = event.formattedText.unMarkdownLinks(event.text);
 
               if (event.messageType == MessageTypes.Emote) {
