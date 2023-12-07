@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class TwakeHeader extends StatelessWidget
     with ShowDialogMixin
@@ -25,6 +26,7 @@ class TwakeHeader extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       toolbarHeight: TwakeHeaderStyle.toolbarHeight,
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,

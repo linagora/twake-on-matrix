@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 typedef OnTapMoreBtnAction = void Function();
 typedef OnTapEmojiAction = void Function();
@@ -31,10 +33,13 @@ class ChatInputRowWeb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      margin: ChatInputRowStyle.chatInputRowMargin,
       decoration: BoxDecoration(
         borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
-        color: Theme.of(context).colorScheme.surface,
+        color: LinagoraSysColors.material().onPrimary,
+        border: Border.all(
+          color: LinagoraRefColors.material().tertiary,
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
