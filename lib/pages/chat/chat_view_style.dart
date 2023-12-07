@@ -10,7 +10,7 @@ class ChatViewStyle {
   static const double pinnedMessageHintHeight = 48;
 
   static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 56 : 80;
+      responsive.isMobile(context) ? 56 : 56;
 
   static EdgeInsetsDirectional paddingLeading(BuildContext context) =>
       EdgeInsetsDirectional.only(
