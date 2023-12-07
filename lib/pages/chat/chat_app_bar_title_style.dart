@@ -7,28 +7,29 @@ class ChatAppBarTitleStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static Color get currentlyActiveColor => const Color(0xFF5AD439);
+
   static Color get currentlyInactiveColor => const Color(0xFF818C99);
+
   static double get avatarFontSize => 15.0;
+
   static double avatarSize(BuildContext context) =>
-      responsive.isMobile(context) ? 40.0 : 48.0;
+      responsive.isMobile(context) ? 40.0 : 40.0;
 
   static double get statusSize => 15;
+
   static Color get statusBorderColor => Colors.white;
+
   static double get statusBorderSize => 2;
 
   static double get letterSpacingRoomName => 0.15;
+
   static double get letterSpacingStatusContent => 0.5;
 
   static TextStyle? appBarTitleStyle(BuildContext context) =>
-      responsive.isMobile(context)
-          ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-              )
-          : Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onBackground,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-              );
+      Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+          );
 
   static TextStyle? offlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
