@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
-import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -115,14 +114,21 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                   ],
                                 ),
                               )
-                            : _inputMessageWidget(
-                                ChatViewBodyStyle.bottomSheetPadding(context),
-                              ),
+                            : _inputMessageWidget(),
                       ),
                   ],
                 ),
                 TombstoneDisplay(controller),
-                PinnedEventsView(controller),
+                Column(
+                  children: [
+                    PinnedEventsView(controller),
+                    Divider(
+                      height: ChatViewBodyStyle.dividerSize,
+                      thickness: ChatViewBodyStyle.dividerSize,
+                      color: Theme.of(context).dividerColor,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -146,7 +152,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     );
   }
 
-  Widget _inputMessageWidget(double bottomSheetPadding) {
+  Widget _inputMessageWidget() {
     return Container(
       constraints: BoxConstraints(
         maxWidth: ChatViewBodyStyle.inputMessageWidgetMaxWidth,
@@ -158,18 +164,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             const ConnectionStatusHeader(),
             // Currently we can't support reactions
             // ReactionsPicker(controller),
-            ReplyDisplay(controller),
             ChatInputRow(controller),
+            const SizedBox(height: 8),
           ].map(
-            (widget) => Padding(
-              padding: EdgeInsets.only(
-                left: bottomSheetPadding,
-                right: bottomSheetPadding,
-              ),
-              child: widget,
-            ),
+            (widget) => widget,
           ),
-          SizedBox(height: bottomSheetPadding),
           ChatEmojiPicker(controller),
         ],
       ),

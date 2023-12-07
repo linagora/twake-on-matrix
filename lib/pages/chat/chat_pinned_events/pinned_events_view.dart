@@ -36,7 +36,7 @@ class PinnedEventsView extends StatelessWidget {
               case ChatGetPinnedEventsSuccess:
                 final data = success as ChatGetPinnedEventsSuccess;
                 return Material(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: LinagoraSysColors.material().onPrimary,
                   child: InkWell(
                     onTap: () => controller.pinnedEventsController
                         .jumpToPinnedMessageAction(
