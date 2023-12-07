@@ -147,27 +147,32 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
   }
 
   Widget _inputMessageWidget(double bottomSheetPadding) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...[
-          const ConnectionStatusHeader(),
-          // Currently we can't support reactions
-          // ReactionsPicker(controller),
-          ReplyDisplay(controller),
-          ChatInputRow(controller),
-        ].map(
-          (widget) => Padding(
-            padding: EdgeInsets.only(
-              left: bottomSheetPadding,
-              right: bottomSheetPadding,
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: ChatViewBodyStyle.inputMessageWidgetMaxWidth,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...[
+            const ConnectionStatusHeader(),
+            // Currently we can't support reactions
+            // ReactionsPicker(controller),
+            ReplyDisplay(controller),
+            ChatInputRow(controller),
+          ].map(
+            (widget) => Padding(
+              padding: EdgeInsets.only(
+                left: bottomSheetPadding,
+                right: bottomSheetPadding,
+              ),
+              child: widget,
             ),
-            child: widget,
           ),
-        ),
-        SizedBox(height: bottomSheetPadding),
-        ChatEmojiPicker(controller),
-      ],
+          SizedBox(height: bottomSheetPadding),
+          ChatEmojiPicker(controller),
+        ],
+      ),
     );
   }
 }
