@@ -33,7 +33,7 @@ class ChatInputRow extends StatelessWidget {
         children: controller.selectMode
             ? <Widget>[
                 SizedBox(
-                  height: ChatInputRowStyle.chatInputRowHeightWeb,
+                  height: ChatInputRowStyle.chatInputRowHeight,
                   child: TextButton(
                     onPressed: controller.forwardEventsAction,
                     child: Row(
@@ -51,7 +51,7 @@ class ChatInputRow extends StatelessWidget {
                             .status
                             .isSent
                         ? SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeightWeb,
+                            height: ChatInputRowStyle.chatInputRowHeight,
                             child: TextButton(
                               onPressed: controller.replyAction,
                               child: Row(
@@ -63,7 +63,7 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           )
                         : SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeightWeb,
+                            height: ChatInputRowStyle.chatInputRowHeight,
                             child: TextButton(
                               onPressed: controller.sendAgainAction,
                               child: Row(
@@ -81,7 +81,7 @@ class ChatInputRow extends StatelessWidget {
                 if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
                   Container(
                     margin: ChatInputRowStyle.chatInputRowMoreBtnMarginMobile,
-                    height: ChatInputRowStyle.chatInputRowHeightMobile,
+                    height: ChatInputRowStyle.chatInputRowHeight,
                     child: TwakeIconButton(
                       size: ChatInputRowStyle.chatInputRowMoreBtnSize,
                       tooltip: L10n.of(context)!.more,
@@ -93,7 +93,7 @@ class ChatInputRow extends StatelessWidget {
                     controller.matrix!.hasComplexBundles &&
                     controller.matrix!.currentBundle!.length > 1)
                   Container(
-                    height: ChatInputRowStyle.chatInputRowHeightWeb,
+                    height: ChatInputRowStyle.chatInputRowHeight,
                     alignment: Alignment.center,
                     child: _ChatAccountPicker(controller),
                   ),
@@ -111,17 +111,13 @@ class ChatInputRow extends StatelessWidget {
                     }
                     return const SizedBox();
                   },
-                  child: Container(
-                    height: ChatInputRowStyle.chatInputRowHeight(context),
-                    alignment: Alignment.center,
-                    child: TwakeIconButton(
-                      paddingAll:
-                          ChatInputRowStyle.sendButtonPaddingAll(context),
-                      size: ChatInputRowStyle.sendButtonSize(context),
-                      onTap: controller.send,
-                      tooltip: L10n.of(context)!.send,
-                      imagePath: ImagePaths.icSend,
-                    ),
+                  child: TwakeIconButton(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    size: ChatInputRowStyle.sendIconBtnSize,
+                    onTap: controller.send,
+                    tooltip: L10n.of(context)!.send,
+                    imagePath: ImagePaths.icSend,
                   ),
                 ),
               ],

@@ -9,6 +9,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 enum _EventContextAction { info, report }
@@ -133,7 +134,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           future: controller.getTimeline(),
           builder: (BuildContext context, snapshot) {
             return Scaffold(
+              backgroundColor: LinagoraSysColors.material().onPrimary,
               appBar: AppBar(
+                backgroundColor: LinagoraSysColors.material().onPrimary,
                 automaticallyImplyLeading: false,
                 toolbarHeight: ChatViewStyle.toolbarHeight(context),
                 surfaceTintColor: Colors.transparent,

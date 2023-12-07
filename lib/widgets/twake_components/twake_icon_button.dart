@@ -37,6 +37,10 @@ class TwakeIconButton extends StatelessWidget {
 
   final Color? iconColor;
 
+  final Color? highlightColor;
+
+  final Color? splashColor;
+
   const TwakeIconButton({
     Key? key,
     required this.tooltip,
@@ -54,6 +58,8 @@ class TwakeIconButton extends StatelessWidget {
     this.margin = const EdgeInsets.all(0),
     this.buttonDecoration,
     this.iconColor,
+    this.highlightColor,
+    this.splashColor,
   }) : super(key: key);
 
   @override
@@ -70,6 +76,8 @@ class TwakeIconButton extends StatelessWidget {
           customBorder: const CircleBorder(),
           radius: paddingAll,
           hoverColor: hoverColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
           child: Tooltip(
             preferBelow: preferBelow,
             message: tooltip,
