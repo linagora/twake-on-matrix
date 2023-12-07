@@ -6,12 +6,7 @@ class ChatInputRowStyle {
   static final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const double chatInputRowWidth = 52.0;
-  static const double chatInputRowHeightWeb = 56.0;
-  static const double chatInputRowHeightMobile = 48.0;
-  static double chatInputRowHeight(BuildContext context) =>
-      responsiveUtils.isMobileOrTablet(context)
-          ? ChatInputRowStyle.chatInputRowHeightMobile
-          : ChatInputRowStyle.chatInputRowHeightWeb;
+  static const double chatInputRowHeight = 44.0;
   static const EdgeInsets chatInputRowPaddingMobile =
       EdgeInsets.only(left: 12.0);
   static const EdgeInsets chatInputRowMargin = EdgeInsets.only(right: 8.0);
@@ -23,12 +18,5 @@ class ChatInputRowStyle {
   static const double chatInputRowMoreBtnSize = 24.0;
   static const EdgeInsets chatInputRowBtnMarginWeb = EdgeInsets.all(12.0);
 
-  static const double sendIconBtnSizeMobile = 34.0;
-  static const double sendIconBtnSizeWeb = 48.0;
-  static double sendButtonSize(BuildContext context) =>
-      responsiveUtils.isMobileOrTablet(context)
-          ? ChatInputRowStyle.sendIconBtnSizeMobile
-          : ChatInputRowStyle.sendIconBtnSizeWeb;
-  static double sendButtonPaddingAll(BuildContext context) =>
-      responsiveUtils.isMobileOrTablet(context) ? 0.0 : 8.0;
+  static const double sendIconBtnSize = 44.0;
 }

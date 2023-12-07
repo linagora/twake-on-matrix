@@ -95,7 +95,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                         borderRadius: MessageStyle.bubbleBorderRadius,
                         color: event.isOwnMessage
                             ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context).colorScheme.surface,
+                            : Theme.of(context).colorScheme.surfaceVariant,
                       ),
                       padding: noBubble
                           ? const EdgeInsets.symmetric(

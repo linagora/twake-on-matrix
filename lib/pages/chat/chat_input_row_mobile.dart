@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 typedef OnTapEmojiAction = void Function();
 typedef OnTapKeyboardAction = void Function();
@@ -28,7 +29,7 @@ class ChatInputRowMobile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        minHeight: ChatInputRowStyle.chatInputRowHeightMobile,
+        minHeight: ChatInputRowStyle.chatInputRowHeight,
       ),
       child: Container(
         alignment: Alignment.center,
@@ -36,7 +37,11 @@ class ChatInputRowMobile extends StatelessWidget {
         margin: ChatInputRowStyle.chatInputRowMargin,
         decoration: BoxDecoration(
           borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
-          color: Theme.of(context).colorScheme.surface,
+          color: LinagoraSysColors.material().onPrimary,
+          border: Border.all(
+            color: LinagoraRefColors.material().tertiary,
+            width: 1,
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
