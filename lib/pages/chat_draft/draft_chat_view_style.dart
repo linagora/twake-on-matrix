@@ -49,8 +49,6 @@ class DraftChatViewStyle {
   static double bottomBarButtonPaddingAll(bool isInputEmpty) =>
       isInputEmpty ? 5.0 : 12.0;
 
-  static double get bottomBarButtonButtonContainerHeight => 56.0;
-
   static EdgeInsets get bottomBarButtonRecordMargin =>
       const EdgeInsets.only(right: 7.0);
 
