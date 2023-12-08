@@ -30,6 +30,7 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -122,6 +123,25 @@ class BackgroundPush {
   }
 
   StreamSubscription<SyncUpdate>? onRoomSync;
+
+  Future<void> cancelNotification(String roomId) async {
+    Logs().v('Cancel notification for room', roomId);
+    final id = await mapRoomIdToInt(roomId);
+    await FlutterLocalNotificationsPlugin().cancel(id);
+
+    // Workaround for app icon badge not updating
+    if (Platform.isIOS) {
+      final unreadCount = client.rooms
+          .where((room) => room.isUnreadOrInvited && room.id != roomId)
+          .length;
+      if (unreadCount == 0) {
+        FlutterAppBadger.removeBadge();
+      } else {
+        FlutterAppBadger.updateBadgeCount(unreadCount);
+      }
+      return;
+    }
+  }
 
   Future<void> setupPusher({
     String? gatewayUrl,
