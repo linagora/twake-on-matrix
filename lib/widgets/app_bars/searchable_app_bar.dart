@@ -33,40 +33,15 @@ class SearchableAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      shape: !isFullScreen
-          ? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(
-                  SearchableAppBarStyle.appBarBorderRadius,
-                ),
-              ),
-            )
-          : null,
       automaticallyImplyLeading: false,
-      toolbarHeight: SearchableAppBarStyle.appBarHeight(
-        isFullScreen: isFullScreen,
-      ),
+      toolbarHeight: SearchableAppBarStyle.toolbarHeight(context),
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
+        preferredSize: const Size(double.infinity, 4),
         child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                offset: const Offset(0, 1),
-                blurRadius: 80,
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                offset: const Offset(0, 1),
-                blurRadius: 3,
-                spreadRadius: 0.5,
-              ),
-            ],
-          ),
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer1,
+          height: 1,
         ),
       ),
       backgroundColor: LinagoraSysColors.material().onPrimary,

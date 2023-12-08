@@ -9,8 +9,7 @@ class DraftChatViewStyle {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 56 : 80;
+  static double toolbarHeight = 56;
 
   static BoxConstraints get containerMaxWidthConstraints =>
       const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5);
@@ -28,9 +27,6 @@ class DraftChatViewStyle {
   // Bottom Bar Style
   static EdgeInsetsGeometry get bottomBarPadding =>
       const EdgeInsetsDirectional.only(start: 12.0);
-
-  static EdgeInsetsGeometry get bottomBarMargin =>
-      const EdgeInsetsDirectional.only(end: 8.0);
 
   static BorderRadiusGeometry get bottomBarBorderRadius =>
       const BorderRadius.all(Radius.circular(25));
@@ -71,7 +67,7 @@ class DraftChatViewStyle {
   static const double emptyChatGapWidth = 12.0;
 
   static const EdgeInsetsGeometry iconSendPadding =
-      EdgeInsetsDirectional.only(start: 8.0);
+      EdgeInsetsDirectional.only(end: 8.0, start: 8, bottom: 8);
 
   static const EdgeInsetsGeometry iconLoadingPadding =
       EdgeInsetsDirectional.only(

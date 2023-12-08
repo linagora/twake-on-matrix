@@ -5,19 +5,12 @@ import 'package:flutter/cupertino.dart';
 class SearchableAppBarStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static Size preferredSize({
-    bool? isFullScreen = true,
-  }) =>
-      Size.fromHeight(
-        appBarHeight(
-          isFullScreen: isFullScreen,
-        ),
+  static Size preferredSize(BuildContext context) => Size.fromHeight(
+        toolbarHeight(context),
       );
 
-  static double appBarHeight({
-    bool? isFullScreen = true,
-  }) =>
-      isFullScreen == true ? 56 : 112;
+  static double toolbarHeight(BuildContext context) =>
+      responsive.isMobile(context) ? 48 : 56;
 
   static EdgeInsetsDirectional textFieldWebPadding =
       const EdgeInsetsDirectional.only(
