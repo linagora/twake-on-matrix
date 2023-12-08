@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class DraftChatView extends StatelessWidget {
@@ -45,7 +46,9 @@ class DraftChatView extends StatelessWidget {
         );
       },
       child: Scaffold(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         appBar: AppBar(
+          backgroundColor: LinagoraSysColors.material().onPrimary,
           toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
@@ -99,130 +102,192 @@ class DraftChatView extends StatelessWidget {
                     children: [
                       Padding(
                         padding: DraftChatViewStyle.inputWidgetPadding,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TwakeIconButton(
-                              tooltip: L10n.of(context)!.more,
-                              margin: DraftChatViewStyle.buttonAddMoreMargin,
-                              icon: Icons.add_circle_outline,
-                              onTap: () => controller.onSendFileClick(context),
-                            ),
-                            Expanded(
-                              child: Container(
-                                alignment: Alignment.center,
-                                padding: DraftChatViewStyle.bottomBarPadding,
-                                margin: DraftChatViewStyle.bottomBarMargin,
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      DraftChatViewStyle.bottomBarBorderRadius,
-                                  color: Theme.of(context).colorScheme.surface,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: InputBar(
-                                        minLines:
-                                            DraftChatViewStyle.minLinesInputBar,
-                                        maxLines:
-                                            DraftChatViewStyle.maxLinesInputBar,
-                                        autofocus: !PlatformInfos.isMobile,
-                                        keyboardType: TextInputType.multiline,
-                                        textInputAction: null,
-                                        onSubmitted:
-                                            controller.onInputBarSubmitted,
-                                        focusNode: controller.inputFocus,
-                                        controller: controller.sendController,
-                                        decoration: DraftChatViewStyle
-                                            .bottomBarInputDecoration(context),
-                                        onChanged: controller.onInputBarChanged,
-                                        focusSuggestionController: controller
-                                            .focusSuggestionController,
-                                      ),
+                        child: Container(
+                          alignment: Alignment.center,
+                          constraints: const BoxConstraints(
+                            maxWidth: DraftChatViewStyle.maxInputBarWidth,
+                          ),
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: DraftChatViewStyle.bottomBarPadding,
+                                  margin: DraftChatViewStyle.bottomBarMargin,
+                                  decoration: BoxDecoration(
+                                    borderRadius: ChatInputRowStyle
+                                        .chatInputRowBorderRadius,
+                                    color:
+                                        LinagoraSysColors.material().onPrimary,
+                                    border: Border.all(
+                                      color:
+                                          LinagoraRefColors.material().tertiary,
+                                      width: 1,
                                     ),
-                                    KeyBoardShortcuts(
-                                      keysToPress: {
-                                        LogicalKeyboardKey.altLeft,
-                                        LogicalKeyboardKey.keyE,
-                                      },
-                                      onKeysPressed:
-                                          controller.emojiPickerAction,
-                                      helpLabel: L10n.of(context)!.emojis,
-                                      child: InkWell(
-                                        onTap: controller.emojiPickerAction,
-                                        child: PageTransitionSwitcher(
-                                          transitionBuilder: (
-                                            Widget child,
-                                            Animation<double> primaryAnimation,
-                                            Animation<double>
-                                                secondaryAnimation,
-                                          ) {
-                                            return SharedAxisTransition(
-                                              animation: primaryAnimation,
-                                              secondaryAnimation:
-                                                  secondaryAnimation,
-                                              transitionType:
-                                                  SharedAxisTransitionType
-                                                      .scaled,
-                                              fillColor: Colors.transparent,
-                                              child: child,
-                                            );
-                                          },
-                                          child: null,
-                                        ),
-                                      ),
-                                    ),
-                                    if (PlatformInfos.platformCanRecord &&
-                                        controller.inputText.isEmpty)
-                                      Container(
-                                        alignment: Alignment.center,
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Positioned(
+                                        bottom: 12,
                                         child: TwakeIconButton(
+                                          tooltip: L10n.of(context)!.more,
                                           margin: DraftChatViewStyle
-                                              .bottomBarButtonRecordMargin,
-                                          paddingAll: DraftChatViewStyle
-                                              .bottomBarButtonRecordPaddingAll,
-                                          onTap: controller.emojiPickerAction,
-                                          tooltip: L10n.of(context)!.send,
-                                          icon: Icons.tag_faces,
+                                              .buttonAddMoreMargin,
+                                          icon: Icons.add_circle_outline,
+                                          onTap: () => controller
+                                              .onSendFileClick(context),
+                                          paddingAll: 0,
+                                          splashColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
                                         ),
                                       ),
-                                  ],
+                                      Row(
+                                        children: [
+                                          const SizedBox(width: 24.0),
+                                          Expanded(
+                                            child: Padding(
+                                              padding: DraftChatViewStyle
+                                                  .inputBarPadding,
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: InputBar(
+                                                      minLines:
+                                                          DraftChatViewStyle
+                                                              .minLinesInputBar,
+                                                      maxLines:
+                                                          DraftChatViewStyle
+                                                              .maxLinesInputBar,
+                                                      autofocus: !PlatformInfos
+                                                          .isMobile,
+                                                      keyboardType:
+                                                          TextInputType
+                                                              .multiline,
+                                                      textInputAction: null,
+                                                      onSubmitted: controller
+                                                          .onInputBarSubmitted,
+                                                      focusNode:
+                                                          controller.inputFocus,
+                                                      controller: controller
+                                                          .sendController,
+                                                      decoration: DraftChatViewStyle
+                                                          .bottomBarInputDecoration(
+                                                        context,
+                                                      ),
+                                                      onChanged: controller
+                                                          .onInputBarChanged,
+                                                      focusSuggestionController:
+                                                          controller
+                                                              .focusSuggestionController,
+                                                    ),
+                                                  ),
+                                                  KeyBoardShortcuts(
+                                                    keysToPress: {
+                                                      LogicalKeyboardKey
+                                                          .altLeft,
+                                                      LogicalKeyboardKey.keyE,
+                                                    },
+                                                    onKeysPressed: controller
+                                                        .emojiPickerAction,
+                                                    helpLabel: L10n.of(context)!
+                                                        .emojis,
+                                                    child: InkWell(
+                                                      onTap: controller
+                                                          .emojiPickerAction,
+                                                      child:
+                                                          PageTransitionSwitcher(
+                                                        transitionBuilder: (
+                                                          Widget child,
+                                                          Animation<double>
+                                                              primaryAnimation,
+                                                          Animation<double>
+                                                              secondaryAnimation,
+                                                        ) {
+                                                          return SharedAxisTransition(
+                                                            animation:
+                                                                primaryAnimation,
+                                                            secondaryAnimation:
+                                                                secondaryAnimation,
+                                                            transitionType:
+                                                                SharedAxisTransitionType
+                                                                    .scaled,
+                                                            fillColor: Colors
+                                                                .transparent,
+                                                            child: child,
+                                                          );
+                                                        },
+                                                        child: null,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          if (PlatformInfos.platformCanRecord &&
+                                              controller.inputText.isEmpty)
+                                            Container(
+                                              alignment: Alignment.center,
+                                              child: TwakeIconButton(
+                                                margin: DraftChatViewStyle
+                                                    .bottomBarButtonRecordMargin,
+                                                paddingAll: DraftChatViewStyle
+                                                    .bottomBarButtonRecordPaddingAll,
+                                                onTap: controller
+                                                    .emojiPickerAction,
+                                                tooltip: L10n.of(context)!.send,
+                                                icon: Icons.tag_faces,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            if (!PlatformInfos.isMobile ||
-                                controller.inputText.isNotEmpty)
-                              Container(
-                                alignment: Alignment.center,
-                                child: ValueListenableBuilder<bool>(
-                                  valueListenable: controller.isSendingNotifier,
-                                  builder: (context, isSending, child) {
-                                    if (isSending) {
-                                      return const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 16.0,
-                                        ),
-                                        child: Center(
-                                          child: SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: CircularProgressIndicator
-                                                .adaptive(),
+                              if (!PlatformInfos.isMobile ||
+                                  controller.inputText.isNotEmpty)
+                                Container(
+                                  alignment: Alignment.center,
+                                  child: ValueListenableBuilder<bool>(
+                                    valueListenable:
+                                        controller.isSendingNotifier,
+                                    builder: (context, isSending, child) {
+                                      if (isSending) {
+                                        return const Padding(
+                                          padding: DraftChatViewStyle
+                                              .iconLoadingPadding,
+                                          child: Center(
+                                            child: SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator
+                                                  .adaptive(),
+                                            ),
                                           ),
+                                        );
+                                      }
+                                      return Padding(
+                                        padding:
+                                            DraftChatViewStyle.iconSendPadding,
+                                        child: TwakeIconButton(
+                                          size:
+                                              ChatInputRowStyle.sendIconBtnSize,
+                                          onTap: controller.sendText,
+                                          tooltip: L10n.of(context)!.send,
+                                          imagePath: ImagePaths.icSend,
                                         ),
                                       );
-                                    }
-                                    return TwakeIconButton(
-                                      size: ChatInputRowStyle.sendIconBtnSize,
-                                      onTap: controller.sendText,
-                                      tooltip: L10n.of(context)!.send,
-                                      imagePath: ImagePaths.icSend,
-                                    );
-                                  },
+                                    },
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Container(

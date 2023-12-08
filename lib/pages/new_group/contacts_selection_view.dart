@@ -20,7 +20,7 @@ class ContactsSelectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: controller.isFullScreen ? null : Colors.transparent,
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
         preferredSize: SearchableAppBarStyle.preferredSize(
           isFullScreen: controller.isFullScreen,

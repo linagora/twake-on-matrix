@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatBlank extends StatelessWidget {
   final bool loading;
@@ -13,10 +14,11 @@ class ChatBlank extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // Add invisible appbar to make status bar on Android tablets bright.
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: LinagoraSysColors.material().onPrimary,
       ),
       extendBodyBehindAppBar: true,
       body: loading
