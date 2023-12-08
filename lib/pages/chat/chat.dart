@@ -1283,8 +1283,8 @@ class ChatController extends State<Chat>
   }
 
   void onHover(bool isHovered, int index, Event event) {
-    if (index > 0 &&
-        timeline!.events[index - 1].eventId == event.eventId &&
+    if (index >= 0 &&
+        timeline!.events[index].eventId == event.eventId &&
         responsive.isDesktop(context) &&
         !selectMode &&
         !openingPopupMenu.value) {
