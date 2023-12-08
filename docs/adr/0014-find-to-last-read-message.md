@@ -14,6 +14,7 @@ message.
 ## Decision
 
 The user’s fully read marker is kept as an event in the room’s account data.
+It is different for each user in group.
 The event may be read to determine the user’s current fully read marker location in the room,
 and just like other account data events the event will be pushed down the event stream when updated.
 

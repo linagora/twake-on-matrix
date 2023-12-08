@@ -17,7 +17,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnMenuAction = Function(BuildContext, ChatHorizontalActionMenu, Event);
@@ -26,7 +26,7 @@ class Message extends StatelessWidget {
   final Event event;
   final Event? previousEvent;
   final Event? nextEvent;
-  final Event? unreadEvent;
+  final String? markedUnreadLocation;
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTap;
   final void Function(String)? scrollToEventId;
@@ -59,7 +59,7 @@ class Message extends StatelessWidget {
     required this.listHorizontalActionMenu,
     Key? key,
     this.onMenuAction,
-    this.unreadEvent,
+    this.markedUnreadLocation,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -138,10 +138,21 @@ class Message extends StatelessWidget {
                 StickyTimestampWidget(
                   content: event.originServerTs.relativeTime(context),
                 ),
-              if (unreadEvent != null && unreadEvent?.eventId == event.eventId)
+              if (markedUnreadLocation != null &&
+                  markedUnreadLocation == event.eventId) ...[
+                Padding(
+                  padding: MessageStyle.paddingDividerUnreadMessage,
+                  child: Divider(
+                    height: MessageStyle.heightDivider,
+                    color: LinagoraStateLayer(
+                      LinagoraSysColors.material().surfaceTint,
+                    ).opacityLayer3,
+                  ),
+                ),
                 StickyTimestampWidget(
                   content: L10n.of(context)!.unreadMessages,
                 ),
+              ],
               SwipeableMessage(
                 event: event,
                 onSwipe: onSwipe,
