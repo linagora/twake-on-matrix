@@ -49,10 +49,9 @@ class MessageContentBuilder extends StatelessWidget {
           context,
           maxWidth: availableBubbleContraints.maxWidth,
           ownMessage: event.isOwnMessage,
-          hideDisplayName: nextEvent != null &&
-              event.hideDisplayName(
-                nextEvent!,
-              ),
+          hideDisplayName: event.hideDisplayName(
+            nextEvent,
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
