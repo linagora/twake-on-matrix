@@ -16,6 +16,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -25,6 +26,7 @@ class Message extends StatelessWidget {
   final Event event;
   final Event? previousEvent;
   final Event? nextEvent;
+  final Event? unreadEvent;
   final void Function(Event)? onSelect;
   final void Function(Event)? onAvatarTap;
   final void Function(String)? scrollToEventId;
@@ -57,6 +59,7 @@ class Message extends StatelessWidget {
     required this.listHorizontalActionMenu,
     Key? key,
     this.onMenuAction,
+    this.unreadEvent,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -83,7 +86,7 @@ class Message extends StatelessWidget {
             EventTypes.CallInvite,
           }.contains(event.type)) {
             if (event.type.startsWith('m.call.')) {
-              return Container();
+              return const SizedBox();
             }
             return StateMessage(event);
           }
@@ -134,6 +137,10 @@ class Message extends StatelessWidget {
               if (displayTime)
                 StickyTimestampWidget(
                   content: event.originServerTs.relativeTime(context),
+                ),
+              if (unreadEvent != null && unreadEvent?.eventId == event.eventId)
+                StickyTimestampWidget(
+                  content: L10n.of(context)!.unreadMessages,
                 ),
               SwipeableMessage(
                 event: event,
