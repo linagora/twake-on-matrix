@@ -178,6 +178,8 @@ class ChatController extends State<Chat>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
+  Client get client => Matrix.of(context).client;
+
   final int _loadHistoryCount = 100;
 
   final inputText = ValueNotifier('');
@@ -333,17 +335,76 @@ class ChatController extends State<Chat>
     try {
       await loadTimelineFuture;
       final fullyRead = room?.fullyRead;
-      if (fullyRead == null || fullyRead == '') return;
-      if (timeline!.events.any((event) => event.eventId == fullyRead)) {
-        Logs().v('Scroll up to visible event', fullyRead);
-        setReadMarker();
-        return;
-      }
+      if (fullyRead == null && fullyRead!.isEmpty) return;
+      scrollToEventId(fullyRead);
       if (!mounted) return;
     } catch (e, s) {
-      Logs().e('Unable to load timeline', e, s);
+      Logs().e('Failed to load timeline', e, s);
       rethrow;
     }
+  }
+
+  Event? getFirstUnreadEvent() {
+    final unreadEvents = getEventsUnread();
+    if (unreadEvents.isEmpty) return null;
+
+    return unreadEvents.last;
+  }
+
+  List<Event?> getEventsUnread() {
+    final fullyRead = room!.fullyRead;
+    final lastIndexReadEvent = timeline?.events.indexWhere(
+      (event) => fullyRead.contains(event.eventId),
+    );
+    if (lastIndexReadEvent != -1 &&
+        lastIndexReadEvent != 0 &&
+        lastIndexReadEvent != null) {
+      final afterFullyRead = timeline?.events.getRange(0, lastIndexReadEvent);
+      final unreadEvents = afterFullyRead
+          ?.where((event) => event.senderId != client.userID)
+          .toList();
+      if (unreadEvents == null || unreadEvents.isEmpty) return [];
+      Logs().d(
+        "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
+      );
+      return unreadEvents;
+    }
+
+    return [];
+  }
+
+  void handleMessageVisibilityChanged(Event event, bool visible) {
+    Logs().d(
+      'Chat::handleMessageVisibilityChanged() - isVisible $visible',
+    );
+    final unreadEvents = getEventsUnread();
+    final isUnreadEvent = unreadEvents.firstWhereOrNull(
+      (event) => event?.eventId == event?.eventId,
+    );
+
+    final activeScroll =
+        (scrollController.hasClients && scrollController.position.pixels > 0);
+    final inputBarHasChange = inputFocus.hasFocus;
+
+    if (isUnreadEvent != null && inputBarHasChange) {
+      _setReadMarkerEvent(isUnreadEvent);
+    }
+    if (activeScroll) return;
+
+    if (isUnreadEvent != null && visible) {
+      Logs().d(
+        'Chat::handleMessageVisibilityChanged() - Set read Event ${isUnreadEvent.eventId}',
+      );
+      _setReadMarkerEvent(isUnreadEvent);
+    }
+  }
+
+  void _setReadMarkerEvent(Event event) {
+    if (room == null) return;
+    room!.setReadMarker(
+      event.eventId,
+      mRead: event.eventId,
+    );
   }
 
   void updateView() {
