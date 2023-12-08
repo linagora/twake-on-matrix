@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_app
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class AdaptiveScaffoldAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -22,6 +23,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
           key: AdaptiveScaffoldAppBarStyle.adaptiveAppBarKey,
           builder: (_) {
             return AppBar(
+              backgroundColor: LinagoraSysColors.material().onPrimary,
               toolbarHeight: AdaptiveScaffoldAppBarStyle.toolbarHeight,
               title: const Padding(
                 padding: AdaptiveScaffoldAppBarStyle.appBarPadding,
