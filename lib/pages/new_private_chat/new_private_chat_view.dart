@@ -17,7 +17,7 @@ class NewPrivateChatView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
-        preferredSize: SearchableAppBarStyle.preferredSize(),
+        preferredSize: SearchableAppBarStyle.preferredSize(context),
         child: SearchableAppBar(
           title: L10n.of(context)!.newChat,
           searchModeNotifier: controller.isSearchModeNotifier,

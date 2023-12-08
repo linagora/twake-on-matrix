@@ -49,7 +49,7 @@ class DraftChatView extends StatelessWidget {
         backgroundColor: LinagoraSysColors.material().onPrimary,
         appBar: AppBar(
           backgroundColor: LinagoraSysColors.material().onPrimary,
-          toolbarHeight: DraftChatViewStyle.toolbarHeight(context),
+          toolbarHeight: DraftChatViewStyle.toolbarHeight,
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
           title: Row(
@@ -73,8 +73,9 @@ class DraftChatView extends StatelessWidget {
           bottom: PreferredSize(
             preferredSize: const Size(double.infinity, 4),
             child: Container(
-              color:
-                  Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08),
+              color: LinagoraStateLayer(
+                LinagoraSysColors.material().surfaceTint,
+              ).opacityLayer1,
               height: 1,
             ),
           ),
@@ -118,7 +119,6 @@ class DraftChatView extends StatelessWidget {
                                 child: Container(
                                   alignment: Alignment.center,
                                   padding: DraftChatViewStyle.bottomBarPadding,
-                                  margin: DraftChatViewStyle.bottomBarMargin,
                                   decoration: BoxDecoration(
                                     borderRadius: ChatInputRowStyle
                                         .chatInputRowBorderRadius,
@@ -148,7 +148,7 @@ class DraftChatView extends StatelessWidget {
                                       ),
                                       Row(
                                         children: [
-                                          const SizedBox(width: 24.0),
+                                          const SizedBox(width: 32.0),
                                           Expanded(
                                             child: Padding(
                                               padding: DraftChatViewStyle
@@ -276,11 +276,14 @@ class DraftChatView extends StatelessWidget {
                                         padding:
                                             DraftChatViewStyle.iconSendPadding,
                                         child: TwakeIconButton(
+                                          hoverColor: Colors.transparent,
+                                          splashColor: Colors.transparent,
                                           size:
                                               ChatInputRowStyle.sendIconBtnSize,
                                           onTap: controller.sendText,
                                           tooltip: L10n.of(context)!.send,
                                           imagePath: ImagePaths.icSend,
+                                          paddingAll: 0,
                                         ),
                                       );
                                     },
