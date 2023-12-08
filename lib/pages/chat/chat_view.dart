@@ -127,7 +127,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     }
 
     return GestureDetector(
-      onTapDown: controller.setReadMarker,
+      onTapDown: (_) => controller.setReadMarker(),
       behavior: HitTestBehavior.opaque,
       child: StreamBuilder(
         stream: controller.room!.onUpdate.stream

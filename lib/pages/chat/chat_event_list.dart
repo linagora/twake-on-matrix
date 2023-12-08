@@ -151,6 +151,8 @@ class ChatEventList extends StatelessWidget {
                           controller.listHorizontalActionMenuBuilder(),
                       onMenuAction: controller.handleHorizontalActionMenu,
                       hideKeyboardChatScreen: controller.hideKeyboardChatScreen,
+                      markedUnreadLocation:
+                          controller.unreadReceivedMessageLocation,
                     )
                   : Container(),
             );
