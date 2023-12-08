@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class DraftChatViewStyle {
+  static const double maxInputBarWidth = 800.0;
+
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static double toolbarHeight(BuildContext context) =>
@@ -67,4 +69,18 @@ class DraftChatViewStyle {
   static EdgeInsetsGeometry get emptyChatChildrenPadding =>
       const EdgeInsets.only(right: 3, top: 3);
   static const double emptyChatGapWidth = 12.0;
+
+  static const EdgeInsetsGeometry iconSendPadding =
+      EdgeInsetsDirectional.only(start: 8.0);
+
+  static const EdgeInsetsGeometry iconLoadingPadding =
+      EdgeInsetsDirectional.only(
+    top: 8.0,
+    bottom: 16.0,
+    start: 16.0,
+    end: 8.0,
+  );
+
+  static const EdgeInsetsGeometry inputBarPadding =
+      EdgeInsetsDirectional.symmetric(horizontal: 8);
 }

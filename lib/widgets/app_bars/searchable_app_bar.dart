@@ -5,8 +5,8 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SearchableAppBar extends StatelessWidget {
   final ValueNotifier<bool> searchModeNotifier;
@@ -69,7 +69,7 @@ class SearchableAppBar extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       title: Align(
         alignment: Alignment.centerLeft,
         child: Column(
