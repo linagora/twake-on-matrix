@@ -157,6 +157,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       constraints: BoxConstraints(
         maxWidth: ChatViewBodyStyle.inputMessageWidgetMaxWidth,
       ),
+      padding: ChatViewBodyStyle.inputBarPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

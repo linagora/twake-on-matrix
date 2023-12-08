@@ -10,8 +10,8 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class NewGroupChatInfoView extends StatelessWidget {
@@ -25,6 +25,7 @@ class NewGroupChatInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: _buildAppBar(context),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -128,6 +129,7 @@ class NewGroupChatInfoView extends StatelessWidget {
         NewGroupChatInfoStyle.toolbarHeight,
       ),
       child: AppBar(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
         toolbarHeight: NewGroupChatInfoStyle.toolbarHeight,
         title: Row(
