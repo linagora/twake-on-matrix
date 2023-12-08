@@ -2956,5 +2956,6 @@
   "failToSend": "Failed to send, please try again",
   "showLess": "Show Less",
   "showMore": "Show More",
+  "unreadMessages": "Unread messages",
   "sharedMediaAndFiles": "Shared media and files"
 }
