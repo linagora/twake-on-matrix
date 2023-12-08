@@ -9,6 +9,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -139,8 +140,6 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                 backgroundColor: LinagoraSysColors.material().onPrimary,
                 automaticallyImplyLeading: false,
                 toolbarHeight: ChatViewStyle.toolbarHeight(context),
-                surfaceTintColor: Colors.transparent,
-                titleSpacing: 0,
                 title: Padding(
                   padding: ChatViewStyle.paddingLeading(context),
                   child: Row(
@@ -163,23 +162,12 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     ],
                   ),
                 ),
-                actions: [
-                  if (!controller.selectMode)
-                    Padding(
-                      padding: ChatViewStyle.paddingTrailing(context),
-                      child: IconButton(
-                        onPressed: controller.toggleSearch,
-                        icon: const Icon(Icons.search),
-                      ),
-                    ),
-                ],
                 bottom: PreferredSize(
-                  preferredSize: const Size(double.infinity, 4),
+                  preferredSize: const Size(double.infinity, 1),
                   child: Container(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceTint
-                        .withOpacity(0.08),
+                    color: LinagoraStateLayer(
+                      LinagoraSysColors.material().surfaceTint,
+                    ).opacityLayer1,
                     height: 1,
                   ),
                 ),

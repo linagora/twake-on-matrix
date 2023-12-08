@@ -122,11 +122,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   children: [
                     PinnedEventsView(controller),
-                    Divider(
-                      height: ChatViewBodyStyle.dividerSize,
-                      thickness: ChatViewBodyStyle.dividerSize,
-                      color: Theme.of(context).dividerColor,
-                    ),
+                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                      Divider(
+                        height: ChatViewBodyStyle.dividerSize,
+                        thickness: ChatViewBodyStyle.dividerSize,
+                        color: Theme.of(context).dividerColor,
+                      ),
                   ],
                 ),
               ],
