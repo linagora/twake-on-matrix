@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart';
 class MessageStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
+  static const double heightDivider = 1.0;
   static final bubbleBorderRadius = BorderRadius.circular(20);
   static final errorStatusPlaceHolderWidth = 16 * AppConfig.bubbleSizeFactor;
   static final errorStatusPlaceHolderHeight = 16 * AppConfig.bubbleSizeFactor;
@@ -136,4 +137,7 @@ class MessageStyle {
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
       const EdgeInsetsDirectional.symmetric(horizontal: 12.0);
+
+  static EdgeInsetsDirectional get paddingDividerUnreadMessage =>
+      const EdgeInsetsDirectional.only(top: 16.0);
 }

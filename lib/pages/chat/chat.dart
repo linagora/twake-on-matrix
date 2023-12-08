@@ -33,7 +33,6 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/ios_badge_client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -110,6 +109,10 @@ class ChatController extends State<Chat>
   Timeline? timeline;
 
   MatrixState? matrix;
+
+  String _markerReadLocation = '';
+
+  String? unreadReceivedMessageLocation;
 
   MatrixFile? get shareFile => widget.shareFile;
 
@@ -191,6 +194,29 @@ class ChatController extends State<Chat>
           .firstWhereOrNull((eventId) => eventId == event.eventId) !=
       null;
 
+  String? _findUnreadReceivedMessageLocation() {
+    final events = timeline!.events;
+    if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
+      final lastIndexReadEvent = events.indexWhere(
+        (event) => event.eventId == _markerReadLocation,
+      );
+      if (lastIndexReadEvent > 0) {
+        final afterFullyRead = events.getRange(0, lastIndexReadEvent);
+        final unreadEvents = afterFullyRead
+            .where((event) => event.senderId != client.userID)
+            .toList();
+        if (unreadEvents.isEmpty) return null;
+        Logs().d(
+          "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
+        );
+        return unreadEvents.last.eventId;
+      }
+    } else {
+      return null;
+    }
+    return null;
+  }
+
   void recreateChat() async {
     final room = this.room;
     final userId = room?.directChatMatrixID;
@@ -251,7 +277,6 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-    setReadMarker();
     if (!scrollController.hasClients) return;
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0) {
@@ -330,81 +355,27 @@ class ChatController extends State<Chat>
     });
   }
 
+  void _initUnreadLocation(String fullyRead) {
+    _markerReadLocation = fullyRead;
+    unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
+    scrollToEventId(fullyRead);
+  }
+
   void _tryLoadTimeline() async {
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
       final fullyRead = room?.fullyRead;
-      if (fullyRead == null && fullyRead!.isEmpty) return;
-      scrollToEventId(fullyRead);
+      if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
+        setReadMarker();
+        return;
+      }
+      _initUnreadLocation(fullyRead);
       if (!mounted) return;
     } catch (e, s) {
       Logs().e('Failed to load timeline', e, s);
       rethrow;
     }
-  }
-
-  Event? getFirstUnreadEvent() {
-    final unreadEvents = getEventsUnread();
-    if (unreadEvents.isEmpty) return null;
-
-    return unreadEvents.last;
-  }
-
-  List<Event?> getEventsUnread() {
-    final fullyRead = room!.fullyRead;
-    final lastIndexReadEvent = timeline?.events.indexWhere(
-      (event) => fullyRead.contains(event.eventId),
-    );
-    if (lastIndexReadEvent != -1 &&
-        lastIndexReadEvent != 0 &&
-        lastIndexReadEvent != null) {
-      final afterFullyRead = timeline?.events.getRange(0, lastIndexReadEvent);
-      final unreadEvents = afterFullyRead
-          ?.where((event) => event.senderId != client.userID)
-          .toList();
-      if (unreadEvents == null || unreadEvents.isEmpty) return [];
-      Logs().d(
-        "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
-      );
-      return unreadEvents;
-    }
-
-    return [];
-  }
-
-  void handleMessageVisibilityChanged(Event event, bool visible) {
-    Logs().d(
-      'Chat::handleMessageVisibilityChanged() - isVisible $visible',
-    );
-    final unreadEvents = getEventsUnread();
-    final isUnreadEvent = unreadEvents.firstWhereOrNull(
-      (event) => event?.eventId == event?.eventId,
-    );
-
-    final activeScroll =
-        (scrollController.hasClients && scrollController.position.pixels > 0);
-    final inputBarHasChange = inputFocus.hasFocus;
-
-    if (isUnreadEvent != null && inputBarHasChange) {
-      _setReadMarkerEvent(isUnreadEvent);
-    }
-    if (activeScroll) return;
-
-    if (isUnreadEvent != null && visible) {
-      Logs().d(
-        'Chat::handleMessageVisibilityChanged() - Set read Event ${isUnreadEvent.eventId}',
-      );
-      _setReadMarkerEvent(isUnreadEvent);
-    }
-  }
-
-  void _setReadMarkerEvent(Event event) {
-    if (room == null) return;
-    room!.setReadMarker(
-      event.eventId,
-      mRead: event.eventId,
-    );
   }
 
   void updateView() {
@@ -418,18 +389,26 @@ class ChatController extends State<Chat>
 
   Future<void>? _setReadMarkerFuture;
 
-  void setReadMarker([_]) {
-    if (_setReadMarkerFuture == null &&
-        (room!.hasNewMessages || room!.notificationCount > 0) &&
-        timeline != null &&
-        timeline!.events.isNotEmpty &&
-        Matrix.of(context).webHasFocus) {
-      Logs().v('Set read marker...');
-      // ignore: unawaited_futures
-      _setReadMarkerFuture = timeline!.setReadMarker().then((_) {
-        _setReadMarkerFuture = null;
-      });
-      room!.client.updateIosBadge();
+  void setReadMarker({String? eventId}) {
+    if (room == null) return;
+    if (_setReadMarkerFuture != null) return;
+    if (eventId == null &&
+        !room!.hasNewMessages &&
+        room!.notificationCount == 0) {
+      return;
+    }
+    if (!Matrix.of(context).webHasFocus) return;
+
+    final timeline = this.timeline;
+    if (timeline == null || timeline.events.isEmpty) return;
+
+    Logs().d('Set read marker...', eventId);
+    // ignore: unawaited_futures
+    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
+      _setReadMarkerFuture = null;
+    });
+    if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
+      Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
     }
   }
 
@@ -502,7 +481,7 @@ class ChatController extends State<Chat>
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
     );
-
+    setReadMarker();
     inputText.value = pendingText;
     setState(() {
       replyEvent = null;
@@ -868,6 +847,7 @@ class ChatController extends State<Chat>
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
+      setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -937,6 +917,7 @@ class ChatController extends State<Chat>
   }
 
   void scrollToEventId(String eventId, {bool highlight = false}) async {
+    if (timeline == null) return;
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
       timeline = null;
@@ -1208,7 +1189,6 @@ class ChatController extends State<Chat>
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('draft_$roomId', text);
     });
-    setReadMarker();
     if (text.endsWith(' ') && matrix!.hasComplexBundles) {
       final clients = currentRoomBundle;
       for (final client in clients) {
