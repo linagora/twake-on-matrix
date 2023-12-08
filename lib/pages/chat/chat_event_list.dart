@@ -102,19 +102,15 @@ class ChatEventList extends StatelessWidget {
                   child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                 );
               }
-              if (controller.timeline!.canRequestFuture) {
-                Center(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                    ),
+              if (controller.timeline!.canRequestHistory) {
+                return Center(
+                  child: IconButton(
                     onPressed: controller.requestHistory,
-                    child: Text(L10n.of(context)!.loadMore),
+                    icon: const Icon(Icons.refresh_outlined),
                   ),
                 );
               }
-              return Container();
+              return const SizedBox.shrink();
             }
             index--;
             // The message at this index:
