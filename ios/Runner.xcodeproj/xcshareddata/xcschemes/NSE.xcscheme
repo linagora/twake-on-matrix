@@ -15,7 +15,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0646E1062B1084E00014B8DD"
+               BlueprintIdentifier = "06EA9C142B21CDE000351529"
                BuildableName = "NSE.appex"
                BlueprintName = "NSE"
                ReferencedContainer = "container:Runner.xcodeproj">

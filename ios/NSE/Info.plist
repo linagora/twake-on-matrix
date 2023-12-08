@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>appGroupIdentifier</key>
-	<string>group.com.linagora.ios.twake</string>
+	<string>group.app.twake.ios.chat</string>
 	<key>keychainAccessGroupIdentifier</key>
-	<string>KUT463DS29.com.linagora.ios.twake.shared</string>
+	<string>KUT463DS29.app.twake.ios.chat</string>
 	<key>baseBundleIdentifier</key>
-	<string>com.linagora.ios.twake</string>
+	<string>app.twake.ios.chat</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
