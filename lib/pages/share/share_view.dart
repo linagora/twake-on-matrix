@@ -19,7 +19,7 @@ class ShareView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: SearchableAppBarStyle.preferredSize(),
+        preferredSize: SearchableAppBarStyle.preferredSize(context),
         child: SearchableAppBar(
           title: L10n.of(context)!.selectChat,
           searchModeNotifier: controller.isSearchModeNotifier,

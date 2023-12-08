@@ -22,9 +22,7 @@ class ContactsSelectionView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
-        preferredSize: SearchableAppBarStyle.preferredSize(
-          isFullScreen: controller.isFullScreen,
-        ),
+        preferredSize: SearchableAppBarStyle.preferredSize(context),
         child: SearchableAppBar(
           focusNode: controller.searchFocusNode,
           title: controller.getTitle(context),
