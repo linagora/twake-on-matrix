@@ -12,8 +12,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
   const AdaptiveScaffoldAppBar({super.key});
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(AdaptiveScaffoldAppBarStyle.toolbarHeight);
+  Size get preferredSize => Size.fromHeight(AdaptiveScaffoldAppBarStyle.toolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +24,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
           builder: (_) {
             return AppBar(
               backgroundColor: LinagoraSysColors.material().onPrimary,
-              toolbarHeight: AppConfig.toolbarHeight(context),
+              toolbarHeight: AdaptiveScaffoldAppBarStyle.toolbarHeight,
               title: const Padding(
                 padding: AdaptiveScaffoldAppBarStyle.appBarPadding,
                 child: Row(
