@@ -1,3 +1,24 @@
+## [2.4.5+2330] - 2023-12-11
+
+### Added
+
+- Create unencrypted Direct Message
+- Preview image before sending
+- Search for unencrypted message
+- Add NSE to get plain notification
+- profile info
+
+### Changed
+
+- new app id
+- Jump to message
+- Refactor Message widget
+- Update correct style for app
+
+### Fixed
+
+- thumbnail image in preview link
+
 ## [2.4.2+2330] - 2023-11-28
 
 ### Added
@@ -2069,6 +2090,8 @@ interesting devices. If you have one, I would very like to see some screenshots 
 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
+
+[2.4.5+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.5+2330
 
 [2.4.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.2
 
