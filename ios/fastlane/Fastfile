@@ -40,7 +40,8 @@ platform :ios do
       scheme: "Runner",
       configuration: "Release",
       workspace: "Runner.xcworkspace",
-      export_method: "app-store"
+      export_method: "app-store",
+      xcodebuild_formatter: "xcbeautify"
     )
     upload_to_testflight(
       ipa: "Runner.ipa"
@@ -57,7 +58,8 @@ platform :ios do
       scheme: "Runner",
       configuration: "Debug",
       workspace: "Runner.xcworkspace",
-      export_method: "development"
+      export_method: "development",
+      xcodebuild_formatter: "xcbeautify"
     )
   end
 
