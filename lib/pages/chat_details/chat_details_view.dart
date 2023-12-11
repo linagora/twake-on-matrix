@@ -39,7 +39,6 @@ class ChatDetailsView extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceVariant,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            toolbarHeight: ChatDetailViewStyle.toolbarHeight(context),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
               child: Container(

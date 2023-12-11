@@ -49,7 +49,6 @@ class DraftChatView extends StatelessWidget {
         backgroundColor: LinagoraSysColors.material().onPrimary,
         appBar: AppBar(
           backgroundColor: LinagoraSysColors.material().onPrimary,
-          toolbarHeight: DraftChatViewStyle.toolbarHeight,
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
           title: Row(
@@ -71,7 +70,7 @@ class DraftChatView extends StatelessWidget {
             ],
           ),
           bottom: PreferredSize(
-            preferredSize: const Size(double.infinity, 4),
+            preferredSize: const Size(double.infinity, 1),
             child: Container(
               color: LinagoraStateLayer(
                 LinagoraSysColors.material().surfaceTint,
