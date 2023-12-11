@@ -1,18 +1,28 @@
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class AppConfig {
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+
   static String _applicationName = 'Twake Chat';
+
   static String get applicationName => _applicationName;
   static String? _applicationWelcomeMessage;
+
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
   static String _defaultHomeserver = 'matrix.linagora.com';
+
   static String get defaultHomeserver => _defaultHomeserver;
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
+
+  static double toolbarHeight(BuildContext context) =>
+      responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
   static Color colorSchemeSeed = primaryColor;
   static const double messageFontSize = 17.0;

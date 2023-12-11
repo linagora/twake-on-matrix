@@ -80,8 +80,16 @@ class TwakeAppState extends State<TwakeApp> {
             title: AppConfig.applicationName,
             debugShowCheckedModeBanner: false,
             themeMode: themeMode,
-            theme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
-            darkTheme: TwakeThemes.buildTheme(Brightness.light, primaryColor),
+            theme: TwakeThemes.buildTheme(
+              context,
+              Brightness.light,
+              primaryColor,
+            ),
+            darkTheme: TwakeThemes.buildTheme(
+              context,
+              Brightness.light,
+              primaryColor,
+            ),
             scrollBehavior: CustomScrollBehavior(),
             localizationsDelegates: const [
               LocaleNamesLocalizationsDelegate(),

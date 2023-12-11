@@ -25,6 +25,7 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: AppConfig.toolbarHeight(context),
         title: Text(
           L10n.of(context)!.settings,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
