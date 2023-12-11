@@ -7,9 +7,6 @@ class ChatDetailViewStyle {
 
   static const double toolbarHeightSliverAppBar = 300.0;
 
-  static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 56 : 80;
-
   static double actionsHeaderWidth(BuildContext context) =>
       responsive.isMobile(context) || responsive.isTablet(context) ? 98 : 148;
 

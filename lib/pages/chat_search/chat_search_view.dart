@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content.dart';
@@ -41,7 +42,7 @@ class ChatSearchView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: ChatViewStyle.toolbarHeight(context),
+          toolbarHeight: AppConfig.toolbarHeight(context),
           automaticallyImplyLeading: false,
           title: _ChatSearchAppBar(controller),
         ),
