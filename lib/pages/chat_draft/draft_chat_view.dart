@@ -54,6 +54,9 @@ class DraftChatView extends StatelessWidget {
           title: Row(
             children: [
               TwakeIconButton(
+                splashColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
                 tooltip: L10n.of(context)!.back,
                 icon: Icons.arrow_back,
                 onTap: () => context.pop(),

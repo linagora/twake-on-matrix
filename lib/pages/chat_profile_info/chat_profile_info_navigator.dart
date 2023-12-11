@@ -7,10 +7,6 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 class ProfileInfoRoutes {
   static const String profileInfo = '/profileInfo';
   static const String profileInfoShared = 'profileInfo/shared';
-
-  static final GlobalKey<NavigatorState> innerNavigatorProfileKey = GlobalKey(
-    debugLabel: 'innerNavigatorProfileKey',
-  );
 }
 
 class ProfileInfoNavigator extends StatelessWidget {
@@ -18,6 +14,7 @@ class ProfileInfoNavigator extends StatelessWidget {
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
+  final bool isDraftInfo;
 
   const ProfileInfoNavigator({
     Key? key,
@@ -25,12 +22,12 @@ class ProfileInfoNavigator extends StatelessWidget {
     this.roomId,
     this.contact,
     required this.isInStack,
+    this.isDraftInfo = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: ProfileInfoRoutes.innerNavigatorProfileKey,
       initialRoute: ProfileInfoRoutes.profileInfo,
       onGenerateRoute: (route) => MaterialPageRoute(
         builder: (context) {
@@ -41,6 +38,7 @@ class ProfileInfoNavigator extends StatelessWidget {
                 isInStack: isInStack,
                 roomId: roomId,
                 contact: contact,
+                isDraftInfo: isDraftInfo,
               );
 
             case ProfileInfoRoutes.profileInfoShared:

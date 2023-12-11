@@ -30,25 +30,27 @@ class ProfileInfoView extends StatelessWidget {
     final user = controller.user;
     final contact = controller.widget.contact;
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
         centerTitle: false,
-        leading: Padding(
-          padding: ChatProfileInfoStyle.backIconPadding,
-          child: IconButton(
-            splashColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onPressed: controller.widget.onBack,
-            icon: controller.widget.isInStack
-                ? const Icon(Icons.arrow_back)
-                : const Icon(Icons.close),
-          ),
-        ),
-        leadingWidth: 40,
-        title: Text(
-          L10n.of(context)!.contactInfo,
-          style: Theme.of(context).textTheme.titleLarge,
+        title: Row(
+          children: [
+            Padding(
+              padding: ChatProfileInfoStyle.backIconPadding,
+              child: IconButton(
+                onPressed: controller.widget.onBack,
+                icon: controller.widget.isInStack
+                    ? const Icon(Icons.arrow_back)
+                    : const Icon(Icons.close),
+              ),
+            ),
+            Text(
+              L10n.of(context)!.contactInfo,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -71,6 +73,7 @@ class ProfileInfoView extends StatelessWidget {
                       matrixId: contact.matrixId,
                       lookupContactNotifier: controller.lookupContactNotifier,
                       goToProfileShared: controller.goToProfileShared,
+                      isDraftInfo: controller.widget.isDraftInfo,
                     ),
                   );
                 }
@@ -80,6 +83,7 @@ class ProfileInfoView extends StatelessWidget {
                     matrixId: contact.matrixId,
                     lookupContactNotifier: controller.lookupContactNotifier,
                     goToProfileShared: controller.goToProfileShared,
+                    isDraftInfo: controller.widget.isDraftInfo,
                   );
                 }
                 return _Information(
@@ -88,6 +92,7 @@ class ProfileInfoView extends StatelessWidget {
                   matrixId: user?.id,
                   lookupContactNotifier: controller.lookupContactNotifier,
                   goToProfileShared: controller.goToProfileShared,
+                  isDraftInfo: controller.widget.isDraftInfo,
                 );
               },
             ),
@@ -108,6 +113,7 @@ class _Information extends StatelessWidget {
     this.matrixId,
     required this.lookupContactNotifier,
     this.goToProfileShared,
+    required this.isDraftInfo,
   }) : super(key: key);
 
   final Uri? avatarUri;
@@ -115,6 +121,7 @@ class _Information extends StatelessWidget {
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
   final Function()? goToProfileShared;
+  final bool isDraftInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -244,29 +251,31 @@ class _Information extends StatelessWidget {
                 },
                 child: const SizedBox.shrink(),
               ),
-              InkWell(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: goToProfileShared,
-                child: Padding(
-                  padding: ChatProfileInfoStyle.titleSharedMediaAndFilesPadding,
-                  child: Row(
-                    children: [
-                      Text(
-                        L10n.of(context)!.sharedMediaAndFiles,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 18,
-                        color: LinagoraSysColors.material().onSurface,
-                      ),
-                    ],
+              if (!isDraftInfo)
+                InkWell(
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: goToProfileShared,
+                  child: Padding(
+                    padding:
+                        ChatProfileInfoStyle.titleSharedMediaAndFilesPadding,
+                    child: Row(
+                      children: [
+                        Text(
+                          L10n.of(context)!.sharedMediaAndFiles,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 18,
+                          color: LinagoraSysColors.material().onSurface,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
