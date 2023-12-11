@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -16,6 +18,7 @@ class ProfileInfo extends StatefulWidget {
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
+  final bool isDraftInfo;
 
   const ProfileInfo({
     super.key,
@@ -23,6 +26,7 @@ class ProfileInfo extends StatefulWidget {
     required this.isInStack,
     this.roomId,
     this.contact,
+    required this.isDraftInfo,
   });
 
   @override
@@ -32,6 +36,8 @@ class ProfileInfo extends StatefulWidget {
 class ProfileInfoController extends State<ProfileInfo> {
   final _lookupMatchContactInteractor =
       getIt.get<LookupMatchContactInteractor>();
+
+  StreamSubscription? lookupContactNotifierSub;
 
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier =
       ValueNotifier<Either<Failure, Success>>(
@@ -46,9 +52,9 @@ class ProfileInfoController extends State<ProfileInfo> {
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
   void lookupMatchContactAction() {
-    _lookupMatchContactInteractor
+    lookupContactNotifierSub = _lookupMatchContactInteractor
         .execute(
-          val: user?.id ?? '',
+          val: widget.contact?.matrixId ?? user?.id ?? '',
         )
         .listen(
           (event) => lookupContactNotifier.value = event,
@@ -56,6 +62,7 @@ class ProfileInfoController extends State<ProfileInfo> {
   }
 
   void goToProfileShared() {
+    if (widget.isDraftInfo) return;
     Navigator.of(context).pushNamed(
       ProfileInfoRoutes.profileInfoShared,
       arguments: widget.roomId,
@@ -66,6 +73,13 @@ class ProfileInfoController extends State<ProfileInfo> {
   void initState() {
     lookupMatchContactAction();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    lookupContactNotifier.dispose();
+    lookupContactNotifierSub?.cancel();
+    super.dispose();
   }
 
   @override
