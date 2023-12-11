@@ -22,11 +22,12 @@ class LockScreenState extends State<LockScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _wrongInput = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: TwakeThemes.buildTheme(Brightness.light),
-      darkTheme: TwakeThemes.buildTheme(Brightness.dark),
+      theme: TwakeThemes.buildTheme(context, Brightness.light),
+      darkTheme: TwakeThemes.buildTheme(context, Brightness.dark),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
       home: Builder(
