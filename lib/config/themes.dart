@@ -74,7 +74,11 @@ abstract class TwakeThemes {
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
 
-  static ThemeData buildTheme(Brightness brightness, [Color? seed]) =>
+  static ThemeData buildTheme(
+    BuildContext context,
+    Brightness brightness, [
+    Color? seed,
+  ]) =>
       ThemeData(
         visualDensity: VisualDensity.standard,
         useMaterial3: true,
@@ -107,6 +111,7 @@ abstract class TwakeThemes {
           ),
         ),
         appBarTheme: AppBarTheme(
+          toolbarHeight: AppConfig.toolbarHeight(context),
           scrolledUnderElevation: 0,
           titleSpacing: 0,
           systemOverlayStyle: SystemUiOverlayStyle(

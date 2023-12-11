@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
@@ -24,7 +25,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
           builder: (_) {
             return AppBar(
               backgroundColor: LinagoraSysColors.material().onPrimary,
-              toolbarHeight: AdaptiveScaffoldAppBarStyle.toolbarHeight,
+              toolbarHeight: AppConfig.toolbarHeight(context),
               title: const Padding(
                 padding: AdaptiveScaffoldAppBarStyle.appBarPadding,
                 child: Row(
