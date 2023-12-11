@@ -34,6 +34,7 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
               onBack: controller.hideRightColumn,
               contact: _contact,
               isInStack: isInStack,
+              isDraftInfo: true,
             );
           default:
             return const SizedBox();
