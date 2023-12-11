@@ -21,13 +21,22 @@ class CreateNewGroupChatInteractor {
         },
         stateKey: '',
       );
+      final historyVisibility =
+          createNewGroupChatRequest.enableEncryption == true
+              ? HistoryVisibility.joined
+              : HistoryVisibility.shared;
+      final historyVisibilityStateEvent = StateEvent(
+        type: EventTypes.HistoryVisibility,
+        content: {'history_visibility': historyVisibility.name},
+        stateKey: '',
+      );
 
       final roomId = await matrixClient.createGroupChat(
         groupName: createNewGroupChatRequest.groupName,
         invite: createNewGroupChatRequest.invite,
         enableEncryption: createNewGroupChatRequest.enableEncryption,
         preset: createNewGroupChatRequest.createRoomPreset,
-        initialState: [addAvatarStateEvent],
+        initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
       );
 
       if (roomId.isNotEmpty) {
