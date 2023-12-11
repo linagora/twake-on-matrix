@@ -74,7 +74,7 @@ mixin GoToDraftChatMixin {
         Matrix.of(context).client.userID) {
       Router.neglect(
         context,
-        () => context.push(
+        () => context.go(
           '/$path/draftChat',
           extra: {
             PresentationContactConstant.receiverId:
