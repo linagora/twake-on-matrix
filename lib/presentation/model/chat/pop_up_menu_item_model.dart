@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class PopupMenuItemModel with EquatableMixin {
+class ContextMenuItemModel with EquatableMixin {
   final String text;
 
   final String? imagePath;
@@ -12,7 +12,7 @@ class PopupMenuItemModel with EquatableMixin {
 
   final void Function({Object? extra})? onTap;
 
-  PopupMenuItemModel({
+  ContextMenuItemModel({
     required this.text,
     this.imagePath,
     this.iconData,
