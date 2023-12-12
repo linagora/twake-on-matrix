@@ -13,4 +13,8 @@ class PinnedMessagesStyle {
   static const SizedBox paddingIconAndUnpin = SizedBox(width: 4.0);
 
   static const double unpinButtonHeight = 72;
+
+  static const double paddingAllContextMenuItem = 12;
+
+  static const double heightContextMenuItem = 48;
 }
