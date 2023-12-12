@@ -1,3 +1,8 @@
+## [2.4.6+2330] - 2023-12-12
+### Fixed
+- Context menu in Chat screen
+- build NSE with new Xcode
+
 ## [2.4.5+2330] - 2023-12-11
 
 ### Added
@@ -2091,8 +2096,8 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
-[2.4.5+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.5+2330
-
+[2.4.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.6
+[2.4.5+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.5
 [2.4.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.2
 
 [2.4.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.1
