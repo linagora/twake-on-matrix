@@ -5,6 +5,8 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatDetailsMembersPage extends StatelessWidget {
+  static const int addMemberItemCount = 1;
+
   final List<User> members;
   final int actualMembersCount;
   final VoidCallback openDialogInvite;
@@ -29,13 +31,15 @@ class ChatDetailsMembersPage extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: members.length + (canRequestMoreMembers ? 1 : 0) + 1,
+            itemCount: members.length +
+                (canRequestMoreMembers ? 1 : 0) +
+                addMemberItemCount,
             itemBuilder: (BuildContext context, int index) {
               if (index == 0) {
                 return _listMemberInfoMobileAndTablet(context);
               }
-              if (index < members.length) {
-                return ParticipantListItem(members[index - 1]);
+              if (index - addMemberItemCount < members.length) {
+                return ParticipantListItem(members[index - addMemberItemCount]);
               }
 
               return ListTile(

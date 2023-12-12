@@ -1,7 +1,8 @@
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:matrix/matrix.dart';
 
 class UpdateGroupChatFailure extends Failure {
-  final dynamic exception;
+  final MatrixException exception;
 
   const UpdateGroupChatFailure(this.exception) : super();
 
@@ -12,7 +13,9 @@ class UpdateGroupChatFailure extends Failure {
 class UpdateGroupAvatarFailure extends Failure {
   final dynamic exception;
 
-  const UpdateGroupAvatarFailure(this.exception) : super();
+  const UpdateGroupAvatarFailure({
+    this.exception,
+  }) : super();
 
   @override
   List<Object?> get props => [exception];
@@ -21,7 +24,9 @@ class UpdateGroupAvatarFailure extends Failure {
 class UpdateGroupDisplayNameFailure extends Failure {
   final dynamic exception;
 
-  const UpdateGroupDisplayNameFailure(this.exception) : super();
+  const UpdateGroupDisplayNameFailure({
+    this.exception,
+  }) : super();
 
   @override
   List<Object?> get props => [exception];
@@ -30,8 +35,17 @@ class UpdateGroupDisplayNameFailure extends Failure {
 class UpdateGroupDescriptionFailure extends Failure {
   final dynamic exception;
 
-  const UpdateGroupDescriptionFailure(this.exception) : super();
+  const UpdateGroupDescriptionFailure({
+    this.exception,
+  }) : super();
 
   @override
   List<Object?> get props => [exception];
+}
+
+class UpdateGroupNameIsEmptyFailure extends Failure {
+  const UpdateGroupNameIsEmptyFailure() : super();
+
+  @override
+  List<Object?> get props => [];
 }

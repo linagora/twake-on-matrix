@@ -48,4 +48,7 @@ class ChatDetailEditViewStyle {
 
   static const EdgeInsetsDirectional contentPadding =
       EdgeInsetsDirectional.all(16.0);
+
+  static const EdgeInsetsDirectional editIconMaterialPadding =
+      EdgeInsetsDirectional.all(8.0);
 }

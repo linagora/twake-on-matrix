@@ -13,6 +13,7 @@ import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
+import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -20,7 +21,6 @@ import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -132,6 +132,8 @@ class ChatDetailsController extends State<ChatDetails>
     });
     room = Matrix.of(context).client.getRoomById(roomId!);
     muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
+    members ??=
+        Matrix.of(context).client.getRoomById(roomId!)!.getParticipants();
   }
 
   @override
@@ -286,7 +288,7 @@ class ChatDetailsController extends State<ChatDetails>
   }
 
   void onTapInviteLink(BuildContext context, String inviteLink) async {
-    await Clipboard.setData(ClipboardData(text: inviteLink));
+    await Clipboard.instance.copyText(inviteLink);
     TwakeSnackBar.show(
       context,
       L10n.of(context)!.copiedToClipboard,
@@ -295,8 +297,6 @@ class ChatDetailsController extends State<ChatDetails>
 
   @override
   Widget build(BuildContext context) {
-    members ??=
-        Matrix.of(context).client.getRoomById(roomId!)!.getParticipants();
     return SizedBox(
       width: ChatDetailViewStyle.fixedWidth,
       child: ChatDetailsView(this),

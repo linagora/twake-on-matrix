@@ -17,6 +17,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -86,8 +87,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     BuildContext context,
   ) {
     final listAction = [
-      ChatDetailsEditContextMenuActions.edit,
-      ChatDetailsEditContextMenuActions.delete,
+      EditChatAvatarContextMenuActions.edit,
+      EditChatAvatarContextMenuActions.delete,
     ];
     return listAction.map((action) {
       return PopupMenuItem(
@@ -106,12 +107,12 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }).toList();
   }
 
-  void _handleActionContextMenu(ChatDetailsEditContextMenuActions action) {
+  void _handleActionContextMenu(EditChatAvatarContextMenuActions action) {
     switch (action) {
-      case ChatDetailsEditContextMenuActions.edit:
+      case EditChatAvatarContextMenuActions.edit:
         _handleEditAvatarAction(context: context);
         break;
-      case ChatDetailsEditContextMenuActions.delete:
+      case EditChatAvatarContextMenuActions.delete:
         _handleRemoveAvatarAction();
         break;
     }
@@ -245,12 +246,12 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           );
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.errorUploadingGroupAvatar,
+            L10n.of(context)!.oopsSomethingWentWrong,
           );
         },
       );
     } else {
-      _uploadGroupInfo(
+      _updateGroupInfo(
         displayName: groupNameTextEditingController.text,
         description: descriptionTextEditingController.text,
       );
@@ -273,7 +274,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           'ChatDetailsEdit::_handleUploadAvatarOnData() - success: $success',
         );
         if (success is UploadContentSuccess) {
-          _uploadGroupInfo(
+          _updateGroupInfo(
             avatarUr: success.uri,
             displayName: groupNameTextEditingController.text,
             description: descriptionTextEditingController.text,
@@ -303,19 +304,19 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           );
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.errorUploadingGroupAvatar,
+            L10n.of(context)!.oopsSomethingWentWrong,
           );
         },
       );
     } else {
-      _uploadGroupInfo(
+      _updateGroupInfo(
         displayName: groupNameTextEditingController.text,
         description: descriptionTextEditingController.text,
       );
     }
   }
 
-  void _uploadGroupInfo({
+  void _updateGroupInfo({
     Uri? avatarUr,
     String? displayName,
     String? description,
@@ -363,31 +364,41 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       (failure) {
         if (failure is UpdateGroupDisplayNameFailure) {
           Logs().e(
-            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDisplayNameFailure',
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDisplayNameFailure - ${failure.exception}',
           );
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.errorUploadingGroupName,
+            L10n.of(context)!.oopsSomethingWentWrong,
           );
         } else if (failure is UpdateGroupAvatarFailure) {
           Logs().e(
-            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupAvatarFailure',
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupAvatarFailure - ${failure.exception}',
           );
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.errorUploadingGroupAvatar,
+            L10n.of(context)!.oopsSomethingWentWrong,
           );
         } else if (failure is UpdateGroupDescriptionFailure) {
           Logs().e(
-            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDescriptionFailure',
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDescriptionFailure - ${failure.exception}',
           );
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.errorUploadingGroupDescription,
+            L10n.of(context)!.oopsSomethingWentWrong,
+          );
+        } else if (failure is UpdateGroupNameIsEmptyFailure) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.groupNameCannotBeEmpty,
+          );
+        } else if (failure is UpdateGroupChatFailure) {
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toLocalizedString(context),
           );
         } else {
           Logs().e(
-            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - failure: $failure',
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - failure: UNKNOWN',
           );
         }
       },
@@ -398,6 +409,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           );
           _handleSaveIconOnUpdateSuccess();
           _isDeleteAvatar = false;
+          avatarFilePicker = null;
+          avatarAssetEntity = null;
         } else if (success is UpdateDisplayNameGroupChatSuccess) {
           Logs().d(
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateDisplayNameGroupChatSuccess',

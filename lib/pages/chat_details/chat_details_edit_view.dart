@@ -129,7 +129,7 @@ class ChatDetailsEditView extends StatelessWidget {
                                 const CircleBorder(),
                               ),
                               padding: MaterialStateProperty.all(
-                                const EdgeInsets.all(8.0),
+                                ChatDetailEditViewStyle.editIconMaterialPadding,
                               ),
                               iconColor: MaterialStateProperty.all(
                                 Theme.of(context).colorScheme.onPrimary,
