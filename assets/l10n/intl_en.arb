@@ -2974,5 +2974,6 @@
   "sharedMediaAndFiles": "Shared media and files",
   "unpinAllMessages": "Unpin all messages",
   "pinnedMessagesTooltip": "Pinned messages",
-  "jumpToMessage": "Jump to message"
+  "jumpToMessage": "Jump to message",
+  "failedToUnpin": "Failed to unpin message"
 }
