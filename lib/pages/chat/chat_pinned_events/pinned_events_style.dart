@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class PinnedEventsStyle {
   static const double maxHeight = 48;
+  static const double maxWidthContextItem = 100;
+  static const double minWidthContextItem = 80;
   static const double minHeightIndicator = 12;
   static const double maxWidthIndicator = 2.0;
   static const double maxLengthIndicator = 5.0;

@@ -130,13 +130,18 @@ class PinnedEventsView extends StatelessWidget {
                                       margin: PinnedEventsStyle.marginPinIcon,
                                       paddingAll:
                                           PinnedEventsStyle.paddingPinIcon,
-                                      onTap: () {
-                                        context.pushChild(
+                                      onTap: () async {
+                                        final popResult =
+                                            await context.pushChild(
                                           'pinnedmessages',
                                           extra: PinnedEventsArgument(
                                             pinnedEvents: data.pinnedEvents,
                                             timeline: controller.timeline,
                                           ),
+                                        );
+                                        controller
+                                            .handlePopBackFromPinnedScreen(
+                                          popResult,
                                         );
                                       },
                                     ),
