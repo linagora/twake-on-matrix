@@ -28,8 +28,8 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ScrollController scrollController = ScrollController();
 
-  List<PopupMenuItemModel> get pinnedMessagesActionsList => [
-        PopupMenuItemModel(
+  List<ContextMenuItemModel> get pinnedMessagesActionsList => [
+        ContextMenuItemModel(
           text: L10n.of(context)!.unpin,
           imagePath: ImagePaths.icUnpin,
           color: Theme.of(context).colorScheme.onSurface,
@@ -40,12 +40,12 @@ class PinnedMessagesController extends State<PinnedMessages>
             }
           },
         ),
-        PopupMenuItemModel(
+        ContextMenuItemModel(
           text: L10n.of(context)!.jumpToMessage,
           imagePath: ImagePaths.icJumpTo,
           color: Theme.of(context).colorScheme.onSurface,
         ),
-        PopupMenuItemModel(
+        ContextMenuItemModel(
           text: L10n.of(context)!.copy,
           iconData: Icons.content_copy,
           color: Theme.of(context).colorScheme.onSurface,
