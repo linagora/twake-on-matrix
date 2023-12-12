@@ -6,11 +6,8 @@ class ChatDetailEditViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
   static const double fixedWidth = 360.0;
 
-  // Navigation App Bar
-  static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 56 : 80;
   static const EdgeInsets navigationAppBarPadding =
-      EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0);
+      EdgeInsets.symmetric(horizontal: 4.0);
   static const EdgeInsetsGeometry backIconPadding =
       EdgeInsets.symmetric(vertical: 8, horizontal: 4);
   static const EdgeInsetsGeometry doneIconPadding =
@@ -21,6 +18,7 @@ class ChatDetailEditViewStyle {
   static const int thumbnailSizeHeight = 56;
   static const double avatarRadiusForWeb = 48;
   static const double avatarRadiusForMobile = 28;
+
   static double avatarSize(BuildContext context) => 96;
   static const double avatarFontSize = 15;
   static const EdgeInsets editAvatarPadding =
@@ -34,12 +32,14 @@ class ChatDetailEditViewStyle {
   static const double textFieldsGap = 16.0;
   static const EdgeInsets textFieldPadding =
       EdgeInsets.symmetric(horizontal: 8.0);
+
   static TextStyle? textFieldLabelStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodySmall?.copyWith(
             fontSize: 16,
             letterSpacing: 0.4,
             color: Theme.of(context).colorScheme.onSurface,
           );
+
   static TextStyle? textFieldHintStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge?.copyWith(
             letterSpacing: -0.15,
