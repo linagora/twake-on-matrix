@@ -174,14 +174,15 @@ extension LocalizedBody on Event {
     }
     final pinnedEventIds = room.pinnedEventIds;
     pinnedEventIds.remove(eventId);
-    String? message;
+    String? responseMessage;
     try {
-      message = await room.setPinnedEvents(pinnedEventIds);
+      responseMessage = await room.setPinnedEvents(pinnedEventIds);
     } catch (e) {
-      Logs().e('$e');
+      Logs().e('EventExtension::unpin(): $e');
       return false;
     }
-    if (message.startsWith('\$')) {
+    // If it's start with $, it means it's a eventId
+    if (responseMessage.startsWith('\$')) {
       return true;
     }
     return false;
