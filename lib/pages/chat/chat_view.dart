@@ -163,6 +163,19 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     ],
                   ),
                 ),
+                actions: [
+                  if (!controller.selectMode)
+                    Padding(
+                      padding: ChatViewStyle.paddingTrailing(context),
+                      child: IconButton(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onPressed: controller.toggleSearch,
+                        icon: const Icon(Icons.search),
+                      ),
+                    ),
+                ],
                 bottom: PreferredSize(
                   preferredSize: const Size(double.infinity, 1),
                   child: Container(
