@@ -169,9 +169,19 @@ extension LocalizedBody on Event {
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
   Future<bool> unpin() async {
-    if (isPinned) {
-      room.pinnedEventIds.remove(eventId);
-      await room.setPinnedEvents(room.pinnedEventIds);
+    if (!isPinned) {
+      return true;
+    }
+    final pinnedEventIds = room.pinnedEventIds;
+    pinnedEventIds.remove(eventId);
+    String? message;
+    try {
+      message = await room.setPinnedEvents(pinnedEventIds);
+    } catch (e) {
+      Logs().e('$e');
+      return false;
+    }
+    if (message.startsWith('\$')) {
       return true;
     }
     return false;
