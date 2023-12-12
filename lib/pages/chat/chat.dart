@@ -786,7 +786,7 @@ class ChatController extends State<Chat>
     inputFocus.requestFocus();
   }
 
-  void scrollToEventIdAndHighlight(String eventId) {
+  Future<void> scrollToEventIdAndHighlight(String eventId) {
     return scrollToEventId(eventId, highlight: true);
   }
 
@@ -868,8 +868,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void scrollToEventId(String eventId, {bool highlight = false}) async {
-    if (timeline == null) return;
+  Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
       timeline = null;
@@ -896,7 +895,7 @@ class ChatController extends State<Chat>
     );
     if (highlight) {
       await scrollController.highlight(
-        index,
+        index + 1,
       );
     }
     setState(() {});
@@ -1463,6 +1462,17 @@ class ChatController extends State<Chat>
     } else {
       return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
           room!.getLocalizedDisplayname();
+    }
+  }
+
+  void handlePopBackFromPinnedScreen(Object? popResult) async {
+    Logs().d(
+      "PinnedEventsController()::handlePopBack(): popResult: $popResult",
+    );
+    if (popResult is Event) {
+      scrollToEventIdAndHighlight(popResult.eventId);
+    } else if (popResult is List<Event?>) {
+      pinnedEventsController.handlePopBack(popResult);
     }
   }
 
