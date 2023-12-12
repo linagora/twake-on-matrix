@@ -3,21 +3,29 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/update_group_chat_failure.dart';
 import 'package:fluffychat/domain/app_state/room/update_group_chat_success.dart';
+import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_avatar_ui_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class ChatDetailsEdit extends StatefulWidget {
@@ -36,6 +44,10 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     with PopupMenuWidgetMixin, CommonMediaPickerMixin, SingleImagePickerMixin {
   final updateGroupChatInteractor = getIt.get<UpdateGroupChatInteractor>();
 
+  final uploadContentInteractor = getIt.get<UploadContentInteractor>();
+  final uploadContentWebInteractor =
+      getIt.get<UploadContentInBytesInteractor>();
+
   Room? room;
 
   final groupNameTextEditingController = TextEditingController();
@@ -43,16 +55,28 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
   final descriptionTextEditingController = TextEditingController();
   final descriptionFocusNode = FocusNode();
-
-  AssetEntity? assetEntity;
-  final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
-
-  FilePickerResult? filePickerResult;
-  final avatarFilePickerNotifier = ValueNotifier<FilePickerResult?>(null);
+  final updateGroupAvatarNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(ChatDetailsUploadAvatarInitial()),
+  );
+  FilePickerResult? avatarFilePicker;
+  AssetEntity? avatarAssetEntity;
 
   final MenuController menuController = MenuController();
 
-  final showSaveButtonNotifier = ValueNotifier<bool>(false);
+  final isEditedGroupInfoNotifier = ValueNotifier<bool>(false);
+
+  Client get client => Matrix.of(context).client;
+
+  bool _isDeleteAvatar = false;
+
+  bool get _isEditGroupName =>
+      groupNameTextEditingController.text != room?.name;
+
+  bool get _isEditDescription =>
+      descriptionTextEditingController.text != room?.topic;
+
+  bool get _isEditAvatar =>
+      avatarFilePicker != null || avatarAssetEntity != null;
 
   void onBack() {
     Navigator.of(context).pop();
@@ -102,7 +126,6 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionPhotos != null && currentPermissionCamera != null) {
       final imagePickerController = createImagePickerController();
-      groupNameFocusNode.unfocus();
       showImagePickerBottomSheet(
         context,
         currentPermissionPhotos,
@@ -123,7 +146,17 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         if (!imagePickerController.pickFromCamera()) {
           Navigator.pop(context);
         }
-        avatarAssetEntityNotifier.value = selectedAsset?.asset;
+        if (!isEditedGroupInfoNotifier.value) {
+          isEditedGroupInfoNotifier.toggle();
+        }
+        if (selectedAsset != null) {
+          avatarAssetEntity = selectedAsset.asset;
+
+          updateGroupAvatarNotifier.value = Right(
+            ChatDetailsGetAvatarInStreamSuccess(selectedAsset.asset),
+          );
+        }
+
         imagePickerController.removeAllSelectedItem();
       }
     });
@@ -143,123 +176,297 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (result == null || result.files.single.bytes == null) {
       return;
     } else {
-      avatarFilePickerNotifier.value = result;
+      if (!isEditedGroupInfoNotifier.value) {
+        isEditedGroupInfoNotifier.toggle();
+      }
+      avatarFilePicker = result;
+      updateGroupAvatarNotifier.value = Right(
+        ChatDetailsGetAvatarInByteSuccess(result),
+      );
       Logs().d(
-        'ChatDetailsEditController::_getImageOnWeb(): AvatarWebNotifier - ${avatarFilePickerNotifier.value}',
+        'ChatDetailsEditController::_getImageOnWeb(): AvatarWebNotifier - $avatarFilePicker',
       );
     }
   }
 
   void _handleRemoveAvatarAction() async {
-    try {
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => room!.setAvatar(null),
+    if (avatarFilePicker != null) {
+      avatarFilePicker = null;
+      updateGroupAvatarNotifier.value = Right(
+        ChatDetailsUploadAvatarInitial(),
       );
-    } catch (e, s) {
-      Logs().e(
-        'ChatDetailsEdit::__handleRemoveAvatarAction - Unable to remove avatar',
-        e,
-        s,
+      if (_isEditDescription || _isEditGroupName) {
+        return;
+      } else {
+        isEditedGroupInfoNotifier.toggle();
+      }
+    }
+    if (avatarAssetEntity != null) {
+      avatarAssetEntity = null;
+      updateGroupAvatarNotifier.value = Right(
+        ChatDetailsUploadAvatarInitial(),
+      );
+      if (_isEditDescription || _isEditGroupName) {
+        return;
+      } else {
+        isEditedGroupInfoNotifier.toggle();
+      }
+    }
+    if (room?.avatar != null) {
+      updateGroupAvatarNotifier.value = Right(
+        ChatDetailsDeleteAvatarSuccess(),
+      );
+      _isDeleteAvatar = true;
+      if (_isEditDescription || _isEditGroupName) {
+        return;
+      } else {
+        isEditedGroupInfoNotifier.toggle();
+      }
+    }
+  }
+
+  void _setAvatarInStream() {
+    if (avatarAssetEntity != null) {
+      uploadContentInteractor
+          .execute(
+        matrixClient: client,
+        entity: avatarAssetEntity!,
+      )
+          .listen(
+        (event) => _handleUploadAvatarOnData(context, event),
+        onDone: () {
+          Logs().d(
+            'ChatDetailsEdit::_setAvatarInStream() - done',
+          );
+        },
+        onError: (error) {
+          Logs().e(
+            'ChatDetailsEdit::_setAvatarInStream() - error: $error',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.errorUploadingGroupAvatar,
+          );
+        },
+      );
+    } else {
+      _uploadGroupInfo(
+        displayName: groupNameTextEditingController.text,
+        description: descriptionTextEditingController.text,
       );
     }
   }
 
-  void handleSaveAction(BuildContext context) async {
-    MatrixFile? avatar;
-    if (PlatformInfos.isWeb && avatarFilePickerNotifier.value != null) {
-      avatar = MatrixFile.fromMimeType(
-        bytes: avatarFilePickerNotifier.value!.files.single.bytes,
-        name: avatarFilePickerNotifier.value!.files.single.name,
-        filePath: '',
-      );
-    } else if (avatarAssetEntityNotifier.value != null) {
-      avatar = MatrixFile.fromMimeType(
-        bytes: await avatarAssetEntityNotifier.value!.originBytes,
-        name: avatarAssetEntityNotifier.value!.title!,
-        filePath: '',
-      );
-    }
-
-    final newDisplayName = groupNameTextEditingController.text != room!.name
-        ? groupNameTextEditingController.text
-        : null;
-
-    final newDescription = descriptionTextEditingController.text != room!.topic
-        ? descriptionTextEditingController.text
-        : null;
-
-    updateGroupChatInteractor
-        .execute(
-          room: room!,
-          avatar: avatar,
-          displayName: newDisplayName,
-          description: newDescription,
-        )
-        .listen((event) => _handleUpdateGroupInfosOnEvents(context, event));
-  }
-
-  void _handleUpdateGroupInfosOnEvents(
+  void _handleUploadAvatarOnData(
     BuildContext context,
     Either<Failure, Success> event,
   ) {
-    Logs().d('ChatDetailsEdit::_handleUpdateGroupInfosOnEvents()');
+    Logs().d('ChatDetailsEdit::_handleUploadAvatarOnData()');
     event.fold(
       (failure) {
         Logs().e(
-          'ChatDetailsEdit::_handleUpdateGroupInfosOnEvents() - failure: $failure',
+          'ChatDetailsEdit::_handleUploadAvatarOnData() - failure: $failure',
         );
       },
       (success) {
         Logs().d(
-          'ChatDetailsEdit::_handleUpdateGroupInfosOnEvents() - success: $success',
+          'ChatDetailsEdit::_handleUploadAvatarOnData() - success: $success',
         );
-        if (success is UpdateGroupChatSuccess) {
-          Navigator.of(context).pop();
+        if (success is UploadContentSuccess) {
+          _uploadGroupInfo(
+            avatarUr: success.uri,
+            displayName: groupNameTextEditingController.text,
+            description: descriptionTextEditingController.text,
+          );
         }
       },
     );
   }
 
+  void _setAvatarInBytes() {
+    if (avatarFilePicker != null) {
+      uploadContentWebInteractor
+          .execute(
+        matrixClient: client,
+        filePickerResult: avatarFilePicker!,
+      )
+          .listen(
+        (event) => _handleUploadAvatarOnData(context, event),
+        onDone: () {
+          Logs().d(
+            'ChatDetailsEdit::_setAvatarInBytes() - done',
+          );
+        },
+        onError: (error) {
+          Logs().e(
+            'ChatDetailsEdit::_setAvatarInBytes() - error: $error',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.errorUploadingGroupAvatar,
+          );
+        },
+      );
+    } else {
+      _uploadGroupInfo(
+        displayName: groupNameTextEditingController.text,
+        description: descriptionTextEditingController.text,
+      );
+    }
+  }
+
+  void _uploadGroupInfo({
+    Uri? avatarUr,
+    String? displayName,
+    String? description,
+  }) {
+    if (room == null) return;
+    updateGroupChatInteractor
+        .execute(
+          client: client,
+          room: room!,
+          avatarUrl: avatarUr,
+          displayName: displayName,
+          description: description,
+          isDeleteAvatar: _isDeleteAvatar,
+        )
+        .listen(
+          (event) {
+            _handleUpdateGroupInfoOnEvents(context, event);
+          },
+          onDone: _handleUpdateGroupInfoOnDone,
+          onError: (error) {
+            Logs().e(
+              'ChatDetailsEdit::_uploadGroupInfo() - error: $error',
+            );
+          },
+        );
+  }
+
+  void handleSaveAction(BuildContext context) async {
+    if (groupNameFocusNode.hasFocus) groupNameFocusNode.unfocus();
+    if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
+    TwakeDialog.showLoadingDialog(context);
+    if (PlatformInfos.isMobile) {
+      _setAvatarInStream();
+    } else {
+      _setAvatarInBytes();
+    }
+  }
+
+  void _handleUpdateGroupInfoOnEvents(
+    BuildContext context,
+    Either<Failure, Success> event,
+  ) {
+    Logs().d('ChatDetailsEdit::_handleUpdateGroupInfoOnEvents()');
+    event.fold(
+      (failure) {
+        if (failure is UpdateGroupDisplayNameFailure) {
+          Logs().e(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDisplayNameFailure',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.errorUploadingGroupName,
+          );
+        } else if (failure is UpdateGroupAvatarFailure) {
+          Logs().e(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupAvatarFailure',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.errorUploadingGroupAvatar,
+          );
+        } else if (failure is UpdateGroupDescriptionFailure) {
+          Logs().e(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDescriptionFailure',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.errorUploadingGroupDescription,
+          );
+        } else {
+          Logs().e(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - failure: $failure',
+          );
+        }
+      },
+      (success) {
+        if (success is UpdateAvatarGroupChatSuccess) {
+          Logs().d(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateAvatarGroupChatSuccess',
+          );
+          _handleSaveIconOnUpdateSuccess();
+          _isDeleteAvatar = false;
+        } else if (success is UpdateDisplayNameGroupChatSuccess) {
+          Logs().d(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateDisplayNameGroupChatSuccess',
+          );
+          _handleSaveIconOnUpdateSuccess();
+        } else if (success is UpdateDescriptionGroupChatSuccess) {
+          Logs().d(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateDescriptionGroupChatSuccess',
+          );
+          _handleSaveIconOnUpdateSuccess();
+        } else {
+          Logs().d(
+            'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - success: $success',
+          );
+        }
+      },
+    );
+  }
+
+  void _handleSaveIconOnUpdateSuccess() {
+    if (isEditedGroupInfoNotifier.value) {
+      isEditedGroupInfoNotifier.toggle();
+    }
+  }
+
+  void _handleUpdateGroupInfoOnDone() {
+    Logs().d('ChatDetailsEdit::_handleUpdateGroupInfoOnDone()');
+    TwakeDialog.hideLoadingDialog(context);
+  }
+
   @override
   void dispose() {
     groupNameTextEditingController.dispose();
+    descriptionTextEditingController.dispose();
+    isEditedGroupInfoNotifier.dispose();
+    descriptionFocusNode.dispose();
     groupNameFocusNode.dispose();
-    avatarFilePickerNotifier.dispose();
-    avatarAssetEntityNotifier.dispose();
     super.dispose();
   }
 
   void _setupGroupNameTextEditingController() {
     groupNameTextEditingController.text = room?.name ?? '';
     groupNameTextEditingController.addListener(() {
-      if (groupNameTextEditingController.text != room?.name) {
-        showSaveButtonNotifier.value = true;
+      if (_isEditAvatar || _isEditDescription) {
+        return;
       }
+      if (groupNameTextEditingController.text.isEmpty &&
+          groupNameTextEditingController.text != '') {
+        isEditedGroupInfoNotifier.toggle();
+        return;
+      }
+      isEditedGroupInfoNotifier.value =
+          groupNameTextEditingController.text != (room?.name ?? '');
     });
   }
 
   void _setupDescriptionTextEditingController() {
     descriptionTextEditingController.text = room?.topic ?? '';
     descriptionTextEditingController.addListener(() {
-      if (descriptionTextEditingController.text != room?.topic) {
-        showSaveButtonNotifier.value = true;
+      if (_isEditAvatar || _isEditGroupName) {
+        return;
       }
-    });
-  }
-
-  void _listenToAvatarAssetEntityNotifier() {
-    avatarAssetEntityNotifier.addListener(() {
-      if (avatarAssetEntityNotifier.value != null) {
-        showSaveButtonNotifier.value = true;
+      if (descriptionTextEditingController.text.isEmpty &&
+          descriptionTextEditingController.text != '') {
+        isEditedGroupInfoNotifier.toggle();
+        return;
       }
-    });
-  }
-
-  void _listenToAvatarFilePickerNotifier() {
-    avatarFilePickerNotifier.addListener(() {
-      if (avatarFilePickerNotifier.value != null) {
-        showSaveButtonNotifier.value = true;
-      }
+      isEditedGroupInfoNotifier.value =
+          descriptionTextEditingController.text != (room?.topic ?? '');
     });
   }
 
@@ -268,8 +475,6 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     room = Matrix.of(context).client.getRoomById(widget.roomId);
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
-    _listenToAvatarAssetEntityNotifier();
-    _listenToAvatarFilePickerNotifier();
     super.initState();
   }
 
