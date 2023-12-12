@@ -41,8 +41,10 @@ class PinnedEventsView extends StatelessWidget {
                     onTap: () => controller.pinnedEventsController
                         .jumpToPinnedMessageAction(
                       data.pinnedEvents,
-                      scrollToEventId: (eventId) =>
-                          controller.scrollToEventId(eventId),
+                      scrollToEventId: (eventId) => controller.scrollToEventId(
+                        eventId,
+                        highlight: true,
+                      ),
                     ),
                     child: Container(
                       margin: PinnedEventsStyle.marginPinnedEventsWidget,
