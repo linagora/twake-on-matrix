@@ -1,11 +1,15 @@
-import 'package:file_picker/file_picker.dart';
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_avatar_ui_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -21,7 +25,9 @@ class ChatDetailsEditView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.room == null) {
       return Scaffold(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         appBar: AppBar(
+          backgroundColor: LinagoraSysColors.material().onPrimary,
           title: Text(L10n.of(context)!.oopsSomethingWentWrong),
         ),
         body: Center(
@@ -31,44 +37,47 @@ class ChatDetailsEditView extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: ChatDetailEditViewStyle.toolbarHeight(context),
-        backgroundColor: Theme.of(context).colorScheme.background,
-        title: Padding(
-          padding: ChatDetailEditViewStyle.navigationAppBarPadding,
-          child: Row(
-            children: [
-              Padding(
-                padding: ChatDetailEditViewStyle.backIconPadding,
+        backgroundColor: LinagoraSysColors.material().onPrimary,
+        title: Row(
+          children: [
+            Padding(
+              padding: ChatDetailEditViewStyle.backIconPadding,
+              child: IconButton(
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onPressed: controller.onBack,
+                icon: const Icon(Icons.arrow_back),
+              ),
+            ),
+            Text(
+              L10n.of(context)!.edit,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const Spacer(),
+            ValueListenableBuilder(
+              valueListenable: controller.isEditedGroupInfoNotifier,
+              builder: (context, value, child) {
+                if (!value) {
+                  return const SizedBox.shrink();
+                }
+                return child!;
+              },
+              child: Padding(
+                padding: ChatDetailEditViewStyle.doneIconPadding,
                 child: IconButton(
-                  onPressed: controller.onBack,
-                  icon: const Icon(Icons.arrow_back),
+                  highlightColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  onPressed: () => controller.handleSaveAction(context),
+                  icon: const Icon(Icons.done),
                 ),
               ),
-              Text(
-                L10n.of(context)!.edit,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const Spacer(),
-              ValueListenableBuilder<bool>(
-                valueListenable: controller.showSaveButtonNotifier,
-                builder: (context, value, child) {
-                  if (!value) {
-                    return const SizedBox.shrink();
-                  }
-                  return child!;
-                },
-                child: Padding(
-                  padding: ChatDetailEditViewStyle.doneIconPadding,
-                  child: IconButton(
-                    onPressed: () => controller.handleSaveAction(context),
-                    icon: const Icon(Icons.done),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       body: Padding(
@@ -85,7 +94,11 @@ class ChatDetailsEditView extends StatelessWidget {
                       height: ChatDetailEditViewStyle.avatarSize(context),
                       child: Hero(
                         tag: 'content_banner',
-                        child: _buildAvatar(),
+                        child: _AvatarBuilder(
+                          updateGroupAvatarNotifier:
+                              controller.updateGroupAvatarNotifier,
+                          room: controller.room!,
+                        ),
                       ),
                     ),
                   ),
@@ -155,128 +168,99 @@ class ChatDetailsEditView extends StatelessWidget {
       ),
     );
   }
-
-  StatelessWidget _buildAvatar() {
-    return PlatformInfos.isMobile
-        ? _AvatarForMobileBuilder(
-            avatarMobileNotifier: controller.avatarAssetEntityNotifier,
-            room: controller.room!,
-          )
-        : _AvatarForWebBuilder(
-            avatarWebNotifier: controller.avatarFilePickerNotifier,
-            room: controller.room!,
-          );
-  }
 }
 
-class _BuildInitialAvatar extends StatelessWidget {
+class _AvatarBuilder extends StatelessWidget {
+  final ValueNotifier<Either<Failure, Success>> updateGroupAvatarNotifier;
   final Room room;
 
-  const _BuildInitialAvatar({
-    required this.room,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Avatar(
-      fontSize: ChatDetailEditViewStyle.avatarFontSize,
-      mxContent: room.avatar,
-      name: room.getLocalizedDisplayname(
-        MatrixLocals(L10n.of(context)!),
-      ),
-      size: ChatDetailEditViewStyle.avatarSize(context),
-    );
-  }
-}
-
-class _AvatarForMobileBuilder extends StatelessWidget {
-  final ValueNotifier<AssetEntity?> avatarMobileNotifier;
-  final Room room;
-
-  const _AvatarForMobileBuilder({
-    required this.avatarMobileNotifier,
+  const _AvatarBuilder({
+    required this.updateGroupAvatarNotifier,
     required this.room,
   });
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: avatarMobileNotifier,
-      builder: (context, value, child) {
-        if (value == null) {
-          return child!;
-        }
-        return ClipOval(
-          child: SizedBox.fromSize(
-            size: const Size.fromRadius(
-              ChatDetailEditViewStyle.avatarRadiusForMobile,
-            ),
-            child: AssetEntityImage(
-              value,
-              thumbnailSize: const ThumbnailSize(
-                ChatDetailEditViewStyle.thumbnailSizeWidth,
-                ChatDetailEditViewStyle.thumbnailSizeHeight,
+      valueListenable: updateGroupAvatarNotifier,
+      builder: (context, value, child) => value.fold(
+        (failure) => const SizedBox(),
+        (success) {
+          if (PlatformInfos.isMobile &&
+              success is ChatDetailsGetAvatarInStreamSuccess) {
+            return ClipOval(
+              child: SizedBox.fromSize(
+                size: const Size.fromRadius(
+                  ChatDetailEditViewStyle.avatarRadiusForMobile,
+                ),
+                child: AssetEntityImage(
+                  success.assetEntity,
+                  thumbnailSize: const ThumbnailSize(
+                    ChatDetailEditViewStyle.thumbnailSizeWidth,
+                    ChatDetailEditViewStyle.thumbnailSizeHeight,
+                  ),
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress != null &&
+                        loadingProgress.cumulativeBytesLoaded !=
+                            loadingProgress.expectedTotalBytes) {
+                      return const Center(
+                        child: CircularProgressIndicator.adaptive(),
+                      );
+                    }
+                    return child;
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(Icons.error_outline),
+                    );
+                  },
+                ),
               ),
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress != null &&
-                    loadingProgress.cumulativeBytesLoaded !=
-                        loadingProgress.expectedTotalBytes) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                }
-                return child;
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
-              },
-            ),
-          ),
-        );
-      },
-      child: _BuildInitialAvatar(room: room),
-    );
-  }
-}
+            );
+          }
 
-class _AvatarForWebBuilder extends StatelessWidget {
-  final ValueNotifier<FilePickerResult?> avatarWebNotifier;
-  final Room room;
+          if (PlatformInfos.isWeb &&
+              success is ChatDetailsGetAvatarInByteSuccess) {
+            return ClipOval(
+              child: SizedBox.fromSize(
+                size: const Size.fromRadius(
+                  ChatDetailEditViewStyle.avatarRadiusForWeb,
+                ),
+                child: Image.memory(
+                  success.filePickerResult.files.single.bytes!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(Icons.error_outline),
+                    );
+                  },
+                ),
+              ),
+            );
+          }
 
-  const _AvatarForWebBuilder({
-    required this.avatarWebNotifier,
-    required this.room,
-  });
+          if (success is ChatDetailsDeleteAvatarSuccess) {
+            return Avatar(
+              fontSize: ChatDetailEditViewStyle.avatarFontSize,
+              name: room.getLocalizedDisplayname(
+                MatrixLocals(L10n.of(context)!),
+              ),
+              size: ChatDetailEditViewStyle.avatarSize(context),
+            );
+          }
 
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: avatarWebNotifier,
-      builder: (context, value, child) {
-        if (value == null || value.files.single.bytes == null) {
           return child!;
-        }
-        return ClipOval(
-          child: SizedBox.fromSize(
-            size: const Size.fromRadius(
-              ChatDetailEditViewStyle.avatarRadiusForWeb,
-            ),
-            child: Image.memory(
-              value.files.single.bytes!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
-              },
-            ),
-          ),
-        );
-      },
-      child: _BuildInitialAvatar(room: room),
+        },
+      ),
+      child: Avatar(
+        fontSize: ChatDetailEditViewStyle.avatarFontSize,
+        mxContent: room.avatar,
+        name: room.getLocalizedDisplayname(
+          MatrixLocals(L10n.of(context)!),
+        ),
+        size: ChatDetailEditViewStyle.avatarSize(context),
+      ),
     );
   }
 }
