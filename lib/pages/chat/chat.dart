@@ -301,6 +301,7 @@ class ChatController extends State<Chat>
         widget.jumpToEventIdStream?.stream.listen(scrollToEventIdAndHighlight);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
+    _tryLoadTimeline();
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (room == null) {
@@ -325,6 +326,24 @@ class ChatController extends State<Chat>
     });
   }
 
+  void _tryLoadTimeline() async {
+    loadTimelineFuture = _getTimeline();
+    try {
+      await loadTimelineFuture;
+      final fullyRead = room?.fullyRead;
+      if (fullyRead == null || fullyRead == '') return;
+      if (timeline!.events.any((event) => event.eventId == fullyRead)) {
+        Logs().v('Scroll up to visible event', fullyRead);
+        setReadMarker();
+        return;
+      }
+      if (!mounted) return;
+    } catch (e, s) {
+      Logs().e('Unable to load timeline', e, s);
+      rethrow;
+    }
+  }
+
   void updateView() {
     if (!mounted) return;
     setState(() {});
@@ -332,33 +351,6 @@ class ChatController extends State<Chat>
 
   void onBackPress() {
     context.pop();
-  }
-
-  Future<bool> getTimeline() async {
-    if (timeline == null) {
-      await Matrix.of(context).client.roomsLoading;
-      await Matrix.of(context).client.accountDataLoading;
-      timeline = await room!.getTimeline(onUpdate: updateView);
-      if (timeline!.events.isNotEmpty) {
-        if (room!.markedUnread) room!.markUnread(false);
-        setReadMarker();
-      }
-
-      // when the scroll controller is attached we want to scroll to an event id, if specified
-      // and update the scroll controller...which will trigger a request history, if the
-      // "load more" button is visible on the screen
-      SchedulerBinding.instance.addPostFrameCallback((_) async {
-        if (mounted) {
-          final event = GoRouterState.of(context).pathParameters['event'];
-          if (event != null) {
-            scrollToEventId(event);
-          }
-          _updateScrollController();
-        }
-      });
-    }
-    timeline!.requestKeys(onlineKeyBackupOnly: false);
-    return true;
   }
 
   Future<void>? _setReadMarkerFuture;
@@ -892,7 +884,7 @@ class ChatController extends State<Chat>
       );
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        scrollToEventId(eventId);
+        scrollToEventId(eventId, highlight: highlight);
       });
       setState(() {});
       return;
