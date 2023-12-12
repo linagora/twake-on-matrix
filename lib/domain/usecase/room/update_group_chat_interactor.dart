@@ -9,37 +9,65 @@ import 'package:matrix/matrix.dart';
 class UpdateGroupChatInteractor {
   Stream<Either<Failure, Success>> execute({
     required Room room,
-    MatrixFile? avatar,
+    required Client client,
+    Uri? avatarUrl,
     String? displayName,
     String? description,
     bool isDeleteAvatar = false,
   }) async* {
     yield const Right(UpdateGroupChatLoading());
-    try {
-      Logs().d(
-        'UpdateGroupChatInteractor::execute(): Avatar - ${avatar?.name} - displayName - $displayName - description - $description',
-      );
 
-      Future.wait([
-        if (isDeleteAvatar) room.setAvatar(null),
-        if (avatar != null) room.setAvatar(avatar),
-        if (displayName != null) room.setName(displayName),
-        if (description != null) room.setDescription(description),
-      ]);
+    if (avatarUrl != null || isDeleteAvatar) {
+      try {
+        await client.setRoomStateWithKey(
+          room.id,
+          EventTypes.RoomAvatar,
+          '',
+          {
+            'url': isDeleteAvatar ? null : avatarUrl.toString(),
+          },
+        );
+        yield Right(UpdateAvatarGroupChatSuccess(isDeleteAvatar));
+      } catch (e) {
+        Logs().e('UpdateGroupChatInteractor::_updateAvatarForRoom(): $e');
+        yield Left(UpdateGroupAvatarFailure(e));
+        return;
+      }
+    }
+    if (displayName != null && displayName != room.name) {
+      try {
+        await client.setRoomStateWithKey(
+          room.id,
+          EventTypes.RoomName,
+          '',
+          {
+            'name': displayName,
+          },
+        );
+        yield const Right(UpdateDisplayNameGroupChatSuccess());
+      } catch (e) {
+        Logs().e('UpdateGroupChatInteractor::_updateDisplayNameForRoom(): $e');
+        yield Left(UpdateGroupDisplayNameFailure(e));
+        return;
+      }
+    }
 
-      yield Right(
-        UpdateGroupChatSuccess(
-          displayName: displayName,
-          roomAvatarFile: avatar,
-          description: description,
-          isDeleteAvatar: isDeleteAvatar,
-        ),
-      );
-    } catch (e) {
-      Logs().d(
-        'UpdateGroupChatInteractor::execute(): Exception - $e}',
-      );
-      yield Left(UpdateGroupChatFailure(e));
+    if (description != null && description != room.topic) {
+      try {
+        await client.setRoomStateWithKey(
+          room.id,
+          EventTypes.RoomTopic,
+          '',
+          {
+            'topic': description,
+          },
+        );
+        yield const Right(UpdateDescriptionGroupChatSuccess());
+      } catch (e) {
+        Logs().e('UpdateGroupChatInteractor::_updateDescriptionForRoom(): $e');
+        yield Left(UpdateGroupDescriptionFailure(e));
+        return;
+      }
     }
   }
 }
