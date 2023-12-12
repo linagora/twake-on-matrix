@@ -112,12 +112,14 @@ class ChatEventList extends StatelessWidget {
               }
               return const SizedBox.shrink();
             }
-            index--;
-            // The message at this index:
-            final event = events[index];
-            final previousEvent = index > 0 ? events[index - 1] : null;
-            final nextEvent =
-                index + 1 < events.length ? events[index + 1] : null;
+            final currentEventIndex = index - 1;
+            final event = controller.timeline!.events[currentEventIndex];
+            final previousEvent = currentEventIndex > 0
+                ? controller.timeline!.events[currentEventIndex - 1]
+                : null;
+            final nextEvent = index < controller.timeline!.events.length
+                ? controller.timeline!.events[currentEventIndex + 1]
+                : null;
             return AutoScrollTag(
               key: ValueKey(event.eventId),
               index: index,
