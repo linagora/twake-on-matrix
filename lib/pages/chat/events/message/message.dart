@@ -39,6 +39,7 @@ class Message extends StatelessWidget {
   final OnMenuAction? onMenuAction;
   final bool selectMode;
   final VoidCallback? hideKeyboardChatScreen;
+  final ContextMenuBuilder? menuChildren;
 
   const Message(
     this.event, {
@@ -56,6 +57,7 @@ class Message extends StatelessWidget {
     required this.timeline,
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
+    this.menuChildren,
     Key? key,
     this.onMenuAction,
     this.markedUnreadLocation,
@@ -121,6 +123,7 @@ class Message extends StatelessWidget {
                 isHoverNotifier: isHoverNotifier,
                 listHorizontalActionMenu: listHorizontalActionMenu,
                 onMenuAction: onMenuAction,
+                menuChildren: menuChildren,
               ),
             ),
           ];
