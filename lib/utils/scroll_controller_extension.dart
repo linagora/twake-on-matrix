@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 extension ScrollControllerExtension on ScrollController {
   static const endReachedDistance = 500;
@@ -10,6 +11,14 @@ extension ScrollControllerExtension on ScrollController {
     addListener(() {
       if (shouldLoadMore) {
         listener();
+      }
+    });
+  }
+
+  void tryLoadMoreIfNeeded(VoidCallback loadMore) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (shouldLoadMore) {
+        loadMore();
       }
     });
   }
