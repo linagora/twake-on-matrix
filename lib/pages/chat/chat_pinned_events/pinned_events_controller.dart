@@ -38,8 +38,11 @@ class PinnedEventsController {
     String? eventId,
   }) async {
     await Future.delayed(_timeDelayGetPinnedMessage);
-    _pinnedEventsSubscription =
-        getPinnedMessageInteractor.execute(room: room).listen((event) {
+    _pinnedEventsSubscription = getPinnedMessageInteractor
+        .execute(
+      room: room,
+    )
+        .listen((event) {
       getPinnedMessageNotifier.value = event;
       event.fold((_) => null, (success) {
         if (success is ChatGetPinnedEventsSuccess) {
@@ -94,6 +97,21 @@ class PinnedEventsController {
     pinnedMessageScrollController.scrollToIndex(
       pinnedEvents.length - 1,
     );
+  }
+
+  void handlePopBack(Object? popResult) {
+    Logs().d(
+      "PinnedEventsController()::handlePopBack(): popResult: $popResult",
+    );
+    if (popResult is List<Event?>) {
+      final room = popResult.first?.room;
+      if (room != null) {
+        getPinnedMessageAction(
+          room: room,
+          isInitial: true,
+        );
+      }
+    }
   }
 
   void jumpToCurrentMessage(
