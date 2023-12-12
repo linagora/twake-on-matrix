@@ -1,25 +1,29 @@
 import 'package:fluffychat/app_state/success.dart';
-import 'package:matrix/matrix.dart';
 
 class UpdateGroupChatInitial extends Success {
   @override
   List<Object?> get props => [];
 }
 
-class UpdateGroupChatSuccess extends Success {
-  final MatrixFile? roomAvatarFile;
-  final String? displayName;
-  final String? description;
+class UpdateAvatarGroupChatSuccess extends Success {
   final bool isDeleteAvatar;
 
-  const UpdateGroupChatSuccess({
-    this.roomAvatarFile,
-    this.displayName,
-    this.description,
-    this.isDeleteAvatar = false,
-  });
+  const UpdateAvatarGroupChatSuccess(this.isDeleteAvatar);
 
   @override
-  List<Object?> get props =>
-      [roomAvatarFile, displayName, description, isDeleteAvatar];
+  List<Object?> get props => [isDeleteAvatar];
+}
+
+class UpdateDisplayNameGroupChatSuccess extends Success {
+  const UpdateDisplayNameGroupChatSuccess();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class UpdateDescriptionGroupChatSuccess extends Success {
+  const UpdateDescriptionGroupChatSuccess();
+
+  @override
+  List<Object?> get props => [];
 }
