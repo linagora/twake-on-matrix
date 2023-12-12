@@ -132,8 +132,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       child: StreamBuilder(
         stream: controller.room!.onUpdate.stream
             .rateLimit(const Duration(seconds: 1)),
-        builder: (context, snapshot) => FutureBuilder<bool>(
-          future: controller.getTimeline(),
+        builder: (context, snapshot) => FutureBuilder(
+          future: controller.loadTimelineFuture,
           builder: (BuildContext context, snapshot) {
             return Scaffold(
               backgroundColor: LinagoraSysColors.material().onPrimary,
