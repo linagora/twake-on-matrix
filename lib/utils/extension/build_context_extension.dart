@@ -150,7 +150,7 @@ extension ContextExtensionss on BuildContext {
         extra: extra,
       );
 
-  void pushChild(String path, {Object? extra}) =>
+  Future<T?> pushChild<T extends Object?>(String path, {Object? extra}) =>
       push('${GoRouterState.of(this).uri.path}/$path', extra: extra);
 
   RelativeRect getCurrentRelativeRectOfWidget() {
