@@ -6,7 +6,7 @@ import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
 class ChatDetailsRoutes {
   static const String chatDetails = '/groupChatDetails';
-  static const String chatDetailsEdit = '/groupChatDetailsEdit';
+  static const String chatDetailsEdit = '/groupChatDetails/edit';
 }
 
 class ChatDetailsNavigator extends StatelessWidget {

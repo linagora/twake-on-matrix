@@ -435,50 +435,6 @@ abstract class AppRoutes {
                   ),
                   redirect: loggedOutRedirect,
                 ),
-                // GoRoute(
-                //   path: 'details',
-                //   pageBuilder: (context, state) => defaultPageBuilder(
-                //     context,
-                //     ChatDetails(
-                //       roomId: state.pathParameters['roomid']!,
-                //     ),
-                //   ),
-                //   routes: [
-                //     GoRoute(
-                //       path: 'permissions',
-                //       pageBuilder: (context, state) => defaultPageBuilder(
-                //         context,
-                //         const ChatPermissionsSettings(),
-                //       ),
-                //       redirect: loggedOutRedirect,
-                //     ),
-                //     GoRoute(
-                //       path: 'multiple_emotes',
-                //       pageBuilder: (context, state) => defaultPageBuilder(
-                //         context,
-                //         const MultipleEmotesSettings(),
-                //       ),
-                //       redirect: loggedOutRedirect,
-                //     ),
-                //     GoRoute(
-                //       path: 'emotes',
-                //       pageBuilder: (context, state) => defaultPageBuilder(
-                //         context,
-                //         const EmotesSettings(),
-                //       ),
-                //       redirect: loggedOutRedirect,
-                //     ),
-                //     GoRoute(
-                //       path: 'emotes/:state_key',
-                //       pageBuilder: (context, state) => defaultPageBuilder(
-                //         context,
-                //         const EmotesSettings(),
-                //       ),
-                //       redirect: loggedOutRedirect,
-                //     ),
-                //   ],
-                //   redirect: loggedOutRedirect,
-                // ),
               ],
             ),
           ],
