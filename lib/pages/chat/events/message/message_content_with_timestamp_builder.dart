@@ -11,9 +11,12 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_area.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+
+typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
 class MessageContentWithTimestampBuilder extends StatelessWidget {
   final Event event;
@@ -27,6 +30,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
+  final ContextMenuBuilder? menuChildren;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -43,6 +47,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
     this.onMenuAction,
+    this.menuChildren,
   });
 
   @override
@@ -68,123 +73,129 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
       children: [
         if (event.isOwnMessage)
           _menuActionsRowBuilder(context, event.isOwnMessage),
-        Container(
-          alignment:
-              event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
-          padding: MessageStyle.paddingMessageContainer(
-            displayTime,
-            context,
-            nextEvent,
-            event,
-            selected,
-          ),
-          child: MultiPlatformSelectionMode(
-            event: event,
-            longPressSelect: longPressSelect,
-            useInkWell: !PlatformInfos.isWeb,
-            onSelect: onSelect,
-            child: Stack(
-              alignment: event.isOwnMessage
-                  ? AlignmentDirectional.bottomStart
-                  : AlignmentDirectional.bottomEnd,
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: MessageStyle.bubbleBorderRadius,
-                        color: event.isOwnMessage
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context).colorScheme.surfaceVariant,
-                      ),
-                      padding: noBubble
-                          ? const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                            )
-                          : MessageStyle.paddingMessageContentBuilder(event),
-                      constraints: BoxConstraints(
-                        maxWidth: MessageStyle.messageBubbleWidth(
-                          context,
+        ContextMenuArea(
+          width: MessageStyle.contextMenuWidth,
+          builder: menuChildren != null
+              ? (context) => menuChildren!.call(context)
+              : null,
+          child: Container(
+            alignment:
+                event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
+            padding: MessageStyle.paddingMessageContainer(
+              displayTime,
+              context,
+              nextEvent,
+              event,
+              selected,
+            ),
+            child: MultiPlatformSelectionMode(
+              event: event,
+              longPressSelect: longPressSelect,
+              useInkWell: !PlatformInfos.isWeb,
+              onSelect: onSelect,
+              child: Stack(
+                alignment: event.isOwnMessage
+                    ? AlignmentDirectional.bottomStart
+                    : AlignmentDirectional.bottomEnd,
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: MessageStyle.bubbleBorderRadius,
+                          color: event.isOwnMessage
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surfaceVariant,
                         ),
-                      ),
-                      child: LayoutBuilder(
-                        builder: (
-                          context,
-                          availableBubbleContraints,
-                        ) =>
-                            Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            event.hideDisplayName(nextEvent) ||
-                                    event.hideDisplayNameInBubbleChat
-                                ? const SizedBox()
-                                : DisplayNameWidget(
-                                    event: event,
-                                  ),
-                            IntrinsicHeight(
-                              child: Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  MessageContentBuilder(
-                                    event: event,
-                                    timeline: timeline,
-                                    availableBubbleContraints:
-                                        availableBubbleContraints,
-                                    onSelect: onSelect,
-                                    nextEvent: nextEvent,
-                                    scrollToEventId: scrollToEventId,
-                                    selectMode: selectMode,
-                                  ),
-                                  if (timelineText)
-                                    Positioned(
-                                      child: SelectionContainer.disabled(
-                                        child: Padding(
-                                          padding:
-                                              MessageStyle.paddingMessageTime,
-                                          child: MultiPlatformSelectionMode(
-                                            useInkWell: PlatformInfos.isWeb,
-                                            longPressSelect: longPressSelect,
-                                            onSelect: onSelect,
-                                            event: event,
-                                            child: MessageTime(
-                                              timelineOverlayMessage:
-                                                  event.timelineOverlayMessage,
-                                              room: event.room,
+                        padding: noBubble
+                            ? const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                              )
+                            : MessageStyle.paddingMessageContentBuilder(event),
+                        constraints: BoxConstraints(
+                          maxWidth: MessageStyle.messageBubbleWidth(
+                            context,
+                          ),
+                        ),
+                        child: LayoutBuilder(
+                          builder: (
+                            context,
+                            availableBubbleContraints,
+                          ) =>
+                              Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              event.hideDisplayName(nextEvent) ||
+                                      event.hideDisplayNameInBubbleChat
+                                  ? const SizedBox()
+                                  : DisplayNameWidget(
+                                      event: event,
+                                    ),
+                              IntrinsicHeight(
+                                child: Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    MessageContentBuilder(
+                                      event: event,
+                                      timeline: timeline,
+                                      availableBubbleContraints:
+                                          availableBubbleContraints,
+                                      onSelect: onSelect,
+                                      nextEvent: nextEvent,
+                                      scrollToEventId: scrollToEventId,
+                                      selectMode: selectMode,
+                                    ),
+                                    if (timelineText)
+                                      Positioned(
+                                        child: SelectionContainer.disabled(
+                                          child: Padding(
+                                            padding:
+                                                MessageStyle.paddingMessageTime,
+                                            child: MultiPlatformSelectionMode(
+                                              useInkWell: PlatformInfos.isWeb,
+                                              longPressSelect: longPressSelect,
+                                              onSelect: onSelect,
                                               event: event,
-                                              ownMessage: event.isOwnMessage,
-                                              timeline: timeline,
+                                              child: MessageTime(
+                                                timelineOverlayMessage: event
+                                                    .timelineOverlayMessage,
+                                                room: event.room,
+                                                event: event,
+                                                ownMessage: event.isOwnMessage,
+                                                timeline: timeline,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    if (event.hasAggregatedEvents(
-                      timeline,
-                      RelationshipTypes.reaction,
-                    ))
-                      const SizedBox(height: 24),
-                  ],
-                ),
-                if (event.hasAggregatedEvents(
-                  timeline,
-                  RelationshipTypes.reaction,
-                )) ...[
-                  Positioned(
-                    left: 8,
-                    right: 0,
-                    bottom: 0,
-                    child: MessageReactions(event, timeline),
+                      if (event.hasAggregatedEvents(
+                        timeline,
+                        RelationshipTypes.reaction,
+                      ))
+                        const SizedBox(height: 24),
+                    ],
                   ),
-                  const SizedBox(width: 4),
+                  if (event.hasAggregatedEvents(
+                    timeline,
+                    RelationshipTypes.reaction,
+                  )) ...[
+                    Positioned(
+                      left: 8,
+                      right: 0,
+                      bottom: 0,
+                      child: MessageReactions(event, timeline),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
