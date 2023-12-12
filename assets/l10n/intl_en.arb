@@ -2964,7 +2964,5 @@
   "description": "Description",
   "groupName": "Group name",
   "descriptionHelper": "You can provide an optional description for your group.",
-  "errorUploadingGroupName": "Error uploading group name.",
-  "errorUploadingGroupDescription": "Error uploading group description.",
-  "errorUploadingGroupAvatar": "Error uploading group avatar."
+  "groupNameCannotBeEmpty": "Group name cannot be empty"
 }
