@@ -76,18 +76,20 @@ class ChatDetailsController extends State<ChatDetails>
     ChatDetailsPage.links,
   ];
 
+  final responsive = getIt.get<ResponsiveUtils>();
+
+  final Map<EventId, ImageData> _mediaCacheMap = {};
+
+  final muteNotifier = ValueNotifier<PushRuleState>(
+    PushRuleState.notify,
+  );
+
   SameTypeEventsBuilderController? mediaListController;
   SameTypeEventsBuilderController? linksListController;
 
   Room? room;
 
-  final responsive = getIt.get<ResponsiveUtils>();
-
   TabController? tabController;
-
-  final muteNotifier = ValueNotifier<PushRuleState>(
-    PushRuleState.notify,
-  );
 
   List<User>? members;
 
@@ -102,8 +104,6 @@ class ChatDetailsController extends State<ChatDetails>
     _timeline ??= await room!.getTimeline();
     return _timeline!;
   }
-
-  final Map<EventId, ImageData> _mediaCacheMap = {};
 
   int get actualMembersCount => room!.summary.actualMembersCount;
 

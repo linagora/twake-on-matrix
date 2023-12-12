@@ -130,6 +130,9 @@ class ChatController extends State<Chat>
           EventTypes.Sticker,
           EventTypes.Encrypted,
           EventTypes.CallInvite,
+          EventTypes.RoomAvatar,
+          EventTypes.RoomName,
+          EventTypes.RoomTopic,
         }.contains(event.type),
       );
 
@@ -364,6 +367,9 @@ class ChatController extends State<Chat>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
+      if ((timeline?.events.length ?? 0) < _loadHistoryCount) {
+        requestFuture();
+      }
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();
