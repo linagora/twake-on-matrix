@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsProfileViewStyle {
-  static const sizeIcon = 24.0;
-  static const borderRadius = 20.0;
+  static double sizeIcon = 24.0.w;
+  static double borderRadius = 20.0.r;
 
-  static const EdgeInsetsDirectional paddingTextButton =
+  static EdgeInsetsDirectional paddingTextButton =
       EdgeInsetsDirectional.symmetric(
-    vertical: 14,
-    horizontal: 12,
+    vertical: 14.0.h,
+    horizontal: 12.0.w,
   );
 
-  static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
+  static EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.symmetric(
+    horizontal: 16.0.w,
   );
 }

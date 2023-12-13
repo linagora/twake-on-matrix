@@ -76,7 +76,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
                           child: Stack(
                             alignment: AlignmentDirectional.center,
                             children: [
-                              const SizedBox(
+                              SizedBox(
                                 width: SettingsProfileViewWebStyle.widthSize,
                               ),
                               ValueListenableBuilder(
@@ -95,7 +95,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                       }
                                       return ClipOval(
                                         child: SizedBox.fromSize(
-                                          size: const Size.fromRadius(
+                                          size: Size.fromRadius(
                                             SettingsProfileViewWebStyle
                                                 .radiusImageMemory,
                                           ),

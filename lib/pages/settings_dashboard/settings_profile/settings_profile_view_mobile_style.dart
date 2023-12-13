@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsProfileViewMobileStyle {
-  static const double widthSize = 116;
-  static const double avatarSize = 96;
-  static const double avatarFontSize = 18 * 2.5;
-  static const double positionedBottomSize = 0;
-  static const double positionedRightSize = 0;
-  static const double iconEditBorderWidth = 4;
-  static const double iconEditSize = 24;
-  static const double dividerHeight = 2;
-  static const int thumbnailSize = 28;
+  static double widthSize = 116.0.w;
+  static double avatarSize = 96.0.w;
+  static double avatarFontSize = (18.0 * 2.5).sp;
+  static double positionedBottomSize = 0;
+  static double positionedRightSize = 0;
+  static double iconEditBorderWidth = 4.0.w;
+  static double iconEditSize = 24.0.w;
+  static double dividerHeight = 2.0.h;
+  static int thumbnailSize = 28.0.w.toInt();
 
   static EdgeInsetsDirectional padding =
-      const EdgeInsetsDirectional.symmetric(vertical: 16.0);
+      EdgeInsetsDirectional.symmetric(vertical: 16.0.h);
 
   static EdgeInsetsDirectional editIconPadding =
-      const EdgeInsetsDirectional.all(8);
+      EdgeInsetsDirectional.all(8.0.w);
 }

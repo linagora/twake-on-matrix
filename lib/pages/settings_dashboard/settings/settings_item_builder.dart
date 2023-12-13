@@ -86,7 +86,7 @@ class SettingsItemBuilder extends StatelessWidget {
                       ),
                     ),
                     if (!isHideTrailingIcon)
-                      const Icon(
+                      Icon(
                         Icons.chevron_right_outlined,
                         size: SettingsViewStyle.iconSize,
                       ),

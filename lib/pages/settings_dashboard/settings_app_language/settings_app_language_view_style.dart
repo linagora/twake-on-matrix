@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsAppLanguageViewStyle {
-  static const double borderRadius = 20;
-  static const double iconSize = 28;
+  static double borderRadius = 20.0.r;
+  static double iconSize = 28.0.w;
 
-  static const EdgeInsets paddingBody = EdgeInsets.symmetric(horizontal: 16);
-  static const EdgeInsets paddingListItems = EdgeInsets.only(
-    top: 16,
+  static EdgeInsets paddingBody = EdgeInsets.symmetric(horizontal: 16.0.w);
+  static EdgeInsets paddingListItems = EdgeInsets.only(
+    top: 16.0.h,
   );
 }

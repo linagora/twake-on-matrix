@@ -31,7 +31,7 @@ class SettingsProfileView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
             size: SettingsProfileViewStyle.sizeIcon,
           ),

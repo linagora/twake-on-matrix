@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsProfileViewWebStyle {
-  static const double bodyWidth = 640;
-  static const double widthSize = 116;
-  static const double avatarSize = 96;
-  static const double avatarFontSize = 18 * 2.5;
-  static const double positionedBottomSize = 0;
-  static const double positionedRightSize = 0;
-  static const double iconEditBorderWidth = 4;
-  static const double iconEditSize = 24;
-  static const double dividerHeight = 2;
-  static const double radiusCircular = 16;
-  static const double radiusImageMemory = 48;
+  static double bodyWidth = 640.0.w;
+  static double widthSize = 116.0.w;
+  static double avatarSize = 96.0.w;
+  static double avatarFontSize = (18.0 * 2.5).sp;
+  static double positionedBottomSize = 0;
+  static double positionedRightSize = 0;
+  static double iconEditBorderWidth = 4.0.w;
+  static double iconEditSize = 24.0.w;
+  static double radiusCircular = 16.0.r;
+  static double radiusImageMemory = 48.0.r;
 
-  static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.all(32);
+  static EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(32.0.w);
 
-  static const EdgeInsetsDirectional paddingWidgetBasicInfo =
-      EdgeInsetsDirectional.all(16);
+  static EdgeInsetsDirectional paddingWidgetBasicInfo =
+      EdgeInsetsDirectional.all(16.0.w);
 
-  static const EdgeInsetsDirectional paddingBasicInfoTitle =
-      EdgeInsetsDirectional.only(bottom: 32);
+  static EdgeInsetsDirectional paddingBasicInfoTitle =
+      EdgeInsetsDirectional.only(bottom: 3.0.h);
 
-  static const EdgeInsetsDirectional paddingEditIcon =
-      EdgeInsetsDirectional.all(8);
+  static EdgeInsetsDirectional paddingEditIcon =
+      EdgeInsetsDirectional.all(8.0.w);
 
-  static const EdgeInsetsDirectional paddingWidgetEditProfileInfo =
-      EdgeInsetsDirectional.symmetric(vertical: 16);
+  static EdgeInsetsDirectional paddingWidgetEditProfileInfo =
+      EdgeInsetsDirectional.symmetric(vertical: 16.0.h);
 
-  static const EdgeInsetsDirectional paddingWorkIdentitiesInfoWidget =
-      EdgeInsetsDirectional.only(bottom: 16);
+  static EdgeInsetsDirectional paddingWorkIdentitiesInfoWidget =
+      EdgeInsetsDirectional.only(bottom: 16.0.h);
 }

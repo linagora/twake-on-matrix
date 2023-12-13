@@ -46,7 +46,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: [
-              const SizedBox(
+              SizedBox(
                 width: SettingsProfileViewMobileStyle.widthSize,
               ),
               ValueListenableBuilder(
@@ -68,7 +68,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                             width: AvatarStyle.defaultSize,
                             height: AvatarStyle.defaultSize,
                             success.assetEntity!,
-                            thumbnailSize: const ThumbnailSize(
+                            thumbnailSize: ThumbnailSize(
                               SettingsProfileViewMobileStyle.thumbnailSize,
                               SettingsProfileViewMobileStyle.thumbnailSize,
                             ),
