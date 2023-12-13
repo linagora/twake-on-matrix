@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ErrorPageStyle {
@@ -12,10 +13,10 @@ class ErrorPageStyle {
         BlendMode.srcATop,
       );
 
-  static const double backgroundIconWidthWeb = 448.0;
-  static const double backgroundIconWidthMobile = 280.0;
+  static double backgroundIconWidthWeb = 448.0.w;
+  static double backgroundIconWidthMobile = 280.0.w;
 
-  static const EdgeInsets textPadding = EdgeInsets.symmetric(vertical: 32.0);
+  static EdgeInsets textPadding = EdgeInsets.symmetric(vertical: 32.0.h);
 
   static TextStyle? titleTextStyle(BuildContext context) =>
       ErrorPageStyle.responsiveUtils.isMobile(context)
@@ -39,7 +40,7 @@ class ErrorPageStyle {
               );
 
   static ButtonStyle buttonStyle(BuildContext context) => ButtonStyle(
-        iconSize: MaterialStateProperty.all<double>(18),
+        iconSize: MaterialStateProperty.all<double>(18.w),
         textStyle: MaterialStateProperty.all(
           Theme.of(context).textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w500,
@@ -59,5 +60,5 @@ class ErrorPageStyle {
         ),
       );
 
-  static const double textsGap = 12.0;
+  static double textsGap = 12.0.h;
 }

@@ -1,6 +1,8 @@
-class ClientChooserButtonStyle {
-  static double get avatarSizeInAppBar => 40.0;
-  static double get avatarFontSizeInAppBar => 17.0;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-  static double get dropDownIconSize => 20.0;
+class ClientChooserButtonStyle {
+  static double get avatarSizeInAppBar => 40.0.w;
+  static double get avatarFontSizeInAppBar => 17.0.sp;
+
+  static double get dropDownIconSize => 20.0.w;
 }

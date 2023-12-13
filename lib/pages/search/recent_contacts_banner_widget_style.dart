@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RecentContactsBannerWidgetStyle {
-  static double get chatRecentContactItemWidth => 72.0;
-  static double get avatarWidthSize => 48.0;
+  static double get chatRecentContactItemWidth => 72.0.w;
+  static double get avatarWidthSize => 48.0.w;
 
   static EdgeInsetsGeometry get chatRecentContactItemPadding =>
-      const EdgeInsets.only(top: 8, right: 4, left: 4);
+      EdgeInsets.only(top: 8.0.h, right: 4.0.w, left: 4.0.w);
   static EdgeInsetsDirectional get chatRecentContactHorizontalPadding =>
-      const EdgeInsetsDirectional.symmetric(horizontal: 8);
+      EdgeInsetsDirectional.symmetric(horizontal: 8.0.w);
 }

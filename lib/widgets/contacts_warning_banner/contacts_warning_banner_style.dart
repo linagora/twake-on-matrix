@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ContactsWarningBannerStyle {
-  static const double borderWarningBanner = 16.0;
-  static const double borderHoverButtonWaningBanner = 100.0;
+  static double warningBannerBorder = 16.0.r;
+  static double hoverButtonWaningBannerBorder = 100.0.r;
 
-  static EdgeInsets marginWarningBanner = const EdgeInsets.symmetric(
-    horizontal: 16,
-    vertical: 8,
+  static EdgeInsets warningBannerMargin = EdgeInsets.symmetric(
+    horizontal: 16.0.w,
+    vertical: 8.0.h,
   );
 
-  static EdgeInsets paddingWarningBanner = const EdgeInsets.all(16);
+  static EdgeInsets warningBannerPadding = EdgeInsets.all(16.0.w);
 
-  static EdgeInsets paddingForContentBanner = const EdgeInsets.only(bottom: 16);
+  static EdgeInsets paddingForContentBanner = EdgeInsets.only(bottom: 16.0.h);
 
-  static EdgeInsetsDirectional marginButtonWarningBanner =
-      const EdgeInsetsDirectional.symmetric(
-    vertical: 10.0,
-    horizontal: 24.0,
+  static EdgeInsetsDirectional buttonWarningBannerMargin =
+      EdgeInsetsDirectional.symmetric(
+    vertical: 10.0.h,
+    horizontal: 24.0.w,
   );
 
-  static EdgeInsets paddingRightButton = const EdgeInsets.only(
-    right: 10,
+  static EdgeInsets rightButtonPadding = EdgeInsets.only(
+    right: 10.0.w,
   );
 }

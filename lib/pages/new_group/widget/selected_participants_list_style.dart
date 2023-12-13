@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SelectedParticipantsListStyle {
-  static const EdgeInsetsDirectional paddingAll =
-      EdgeInsetsDirectional.only(top: 12.0, start: 16.0, end: 16.0);
+  static EdgeInsetsDirectional paddingAll =
+      EdgeInsetsDirectional.only(top: 12.0.h, start: 16.0.w, end: 16.0.w);
 
-  static const double borderRadiusChip = 16.0;
+  static double borderRadiusChip = 16.0.r;
 
-  static const EdgeInsetsDirectional labelChipPadding =
-      EdgeInsetsDirectional.only(
-    start: 0.0,
-    top: 2.0,
-    bottom: 2.0,
+  static EdgeInsetsDirectional labelChipPadding = EdgeInsetsDirectional.only(
+    start: 0.0.w,
+    top: 2.0.h,
+    bottom: 2.0.h,
   );
 
-  static const double avatarChipSize = 24.0;
+  static double avatarChipSize = 24.0.w;
 
-  static const EdgeInsetsDirectional contactPadding =
-      EdgeInsetsDirectional.only(
-    start: 16.0,
-    end: 16.0,
-    bottom: 8.0,
+  static EdgeInsetsDirectional contactPadding = EdgeInsetsDirectional.only(
+    start: 16.0.w,
+    end: 16.0.w,
+    bottom: 8.0.h,
   );
 }

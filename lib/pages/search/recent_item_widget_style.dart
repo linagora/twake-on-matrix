@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RecentItemStyle {
   static EdgeInsetsGeometry get paddingRecentItem =>
-      const EdgeInsets.symmetric(vertical: 8);
-  static double get avatarSize => 48.0;
+      EdgeInsets.symmetric(vertical: 8.0.h);
+  static double get avatarSize => 48.0.w;
 }

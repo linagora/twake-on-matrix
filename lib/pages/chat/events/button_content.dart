@@ -37,9 +37,9 @@ class ButtonContent extends StatelessWidget {
                     size: ButtonContentStyle.leadingIconSize,
                   ),
                 ),
-                const SizedBox(width: ButtonContentStyle.leadingAndTextGap),
+                SizedBox(width: ButtonContentStyle.leadingAndTextGap),
                 Container(
-                  constraints: const BoxConstraints(
+                  constraints: BoxConstraints(
                     maxWidth: ButtonContentStyle.textMaxWidth,
                   ),
                   child: Text(

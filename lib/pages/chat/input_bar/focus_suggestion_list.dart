@@ -58,7 +58,7 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
       child: ListView.builder(
         controller: widget.scrollController,
         physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           vertical: InputBarStyle.suggestionListPadding,
         ),
         itemCount: widget.items.length,

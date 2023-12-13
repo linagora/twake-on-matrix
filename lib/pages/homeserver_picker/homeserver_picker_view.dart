@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view_style.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -22,11 +23,12 @@ class HomeserverPickerView extends StatelessWidget {
     return LoginScaffold(
       appBar: AppBar(
         centerTitle: true,
+        toolbarHeight: HomeserverPickerViewStyle.toolbarHeight,
         title: Padding(
-          padding: const EdgeInsets.only(top: 40, bottom: 16.0),
+          padding: HomeserverPickerViewStyle.loginPadding,
           child: SvgPicture.asset(
             ImagePaths.icTwakeLogo,
-            width: 200,
+            width: HomeserverPickerViewStyle.twakeLogo,
           ),
         ),
       ),
@@ -38,15 +40,20 @@ class HomeserverPickerView extends StatelessWidget {
             // users. This feature is just some UX sugar as TOR users are
             // usually forced to logout as TOR browser is non-persistent
             AnimatedContainer(
-              height: controller.isTorBrowser ? 64 : 0,
+              height: controller.isTorBrowser
+                  ? HomeserverPickerViewStyle.containerHeight
+                  : 0,
               duration: TwakeThemes.animationDuration,
               curve: TwakeThemes.animationCurve,
               clipBehavior: Clip.hardEdge,
               decoration: const BoxDecoration(),
               child: Material(
                 clipBehavior: Clip.hardEdge,
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(8)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(
+                    HomeserverPickerViewStyle.containerBorderRadius,
+                  ),
+                ),
                 color: Theme.of(context).colorScheme.surface,
                 child: ListTile(
                   leading: const Icon(Icons.vpn_key),
@@ -58,16 +65,16 @@ class HomeserverPickerView extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: HomeserverPickerViewStyle.textFieldPadding,
               child: HomeserverTextField(
                 controller: controller,
                 benchmarkResults: benchmarkResults,
               ),
             ),
-            const SizedBox(height: 4.0),
+            SizedBox(height: HomeserverPickerViewStyle.textFieldSpacer),
             if (controller.state == HomeserverState.wrongServerName)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: HomeserverPickerViewStyle.errorPadding,
                 child: Text(
                   L10n.of(context)!.serverNameWrongExplain,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -78,7 +85,7 @@ class HomeserverPickerView extends StatelessWidget {
                 ),
               ),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: HomeserverPickerViewStyle.parentButtonPadding,
               width: double.infinity,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -88,8 +95,10 @@ class HomeserverPickerView extends StatelessWidget {
                     tag: 'loginButton',
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        maximumSize: const Size.fromHeight(40),
+                        padding: HomeserverPickerViewStyle.buttonPadding,
+                        maximumSize: const Size.fromHeight(
+                          40.0,
+                        ),
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor:
                             Theme.of(context).colorScheme.onPrimary,

@@ -2,6 +2,7 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 
 import 'package:matrix/matrix.dart';
@@ -34,20 +35,20 @@ class Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final fallbackLetters = name?.getShortcutNameForAvatar() ?? '@';
     return ClipRRect(
-      borderRadius: BorderRadius.circular(size / 2),
+      borderRadius: BorderRadius.circular(size.r / 2),
       child: MxcImage(
         key: Key(mxContent.toString()),
         uri: mxContent,
         fit: BoxFit.cover,
-        width: size,
-        height: size,
+        width: size.r,
+        height: size.r,
         cacheKey: mxContent.toString(),
         placeholder: (context) => RoundAvatar(
-          size: size,
+          size: size.r,
           text: fallbackLetters,
           boxShadows: boxShadows,
           textStyle: TextStyle(
-            fontSize: fontSize,
+            fontSize: fontSize.sp,
             color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
             fontFamily: AvatarStyle.fontFamily,
             fontWeight: AvatarStyle.fontWeight,

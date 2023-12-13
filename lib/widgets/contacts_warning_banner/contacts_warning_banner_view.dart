@@ -26,14 +26,14 @@ class ContactsWarningBannerView extends StatelessWidget {
         if (state == WarningContactsBannerState.display) {
           return Container(
             margin: isShowMargin
-                ? ContactsWarningBannerStyle.marginWarningBanner
+                ? ContactsWarningBannerStyle.warningBannerMargin
                 : null,
-            padding: ContactsWarningBannerStyle.paddingWarningBanner,
+            padding: ContactsWarningBannerStyle.warningBannerPadding,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.all(
+              borderRadius: BorderRadius.all(
                 Radius.circular(
-                  ContactsWarningBannerStyle.borderWarningBanner,
+                  ContactsWarningBannerStyle.warningBannerBorder,
                 ),
               ),
             ),
@@ -52,24 +52,24 @@ class ContactsWarningBannerView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: ContactsWarningBannerStyle.paddingRightButton,
+                      padding: ContactsWarningBannerStyle.rightButtonPadding,
                       child: TwakeTextButton(
                         onTap: closeContactsWarningBanner,
                         message: L10n.of(context)!.notNow,
                         borderHover: ContactsWarningBannerStyle
-                            .borderHoverButtonWaningBanner,
+                            .hoverButtonWaningBannerBorder,
                         styleMessage:
                             Theme.of(context).textTheme.labelLarge?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                         margin: ContactsWarningBannerStyle
-                            .marginButtonWarningBanner,
+                            .buttonWarningBannerMargin,
                       ),
                     ),
                     TwakeTextButton(
                       message: L10n.of(context)!.allow,
                       borderHover: ContactsWarningBannerStyle
-                          .borderHoverButtonWaningBanner,
+                          .hoverButtonWaningBannerBorder,
                       onTap: goToSettingsForPermissionActions,
                       styleMessage:
                           Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -80,7 +80,7 @@ class ContactsWarningBannerView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       margin:
-                          ContactsWarningBannerStyle.marginButtonWarningBanner,
+                          ContactsWarningBannerStyle.buttonWarningBannerMargin,
                     ),
                   ],
                 ),

@@ -40,8 +40,7 @@ class ForwardView extends StatelessWidget {
           return true;
         },
         child: SingleChildScrollView(
-          padding:
-              const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
+          padding: EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
           child: Column(
             children: [
               const RecentChatsTitle(),
@@ -108,9 +107,9 @@ class ForwardButton extends StatelessWidget {
           } else {
             return forwardMessageState.fold((failure) => child!, (success) {
               if (success is ForwardMessageLoading) {
-                return const SizedBox(
+                return SizedBox(
                   height: ForwardViewStyle.bottomBarHeight,
-                  child: Align(
+                  child: const Align(
                     alignment: Alignment.centerRight,
                     child: TwakeFloatingActionButton(
                       customIcon: SizedBox(child: CircularProgressIndicator()),

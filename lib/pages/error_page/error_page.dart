@@ -102,7 +102,7 @@ class _ErrorPageText extends StatelessWidget {
             L10n.of(context)!.errorPageTitle,
             style: ErrorPageStyle.titleTextStyle(context),
           ),
-          const SizedBox(height: ErrorPageStyle.textsGap),
+          SizedBox(height: ErrorPageStyle.textsGap),
           Text(
             L10n.of(context)!.errorPageDescription,
             style: ErrorPageStyle.descriptionTextStyle(context),

@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ContactsSelectionViewStyle {
   static EdgeInsetsDirectional getSelectionListPadding({
@@ -6,22 +7,17 @@ class ContactsSelectionViewStyle {
   }) =>
       haveSelectedContact
           ? EdgeInsetsDirectional.zero
-          : const EdgeInsetsDirectional.only(top: 8.0);
+          : EdgeInsetsDirectional.only(top: 8.0.h);
 
   static EdgeInsetsDirectional webActionsButtonMargin =
-      const EdgeInsetsDirectional.symmetric(
-    vertical: 10.0,
-    horizontal: 24.0,
+      EdgeInsetsDirectional.symmetric(
+    vertical: 10.0.h,
+    horizontal: 24.0.w,
   );
 
-  static EdgeInsetsDirectional webActionsButtonPadding =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 16.0,
-  );
+  static double webActionsButtonHeight = 72.0.h;
 
-  static const double webActionsButtonHeight = 72.0;
+  static double webActionsButtonPaddingAll = 10.0.w;
 
-  static const double webActionsButtonPaddingAll = 10.0;
-
-  static const double webActionsButtonBorder = 100.0;
+  static double webActionsButtonBorder = 100.0.r;
 }
