@@ -1,43 +1,43 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NewGroupChatInfoStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const double toolbarHeight = 56;
-  static const int thumbnailSizeWidth = 56;
-  static const int thumbnailSizeHeight = 56;
-  static const double avatarRadiusForWeb = 48;
-  static const double avatarRadiusForMobile = 28;
-  static const double backIconPaddingAll = 8;
+  static int thumbnailSizeWidth = 56.0.w.toInt();
+  static int thumbnailSizeHeight = 56.0.h.toInt();
+  static double avatarRadiusForWeb = 48.0.w;
+  static double avatarRadiusForMobile = 28.0.w;
+  static double backIconPaddingAll = 8.0.w;
 
   static double profileSize(BuildContext context) =>
-      responsive.isMobile(context) ? 56 : 96;
+      (responsive.isMobile(context) ? 56.0 : 96.0).h;
 
-  static const EdgeInsetsDirectional groupNameTextFieldPadding =
+  static EdgeInsetsDirectional groupNameTextFieldPadding =
       EdgeInsetsDirectional.only(
-    start: 8,
-    end: 8,
+    start: 8.0.w,
+    end: 8.0.w,
   );
 
-  static const EdgeInsets backIconMargin = EdgeInsets.symmetric(
-    vertical: 12.0,
-    horizontal: 8.0,
+  static EdgeInsets backIconMargin = EdgeInsets.symmetric(
+    vertical: 12.0.h,
+    horizontal: 8.0.w,
   );
 
-  static const EdgeInsetsDirectional padding =
-      EdgeInsetsDirectional.symmetric(horizontal: 8.0);
+  static EdgeInsetsDirectional padding =
+      EdgeInsetsDirectional.symmetric(horizontal: 8.0.w);
 
-  static const EdgeInsetsDirectional contentPadding =
-      EdgeInsetsDirectional.all(16.0);
+  static EdgeInsetsDirectional contentPadding =
+      EdgeInsetsDirectional.all(16.0.w);
 
-  static const EdgeInsetsDirectional profilePadding =
-      EdgeInsetsDirectional.only(top: 16.0);
+  static EdgeInsetsDirectional profilePadding =
+      EdgeInsetsDirectional.only(top: 16.0.h);
 
-  static const EdgeInsetsDirectional screenPadding =
-      EdgeInsetsDirectional.only(start: 8.0, bottom: 8.0, end: 4.0);
+  static EdgeInsetsDirectional screenPadding =
+      EdgeInsetsDirectional.only(start: 8.0.w, bottom: 8.0.h, end: 4.0.w);
 
-  static const EdgeInsetsDirectional topScreenPadding =
-      EdgeInsetsDirectional.only(top: 8.0);
+  static EdgeInsetsDirectional topScreenPadding =
+      EdgeInsetsDirectional.only(top: 8.0.h);
 }

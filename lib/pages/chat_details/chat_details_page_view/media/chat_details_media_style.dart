@@ -1,13 +1,14 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatDetailsMediaStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const durationPadding = EdgeInsets.symmetric(
-    horizontal: 4,
-    vertical: 2,
+  static EdgeInsets durationPadding = EdgeInsets.symmetric(
+    horizontal: 4.0.w,
+    vertical: 2.0.h,
   );
 
   static int crossAxisCount(BuildContext context) {

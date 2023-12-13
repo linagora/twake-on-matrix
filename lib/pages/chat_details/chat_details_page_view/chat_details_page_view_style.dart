@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatDetailsPageViewStyle {
-  static const double tabBarPageViewHeight = 72;
+  static double tabBarPageViewHeight = 72.0.h;
 
   static EdgeInsetsDirectional tabBarPageViewPadding =
-      const EdgeInsetsDirectional.only(
-    start: 16,
-    end: 16,
-    top: 16,
+      EdgeInsetsDirectional.only(
+    start: 16.0.w,
+    end: 16.0.w,
+    top: 16.0.h,
   );
 
-  static const double tabBarPageViewIndicatorHeight = 3;
+  static double tabBarPageViewIndicatorHeight = 3.0.h;
 
-  static const double tabBarPageViewIndicatorBonus = 16;
+  static double tabBarPageViewIndicatorBonus = 16.0.w;
 
-  static const double tabBarPageViewIndicatorBorder = 100;
+  static double tabBarPageViewIndicatorBorder = 100.0.r;
 }

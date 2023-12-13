@@ -49,7 +49,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
         return InkWell(
           onTap: () => UrlLauncher(context, _link).launchUrl(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: ChatDetailsLinksStyle.margin,
             ),
             child: Row(
@@ -70,7 +70,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
                         )
                       : child!,
                 ),
-                const SizedBox(
+                SizedBox(
                   width: ChatDetailsLinksStyle.margin,
                 ),
                 Expanded(

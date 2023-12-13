@@ -87,7 +87,7 @@ class ChatDetailsPageViewBuilder extends StatelessWidget {
         color: currentIndexPageSelected != index
             ? Colors.transparent
             : LinagoraSysColors.material().primary,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(
               ChatDetailsPageViewStyle.tabBarPageViewIndicatorBorder,

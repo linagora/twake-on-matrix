@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
@@ -125,13 +126,13 @@ class NewGroupChatInfoView extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(
-        NewGroupChatInfoStyle.toolbarHeight,
+      preferredSize: Size.fromHeight(
+        AppConfig.toolbarHeight(context),
       ),
       child: AppBar(
         backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
-        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight,
+        toolbarHeight: AppConfig.toolbarHeight(context),
         title: Row(
           children: [
             TwakeIconButton(
@@ -254,12 +255,12 @@ class _AvatarForMobileBuilder extends StatelessWidget {
         }
         return ClipOval(
           child: SizedBox.fromSize(
-            size: const Size.fromRadius(
+            size: Size.fromRadius(
               NewGroupChatInfoStyle.avatarRadiusForMobile,
             ),
             child: AssetEntityImage(
               value,
-              thumbnailSize: const ThumbnailSize(
+              thumbnailSize: ThumbnailSize(
                 NewGroupChatInfoStyle.thumbnailSizeWidth,
                 NewGroupChatInfoStyle.thumbnailSizeHeight,
               ),
@@ -308,8 +309,7 @@ class _AvatarForWebBuilder extends StatelessWidget {
         }
         return ClipOval(
           child: SizedBox.fromSize(
-            size:
-                const Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
+            size: Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
             child: Image.memory(
               value.files.single.bytes!,
               fit: BoxFit.cover,

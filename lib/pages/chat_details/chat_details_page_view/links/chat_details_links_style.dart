@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ChatDetailsLinksStyle {
-  static const double avatarSize = 56;
+  static double avatarSize = 56.0.w;
   static BoxDecoration avatarDecoration(BuildContext context) => BoxDecoration(
         color: Theme.of(context).colorScheme.secondary,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.0.r),
       );
-  static const double margin = 16;
+  static double margin = 16.0.w;
   static TextStyle? avatarTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.headlineLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSecondary,

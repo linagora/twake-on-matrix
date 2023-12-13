@@ -57,7 +57,7 @@ class ProfileInfoView extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints:
-                const BoxConstraints(maxWidth: ChatProfileInfoStyle.maxWidth),
+                BoxConstraints(maxWidth: ChatProfileInfoStyle.maxWidth),
             child: Builder(
               builder: (context) {
                 if (contact?.matrixId != null) {

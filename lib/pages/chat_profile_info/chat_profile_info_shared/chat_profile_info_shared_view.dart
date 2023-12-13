@@ -26,7 +26,7 @@ class ProfileInfoSharedView extends StatelessWidget {
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
               size: ChatProfileInfoSharedViewStyle.leadingSize,
             ),
