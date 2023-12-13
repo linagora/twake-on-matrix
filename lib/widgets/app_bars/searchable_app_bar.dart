@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
@@ -34,7 +35,7 @@ class SearchableAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: SearchableAppBarStyle.toolbarHeight(context),
+      toolbarHeight: AppConfig.toolbarHeight(context),
       bottom: PreferredSize(
         preferredSize: const Size(double.infinity, 4),
         child: Container(

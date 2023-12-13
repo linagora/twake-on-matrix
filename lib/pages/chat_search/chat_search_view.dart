@@ -95,7 +95,7 @@ class _EmptyView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(L10n.of(context)!.noResultsFound),
-                    const SizedBox(height: ChatSearchStyle.emptyGap),
+                    SizedBox(height: ChatSearchStyle.emptyGap),
                     Center(
                       child: SvgPicture.asset(
                         ImagePaths.icNoResultsFound,

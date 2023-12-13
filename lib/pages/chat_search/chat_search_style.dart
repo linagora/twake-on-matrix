@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatSearchStyle {
-  static const EdgeInsetsGeometry inputPadding =
-      EdgeInsetsDirectional.only(start: 8, top: 16, bottom: 16, end: 16);
+  static EdgeInsetsGeometry inputPadding = EdgeInsetsDirectional.only(
+    start: 8.0.w,
+    top: 16.0.h,
+    bottom: 16.0.h,
+    end: 16.0.w,
+  );
 
-  static const EdgeInsetsGeometry itemMargin =
-      EdgeInsetsDirectional.symmetric(horizontal: 16);
+  static EdgeInsetsGeometry itemMargin =
+      EdgeInsetsDirectional.symmetric(horizontal: 16.0.w);
 
-  static const EdgeInsetsGeometry itemPadding =
-      EdgeInsetsDirectional.only(end: 8);
+  static EdgeInsetsGeometry itemPadding =
+      EdgeInsetsDirectional.only(end: 8.0.w);
 
-  static const EdgeInsetsGeometry avatarPadding =
-      EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 16);
+  static EdgeInsetsGeometry avatarPadding =
+      EdgeInsetsDirectional.symmetric(horizontal: 8.0.w, vertical: 16.0.h);
 
-  static const EdgeInsetsGeometry emptyPadding = EdgeInsetsDirectional.all(16);
+  static EdgeInsetsGeometry emptyPadding = EdgeInsetsDirectional.all(16.0.w);
 
-  static const double emptyGap = 128.0;
+  static double emptyGap = 128.0.h;
 
-  static const double itemHeight = 90.0;
+  static double itemHeight = 90.0.h;
 
-  static const double itemBorderRadius = 12.0;
+  static double itemBorderRadius = 12.0.r;
 }

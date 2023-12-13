@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ServerSearchViewStyle {
-  static EdgeInsetsGeometry paddingList = const EdgeInsets.all(8.0);
-  static EdgeInsetsGeometry paddingListItem = const EdgeInsets.all(8.0);
+  static EdgeInsetsGeometry paddingList = EdgeInsets.all(8.0.w);
+  static EdgeInsetsGeometry paddingListItem = EdgeInsets.all(8.0.w);
 
   static EdgeInsetsGeometry paddingInsideListItem =
-      const EdgeInsets.only(bottom: 8.0);
+      EdgeInsets.only(bottom: 8.0.h);
 
   static EdgeInsetsGeometry paddingAvatar =
-      const EdgeInsets.only(right: 12.0, bottom: 8.0);
+      EdgeInsets.only(right: 12.0.w, bottom: 8.0.h);
 }
