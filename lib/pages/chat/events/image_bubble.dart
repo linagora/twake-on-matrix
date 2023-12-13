@@ -108,8 +108,7 @@ class ImageBubble extends StatelessWidget {
               SizedBox(
                 width: bubbleWidth,
                 height: bubbleHeight,
-                child:
-                    const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+                child: BlurHash(hash: MessageContentStyle.defaultBlurHash),
               ),
               MxcImage(
                 event: event,

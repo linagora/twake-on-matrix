@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SendFileDialogStyle {
-  static const dialogBorderRadius = 16.0;
+  static double dialogBorderRadius = 16.0.r;
 
-  static const double dialogWidth = 328;
+  static double dialogWidth = 328.0.w;
 
-  static const double dialogHeight = 500;
+  static double imageBorderRadius = 8.0.r;
 
-  static const double imageBorderRadius = 8.0;
+  static double imageSize = 328.0.w;
 
-  static const double imageSize = 328;
+  static double buttonBorderRadius = 100.0.r;
 
-  static const double buttonBorderRadius = 100;
-
-  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
-    horizontal: 24.0,
-    vertical: 10.0,
+  static EdgeInsets buttonPadding = EdgeInsets.symmetric(
+    horizontal: 24.0.w,
+    vertical: 10.0.h,
   );
 
-  static const EdgeInsets headerPadding = EdgeInsets.all(4.0);
+  static EdgeInsets headerPadding = EdgeInsets.all(4.0.w);
 
   static InputDecoration bottomBarInputDecoration(BuildContext context) =>
       InputDecoration(
@@ -36,5 +35,5 @@ class SendFileDialogStyle {
         fillColor: Theme.of(context).colorScheme.surfaceVariant,
       );
 
-  static const spaceBwInputBarAndButton = SizedBox(height: 8.0);
+  static Widget spaceBwInputBarAndButton = SizedBox(height: 8.0.h);
 }

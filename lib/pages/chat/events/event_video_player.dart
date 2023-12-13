@@ -139,7 +139,7 @@ class CenterVideoButton extends StatelessWidget {
       child: Container(
         width: MessageContentStyle.videoCenterButtonSize,
         height: MessageContentStyle.videoCenterButtonSize,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: MessageContentStyle.backgroundColorCenterButton,
           shape: BoxShape.circle,
         ),

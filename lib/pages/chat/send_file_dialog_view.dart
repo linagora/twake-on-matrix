@@ -23,7 +23,7 @@ class SendFileDialogView extends StatelessWidget {
             BorderRadius.circular(SendFileDialogStyle.dialogBorderRadius),
         child: Container(
           width: SendFileDialogStyle.dialogWidth,
-          padding: const EdgeInsets.all(SendFileDialogStyle.dialogBorderRadius),
+          padding: EdgeInsets.all(SendFileDialogStyle.dialogBorderRadius),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -95,7 +95,7 @@ class SendFileDialogView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      padding: const MaterialStatePropertyAll(
+                      padding: MaterialStatePropertyAll(
                         SendFileDialogStyle.buttonPadding,
                       ),
                     ),
@@ -123,7 +123,7 @@ class SendFileDialogView extends StatelessWidget {
                       backgroundColor: MaterialStatePropertyAll(
                         Theme.of(context).colorScheme.primary,
                       ),
-                      padding: const MaterialStatePropertyAll(
+                      padding: MaterialStatePropertyAll(
                         SendFileDialogStyle.buttonPadding,
                       ),
                     ),

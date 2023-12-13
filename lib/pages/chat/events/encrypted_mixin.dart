@@ -42,8 +42,7 @@ mixin EncryptedMixin {
           leading: CloseButton(onPressed: Navigator.of(context).pop),
           title: Text(
             l10n.whyIsThisMessageEncrypted,
-            style:
-                const TextStyle(fontSize: MessageContentStyle.appBarFontSize),
+            style: TextStyle(fontSize: MessageContentStyle.appBarFontSize),
           ),
         ),
         body: SafeArea(

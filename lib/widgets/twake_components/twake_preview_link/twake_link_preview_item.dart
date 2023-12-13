@@ -116,7 +116,7 @@ class LinkPreviewLarge extends StatelessWidget {
       children: [
         if (urlPreviewPresentation.imageUri != null)
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(
+            borderRadius: BorderRadius.vertical(
               top: Radius.circular(
                 TwakeLinkPreviewItemStyle.radiusBorder,
               ),
@@ -178,7 +178,7 @@ class LinkPreviewSmall extends StatelessWidget {
           Padding(
             padding: TwakeLinkPreviewItemStyle.paddingPreviewImage,
             child: ClipRRect(
-              borderRadius: const BorderRadius.all(
+              borderRadius: BorderRadius.all(
                 Radius.circular(
                   TwakeLinkPreviewItemStyle.radiusBorder,
                 ),

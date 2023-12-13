@@ -1,34 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TwakeLinkPreviewItemStyle {
-  static const double radiusBorder = 20;
+  static double radiusBorder = 20.0.r;
 
-  static const EdgeInsets paddingPreviewImage = EdgeInsets.only(left: 8.0);
+  static EdgeInsets paddingPreviewImage = EdgeInsets.only(left: 8.0.w);
 
-  static const EdgeInsetsDirectional paddingTitle = EdgeInsetsDirectional.only(
-    start: 8,
-    end: 8,
-    top: 8,
-    bottom: 2,
+  static EdgeInsetsDirectional paddingTitle = EdgeInsetsDirectional.only(
+    start: 8.0.w,
+    end: 8.0.w,
+    top: 8.0.h,
+    bottom: 2.0.h,
   );
 
-  static const EdgeInsetsDirectional paddingSubtitle =
-      EdgeInsetsDirectional.only(
-    start: 8,
-    end: 8,
-    top: 2,
-    bottom: 8,
-  );
-  static const EdgeInsetsDirectional paddingWidgetNoPreview =
-      EdgeInsetsDirectional.only(start: 8.0);
-
-  static const EdgeInsetsDirectional paddingCleanRichText =
-      EdgeInsetsDirectional.only(
-    start: 8.0,
-    end: 8.0,
-    top: 8.0,
+  static EdgeInsetsDirectional paddingSubtitle = EdgeInsetsDirectional.only(
+    start: 8.0.w,
+    end: 8.0.w,
+    top: 2.0.h,
+    bottom: 8.0.h,
   );
 
-  static const double heightMxcImagePreview = 96;
-  static const double maxHeightPreviewLarge = 480;
+  static double heightMxcImagePreview = 96.0.h;
 }

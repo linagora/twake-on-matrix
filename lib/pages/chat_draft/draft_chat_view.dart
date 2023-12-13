@@ -107,7 +107,7 @@ class DraftChatView extends StatelessWidget {
                         padding: DraftChatViewStyle.inputWidgetPadding,
                         child: Container(
                           alignment: Alignment.center,
-                          constraints: const BoxConstraints(
+                          constraints: BoxConstraints(
                             maxWidth: DraftChatViewStyle.maxInputBarWidth,
                           ),
                           padding: const EdgeInsets.only(
@@ -261,10 +261,10 @@ class DraftChatView extends StatelessWidget {
                                         controller.isSendingNotifier,
                                     builder: (context, isSending, child) {
                                       if (isSending) {
-                                        return const Padding(
+                                        return Padding(
                                           padding: DraftChatViewStyle
                                               .iconLoadingPadding,
-                                          child: Center(
+                                          child: const Center(
                                             child: SizedBox(
                                               width: 24,
                                               height: 24,
@@ -376,11 +376,11 @@ class _EmptyChatTitle extends StatelessWidget {
                       name: snapshot.data?.displayName ??
                           displayName ??
                           receiverId,
-                      size: ChatAppBarTitleStyle.avatarSize(context),
+                      size: ChatAppBarTitleStyle.avatarSize,
                     ),
                   ),
                 ),
-                const SizedBox(width: DraftChatViewStyle.emptyChatGapWidth),
+                SizedBox(width: DraftChatViewStyle.emptyChatGapWidth),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

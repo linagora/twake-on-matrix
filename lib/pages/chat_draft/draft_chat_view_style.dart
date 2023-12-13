@@ -3,22 +3,21 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DraftChatViewStyle {
-  static const double maxInputBarWidth = 800.0;
-
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double toolbarHeight = 56;
+  static double maxInputBarWidth = 800.0.w;
 
   static BoxConstraints get containerMaxWidthConstraints =>
-      const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5);
+      BoxConstraints(maxWidth: (TwakeThemes.columnWidth * 2.5).w);
 
   static double animatedContainerHeight(
     BuildContext context,
     bool isShowEmojiPicker,
   ) =>
-      isShowEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0;
+      (isShowEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0).h;
 
   static int get minLinesInputBar => 1;
 
@@ -26,10 +25,10 @@ class DraftChatViewStyle {
 
   // Bottom Bar Style
   static EdgeInsetsGeometry get bottomBarPadding =>
-      const EdgeInsetsDirectional.only(start: 12.0);
+      EdgeInsetsDirectional.only(start: 12.0.w);
 
   static BorderRadiusGeometry get bottomBarBorderRadius =>
-      const BorderRadius.all(Radius.circular(25));
+      BorderRadius.all(Radius.circular(25.r));
 
   static InputDecoration bottomBarInputDecoration(BuildContext context) =>
       InputDecoration(
@@ -45,38 +44,36 @@ class DraftChatViewStyle {
       );
 
   static double bottomBarButtonPaddingAll(bool isInputEmpty) =>
-      isInputEmpty ? 5.0 : 12.0;
+      (isInputEmpty ? 5.0 : 12.0).w;
 
   static EdgeInsets get bottomBarButtonRecordMargin =>
-      const EdgeInsets.only(right: 7.0);
+      EdgeInsets.only(right: 7.0.w);
 
-  static double get bottomBarButtonRecordPaddingAll => 5.0;
+  static double get bottomBarButtonRecordPaddingAll => 5.0.w;
 
-  static EdgeInsets get buttonAddMoreMargin =>
-      const EdgeInsets.only(right: 4.0);
+  static EdgeInsets get buttonAddMoreMargin => EdgeInsets.only(right: 4.0.w);
 
   static EdgeInsetsGeometry get inputWidgetPadding =>
-      const EdgeInsetsDirectional.only(bottom: 8.0);
+      EdgeInsetsDirectional.only(bottom: 8.0.h);
 
   // Empty Chat Style
   static EdgeInsetsGeometry get emptyChatParentPadding =>
-      const EdgeInsets.only(left: 8.0);
+      EdgeInsets.only(left: 8.0.w);
 
   static EdgeInsetsGeometry get emptyChatChildrenPadding =>
-      const EdgeInsets.only(right: 3, top: 3);
-  static const double emptyChatGapWidth = 12.0;
+      EdgeInsets.only(right: 3.0.w, top: 3.0.h);
+  static double emptyChatGapWidth = 12.0.w;
 
-  static const EdgeInsetsGeometry iconSendPadding =
-      EdgeInsetsDirectional.only(end: 8.0, start: 8, bottom: 8);
+  static EdgeInsetsGeometry iconSendPadding =
+      EdgeInsetsDirectional.only(end: 8.0.w, start: 8.0.w, bottom: 8.0.h);
 
-  static const EdgeInsetsGeometry iconLoadingPadding =
-      EdgeInsetsDirectional.only(
-    top: 8.0,
-    bottom: 16.0,
-    start: 16.0,
-    end: 8.0,
+  static EdgeInsetsGeometry iconLoadingPadding = EdgeInsetsDirectional.only(
+    top: 8.0.h,
+    bottom: 16.0.h,
+    start: 16.0.w,
+    end: 8.0.w,
   );
 
-  static const EdgeInsetsGeometry inputBarPadding =
-      EdgeInsetsDirectional.symmetric(horizontal: 8);
+  static EdgeInsetsGeometry inputBarPadding =
+      EdgeInsetsDirectional.symmetric(horizontal: 8.0.w);
 }

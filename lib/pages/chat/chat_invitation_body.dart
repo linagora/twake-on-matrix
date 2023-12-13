@@ -58,12 +58,11 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
             ),
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.all(ChatInvitationBodyStyle.dialogPadding),
+            padding: EdgeInsets.all(ChatInvitationBodyStyle.dialogPadding),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(
+                  padding: EdgeInsets.all(
                     ChatInvitationBodyStyle.dialogTextPadding,
                   ),
                   child: Text.rich(
@@ -99,7 +98,7 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
                         onReject: () => controller.onRejectInvitation(context),
                       ),
                     ),
-                    const SizedBox(
+                    SizedBox(
                       width: ChatInvitationBodyStyle.dialogButtonSpacing,
                     ),
                     Expanded(
@@ -145,7 +144,7 @@ class InvitationAcceptButton extends StatelessWidget {
         ),
         side: MaterialStateProperty.all<BorderSide>(BorderSide.none),
         fixedSize: MaterialStateProperty.all<Size>(
-          const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
+          Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
       ),
       onPressed: onAccept,
@@ -181,7 +180,7 @@ class InvitationRejectButton extends StatelessWidget {
         ),
         side: MaterialStateProperty.all<BorderSide>(BorderSide.none),
         fixedSize: MaterialStateProperty.all<Size>(
-          const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
+          Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
       ),
       onPressed: onReject,
@@ -198,7 +197,7 @@ class InvitationBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(
+      padding: EdgeInsets.all(
         ChatInvitationBodyStyle.chatInvitationBottomBarPadding,
       ),
       color: Theme.of(context).colorScheme.surfaceVariant,
@@ -214,7 +213,7 @@ class InvitationBottomBar extends StatelessWidget {
               size: ChatInvitationBodyStyle.chatInvitationBottomBarIconSize,
               color: LinagoraRefColors.material().tertiary[30],
             ),
-            const SizedBox(
+            SizedBox(
               width: ChatInvitationBodyStyle.chatInvitationBottomBarIconSpacing,
             ),
             Flexible(

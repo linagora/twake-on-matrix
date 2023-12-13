@@ -42,8 +42,7 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
                 height: MessageContentStyle.imageBubbleHeight(
                   displayImageInfo.size.height,
                 ),
-                child:
-                    const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+                child: BlurHash(hash: MessageContentStyle.defaultBlurHash),
               ),
               child!,
               if (value == SendingVideoStatus.sending) ...[
@@ -67,10 +66,10 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
                   child: const _PlayVideoButton(),
                 ),
               ] else if (value == SendingVideoStatus.error) ...[
-                const SizedBox(
+                SizedBox(
                   width: MessageContentStyle.videoCenterButtonSize,
                   height: MessageContentStyle.videoCenterButtonSize,
-                  child: Icon(Icons.error),
+                  child: const Icon(Icons.error),
                 ),
               ],
             ],

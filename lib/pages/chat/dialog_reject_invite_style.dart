@@ -1,22 +1,23 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DialogAcceptInviteStyle {
-  static const double borderRadiusActionButton = 100;
-  static const double borderRadiusDialog = 28.0;
-  static const EdgeInsetsDirectional paddingActionButton =
-      EdgeInsetsDirectional.symmetric(horizontal: 12.0, vertical: 10.0);
+  static double borderRadiusActionButton = 100.0.r;
+  static double borderRadiusDialog = 28.0.r;
+  static EdgeInsetsDirectional paddingActionButton =
+      EdgeInsetsDirectional.symmetric(horizontal: 12.0.w, vertical: 10.0.h);
 
-  static const EdgeInsetsDirectional paddingDialog =
-      EdgeInsetsDirectional.symmetric(horizontal: 24);
+  static EdgeInsetsDirectional paddingDialog =
+      EdgeInsetsDirectional.symmetric(horizontal: 24.0.w);
 
-  static const EdgeInsetsDirectional marginDialog =
-      EdgeInsetsDirectional.symmetric(horizontal: 24);
+  static EdgeInsetsDirectional marginDialog =
+      EdgeInsetsDirectional.symmetric(horizontal: 24.0.w);
 
-  static const EdgeInsetsDirectional paddingButton =
-      EdgeInsetsDirectional.symmetric(vertical: 24);
+  static EdgeInsetsDirectional paddingButton =
+      EdgeInsetsDirectional.symmetric(vertical: 24.0.h);
 
-  static const EdgeInsetsDirectional paddingTitle =
-      EdgeInsetsDirectional.only(top: 24);
+  static EdgeInsetsDirectional paddingTitle =
+      EdgeInsetsDirectional.only(top: 24.0.h);
 
-  static const double dialogTextWidth = 264.0;
+  static double dialogTextWidth = 264.0.w;
 }
