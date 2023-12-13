@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatListBottomNavigatorStyle {
-  static const EdgeInsetsDirectional padding = EdgeInsetsDirectional.symmetric(
-    horizontal: 8,
-    vertical: 12,
+  static EdgeInsetsDirectional padding = EdgeInsetsDirectional.symmetric(
+    horizontal: 8.w,
+    vertical: 12.h,
   );
 
-  static const EdgeInsetsDirectional paddingIcon = EdgeInsetsDirectional.only(
-    bottom: 8,
+  static EdgeInsetsDirectional paddingIcon = EdgeInsetsDirectional.only(
+    bottom: 8.h,
   );
 
-  static const double width = 86;
-  static const double iconSize = 24;
+  static double width = 86.w;
+  static double iconSize = 24.r;
 }

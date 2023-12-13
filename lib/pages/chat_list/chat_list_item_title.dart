@@ -42,12 +42,11 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                 children: [
                   if (room.encrypted)
                     Padding(
-                      padding:
-                          const EdgeInsets.only(right: 4, top: 2, bottom: 2),
+                      padding: ChatListItemTitleStyle.paddingIconEncrypted,
                       child: SvgPicture.asset(
                         ImagePaths.icEncrypted,
-                        width: 20,
-                        height: 20,
+                        width: ChatListItemTitleStyle.iconEncryptedSize,
+                        height: ChatListItemTitleStyle.iconEncryptedSize,
                       ),
                     ),
                   Flexible(

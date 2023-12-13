@@ -554,7 +554,7 @@ class SuggestionTile extends StatelessWidget {
               fontSize: InputBarStyle.suggestionAvatarFontSize,
               client: client,
             ),
-            const SizedBox(
+            SizedBox(
               width: InputBarStyle.suggestionTileAvatarTextGap,
             ),
             Expanded(

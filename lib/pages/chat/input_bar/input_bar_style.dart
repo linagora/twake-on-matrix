@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class InputBarStyle {
-  static const double suggestionAvatarSize = 30;
+  static double suggestionAvatarSize = 30.0.w;
 
-  static const double suggestionAvatarFontSize = 15;
+  static double suggestionAvatarFontSize = 15.0.sp;
 
-  static const double suggestionSize = 50;
+  static double suggestionSize = 50.0.h;
 
-  static const double suggestionBorderRadius = 12.0;
+  static double suggestionBorderRadius = 12.0.r;
 
-  static const double suggestionListPadding = 8.0;
+  static double suggestionListPadding = 8.0.h;
 
   static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
-        fontSize: 15,
+        fontSize: 15.0.sp,
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
       );
 
-  static const double suggestionTileAvatarTextGap = 8.0;
+  static double suggestionTileAvatarTextGap = 8.0.w;
 }

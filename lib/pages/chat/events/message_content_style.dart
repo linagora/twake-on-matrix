@@ -4,12 +4,11 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MessageContentStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
-
-  static const int maxLengthTextInline = 180;
-  static const double appBarFontSize = 16.0;
+  static double appBarFontSize = 16.0.sp;
 
   static double imageWidth(BuildContext context) {
     if (responsiveUtils.isDesktop(context)) {
@@ -25,16 +24,16 @@ class MessageContentStyle {
     return imageBubbleHeightForMobileAndTable;
   }
 
-  static const double imageBubbleHeightForWeb = 420;
-  static const double imageBubbleHeightForMobileAndTable = 320;
-  static const double imageBubbleWidthForMobileAndTablet = 256;
-  static const double imageBubbleWidthForWeb = 500;
-  static const double imageBubbleMinWidth = 120;
-  static const double imageBubbleMinHeight = 100;
-  static const double imageBubbleDefaultWidth = 292;
-  static const double imageBubbleDefaultHeight = 340;
+  static double imageBubbleHeightForWeb = 420.0.h;
+  static double imageBubbleHeightForMobileAndTable = 320.0.h;
+  static double imageBubbleWidthForMobileAndTablet = 256.0.w;
+  static double imageBubbleWidthForWeb = 500.0.w;
+  static double imageBubbleMinWidth = 120.0.w;
+  static double imageBubbleMinHeight = 100.0.h;
+  static double imageBubbleDefaultWidth = 292.0.w;
+  static double imageBubbleDefaultHeight = 340.0.h;
   static Color backgroundColorButton = Colors.white.withAlpha(64);
-  static const String defaultBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+  static String defaultBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
 
   static double imageBubbleWidth(double displayWidth) => max(
         MessageContentStyle.imageBubbleMinWidth,
@@ -53,18 +52,14 @@ class MessageContentStyle {
         displayHeight,
       );
 
-  static const double letterSpacingMessageContent = -0.15;
+  static double videoCenterButtonSize = 56.0.w;
 
-  static const double videoCenterButtonSize = 56;
+  static double iconInsideVideoButtonSize = 48.0.w;
 
-  static const double iconInsideVideoButtonSize = 48;
+  static double strokeVideoWidth = 2.0.w;
 
-  static const double strokeVideoWidth = 2;
+  static Color backgroundColorCenterButton = Colors.black38;
 
-  static const Color backgroundColorCenterButton = Colors.black38;
-
-  static const BorderRadiusGeometry borderRadiusBubble =
-      BorderRadius.all(Radius.circular(12.0));
-
-  static const backIconColor = Colors.white;
+  static BorderRadiusGeometry borderRadiusBubble =
+      BorderRadius.all(Radius.circular(12.0.r));
 }

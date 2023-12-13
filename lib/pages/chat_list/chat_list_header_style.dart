@@ -3,19 +3,19 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ChatListHeaderStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const double searchRadiusBorder = 24.0;
-  static const double searchBarContainerHeight = 64.0;
-  static const double searchIconSize = 24.0;
+  static double searchRadiusBorder = 24.0.r;
+  static double searchBarContainerHeight = 64.0.h;
+  static double searchIconSize = 24.0.r;
 
-  static const EdgeInsetsDirectional searchInputPadding =
-      EdgeInsetsDirectional.only(
-    start: 16,
-    end: 16,
+  static EdgeInsetsDirectional searchInputPadding = EdgeInsetsDirectional.only(
+    start: 16.w,
+    end: 16.w,
   );
 
   static const EdgeInsetsDirectional paddingZero = EdgeInsetsDirectional.zero;

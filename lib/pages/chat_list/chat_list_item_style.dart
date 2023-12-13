@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
 
-  static const double readIconSize = 20;
+  static double readIconSize = 20.r;
 
-  static const double groupIconSize = 16;
+  static double groupIconSize = 16.r;
 
-  static const double mentionIconWidth = 20;
+  static double mentionIconWidth = 20.w;
 
-  static const double chatItemHeight = 85;
+  static double chatItemHeight = 96.h;
 
   static double unreadBadgeSize(
     bool unread,
@@ -19,26 +20,26 @@ class ChatListItemStyle {
   ) {
     return unread || hasNewMessages
         ? hasNotifications
-            ? 20.0
-            : 14.0
+            ? 20.0.h
+            : 14.0.h
         : 0.0;
   }
 
-  static const EdgeInsetsDirectional paddingConversation =
+  static EdgeInsetsDirectional paddingConversation =
       EdgeInsetsDirectional.symmetric(
-    horizontal: 8,
-    vertical: 2,
+    horizontal: 8.w,
+    vertical: 2.h,
   );
 
-  static const EdgeInsetsDirectional paddingAvatar =
-      EdgeInsetsDirectional.only(end: 8);
+  static EdgeInsetsDirectional paddingAvatar =
+      EdgeInsetsDirectional.only(end: 8.w);
 
-  static const EdgeInsetsDirectional paddingIconGroup =
-      EdgeInsetsDirectional.all(4);
+  static EdgeInsetsDirectional paddingIconGroup =
+      EdgeInsetsDirectional.all(4.w);
 
-  static const EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(8);
+  static EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(8.h);
 
-  static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
+  static double unreadBadgePaddingWhenMoreThanOne = 9.0.w;
 
   static double notificationBadgeSize(
     bool unread,

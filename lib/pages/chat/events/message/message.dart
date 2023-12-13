@@ -199,7 +199,7 @@ class Message extends StatelessWidget {
       );
     }
 
-    return const SizedBox(width: MessageStyle.avatarSize);
+    return SizedBox(width: MessageStyle.avatarSize);
   }
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {

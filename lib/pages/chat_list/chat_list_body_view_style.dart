@@ -1,37 +1,38 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatListBodyViewStyle {
-  static const double sizeIconExpand = 24;
+  static double sizeIconExpand = 24.r;
 
-  static double heightIsTorBrowser(bool isTorBrowser) => isTorBrowser ? 64 : 0;
+  static double heightIsTorBrowser(bool isTorBrowser) =>
+      isTorBrowser ? 64.h : 0;
 
-  static const EdgeInsetsDirectional paddingIconSkeletons =
+  static EdgeInsetsDirectional paddingIconSkeletons =
       EdgeInsetsDirectional.only(
-    top: 64,
+    top: 64.h,
   );
 
-  static const EdgeInsetsDirectional paddingOwnProfile =
-      EdgeInsetsDirectional.only(
-    top: 16,
+  static EdgeInsetsDirectional paddingOwnProfile = EdgeInsetsDirectional.only(
+    top: 16.h,
   );
 
-  static const EdgeInsetsDirectional paddingTextStartNewChatMessage =
+  static EdgeInsetsDirectional paddingTextStartNewChatMessage =
       EdgeInsetsDirectional.only(
-    start: 32,
-    end: 32,
-    top: 8,
+    start: 32.w,
+    end: 32.w,
+    top: 8.h,
   );
 
-  static const EdgeInsetsDirectional paddingTopExpandableTitleBuilder =
+  static EdgeInsetsDirectional paddingTopExpandableTitleBuilder =
       EdgeInsetsDirectional.only(
-    top: 8,
+    top: 8.h,
   );
 
-  static const EdgeInsetsDirectional paddingHorizontalExpandableTitleBuilder =
+  static EdgeInsetsDirectional paddingHorizontalExpandableTitleBuilder =
       EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
+    horizontal: 16.w,
   );
 
-  static const EdgeInsetsDirectional paddingIconExpand =
-      EdgeInsetsDirectional.all(8);
+  static EdgeInsetsDirectional paddingIconExpand =
+      EdgeInsetsDirectional.all(8.w);
 }

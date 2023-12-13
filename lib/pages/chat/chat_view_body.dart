@@ -43,7 +43,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   children: <Widget>[
                     if (controller.room!.pinnedEventIds.isNotEmpty)
-                      const SizedBox(
+                      SizedBox(
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
                     Expanded(

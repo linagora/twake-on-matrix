@@ -67,7 +67,7 @@ class ChatAppBarTitle extends StatelessWidget {
                       room!.getLocalizedDisplayname(
                         MatrixLocals(L10n.of(context)!),
                       ),
-                  size: ChatAppBarTitleStyle.avatarSize(context),
+                  size: ChatAppBarTitleStyle.avatarSize,
                 ),
               ),
             ],

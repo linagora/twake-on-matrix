@@ -76,7 +76,7 @@ class ReplyContent extends StatelessWidget {
                 vertical: ReplyContentStyle.prefixBarVerticalPadding,
               ),
               child: Container(
-                constraints: const BoxConstraints(
+                constraints: BoxConstraints(
                   minHeight: ReplyContentStyle.replyContentSize,
                 ),
                 width: ReplyContentStyle.prefixBarWidth,

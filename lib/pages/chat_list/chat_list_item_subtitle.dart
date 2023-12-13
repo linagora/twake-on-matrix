@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -43,7 +44,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                       room.isUnreadOrInvited,
                     )),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         FutureBuilder<String>(
           future: room.lastEvent?.calcLocalizedBody(
                 MatrixLocals(L10n.of(context)!),
@@ -94,11 +95,11 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             );
           },
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4.w),
         AnimatedContainer(
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
-          padding: const EdgeInsets.symmetric(horizontal: 7),
+          padding: EdgeInsets.symmetric(horizontal: 7.w),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
             room.isUnreadOrInvited,

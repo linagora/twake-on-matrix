@@ -4,71 +4,34 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  static final bubbleBorderRadius = BorderRadius.circular(20);
-  static final errorStatusPlaceHolderWidth = 16 * AppConfig.bubbleSizeFactor;
-  static final errorStatusPlaceHolderHeight = 16 * AppConfig.bubbleSizeFactor;
-  static const double avatarSize = 40;
-  static const double fontSize = 15;
-  static const notSameSenderPadding = EdgeInsets.only(left: 8.0, bottom: 4);
-
-  static const double buttonHeight = 66;
-
-  static List<BoxShadow> boxShadow(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? const [
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.12),
-              offset: Offset(0, 0),
-              blurRadius: 2,
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.16),
-              offset: Offset(0, 0),
-              blurRadius: 96,
-            ),
-          ]
-        : [];
-  }
-
-  static Color backgroundColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? Colors.white
-        : const Color.fromARGB(239, 36, 36, 36);
-  }
-
-  static int get messageFlexMobile => 7;
+  static final bubbleBorderRadius = BorderRadius.circular(20.0.r);
+  static double avatarSize = 40.0.w;
+  static double fontSize = 15.0.sp;
 
   static int get replyIconFlexMobile => 2;
 
-  static TextStyle? displayTime(BuildContext context) =>
-      Theme.of(context).textTheme.bodySmall?.merge(
-            TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              letterSpacing: 0.4,
-            ),
-          );
-
-  static double get forwardContainerSize => 40.0;
+  static double get forwardContainerSize => 40.0.w;
 
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
-  static const double messageBubbleDesktopMaxWidth = 520.0;
-  static const double messageBubbleMobileRatioMaxWidth = 0.80;
-  static const double messageBubbleTabletRatioMaxWidth = 0.30;
+  static double messageBubbleDesktopMaxWidth = 520.0.w;
+  static double messageBubbleMobileRatioMaxWidth = 0.80.w;
+  static double messageBubbleTabletRatioMaxWidth = 0.30.w;
 
   static double messageBubbleWidth(BuildContext context) {
-    return context.responsiveValue<double>(
+    return (context.responsiveValue<double>(
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
       mobile:
           MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
-    );
+    )).w;
   }
 
   static double messageSpacing(
@@ -83,21 +46,21 @@ class MessageStyle {
       return 0;
     }
 
-    return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
+    return (currentEvent.senderId != nextEvent.senderId ? 8 : 4).h;
   }
 
   static EdgeInsets paddingDisplayName(Event event) => EdgeInsets.only(
-        left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-        bottom: 4.0,
+        left: event.messageType == MessageTypes.Image ? 0 : 8.0.w,
+        bottom: 4.0.h,
       );
 
-  static EdgeInsets get paddingTimestamp => const EdgeInsets.only(
-        left: 8.0,
-        right: 4.0,
+  static EdgeInsets get paddingTimestamp => EdgeInsets.only(
+        left: 8.0.w,
+        right: 4.0.w,
       );
 
   static EdgeInsets get paddingEditButton => EdgeInsets.only(
-        top: 4.0 * AppConfig.bubbleSizeFactor,
+        top: (4.0 * AppConfig.bubbleSizeFactor).h,
       );
 
   static EdgeInsetsDirectional paddingMessageContainer(
@@ -113,27 +76,28 @@ class MessageStyle {
         nextEvent,
         event,
       ),
-      start: 8,
-      end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
+      start: 8.0.w,
+      end: (selected || responsiveUtils.isDesktop(context) ? 8 : 0).w,
     );
   }
 
   static EdgeInsets paddingMessageContentBuilder(Event event) =>
       EdgeInsets.only(
-        left: 8 * AppConfig.bubbleSizeFactor,
-        right: 8 * AppConfig.bubbleSizeFactor,
-        top: 8 * AppConfig.bubbleSizeFactor,
-        bottom: event.timelineOverlayMessage
-            ? 8 * AppConfig.bubbleSizeFactor
-            : 0 * AppConfig.bubbleSizeFactor,
+        left: (8 * AppConfig.bubbleSizeFactor).w,
+        right: (8 * AppConfig.bubbleSizeFactor).w,
+        top: (8 * AppConfig.bubbleSizeFactor).h,
+        bottom: (event.timelineOverlayMessage
+                ? 8 * AppConfig.bubbleSizeFactor
+                : 0 * AppConfig.bubbleSizeFactor)
+            .h,
       );
 
-  static EdgeInsets get paddingMessageTime => const EdgeInsets.only(
-        left: 6,
-        right: 8.0,
-        bottom: 4.0,
+  static EdgeInsets get paddingMessageTime => EdgeInsets.only(
+        left: 6.0.w,
+        right: 8.0.w,
+        bottom: 4.0.h,
       );
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
-      const EdgeInsetsDirectional.symmetric(horizontal: 12.0);
+      EdgeInsetsDirectional.symmetric(horizontal: 12.0.w);
 }

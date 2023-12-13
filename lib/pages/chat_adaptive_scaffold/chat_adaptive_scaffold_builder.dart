@@ -54,7 +54,7 @@ class ChatAdaptiveScaffoldBuilderController
 
   @override
   Widget build(BuildContext context) {
-    const breakpoint = ResponsiveUtils.minTabletWidth +
+    final breakpoint = ResponsiveUtils.minTabletWidth +
         MessageStyle.messageBubbleDesktopMaxWidth;
     return ValueListenableBuilder(
       valueListenable: rightColumnTypeNotifier,
@@ -64,7 +64,7 @@ class ChatAdaptiveScaffoldBuilderController
           child: AdaptiveLayout(
             body: SlotLayout(
               config: {
-                const WidthPlatformBreakpoint(
+                WidthPlatformBreakpoint(
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
@@ -80,7 +80,7 @@ class ChatAdaptiveScaffoldBuilderController
                     ],
                   ),
                 ),
-                const WidthPlatformBreakpoint(
+                WidthPlatformBreakpoint(
                   begin: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
@@ -101,13 +101,13 @@ class ChatAdaptiveScaffoldBuilderController
             secondaryBody: rightColumnType != null
                 ? SlotLayout(
                     config: {
-                      const WidthPlatformBreakpoint(
+                      WidthPlatformBreakpoint(
                         end: breakpoint,
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointMobileKey,
                         builder: null,
                       ),
-                      const WidthPlatformBreakpoint(
+                      WidthPlatformBreakpoint(
                         begin: breakpoint,
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,

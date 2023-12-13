@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ReplyContentStyle {
-  static const double fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
-  static const double fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
-  static const double replyContentSize = fontSizeDisplayContent * 2;
+  static double fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
+  static double fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
+  static double replyContentSize = fontSizeDisplayContent * 2;
 
   static const EdgeInsets replyParentContainerPadding = EdgeInsets.only(
     left: 4,
@@ -37,7 +37,7 @@ class ReplyContentStyle {
 
   static const double contentSpacing = 6.0;
   static const BorderRadius previewedImageBorderRadius =
-      BorderRadius.all(Radius.circular(4));
+      BorderRadius.all(Radius.circular(4.0));
   static const double previewedImagePlaceholderPadding = 4.0;
 
   static TextStyle? displayNameTextStyle(BuildContext context) {

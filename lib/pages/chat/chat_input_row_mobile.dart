@@ -27,7 +27,7 @@ class ChatInputRowMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(
+      constraints: BoxConstraints(
         minHeight: ChatInputRowStyle.chatInputRowHeight,
       ),
       child: Container(
