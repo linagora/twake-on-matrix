@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -23,51 +24,64 @@ abstract class TwakeThemes {
     bodyLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: -0.15,
+      fontSize: 16.sp,
     ),
     bodyMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.25,
+      fontSize: 14.sp,
     ),
     bodySmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.4,
+      fontSize: 12.sp,
     ),
     labelLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
+      fontSize: 14.sp,
     ),
     labelSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
+      fontSize: 11.sp,
     ),
     displayLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w700,
+      fontSize: 57.sp,
     ),
     displayMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
+      fontSize: 45.sp,
     ),
     displaySmall: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
+      fontSize: 36.sp,
     ),
     headlineMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
+      fontSize: 28.sp,
     ),
     headlineSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
+      fontSize: 24.sp,
     ),
     titleLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
+      fontSize: 22.sp,
     ),
     titleMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.15,
+      fontSize: 16.sp,
     ),
     titleSmall: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
+      fontSize: 15.sp,
     ),
   );
 
@@ -94,13 +108,13 @@ abstract class TwakeThemes {
             : Colors.blueGrey.shade900,
         popupMenuTheme: PopupMenuThemeData(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            borderRadius: BorderRadius.circular(AppConfig.borderRadius.r),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: UnderlineInputBorder(
             borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+            borderRadius: BorderRadius.circular(AppConfig.borderRadius.r / 2),
           ),
           hintStyle: fallbackTextTheme.bodyLarge?.merge(
             TextStyle(
@@ -129,20 +143,20 @@ abstract class TwakeThemes {
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius.r / 2),
             ),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius.r / 2),
             ),
           ),
         ),
         dialogTheme: DialogTheme(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+            borderRadius: BorderRadius.circular(AppConfig.borderRadius.r / 2),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -150,7 +164,7 @@ abstract class TwakeThemes {
             padding: const EdgeInsets.all(16),
             textStyle: const TextStyle(fontSize: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius.r),
             ),
           ),
         ),

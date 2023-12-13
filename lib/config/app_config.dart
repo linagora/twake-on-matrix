@@ -4,6 +4,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class AppConfig {
@@ -22,10 +23,10 @@ abstract class AppConfig {
   static double fontSizeFactor = 1;
 
   static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 48 : 56;
+      (responsive.isMobile(context) ? 48.0 : 56.0).h;
   static const Color chatColor = primaryColor;
   static Color colorSchemeSeed = primaryColor;
-  static const double messageFontSize = 17.0;
+  static double messageFontSize = 17.0.sp;
   static const bool allowOtherHomeservers = true;
   static const bool enableRegistration = true;
   static const Color primaryColor = Color.fromARGB(255, 135, 103, 172);
@@ -86,6 +87,9 @@ abstract class AppConfig {
   static const int imageQuality = 50;
   static const String iOSKeychainSharingId = 'KUT463DS29.app.twake.ios.chat';
   static const String iOSKeychainSharingAccount = 'app.twake.ios.chat.sessions';
+
+  static const Size mobileSize = Size(360, 966);
+  static const Size webSize = Size(1600, 1024);
 
   static String? issueId;
 

@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_app
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class AppAdaptiveScaffold extends StatelessWidget {
@@ -50,7 +51,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
             ),
           },
         ),
-        bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
+        bodyRatio: ResponsiveUtils.bodyRadioWidth.w / context.width.w,
         secondaryBody: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
             const WidthPlatformBreakpoint(end: ResponsiveUtils.maxMobileWidth):

@@ -5,12 +5,14 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -75,44 +77,53 @@ class TwakeAppState extends State<TwakeApp> {
       builder: (context, themeMode, primaryColor) => ValueListenableBuilder(
         valueListenable: LocalizationService.currentLocale,
         builder: (context, local, _) {
-          return MaterialApp.router(
-            restorationScopeId: 'Twake',
-            title: AppConfig.applicationName,
-            debugShowCheckedModeBanner: false,
-            themeMode: themeMode,
-            theme: TwakeThemes.buildTheme(
-              context,
-              Brightness.light,
-              primaryColor,
-            ),
-            darkTheme: TwakeThemes.buildTheme(
-              context,
-              Brightness.light,
-              primaryColor,
-            ),
-            scrollBehavior: CustomScrollBehavior(),
-            localizationsDelegates: const [
-              LocaleNamesLocalizationsDelegate(),
-              L10n.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: LocalizationService.supportedLocales,
-            locale: local,
-            localeResolutionCallback: (deviceLocale, supportedLocales) {
-              for (final locale in supportedLocales) {
-                if (locale.languageCode == deviceLocale?.languageCode) {
-                  return deviceLocale;
-                }
-              }
-              return supportedLocales.first;
+          return ScreenUtilInit(
+            designSize: PlatformInfos.isMobile
+                ? AppConfig.mobileSize
+                : AppConfig.webSize,
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (_, child) {
+              return MaterialApp.router(
+                restorationScopeId: 'Twake',
+                title: AppConfig.applicationName,
+                debugShowCheckedModeBanner: false,
+                themeMode: themeMode,
+                theme: TwakeThemes.buildTheme(
+                  context,
+                  Brightness.light,
+                  primaryColor,
+                ),
+                darkTheme: TwakeThemes.buildTheme(
+                  context,
+                  Brightness.light,
+                  primaryColor,
+                ),
+                scrollBehavior: CustomScrollBehavior(),
+                localizationsDelegates: const [
+                  LocaleNamesLocalizationsDelegate(),
+                  L10n.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+                supportedLocales: LocalizationService.supportedLocales,
+                locale: local,
+                localeResolutionCallback: (deviceLocale, supportedLocales) {
+                  for (final locale in supportedLocales) {
+                    if (locale.languageCode == deviceLocale?.languageCode) {
+                      return deviceLocale;
+                    }
+                  }
+                  return supportedLocales.first;
+                },
+                routerConfig: TwakeApp.router,
+                builder: (context, child) => Matrix(
+                  clients: widget.clients,
+                  child: child,
+                ),
+              );
             },
-            routerConfig: TwakeApp.router,
-            builder: (context, child) => Matrix(
-              clients: widget.clients,
-              child: child,
-            ),
           );
         },
       ),

@@ -39,11 +39,19 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                 onDestinationSelected: onDestinationSelected,
                 labelType: NavigationRailLabelType.all,
                 backgroundColor: Theme.of(context).colorScheme.surface,
+                selectedLabelTextStyle:
+                    Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                unselectedLabelTextStyle:
+                    Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
               ),
             ),
             Column(
               children: [
-                const Padding(
+                Padding(
                   padding:
                       AdaptiveScaffoldPrimaryNavigationStyle.dividerPadding,
                   child: Divider(
