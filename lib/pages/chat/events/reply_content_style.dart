@@ -61,4 +61,6 @@ class ReplyContentStyle {
       EdgeInsetsDirectional.symmetric(
         vertical: 4.0 * AppConfig.bubbleSizeFactor,
       );
+
+  static const double replyContainerHeight = 60;
 }
