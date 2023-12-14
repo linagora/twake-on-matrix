@@ -1,7 +1,11 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/update_pinned_events_state.dart';
+import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/presentation/model/chat/pop_up_menu_item_model.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
@@ -29,6 +33,11 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ScrollController scrollController = ScrollController();
 
+  final updatePinnedMessagesInteractor =
+      getIt.get<UpdatePinnedMessagesInteractor>();
+
+  Room? get room => widget.pinnedEvents.first?.room;
+
   List<ContextMenuItemModel> get pinnedMessagesActionsList => [
         ContextMenuItemModel(
           text: L10n.of(context)!.unpin,
@@ -36,16 +45,7 @@ class PinnedMessagesController extends State<PinnedMessages>
           color: Theme.of(context).colorScheme.onSurface,
           onTap: ({extra}) async {
             if (extra is Event) {
-              final result = await extra.unpin();
-              if (result) {
-                eventsNotifier.value.remove(extra);
-                eventsNotifier.value = List.from(eventsNotifier.value);
-                if (eventsNotifier.value.isEmpty) {
-                  Navigator.of(context).pop(eventsNotifier.value);
-                }
-              } else {
-                TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
-              }
+              unpin(extra.eventId);
             }
           },
         ),
@@ -71,9 +71,41 @@ class PinnedMessagesController extends State<PinnedMessages>
         ),
       ];
 
+  void unpin(String eventId) {
+    updatePinnedMessagesInteractor
+        .execute(room: room!, eventIds: [eventId]).listen((event) {
+      event.fold((failure) {
+        if (failure is UnpinEventsFailure) {
+          TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
+        } else if (failure is UpdatePinnedEventsFailure) {
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toLocalizedString(context),
+          );
+        }
+      }, (success) {
+        if (success is UpdatePinnedEventsSuccess) {
+          eventsNotifier.value
+              .removeWhere((element) => element?.eventId == eventId);
+          eventsNotifier.value = List.from(eventsNotifier.value);
+          if (eventsNotifier.value.isEmpty) {
+            Navigator.of(context).pop(eventsNotifier.value);
+          }
+        }
+      });
+    });
+  }
+
   void unpinAll() {
-    widget.pinnedEvents.first?.room.setPinnedEvents([]);
-    Navigator.of(context).pop();
+    updatePinnedMessagesInteractor
+        .execute(room: room!, eventIds: []).listen((event) {
+      if (event is UpdatePinnedEventsSuccess) {
+        eventsNotifier.value = [];
+        Navigator.of(context).pop();
+      } else if (event is UnpinEventsFailure) {
+        TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
+      }
+    });
   }
 
   void handleContextMenuActionInMore(

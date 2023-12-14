@@ -144,5 +144,5 @@ class MessageStyle {
 
   static const double paddingAllPushpin = 0;
 
-  static const double contextMenuWidth = 250;
+  static const double contextMenuWidth = 200;
 }

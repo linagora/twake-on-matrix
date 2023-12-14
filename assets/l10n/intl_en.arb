@@ -2970,7 +2970,7 @@
   "description": "Description",
   "groupName": "Group name",
   "descriptionHelper": "You can provide an optional description for your group.",
-  "groupNameCannotBeEmpty": "Group name cannot be empty"
+  "groupNameCannotBeEmpty": "Group name cannot be empty",
   "sharedMediaAndFiles": "Shared media and files",
   "unpinAllMessages": "Unpin all messages",
   "pinnedMessagesTooltip": "Pinned messages",
