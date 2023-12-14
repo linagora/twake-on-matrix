@@ -134,7 +134,6 @@ class MessageContent extends StatelessWidget
               return Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                 child: HtmlMessage(
-                  event: event,
                   html: html,
                   defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
                   linkStyle: TextStyle(

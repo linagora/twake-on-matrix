@@ -17,7 +17,6 @@ class HtmlMessage extends StatelessWidget {
   final String html;
   final int? maxLines;
   final Room room;
-  final Event event;
   final TextStyle? defaultTextStyle;
   final TextStyle? linkStyle;
   final double? emoteSize;
@@ -26,7 +25,6 @@ class HtmlMessage extends StatelessWidget {
   const HtmlMessage({
     Key? key,
     required this.html,
-    required this.event,
     this.maxLines,
     required this.room,
     this.defaultTextStyle,
