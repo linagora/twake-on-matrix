@@ -786,8 +786,8 @@ class ChatController extends State<Chat>
     inputFocus.requestFocus();
   }
 
-  Future<void> scrollToEventIdAndHighlight(String eventId) {
-    return scrollToEventId(eventId, highlight: true);
+  Future<void> scrollToEventIdAndHighlight(String eventId) async {
+    return await scrollToEventId(eventId, highlight: true);
   }
 
   Future<void>? loadTimelineFuture;
@@ -868,6 +868,11 @@ class ChatController extends State<Chat>
     }
   }
 
+  int getDisplayEventIndex(int eventIndex) {
+    const addedHeadItemsInChat = 1;
+    return eventIndex + addedHeadItemsInChat;
+  }
+
   Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
@@ -884,7 +889,7 @@ class ChatController extends State<Chat>
       setState(() {});
       return;
     }
-    await scrollToIndex(eventIndex, highlight: highlight);
+    await scrollToIndex(getDisplayEventIndex(eventIndex), highlight: highlight);
     _updateScrollController();
   }
 
@@ -895,7 +900,7 @@ class ChatController extends State<Chat>
     );
     if (highlight) {
       await scrollController.highlight(
-        index + 1,
+        index,
       );
     }
     setState(() {});

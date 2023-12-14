@@ -18,8 +18,7 @@ class PinnedEventsController {
   final AutoScrollController pinnedMessageScrollController =
       AutoScrollController();
 
-  final ValueNotifier<Event?> isCurrentPinnedEventNotifier =
-      ValueNotifier(null);
+  final ValueNotifier<Event?> currentPinnedEventNotifier = ValueNotifier(null);
 
   final ValueNotifier<Either<Failure, Success>> getPinnedMessageNotifier =
       ValueNotifier<Either<Failure, Success>>(
@@ -29,7 +28,7 @@ class PinnedEventsController {
   StreamSubscription? _pinnedEventsSubscription;
 
   bool isCurrentPinnedEvent(Event event) {
-    return isCurrentPinnedEventNotifier.value?.eventId == event.eventId;
+    return currentPinnedEventNotifier.value?.eventId == event.eventId;
   }
 
   void getPinnedMessageAction({
@@ -71,7 +70,7 @@ class PinnedEventsController {
       "PinnedEventsController()::jumpToPinnedMessage(): eventID: ${event?.eventId}",
     );
     if (event != null) {
-      isCurrentPinnedEventNotifier.value = event;
+      currentPinnedEventNotifier.value = event;
       pinnedMessageScrollController.scrollToIndex(nextIndex);
       if (scrollToEventId != null) {
         scrollToEventId.call(event.eventId);
@@ -80,9 +79,13 @@ class PinnedEventsController {
   }
 
   int currentIndexOfPinnedMessage(List<Event?> pinnedEvents) {
-    return pinnedEvents.indexWhere(
-      (event) => event?.eventId == isCurrentPinnedEventNotifier.value?.eventId,
+    final index = pinnedEvents.indexWhere(
+      (event) => event?.eventId == currentPinnedEventNotifier.value?.eventId,
     );
+    if (index < 0) {
+      currentPinnedEventNotifier.value = pinnedEvents.first;
+    }
+    return index;
   }
 
   int _nextIndexOfPinnedMessage(List<Event?> pinnedEvents) {
@@ -93,7 +96,7 @@ class PinnedEventsController {
   }
 
   void initialPinnedMessage(List<Event?> pinnedEvents) {
-    isCurrentPinnedEventNotifier.value = pinnedEvents.last;
+    currentPinnedEventNotifier.value = pinnedEvents.last;
     pinnedMessageScrollController.scrollToIndex(
       pinnedEvents.length - 1,
     );
@@ -121,13 +124,16 @@ class PinnedEventsController {
     final currentEvent = pinnedEvents.firstWhere(
       (event) => event?.eventId == eventId,
     );
-    final index = pinnedEvents.indexOf(currentEvent);
-    isCurrentPinnedEventNotifier.value = currentEvent;
+    int index = pinnedEvents.indexOf(currentEvent);
+    if (index == -1) {
+      index = 0;
+    }
+    currentPinnedEventNotifier.value = currentEvent;
     pinnedMessageScrollController.scrollToIndex(index);
   }
 
   void dispose() {
-    isCurrentPinnedEventNotifier.dispose();
+    currentPinnedEventNotifier.dispose();
     getPinnedMessageNotifier.dispose();
     pinnedMessageScrollController.dispose();
     _pinnedEventsSubscription?.cancel();

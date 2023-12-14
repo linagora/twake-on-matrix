@@ -11,7 +11,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/context_menu/context_menu_area.dart';
+import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -73,7 +73,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
       children: [
         if (event.isOwnMessage)
           _menuActionsRowBuilder(context, event.isOwnMessage),
-        ContextMenuArea(
+        TwakeContextMenuArea(
           width: MessageStyle.contextMenuWidth,
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
