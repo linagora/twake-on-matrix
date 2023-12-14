@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
@@ -31,11 +28,6 @@ class ChatAdaptiveScaffoldBuilder extends StatefulWidget {
 class ChatAdaptiveScaffoldBuilderController
     extends State<ChatAdaptiveScaffoldBuilder> {
   final rightColumnTypeNotifier = ValueNotifier<RightColumnType?>(null);
-  final jumpToEventIdStream = StreamController<EventId>.broadcast();
-
-  void jumpToEventId(String eventId) {
-    jumpToEventIdStream.sink.add(eventId);
-  }
 
   void hideRightColumn() {
     rightColumnTypeNotifier.value = null;
@@ -47,7 +39,6 @@ class ChatAdaptiveScaffoldBuilderController
 
   @override
   void dispose() {
-    jumpToEventIdStream.close();
     rightColumnTypeNotifier.dispose();
     super.dispose();
   }
