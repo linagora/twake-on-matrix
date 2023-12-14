@@ -26,7 +26,7 @@ class Message extends StatelessWidget {
   final Event? previousEvent;
   final Event? nextEvent;
   final void Function(Event)? onSelect;
-  final void Function(Event)? onAvatarTab;
+  final void Function(Event)? onAvatarTap;
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
@@ -45,7 +45,7 @@ class Message extends StatelessWidget {
     this.nextEvent,
     this.longPressSelect = false,
     this.onSelect,
-    this.onAvatarTab,
+    this.onAvatarTap,
     this.onHover,
     this.scrollToEventId,
     this.onSwipe,
@@ -193,7 +193,7 @@ class Message extends StatelessWidget {
             fontSize: MessageStyle.fontSize,
             mxContent: user.avatarUrl,
             name: user.calcDisplayname(),
-            onTap: () => onAvatarTab!(event),
+            onTap: () => onAvatarTap!(event),
           );
         },
       );
