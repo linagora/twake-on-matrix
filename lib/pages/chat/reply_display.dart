@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import '../../config/themes.dart';
 import 'chat.dart';
 import 'events/reply_content.dart';
+import 'events/reply_content_style.dart';
 
 class ReplyDisplay extends StatelessWidget {
   final ChatController controller;
@@ -25,7 +26,7 @@ class ReplyDisplay extends StatelessWidget {
         duration: TwakeThemes.animationDuration,
         curve: TwakeThemes.animationCurve,
         height: controller.editEvent != null || controller.replyEvent != null
-            ? 56
+            ? ReplyContentStyle.replyContainerHeight
             : 0,
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
