@@ -156,6 +156,10 @@ class SearchController extends State<Search>
     context.popInnerAll();
   }
 
+  void goToEvent(BuildContext context, MatrixEvent event) {
+    context.go('/rooms/${event.roomId}?event=${event.eventId}');
+  }
+
   @override
   void initState() {
     searchContactAndRecentChatController =
