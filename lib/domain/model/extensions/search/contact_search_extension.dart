@@ -4,8 +4,8 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 extension SearchExtension on ContactSearchModel {
   ContactPresentationSearch toContactPresentationSearch() {
     return ContactPresentationSearch(
-      id,
-      email,
+      matrixId: id,
+      email: email,
       displayName: displayName,
     );
   }

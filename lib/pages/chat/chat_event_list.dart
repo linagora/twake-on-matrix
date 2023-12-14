@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
-import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 
 class ChatEventList extends StatelessWidget {
@@ -128,14 +127,12 @@ class ChatEventList extends StatelessWidget {
                       event,
                       onSwipe: (direction) =>
                           controller.replyAction(replyTo: event),
-                      onAvatarTab: (Event event) => showAdaptiveBottomSheet(
+                      onAvatarTap: (Event event) => controller.onContactTap(
+                        contactPresentationSearch: event
+                            .senderFromMemoryOrFallback
+                            .toContactPresentationSearch(),
                         context: context,
-                        builder: (c) => UserBottomSheet(
-                          user: event.senderFromMemoryOrFallback,
-                          outerContext: context,
-                          onMention: () => controller.sendController.text +=
-                              '${event.senderFromMemoryOrFallback.mention} ',
-                        ),
+                        path: 'rooms',
                       ),
                       onSelect: controller.onSelectMessage,
                       selectMode: controller.selectMode,
