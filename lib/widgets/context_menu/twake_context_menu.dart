@@ -1,41 +1,42 @@
+// reference to: https://pub.dev/packages/contextmenu
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
-import 'context_menu_area.dart';
+import 'twake_context_menu_area.dart';
 
 const double _kMinTileHeight = 24;
 
-/// The actual [ContextMenu] to be displayed
+/// The actual [TwakeContextMenu] to be displayed
 ///
-/// You will most likely use [showContextMenu] to manually display a [ContextMenu].
+/// You will most likely use [showTwakeContextMenu] to manually display a [TwakeContextMenu].
 ///
-/// If you just want to use a normal [ContextMenu], please use [ContextMenuArea].
+/// If you just want to use a normal [TwakeContextMenu], please use [TwakeContextMenuArea].
 
-class ContextMenu extends StatefulWidget {
-  /// The [Offset] from coordinate origin the [ContextMenu] will be displayed at.
+class TwakeContextMenu extends StatefulWidget {
+  /// The [Offset] from coordinate origin the [TwakeContextMenu] will be displayed at.
   final Offset position;
 
   /// The builder for the items to be displayed. [ListTile] is very useful in most cases.
   final ContextMenuBuilder builder;
 
-  /// The padding value at the top an bottom between the edge of the [ContextMenu] and the first / last item
+  /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double verticalPadding;
 
-  /// The width for the [ContextMenu]. 320 by default according to Material Design specs.
+  /// The width for the [TwakeContextMenu]. 320 by default according to Material Design specs.
   final double width;
 
-  const ContextMenu({
+  const TwakeContextMenu({
     Key? key,
     required this.position,
     required this.builder,
     this.verticalPadding = 8,
-    this.width = 320,
+    required this.width,
   }) : super(key: key);
 
   @override
-  ContextMenuState createState() => ContextMenuState();
+  TwakeContextMenuState createState() => TwakeContextMenuState();
 }
 
-class ContextMenuState extends State<ContextMenu> {
+class TwakeContextMenuState extends State<TwakeContextMenu> {
   final Map<ValueKey, double> _heights = {};
 
   @override
