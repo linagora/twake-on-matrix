@@ -5,13 +5,12 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatSearch extends StatefulWidget {
   final VoidCallback? onBack;
-  final void Function(EventId) jumpToEventId;
   final String roomId;
   final bool isInStack;
 
@@ -19,7 +18,6 @@ class ChatSearch extends StatefulWidget {
     super.key,
     this.onBack,
     required this.roomId,
-    required this.jumpToEventId,
     required this.isInStack,
   });
 
@@ -79,7 +77,7 @@ class ChatSearchController extends State<ChatSearch> {
     if (widget.isInStack) {
       await onBack();
     }
-    widget.jumpToEventId(event.eventId);
+    context.go('/rooms/${event.roomId}?event=${event.eventId}');
   }
 
   Future onBack() async {
