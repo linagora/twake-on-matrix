@@ -9,14 +9,12 @@ import 'package:matrix/matrix.dart';
 
 class ChatAdaptiveScaffold extends StatefulWidget {
   final String roomId;
-  final String? eventId;
   final MatrixFile? shareFile;
   final String? roomName;
 
   const ChatAdaptiveScaffold({
     Key? key,
     required this.roomId,
-    required this.eventId,
     this.shareFile,
     this.roomName,
   }) : super(key: key);
@@ -31,7 +29,6 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
     return ChatAdaptiveScaffoldBuilder(
       bodyBuilder: (controller) => Chat(
         roomId: widget.roomId,
-        eventId: widget.eventId,
         shareFile: widget.shareFile,
         roomName: widget.roomName,
         onChangeRightColumnType: controller.setRightColumnType,

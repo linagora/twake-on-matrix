@@ -31,7 +31,7 @@ class SearchView extends StatelessWidget {
         },
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
-          controller: searchController.serverSearchController.scrollController,
+          controller: searchController.scrollController,
           slivers: [
             ValueListenableBuilder(
               valueListenable: searchController.preSearchRecentContactsNotifier,

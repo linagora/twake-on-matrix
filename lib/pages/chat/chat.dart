@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
@@ -62,7 +63,6 @@ import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
   final String roomId;
-  final String? eventId;
   final MatrixFile? shareFile;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
@@ -70,7 +70,6 @@ class Chat extends StatefulWidget {
   const Chat({
     Key? key,
     required this.roomId,
-    required this.eventId,
     this.shareFile,
     this.roomName,
     this.onChangeRightColumnType,
@@ -354,9 +353,10 @@ class ChatController extends State<Chat>
   @override
   void didUpdateWidget(covariant Chat oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.eventId != widget.eventId && widget.eventId != null) {
-      scrollToEventId(widget.eventId!, highlight: true);
+    final highlightEventId =
+        GoRouterState.of(context).uri.queryParameters['event'];
+    if (highlightEventId != null) {
+      scrollToEventId(highlightEventId, highlight: true);
     }
   }
 
@@ -847,8 +847,9 @@ class ChatController extends State<Chat>
     // "load more" button is visible on the screen
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        if (widget.eventId != null) {
-          scrollToEventId(widget.eventId!);
+        final event = GoRouterState.of(context).uri.queryParameters['event'];
+        if (event != null) {
+          scrollToEventId(event, highlight: true);
         }
       }
     });
@@ -1476,6 +1477,21 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _resetLocationPath() {
+    final queryParameters =
+        GoRouterState.of(context).uri.queryParameters['event'];
+    Logs().d("Chat::_resetLocationPath: QueryParameters - $queryParameters");
+    if (queryParameters == null) return;
+    final currentLocation = html.window.location.href;
+    Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
+    final queryIndex = currentLocation.indexOf('?');
+    final newLocation = queryIndex != -1
+        ? currentLocation.substring(0, queryIndex)
+        : currentLocation;
+    Logs().d("Chat::_resetLocationPath: New - $newLocation");
+    html.window.location.href = newLocation;
+  }
+
   void handlePopBackFromPinnedScreen(Object? popResult) async {
     Logs().d(
       "PinnedEventsController()::handlePopBack(): popResult: $popResult",
@@ -1489,7 +1505,10 @@ class ChatController extends State<Chat>
 
   @override
   Widget build(BuildContext context) {
-    return ChatView(this, key: widget.key);
+    return MouseRegion(
+      onHover: (_) => _resetLocationPath(),
+      child: ChatView(this, key: widget.key),
+    );
   }
 }
 
