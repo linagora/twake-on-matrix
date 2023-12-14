@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
 
 extension ContextExtensionss on BuildContext {
   /// The same of [MediaQuery.of(context).size]
@@ -186,5 +187,9 @@ extension ContextExtensionss on BuildContext {
 
   void popInnerAll() {
     Navigator.of(this).popUntil((route) => route.isFirst);
+  }
+
+  void goToRoomWithEvent(MatrixEvent event) {
+    go('/rooms/${event.roomId}?event=${event.eventId}');
   }
 }

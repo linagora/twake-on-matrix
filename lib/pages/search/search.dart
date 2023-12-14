@@ -13,6 +13,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -48,6 +49,8 @@ class SearchController extends State<Search>
       ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
   final TextEditingController textEditingController = TextEditingController();
+
+  final scrollController = ScrollController();
 
   bool get isShowMore =>
       textEditingController.value.text.isNotEmpty &&
@@ -156,10 +159,6 @@ class SearchController extends State<Search>
     context.popInnerAll();
   }
 
-  void goToEvent(BuildContext context, MatrixEvent event) {
-    context.go('/rooms/${event.roomId}?event=${event.eventId}');
-  }
-
   @override
   void initState() {
     searchContactAndRecentChatController =
@@ -168,11 +167,12 @@ class SearchController extends State<Search>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchContactAndRecentChatController?.init();
-        serverSearchController.init();
+        serverSearchController.initSearch();
         fetchPreSearchRecentContacts();
         textEditingController.addListener(() {
           onSearchBarChanged(textEditingController.text);
         });
+        scrollController.addLoadMoreListener(loadMore);
       }
     });
   }
@@ -180,6 +180,10 @@ class SearchController extends State<Search>
   void onSearchBarChanged(String keyword) {
     searchContactAndRecentChatController?.onSearchBarChanged(keyword);
     serverSearchController.onSearchBarChanged(keyword);
+  }
+
+  void loadMore() {
+    serverSearchController.loadMore();
   }
 
   void onCloseSearchTapped() {
