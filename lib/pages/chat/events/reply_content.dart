@@ -47,7 +47,6 @@ class ReplyContent extends StatelessWidget {
         maxLines: 1,
         room: displayEvent.room,
         emoteSize: ReplyContentStyle.fontSizeDisplayContent * 1.5,
-        event: timeline!.events.first,
       );
     } else {
       replyBody = Text(
@@ -89,6 +88,7 @@ class ReplyContent extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: ReplyContentStyle.previewedImageBorderRadius,
                   child: MxcImage(
+                    key: ValueKey(displayEvent.eventId),
                     noResize: true,
                     event: displayEvent,
                     width: ReplyContentStyle.replyContentSize,
