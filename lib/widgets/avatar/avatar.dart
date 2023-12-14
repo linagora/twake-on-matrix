@@ -1,7 +1,7 @@
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 
 import 'package:matrix/matrix.dart';
@@ -33,24 +33,28 @@ class Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fallbackLetters = name?.getShortcutNameForAvatar() ?? '@';
-    return ClipRRect(
+    return InkWell(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(size / 2),
-      child: MxcImage(
-        key: Key(mxContent.toString()),
-        uri: mxContent,
-        fit: BoxFit.cover,
-        width: size,
-        height: size,
-        cacheKey: mxContent.toString(),
-        placeholder: (context) => RoundAvatar(
-          size: size,
-          text: fallbackLetters,
-          boxShadows: boxShadows,
-          textStyle: TextStyle(
-            fontSize: fontSize,
-            color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
-            fontFamily: AvatarStyle.fontFamily,
-            fontWeight: AvatarStyle.fontWeight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size / 2),
+        child: MxcImage(
+          key: Key(mxContent.toString()),
+          uri: mxContent,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+          cacheKey: mxContent.toString(),
+          placeholder: (context) => RoundAvatar(
+            size: size,
+            text: fallbackLetters,
+            boxShadows: boxShadows,
+            textStyle: TextStyle(
+              fontSize: fontSize,
+              color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
+              fontFamily: AvatarStyle.fontFamily,
+              fontWeight: AvatarStyle.fontWeight,
+            ),
           ),
         ),
       ),

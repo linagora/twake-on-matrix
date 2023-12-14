@@ -52,8 +52,8 @@ class NewPrivateChatController extends State<NewPrivateChat>
         context: context,
         path: 'rooms',
         contactPresentationSearch: ContactPresentationSearch(
-          contact.matrixId,
-          contact.email,
+          matrixId: contact.matrixId,
+          email: contact.email,
           displayName: contact.displayName,
         ),
       );

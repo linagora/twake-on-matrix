@@ -39,8 +39,8 @@ extension PresentaionContactExtension on PresentationContact {
   Set<PresentationSearch> toPresentationSearch() {
     final listContacts = {
       ContactPresentationSearch(
-        matrixId,
-        email,
+        matrixId: matrixId,
+        email: email,
         displayName: displayName,
       ),
     };
