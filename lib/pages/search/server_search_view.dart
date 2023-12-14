@@ -44,40 +44,44 @@ class ServerSearchMessagesList extends StatelessWidget {
                 final event = Event.fromMatrixEvent(searchResult, room);
                 final originServerTs = searchResult.originServerTs;
 
-                return Padding(
-                  padding: ServerSearchViewStyle.paddingInsideListItem,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: ServerSearchViewStyle.paddingAvatar,
-                        child: Avatar(
-                          mxContent: room.avatar,
-                          name: room.name,
+                return InkWell(
+                  onTap: () => searchController.goToEvent(context, event),
+                  borderRadius: ServerSearchViewStyle.itemBorderRadius,
+                  child: Padding(
+                    padding: ServerSearchViewStyle.paddingInsideListItem,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: ServerSearchViewStyle.paddingAvatar,
+                          child: Avatar(
+                            mxContent: room.avatar,
+                            name: room.name,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ChatListItemTitle(
-                              room: room,
-                              originServerTs: originServerTs,
-                            ),
-                            HighlightText(
-                              text: searchController.getBodyText(
-                                event,
-                                searchWord,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ChatListItemTitle(
+                                room: room,
+                                originServerTs: originServerTs,
                               ),
-                              searchWord: searchWord,
-                              maxLines: 2,
-                              style: ChatLitSubSubtitleTextStyleView.textStyle
-                                  .textStyle(room),
-                            ),
-                          ],
+                              HighlightText(
+                                text: searchController.getBodyText(
+                                  event,
+                                  searchWord,
+                                ),
+                                searchWord: searchWord,
+                                maxLines: 2,
+                                style: ChatLitSubSubtitleTextStyleView.textStyle
+                                    .textStyle(room),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }),

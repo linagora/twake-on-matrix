@@ -62,18 +62,18 @@ import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
   final String roomId;
+  final String? eventId;
   final MatrixFile? shareFile;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
-  final StreamController<EventId>? jumpToEventIdStream;
 
   const Chat({
     Key? key,
     required this.roomId,
+    required this.eventId,
     this.shareFile,
     this.roomName,
     this.onChangeRightColumnType,
-    this.jumpToEventIdStream,
   }) : super(key: key);
 
   @override
@@ -324,8 +324,6 @@ class ChatController extends State<Chat>
   void initState() {
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
-    _jumpToEventIdSubscription =
-        widget.jumpToEventIdStream?.stream.listen(scrollToEventIdAndHighlight);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
     _tryLoadTimeline();
@@ -351,6 +349,15 @@ class ChatController extends State<Chat>
         isInitial: true,
       );
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant Chat oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.eventId != widget.eventId && widget.eventId != null) {
+      scrollToEventId(widget.eventId!, highlight: true);
+    }
   }
 
   void _initUnreadLocation(String fullyRead) {
@@ -840,9 +847,8 @@ class ChatController extends State<Chat>
     // "load more" button is visible on the screen
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        final event = GoRouterState.of(context).uri.queryParameters['event'];
-        if (event != null) {
-          scrollToEventId(event);
+        if (widget.eventId != null) {
+          scrollToEventId(widget.eventId!);
         }
       }
     });
