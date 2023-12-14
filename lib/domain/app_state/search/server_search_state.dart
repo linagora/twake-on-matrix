@@ -9,18 +9,21 @@ class ServerSearchInitial extends Initial {
 }
 
 class ServerSearchChatSuccess extends Success {
+  final String? roomId;
   final List<Result>? results;
   final String? nextBatch;
 
   const ServerSearchChatSuccess({
     this.results,
     this.nextBatch,
+    this.roomId,
   });
 
   @override
   List<Object?> get props => [
         results,
         nextBatch,
+        roomId,
       ];
 }
 

@@ -1,12 +1,12 @@
-import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
+import 'package:fluffychat/pages/search/server_search_controller.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatSearch extends StatefulWidget {
@@ -26,7 +26,6 @@ class ChatSearch extends StatefulWidget {
 }
 
 class ChatSearchController extends State<ChatSearch> {
-  static const _debouncerDuration = Duration(milliseconds: 300);
   static const _pageLimit = 20;
   Timeline? _timeline;
 
@@ -41,43 +40,65 @@ class ChatSearchController extends State<ChatSearch> {
 
   final inputFocus = FocusNode();
 
-  final debouncer = Debouncer(
-    _debouncerDuration,
-    initialValue: '',
-    checkEquality: false,
-  );
+  SameTypeEventsBuilderController? sameTypeEventsBuilderController;
 
-  SameTypeEventsBuilderController? eventsController;
+  late ServerSearchController serverSearchController;
 
   final scrollController = ScrollController();
 
   @override
   void initState() {
-    eventsController = SameTypeEventsBuilderController(
-      getTimeline: getTimeline,
-      searchFunc: (event) =>
-          event.isContains(debouncer.value) && event.isSearchable,
-      limit: _pageLimit,
+    serverSearchController = ServerSearchController(
+      inRoomId: widget.roomId,
     );
-    scrollController.addLoadMoreListener(eventsController!.loadMore);
-    textEditingController.addListener(() {
-      debouncer.value = textEditingController.text;
-    });
-    debouncer.values.listen((text) {
-      if (text.length >= AppConfig.chatRoomSearchKeywordMin) {
-        eventsController?.refresh(force: true);
-      } else {
-        eventsController?.clear();
-      }
-    });
+    _initSearchInsideChat();
+    scrollController.addLoadMoreListener(loadMore);
+    textEditingController.addListener(
+      () => serverSearchController.setDebouncerValue(
+        textEditingController.text,
+      ),
+    );
+    serverSearchController.initSearch(
+      onSearchEncryptedMessage: sameTypeEventsBuilderController != null
+          ? _listenSearchEncryptedMessage
+          : null,
+    );
     super.initState();
+  }
+
+  void loadMore() {
+    if (sameTypeEventsBuilderController != null) {
+      sameTypeEventsBuilderController!.loadMore();
+    } else {
+      serverSearchController.loadMore();
+    }
+  }
+
+  void _initSearchInsideChat() {
+    if (room?.encrypted == true) {
+      sameTypeEventsBuilderController = SameTypeEventsBuilderController(
+        getTimeline: getTimeline,
+        searchFunc: (event) =>
+            event.isContains(serverSearchController.debouncerValue) &&
+            event.isSearchable,
+        limit: _pageLimit,
+      );
+    }
+  }
+
+  void _listenSearchEncryptedMessage(String keyword) {
+    if (keyword.length >= AppConfig.chatRoomSearchKeywordMin) {
+      sameTypeEventsBuilderController?.refresh(force: true);
+    } else {
+      sameTypeEventsBuilderController?.clear();
+    }
   }
 
   void onEventTap(Event event) async {
     if (widget.isInStack) {
       await onBack();
     }
-    context.go('/rooms/${event.roomId}?event=${event.eventId}');
+    context.goToRoomWithEvent(event);
   }
 
   Future onBack() async {
@@ -89,6 +110,8 @@ class ChatSearchController extends State<ChatSearch> {
   void dispose() {
     textEditingController.dispose();
     scrollController.dispose();
+    sameTypeEventsBuilderController?.dispose();
+    serverSearchController.dispose();
     super.dispose();
   }
 
