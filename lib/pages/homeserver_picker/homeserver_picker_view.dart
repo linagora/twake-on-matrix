@@ -21,13 +21,11 @@ class HomeserverPickerView extends StatelessWidget {
     final benchmarkResults = controller.benchmarkResults;
     return LoginScaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
         centerTitle: true,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 40, bottom: 16.0),
-          child: SvgPicture.asset(
-            ImagePaths.icTwakeLogo,
-            width: 200,
-          ),
+        title: SvgPicture.asset(
+          ImagePaths.icTwakeLogo,
+          width: 200,
         ),
       ),
       body: SafeArea(

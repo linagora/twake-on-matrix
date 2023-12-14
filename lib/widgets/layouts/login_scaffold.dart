@@ -20,6 +20,7 @@ class LoginScaffold extends StatelessWidget {
       appBar: appBar == null
           ? null
           : AppBar(
+              toolbarHeight: appBar?.toolbarHeight,
               titleSpacing: appBar?.titleSpacing,
               automaticallyImplyLeading:
                   appBar?.automaticallyImplyLeading ?? true,
