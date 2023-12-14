@@ -14,6 +14,8 @@ class ContactsSelectionViewStyle {
     horizontal: 24.0,
   );
 
+  static EdgeInsets parentPadding = const EdgeInsets.all(12.0);
+
   static EdgeInsetsDirectional webActionsButtonPadding =
       const EdgeInsetsDirectional.symmetric(
     horizontal: 16.0,
