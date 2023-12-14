@@ -56,7 +56,7 @@ class PinnedEventsView extends StatelessWidget {
                         children: [
                           ValueListenableBuilder(
                             valueListenable: controller.pinnedEventsController
-                                .isCurrentPinnedEventNotifier,
+                                .currentPinnedEventNotifier,
                             builder: (context, currentEvent, child) {
                               if (currentEvent == null) return child!;
                               return Expanded(
@@ -115,14 +115,15 @@ class PinnedEventsView extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    _PinnedEventsContentWidget(
-                                      countPinnedEvents: controller
-                                          .pinnedEventsController
-                                          .currentIndexOfPinnedMessage(
-                                        data.pinnedEvents.reversed.toList(),
+                                    if (data.pinnedEvents.isNotEmpty)
+                                      _PinnedEventsContentWidget(
+                                        countPinnedEvents: controller
+                                            .pinnedEventsController
+                                            .currentIndexOfPinnedMessage(
+                                          data.pinnedEvents.reversed.toList(),
+                                        ),
+                                        currentEvent: currentEvent,
                                       ),
-                                      currentEvent: currentEvent,
-                                    ),
                                     TwakeIconButton(
                                       tooltip: L10n.of(context)!
                                           .pinnedMessagesTooltip,

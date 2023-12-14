@@ -168,26 +168,6 @@ extension LocalizedBody on Event {
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
-  Future<bool> unpin() async {
-    if (!isPinned) {
-      return true;
-    }
-    final pinnedEventIds = room.pinnedEventIds;
-    pinnedEventIds.remove(eventId);
-    String? responseMessage;
-    try {
-      responseMessage = await room.setPinnedEvents(pinnedEventIds);
-    } catch (e) {
-      Logs().e('EventExtension::unpin(): $e');
-      return false;
-    }
-    // If it's start with $, it means it's a eventId
-    if (responseMessage.startsWith('\$')) {
-      return true;
-    }
-    return false;
-  }
-
   Future<void> copy(BuildContext context, Timeline timeline) async {
     if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
       final matrixFile = getMatrixFile() ??

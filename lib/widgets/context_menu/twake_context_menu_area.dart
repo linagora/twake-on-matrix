@@ -1,12 +1,13 @@
+// reference to: https://pub.dev/packages/contextmenu
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-import 'context_menu.dart';
+import 'twake_context_menu.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
-/// Show a [ContextMenu] on the given [BuildContext]. For other parameters, see [ContextMenu].
-void showContextMenu(
+/// Show a [TwakeContextMenu] on the given [BuildContext]. For other parameters, see [TwakeContextMenu].
+void showTwakeContextMenu(
   Offset offset,
   BuildContext context,
   ContextMenuBuilder builder,
@@ -18,7 +19,7 @@ void showContextMenu(
     configuration: const FadeScaleTransitionConfiguration(
       barrierColor: Colors.transparent,
     ),
-    builder: (context) => ContextMenu(
+    builder: (context) => TwakeContextMenu(
       position: offset,
       builder: builder,
       verticalPadding: verticalPadding,
@@ -27,27 +28,27 @@ void showContextMenu(
   );
 }
 
-/// The [ContextMenuArea] is the way to use a [ContextMenu]
+/// The [TwakeContextMenuArea] is the way to use a [TwakeContextMenu]
 ///
-/// It listens for right click and long press and executes [showContextMenu]
+/// It listens for right click and long press and executes [showTwakeContextMenu]
 /// with the corresponding location [Offset].
 
-class ContextMenuArea extends StatelessWidget {
-  /// The widget displayed inside the [ContextMenuArea]
+class TwakeContextMenuArea extends StatelessWidget {
+  /// The widget displayed inside the [TwakeContextMenuArea]
   final Widget child;
 
-  /// Builds a [List] of items to be displayed in an opened [ContextMenu]
+  /// Builds a [List] of items to be displayed in an opened [TwakeContextMenu]
   ///
   /// Usually, a [ListTile] might be the way to go.
   final ContextMenuBuilder? builder;
 
-  /// The padding value at the top an bottom between the edge of the [ContextMenu] and the first / last item
+  /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double verticalPadding;
 
-  /// The width for the [ContextMenu]. 320 by default according to Material Design specs.
+  /// The width for the [TwakeContextMenu]. 320 by default according to Material Design specs.
   final double width;
 
-  const ContextMenuArea({
+  const TwakeContextMenuArea({
     Key? key,
     required this.child,
     this.builder,
@@ -61,7 +62,7 @@ class ContextMenuArea extends StatelessWidget {
       return child;
     }
     return GestureDetector(
-      onSecondaryTapDown: (details) => showContextMenu(
+      onSecondaryTapDown: (details) => showTwakeContextMenu(
         details.globalPosition,
         context,
         builder!,

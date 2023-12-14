@@ -438,6 +438,25 @@ abstract class AppRoutes {
                   ),
                   redirect: loggedOutRedirect,
                 ),
+                GoRoute(
+                  path: 'pinnedmessages',
+                  pageBuilder: (context, state) {
+                    if (state.extra is PinnedEventsArgument) {
+                      final arg = state.extra as PinnedEventsArgument;
+                      return MaterialPage(
+                        fullscreenDialog: true,
+                        child: PinnedMessages(
+                          pinnedEvents: arg.pinnedEvents,
+                          timeline: arg.timeline,
+                        ),
+                      );
+                    }
+
+                    return const CupertinoPage(
+                      child: PinnedMessages(pinnedEvents: []),
+                    );
+                  },
+                ),
               ],
             ),
           ],
