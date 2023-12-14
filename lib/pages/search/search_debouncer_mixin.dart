@@ -20,6 +20,8 @@ mixin SearchDebouncerMixin {
     });
   }
 
+  String get debouncerValue => _debouncer?.value ?? '';
+
   void setDebouncerValue(String keyword) {
     _debouncer?.value = keyword;
   }

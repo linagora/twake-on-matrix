@@ -181,7 +181,6 @@ abstract class AppRoutes {
                       context,
                       ChatAdaptiveScaffold(
                         roomId: state.pathParameters['roomid']!,
-                        eventId: state.uri.queryParameters['event'],
                       ),
                     );
                   },
@@ -391,7 +390,6 @@ abstract class AppRoutes {
                         return CupertinoPage(
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
-                            eventId: state.uri.queryParameters['event'],
                             key: Key(state.pathParameters['roomid']!),
                             roomName: extra.data as String?,
                           ),
@@ -400,7 +398,6 @@ abstract class AppRoutes {
                       return CupertinoPage(
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
-                          eventId: state.uri.queryParameters['event'],
                           key: Key(state.pathParameters['roomid']!),
                         ),
                       );
@@ -408,7 +405,6 @@ abstract class AppRoutes {
                       return CupertinoPage(
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
-                          eventId: state.uri.queryParameters['event'],
                           key: Key(state.pathParameters['roomid']!),
                           shareFile: extra.data as MatrixFile?,
                         ),
@@ -418,7 +414,6 @@ abstract class AppRoutes {
                 return CupertinoPage(
                   child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
-                    eventId: state.uri.queryParameters['event'],
                     key: Key(state.pathParameters['roomid']!),
                   ),
                 );

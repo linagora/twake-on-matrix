@@ -8,12 +8,17 @@ import 'package:fluffychat/domain/model/search/server_side_search_categories.dar
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
-import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchController with SearchDebouncerMixin {
+  final String? inRoomId;
+
+  ServerSearchController({
+    this.inRoomId,
+  });
+
   final _serverSearchInteractor = getIt.get<ServerSearchInteractor>();
 
   final searchResultsNotifier = ValueNotifier<PresentationServerSideSearch>(
@@ -26,16 +31,20 @@ class ServerSearchController with SearchDebouncerMixin {
 
   final isLoadingMoreNotifier = ValueNotifier<bool>(false);
 
-  final scrollController = ScrollController();
-
   StreamSubscription? _searchSubscription;
 
   String? _nextBatch;
 
   ServerSideSearchCategories? _searchCategories;
 
-  void init() {
+  void initSearch({
+    Function(String)? onSearchEncryptedMessage,
+  }) {
     initializeDebouncer((searchTerm) {
+      if (onSearchEncryptedMessage != null) {
+        onSearchEncryptedMessage(searchTerm);
+        return;
+      }
       updateSearchCategories(searchTerm);
       resetSearchResults();
       if (searchTerm.isNotEmpty) {
@@ -44,16 +53,15 @@ class ServerSearchController with SearchDebouncerMixin {
         resetSearchResults();
       }
     });
-    scrollController.addLoadMoreListener(loadMore);
   }
 
   void dispose() {
     super.disposeDebouncer();
-    scrollController.dispose();
     _searchSubscription?.cancel();
     isLoadingMoreNotifier.dispose();
     resetNextBatch();
     resetSearchResults();
+    disposeDebouncer();
     _searchCategories = null;
   }
 
@@ -96,8 +104,13 @@ class ServerSearchController with SearchDebouncerMixin {
       searchTerm: searchTerm,
       searchFilter: SearchFilter(
         limit: _limitServerSideSearchFilter,
+        rooms: inRoomId != null ? [inRoomId!] : null,
       ),
     );
+  }
+
+  void onSearchBarChanged(String keyword) {
+    setDebouncerValue(keyword);
   }
 
   void searchUnencryptedMessages() {
@@ -108,10 +121,6 @@ class ServerSearchController with SearchDebouncerMixin {
         .listen(
           (searchResult) => _handleListenServerSearch(searchResult),
         );
-  }
-
-  void onSearchBarChanged(String keyword) {
-    setDebouncerValue(keyword);
   }
 
   void loadMore() {
