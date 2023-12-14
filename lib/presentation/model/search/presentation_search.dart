@@ -21,12 +21,11 @@ abstract class PresentationSearch extends Equatable {
 
 class ContactPresentationSearch extends PresentationSearch {
   final String? matrixId;
-
   final String? email;
 
-  const ContactPresentationSearch(
+  const ContactPresentationSearch({
     this.matrixId,
-    this.email, {
+    this.email,
     String? displayName,
   }) : super(
           displayName: displayName,
@@ -76,8 +75,17 @@ extension RecentChatSearchModelExtension on RecentChatSearchModel {
 extension ContactSearchModelExtension on ContactSearchModel {
   ContactPresentationSearch toPresentation() {
     return ContactPresentationSearch(
-      id,
-      email,
+      matrixId: id,
+      email: email,
+      displayName: displayName,
+    );
+  }
+}
+
+extension UserExtension on User {
+  ContactPresentationSearch toContactPresentationSearch() {
+    return ContactPresentationSearch(
+      matrixId: id,
       displayName: displayName,
     );
   }
