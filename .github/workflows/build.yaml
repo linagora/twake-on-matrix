@@ -1,7 +1,10 @@
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 11 * * *"
+  workflow_run:
+    types:
+      - completed
+    workflows:
+      - "Tests"
 
 name: Build
 
