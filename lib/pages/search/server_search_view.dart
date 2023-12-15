@@ -1,5 +1,3 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/server_search_view_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -23,25 +21,21 @@ class ServerSearchMessagesList extends StatelessWidget {
     return SliverToBoxAdapter(
       child: ValueListenableBuilder(
         valueListenable:
-            searchController.serverSearchController.serverSearchNotifier,
-        builder: ((context, searchResults, child) {
-          final messagesFound =
-              searchResults.getSuccessOrNull<ServerSearchChatSuccess>();
-          if (messagesFound == null ||
-              messagesFound.results == null ||
-              messagesFound.results!.isEmpty) {
-            return const SizedBox();
+            searchController.serverSearchController.searchResultsNotifier,
+        builder: (context, severSearchNotifier, child) {
+          if (severSearchNotifier.searchResults.isEmpty) {
+            return child!;
           }
-
           return Padding(
             padding: ServerSearchViewStyle.paddingList,
             child: ListView.builder(
               shrinkWrap: true,
               physics: const ClampingScrollPhysics(),
-              itemCount: messagesFound.results!.length,
+              itemCount: severSearchNotifier.searchResults.length,
               padding: ServerSearchViewStyle.paddingListItem,
               itemBuilder: ((context, index) {
-                final searchResult = messagesFound.results?[index].result;
+                final searchResult =
+                    severSearchNotifier.searchResults[index].result;
                 final room = searchResult?.getRoom(context);
                 if (room == null || searchResult == null) {
                   return const SizedBox.shrink();
@@ -89,7 +83,8 @@ class ServerSearchMessagesList extends StatelessWidget {
               }),
             ),
           );
-        }),
+        },
+        child: const SizedBox(),
       ),
     );
   }

@@ -305,9 +305,21 @@ extension StringCasingExtension on String {
     if (prefixLength < 0) return this;
     final index = toLowerCase().indexOf(highlightText.toLowerCase());
     if (index > prefixLength) {
-      return '...${substring(index - prefixLength)}';
+      final enterIndex =
+          substring(index - prefixLength, index).lastIndexOf(RegExp(r'\n'));
+      if (enterIndex <= -1) {
+        return '...${substring(index - prefixLength)}';
+      }
+      return '...${substring(index - prefixLength + enterIndex + 1)}';
     }
-    return this;
+    if (index <= -1) {
+      return this;
+    }
+    final enterIndex = substring(0, index).lastIndexOf(RegExp(r'\n'));
+    if (enterIndex <= -1) {
+      return this;
+    }
+    return '...${substring(enterIndex + 1)}';
   }
 
   String msisdnSanitizer() {
