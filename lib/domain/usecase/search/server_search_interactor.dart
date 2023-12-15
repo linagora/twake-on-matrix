@@ -3,6 +3,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
+import 'package:fluffychat/domain/model/search/server_side_search_categories.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:matrix/matrix.dart';
 
@@ -11,36 +12,32 @@ class ServerSearchInteractor {
       getIt.get<ServerSearchRepository>();
 
   Stream<Either<Failure, Success>> execute({
+    required ServerSideSearchCategories searchCategories,
     String? nextBatch,
-    required String searchTerm,
-    List<KeyKind>? keys = const [KeyKind.contentBody],
-    SearchOrder orderBy = SearchOrder.recent,
-    List<GroupKey> groupKeys = const [GroupKey.roomId],
   }) async* {
     try {
-      yield Right(ServerSearchInitial());
+      if (nextBatch == null) {
+        yield Right(ServerSearchInitial());
+      }
       final response = await _repository.search(
         nextBatch: nextBatch,
-        searchCategories: Categories(
-          roomEvents: RoomEventsCriteria(
-            searchTerm: searchTerm,
-            groupings: Groupings(
-              groupBy: groupKeys.map((e) => Group(key: e)).toList(),
-            ),
-            keys: keys,
-            orderBy: orderBy,
-          ),
-        ),
+        searchCategories: searchCategories.searchCategories,
       );
 
       final roomEventsResult = response.searchCategories.roomEvents;
+
+      Logs().d(
+        'ServerSearchInteractor::execute(): Search success - ${response.searchCategories.roomEvents?.results?.length}.',
+      );
+
       yield Right(
         ServerSearchChatSuccess(
           results: roomEventsResult?.results,
+          nextBatch: roomEventsResult?.nextBatch,
         ),
       );
     } catch (e) {
-      Logs().d(
+      Logs().e(
         'ServerSearchInteractor::execute(): Exception - $e}.',
       );
       yield Left(ServerSearchChatFailed(exception: e));

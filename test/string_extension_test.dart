@@ -329,6 +329,35 @@ void main() {
 
       expect(result, equals(text));
     });
+
+    test(
+        'substringToHighlight returns second line if text have multi short line',
+        () {
+      const text = "First\nSecond\nThird";
+      const highlightText = "Second";
+      final result = text.substringToHighlight(highlightText, prefixLength: 3);
+
+      expect(result, equals('...Second\nThird'));
+    });
+
+    test('substringToHighlight returns last line if text have multi short line',
+        () {
+      const text = "First\nSecond\nThird";
+      const highlightText = "Third";
+      final result = text.substringToHighlight(highlightText, prefixLength: 3);
+
+      expect(result, equals('...Third'));
+    });
+
+    test(
+        'substringToHighlight returns last line if text have multi short line and long prefix length',
+        () {
+      const text = "First\nSecond\nThird";
+      const highlightText = "Third";
+      final result = text.substringToHighlight(highlightText, prefixLength: 20);
+
+      expect(result, equals('...Third'));
+    });
   });
 
   group('msisdnSanitizer tests', () {
