@@ -1,6 +1,4 @@
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
-import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
@@ -8,6 +6,7 @@ import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -32,6 +31,7 @@ class SearchView extends StatelessWidget {
         },
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
+          controller: searchController.serverSearchController.scrollController,
           slivers: [
             ValueListenableBuilder(
               valueListenable: searchController.preSearchRecentContactsNotifier,
@@ -71,12 +71,9 @@ class SearchView extends StatelessWidget {
             _recentChatsWidget(),
             ValueListenableBuilder(
               valueListenable:
-                  searchController.serverSearchController.serverSearchNotifier,
+                  searchController.serverSearchController.searchResultsNotifier,
               builder: ((context, searchResults, _) {
-                final messagesFound =
-                    searchResults.getSuccessOrNull<ServerSearchChatSuccess>();
-                if (messagesFound?.results == null ||
-                    messagesFound!.results!.isEmpty) {
+                if (searchResults.searchResults.isEmpty) {
                   return _EmptySliverBox();
                 }
                 return _SearchHeader(
@@ -87,6 +84,17 @@ class SearchView extends StatelessWidget {
               }),
             ),
             ServerSearchMessagesList(searchController: searchController),
+            ValueListenableBuilder(
+              valueListenable:
+                  searchController.serverSearchController.isLoadingMoreNotifier,
+              builder: (context, isLoadingMore, _) {
+                return SliverToBoxAdapter(
+                  child: isLoadingMore
+                      ? const CenterLoadingIndicator()
+                      : const SizedBox(),
+                );
+              },
+            ),
           ],
         ),
       ),
