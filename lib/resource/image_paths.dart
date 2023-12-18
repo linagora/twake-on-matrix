@@ -38,6 +38,7 @@ class ImagePaths {
   static String get icNoResultsFound =>
       _getImagePath('ic_no_results_found.svg');
   static String get icEncrypted => _getImagePath('ic_encrypted.svg');
+  static String get icMatrixid => _getImagePath('ic_matrixid.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;

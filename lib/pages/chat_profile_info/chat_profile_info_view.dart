@@ -2,12 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
 import 'package:linagora_design_flutter/extensions/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -182,74 +184,63 @@ class _Information extends StatelessWidget {
                     ),
                 maxLines: 2,
               ),
-              Row(
-                children: [
-                  Text(
-                    matrixId ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
-                    maxLines: 2,
+              Container(
+                padding: ChatProfileInfoStyle.copiableContainerPadding,
+                margin: ChatProfileInfoStyle.copiableContainerMargin,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: LinagoraRefColors.material().neutral[90] ??
+                        Colors.black,
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(
-                      Icons.content_copy,
-                      size: ChatProfileInfoStyle.copyIconSize,
-                      color: LinagoraRefColors.material().tertiary[40],
-                    ),
-                    color: LinagoraRefColors.material().tertiary[40],
-                    onPressed: () {
-                      Clipboard.instance.copyText(matrixId ?? '');
-                      TwakeSnackBar.show(
-                        context,
-                        L10n.of(context)!.copiedToClipboard,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              ValueListenableBuilder(
-                valueListenable: lookupContactNotifier,
-                builder: (context, contact, child) {
-                  return contact.fold(
-                    (failure) => const SizedBox.shrink(),
-                    (success) {
-                      if (success is LookupMatchContactSuccess) {
-                        return Container(
-                          padding: ChatProfileInfoStyle.emailPadding,
-                          margin: ChatProfileInfoStyle.emailMargin,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: LinagoraRefColors.material().neutral[90] ??
-                                  Colors.black,
-                            ),
-                            borderRadius:
-                                ChatProfileInfoStyle.emailBorderRadius,
-                          ),
-                          child: Wrap(
-                            runSpacing: ChatProfileInfoStyle.textSpacing,
-                            children: [
-                              if (success.contact.email != null)
-                                _CopiableRow(
-                                  icon: Icons.alternate_email,
-                                  text: success.contact.email!,
-                                ),
-                              if (success.contact.phoneNumber != null)
-                                _CopiableRow(
-                                  icon: Icons.call,
-                                  text: success.contact.phoneNumber!,
-                                ),
-                            ],
-                          ),
-                        );
-                      }
+                  borderRadius:
+                      ChatProfileInfoStyle.copiableContainerBorderRadius,
+                ),
+                child: Column(
+                  children: [
+                    if (matrixId != null)
+                      _CopiableRowWithSvgIcon(
+                        iconPath: ImagePaths.icMatrixid,
+                        text: matrixId!,
+                      ),
+                    ValueListenableBuilder(
+                      valueListenable: lookupContactNotifier,
+                      builder: (context, contact, child) {
+                        return contact.fold(
+                          (failure) => const SizedBox.shrink(),
+                          (success) {
+                            if (success is LookupMatchContactSuccess) {
+                              return Column(
+                                children: [
+                                  if (success.contact.email != null) ...{
+                                    const SizedBox(
+                                      height: ChatProfileInfoStyle.textSpacing,
+                                    ),
+                                    _CopiableRowWithMaterialIcon(
+                                      icon: Icons.alternate_email,
+                                      text: success.contact.email!,
+                                    ),
+                                  },
+                                  if (success.contact.phoneNumber != null) ...{
+                                    const SizedBox(
+                                      height: ChatProfileInfoStyle.textSpacing,
+                                    ),
+                                    _CopiableRowWithMaterialIcon(
+                                      icon: Icons.call,
+                                      text: success.contact.phoneNumber!,
+                                    ),
+                                  },
+                                ],
+                              );
+                            }
 
-                      return const SizedBox.shrink();
-                    },
-                  );
-                },
-                child: const SizedBox.shrink(),
+                            return const SizedBox.shrink();
+                          },
+                        );
+                      },
+                      child: const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
               ),
               if (!isDraftInfo)
                 InkWell(
@@ -284,8 +275,8 @@ class _Information extends StatelessWidget {
   }
 }
 
-class _CopiableRow extends StatelessWidget {
-  const _CopiableRow({
+class _CopiableRowWithMaterialIcon extends StatelessWidget {
+  const _CopiableRowWithMaterialIcon({
     Key? key,
     required this.icon,
     required this.text,
@@ -298,19 +289,23 @@ class _CopiableRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: ChatProfileInfoStyle.copyIconSize,
-          color: LinagoraSysColors.material().onSurface,
+        Padding(
+          padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
+          child: Icon(
+            icon,
+            size: ChatProfileInfoStyle.iconSize,
+            color: LinagoraSysColors.material().onSurface,
+          ),
         ),
         Expanded(
           child: Padding(
             padding: ChatProfileInfoStyle.textPadding,
             child: Text(
               text,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: LinagoraSysColors.material().onSurface,
                   ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
@@ -321,6 +316,62 @@ class _CopiableRow extends StatelessWidget {
             color: LinagoraRefColors.material().tertiary[40],
           ),
           color: LinagoraRefColors.material().tertiary[40],
+          onPressed: () {
+            Clipboard.instance.copyText(text);
+            TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _CopiableRowWithSvgIcon extends StatelessWidget {
+  const _CopiableRowWithSvgIcon({
+    Key? key,
+    required this.iconPath,
+    required this.text,
+  }) : super(key: key);
+
+  final String iconPath;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
+          child: SvgPicture.asset(
+            iconPath,
+            width: ChatProfileInfoStyle.iconSize,
+            height: ChatProfileInfoStyle.iconSize,
+            colorFilter: ColorFilter.mode(
+              LinagoraSysColors.material().onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: ChatProfileInfoStyle.textPadding,
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.content_copy,
+            size: ChatProfileInfoStyle.copyIconSize,
+            color: LinagoraRefColors.material().tertiary[40],
+          ),
+          color: LinagoraRefColors.material().tertiary[40],
+          focusColor: Theme.of(context).primaryColor,
           onPressed: () {
             Clipboard.instance.copyText(text);
             TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
