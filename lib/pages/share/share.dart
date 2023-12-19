@@ -73,6 +73,12 @@ class ShareController extends State<Share>
     isSearchModeNotifier.toggle();
   }
 
+  void closeSearchBar() {
+    searchTextEditingController.clear();
+    searchFocusNode.unfocus();
+    isSearchModeNotifier.value = false;
+  }
+
   void shareTo(String roomId) async {
     final room = Room(
       id: selectedRoomsNotifier.value.first,
