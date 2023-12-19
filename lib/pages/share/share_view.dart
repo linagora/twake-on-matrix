@@ -25,7 +25,7 @@ class ShareView extends StatelessWidget {
           searchModeNotifier: controller.isSearchModeNotifier,
           textEditingController: controller.searchTextEditingController,
           openSearchBar: controller.toggleSearchMode,
-          closeSearchBar: controller.toggleSearchMode,
+          closeSearchBar: controller.closeSearchBar,
           focusNode: controller.searchFocusNode,
         ),
       ),
