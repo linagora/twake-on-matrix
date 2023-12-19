@@ -1,4 +1,3 @@
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_matrix_html/text_parser.dart';
 
@@ -16,8 +15,6 @@ class MentionnedUser extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  final int _maxCharactersDisplayNameForPill = 12;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -25,9 +22,7 @@ class MentionnedUser extends StatelessWidget {
         onTap?.call(url);
       },
       child: Text(
-        displayName.shortenDisplayName(
-          maxCharacters: _maxCharactersDisplayNameForPill,
-        ),
+        displayName,
         style: textStyle,
         maxLines: 1,
         overflow: TextOverflow.clip,
