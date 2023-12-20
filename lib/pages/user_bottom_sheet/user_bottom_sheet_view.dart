@@ -26,7 +26,11 @@ class UserBottomSheetView extends StatelessWidget {
           leading: CloseButton(
             onPressed: Navigator.of(context, rootNavigator: false).pop,
           ),
-          title: Text(user.calcDisplayname()),
+          title: Text(
+            user.calcDisplayname(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           actions: [
             if (user.id != client.userID)
               Padding(
