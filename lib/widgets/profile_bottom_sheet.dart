@@ -47,6 +47,8 @@ class ProfileBottomSheet extends StatelessWidget {
                 contentPadding: const EdgeInsets.only(right: 16.0),
                 title: Text(
                   profile?.displayName ?? userId.localpart ?? userId,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 18),
                 ),
                 subtitle: Text(
