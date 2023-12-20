@@ -103,62 +103,78 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                 event: widget.event,
                 fit: BoxFit.cover,
               ),
-              Center(
-                child: ValueListenableBuilder<DownloadVideoState>(
-                  valueListenable: _downloadStateNotifier,
-                  builder: (context, downloadState, child) {
-                    switch (downloadState) {
-                      case DownloadVideoState.loading:
-                        return Stack(
-                          children: [
-                            CenterVideoButton(
-                              icon: Icons.play_arrow,
-                              onTap: _downloadAction,
-                            ),
-                            SizedBox(
-                              width: MessageContentStyle.videoCenterButtonSize,
-                              height: MessageContentStyle.videoCenterButtonSize,
-                              child: ValueListenableBuilder(
-                                valueListenable: downloadProgressNotifier,
-                                builder: (context, progress, child) {
-                                  return CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: LinagoraRefColors.material()
-                                        .primary[100],
-                                    value:
-                                        PlatformInfos.isWeb ? null : progress,
-                                  );
-                                },
+              ValueListenableBuilder<DownloadVideoState>(
+                valueListenable: _downloadStateNotifier,
+                builder: (context, downloadState, child) {
+                  switch (downloadState) {
+                    case DownloadVideoState.loading:
+                      return InkWell(
+                        onTap: _downloadAction,
+                        child: Center(
+                          child: Stack(
+                            children: [
+                              const CenterVideoButton(
+                                icon: Icons.play_arrow,
                               ),
-                            ),
-                          ],
-                        );
-                      case DownloadVideoState.initial:
-                        return CenterVideoButton(
-                          icon: Icons.play_arrow,
-                          onTap: _downloadAction,
-                        );
-                      case DownloadVideoState.done:
-                        return CenterVideoButton(
-                          icon: Icons.play_arrow,
-                          onTap: () {
-                            if (path != null) {
-                              playVideoAction(
-                                context,
-                                path!,
-                                event: widget.event,
-                              );
-                            }
-                          },
-                        );
-                      case DownloadVideoState.failed:
-                        return CenterVideoButton(
-                          icon: Icons.error,
-                          onTap: _downloadAction,
-                        );
-                    }
-                  },
-                ),
+                              SizedBox(
+                                width:
+                                    MessageContentStyle.videoCenterButtonSize,
+                                height:
+                                    MessageContentStyle.videoCenterButtonSize,
+                                child: ValueListenableBuilder(
+                                  valueListenable: downloadProgressNotifier,
+                                  builder: (context, progress, child) {
+                                    return CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: LinagoraRefColors.material()
+                                          .primary[100],
+                                      value:
+                                          PlatformInfos.isWeb ? null : progress,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    case DownloadVideoState.initial:
+                      return InkWell(
+                        onTap: _downloadAction,
+                        child: const Center(
+                          child: CenterVideoButton(
+                            icon: Icons.play_arrow,
+                          ),
+                        ),
+                      );
+                    case DownloadVideoState.done:
+                      return InkWell(
+                        onTap: () {
+                          if (path != null) {
+                            playVideoAction(
+                              context,
+                              path!,
+                              event: widget.event,
+                            );
+                          }
+                        },
+                        child: const Center(
+                          child: CenterVideoButton(
+                            icon: Icons.play_arrow,
+                          ),
+                        ),
+                      );
+                    case DownloadVideoState.failed:
+                      return InkWell(
+                        onTap: _downloadAction,
+                        child: const Center(
+                          child: CenterVideoButton(
+                            icon: Icons.error,
+                          ),
+                        ),
+                      );
+                  }
+                },
               ),
             ],
           ),

@@ -255,6 +255,8 @@ class _MxcImageState extends State<MxcImage>
     if (widget.isPreview) {
       return Material(
         child: InkWell(
+          borderRadius:
+              widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
           onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
               ? () => _onTap(context)
               : null,

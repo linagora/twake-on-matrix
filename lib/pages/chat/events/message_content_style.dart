@@ -63,7 +63,7 @@ class MessageContentStyle {
 
   static const Color backgroundColorCenterButton = Colors.black38;
 
-  static const BorderRadiusGeometry borderRadiusBubble =
+  static const BorderRadius borderRadiusBubble =
       BorderRadius.all(Radius.circular(12.0));
 
   static const backIconColor = Colors.white;
