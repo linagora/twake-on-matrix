@@ -195,7 +195,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.help:
         UrlLauncher(
           context,
-          AppConfig.supportUrl,
+          url: AppConfig.supportUrl,
         ).openUrlInAppBrowser();
         break;
       case SettingEnum.about:

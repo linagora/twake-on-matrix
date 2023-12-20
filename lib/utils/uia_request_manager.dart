@@ -83,7 +83,7 @@ extension UiaRequestManager on MatrixState {
           final url = Uri.parse(
             '${client.homeserver}/_matrix/client/r0/auth/$stage/fallback/web?session=${uiaRequest.session}',
           );
-          UrlLauncher(context, url.toString()).openUrlInAppBrowser();
+          UrlLauncher(context, url: url.toString()).openUrlInAppBrowser();
           if (OkCancelResult.ok ==
               await showOkCancelAlertDialog(
                 useRootNavigator: false,

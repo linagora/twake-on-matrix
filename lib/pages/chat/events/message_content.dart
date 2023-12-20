@@ -181,8 +181,8 @@ class MessageContent extends StatelessWidget
                     const SizedBox(height: 6),
                     OutlinedButton.icon(
                       icon: Icon(Icons.location_on_outlined, color: textColor),
-                      onPressed:
-                          UrlLauncher(context, geoUri.toString()).launchUrl,
+                      onPressed: UrlLauncher(context, url: geoUri.toString())
+                          .launchUrl,
                       label: Text(
                         L10n.of(context)!.openInMaps,
                         style: TextStyle(color: textColor),
@@ -229,7 +229,7 @@ class MessageContent extends StatelessWidget
                   uri: Uri.parse(text.getFirstValidUrl() ?? ''),
                   ownMessage: ownMessage,
                   onLinkTap: (url) =>
-                      UrlLauncher(context, url.toString()).launchUrl(),
+                      UrlLauncher(context, url: url.toString()).launchUrl(),
                 );
               },
             );

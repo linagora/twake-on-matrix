@@ -52,7 +52,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (text == null) return;
     TwakeApp.router.go('/share');
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, text).openMatrixToUrl();
+      UrlLauncher(context, url: text).openMatrixToUrl();
     });
   }
 
