@@ -69,7 +69,7 @@ class QrScannerModalState extends State<QrScannerModal> {
     sub = controller.scannedDataStream.listen((scanData) {
       sub.cancel();
       Navigator.of(context).pop();
-      UrlLauncher(context, scanData.code).openMatrixToUrl();
+      UrlLauncher(context, url: scanData.code).openMatrixToUrl();
     });
   }
 

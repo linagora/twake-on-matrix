@@ -65,7 +65,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
       linkStyle: widget.linkStyle,
       childWidget: widget.childWidget,
       firstValidUrl: firstValidUrl,
-      onLinkTap: (url) => UrlLauncher(context, url.toString()).launchUrl(),
+      onLinkTap: (url) => UrlLauncher(context, url: url.toString()).launchUrl(),
       textSpanBuilder: widget.textSpanBuilder,
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,

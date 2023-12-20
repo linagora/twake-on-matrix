@@ -260,7 +260,7 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                       ),
                   onLinkTap: (url) => UrlLauncher(
                     context,
-                    url.toString(),
+                    url: url.toString(),
                   ).launchUrl(),
                 );
               },

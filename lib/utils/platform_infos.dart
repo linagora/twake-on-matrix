@@ -70,8 +70,9 @@ abstract class PlatformInfos {
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: OutlinedButton(
-            onPressed: () => UrlLauncher(twakeContext, AppConfig.sourceCodeUrl)
-                .openUrlInAppBrowser(),
+            onPressed: () =>
+                UrlLauncher(twakeContext, url: AppConfig.sourceCodeUrl)
+                    .openUrlInAppBrowser(),
             child: Text(L10n.of(twakeContext)!.sourceCode),
           ),
         ),

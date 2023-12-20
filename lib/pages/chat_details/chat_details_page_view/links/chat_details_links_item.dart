@@ -47,7 +47,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
             .getSuccessOrNull<GetPreviewUrlSuccess>()
             ?.urlPreview;
         return InkWell(
-          onTap: () => UrlLauncher(context, _link).launchUrl(),
+          onTap: () => UrlLauncher(context, url: _link).launchUrl(),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: ChatDetailsLinksStyle.margin,
