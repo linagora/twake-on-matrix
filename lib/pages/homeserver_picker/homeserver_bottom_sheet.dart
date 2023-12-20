@@ -39,29 +39,30 @@ class HomeserverBottomSheet extends StatelessWidget {
               title: Text(homeserverSoftware),
             ),
           ListTile(
-            onTap: () =>
-                UrlLauncher(context, homeserver.homeserver.baseUrl.toString())
-                    .openUrlInAppBrowser(),
+            onTap: () => UrlLauncher(
+              context,
+              url: homeserver.homeserver.baseUrl.toString(),
+            ).openUrlInAppBrowser(),
             leading: const Icon(Icons.link_outlined),
             title: Text(homeserver.homeserver.baseUrl.toString()),
           ),
           if (registration != null)
             ListTile(
-              onTap: () => UrlLauncher(context, registration.toString())
+              onTap: () => UrlLauncher(context, url: registration.toString())
                   .openUrlInAppBrowser(),
               leading: const Icon(Icons.person_add_outlined),
               title: Text(registration.toString()),
             ),
           if (rules != null)
             ListTile(
-              onTap: () =>
-                  UrlLauncher(context, rules.toString()).openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(context, url: rules.toString())
+                  .openUrlInAppBrowser(),
               leading: const Icon(Icons.visibility_outlined),
               title: Text(rules.toString()),
             ),
           if (privacy != null)
             ListTile(
-              onTap: () => UrlLauncher(context, privacy.toString())
+              onTap: () => UrlLauncher(context, url: privacy.toString())
                   .openUrlInAppBrowser(),
               leading: const Icon(Icons.shield_outlined),
               title: Text(privacy.toString()),

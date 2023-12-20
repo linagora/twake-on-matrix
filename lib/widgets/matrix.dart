@@ -448,7 +448,7 @@ class MatrixState extends State<Matrix>
             cancelLabel: L10n.of(context)!.doNotShowAgain,
           );
           if (result == OkCancelResult.ok && link != null) {
-            UrlLauncher(context, link.toString()).openUrlInAppBrowser();
+            UrlLauncher(context, url: link.toString()).openUrlInAppBrowser();
           }
           if (result == OkCancelResult.cancel) {
             await store.setItemBool(SettingKeys.showNoGoogle, true);

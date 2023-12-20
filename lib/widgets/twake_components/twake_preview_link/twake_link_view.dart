@@ -39,7 +39,7 @@ class TwakeLinkView extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (firstValidUrl == null) return;
-        UrlLauncher(context, firstValidUrl).launchUrl();
+        UrlLauncher(context, url: firstValidUrl).launchUrl();
       },
       child: _buildWidgetWithPreview(context, firstValidUrl!),
     );
