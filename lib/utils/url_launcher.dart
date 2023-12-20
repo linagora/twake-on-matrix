@@ -1,3 +1,5 @@
+import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -17,11 +19,12 @@ import 'package:fluffychat/widgets/profile_bottom_sheet.dart';
 import 'package:fluffychat/widgets/public_room_bottom_sheet.dart';
 import 'platform_infos.dart';
 
-class UrlLauncher {
+class UrlLauncher with GoToDraftChatMixin {
   final String? url;
   final BuildContext context;
+  final Room? room;
 
-  UrlLauncher(this.context, this.url);
+  UrlLauncher(this.context, {this.url, this.room});
 
   final ChromeSafariBrowser browser = ChromeSafariBrowser();
 
@@ -189,11 +192,28 @@ class UrlLauncher {
         }
       }
     } else if (identityParts.primaryIdentifier.sigil == '@') {
-      await showAdaptiveBottomSheet(
+      if (room?.isDirectChat == true) {
+        await showAdaptiveBottomSheet(
+          context: context,
+          builder: (c) => ProfileBottomSheet(
+            userId: identityParts.primaryIdentifier,
+            outerContext: context,
+          ),
+        );
+        return;
+      }
+
+      onContactTap(
         context: context,
-        builder: (c) => ProfileBottomSheet(
-          userId: identityParts.primaryIdentifier,
-          outerContext: context,
+        path: 'rooms',
+        contactPresentationSearch: ContactPresentationSearch(
+          matrixId: identityParts.primaryIdentifier,
+          displayName: room
+                  ?.unsafeGetUserFromMemoryOrFallback(
+                    identityParts.primaryIdentifier,
+                  )
+                  .displayName ??
+              identityParts.primaryIdentifier,
         ),
       );
     }

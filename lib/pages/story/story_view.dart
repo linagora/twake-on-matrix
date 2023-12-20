@@ -280,7 +280,7 @@ class StoryView extends StatelessWidget {
                           : event.content.tryGet<String>('body') ?? '',
                       textAlign: TextAlign.center,
                       onLinkTap: (url) =>
-                          UrlLauncher(context, url.toString()).launchUrl(),
+                          UrlLauncher(context, url: url.toString()).launchUrl(),
                       linkStyle: TextStyle(
                         fontSize: 24,
                         color: Colors.blue.shade50,

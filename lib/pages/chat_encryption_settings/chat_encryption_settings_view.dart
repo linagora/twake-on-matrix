@@ -31,7 +31,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () =>
-                  UrlLauncher(context, AppConfig.encryptionTutorial)
+                  UrlLauncher(context, url: AppConfig.encryptionTutorial)
                       .openUrlInAppBrowser(),
               child: Text(L10n.of(context)!.help),
             ),
