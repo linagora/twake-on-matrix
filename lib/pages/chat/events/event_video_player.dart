@@ -61,61 +61,66 @@ class EventVideoPlayer extends StatelessWidget {
           rounded ? MessageContentStyle.borderRadiusBubble : BorderRadius.zero,
       child: Material(
         color: Colors.black,
-        child: SizedBox(
-          width: MessageContentStyle.imageBubbleWidth(imageWidth),
-          height: MessageContentStyle.videoBubbleHeight(imageHeight),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              BlurHash(hash: blurHash),
-              if (hasThumbnail)
-                Center(
-                  child: ImageBubble(
-                    event,
-                    width: MessageContentStyle.imageBubbleWidth(imageWidth),
-                    height: MessageContentStyle.videoBubbleHeight(imageHeight),
-                    rounded: rounded,
-                    thumbnailCacheKey: thumbnailCacheKey,
-                    thumbnailCacheMap: thumbnailCacheMap,
-                    noResizeThumbnail: noResizeThumbnail,
-                    thumbnailOnly: true,
-                  ),
-                ),
-              CenterVideoButton(
-                icon: Icons.play_arrow,
-                onTap: () async {
-                  await Navigator.of(
-                    context,
-                    rootNavigator: PlatformInfos.isWeb,
-                  ).push(
-                    HeroPageRoute(
-                      builder: (context) {
-                        return InteractiveViewerGallery(
-                          itemBuilder: DownloadVideoWidget(event: event),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-              if (showDuration)
-                Positioned(
-                  bottom: ChatDetailsMediaStyle.durationPosition,
-                  right: ChatDetailsMediaStyle.durationPosition,
-                  child: Container(
-                    padding: ChatDetailsMediaStyle.durationPadding,
-                    decoration: ChatDetailsMediaStyle.durationBoxDecoration(
-                      context,
-                    ),
-                    child: Text(
-                      event.duration?.mediaTimeLength() ?? "--:--",
-                      style: ChatDetailsMediaStyle.durationTextStyle(context),
+        child: InkWell(
+          onTap: () => _onTapVideo(context),
+          child: SizedBox(
+            width: MessageContentStyle.imageBubbleWidth(imageWidth),
+            height: MessageContentStyle.videoBubbleHeight(imageHeight),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                BlurHash(hash: blurHash),
+                if (hasThumbnail)
+                  Center(
+                    child: ImageBubble(
+                      event,
+                      width: MessageContentStyle.imageBubbleWidth(imageWidth),
+                      height:
+                          MessageContentStyle.videoBubbleHeight(imageHeight),
+                      rounded: rounded,
+                      thumbnailCacheKey: thumbnailCacheKey,
+                      thumbnailCacheMap: thumbnailCacheMap,
+                      noResizeThumbnail: noResizeThumbnail,
+                      thumbnailOnly: true,
                     ),
                   ),
+                const CenterVideoButton(
+                  icon: Icons.play_arrow,
                 ),
-            ],
+                if (showDuration)
+                  Positioned(
+                    bottom: ChatDetailsMediaStyle.durationPosition,
+                    right: ChatDetailsMediaStyle.durationPosition,
+                    child: Container(
+                      padding: ChatDetailsMediaStyle.durationPadding,
+                      decoration: ChatDetailsMediaStyle.durationBoxDecoration(
+                        context,
+                      ),
+                      child: Text(
+                        event.duration?.mediaTimeLength() ?? "--:--",
+                        style: ChatDetailsMediaStyle.durationTextStyle(context),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _onTapVideo(BuildContext context) async {
+    await Navigator.of(
+      context,
+      rootNavigator: PlatformInfos.isWeb,
+    ).push(
+      HeroPageRoute(
+        builder: (context) {
+          return InteractiveViewerGallery(
+            itemBuilder: DownloadVideoWidget(event: event),
+          );
+        },
       ),
     );
   }
@@ -124,31 +129,25 @@ class EventVideoPlayer extends StatelessWidget {
 class CenterVideoButton extends StatelessWidget {
   final IconData icon;
 
-  final VoidCallback? onTap;
-
   const CenterVideoButton({
     super.key,
     required this.icon,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: MessageContentStyle.videoCenterButtonSize,
-        height: MessageContentStyle.videoCenterButtonSize,
-        decoration: const BoxDecoration(
-          color: MessageContentStyle.backgroundColorCenterButton,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          icon,
-          color: LinagoraRefColors.material().primary[100],
-          size: MessageContentStyle.iconInsideVideoButtonSize,
-        ),
+    return Container(
+      width: MessageContentStyle.videoCenterButtonSize,
+      height: MessageContentStyle.videoCenterButtonSize,
+      decoration: const BoxDecoration(
+        color: MessageContentStyle.backgroundColorCenterButton,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        icon,
+        color: LinagoraRefColors.material().primary[100],
+        size: MessageContentStyle.iconInsideVideoButtonSize,
       ),
     );
   }
