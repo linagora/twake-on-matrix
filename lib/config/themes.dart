@@ -58,6 +58,10 @@ abstract class TwakeThemes {
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
+    headlineLarge: GoogleFonts.inter(
+      fontWeight: FontWeight.w600,
+      fontSize: 32,
+    ),
     titleLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
     ),
