@@ -2,7 +2,6 @@ import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -90,17 +89,12 @@ class InvitationSelectionController
         context,
         L10n.of(context)!.contactHasBeenInvitedToTheGroup,
       );
-      onCloseDialogInvite();
       inviteSuccessAction();
     }
   }
 
   void inviteSuccessAction() {
     context.pop();
-  }
-
-  void onCloseDialogInvite() {
-    TwakeApp.router.routerDelegate.pop();
   }
 
   @override
