@@ -1,13 +1,12 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
 import 'homeserver_picker.dart';
 
@@ -20,14 +19,15 @@ class HomeserverPickerView extends StatelessWidget {
   Widget build(BuildContext context) {
     final benchmarkResults = controller.benchmarkResults;
     return LoginScaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        centerTitle: true,
-        title: SvgPicture.asset(
-          ImagePaths.icTwakeLogo,
-          width: 200,
-        ),
-      ),
+      appBar: PlatformInfos.isMobile
+          ? AppBar(
+              leading: TwakeIconButton(
+                icon: Icons.arrow_back,
+                onTap: () => context.pop(),
+                tooltip: L10n.of(context)!.back,
+              ),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -99,11 +99,6 @@ class HomeserverPickerView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => UrlLauncher(context, AppConfig.privacyUrl)
-                        .openUrlInAppBrowser(),
-                    child: Text(L10n.of(context)!.privacy),
-                  ),
                 ],
               ),
             ),
@@ -120,12 +115,12 @@ class HomeserverPickerView extends StatelessWidget {
         );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
-        return Text(L10n.of(context)!.loginWithSSO, style: textStyle);
+        return Text(L10n.of(context)!.continueProcess, style: textStyle);
       case HomeserverState.loading:
         return const Expanded(child: LinearProgressIndicator());
       case HomeserverState.ssoLoginServer:
       case HomeserverState.wrongServerName:
-        return Text(L10n.of(context)!.loginWithSSO, style: textStyle);
+        return Text(L10n.of(context)!.continueProcess, style: textStyle);
     }
   }
 }
