@@ -2650,8 +2650,6 @@
   },
   "back": "Back",
   "@back": {},
-  "loginWithSSO": "Log in with SSO",
-  "@loginWithSSO": {},
   "wrongServerName": "Wrong server name",
   "@wrongServerName": {},
   "serverNameWrongExplain": "Server address was sent to you by company admin. Check the invitation email.",
