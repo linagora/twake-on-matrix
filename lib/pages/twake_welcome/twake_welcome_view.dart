@@ -42,7 +42,7 @@ class TwakeWelcomeView extends StatelessWidget {
         width: TwakeWelcomeViewStyle.logoWidth,
         height: TwakeWelcomeViewStyle.logoHeight,
       ),
-      buttonOnTap: controller.goToLinagoraHomeserver,
+      buttonOnTap: controller.goToTwakeIdScreen,
       privacyOnTap: () =>
           UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
     );
