@@ -12,14 +12,17 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/twake_id/twake_id.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
+import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
@@ -57,7 +60,7 @@ abstract class AppRoutes {
     BuildContext context,
     GoRouterState state,
   ) =>
-      Matrix.of(context).client.isLogged() ? null : '/home';
+      Matrix.of(context).client.isLogged() ? null : '/home/twakeid';
 
   AppRoutes();
 
@@ -73,7 +76,9 @@ abstract class AppRoutes {
       path: '/home',
       pageBuilder: (context, state) => defaultPageBuilder(
         context,
-        const HomeserverPicker(),
+        PlatformInfos.isMobile
+            ? const TwakeWelcome()
+            : const HomeserverPicker(),
       ),
       redirect: loggedInRedirect,
       routes: [
@@ -82,6 +87,22 @@ abstract class AppRoutes {
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
             const Login(),
+          ),
+          redirect: loggedInRedirect,
+        ),
+        GoRoute(
+          path: 'twakeid',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            const TwakeId(),
+          ),
+          redirect: loggedInRedirect,
+        ),
+        GoRoute(
+          path: 'homeserverpicker',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            const HomeserverPicker(),
           ),
           redirect: loggedInRedirect,
         ),
@@ -342,6 +363,22 @@ abstract class AppRoutes {
                     const Login(),
                   ),
                   redirect: loggedOutRedirect,
+                ),
+                GoRoute(
+                  path: 'twakeid',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    const TwakeId(),
+                  ),
+                  redirect: loggedInRedirect,
+                ),
+                GoRoute(
+                  path: 'homeserverpicker',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    const HomeserverPicker(),
+                  ),
+                  redirect: loggedInRedirect,
                 ),
               ],
             ),
