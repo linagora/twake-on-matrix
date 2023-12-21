@@ -10,7 +10,7 @@ class TwakeWelcome extends StatefulWidget {
 }
 
 class TwakeWelcomeController extends State<TwakeWelcome> {
-  void goToLinagoraHomeserver() {
+  void goToTwakeIdScreen() {
     context.push('/home/twakeid');
   }
 
