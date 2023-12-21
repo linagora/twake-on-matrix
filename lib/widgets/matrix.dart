@@ -365,7 +365,11 @@ class MatrixState extends State<Matrix>
           TwakeApp.router.go('/rooms');
         } else {
           Logs().v('[MATRIX] Log out successful');
-          TwakeApp.router.go('/home');
+          if (PlatformInfos.isMobile) {
+            TwakeApp.router.go('/home/twakeid');
+          } else {
+            TwakeApp.router.go('/home');
+          }
         }
       }
     });

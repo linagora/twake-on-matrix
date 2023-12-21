@@ -2975,5 +2975,12 @@
   "unpinAllMessages": "Unpin all messages",
   "pinnedMessagesTooltip": "Pinned messages",
   "jumpToMessage": "Jump to message",
-  "failedToUnpin": "Failed to unpin message"
+  "failedToUnpin": "Failed to unpin message",
+  "welcomeTo": "Welcome to",
+  "descriptionWelcomeTo": "an open source messenger based on\nthe matrix protocol, which allows you to\nencrypt your data",
+  "startMessaging": "Start messaging",
+  "signIn": "Sign in",
+  "createTwakeId": "Create Twake ID",
+  "useYourCompanyServer": "Use your company server",
+  "descriptionTwakeId": "To start, please create a TwakeID \nthat will allow you to use \nchat, mail and drive"
 }
