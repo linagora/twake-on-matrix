@@ -1509,8 +1509,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: new-starting-page
-      resolved-ref: "0d214106df049551a9952abe05327a2ee51e8c53"
+      ref: master
+      resolved-ref: "94f33a620a160f6f494365317d08c1b4af478c9c"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
