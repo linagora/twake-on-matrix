@@ -144,6 +144,11 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
+  final FocusSuggestionController _focusSuggestionController =
+      FocusSuggestionController();
+
+  final TextEditingController _captionsController = TextEditingController();
+
   FocusNode inputFocus = FocusNode();
 
   FocusNode keyboardFocus = FocusNode();
@@ -425,6 +430,8 @@ class ChatController extends State<Chat>
     focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
     pinnedEventsController.dispose();
+    _captionsController.dispose();
+    focusSuggestionController.dispose();
     super.dispose();
   }
 
@@ -1275,8 +1282,17 @@ class ChatController extends State<Chat>
         room: room,
         context: context,
       ),
-      onSendTap: () => sendImages(imagePickerController, room: room),
-      onCameraPicked: (_) => sendImages(imagePickerController, room: room),
+      onSendTap: () {
+        sendMedia(
+          imagePickerController,
+          room: room,
+          caption: _captionsController.text,
+        );
+        _captionsController.clear();
+      },
+      onCameraPicked: (_) => sendMedia(imagePickerController, room: room),
+      captionController: _captionsController,
+      focusSuggestionController: _focusSuggestionController,
     );
   }
 
