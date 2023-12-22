@@ -63,14 +63,14 @@ import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
   final String roomId;
-  final MatrixFile? shareFile;
+  final List<MatrixFile?>? shareFiles;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
 
   const Chat({
     Key? key,
     required this.roomId,
-    this.shareFile,
+    this.shareFiles,
     this.roomName,
     this.onChangeRightColumnType,
   }) : super(key: key);
@@ -111,7 +111,7 @@ class ChatController extends State<Chat>
 
   String? unreadReceivedMessageLocation;
 
-  MatrixFile? get shareFile => widget.shareFile;
+  List<MatrixFile?>? get shareFiles => widget.shareFiles;
 
   String? get roomName => widget.roomName;
 
@@ -324,6 +324,19 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _handleReceivedShareFiles() {
+    if (shareFiles != null && room != null) {
+      final sendFileInteractor = getIt.get<SendFileInteractor>();
+      final filesIsNotNull = shareFiles!.where((file) => file != null);
+      sendFileInteractor.execute(
+        room: room!,
+        fileInfos: filesIsNotNull
+            .map((file) => FileInfo.fromMatrixFile(file!))
+            .toList(),
+      );
+    }
+  }
+
   @override
   void initState() {
     keyboardVisibilityController.onChange.listen(_keyboardListener);
@@ -336,18 +349,8 @@ class ChatController extends State<Chat>
       if (room == null) {
         return context.go("/error");
       }
+      _handleReceivedShareFiles();
 
-      if (shareFile != null && room != null && shareFile!.filePath != null) {
-        final sendFileInteractor = getIt.get<SendFileInteractor>();
-        sendFileInteractor.execute(
-          room: room!,
-          fileInfos: [
-            FileInfo.fromMatrixFile(
-              shareFile!,
-            ),
-          ],
-        );
-      }
       pinnedEventsController.getPinnedMessageAction(
         room: room!,
         isInitial: true,
@@ -380,7 +383,9 @@ class ChatController extends State<Chat>
         setReadMarker();
         return;
       }
-      _initUnreadLocation(fullyRead);
+      if (room?.hasNewMessages == true) {
+        _initUnreadLocation(fullyRead);
+      }
       if (!mounted) return;
     } catch (e, s) {
       Logs().e('Failed to load timeline', e, s);

@@ -84,23 +84,52 @@ class ShareController extends State<Share>
       id: selectedRoomsNotifier.value.first,
       client: Matrix.of(context).client,
     );
+    final shareContentList = Matrix.of(context).shareContentList;
     final shareContent = Matrix.of(context).shareContent;
-    if (shareContent != null) {
-      final shareFile = shareContent.tryGet<MatrixFile>('file');
-      if (shareContent.tryGet<String>('msgtype') ==
-          TwakeEventTypes.shareFileEventType) {
+
+    if (shareContentList.isNotEmpty) {
+      _handleShareFilesContent(
+        room: room,
+        shareContentList: shareContentList,
+      );
+    } else if (shareContent != null) {
+      _handleShareTextContent(
+        room: room,
+        textContent: shareContent,
+      );
+    }
+  }
+
+  void _handleShareTextContent({
+    required Room room,
+    Map<String, dynamic>? textContent,
+  }) {
+    if (textContent == null) return;
+    room.sendEvent(textContent);
+    context.go('/rooms/${room.id}');
+  }
+
+  void _handleShareFilesContent({
+    required Room room,
+    required List<Map<String, dynamic>?> shareContentList,
+  }) {
+    if (shareContentList.isNotEmpty) {
+      if (shareContentList.every(
+        (content) =>
+            content?.tryGet<String>('msgtype') ==
+            TwakeEventTypes.shareFileEventType,
+      )) {
         context.go(
           '/rooms/${room.id}',
           extra: ChatRouterInputArgument(
             type: ChatRouterInputArgumentType.share,
-            data: shareFile,
+            data: shareContentList
+                .map((content) => content?.tryGet<MatrixFile>('file'))
+                .toList(),
           ),
         );
-      } else {
-        room.sendEvent(shareContent);
-        context.go('/rooms/${room.id}');
       }
-      Matrix.of(context).shareContent = null;
+      Matrix.of(context).shareContentList = null;
     }
   }
 
