@@ -14,17 +14,19 @@ import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 
 mixin SendFilesMixin {
-  Future<void> sendImages(
+  Future<void> sendMedia(
     ImagePickerGridController imagePickerController, {
+    String? caption,
     Room? room,
   }) async {
     if (room == null) {
       return;
     }
     final selectedAssets = imagePickerController.sortedSelectedAssets;
-    final sendImagesInteractor = getIt.get<SendImagesInteractor>();
-    await sendImagesInteractor.execute(
+    final sendMediaInteractor = getIt.get<SendMediaInteractor>();
+    await sendMediaInteractor.execute(
       room: room,
+      caption: caption,
       entities: selectedAssets.map<FileAssetEntity>((entity) {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),
