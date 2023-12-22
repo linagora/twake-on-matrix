@@ -22,11 +22,14 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
   void _processIncomingSharedFiles(List<SharedMediaFile> files) {
     if (files.isEmpty) return;
-    final shareFile = files.first;
-    matrixState.shareContent = {
-      'msgtype': TwakeEventTypes.shareFileEventType,
-      'file': shareFile.toMatrixFile(),
-    };
+    matrixState.shareContentList = files
+        .map(
+          (files) => {
+            'msgtype': TwakeEventTypes.shareFileEventType,
+            'file': files.toMatrixFile(),
+          },
+        )
+        .toList();
     TwakeApp.router.go('/share');
   }
 
