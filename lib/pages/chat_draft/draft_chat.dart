@@ -102,13 +102,14 @@ class DraftChatController extends State<DraftChat>
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
   @override
-  Future<void> sendImages(
+  Future<void> sendMedia(
     ImagePickerGridController imagePickerController, {
+    String? caption,
     Room? room,
   }) {
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        super.sendImages(imagePickerController, room: newRoom);
+        super.sendMedia(imagePickerController, room: newRoom);
       },
     );
   }
@@ -293,8 +294,8 @@ class DraftChatController extends State<DraftChat>
         type: action,
         context: context,
       ),
-      onSendTap: () => sendImages(imagePickerController),
-      onCameraPicked: (_) => sendImages(imagePickerController),
+      onSendTap: () => sendMedia(imagePickerController),
+      onCameraPicked: (_) => sendMedia(imagePickerController),
     );
   }
 
