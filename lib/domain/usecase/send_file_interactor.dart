@@ -18,7 +18,7 @@ class SendFileInteractor {
         final txid = room.storePlaceholderFileInMem(
           fileInfo: fileInfo,
         );
-        await room.sendFileEvent(
+        room.sendFileEvent(
           fileInfo,
           msgType: fileInfo.msgType,
           txid: txid,
