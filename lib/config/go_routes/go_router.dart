@@ -406,7 +406,7 @@ abstract class AppRoutes {
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
-                          shareFile: extra.data as MatrixFile?,
+                          shareFiles: extra.data as List<MatrixFile?>?,
                         ),
                       );
                   }
