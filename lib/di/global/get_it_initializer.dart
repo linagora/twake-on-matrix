@@ -207,7 +207,7 @@ class GetItInitializer {
     getIt.registerFactory<PhonebookContactInteractor>(
       () => PhonebookContactInteractor(),
     );
-    getIt.registerSingleton<SendImagesInteractor>(SendImagesInteractor());
+    getIt.registerSingleton<SendMediaInteractor>(SendMediaInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
     );
