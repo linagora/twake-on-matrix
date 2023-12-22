@@ -1,7 +1,9 @@
 import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,6 +36,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     Room? room,
     OnSendPhotosTap onSendTap,
     OnCameraPicked? onCameraPicked,
+    FocusSuggestionController? focusSuggestionController,
+    TextEditingController? captionController,
   }) async {
     final currentPermissionPhotos = await getCurrentMediaPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
@@ -47,6 +51,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         room: room,
         onPickerTypeTap: onPickerTypeTap,
         onCameraPicked: onCameraPicked,
+        focusSuggestionController: focusSuggestionController,
+        captionController: captionController,
       );
     }
   }
@@ -60,11 +66,20 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     OnSendPhotosTap onSendTap,
     OnPickerTypeTap? onPickerTypeTap,
     OnCameraPicked? onCameraPicked,
+    Widget? inputBar,
+    FocusSuggestionController? focusSuggestionController,
+    TextEditingController? captionController,
   }) async {
     final numberSelectedImagesNotifier = ValueNotifier<int>(0);
     imagePickerController.addListener(() {
       numberSelectedImagesNotifier.value =
           imagePickerController.selectedAssets.length;
+      Logs().d(
+        "MediaPickerMixin::showMediasPickerBottomSheet(): ImageCounts - ${numberSelectedImagesNotifier.value}",
+      );
+      if (numberSelectedImagesNotifier.value == 0) {
+        captionController?.clear();
+      }
     });
 
     return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
@@ -73,6 +88,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       backgroundImageCamera: const AssetImage("assets/verification.png"),
       initialChildSize: 0.6,
       permissionStatus: permissionStatusPhotos,
+      gridPadding: const EdgeInsets.only(bottom: 150),
       assetBackgroundColor: LinagoraSysColors.material().background,
       counterImageBuilder: (counterImage) {
         if (counterImage == 0) {
@@ -146,7 +162,6 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                 alignment: Alignment.bottomRight,
                 children: [
                   Container(
-                    height: 64,
                     padding: const EdgeInsets.only(
                       right: 20.0,
                       top: 8.0,
@@ -166,74 +181,41 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                     child: Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            onTap: () => TwakeSnackBar.show(
+                          child: InputBar(
+                            maxLines: 5,
+                            minLines: 1,
+                            focusSuggestionController:
+                                focusSuggestionController ??
+                                    FocusSuggestionController(),
+                            room: room,
+                            controller: captionController,
+                            decoration:
+                                SendFileDialogStyle.bottomBarInputDecoration(
                               context,
-                              L10n.of(context)!.captionForImagesIsNotSupportYet,
                             ),
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(
-                                Icons.tag_faces,
-                                color:
-                                    LinagoraRefColors.material().neutralVariant,
-                              ),
-                              hintText: L10n.of(context)!.addACaption,
-                            ),
+                            keyboardType: TextInputType.multiline,
+                            enablePasteImage: false,
                           ),
                         ),
-                        Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            InkWell(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(100)),
-                              onTap: () {
-                                if (onSendTap != null) {
-                                  onSendTap();
-                                }
-                                Navigator.of(context).pop();
-                              },
-                              child: SvgPicture.asset(
-                                ImagePaths.icSend,
-                                width: 40,
-                                height: 40,
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: InkWell(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(100)),
+                            onTap: () {
+                              if (onSendTap != null) {
+                                onSendTap();
+                              }
+                              Navigator.of(context).pop();
+                            },
+                            child: SvgPicture.asset(
+                              ImagePaths.icSend,
+                              width: 40,
+                              height: 40,
                             ),
-                          ],
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                  Positioned(
-                    right: 12.0,
-                    bottom: 2.0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: ShapeDecoration(
-                        shape: CircleBorder(
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.surface,
-                          ),
-                        ),
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      alignment: Alignment.center,
-                      child: ValueListenableBuilder(
-                        valueListenable: numberSelectedImagesNotifier,
-                        builder: (context, value, child) {
-                          return Text(
-                            "$value",
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  letterSpacing: 0.1,
-                                ),
-                          );
-                        },
-                      ),
                     ),
                   ),
                 ],
