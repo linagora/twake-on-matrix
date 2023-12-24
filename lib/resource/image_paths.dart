@@ -42,6 +42,9 @@ class ImagePaths {
   static String get icUnpin => _getImagePath('ic_unpin.svg');
   static String get icJumpTo => _getImagePath('ic_jump_to.svg');
   static String get logoTwakeWelcome => _getImagePath('logo_twake_welcome.svg');
+  static String get icFileImage => _getImagePath('ic_file_image.svg');
+  static String get icFileAudio => _getImagePath('ic_file_audio.svg');
+  static String get icFileVideo => _getImagePath('ic_file_video.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
