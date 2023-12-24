@@ -106,4 +106,7 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   String get sizeString => size.sizeString;
+
+  String? get fileExtension =>
+      name.contains('.') ? name.split('.').last.toUpperCase() : null;
 }

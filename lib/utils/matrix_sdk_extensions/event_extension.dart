@@ -6,6 +6,7 @@ import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -42,7 +43,7 @@ extension LocalizedBody on Event {
         : null;
   }
 
-  String? get mimeType {
+  TwakeMimeType? get mimeType {
     return content
         .tryGetMap<String, dynamic>('info')
         ?.tryGet<String>('mimetype');

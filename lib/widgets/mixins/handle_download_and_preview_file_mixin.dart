@@ -3,11 +3,11 @@ import 'package:fluffychat/domain/app_state/preview_file/download_file_for_previ
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
-import 'package:fluffychat/domain/model/extensions/mime_type_extension.dart';
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
@@ -116,7 +116,7 @@ mixin HandleDownloadAndPreviewFileMixin {
       return;
     }
 
-    if (event.isPdfFile()) {
+    if (event.mimeType.isPdfFile()) {
       return previewPdfWeb(context, event);
     }
 
