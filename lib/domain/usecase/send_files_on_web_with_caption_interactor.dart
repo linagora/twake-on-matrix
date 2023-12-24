@@ -2,19 +2,24 @@ import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:matrix/matrix.dart';
 
-class SendMediaOnWebWithCaptionInteractor {
+class SendFilesOnWebWithCaptionInteractor {
   Future<void> execute({
     required Room room,
-    required MatrixFile media,
+    required List<MatrixFile> files,
     String? caption,
   }) async {
     try {
-      final txid = room.client.generateUniqueTransactionId();
-      room.sendingFilePlaceholders[txid] = media;
-      final fakeImageEvent = await room.sendFakeFileEvent(
-        media,
-        txid: txid,
-      );
+      final txIdsMapFileEvents = <String, (MatrixFile, SyncUpdate)>{};
+      for (final file in files) {
+        final txid = room.client.generateUniqueTransactionId();
+        room.sendingFilePlaceholders[txid] = file;
+        final fakeFileEvent = await room.sendFakeFileEvent(
+          file,
+          txid: txid,
+        );
+        txIdsMapFileEvents[txid] = (file, fakeFileEvent);
+      }
+
       String? messageID;
       Map<String, dynamic>? msgEventContent;
       if (caption != null && caption.isNotEmpty == true) {
@@ -26,11 +31,16 @@ class SendMediaOnWebWithCaptionInteractor {
         );
       }
 
-      await room.sendFileOnWebEvent(
-        media,
-        fakeImageEvent: fakeImageEvent,
-        txid: txid,
-      );
+      for (final txId in txIdsMapFileEvents.keys) {
+        if (txIdsMapFileEvents[txId] != null) {
+          await room.sendFileOnWebEvent(
+            txIdsMapFileEvents[txId]!.$1,
+            fakeImageEvent: txIdsMapFileEvents[txId]!.$2,
+            txid: txId,
+          );
+        }
+      }
+
       if (messageID != null && msgEventContent != null) {
         await room.sendMessageContent(
           EventTypes.Message,
@@ -39,7 +49,7 @@ class SendMediaOnWebWithCaptionInteractor {
         );
       }
     } catch (e) {
-      Logs().e("SendMediaOnWebWithCaptionInteractor: $e");
+      Logs().e("SendFilesOnWebWithCaptionInteractor: $e");
     }
   }
 }
