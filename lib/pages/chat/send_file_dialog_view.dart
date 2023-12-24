@@ -2,12 +2,15 @@ import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/file_tile_widget.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class SendFileDialogView extends StatelessWidget {
   final SendFileDialogController controller;
@@ -23,6 +26,9 @@ class SendFileDialogView extends StatelessWidget {
             BorderRadius.circular(SendFileDialogStyle.dialogBorderRadius),
         child: Container(
           width: SendFileDialogStyle.dialogWidth,
+          constraints: const BoxConstraints(
+            maxHeight: SendFileDialogStyle.maxDialogHeight,
+          ),
           padding: const EdgeInsets.all(SendFileDialogStyle.dialogBorderRadius),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -33,42 +39,19 @@ class SendFileDialogView extends StatelessWidget {
                   Padding(
                     padding: SendFileDialogStyle.headerPadding,
                     child: Text(
-                      L10n.of(context)!.sendImages(1),
+                      controller.isSendMediaWithCaption
+                          ? L10n.of(context)!.sendImages(1)
+                          : L10n.of(context)!
+                              .sendFiles(controller.files.length),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16.0),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context, rootNavigator: PlatformInfos.isWeb)
-                      .push(
-                    HeroPageRoute(
-                      builder: (context) {
-                        return InteractiveViewerGallery(
-                          itemBuilder: ImageViewer(
-                            imageData: controller.widget.files.first.bytes,
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: SizedBox(
-                  width: SendFileDialogStyle.imageSize,
-                  height: SendFileDialogStyle.imageSize,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      SendFileDialogStyle.imageBorderRadius,
-                    ),
-                    child: Image.memory(
-                      controller.widget.files.first.bytes!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
+              controller.isSendMediaWithCaption
+                  ? _MediaPageViewWidget(files: controller.files)
+                  : _FilesListViewWidget(files: controller.files),
               const SizedBox(height: 16.0),
               InputBar(
                 maxLines: 5,
@@ -130,7 +113,9 @@ class SendFileDialogView extends StatelessWidget {
                     child: Text(
                       L10n.of(context)!.send,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: SendFileDialogStyle.listViewBackgroundColor(
+                              context,
+                            ),
                           ),
                     ),
                   ),
@@ -138,6 +123,92 @@ class SendFileDialogView extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaPageViewWidget extends StatelessWidget {
+  const _MediaPageViewWidget({
+    required this.files,
+  });
+
+  final List<MatrixFile> files;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+          HeroPageRoute(
+            builder: (context) {
+              return InteractiveViewerGallery(
+                itemBuilder: ImageViewer(
+                  imageData: files.first.bytes,
+                ),
+              );
+            },
+          ),
+        );
+      },
+      child: SizedBox(
+        width: SendFileDialogStyle.imageSize,
+        height: SendFileDialogStyle.imageSize,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(
+            SendFileDialogStyle.imageBorderRadius,
+          ),
+          child: files.first.bytes != null
+              ? Image.memory(
+                  files.first.bytes!,
+                  fit: BoxFit.cover,
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilesListViewWidget extends StatelessWidget {
+  final List<MatrixFile> files;
+
+  const _FilesListViewWidget({
+    required this.files,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(
+        maxHeight: SendFileDialogStyle.maxHeightFilesListView,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          SendFileDialogStyle.listViewBorderRadius,
+        ),
+        color: SendFileDialogStyle.listViewBackgroundColor(context),
+      ),
+      child: SingleChildScrollView(
+        child: ListView.builder(
+          itemCount: files.length,
+          shrinkWrap: true,
+          padding: SendFileDialogStyle.paddingFilesListView,
+          itemBuilder: (BuildContext context, int index) {
+            final file = files[index];
+            return Padding(
+              padding: SendFileDialogStyle.paddingFileTile,
+              child: FileTileWidget(
+                mimeType: file.mimeType,
+                filename: file.name,
+                fileType: file.fileExtension,
+                sizeString: file.sizeString,
+                backgroundColor:
+                    SendFileDialogStyle.listViewBackgroundColor(context),
+              ),
+            );
+          },
         ),
       ),
     );

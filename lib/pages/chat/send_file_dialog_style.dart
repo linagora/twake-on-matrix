@@ -4,9 +4,9 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class SendFileDialogStyle {
   static const dialogBorderRadius = 16.0;
 
-  static const double dialogWidth = 328;
+  static const double dialogWidth = 360;
 
-  static const double dialogHeight = 500;
+  static const double maxDialogHeight = 560;
 
   static const double imageBorderRadius = 8.0;
 
@@ -37,4 +37,17 @@ class SendFileDialogStyle {
       );
 
   static const spaceBwInputBarAndButton = SizedBox(height: 8.0);
+
+  static const double maxHeightFilesListView = 320;
+
+  static const EdgeInsets paddingFilesListView = EdgeInsets.only(
+    top: 8.0,
+  );
+
+  static Color? listViewBackgroundColor(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
+
+  static const double listViewBorderRadius = 8.0;
+
+  static const paddingFileTile = EdgeInsets.only(bottom: 8.0);
 }
