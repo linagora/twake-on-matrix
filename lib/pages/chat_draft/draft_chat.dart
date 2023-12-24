@@ -298,7 +298,6 @@ class DraftChatController extends State<DraftChat>
     );
   }
 
-  @override
   void sendFileOnWebAction(
     BuildContext context, {
     Room? room,
@@ -306,7 +305,6 @@ class DraftChatController extends State<DraftChat>
     final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
     final result = await FilePicker.platform.pickFiles(
       withData: true,
-      allowMultiple: true,
     );
     if (result == null || result.files.isEmpty) return;
 

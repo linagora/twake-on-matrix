@@ -1,19 +1,14 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 mixin SendFilesMixin {
   Future<void> sendImages(
@@ -60,35 +55,13 @@ mixin SendFilesMixin {
     sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
   }
 
-  void sendFileOnWebAction(
-    BuildContext context, {
-    Room? room,
-  }) async {
+  Future<List<MatrixFile>> pickFilesFromSystem() async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
     );
-    if (result == null || result.files.isEmpty) return;
-    final matrixFilesList =
-        result.files.map((file) => file.toMatrixFile()).toList();
-    if (matrixFilesList.length <= AppConfig.maxFilesSendPerDialog) {
-      showDialog(
-        context: context,
-        useRootNavigator: PlatformInfos.isWeb,
-        builder: (context) {
-          return SendFileDialog(
-            room: room,
-            files: matrixFilesList,
-          );
-        },
-      );
-    } else {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!
-            .countFilesSendPerDialog(AppConfig.maxFilesSendPerDialog),
-      );
-    }
+    if (result == null || result.files.isEmpty) return [];
+    return result.files.map((file) => file.toMatrixFile()).toList();
   }
 
   void onPickerTypeClick({

@@ -24,6 +24,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/send_files_with_caption_web_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/account_bundles.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
@@ -83,6 +84,7 @@ class ChatController extends State<Chat>
     with
         CommonMediaPickerMixin,
         MediaPickerMixin,
+        SendFilesWithCaptionWebMixin,
         SendFilesMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
@@ -310,13 +312,7 @@ class ChatController extends State<Chat>
 
   void handleDragDone(DropDoneDetails details) async {
     final matrixFiles = await onDragDone(details);
-    if (room != null) {
-      sendImagesWithCaption(
-        room: room!,
-        context: context,
-        matrixFiles: matrixFiles,
-      );
-    }
+    sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
   }
 
   @override
@@ -1257,7 +1253,8 @@ class ChatController extends State<Chat>
     if (PlatformInfos.isMobile) {
       _showMediaPicker(context);
     } else {
-      sendFileOnWebAction(context, room: room);
+      final matrixFiles = await pickFilesFromSystem();
+      sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
     }
   }
 
