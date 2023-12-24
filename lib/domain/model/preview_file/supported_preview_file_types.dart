@@ -1,3 +1,5 @@
+import 'package:fluffychat/resource/image_paths.dart';
+
 enum SupportedIconFileTypesEnum {
   image,
   doc,
@@ -5,7 +7,33 @@ enum SupportedIconFileTypesEnum {
   powerPoint,
   pdf,
   zip,
-  unknown,
+  video,
+  audio,
+  unknown;
+
+  String get imagePath {
+    switch (this) {
+      case SupportedIconFileTypesEnum.image:
+        return ImagePaths.icFileImage;
+      case SupportedIconFileTypesEnum.doc:
+        return ImagePaths.icFileDocx;
+      case SupportedIconFileTypesEnum.excel:
+        return ImagePaths.icFileXlsx;
+      case SupportedIconFileTypesEnum.powerPoint:
+        return ImagePaths.icFilePptx;
+      case SupportedIconFileTypesEnum.pdf:
+        return ImagePaths.icFilePdf;
+      case SupportedIconFileTypesEnum.zip:
+        return ImagePaths.icFileZip;
+      case SupportedIconFileTypesEnum.video:
+        return ImagePaths.icFileVideo;
+      case SupportedIconFileTypesEnum.audio:
+        return ImagePaths.icFileAudio;
+      case SupportedIconFileTypesEnum.unknown:
+      default:
+        return ImagePaths.icFileUnknown;
+    }
+  }
 }
 
 class SupportedPreviewFileTypes {
@@ -14,6 +42,18 @@ class SupportedPreviewFileTypes {
     'image/jpeg',
     'image/gif',
     'image/png',
+  ];
+
+  static const videoMimeTypes = [
+    'video/mp4',
+    'video/3gpp',
+    'video/quicktime',
+  ];
+
+  static const audioMimeTypes = [
+    'audio/mpeg',
+    'audio/wav',
+    'audio/x-ms-wmv',
   ];
 
   static const docMimeTypes = [
