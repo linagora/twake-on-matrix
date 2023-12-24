@@ -39,7 +39,7 @@ extension SendFileWebExtension on Room {
       height: imageBitmap?.height,
       bytes: file.bytes,
     );
-    fakeImageEvent ??= await sendFakeImageEvent(
+    fakeImageEvent ??= await sendFakeFileEvent(
       file,
       txid: txid,
       inReplyTo: inReplyTo,
@@ -195,7 +195,7 @@ extension SendFileWebExtension on Room {
     return eventId;
   }
 
-  Future<SyncUpdate> sendFakeImageEvent(
+  Future<SyncUpdate> sendFakeFileEvent(
     MatrixFile file, {
     required String txid,
     Event? inReplyTo,
@@ -218,6 +218,7 @@ extension SendFileWebExtension on Room {
                     'msgtype': file.msgType,
                     'body': file.name,
                     'filename': file.name,
+                    'info': file.info,
                   },
                   type: EventTypes.Message,
                   eventId: txid,
