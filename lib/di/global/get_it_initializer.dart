@@ -65,6 +65,7 @@ import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
+import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
@@ -255,7 +256,7 @@ class GetItInitializer {
         getIt.get<LocalizationsRepository>(),
       ),
     );
-    getIt.registerLazySingleton<SendMediaOnWebWithCaptionInteractor>(
+    getIt.registerFactory<SendMediaOnWebWithCaptionInteractor>(
       () => SendMediaOnWebWithCaptionInteractor(),
     );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
@@ -267,6 +268,9 @@ class GetItInitializer {
     );
     getIt.registerLazySingleton<UpdatePinnedMessagesInteractor>(
       () => UpdatePinnedMessagesInteractor(),
+    );
+    getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
+      () => SendFilesOnWebWithCaptionInteractor(),
     );
   }
 }
