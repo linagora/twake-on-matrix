@@ -1,16 +1,11 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog_view.dart';
-import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
-
-import '../../utils/resize_image.dart';
 
 class SendFileDialog extends StatefulWidget {
   final Room? room;
@@ -27,17 +22,31 @@ class SendFileDialog extends StatefulWidget {
 }
 
 class SendFileDialogController extends State<SendFileDialog> {
-  bool origImage = false;
-
-  /// Images smaller than 20kb don't need compression.
-  static const int minSizeToCompress = 20 * 1024;
-
   final sendMediaOnWebWithCaptionInteractor =
       getIt.get<SendMediaOnWebWithCaptionInteractor>();
+
+  final sendFilesOnWebWithCaptionInteractor =
+      getIt.get<SendFilesOnWebWithCaptionInteractor>();
 
   final focusSuggestionController = FocusSuggestionController();
 
   final TextEditingController textEditingController = TextEditingController();
+
+  bool isSendMediaWithCaption = true;
+
+  List<MatrixFile> get files => widget.files;
+
+  @override
+  void initState() {
+    super.initState();
+    isSendMediaWithCaption = _isShowSendMediaDialog(widget.files, widget.room);
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
 
   void sendMediaWithCaption() {
     if (widget.room == null) {
@@ -50,49 +59,35 @@ class SendFileDialogController extends State<SendFileDialog> {
       media: widget.files.first,
       caption: textEditingController.text,
     );
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
   }
 
-  Future<void> sendWithoutCaption() async {
-    for (var file in widget.files) {
-      // ignore: unused_local_variable
-      MatrixImageFile? thumbnail;
-      if (file is MatrixVideoFile &&
-          (file.bytes?.length ?? 0) > minSizeToCompress) {
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            file = await file.resizeVideo();
-            thumbnail = await file.getVideoThumbnail();
-          },
-        );
-      }
-      if (widget.room == null) {
-        Logs().e("sendMediaWithCaption:: room is null");
-        Navigator.of(context).pop();
-        return;
-      }
-      widget.room!
-          .sendFileOnWebEvent(
-        file,
-        thumbnail: thumbnail,
-      )
-          .catchError((e) {
-        TwakeSnackBar.show(context, (e as Object).toLocalizedString(context));
-        return null;
-      });
+  void sendFilesWithCaption() {
+    if (widget.room == null) {
+      Logs().e("sendFilesWithCaption:: room is null");
+      Navigator.of(context).pop();
+      return;
     }
-    Navigator.of(context, rootNavigator: false).pop();
-
-    return;
+    sendFilesOnWebWithCaptionInteractor.execute(
+      room: widget.room!,
+      files: widget.files,
+      caption: textEditingController.text,
+    );
+    Navigator.of(context).pop(true);
   }
 
   void send() {
-    if (textEditingController.text.isEmpty) {
-      sendWithoutCaption();
-    } else {
+    if (_isShowSendMediaDialog(widget.files, widget.room)) {
       sendMediaWithCaption();
+    } else {
+      sendFilesWithCaption();
     }
   }
+
+  bool _isShowSendMediaDialog(List<MatrixFile> matrixFilesList, Room? room) =>
+      matrixFilesList.length == 1 &&
+      matrixFilesList.first is MatrixImageFile &&
+      room != null;
 
   @override
   Widget build(BuildContext context) {
