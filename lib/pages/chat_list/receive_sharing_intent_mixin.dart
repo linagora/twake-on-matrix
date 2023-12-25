@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -49,6 +50,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _processIncomingUris(String? text) async {
+    Logs().d("ReceiveSharingIntentMixin: _processIncomingUris: $text");
     if (text == null) return;
     TwakeApp.router.go('/share');
     WidgetsBinding.instance.addPostFrameCallback((_) {

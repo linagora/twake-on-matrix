@@ -21,6 +21,10 @@ abstract class AppConfig {
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
 
+  static String registrationUrl = 'https://example.com/';
+
+  static String twakeWorkplaceHomeserver = 'https://example.com/';
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -91,6 +95,19 @@ abstract class AppConfig {
   static String? issueId;
 
   static void loadFromJson(Map<String, dynamic> json) {
+    if (json['register_site'] != null && json['registration_url'] is String) {
+      if (json['registration_url'] != '') {
+        registrationUrl = json['registration_url'];
+      }
+    }
+
+    if (json['twake_workplace_homeserver'] != null &&
+        json['twake_workplace_homeserver'] is String) {
+      if (json['twake_workplace_homeserver'] != '') {
+        twakeWorkplaceHomeserver = json['twake_workplace_homeserver'];
+      }
+    }
+
     if (json['chat_color'] != null) {
       try {
         colorSchemeSeed = Color(json['chat_color']);
