@@ -370,7 +370,7 @@ class MatrixState extends State<Matrix>
           if (PlatformInfos.isMobile) {
             TwakeApp.router.go('/home/twakeWelcome');
           } else {
-            TwakeApp.router.go('/home');
+            TwakeApp.router.go('/home', extra: true);
           }
         }
       }
