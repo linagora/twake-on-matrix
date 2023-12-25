@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/exception/check_homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
@@ -59,7 +61,7 @@ mixin ConnectPageMixin {
     return '$authUrl?logout=1&url=$redirectUrlEncode';
   }
 
-  void ssoLoginAction({
+  Future<void> ssoLoginAction({
     required BuildContext context,
     required String id,
   }) async {
@@ -81,11 +83,19 @@ mixin ConnectPageMixin {
     if (token?.isEmpty ?? false) return;
     Matrix.of(context).loginType = LoginType.mLoginToken;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).getLoginClient().login(
+      future: () => Matrix.of(context)
+          .getLoginClient()
+          .login(
             LoginType.mLoginToken,
             token: token,
             initialDeviceDisplayName: PlatformInfos.clientName,
-          ),
+          )
+          .timeout(
+        AutoHomeserverPickerController.autoHomeserverPickerTimeout,
+        onTimeout: () {
+          throw CheckHomeserverTimeoutException();
+        },
+      ),
     );
   }
 

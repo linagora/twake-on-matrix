@@ -25,6 +25,8 @@ abstract class AppConfig {
 
   static String twakeWorkplaceHomeserver = 'https://example.com/';
 
+  static String homeserver = 'https://example.com/';
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -95,6 +97,12 @@ abstract class AppConfig {
   static String? issueId;
 
   static void loadFromJson(Map<String, dynamic> json) {
+    if (json['homeserver'] != null && json['homeserver'] is String) {
+      if (json['homeserver'] != '') {
+        homeserver = json['homeserver'];
+      }
+    }
+
     if (json['register_site'] != null && json['registration_url'] is String) {
       if (json['registration_url'] != '') {
         registrationUrl = json['registration_url'];
