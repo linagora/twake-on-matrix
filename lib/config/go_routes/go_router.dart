@@ -4,6 +4,7 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
@@ -78,7 +79,9 @@ abstract class AppRoutes {
         context,
         PlatformInfos.isMobile
             ? const TwakeWelcome()
-            : const HomeserverPicker(),
+            : AutoHomeserverPicker(
+                loggedOut: state.extra is bool ? state.extra as bool? : null,
+              ),
       ),
       redirect: loggedInRedirect,
       routes: [
