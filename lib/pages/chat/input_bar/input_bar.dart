@@ -167,7 +167,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     final userMatch = RegExp(userMentionsRegex).firstMatch(searchText);
     if (userMatch != null && room != null) {
       final userSearch = userMatch[1]!.toLowerCase();
-      for (final user in room!.getParticipants()) {
+      final users = room!
+          .getParticipants()
+          .where((user) => user.senderId != room!.client.userID)
+          .toList();
+      for (final user in users) {
         if ((user.displayName != null &&
                 (user.displayName!.toLowerCase().contains(userSearch) ||
                     slugify(user.displayName!.toLowerCase())
@@ -228,6 +232,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   void insertSuggestion(Map<String, String?> suggestion) {
+    if (room!.isDirectChat) return;
     final replaceText =
         controller!.text.substring(0, controller!.selection.baseOffset);
     var startText = '';
@@ -408,6 +413,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: (text) {
+            if (room!.isDirectChat) return [];
             final suggestions = getSuggestions(text);
             focusSuggestionController.suggestions = suggestions;
             return suggestions;
