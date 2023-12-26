@@ -1,10 +1,8 @@
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' hide Clipboard;
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -206,24 +204,13 @@ class SelectionTextContainer extends StatelessWidget {
       return child;
     }
 
-    return CallbackShortcuts(
-      bindings: {
-        SingleActivator(
-          LogicalKeyboardKey.keyC,
-          meta: PlatformInfos.isMacKeyboardPlatform,
-          control: !PlatformInfos.isMacKeyboardPlatform,
-        ): () async {
-          await Clipboard.instance.copyText(chatController.selectionText);
-        },
+    return SelectionArea(
+      focusNode: focusNode,
+      onSelectionChanged: (value) {
+        focusNode.requestFocus();
+        chatController.selectionText = value?.plainText ?? "";
       },
-      child: SelectionArea(
-        focusNode: focusNode,
-        onSelectionChanged: (value) {
-          focusNode.requestFocus();
-          chatController.selectionText = value?.plainText ?? "";
-        },
-        child: child,
-      ),
+      child: child,
     );
   }
 }
