@@ -337,106 +337,54 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       handlePaste: enablePasteImage ? () => handlePaste(context) : null,
       child: ContextMenuInputBar(
         controller: controller,
-        focusNode: focusNode,
-        handlePaste: enablePasteImage ? () => handlePaste(context) : null,
-        child: TypeAheadField<Map<String, String?>>(
-          direction: AxisDirection.up,
-          hideOnEmpty: true,
-          hideOnLoading: true,
-          keepSuggestionsOnSuggestionSelected: true,
-          debounceDuration: const Duration(milliseconds: 50),
-          // show suggestions after 50ms idle time (default is 300)
-          textFieldConfiguration: TextFieldConfiguration(
-            minLines: minLines,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            textInputAction: textInputAction,
-            autofocus: autofocus,
-            style: InputBarStyle.getTypeAheadTextStyle(context),
-            controller: controller,
-            decoration: decoration,
-            focusNode: focusNode,
-            onChanged: (text) {
-              // fix for the library for now
-              // it sets the types for the callback incorrectly
-              if (onChanged != null) {
-                onChanged!(text);
-              }
-            },
-            onTap: () async {
-              await Future.delayed(const Duration(milliseconds: 100));
-              FocusScope.of(context).requestFocus(focusNode);
-            },
-            onSubmitted: PlatformInfos.isMobile
-                ? (text) {
-                    // fix for library for now
-                    // it sets the types for the callback incorrectly
+        // show suggestions after 50ms idle time (default is 300)
+        builder: (context, controller, focusNode) => TextField(
+          minLines: minLines,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          autofocus: autofocus,
+          style: InputBarStyle.getTypeAheadTextStyle(context),
+          controller: controller,
+          decoration: decoration,
+          focusNode: focusNode,
+          onChanged: (text) {
+            if (onChanged != null) {
+              onChanged!(text);
+            }
+          },
+          onTap: () async {
+            await Future.delayed(const Duration(milliseconds: 100));
+            FocusScope.of(context).requestFocus(focusNode);
+          },
+          onSubmitted: PlatformInfos.isMobile
+              ? (text) {
+                  if (onSubmitted != null) {
                     onSubmitted!(text);
                   }
-                : null,
-            contextMenuBuilder: !PlatformInfos.isWeb
-                ? (
-                    BuildContext contextMenucontext,
-                    EditableTextState editableTextState,
-                  ) {
-                    return AdaptiveTextSelectionToolbar.editable(
-                      anchors: editableTextState.contextMenuAnchors,
-                      clipboardStatus: ClipboardStatus.pasteable,
-                      onPaste: !PlatformInfos.isWeb
-                          ? () async {
-                              if (room == null) {
-                                // FIXME: need to handle the case when in draft chat
-                                return;
-                              }
-                              editableTextState
-                                  .pasteText(SelectionChangedCause.toolbar);
-                            }
-                          : null,
-                      onCopy: () {
-                        editableTextState
-                            .copySelection(SelectionChangedCause.toolbar);
-                      },
-                      onCut: () {
-                        editableTextState
-                            .cutSelection(SelectionChangedCause.toolbar);
-                      },
-                      onSelectAll: () {
-                        editableTextState
-                            .selectAll(SelectionChangedCause.toolbar);
-                      },
-                      onLiveTextInput: () {
-                        // FIXME: Need to hadle live text input
-                      },
-                    );
-                  }
-                : null,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          suggestionsCallback: (text) {
-            if (room!.isDirectChat) return [];
-            final suggestions = getSuggestions(text);
-            focusSuggestionController.suggestions = suggestions;
-            return suggestions;
-          },
-          itemBuilder: (context, suggestion) => SuggestionTile(
-            suggestion: suggestion,
-            client: Matrix.of(context).client,
-          ),
-          onSuggestionSelected: insertSuggestion,
-          errorBuilder: (BuildContext context, Object? error) => Container(),
-          loadingBuilder: (BuildContext context) => Container(),
-          // fix loading briefly flickering a dark box
-          noItemsFoundBuilder: (BuildContext context) =>
-              Container(), // fix loading briefly showing no suggestions
-          layoutArchitecture: (items, scrollController) => FocusSuggestionList(
-            items: items,
-            scrollController: scrollController,
-            focusSuggestionController: focusSuggestionController,
-          ),
-          suggestionsBoxDecoration: SuggestionsBoxDecoration(
-            borderRadius:
-                BorderRadius.circular(InputBarStyle.suggestionBorderRadius),
-          ),
+                }
+              : null,
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        suggestionsCallback: (text) {
+          final suggestions = getSuggestions(text);
+          focusSuggestionController.suggestions = suggestions;
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) => SuggestionTile(
+          suggestion: suggestion,
+          client: Matrix.of(context).client,
+        ),
+        onSelected: insertSuggestion,
+        errorBuilder: (BuildContext context, Object? error) => Container(),
+        loadingBuilder: (BuildContext context) => Container(),
+        // fix loading briefly flickering a dark box
+        emptyBuilder: (BuildContext context) =>
+            Container(), // fix loading briefly showing no suggestions
+        listBuilder: (context, widgets) => FocusSuggestionList(
+          items: widgets,
+          scrollController: suggestionScrollController,
+          focusSuggestionController: focusSuggestionController,
         ),
       ),
     );
