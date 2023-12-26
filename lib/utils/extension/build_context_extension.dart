@@ -91,9 +91,6 @@ extension ContextExtensionss on BuildContext {
   /// similar to [MediaQuery.of(this).devicePixelRatio]
   double get devicePixelRatio => MediaQuery.of(this).devicePixelRatio;
 
-  /// similar to [MediaQuery.of(this).textScaleFactor]
-  double get textScaleFactor => MediaQuery.of(this).textScaleFactor;
-
   /// get the shortestSide from screen
   double get mediaQueryShortestSide => mediaQuerySize.shortestSide;
 
