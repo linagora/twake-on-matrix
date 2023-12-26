@@ -1,12 +1,14 @@
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 extension TextEdittingControllerExtension on TextEditingController {
-  Future<void> pasteText() async {
+  Future<void> pasteText({ClipboardReader? clipboardReader}) async {
     final start = selection.start;
     final end = selection.end;
     Clipboard.instance.initReader();
-    final pastedText = await Clipboard.instance.pasteText();
+    final pastedText =
+        await Clipboard.instance.pasteText(clipboardReader: clipboardReader);
     if (pastedText != null) {
       if (start == -1 || end == -1) {
         text = pastedText + text;
