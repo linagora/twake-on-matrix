@@ -1,6 +1,5 @@
 import 'package:emojis/emoji.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
-import 'package:fluffychat/pages/chat/input_bar/context_menu_input_bar.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
@@ -28,6 +27,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final ValueChanged<String>? onSubmitted;
   final FocusNode? focusNode;
   final TextEditingController? controller;
+  final ScrollController? suggestionScrollController;
   final FocusSuggestionController focusSuggestionController;
   final InputDecoration decoration;
   final ValueChanged<String>? onChanged;
@@ -46,6 +46,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.onChanged,
     this.autofocus = false,
     this.textInputAction,
+    this.suggestionScrollController,
     this.enablePasteImage = true,
     required this.focusSuggestionController,
     Key? key,
@@ -334,8 +335,14 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       focusSuggestionController: focusSuggestionController,
       room: room,
       onEnter: _onEnter,
-      handlePaste: enablePasteImage ? () => handlePaste(context) : null,
-      child: ContextMenuInputBar(
+      child: TypeAheadField<Map<String, String?>>(
+        direction: VerticalDirection.up,
+        hideOnEmpty: true,
+        hideOnLoading: true,
+        hideOnSelect: false,
+        debounceDuration: const Duration(milliseconds: 50),
+        autoFlipDirection: true,
+        scrollController: suggestionScrollController,
         controller: controller,
         // show suggestions after 50ms idle time (default is 300)
         builder: (context, controller, focusNode) => TextField(
