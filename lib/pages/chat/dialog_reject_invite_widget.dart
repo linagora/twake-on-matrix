@@ -16,10 +16,10 @@ class DialogRejectInviteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: WillPopScope(
-        onWillPop: () async {
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
           Navigator.of(context).pop(DialogRejectInviteResult.cancel);
-          return false;
         },
         child: Center(
           child: UnconstrainedBox(
