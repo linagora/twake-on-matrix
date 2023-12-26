@@ -72,9 +72,11 @@ class HtmlMessage extends StatelessWidget {
       shrinkToFit: true,
       maxLines: maxLines,
       onLinkTap: (url) => UrlLauncher(context, url: url.toString()).launchUrl(),
-      onPillTap: (url) {
-        UrlLauncher(context, url: url, room: room).launchUrl();
-      },
+      onPillTap: !room.isDirectChat
+          ? (url) {
+              UrlLauncher(context, url: url, room: room).launchUrl();
+            }
+          : null,
       getMxcUrl: (
         String mxc,
         double? width,
@@ -116,68 +118,77 @@ class HtmlMessage extends StatelessWidget {
       getCodeLanguage: (String key) async {
         return await matrix.store.getItem('${SettingKeys.codeLanguage}.$key');
       },
-      getPillInfo: (String url) async {
-        final identityParts = url.parseIdentifierIntoParts();
-        final identifier = identityParts?.primaryIdentifier;
-        if (identifier == null) {
-          return {};
-        }
-        if (identifier.sigil == '@') {
-          // we have a user pill
-          final user = room.getState('m.room.member', identifier);
-          if (user != null) {
-            return user.content;
-          }
-          // there might still be a profile...
-          final profile = await room.client.getProfileFromUserId(identifier);
-          return {
-            'displayname': profile.displayName,
-            'avatar_url': profile.avatarUrl.toString(),
-          };
-        }
-        if (identifier.sigil == '#') {
-          // we have an alias pill
-          for (final r in room.client.rooms) {
-            final state = r.getState('m.room.canonical_alias');
-            final altAliases = state?.content['alt_aliases'];
-            if (state != null &&
-                ((state.content['alias'] is String &&
-                        state.content['alias'] == identifier) ||
-                    (altAliases is List && altAliases.contains(identifier)))) {
-              // we have a room!
-              return {
-                'displayname':
-                    r.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
-                'avatar_url': r.getState('m.room.avatar')?.content['url'],
-              };
+      getPillInfo: !room.isDirectChat
+          ? (String url) async {
+              final identityParts = url.parseIdentifierIntoParts();
+              final identifier = identityParts?.primaryIdentifier;
+              if (identifier == null) {
+                return {};
+              }
+              if (identifier.sigil == '@') {
+                // we have a user pill
+                final user = room.getState('m.room.member', identifier);
+                if (user != null) {
+                  return user.content;
+                }
+                // there might still be a profile...
+                final profile =
+                    await room.client.getProfileFromUserId(identifier);
+                return {
+                  'displayname': profile.displayName,
+                  'avatar_url': profile.avatarUrl.toString(),
+                };
+              }
+              if (identifier.sigil == '#') {
+                // we have an alias pill
+                for (final r in room.client.rooms) {
+                  final state = r.getState('m.room.canonical_alias');
+                  final altAliases = state?.content['alt_aliases'];
+                  if (state != null &&
+                      ((state.content['alias'] is String &&
+                              state.content['alias'] == identifier) ||
+                          (altAliases is List &&
+                              altAliases.contains(identifier)))) {
+                    // we have a room!
+                    return {
+                      'displayname': r.getLocalizedDisplayname(
+                        MatrixLocals(L10n.of(context)!),
+                      ),
+                      'avatar_url': r.getState('m.room.avatar')?.content['url'],
+                    };
+                  }
+                }
+                return {};
+              }
+              if (identifier.sigil == '!') {
+                // we have a room ID pill
+                final r = room.client.getRoomById(identifier);
+                if (r == null) {
+                  return {};
+                }
+                return {
+                  'displayname': r
+                      .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+                  'avatar_url': r.getState('m.room.avatar')?.content['url'],
+                };
+              }
+              return {};
             }
-          }
-          return {};
-        }
-        if (identifier.sigil == '!') {
-          // we have a room ID pill
-          final r = room.client.getRoomById(identifier);
-          if (r == null) {
-            return {};
-          }
-          return {
-            'displayname':
-                r.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
-            'avatar_url': r.getState('m.room.avatar')?.content['url'],
-          };
-        }
-        return {};
-      },
+          : null,
       pillBuilder: (identifier, url, onTap, getMxcUrl) {
         final user = room.getUser(identifier);
         final displayName = user?.displayName ?? identifier;
         return MentionnedUser(
           displayName: displayName,
           url: url,
-          onTap: onTap,
-          textStyle: defaultTextStyle?.copyWith(
-            color: themeData.colorScheme.primary,
-          ),
+          onTap: !room.isDirectChat ? onTap : null,
+          textStyle: !room.isDirectChat
+              ? defaultTextStyle?.copyWith(
+                  color: themeData.colorScheme.primary,
+                )
+              : Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
         );
       },
     );
