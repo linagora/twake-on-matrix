@@ -44,7 +44,7 @@ class TwakeWelcomeView extends StatelessWidget {
       ),
       buttonOnTap: controller.goToTwakeIdScreen,
       privacyOnTap: () =>
-          UrlLauncher(context, AppConfig.privacyUrl).openUrlInAppBrowser(),
+          UrlLauncher(context, url: AppConfig.privacyUrl).openUrlInAppBrowser(),
     );
   }
 }
