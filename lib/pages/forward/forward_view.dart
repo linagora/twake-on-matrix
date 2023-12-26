@@ -34,10 +34,10 @@ class ForwardView extends StatelessWidget {
           textEditingController: controller.searchTextEditingController,
         ),
       ),
-      body: WillPopScope(
-        onWillPop: () async {
+      body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) async {
           controller.popScreen();
-          return true;
         },
         child: SingleChildScrollView(
           padding:

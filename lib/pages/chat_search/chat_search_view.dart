@@ -38,12 +38,12 @@ class ChatSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (isPop) async {
         if (Platform.isAndroid) {
           controller.onBack();
         }
-        return false;
       },
       child: Scaffold(
         backgroundColor: LinagoraSysColors.material().onPrimary,
