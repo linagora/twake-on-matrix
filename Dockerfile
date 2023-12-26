@@ -1,5 +1,5 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.13.7
+ARG FLUTTER_VERSION=3.16.5
 ARG OLM_VERSION=3.2.15
 
 # Building libolm

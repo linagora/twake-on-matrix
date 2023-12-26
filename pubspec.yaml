@@ -30,7 +30,7 @@ dependencies:
     sdk: flutter
   flutter_app_badger: ^1.5.0
   flutter_app_lock: ^3.0.0
-  flutter_blurhash: ^0.7.0
+  flutter_blurhash: ^0.8.2
   flutter_cache_manager: ^3.3.0
   flutter_foreground_task: ^3.10.0
   flutter_local_notifications: ^12.0.2
@@ -43,11 +43,7 @@ dependencies:
   flutter_ringtone_player: ^3.1.1
   flutter_secure_storage: ^7.0.1
   flutter_svg: ^0.22.0
-  # FIXME: change to upstream when https://github.com/AbdulRahmanAlHamali/flutter_typeahead/pull/528 is merge
-  flutter_typeahead:
-    git:
-      url: https://github.com/linagora/flutter_typeahead.git
-      ref: twake-supported
+  flutter_typeahead: ^5.0.0
   flutter_web_auth_2: ^3.0.2
   # flutter_webrtc: # Until https://github.com/flutter-webrtc/flutter-webrtc/issues/1212 is fixed
   #   git: https://github.com/radzio-it/flutter-webrtc.git
@@ -128,7 +124,7 @@ dependencies:
   debounce_throttle: ^2.0.0
   fluttertoast: ^8.2.2
   rxdart: ^0.27.7
-  photo_manager: ^2.7.1
+  photo_manager: ^3.0.0-dev.5
   flutter_inappwebview: ^5.8.0
   tuple: ^2.0.2
   lottie: ^2.3.2
@@ -153,16 +149,21 @@ dependencies:
   media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
   js: ^0.6.7
-  super_clipboard: ^0.6.4
+  # TODO:update when super_clipboard release a new version higher than 0.8.0
+  super_clipboard:
+    git:
+      url: https://github.com/superlistapp/super_native_extensions.git
+      ref: main
+      path: super_clipboard
   google_fonts: ^4.0.4
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
   flutter_localized_locales: ^2.0.5
   after_layout: ^1.2.0
+  photo_manager_image_provider: ^2.1.0
 
 dev_dependencies:
   build_runner: ^2.3.3
-  dart_code_metrics: ^5.7.3
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^2.0.1
   flutter_native_splash: ^2.0.3+1
@@ -215,6 +216,12 @@ msix_config:
   install_certificate: false
 
 dependency_overrides:
+  # TODO:remove when super_clipboard release a new version higher than 0.8.0
+  super_native_extensions:
+    git:
+      url: https://github.com/superlistapp/super_native_extensions.git
+      ref: main
+      path: super_native_extensions
   # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
   ffi: ^2.0.0
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
