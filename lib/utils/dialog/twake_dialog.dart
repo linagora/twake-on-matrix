@@ -22,9 +22,9 @@ class TwakeDialog {
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(animation),
-          child: WillPopScope(
-            onWillPop: () async => false,
-            child: const ProgressDialog(),
+          child: const PopScope(
+            canPop: false,
+            child: ProgressDialog(),
           ),
         );
       },

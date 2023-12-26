@@ -24,10 +24,10 @@ class SearchView extends StatelessWidget {
         preferredSize: Size.fromHeight(SearchViewStyle.toolbarHeightSearch),
         child: _buildAppBarSearch(context),
       ),
-      body: WillPopScope(
-        onWillPop: () async {
+      body: PopScope(
+        canPop: true,
+        onPopInvoked: (didPop) async {
           searchController.goToRoomsShellBranch();
-          return true;
         },
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
