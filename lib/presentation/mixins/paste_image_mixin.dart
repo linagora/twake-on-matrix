@@ -8,10 +8,16 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 mixin PasteImageMixin {
-  Future<void> pasteImage(BuildContext context, Room room) async {
-    if (!(await Clipboard.instance.isReadableImageFormat())) {
+  Future<void> pasteImage(
+    BuildContext context,
+    Room room, {
+    ClipboardReader? clipboardReader,
+  }) async {
+    if (!(await Clipboard.instance
+        .isReadableImageFormat(clipboardReader: clipboardReader))) {
       TwakeSnackBar.show(context, L10n.of(context)!.fileFormatNotSupported);
       Logs().e('PasteImageMixin::pasteImage(): not readable image format');
       return;
@@ -19,7 +25,8 @@ mixin PasteImageMixin {
     Uint8List? imageData;
     ClipboardImageInfo? imageClipboard;
     if (PlatformInfos.isWeb) {
-      imageData = await Clipboard.instance.pasteImageUsingBytes();
+      imageData = await Clipboard.instance
+          .pasteImageUsingBytes(reader: clipboardReader);
     } else {
       imageClipboard = await Clipboard.instance.pasteImageUsingStream();
       if (imageClipboard == null) {
