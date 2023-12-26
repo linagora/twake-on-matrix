@@ -3,7 +3,6 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/mentionned_user.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -19,8 +18,10 @@ class HtmlMessage extends StatelessWidget {
   final Room room;
   final TextStyle? defaultTextStyle;
   final TextStyle? linkStyle;
+  final TextStyle? mentionStyle;
   final double? emoteSize;
   final Widget? bottomWidgetSpan;
+  final bool isClickMentionAvailable;
 
   const HtmlMessage({
     Key? key,
@@ -29,8 +30,10 @@ class HtmlMessage extends StatelessWidget {
     required this.room,
     this.defaultTextStyle,
     this.linkStyle,
+    this.mentionStyle,
     this.emoteSize,
     this.bottomWidgetSpan,
+    this.isClickMentionAvailable = true,
   }) : super(key: key);
 
   @override
@@ -71,8 +74,10 @@ class HtmlMessage extends StatelessWidget {
           ),
       shrinkToFit: true,
       maxLines: maxLines,
-      onLinkTap: (url) => UrlLauncher(context, url: url.toString()).launchUrl(),
-      onPillTap: !room.isDirectChat
+      onLinkTap: !room.isDirectChat && isClickMentionAvailable
+          ? (url) => UrlLauncher(context, url: url.toString()).launchUrl()
+          : null,
+      onPillTap: !room.isDirectChat && isClickMentionAvailable
           ? (url) {
               UrlLauncher(context, url: url, room: room).launchUrl();
             }
@@ -118,7 +123,7 @@ class HtmlMessage extends StatelessWidget {
       getCodeLanguage: (String key) async {
         return await matrix.store.getItem('${SettingKeys.codeLanguage}.$key');
       },
-      getPillInfo: !room.isDirectChat
+      getPillInfo: !room.isDirectChat && isClickMentionAvailable
           ? (String url) async {
               final identityParts = url.parseIdentifierIntoParts();
               final identifier = identityParts?.primaryIdentifier;
@@ -179,17 +184,23 @@ class HtmlMessage extends StatelessWidget {
         final user = room.getUser(identifier);
         final displayName =
             user?.id.substring(0, user.id.indexOf(':')) ?? identifier;
-        return MentionnedUser(
-          displayName: displayName,
-          url: url,
-          onTap: !room.isDirectChat ? onTap : null,
-          textStyle: !room.isDirectChat
-              ? defaultTextStyle?.copyWith(
-                  color: themeData.colorScheme.primary,
-                )
-              : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+        return InkWell(
+          onTap: !room.isDirectChat && isClickMentionAvailable
+              ? () => onTap?.call(url)
+              : null,
+          child: Text(
+            displayName,
+            style: mentionStyle ??
+                (!room.isDirectChat
+                    ? defaultTextStyle?.copyWith(
+                        color: themeData.colorScheme.primary,
+                      )
+                    : Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        )),
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+          ),
         );
       },
     );

@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/html_message.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
@@ -91,21 +92,38 @@ mixin ChatListItemMixin {
       future: room.lastEvent?.fetchSenderUser(),
       builder: (context, snapshot) {
         if (snapshot.data == null) return const SizedBox.shrink();
-        final youAreInvitedToThisChat =
-            L10n.of(context)!.youAreInvitedToThisChat;
-        final subscriptions = room.membership == Membership.invite
-            ? youAreInvitedToThisChat
-            : room.lastEvent?.calcLocalizedBodyFallback(
-                  MatrixLocals(L10n.of(context)!),
-                  hideReply: true,
-                  hideEdit: true,
-                  plaintextBody: true,
-                  removeMarkdown: true,
-                ) ??
-                L10n.of(context)!.emptyChat;
-
+        if (room.membership == Membership.invite) {
+          return Text(
+            "${snapshot.data!.calcDisplayname()}: ${L10n.of(context)!.youAreInvitedToThisChat}",
+            softWrap: false,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+          );
+        }
+        if (room.lastEvent!.formattedText.contains('@')) {
+          return HtmlMessage(
+            html:
+                "${snapshot.data!.calcDisplayname()}: ${room.lastEvent!.formattedText}",
+            defaultTextStyle:
+                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+            linkStyle:
+                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+            mentionStyle:
+                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+            isClickMentionAvailable: false,
+            maxLines: 2,
+            room: room,
+          );
+        }
         return Text(
-          "${snapshot.data!.calcDisplayname()}: $subscriptions",
+          "${snapshot.data!.calcDisplayname()}: ${room.lastEvent?.calcLocalizedBodyFallback(
+            MatrixLocals(L10n.of(context)!),
+            hideReply: true,
+            hideEdit: true,
+            plaintextBody: true,
+            removeMarkdown: true,
+          )}",
           softWrap: false,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
