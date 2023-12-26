@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 class FocusSuggestionList extends StatefulWidget {
   final Iterable<Widget> items;
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
   final FocusSuggestionController focusSuggestionController;
 
   const FocusSuggestionList({
     super.key,
     required this.items,
-    required this.scrollController,
+    this.scrollController,
     required this.focusSuggestionController,
   });
 
@@ -41,7 +41,7 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
   void _suggestionIndexChanged() {
     final offset = (widget.focusSuggestionController.currentIndex.value - 2) *
         InputBarStyle.suggestionSize;
-    widget.scrollController.animateTo(
+    widget.scrollController?.animateTo(
       offset,
       duration: _scrollAnimationDuration,
       curve: Curves.linear,

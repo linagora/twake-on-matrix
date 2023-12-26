@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
+import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -89,7 +91,9 @@ class ChatController extends State<Chat>
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
         DragDrogFileMixin,
-        GoToDraftChatMixin {
+        GoToDraftChatMixin,
+        PasteImageMixin,
+        HandleClipboardActionMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -101,6 +105,7 @@ class ChatController extends State<Chat>
 
   PinnedEventsController pinnedEventsController = PinnedEventsController();
 
+  @override
   Room? room;
 
   Client? sendingClient;
@@ -157,6 +162,9 @@ class ChatController extends State<Chat>
 
   FocusNode selectionFocusNode = FocusNode();
 
+  @override
+  FocusNode chatFocusNode = FocusNode();
+
   String selectionText = "";
 
   Timer? typingCoolDown;
@@ -192,6 +200,8 @@ class ChatController extends State<Chat>
   final inputText = ValueNotifier('');
 
   String pendingText = '';
+
+  ScrollController suggestionScrollController = ScrollController();
 
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
@@ -335,6 +345,7 @@ class ChatController extends State<Chat>
 
   @override
   void initState() {
+    registerListeners();
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
@@ -425,6 +436,7 @@ class ChatController extends State<Chat>
 
   @override
   void dispose() {
+    unregisterListeners();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
@@ -436,6 +448,7 @@ class ChatController extends State<Chat>
     super.dispose();
   }
 
+  @override
   final TextEditingController sendController = TextEditingController();
 
   final FocusSuggestionController focusSuggestionController =
