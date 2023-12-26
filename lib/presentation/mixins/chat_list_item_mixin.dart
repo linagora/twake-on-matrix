@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat/events/html_message.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:fluffychat/utils/html/html_parser.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -101,19 +101,13 @@ mixin ChatListItemMixin {
             style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
           );
         }
-        if (room.lastEvent!.formattedText.contains('@')) {
-          return HtmlMessage(
-            html:
-                "${snapshot.data!.calcDisplayname()}: ${room.lastEvent!.formattedText}",
-            defaultTextStyle:
-                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
-            linkStyle:
-                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
-            mentionStyle:
-                ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
-            isClickMentionAvailable: false,
+        if (TwakeHtmlParser.isContentHasPill(room.lastEvent!.formattedText)) {
+          return Text(
+            "${snapshot.data!.calcDisplayname()}: ${TwakeHtmlParser.getContentHasPill(room.lastEvent!.formattedText)}",
+            softWrap: false,
             maxLines: 2,
-            room: room,
+            overflow: TextOverflow.ellipsis,
+            style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
           );
         }
         return Text(

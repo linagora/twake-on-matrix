@@ -12,6 +12,7 @@ import 'package:fluffychat/presentation/model/presentation_contact_constant.dart
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/html/html_parser.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -65,18 +66,24 @@ class SearchController extends State<Search>
       i18n: MatrixLocals(L10n.of(context)!),
     );
 
-    final bodyContent = event
-        .calcLocalizedBodyFallback(
-          MatrixLocals(L10n.of(context)!),
-          hideEdit: true,
-          hideReply: true,
-          plaintextBody: true,
-          removeMarkdown: true,
-        )
-        .substringToHighlight(
-          searchWord,
-          prefixLength: _prefixLengthHighlight,
-        );
+    final bodyContent = TwakeHtmlParser.isContentHasPill(event.formattedText)
+        ? TwakeHtmlParser.getContentHasPill(event.formattedText)
+            .substringToHighlight(
+            searchWord,
+            prefixLength: _prefixLengthHighlight,
+          )
+        : event
+            .calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)!),
+              hideEdit: true,
+              hideReply: true,
+              plaintextBody: true,
+              removeMarkdown: true,
+            )
+            .substringToHighlight(
+              searchWord,
+              prefixLength: _prefixLengthHighlight,
+            );
     return '$senderName: $bodyContent';
   }
 

@@ -14,6 +14,7 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/html/html_parser.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -298,18 +299,24 @@ class _MessageContent extends StatelessWidget {
         return MessageDownloadContent(event, highlightText: searchWord);
       default:
         return HighlightText(
-          text: event
-              .calcLocalizedBodyFallback(
-                MatrixLocals(L10n.of(context)!),
-                hideReply: true,
-                hideEdit: true,
-                plaintextBody: true,
-                removeMarkdown: true,
-              )
-              .substringToHighlight(
-                searchWord,
-                prefixLength: _prefixLengthHighlight,
-              ),
+          text: TwakeHtmlParser.isContentHasPill(event.formattedText)
+              ? TwakeHtmlParser.getContentHasPill(event.formattedText)
+                  .substringToHighlight(
+                  searchWord,
+                  prefixLength: _prefixLengthHighlight,
+                )
+              : event
+                  .calcLocalizedBodyFallback(
+                    MatrixLocals(L10n.of(context)!),
+                    hideReply: true,
+                    hideEdit: true,
+                    plaintextBody: true,
+                    removeMarkdown: true,
+                  )
+                  .substringToHighlight(
+                    searchWord,
+                    prefixLength: _prefixLengthHighlight,
+                  ),
           searchWord: searchWord,
           maxLines: 2,
           style: LinagoraTextStyle.material()
