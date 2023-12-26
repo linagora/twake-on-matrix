@@ -177,7 +177,8 @@ class HtmlMessage extends StatelessWidget {
           : null,
       pillBuilder: (identifier, url, onTap, getMxcUrl) {
         final user = room.getUser(identifier);
-        final displayName = user?.displayName ?? identifier;
+        final displayName =
+            user?.id.substring(0, user.id.indexOf(':')) ?? identifier;
         return MentionnedUser(
           displayName: displayName,
           url: url,
