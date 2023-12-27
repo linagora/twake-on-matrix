@@ -87,35 +87,55 @@ class Clipboard {
     return c.future;
   }
 
-  Future<Uint8List?>? pasteImageUsingBytes({ClipboardReader? reader}) async {
+  Future<List<MatrixFile?>>? pasteImagesUsingBytes({
+    ClipboardReader? reader,
+  }) async {
     _reader = reader ?? await SystemClipboard.instance?.read();
-    final readableFormats = _reader!.getFormats(allImageFormatsSupported);
-    if (readableFormats.isEmpty != false &&
-        readableFormats.first is! SimpleFileFormat) {
-      return null;
-    }
 
-    final c = Completer<Uint8List?>();
-    final progress = _reader!.getFile(
-      readableFormats.first as SimpleFileFormat,
-      (file) async {
-        try {
-          final all = await file.readAll();
-          c.complete(all);
-        } catch (e) {
-          Logs().e('Clipboard::pasteImageUsingBytes(): $e');
-          c.completeError(e);
-        }
-      },
-      onError: (e) {
-        Logs().e('Clipboard::pasteImageUsingBytes(): $e');
-        c.completeError(e);
-      },
-    );
-    if (progress == null) {
-      c.complete(null);
-    }
-    return c.future;
+    final futures = _reader?.items
+        .map((item) {
+          final c = Completer<MatrixFile?>();
+          final readableFormats = item.getFormats(allImageFormatsSupported);
+          if (readableFormats.isEmpty != false &&
+              readableFormats.first is! SimpleFileFormat) {
+            return null;
+          }
+          final format = readableFormats.first as SimpleFileFormat;
+          final progress = item.getFile(
+            format,
+            (file) async {
+              try {
+                final data = await file.readAll();
+
+                c.complete(
+                  MatrixFile(
+                    name: file.fileName ?? 'copied',
+                    bytes: data,
+                    mimeType: format.mimeTypes?.first,
+                  ),
+                );
+              } catch (e) {
+                Logs().e('Clipboard::pasteImageUsingBytes(): $e');
+                c.completeError(e);
+              }
+            },
+            onError: (e) {
+              Logs().e('Clipboard::pasteImageUsingBytes(): $e');
+              c.completeError(e);
+            },
+          );
+          if (progress == null) {
+            c.complete(null);
+          }
+          return c.future;
+        })
+        .where((future) => future != null)
+        .cast<Future<MatrixFile?>>()
+        .toList();
+
+    final results = await Future.wait<MatrixFile?>(futures ?? []);
+
+    return results;
   }
 
   Future<bool> isReadableImageFormat({ClipboardReader? clipboardReader}) async {
