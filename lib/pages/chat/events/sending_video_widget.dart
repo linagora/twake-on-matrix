@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -83,6 +84,7 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
           imageHeight: displayImageInfo.size.height,
           imageWidth: displayImageInfo.size.width,
           matrixFile: matrixFile,
+          event: event,
         ),
       ),
     );
@@ -117,15 +119,17 @@ class VideoWidget extends StatelessWidget {
     required this.imageHeight,
     required this.imageWidth,
     required this.matrixFile,
+    required this.event,
   });
 
   final double imageHeight;
   final double imageWidth;
   final MatrixFile matrixFile;
+  final Event event;
 
   @override
   Widget build(BuildContext context) {
-    return matrixFile.bytes != null
+    return matrixFile.bytes != null && event.isThumbnailGenerated()
         ? Image.memory(
             matrixFile.bytes!,
             width: imageWidth,
