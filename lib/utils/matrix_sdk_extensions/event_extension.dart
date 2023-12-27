@@ -209,4 +209,9 @@ extension LocalizedBody on Event {
       hideReply: true,
     );
   }
+
+  bool isThumbnailGenerated() {
+    return fileSendingStatus == FileSendingStatus.encrypting ||
+        fileSendingStatus == FileSendingStatus.uploading;
+  }
 }
