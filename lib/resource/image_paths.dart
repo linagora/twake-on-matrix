@@ -24,7 +24,10 @@ class ImagePaths {
   static String get icFilePdf => _getImagePath('ic_file_pdf.svg');
   static String get icFilePptx => _getImagePath('ic_file_ppt.svg');
   static String get icFileFolder => _getImagePath('ic_file_folder.svg');
-  static String get icFileUnknown => _getImagePath('ic_file_unknow.svg');
+  static String get icFileUnknown => _getImagePath('ic_file_unknown.svg');
+  static String get icFileImage => _getImagePath('ic_file_image.svg');
+  static String get icFileAudio => _getImagePath('ic_file_audio.svg');
+  static String get icFileVideo => _getImagePath('ic_file_video.svg');
   static String get icTwakeImageLogo =>
       _getImagePath('ic_twake_image_logo.svg');
   static String get icApplicationGrid =>
@@ -42,9 +45,6 @@ class ImagePaths {
   static String get icUnpin => _getImagePath('ic_unpin.svg');
   static String get icJumpTo => _getImagePath('ic_jump_to.svg');
   static String get logoTwakeWelcome => _getImagePath('logo_twake_welcome.svg');
-  static String get icFileImage => _getImagePath('ic_file_image.svg');
-  static String get icFileAudio => _getImagePath('ic_file_audio.svg');
-  static String get icFileVideo => _getImagePath('ic_file_video.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
