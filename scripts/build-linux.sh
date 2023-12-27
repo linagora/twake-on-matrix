@@ -1,5 +1,6 @@
 #!/bin/sh -ve
 echo "Setup Linux dependencies"
+sudo apt update
 sudo apt-get install -y clang cmake ninja-build \
                               pkg-config libgtk-3-dev liblzma-dev \
                               libjsoncpp-dev libfuse-dev \
