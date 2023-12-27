@@ -1,10 +1,11 @@
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/file_tile_widget.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
@@ -51,7 +52,10 @@ class SendFileDialogView extends StatelessWidget {
               const SizedBox(height: 16.0),
               controller.isSendMediaWithCaption
                   ? _MediaPageViewWidget(files: controller.files)
-                  : _FilesListViewWidget(files: controller.files),
+                  : _FilesListViewWidget(
+                      files: controller.files,
+                      room: controller.widget.room,
+                    ),
               const SizedBox(height: 16.0),
               InputBar(
                 maxLines: 5,
@@ -174,8 +178,11 @@ class _MediaPageViewWidget extends StatelessWidget {
 class _FilesListViewWidget extends StatelessWidget {
   final List<MatrixFile> files;
 
+  final Room? room;
+
   const _FilesListViewWidget({
     required this.files,
+    this.room,
   });
 
   @override
@@ -197,7 +204,7 @@ class _FilesListViewWidget extends StatelessWidget {
           padding: SendFileDialogStyle.paddingFilesListView,
           itemBuilder: (BuildContext context, int index) {
             final file = files[index];
-            return Padding(
+            final child = Padding(
               padding: SendFileDialogStyle.paddingFileTile,
               child: FileTileWidget(
                 mimeType: file.mimeType,
@@ -207,6 +214,35 @@ class _FilesListViewWidget extends StatelessWidget {
                 backgroundColor:
                     SendFileDialogStyle.listViewBackgroundColor(context),
               ),
+            );
+            Future<MatrixImageFile?>? getThumbnailFuture;
+            if (file is MatrixImageFile) {
+              getThumbnailFuture = room?.generateThumbnail(file);
+            } else if (file is MatrixVideoFile) {
+              getThumbnailFuture = room?.generateVideoThumbnail(file);
+            } else {
+              return child;
+            }
+
+            return FutureBuilder(
+              future: getThumbnailFuture,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return child;
+                }
+                return Padding(
+                  padding: SendFileDialogStyle.paddingFileTile,
+                  child: FileTileWidget(
+                    mimeType: file.mimeType,
+                    filename: file.name,
+                    fileType: file.fileExtension,
+                    sizeString: file.sizeString,
+                    backgroundColor:
+                        SendFileDialogStyle.listViewBackgroundColor(context),
+                    imageBytes: snapshot.data?.bytes,
+                  ),
+                );
+              },
             );
           },
         ),

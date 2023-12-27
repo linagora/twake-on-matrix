@@ -73,7 +73,7 @@ extension SendFileWebExtension on Room {
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
-      thumbnail ??= await _generateThumbnail(file);
+      thumbnail ??= await generateThumbnail(file);
       if (thumbnail != null && file.size < thumbnail.size) {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
@@ -82,7 +82,7 @@ extension SendFileWebExtension on Room {
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
-      thumbnail ??= await _generateVideoThumbnail(file);
+      thumbnail ??= await generateVideoThumbnail(file);
     }
 
     EncryptedFile? encryptedFile;
@@ -258,7 +258,7 @@ extension SendFileWebExtension on Room {
     }
   }
 
-  Future<MatrixImageFile?> _generateThumbnail(
+  Future<MatrixImageFile?> generateThumbnail(
     MatrixImageFile originalFile,
   ) async {
     if (originalFile.bytes == null) return null;
@@ -287,7 +287,7 @@ extension SendFileWebExtension on Room {
     }
   }
 
-  Future<MatrixImageFile?> _generateVideoThumbnail(
+  Future<MatrixImageFile?> generateVideoThumbnail(
     MatrixVideoFile originalFile,
   ) async {
     if (originalFile.bytes == null) return null;
