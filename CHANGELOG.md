@@ -1,3 +1,29 @@
+## [2.4.10+2330] - 2023-12-27
+
+### Added
+
+- jump to unread message in chat
+- new group information
+- show list of pinned message
+- Load more and jump to message in server side search
+- New starting page
+- Share multiple files from external apps
+- Send multiple file
+- Send multiple file with thumbnail
+
+### Changed
+
+- Change iOS target to 12
+
+### Fixed
+
+- Remove unuse event in htmlMessage
+- overflow in height in reply container
+- image not change when changing reply image message
+- go to direct chat when click on avatar
+- centering logo in homepicker
+- increase video player hit box
+
 ## [2.4.6+2330] - 2023-12-12
 ### Fixed
 - Context menu in Chat screen
@@ -2096,24 +2122,17 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.10+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.10
+
 [2.4.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.6
 [2.4.5+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.5
 [2.4.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.2
-
 [2.4.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.1
-
 [2.4.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.0
-
 [2.3.7+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.7
-
 [2.3.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.6
-
 [2.3.3+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.3
-
 [2.3.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.2
-
 [2.3.1+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.1
-
 [2.3.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.3.0
-
 [2.2.4+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.2.4
