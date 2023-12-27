@@ -52,6 +52,10 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     Key? key,
   }) : super(key: key);
 
+  static const debounceDuration = Duration(milliseconds: 50);
+
+  static const debounceDurationTap = Duration(milliseconds: 100);
+
   List<Map<String, String?>> getSuggestions(String text) {
     if (controller!.selection.baseOffset !=
             controller!.selection.extentOffset ||
@@ -340,7 +344,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
         hideOnEmpty: true,
         hideOnLoading: true,
         hideOnSelect: false,
-        debounceDuration: const Duration(milliseconds: 50),
+        debounceDuration: debounceDuration,
         autoFlipDirection: true,
         scrollController: suggestionScrollController,
         controller: controller,
@@ -361,7 +365,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             }
           },
           onTap: () async {
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future.delayed(debounceDurationTap);
             FocusScope.of(context).requestFocus(focusNode);
           },
           onSubmitted: PlatformInfos.isMobile
