@@ -41,7 +41,8 @@ class SendFileDialogStyle {
   static const double maxHeightFilesListView = 320;
 
   static const EdgeInsets paddingFilesListView = EdgeInsets.only(
-    top: 8.0,
+    top: 4.0,
+    bottom: 4.0,
   );
 
   static Color? listViewBackgroundColor(BuildContext context) =>
@@ -49,5 +50,5 @@ class SendFileDialogStyle {
 
   static const double listViewBorderRadius = 8.0;
 
-  static const paddingFileTile = EdgeInsets.only(bottom: 8.0);
+  static const paddingFileTile = EdgeInsets.symmetric(vertical: 4.0);
 }
