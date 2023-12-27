@@ -1,6 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/file_tile_widget_style.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -13,6 +15,8 @@ class FileTileWidget extends StatelessWidget {
     this.highlightText,
     this.sizeString,
     this.backgroundColor,
+    this.imageBytes,
+    this.style = const FileTileWidgetStyle(),
   });
 
   final TwakeMimeType mimeType;
@@ -21,47 +25,76 @@ class FileTileWidget extends StatelessWidget {
   final String? sizeString;
   final Color? backgroundColor;
   final String? fileType;
+  final Uint8List? imageBytes;
+  final FileTileWidgetStyle style;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: FileTileWidgetStyle.paddingFileTileAll,
+      padding: style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: backgroundColor ?? FileTileWidgetStyle.backgroundColor,
+        color: backgroundColor ?? style.backgroundColor,
         shape: RoundedRectangleBorder(
-          borderRadius: FileTileWidgetStyle.borderRadius,
+          borderRadius: style.borderRadius,
         ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: style.crossAxisAlignment,
         children: [
-          SvgPicture.asset(
-            mimeType.getIcon(fileType: fileType),
-            width: FileTileWidgetStyle.iconSize,
-            height: FileTileWidgetStyle.iconSize,
-          ),
+          if (imageBytes != null)
+            Padding(
+              padding: style.imagePadding,
+              child: ClipRRect(
+                borderRadius: style.borderRadius,
+                child: Image.memory(
+                  imageBytes!,
+                  width: style.imageSize,
+                  height: style.imageSize,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          if (imageBytes == null)
+            SvgPicture.asset(
+              mimeType.getIcon(fileType: fileType),
+              width: style.iconSize,
+              height: style.iconSize,
+            ),
+          style.paddingRightIcon,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: [
+                const SizedBox(height: 4.0),
                 _FileNameText(
                   filename: filename,
                   highlightText: highlightText,
+                  style: style,
                 ),
                 Row(
                   children: [
                     if (sizeString != null)
-                      _TextInformationOfFile(value: sizeString!),
-                    const _TextInformationOfFile(value: " · "),
+                      _TextInformationOfFile(
+                        value: sizeString!,
+                        style: style,
+                      ),
+                    _TextInformationOfFile(
+                      value: " · ",
+                      style: style,
+                    ),
                     Flexible(
                       child: _TextInformationOfFile(
-                        value:
-                            mimeType.getFileType(context, fileType: fileType),
+                        value: mimeType.getFileType(
+                          context,
+                          fileType: fileType,
+                        ),
+                        style: style,
                       ),
                     ),
                   ],
                 ),
+                style.paddingBottomText,
               ],
             ),
           ),
@@ -75,10 +108,12 @@ class _FileNameText extends StatelessWidget {
   const _FileNameText({
     required this.filename,
     this.highlightText,
+    this.style = const FileTileWidgetStyle(),
   });
 
   final String filename;
   final String? highlightText;
+  final FileTileWidgetStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -87,8 +122,8 @@ class _FileNameText extends StatelessWidget {
       text: TextSpan(
         children: filename.buildHighlightTextSpans(
           highlightText ?? '',
-          style: FileTileWidgetStyle.textStyle(context),
-          highlightStyle: FileTileWidgetStyle.highlightTextStyle(context),
+          style: style.textStyle(context),
+          highlightStyle: style.highlightTextStyle(context),
         ),
       ),
       overflow: TextOverflow.ellipsis,
@@ -98,13 +133,17 @@ class _FileNameText extends StatelessWidget {
 
 class _TextInformationOfFile extends StatelessWidget {
   final String value;
-  const _TextInformationOfFile({required this.value});
+  final FileTileWidgetStyle style;
+  const _TextInformationOfFile({
+    required this.value,
+    this.style = const FileTileWidgetStyle(),
+  });
 
   @override
   Widget build(BuildContext context) {
     return Text(
       value,
-      style: FileTileWidgetStyle.textInformationStyle(context),
+      style: style.textInformationStyle(context),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
