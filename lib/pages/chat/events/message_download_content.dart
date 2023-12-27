@@ -1,5 +1,6 @@
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/file_tile_widget.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
+import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -37,6 +38,7 @@ class MessageDownloadContent extends StatelessWidget {
         filename: filename,
         highlightText: highlightText,
         sizeString: sizeString,
+        style: MessageFileTileStyle(),
       ),
     );
   }
