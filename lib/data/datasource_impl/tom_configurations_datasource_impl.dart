@@ -8,11 +8,11 @@ import 'package:matrix/matrix.dart';
 
 class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
   @override
-  Future<ToMConfigurations> getTomConfigurations(String clientName) async {
+  Future<ToMConfigurations> getTomConfigurations(String userId) async {
     final hiveCollectionToMDatabase =
         await getIt.getAsync<HiveCollectionToMDatabase>();
     final cachedConfiguration =
-        await hiveCollectionToMDatabase.tomConfigurationsBox.get(clientName);
+        await hiveCollectionToMDatabase.tomConfigurationsBox.get(userId);
     if (cachedConfiguration != null) {
       final toMConfigurationsHiveObj =
           ToMConfigurationsHiveObj.fromJson(copyMap(cachedConfiguration));
@@ -35,13 +35,13 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
 
   @override
   Future<void> saveTomConfigurations(
-    String clientName,
+    String userId,
     ToMConfigurations toMConfigurations,
   ) async {
     final hiveCollectionToMDatabase =
         await getIt.getAsync<HiveCollectionToMDatabase>();
     return hiveCollectionToMDatabase.tomConfigurationsBox.put(
-      clientName,
+      userId,
       ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations)
           .toJson(),
     );

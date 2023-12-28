@@ -482,9 +482,10 @@ class MatrixState extends State<Matrix>
   }
 
   void _retrieveLocalToMConfiguration() async {
+    if (client.userID == null) return;
     try {
-      final toMConfigurations = await tomConfigurationRepository
-          .getTomConfigurations(client.clientName);
+      final toMConfigurations =
+          await tomConfigurationRepository.getTomConfigurations(client.userID!);
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -591,10 +592,14 @@ class MatrixState extends State<Matrix>
       Logs().e(
         'Matrix::_storeToMConfiguration: clientName - ${client.clientName}',
       );
+      Logs().e(
+        'Matrix::_storeToMConfiguration: userId - ${client.userID}',
+      );
+      if (client.userID == null) return;
       final ToMConfigurationsRepository configurationRepository =
           getIt.get<ToMConfigurationsRepository>();
       configurationRepository.saveTomConfigurations(
-        client.clientName,
+        client.userID!,
         config,
       );
       Logs().e(
@@ -612,9 +617,9 @@ class MatrixState extends State<Matrix>
   }
 
   void _checkHomeserverExists(Client? client) async {
-    if (client == null) return;
+    if (client == null && client?.userID == null) return;
     try {
-      await tomConfigurationRepository.getTomConfigurations(client.clientName);
+      await tomConfigurationRepository.getTomConfigurations(client!.userID!);
       setTakeSupported(supported: true);
     } catch (e) {
       setTakeSupported(supported: false);
