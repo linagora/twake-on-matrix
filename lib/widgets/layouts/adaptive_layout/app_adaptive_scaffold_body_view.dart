@@ -22,6 +22,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
   final PageController pageController;
+  final VoidCallback onOpenSettings;
 
   final ValueNotifier<String?> activeRoomIdNotifier;
 
@@ -43,6 +44,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
+    required this.onOpenSettings,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -109,6 +111,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                               onClientSelected: onClientSelected,
                               destinations: destinations,
                               bottomNavigationKey: bottomNavigationKey,
+                              onOpenSettings: onOpenSettings,
                             );
                           },
                         );
@@ -135,6 +138,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                 onClientSelected: onClientSelected,
                 destinations: destinations,
                 bottomNavigationKey: bottomNavigationKey,
+                onOpenSettings: onOpenSettings,
               ),
             ),
           ],
@@ -160,6 +164,7 @@ class _ColumnPageView extends StatelessWidget {
   final OnClientSelectedSetting onClientSelected;
   final ValueKey bottomNavigationKey;
   final ValueNotifier<String?> activeRoomIdNotifier;
+  final VoidCallback onOpenSettings;
 
   const _ColumnPageView({
     required this.activeNavigationBar,
@@ -171,6 +176,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.onClientSelected,
     required this.destinations,
     required this.bottomNavigationKey,
+    required this.onOpenSettings,
   });
 
   @override
@@ -192,6 +198,7 @@ class _ColumnPageView extends StatelessWidget {
           ),
           onOpenSearchPage: onOpenSearchPage,
           activeRoomIdNotifier: activeRoomIdNotifier,
+          onOpenSettings: onOpenSettings,
         ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,

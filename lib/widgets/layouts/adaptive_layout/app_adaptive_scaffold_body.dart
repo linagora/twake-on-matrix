@@ -122,5 +122,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onCloseSearchPage: _onCloseSearchPage,
         onDestinationSelected: onDestinationSelected,
         onClientSelected: clientSelected,
+        onOpenSettings: _onOpenSettingsPage,
       );
 }
