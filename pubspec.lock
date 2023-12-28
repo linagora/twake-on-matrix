@@ -832,10 +832,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_keyboard_visibility
-      sha256: "4983655c26ab5b959252ee204c2fffa4afeb4413cd030455194ec0caa3b8e7cb"
+      sha256: "98664be7be0e3ffca00de50f7f6a287ab62c763fc8c762e0a21584584a3ff4f8"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.1"
+    version: "6.0.0"
   flutter_keyboard_visibility_linux:
     dependency: transitive
     description:
@@ -986,6 +986,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.17"
+  flutter_portal:
+    dependency: "direct main"
+    description:
+      name: flutter_portal
+      sha256: "4601b3dc24f385b3761721bd852a3f6c09cddd4e943dd184ed58ee1f43006257"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   flutter_ringtone_player:
     dependency: "direct main"
     description:
@@ -1043,6 +1051,14 @@ packages:
       url: "https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git"
     source: git
     version: "1.1.2"
+  flutter_slidable:
+    dependency: "direct main"
+    description:
+      name: flutter_slidable
+      sha256: "673403d2eeef1f9e8483bd6d8d92aae73b1d8bd71f382bc3930f699c731bc27c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -1060,10 +1076,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_typeahead
-      sha256: "1f6b248bb4f3ebb4cf1ee0354aa23c77be457fb2d26d6847ecc33a917f65e58e"
+      sha256: d64712c65db240b1057559b952398ebb6e498077baeebf9b0731dade62438a6d
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.1"
+    version: "5.2.0"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
@@ -1122,14 +1138,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.4"
-  geolocator:
-    dependency: "direct main"
-    description:
-      name: geolocator
-      sha256: b8f520252c5c66851295bcc263bc8ae7555501938427f72216ba7688702e261d
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.7.1"
   geolocator_android:
     dependency: "direct overridden"
     description:
@@ -1138,14 +1146,6 @@ packages:
       url: "https://hanntech-gmbh.gitlab.io/free2pass/flutter-geolocator-floss/"
     source: hosted
     version: "1.0.1"
-  geolocator_apple:
-    dependency: transitive
-    description:
-      name: geolocator_apple
-      sha256: "1e8e398cc92151d946a4bbd34e2075885333e42d35ca33e418e7ce7b0a29991e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.2"
   geolocator_platform_interface:
     dependency: transitive
     description:
@@ -1154,14 +1154,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
-  geolocator_web:
-    dependency: transitive
-    description:
-      name: geolocator_web
-      sha256: "0b9e0ec13ce2211085cae0055b3516c975bd6cfe2878a20c8f13611f1a259855"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.6"
   get_it:
     dependency: "direct main"
     description:
@@ -1399,6 +1391,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.18.1"
+  inview_notifier_list:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: f7a29ac1c4de3ea26d749c38781a6f5e9b1b932d
+      url: "git@github.com:linagora/inview_notifier_list.git"
+    source: git
+    version: "3.0.0"
   io:
     dependency: transitive
     description:
@@ -1411,18 +1412,18 @@ packages:
     dependency: transitive
     description:
       name: irondash_engine_context
-      sha256: "8b8c58f2b6414b0db739b329ca08baf3b66d4fcfc3c315525ddac61639addb90"
+      sha256: "4f5e2629296430cce08cdff42e47cef07b8f74a64fdbdfb0525d147bc1a969a2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "0.5.2"
   irondash_message_channel:
     dependency: transitive
     description:
       name: irondash_message_channel
-      sha256: "131d64d97a3612bc3617aefc878f3e3a8e23e0ce18b3bba8e78cb1930befcec1"
+      sha256: dd581214215dca054bd9873209d690ec3609288c28774cb509dbd86b21180cf8
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.0"
+    version: "0.6.0"
   isolate:
     dependency: transitive
     description:
@@ -1508,8 +1509,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: multiple-account-picker
-      resolved-ref: "908bb487d1073f3dd5727aaeb5ab3d9ddae4c0e4"
+      ref: master
+      resolved-ref: "7ed486ea00f7e91254555a4a828ff3a625b4e1ae"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
@@ -1715,6 +1716,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  mockito:
+    dependency: "direct dev"
+    description:
+      name: mockito
+      sha256: "7d5b53bcd556c1bc7ffbe4e4d5a19c3e112b7e925e9e172dd7c6ad0630812616"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.4.2"
   mpv_dart:
     dependency: transitive
     description:
@@ -1983,10 +1992,34 @@ packages:
     dependency: transitive
     description:
       name: pointer_interceptor
-      sha256: adf7a637f97c077041d36801b43be08559fd4322d2127b3f20bb7be1b9eebc22
+      sha256: bd18321519718678d5fa98ad3a3359cbc7a31f018554eab80b73d08a7f0c165a
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.3+7"
+    version: "0.10.1"
+  pointer_interceptor_ios:
+    dependency: transitive
+    description:
+      name: pointer_interceptor_ios
+      sha256: "2e73c39452830adc4695757130676a39412a3b7f3c34e3f752791b5384770877"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.0+2"
+  pointer_interceptor_platform_interface:
+    dependency: transitive
+    description:
+      name: pointer_interceptor_platform_interface
+      sha256: "0597b0560e14354baeb23f8375cd612e8bd4841bf8306ecb71fcd0bb78552506"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.0+1"
+  pointer_interceptor_web:
+    dependency: transitive
+    description:
+      name: pointer_interceptor_web
+      sha256: "9386e064097fd16419e935c23f08f35b58e6aaec155dd39bd6a003b88f9c14b4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.1+2"
   pointycastle:
     dependency: transitive
     description:
@@ -2412,6 +2445,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  skeletonizer:
+    dependency: "direct main"
+    description:
+      name: skeletonizer
+      sha256: "2eb80153c80507359ff05f6a18ed50ae0bafa1b999aa867a8cef0a53387b5650"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   skeletons:
     dependency: "direct main"
     description:
@@ -2516,21 +2557,19 @@ packages:
   super_clipboard:
     dependency: "direct main"
     description:
-      path: super_clipboard
-      ref: main
-      resolved-ref: fdaf87f6a30ac049d401967a8c5ec400126f288d
-      url: "https://github.com/superlistapp/super_native_extensions.git"
-    source: git
-    version: "0.8.1"
+      name: super_clipboard
+      sha256: "77f044320934386e0b7a3911e05312426d7f33deb6e8cdb28886663430b0e5b0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.4"
   super_native_extensions:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: super_native_extensions
-      ref: main
-      resolved-ref: fdaf87f6a30ac049d401967a8c5ec400126f288d
-      url: "https://github.com/superlistapp/super_native_extensions.git"
-    source: git
-    version: "0.8.1"
+      name: super_native_extensions
+      sha256: f96db6b137a0b135e43034289bb55ca6447b65225076036e81f97ebb6381ffeb
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.5"
   sync_http:
     dependency: transitive
     description:
