@@ -174,15 +174,22 @@ class MatrixState extends State<Matrix>
           .where((l) => l == LoginState.loggedIn)
           .first
           .then((_) {
-        Logs().d('MatrixState::getLoginClient() Login successful');
+        Logs().d(
+          'MatrixState::getLoginClient() Login successful - Client ${_loginClientCandidate!.clientName}',
+        );
         if (!widget.clients.contains(_loginClientCandidate)) {
           widget.clients.add(_loginClientCandidate!);
         }
         ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
         Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
+        TwakeApp.router.go(
+          '/rooms',
+          extra: getClientByName(
+            _loginClientCandidate!.clientName,
+          ),
+        );
         _loginClientCandidate = null;
-        TwakeApp.router.go('/rooms');
       });
     return candidate;
   }
@@ -366,7 +373,7 @@ class MatrixState extends State<Matrix>
         } else {
           Logs().v('[MATRIX] Log out successful');
           if (PlatformInfos.isMobile) {
-            TwakeApp.router.go('/home/twakeid');
+            TwakeApp.router.go('/twakeid');
           } else {
             TwakeApp.router.go('/home', extra: true);
           }

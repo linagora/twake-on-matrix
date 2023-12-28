@@ -164,6 +164,8 @@ abstract class AppRoutes {
                 ? const ChatBlank()
                 : AppAdaptiveScaffoldBody(
                     activeRoomId: state.pathParameters['roomid'],
+                    client:
+                        state.extra is Client? ? state.extra as Client? : null,
                   ),
           ),
           routes: [
