@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:equatable/equatable.dart';
 import 'package:fluffychat/pages/twake_id/twake_id_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -8,8 +9,27 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
+enum TwakeIdType {
+  login,
+  multiLogin,
+}
+
+class TwakeIdArg extends Equatable {
+  final TwakeIdType twakeIdType;
+
+  const TwakeIdArg({
+    this.twakeIdType = TwakeIdType.login,
+  });
+
+  bool get isAddAnotherAccount => twakeIdType == TwakeIdType.multiLogin;
+
+  @override
+  List<Object?> get props => [twakeIdType];
+}
+
 class TwakeId extends StatefulWidget {
-  const TwakeId({super.key});
+  final TwakeIdArg? arg;
+  const TwakeId({super.key, this.arg});
 
   @override
   State<TwakeId> createState() => TwakeIdController();
@@ -17,7 +37,11 @@ class TwakeId extends StatefulWidget {
 
 class TwakeIdController extends State<TwakeId> {
   void goToHomeserverPicker() {
-    context.push('/home/homeserverpicker');
+    if (widget.arg?.isAddAnotherAccount == true) {
+      context.push('/rooms/homeserverpicker');
+    } else {
+      context.push('/home/homeserverpicker');
+    }
   }
 
   static const String postLoginRedirectUrlPathParams =
