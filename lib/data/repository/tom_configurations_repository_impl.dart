@@ -8,17 +8,17 @@ class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
       getIt.get<ToMConfigurationsDatasource>();
 
   @override
-  Future<ToMConfigurations> getTomConfigurations(String clientName) {
-    return tomConfigurationsDatasource.getTomConfigurations(clientName);
+  Future<ToMConfigurations> getTomConfigurations(String userId) {
+    return tomConfigurationsDatasource.getTomConfigurations(userId);
   }
 
   @override
   Future<void> saveTomConfigurations(
-    String clientName,
+    String userId,
     ToMConfigurations toMConfigurations,
   ) {
     return tomConfigurationsDatasource.saveTomConfigurations(
-      clientName,
+      userId,
       toMConfigurations,
     );
   }
