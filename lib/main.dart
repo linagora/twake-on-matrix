@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:path_provider/path_provider.dart';
 import 'utils/background_push.dart';
 import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
@@ -21,6 +23,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
+  if (PlatformInfos.isLinux) {
+    Hive.init((await getApplicationSupportDirectory()).path);
+  } else {
+    await Hive.initFlutter();
+  }
+
+  GetItInitializer().setUp();
+
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
   // Preload first client
@@ -28,8 +38,6 @@ void main() async {
   firstClient?.isSupportDeleteCollections = !PlatformInfos.isWeb;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
-
-  GetItInitializer().setUp();
 
   // If the app starts in detached mode, we assume that it is in
   // background fetch mode for processing push notifications. This is

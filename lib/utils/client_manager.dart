@@ -2,10 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
@@ -16,11 +14,6 @@ import 'famedlysdk_store.dart';
 abstract class ClientManager {
   static const String clientNamespace = 'im.fluffychat.store.clients';
   static Future<List<Client>> getClients({bool initialize = true}) async {
-    if (PlatformInfos.isLinux) {
-      Hive.init((await getApplicationSupportDirectory()).path);
-    } else {
-      await Hive.initFlutter();
-    }
     final clientNames = <String>{};
     try {
       final rawClientNames = await Store().getItem(clientNamespace);
