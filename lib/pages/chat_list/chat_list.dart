@@ -49,11 +49,14 @@ class ChatList extends StatefulWidget {
 
   final VoidCallback? onOpenSearchPage;
 
+  final VoidCallback? onOpenSettings;
+
   const ChatList({
     Key? key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSearchPage,
+    this.onOpenSettings,
   }) : super(key: key);
 
   @override
@@ -772,7 +775,7 @@ class ChatListController extends State<ChatList>
   }
 
   void onGoToAccountSettings() {
-    context.push('/rooms/profile');
+    widget.onOpenSettings?.call();
   }
 
   void onAddAnotherAccount() {

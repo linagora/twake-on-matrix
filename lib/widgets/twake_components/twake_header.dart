@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
@@ -102,24 +103,32 @@ class TwakeHeader extends StatelessWidget
                     padding: TwakeHeaderStyle.actionsPadding,
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () => _displayMultipleAccountPicker(context),
-                        child: ValueListenableBuilder(
-                          valueListenable: controller.currentProfileNotifier,
-                          builder: (context, profile, _) {
-                            return Avatar(
-                              mxContent: profile.avatarUrl,
-                              name: profile.displayName ??
-                                  Matrix.of(context).client.userID!.localpart,
-                              size: TwakeHeaderStyle.avatarSize,
-                              fontSize: TwakeHeaderStyle.avatarFontSizeInAppBar,
-                            );
-                          },
-                        ),
-                      ),
+                      child: PlatformInfos.isMobile
+                          ? InkWell(
+                              hoverColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () =>
+                                  _displayMultipleAccountPicker(context),
+                              child: ValueListenableBuilder(
+                                valueListenable:
+                                    controller.currentProfileNotifier,
+                                builder: (context, profile, _) {
+                                  return Avatar(
+                                    mxContent: profile.avatarUrl,
+                                    name: profile.displayName ??
+                                        Matrix.of(context)
+                                            .client
+                                            .userID!
+                                            .localpart,
+                                    size: TwakeHeaderStyle.avatarSize,
+                                    fontSize:
+                                        TwakeHeaderStyle.avatarFontSizeInAppBar,
+                                  );
+                                },
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 ),
