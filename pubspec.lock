@@ -1589,8 +1589,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "twake-supported-0.22.6"
-      resolved-ref: e5e67b2d0158b9398eb6430841c2bed7f61d8997
+      ref: add-callback-migrating-database
+      resolved-ref: "10d717db2f368bbafb035290a4bc7df558c2e3df"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

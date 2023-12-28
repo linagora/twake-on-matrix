@@ -64,7 +64,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+      ref: add-callback-migrating-database
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
   native_imaging: ^0.1.0

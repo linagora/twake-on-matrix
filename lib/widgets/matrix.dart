@@ -17,6 +17,7 @@ import 'package:fluffychat/domain/repository/tom_configurations_repository.dart'
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
@@ -285,6 +286,7 @@ class MatrixState extends State<Matrix>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _migrateToMDatabase(client);
     initMatrix();
     initReceiveSharingIntent();
     if (PlatformInfos.isWeb) {
@@ -324,9 +326,6 @@ class MatrixState extends State<Matrix>
         'Attempted to register subscriptions for non-existing client $name',
       );
       return;
-    }
-    if (PlatformInfos.isMobile) {
-      await HiveCollectionToMDatabase.databaseBuilder();
     }
     onRoomKeyRequestSub[name] ??=
         c.onRoomKeyRequest.stream.listen((RoomKeyRequest request) async {
@@ -481,11 +480,24 @@ class MatrixState extends State<Matrix>
     voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
   }
 
+  Future<ToMConfigurations?> getTomConfigurations(String userID) async {
+    try {
+      final tomConfigurationRepository =
+          getIt.get<ToMConfigurationsRepository>();
+      final toMConfigurations =
+          await tomConfigurationRepository.getTomConfigurations(userID);
+      return toMConfigurations;
+    } catch (e) {
+      Logs().e('MatrixState::_getTomConfigurations: $e');
+    }
+    return null;
+  }
+
   void _retrieveLocalToMConfiguration() async {
     if (client.userID == null) return;
     try {
-      final toMConfigurations =
-          await tomConfigurationRepository.getTomConfigurations(client.userID!);
+      final toMConfigurations = await getTomConfigurations(client.userID!);
+      if (toMConfigurations == null) return;
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -614,9 +626,15 @@ class MatrixState extends State<Matrix>
     required bool supported,
   }) {
     _twakeSupported = supported;
+    Logs().d(
+      'Matrix::setTakeSupported: _twakeSupported - $_twakeSupported',
+    );
   }
 
   void _checkHomeserverExists(Client? client) async {
+    Logs().d(
+      'Matrix::_checkHomeserverExists: _twakeSupported - $_twakeSupported',
+    );
     if (client == null && client?.userID == null) return;
     try {
       await tomConfigurationRepository.getTomConfigurations(client!.userID!);
@@ -625,6 +643,24 @@ class MatrixState extends State<Matrix>
       setTakeSupported(supported: false);
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
+  }
+
+  void _migrateToMDatabase(Client client) async {
+    if (!FlutterHiveCollectionsDatabase.canMigrateToMDatabase) return;
+    Logs().d(
+      'Matrix::_checkHomeserverExists: Start migration to ToMDatabase',
+    );
+    if (client.userID == null) return;
+    final hiveCollectionToMDatabase =
+        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final currentToMConfigurations = await getTomConfigurations(client.userID!);
+    if (currentToMConfigurations != null) {
+      await hiveCollectionToMDatabase.clearCache();
+      _storeToMConfiguration(client, currentToMConfigurations);
+    }
+    Logs().d(
+      'Matrix::_checkHomeserverExists: Finish migration to ToMDatabase',
+    );
   }
 
   @override
