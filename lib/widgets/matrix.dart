@@ -91,11 +91,8 @@ class MatrixState extends State<Matrix>
     return widget.clients[_activeClient];
   }
 
-  bool get webrtcIsSupported =>
-      kIsWeb ||
-      PlatformInfos.isMobile ||
-      PlatformInfos.isWindows ||
-      PlatformInfos.isMacOS;
+  // TODO: 28Dec2023 Disable until support voip
+  bool get webrtcIsSupported => false;
 
   VoipPlugin? voipPlugin;
 
@@ -460,6 +457,7 @@ class MatrixState extends State<Matrix>
     createVoipPlugin();
   }
 
+  // TODO: 28Dec2023 Disable until support voip
   void createVoipPlugin() async {
     if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
       voipPlugin = null;
