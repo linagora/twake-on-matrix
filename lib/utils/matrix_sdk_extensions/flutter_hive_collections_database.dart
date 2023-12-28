@@ -19,13 +19,17 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String name,
     String path, {
     HiveCipher? key,
+    StartMigrationProcess? startMigrationProcess,
   }) : super(
           name,
           path,
           key: key,
+          startMigrationProcess: startMigrationProcess,
         );
 
   static const String cipherStorageKey = 'hive_encryption_key';
+
+  static bool canMigrateToMDatabase = false;
 
   static Future<FlutterHiveCollectionsDatabase> databaseBuilder(
     Client client,
@@ -73,6 +77,15 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       'hive_collections_${client.clientName.replaceAll(' ', '_').toLowerCase()}',
       await _findDatabasePath(client),
       key: hiverCipher,
+      startMigrationProcess: (currentVersion, newVersion) async {
+        Logs().d(
+          'FlutterHiveCollectionsDatabase::startMigrationProcess() Starting migration process',
+        );
+        Logs().d(
+          'FlutterHiveCollectionsDatabase::startMigrationProcess() CurrentVersion - $currentVersion || NewVersion - $newVersion',
+        );
+        canMigrateToMDatabase = true;
+      },
     );
     try {
       Logs().i('FlutterHiveCollectionsDatabase()::databaseBuilder()::open()');
@@ -119,6 +132,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
   @override
   int get maxFileSize => supportsFileStoring ? 100 * 1024 * 1024 : 0;
+
   @override
   bool get supportsFileStoring => !kIsWeb;
 

@@ -40,4 +40,14 @@ class Store {
     await _prefs!.remove(key);
     return;
   }
+
+  Future<int?> getInt(String key) async {
+    await _setupLocalStorage();
+    return _prefs!.getInt(key);
+  }
+
+  Future<bool> setInt(String key, int value) async {
+    await _setupLocalStorage();
+    return _prefs!.setInt(key, value);
+  }
 }
