@@ -1,23 +1,15 @@
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
-import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 
 class ChatListHeader extends StatelessWidget {
-  final ValueNotifier<SelectMode> selectModeNotifier;
-  final ValueNotifier<List<ConversationSelectionPresentation>>
-      conversationSelectionNotifier;
-  final VoidCallback onToggleSelectMode;
-  final VoidCallback? onOpenSearchPage;
+  final ChatListController controller;
   final VoidCallback onClearSelection;
 
   const ChatListHeader({
     Key? key,
-    this.onOpenSearchPage,
-    required this.selectModeNotifier,
-    required this.onToggleSelectMode,
-    required this.conversationSelectionNotifier,
+    required this.controller,
     required this.onClearSelection,
   }) : super(key: key);
 
@@ -26,9 +18,7 @@ class ChatListHeader extends StatelessWidget {
     return Column(
       children: [
         TwakeHeader(
-          conversationSelectionNotifier: conversationSelectionNotifier,
-          selectModeNotifier: selectModeNotifier,
-          toggleSelectMode: onToggleSelectMode,
+          controller: controller,
           onClearSelection: onClearSelection,
         ),
         Container(

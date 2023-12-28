@@ -1,25 +1,27 @@
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
+import 'package:matrix/matrix.dart';
 
 class TwakeHeader extends StatelessWidget
     with ShowDialogMixin
     implements PreferredSizeWidget {
-  final ValueNotifier<SelectMode> selectModeNotifier;
-  final ValueNotifier<List<ConversationSelectionPresentation>>
-      conversationSelectionNotifier;
-  final VoidCallback toggleSelectMode;
+  final ChatListController controller;
   final VoidCallback onClearSelection;
 
   const TwakeHeader({
     Key? key,
-    required this.selectModeNotifier,
-    required this.toggleSelectMode,
-    required this.conversationSelectionNotifier,
+    required this.controller,
     required this.onClearSelection,
   }) : super(key: key);
 
@@ -31,7 +33,7 @@ class TwakeHeader extends StatelessWidget
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,
       title: ValueListenableBuilder(
-        valueListenable: selectModeNotifier,
+        valueListenable: controller.selectModeNotifier,
         builder: (context, selectMode, _) {
           return Align(
             alignment: TwakeHeaderStyle.alignment,
@@ -72,7 +74,8 @@ class TwakeHeader extends StatelessWidget
                             ),
                           ),
                           ValueListenableBuilder(
-                            valueListenable: conversationSelectionNotifier,
+                            valueListenable:
+                                controller.conversationSelectionNotifier,
                             builder: (context, conversationSelection, _) {
                               return Padding(
                                 padding:
@@ -104,30 +107,24 @@ class TwakeHeader extends StatelessWidget
                     padding: TwakeHeaderStyle.actionsPadding,
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: !TwakeHeaderStyle.isDesktop(context)
-                          ? InkWell(
-                              borderRadius: BorderRadius.circular(
-                                TwakeHeaderStyle.textBorderRadius,
-                              ),
-                              onTap: toggleSelectMode,
-                              child: Padding(
-                                padding: TwakeHeaderStyle.textButtonPadding,
-                                child: Text(
-                                  selectMode == SelectMode.normal
-                                      ? L10n.of(context)!.edit
-                                      : L10n.of(context)!.done,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                      child: InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () => _displayMultipleAccountPicker(context),
+                        child: ValueListenableBuilder(
+                          valueListenable: controller.currentProfileNotifier,
+                          builder: (context, profile, _) {
+                            return Avatar(
+                              mxContent: profile.avatarUrl,
+                              name: profile.displayName ??
+                                  Matrix.of(context).client.userID!.localpart,
+                              size: TwakeHeaderStyle.avatarSize,
+                              fontSize: TwakeHeaderStyle.avatarFontSizeInAppBar,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -138,6 +135,63 @@ class TwakeHeader extends StatelessWidget
       ),
       centerTitle: true,
     );
+  }
+
+  void _displayMultipleAccountPicker(BuildContext context) async {
+    final multipleAccount = await _getMultipleAccount();
+    MultipleAccountPicker.showMultipleAccountPicker(
+      accounts: multipleAccount,
+      context: context,
+      onAddAnotherAccount: controller.onAddAnotherAccount,
+      onGoToAccountSettings: controller.onGoToAccountSettings,
+      onSetAccountAsActive: (_) {},
+      titleAddAnotherAccount: L10n.of(context)!.addAnotherAccount,
+      titleAccountSettings: L10n.of(context)!.accountSettings,
+      logoApp: Padding(
+        padding: TwakeHeaderStyle.logoAppOfMultiplePadding,
+        child: SvgPicture.asset(
+          ImagePaths.icTwakeImageLogo,
+          width: TwakeHeaderStyle.logoAppOfMultipleWidth,
+          height: TwakeHeaderStyle.logoAppOfMultipleHeight,
+        ),
+      ),
+      accountNameStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            color: LinagoraSysColors.material().onSurface,
+          ),
+      accountIdStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            color: LinagoraRefColors.material().tertiary[20],
+          ),
+      addAnotherAccountStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
+            color: LinagoraSysColors.material().onPrimary,
+          ),
+      titleAccountSettingsStyle:
+          Theme.of(context).textTheme.labelLarge!.copyWith(
+                color: LinagoraSysColors.material().primary,
+              ),
+    );
+  }
+
+  Future<List<TwakeChatPresentationAccount>> _getMultipleAccount() async {
+    final profileBundles = await controller.getProfileBundles();
+    return profileBundles
+        .where((profileBundle) => profileBundle != null)
+        .map(
+          (profileBundle) => TwakeChatPresentationAccount(
+            accountId: profileBundle!.userId,
+            accountName: profileBundle.displayName ?? '',
+            avatar: Avatar(
+              mxContent: profileBundle.avatarUrl,
+              name: profileBundle.displayName ?? '',
+              size: TwakeHeaderStyle.avatarOfMultipleAccountSize,
+              fontSize: TwakeHeaderStyle.avatarFontSizeInAppBar,
+            ),
+            accountActiveStatus: profileBundle.userId ==
+                    controller.currentProfileNotifier.value.userId
+                ? AccountActiveStatus.active
+                : AccountActiveStatus.inactive,
+          ),
+        )
+        .toList();
   }
 
   @override

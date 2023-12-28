@@ -2980,6 +2980,8 @@
   "descriptionTwakeId": "An open source messenger encrypt\nyour data with matrix protocol",
   "countFilesSendPerDialog": "The maximum files when sending is {count}.",
   "sendFiles": "Send {count} files",
+  "addAnotherAccount": "Add another account",
+  "accountSettings": "Account settings",
   "failedToSendFiles": "Failed to send files",
   "noResults": "No Results",
   "addAnotherAccount": "Add another account",
