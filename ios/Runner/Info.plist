@@ -13,7 +13,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Twake</string>
+	<string>Twake Chat</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Twake</string>
+	<string>Twake Chat</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -62,30 +62,16 @@
 	<string>Play audio and voice messages via bluetooth devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Play audio and voice messages on bluetooth devices</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Share calendar dates with your contacts in Twake.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Open the camera and take a picture to share them with your contacts on Twake.</string>
+	<string>Open the camera and take a picture to share them with your contacts on Twake Chat.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>Share contacts with your contacts in Twake.</string>
+	<string>Used by Twake Chat to find existed Twake account, who you can connect directly in Twake Chat or who you can send invitation.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Twake uses an app lock for an additional security level</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Share your location with your contacts in Twake.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Share your location with your contacts in Twake.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Share your location with your contacts in Twake.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Record voice message and share them with your contacts on Twake.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>Share motions with your contacts in Twake.</string>
+	<string>Twake Chat uses an app lock for an additional security level</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string> Save photos/videos to device on Twake.</string>
+	<string>Save photos/videos to device on Twake Chat.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Open photos from your gallery and share them with your contacts on Twake.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Share data with your contacts in Twake.</string>
+	<string>Open photos from your gallery and share them with your contacts on Twake Chat.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSUserActivityTypes</key>
