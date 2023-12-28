@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide WidgetBuilder;
+import 'package:matrix/matrix.dart';
 
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
@@ -25,6 +26,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final PageController pageController;
   final OnPopInvoked onPopInvoked;
   final VoidCallback onOpenSettings;
+  final Client? client;
 
   final ValueNotifier<String?> activeRoomIdNotifier;
 
@@ -48,6 +50,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.destinations,
     required this.onPopInvoked,
     required this.onOpenSettings,
+    this.client,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -127,6 +130,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                     onClientSelected: onClientSelected,
                                     destinations: destinations,
                                     bottomNavigationKey: bottomNavigationKey,
+                                    onOpenSettings: onOpenSettings,
+                                    client: client,
                                   );
                                 },
                               );
@@ -153,6 +158,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       onClientSelected: onClientSelected,
                       destinations: destinations,
                       bottomNavigationKey: bottomNavigationKey,
+                      onOpenSettings: onOpenSettings,
+                      client: client,
                     ),
                   ),
                 ],
@@ -182,6 +189,7 @@ class _ColumnPageView extends StatelessWidget {
   final ValueKey bottomNavigationKey;
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
+  final Client? client;
 
   const _ColumnPageView({
     required this.activeNavigationBarNotifier,
@@ -194,6 +202,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.destinations,
     required this.bottomNavigationKey,
     required this.onOpenSettings,
+    required this.client,
   });
 
   @override
@@ -216,6 +225,7 @@ class _ColumnPageView extends StatelessWidget {
           onOpenSearchPage: onOpenSearchPage,
           activeRoomIdNotifier: activeRoomIdNotifier,
           onOpenSettings: onOpenSettings,
+          newClient: client,
         ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,

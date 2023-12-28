@@ -44,11 +44,11 @@ class ChatListBodyView extends StatelessWidget {
         child: SlidableAutoCloseBehavior(
           child: StreamBuilder(
             key: ValueKey(
-              controller.client.userID.toString() +
+              controller.activeClient.userID.toString() +
                   controller.activeFilter.toString() +
                   controller.activeSpaceId.toString(),
             ),
-            stream: controller.client.onSync.stream
+            stream: controller.activeClient.onSync.stream
                 .where((s) => s.hasRoomUpdate)
                 .rateLimit(const Duration(seconds: 1)),
             builder: (context, _) {
@@ -60,7 +60,7 @@ class ChatListBodyView extends StatelessWidget {
                 );
               }
               if (controller.waitForFirstSync &&
-                  controller.client.prevBatch != null) {
+                  controller.activeClient.prevBatch != null) {
                 if (controller.chatListBodyIsEmpty) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -80,7 +80,7 @@ class ChatListBodyView extends StatelessWidget {
                       Padding(
                         padding: ChatListBodyViewStyle.paddingOwnProfile,
                         child: FutureBuilder<Profile?>(
-                          future: controller.client
+                          future: controller.activeClient
                               .fetchOwnProfile(getFromRooms: false),
                           builder: (context, snapshotProfile) {
                             if (snapshotProfile.connectionState !=
@@ -101,8 +101,7 @@ class ChatListBodyView extends StatelessWidget {
                                       .paddingTextStartNewChatMessage,
                                   child: Text(
                                     L10n.of(context)!.startNewChatMessage,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
+                                    style: Theme.of(context).textTheme.bodyMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -153,8 +152,8 @@ class ChatListBodyView extends StatelessWidget {
                                     controller.filteredRoomsForPin.length,
                                   ),
                                   isExpanded: isExpanded,
-                                  onTap: controller
-                                      .expandRoomsForPinNotifier.toggle,
+                                  onTap:
+                                      controller.expandRoomsForPinNotifier.toggle,
                                 ),
                                 if (isExpanded) child!,
                               ],
