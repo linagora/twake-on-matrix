@@ -24,6 +24,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final OnClientSelectedSetting onClientSelected;
   final PageController pageController;
   final OnPopInvoked onPopInvoked;
+  final VoidCallback onOpenSettings;
 
   final ValueNotifier<String?> activeRoomIdNotifier;
 
@@ -46,6 +47,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onClientSelected,
     required this.destinations,
     required this.onPopInvoked,
+    required this.onOpenSettings,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -179,6 +181,7 @@ class _ColumnPageView extends StatelessWidget {
   final OnClientSelectedSetting onClientSelected;
   final ValueKey bottomNavigationKey;
   final ValueNotifier<String?> activeRoomIdNotifier;
+  final VoidCallback onOpenSettings;
 
   const _ColumnPageView({
     required this.activeNavigationBarNotifier,
@@ -190,6 +193,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.onClientSelected,
     required this.destinations,
     required this.bottomNavigationKey,
+    required this.onOpenSettings,
   });
 
   @override
@@ -211,6 +215,7 @@ class _ColumnPageView extends StatelessWidget {
           ),
           onOpenSearchPage: onOpenSearchPage,
           activeRoomIdNotifier: activeRoomIdNotifier,
+          onOpenSettings: onOpenSettings,
         ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,
