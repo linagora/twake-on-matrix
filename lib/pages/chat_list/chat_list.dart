@@ -833,7 +833,9 @@ class ChatListController extends State<ChatList>
 
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
-    Logs().d("Chat::didUpdateWidget(): Client ${widget.newClient?.clientName}");
+    Logs().d(
+      "ChatList::didUpdateWidget(): Client ${widget.newClient?.clientName}",
+    );
     if (widget.newClient != activeClient) {
       initSetActiveClient();
     }
