@@ -79,6 +79,10 @@ class ChatListController extends State<ChatList>
   final ValueNotifier<SelectMode> selectModeNotifier =
       ValueNotifier(SelectMode.normal);
 
+  final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
+    Profile(userId: ''),
+  );
+
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier = ValueNotifier([]);
 
@@ -102,7 +106,9 @@ class ChatListController extends State<ChatList>
 
   bool scrolledToTop = true;
 
-  Client get client => Matrix.of(context).client;
+  Client get client => matrixState.client;
+
+  MatrixState get matrixState => Matrix.of(context);
 
   ActiveFilter activeFilter = AppConfig.separateChatTypes
       ? ActiveFilter.messages
@@ -122,6 +128,15 @@ class ChatListController extends State<ChatList>
 
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
   List<Room> get spaces => client.rooms.where((r) => r.isSpace).toList();
+
+  List<String?> get bundles => matrixState.accountBundles.keys.toList()
+    ..sort(
+      (pre, next) => pre!.isValidMatrixId == next!.isValidMatrixId
+          ? 0
+          : pre.isValidMatrixId && !next.isValidMatrixId
+              ? -1
+              : 1,
+    );
 
   ValueNotifier<String?> activeRoomIdNotifier = ValueNotifier(null);
 
@@ -741,6 +756,40 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  void _getCurrentProfile(Client client) async {
+    final profile = await client.getProfileFromUserId(
+      client.userID!,
+      getFromRooms: false,
+    );
+    Logs().d(
+      'ChatList::_getCurrentProfile() - currentProfile: $profile',
+    );
+    currentProfileNotifier.value = profile;
+  }
+
+  Future<List<Profile?>> getProfileBundles() async {
+    final profiles = await Future.wait(
+      bundles.expand((bundle) {
+        return (matrixState.accountBundles[bundle]!).map((clientBundle) async {
+          if (clientBundle != null) {
+            return await clientBundle.fetchOwnProfile();
+          }
+          return null;
+        });
+      }),
+    );
+
+    return profiles.toList();
+  }
+
+  void onGoToAccountSettings() {
+    context.push('/rooms/profile');
+  }
+
+  void onAddAnotherAccount() {
+    context.go('/rooms/addaccount');
+  }
+
   @override
   void initState() {
     if (kIsWeb) {
@@ -750,6 +799,7 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
+    _getCurrentProfile(client);
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
