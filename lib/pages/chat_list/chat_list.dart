@@ -17,6 +17,8 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:fluffychat/presentation/multiple_account/profile_bundle.dart';
+import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -31,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../../utils/account_bundles.dart';
@@ -451,14 +454,13 @@ class ChatListController extends State<ChatList>
 
   void setActiveClient(Client client) {
     context.go('/rooms');
-    setState(() {
-      activeFilter = AppConfig.separateChatTypes
-          ? ActiveFilter.messages
-          : ActiveFilter.allChats;
-      activeSpaceId = null;
-      conversationSelectionNotifier.value.clear();
-      Matrix.of(context).setActiveClient(client);
-    });
+    _getCurrentProfile(client);
+    activeFilter = AppConfig.separateChatTypes
+        ? ActiveFilter.messages
+        : ActiveFilter.allChats;
+    activeSpaceId = null;
+    conversationSelectionNotifier.value.clear();
+    Matrix.of(context).setActiveClient(client);
     _clientStream.add(client);
   }
 
@@ -737,12 +739,16 @@ class ChatListController extends State<ChatList>
     currentProfileNotifier.value = profile;
   }
 
-  Future<List<Profile?>> getProfileBundles() async {
+  Future<List<ProfileBundlePresentation?>> getProfileBundles() async {
     final profiles = await Future.wait(
       bundles.expand((bundle) {
         return (matrixState.accountBundles[bundle]!).map((clientBundle) async {
           if (clientBundle != null) {
-            return await clientBundle.fetchOwnProfile();
+            final profileBundle = await clientBundle.fetchOwnProfile();
+            return ProfileBundlePresentation(
+              profileBundle: profileBundle,
+              client: clientBundle,
+            );
           }
           return null;
         });
@@ -750,6 +756,19 @@ class ChatListController extends State<ChatList>
     );
 
     return profiles.toList();
+  }
+
+  void onSetAccountAsActive({
+    required List<TwakeChatPresentationAccount> multipleAccounts,
+    required TwakePresentationAccount account,
+  }) {
+    final client = multipleAccounts
+        .firstWhereOrNull(
+          (element) => element.accountId == account.accountId,
+        )
+        ?.clientAccount;
+    if (client == null) return;
+    setActiveClient(client);
   }
 
   void onGoToAccountSettings() {

@@ -134,12 +134,19 @@ class TwakeHeader extends StatelessWidget
 
   void _displayMultipleAccountPicker(BuildContext context) async {
     final multipleAccount = await _getMultipleAccount();
+    multipleAccount.sort((pre, next) {
+      return pre.accountActiveStatus.index
+          .compareTo(next.accountActiveStatus.index);
+    });
     MultipleAccountPicker.showMultipleAccountPicker(
       accounts: multipleAccount,
       context: context,
       onAddAnotherAccount: controller.onAddAnotherAccount,
       onGoToAccountSettings: controller.onGoToAccountSettings,
-      onSetAccountAsActive: (_) {},
+      onSetAccountAsActive: (account) => controller.onSetAccountAsActive(
+        multipleAccounts: multipleAccount,
+        account: account,
+      ),
       titleAddAnotherAccount: L10n.of(context)!.addAnotherAccount,
       titleAccountSettings: L10n.of(context)!.accountSettings,
       logoApp: Padding(
@@ -172,15 +179,16 @@ class TwakeHeader extends StatelessWidget
         .where((profileBundle) => profileBundle != null)
         .map(
           (profileBundle) => TwakeChatPresentationAccount(
-            accountId: profileBundle!.userId,
-            accountName: profileBundle.displayName ?? '',
+            clientAccount: profileBundle!.client,
+            accountId: profileBundle.profileBundle.userId,
+            accountName: profileBundle.profileBundle.displayName ?? '',
             avatar: Avatar(
-              mxContent: profileBundle.avatarUrl,
-              name: profileBundle.displayName ?? '',
+              mxContent: profileBundle.profileBundle.avatarUrl,
+              name: profileBundle.profileBundle.displayName ?? '',
               size: TwakeHeaderStyle.avatarOfMultipleAccountSize,
               fontSize: TwakeHeaderStyle.avatarFontSizeInAppBar,
             ),
-            accountActiveStatus: profileBundle.userId ==
+            accountActiveStatus: profileBundle.profileBundle.userId ==
                     controller.currentProfileNotifier.value.userId
                 ? AccountActiveStatus.active
                 : AccountActiveStatus.inactive,
