@@ -17,7 +17,6 @@ import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/presentation/multiple_account/profile_bundle.dart';
@@ -54,12 +53,15 @@ class ChatList extends StatefulWidget {
 
   final VoidCallback? onOpenSettings;
 
+  final Client? newClient;
+
   const ChatList({
     Key? key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSearchPage,
     this.onOpenSettings,
+    this.newClient,
   }) : super(key: key);
 
   @override
@@ -114,7 +116,7 @@ class ChatListController extends State<ChatList>
 
   bool scrolledToTop = true;
 
-  Client get client => matrixState.client;
+  Client get activeClient => matrixState.client;
 
   MatrixState get matrixState => Matrix.of(context);
 
@@ -122,7 +124,8 @@ class ChatListController extends State<ChatList>
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
-  List<Room> get _filteredRooms => client.filteredRoomsForAll(activeFilter);
+  List<Room> get _filteredRooms =>
+      activeClient.filteredRoomsForAll(activeFilter);
 
   List<Room> get filteredRoomsForAll =>
       _filteredRooms.where((room) => !room.isFavourite).toList();
@@ -135,7 +138,7 @@ class ChatListController extends State<ChatList>
   Stream<Client> get clientStream => _clientStream.stream;
 
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces => client.rooms.where((r) => r.isSpace).toList();
+  List<Room> get spaces => activeClient.rooms.where((r) => r.isSpace).toList();
 
   List<String?> get bundles => matrixState.accountBundles.keys.toList()
     ..sort(
@@ -205,7 +208,7 @@ class ChatListController extends State<ChatList>
   }
 
   void editSpace(BuildContext context, String spaceId) async {
-    await client.getRoomById(spaceId)!.postLoad();
+    await activeClient.getRoomById(spaceId)!.postLoad();
     if (mounted) {
       context.go('/spaces/$spaceId');
     }
@@ -286,9 +289,11 @@ class ChatListController extends State<ChatList>
       future: () async {
         final markUnread = anySelectedRoomNotMarkedUnread;
         for (final conversation in conversationSelectionNotifier.value) {
-          final room = client.getRoomById(conversation.roomId)!;
+          final room = activeClient.getRoomById(conversation.roomId)!;
           if (room.markedUnread == markUnread) continue;
-          await client.getRoomById(conversation.roomId)!.markUnread(markUnread);
+          await activeClient
+              .getRoomById(conversation.roomId)!
+              .markUnread(markUnread);
         }
       },
     );
@@ -299,9 +304,9 @@ class ChatListController extends State<ChatList>
       future: () async {
         final makeFavorite = anySelectedRoomNotFavorite;
         for (final conversation in conversationSelectionNotifier.value) {
-          final room = client.getRoomById(conversation.roomId)!;
+          final room = activeClient.getRoomById(conversation.roomId)!;
           if (room.isFavourite == makeFavorite) continue;
-          await client
+          await activeClient
               .getRoomById(conversation.roomId)!
               .setFavourite(makeFavorite);
         }
@@ -313,9 +318,9 @@ class ChatListController extends State<ChatList>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         for (final conversation in conversationSelectionNotifier.value) {
-          final room = client.getRoomById(conversation.roomId)!;
+          final room = activeClient.getRoomById(conversation.roomId)!;
           if (room.pushRuleState == pushRuleState) continue;
-          await client
+          await activeClient
               .getRoomById(conversation.roomId)!
               .setPushRuleState(pushRuleState);
         }
@@ -354,8 +359,8 @@ class ChatListController extends State<ChatList>
     );
     if (input == null) return;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => client.setPresence(
-        client.userID!,
+      future: () => activeClient.setPresence(
+        activeClient.userID!,
         PresenceType.online,
         statusMsg: input.single,
       ),
@@ -366,7 +371,7 @@ class ChatListController extends State<ChatList>
     while (conversationSelectionNotifier.value.isNotEmpty) {
       final conversation = conversationSelectionNotifier.value.first;
       try {
-        await client.getRoomById(conversation.roomId)!.leave();
+        await activeClient.getRoomById(conversation.roomId)!.leave();
       } finally {
         toggleSelection(conversation.roomId);
       }
@@ -395,7 +400,7 @@ class ChatListController extends State<ChatList>
     if (selectedSpace == null) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        final space = client.getRoomById(selectedSpace)!;
+        final space = activeClient.getRoomById(selectedSpace)!;
         if (space.canSendDefaultStates) {
           for (final conversation in conversationSelectionNotifier.value) {
             await space.setSpaceChild(conversation.roomId);
@@ -420,34 +425,34 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> _waitForFirstSync() async {
-    await client.roomsLoading;
-    await client.accountDataLoading;
-    if (client.userID != null) {
-      await setupAdditionalDioCacheOption(client.userID!);
+    await activeClient.roomsLoading;
+    await activeClient.accountDataLoading;
+    if (activeClient.userID != null) {
+      await setupAdditionalDioCacheOption(activeClient.userID!);
     }
-    if (client.prevBatch == null) {
-      await client.onSync.stream.first;
-      await client.initCompleter?.future;
+    if (activeClient.prevBatch == null) {
+      await activeClient.onSync.stream.first;
+      await activeClient.initCompleter?.future;
 
       // Display first login bootstrap if enabled
-      if (client.encryption?.keyManager.enabled == true) {
+      if (activeClient.encryption?.keyManager.enabled == true) {
         Logs().d(
           'ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled',
         );
-        if (await client.encryption?.keyManager.isCached() == false ||
-            await client.encryption?.crossSigning.isCached() == false ||
-            client.isUnknownSession && mounted) {
+        if (await activeClient.encryption?.keyManager.isCached() == false ||
+            await activeClient.encryption?.crossSigning.isCached() == false ||
+            activeClient.isUnknownSession && mounted) {
           final recoveryWords = await _getRecoveryWords();
           if (recoveryWords != null) {
             await TomBootstrapDialog(
-              client: client,
+              client: activeClient,
               recoveryWords: recoveryWords,
             ).show();
           } else {
             Logs().d(
               'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap',
             );
-            await BootstrapDialog(client: client).show();
+            await BootstrapDialog(client: activeClient).show();
           }
         }
       } else {
@@ -456,7 +461,7 @@ class ChatListController extends State<ChatList>
         );
         final recoveryWords = await _getRecoveryWords();
         await TomBootstrapDialog(
-          client: client,
+          client: activeClient,
           wipeRecovery: recoveryWords != null,
         ).show();
       }
@@ -819,6 +824,23 @@ class ChatListController extends State<ChatList>
     );
   }
 
+  void initSetActiveClient() {
+    if (widget.newClient != null) {
+      setActiveClient(widget.newClient!);
+    } else {
+      _getCurrentProfile(activeClient);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatList oldWidget) {
+    Logs().d("Chat::didUpdateWidget(): Client ${widget.newClient?.clientName}");
+    if (widget.newClient != activeClient) {
+      initSetActiveClient();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   void initState() {
     if (kIsWeb) {
@@ -826,9 +848,10 @@ class ChatListController extends State<ChatList>
     }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
+    initSetActiveClient();
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
-    _getCurrentProfile(client);
+    _getCurrentProfile(activeClient);
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {

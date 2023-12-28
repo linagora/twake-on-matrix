@@ -7,6 +7,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 typedef OnOpenSearchPage = void Function();
 typedef OnCloseSearchPage = void Function();
@@ -19,10 +20,12 @@ typedef OnPopInvoked = void Function(bool);
 
 class AppAdaptiveScaffoldBody extends StatefulWidget {
   final String? activeRoomId;
+  final Client? client;
 
   const AppAdaptiveScaffoldBody({
     super.key,
     this.activeRoomId,
+    this.client,
   });
 
   @override
@@ -150,5 +153,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onClientSelected: clientSelected,
         onPopInvoked: _onPopInvoked,
         onOpenSettings: _onOpenSettingsPage,
+        client: widget.client,
       );
 }
