@@ -86,7 +86,7 @@ class CallKeepManager {
   late FlutterCallkeep _callKeep;
   VoipPlugin? _voipPlugin;
 
-  String get appName => 'FluffyChat';
+  String get appName => 'Twake Chat';
 
   Future<bool> get hasPhoneAccountEnabled async =>
       await _callKeep.hasPhoneAccount();
@@ -234,9 +234,9 @@ class CallKeepManager {
     addCall(call.callId, callKeeper);
     await _callKeep.displayIncomingCall(
       call.callId,
-      '${call.room.getLocalizedDisplayname()} (FluffyChat)',
+      '${call.room.getLocalizedDisplayname()} (Twake Chat)',
       localizedCallerName:
-          '${call.room.getLocalizedDisplayname()} (FluffyChat)',
+          '${call.room.getLocalizedDisplayname()} (Twake Chat)',
       handleType: 'number',
       hasVideo: call.type == CallType.kVideo,
     );

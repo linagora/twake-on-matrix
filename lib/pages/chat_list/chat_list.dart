@@ -7,13 +7,13 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -33,7 +33,6 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../../utils/account_bundles.dart';
-import '../../utils/voip/callkeep_manager.dart';
 import '../../widgets/matrix.dart';
 
 class ChatList extends StatefulWidget {
@@ -719,7 +718,8 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
-    CallKeepManager().initialize();
+    // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
+    // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
