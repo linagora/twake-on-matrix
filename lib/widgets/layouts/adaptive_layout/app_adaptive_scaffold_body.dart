@@ -149,5 +149,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onDestinationSelected: onDestinationSelected,
         onClientSelected: clientSelected,
         onPopInvoked: _onPopInvoked,
+        onOpenSettings: _onOpenSettingsPage,
       );
 }
