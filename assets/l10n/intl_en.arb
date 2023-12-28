@@ -2864,6 +2864,8 @@
   "@editProfileDescriptions": {},
   "workIdentitiesInfo": "WORK IDENTITIES INFO",
   "@workIdentitiesInfo": {},
+  "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
+  "@editWorkIdentitiesDescriptions": {},
   "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
   "@copiedMatrixIdToClipboard": {},
   "changeProfileAvatar": "Change profile avatar",
@@ -2984,8 +2986,6 @@
   "accountSettings": "Account settings",
   "failedToSendFiles": "Failed to send files",
   "noResults": "No Results",
-  "addAnotherAccount": "Add another account",
-  "accountSettings": "Account settings",
   "isSingleAccountOnHomeserver": "We do not yet support multiple accounts on a single homeserver",
   "messageSelected": "{count, plural, =0{No Messages} =1{1 Message} other{{count} Messages}} selected",
   "@messageSelected": {
