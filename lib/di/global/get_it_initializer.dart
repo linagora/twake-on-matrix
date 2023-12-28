@@ -84,6 +84,7 @@ import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
+import 'package:matrix/matrix.dart';
 
 final getIt = GetIt.instance;
 
@@ -96,7 +97,7 @@ class GetItInitializer {
 
   GetItInitializer._internal();
 
-  void setUp() {
+  void setUp() async {
     bindingGlobal();
     bindingQueue();
     bindingAPI();
@@ -105,19 +106,29 @@ class GetItInitializer {
     bindingRepositories();
     bindingInteractor();
     _bindingControllers();
+    Logs().d('GetItInitializer::setUp(): Setup successfully');
   }
 
   void bindingGlobal() {
+    HiveDI().bind();
     setupDioCache();
     NetworkDI().bind();
-    HiveDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
-    getIt.registerSingleton(PowerLevelManager());
     getIt.registerSingleton(TwakeEventDispatcher());
     getIt.registerSingleton(Store());
-    getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
     getIt.registerFactory<AppConfigLoader>(() => AppConfigLoader());
+    bindingCachingManager();
+  }
+
+  void bindingCachingManager() {
+    getIt.registerSingleton(PowerLevelManager());
+    getIt.registerFactory<MultipleAccountCacheManager>(
+      () => MultipleAccountCacheManager(),
+    );
+    getIt.registerFactory<LanguageCacheManager>(
+      () => LanguageCacheManager(),
+    );
   }
 
   void bindingQueue() {
