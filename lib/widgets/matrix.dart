@@ -69,6 +69,8 @@ class Matrix extends StatefulWidget {
 
 class MatrixState extends State<Matrix>
     with WidgetsBindingObserver, ReceiveSharingIntentMixin {
+  final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
+
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
@@ -78,6 +80,7 @@ class MatrixState extends State<Matrix>
   String? loginUsername;
   LoginType? loginType;
   bool? loginRegistrationSupported;
+  bool? _twakeSupported;
 
   BackgroundPush? backgroundPush;
 
@@ -97,6 +100,8 @@ class MatrixState extends State<Matrix>
       PlatformInfos.isWindows ||
       PlatformInfos.isMacOS;
 
+  bool get twakeIsSupported => _twakeSupported ?? false;
+
   VoipPlugin? voipPlugin;
 
   bool get isMultiAccount => widget.clients.length > 1;
@@ -107,14 +112,15 @@ class MatrixState extends State<Matrix>
   late String currentClientSecret;
   RequestTokenResponse? currentThreepidCreds;
 
-  void setActiveClient(Client? cl) {
-    final i = widget.clients.indexWhere((c) => c == cl);
-    if (i != -1) {
-      _activeClient = i;
+  void setActiveClient(Client? newClient) {
+    _checkHomeserverExists(newClient);
+    final index = widget.clients.indexWhere((client) => client == newClient);
+    if (index != -1) {
+      _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
     } else {
-      Logs().w('Tried to set an unknown client ${cl!.userID} as active');
+      Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
     }
   }
 
@@ -477,8 +483,6 @@ class MatrixState extends State<Matrix>
 
   void _retrieveLocalToMConfiguration() async {
     try {
-      final tomConfigurationRepository =
-          getIt.get<ToMConfigurationsRepository>();
       final toMConfigurations = await tomConfigurationRepository
           .getTomConfigurations(client.clientName);
       setUpToMServices(
@@ -487,6 +491,7 @@ class MatrixState extends State<Matrix>
       );
       authUrl = toMConfigurations.authUrl;
       loginType = toMConfigurations.loginType;
+      setTakeSupported(supported: true);
     } catch (e) {
       Logs().e('MatrixState::_retrieveToMConfiguration: $e');
     }
@@ -597,6 +602,23 @@ class MatrixState extends State<Matrix>
       );
     } catch (e) {
       Logs().e('Matrix::_storeToMConfiguration: error - $e');
+    }
+  }
+
+  void setTakeSupported({
+    required bool supported,
+  }) {
+    _twakeSupported = supported;
+  }
+
+  void _checkHomeserverExists(Client? client) async {
+    if (client == null) return;
+    try {
+      await tomConfigurationRepository.getTomConfigurations(client.clientName);
+      setTakeSupported(supported: true);
+    } catch (e) {
+      setTakeSupported(supported: false);
+      Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
   }
 
