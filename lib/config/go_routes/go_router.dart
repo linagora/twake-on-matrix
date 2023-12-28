@@ -97,7 +97,9 @@ abstract class AppRoutes {
           path: 'twakeid',
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
-            const TwakeId(),
+            TwakeId(
+              arg: state.extra as TwakeIdArg?,
+            ),
           ),
           redirect: loggedInRedirect,
         ),
@@ -356,34 +358,25 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
+                TwakeId(
+                  arg: state.extra as TwakeIdArg?,
+                ),
+              ),
+            ),
+            GoRoute(
+              path: 'login',
+              pageBuilder: (context, state) => defaultPageBuilder(
+                context,
+                const Login(),
+              ),
+              redirect: loggedOutRedirect,
+            ),
+            GoRoute(
+              path: 'homeserverpicker',
+              pageBuilder: (context, state) => defaultPageBuilder(
+                context,
                 const HomeserverPicker(),
               ),
-              routes: [
-                GoRoute(
-                  path: 'login',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const Login(),
-                  ),
-                  redirect: loggedOutRedirect,
-                ),
-                GoRoute(
-                  path: 'twakeid',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const TwakeId(),
-                  ),
-                  redirect: loggedInRedirect,
-                ),
-                GoRoute(
-                  path: 'homeserverpicker',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const HomeserverPicker(),
-                  ),
-                  redirect: loggedInRedirect,
-                ),
-              ],
             ),
             GoRoute(
               path: 'security',
