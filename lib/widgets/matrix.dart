@@ -23,6 +23,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -192,8 +193,10 @@ class MatrixState extends State<Matrix>
         _registerSubs(_loginClientCandidate!.clientName);
         TwakeApp.router.go(
           '/rooms',
-          extra: getClientByName(
-            _loginClientCandidate!.clientName,
+          extra: AppAdaptiveScaffoldBodyArgs(
+            client: getClientByName(
+              _loginClientCandidate!.clientName,
+            ),
           ),
         );
         _loginClientCandidate = null;
@@ -368,7 +371,12 @@ class MatrixState extends State<Matrix>
         );
 
         if (state != LoginState.loggedIn) {
-          TwakeApp.router.go('/rooms');
+          TwakeApp.router.go(
+            '/rooms',
+            extra: const AppAdaptiveScaffoldBodyArgs(
+              isLogoutMultipleAccount: true,
+            ),
+          );
         }
       } else {
         if (state == LoginState.loggedIn) {

@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -13,14 +14,31 @@ typedef OnCloseSearchPage = Function();
 typedef OnClientSelectedSetting = Function(Object object, BuildContext context);
 typedef OnDestinationSelected = Function(int index);
 
-class AppAdaptiveScaffoldBody extends StatefulWidget {
+class AppAdaptiveScaffoldBodyArgs extends Equatable {
   final String? activeRoomId;
   final Client? client;
+  final bool isLogoutMultipleAccount;
+
+  const AppAdaptiveScaffoldBodyArgs({
+    this.activeRoomId,
+    this.client,
+    this.isLogoutMultipleAccount = false,
+  });
+
+  @override
+  List<Object?> get props => [
+        activeRoomId,
+        client,
+        isLogoutMultipleAccount,
+      ];
+}
+
+class AppAdaptiveScaffoldBody extends StatefulWidget {
+  final AppAdaptiveScaffoldBodyArgs args;
 
   const AppAdaptiveScaffoldBody({
     super.key,
-    this.activeRoomId,
-    this.client,
+    required this.args,
   });
 
   @override
@@ -101,17 +119,35 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
     pageController.jumpToPage(activeNavigationBar.value.index);
   }
 
+  void _onLogoutMultipleAccountSuccess(
+    covariant AppAdaptiveScaffoldBody oldWidget,
+  ) {
+    Logs().d(
+      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():oldWidget.isLogoutMultipleAccount: ${oldWidget.args.isLogoutMultipleAccount}',
+    );
+    Logs().d(
+      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():newIsLogoutMultipleAccount: ${widget.args.isLogoutMultipleAccount}',
+    );
+    if (oldWidget.args.isLogoutMultipleAccount !=
+            widget.args.isLogoutMultipleAccount &&
+        widget.args.isLogoutMultipleAccount) {
+      activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+      pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+    }
+  }
+
   MatrixState get matrix => Matrix.of(context);
 
   @override
   void initState() {
-    activeRoomIdNotifier.value = widget.activeRoomId;
+    activeRoomIdNotifier.value = widget.args.activeRoomId;
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
-    activeRoomIdNotifier.value = widget.activeRoomId;
+    activeRoomIdNotifier.value = widget.args.activeRoomId;
+    _onLogoutMultipleAccountSuccess(oldWidget);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -126,6 +162,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onDestinationSelected: onDestinationSelected,
         onClientSelected: clientSelected,
         onOpenSettings: _onOpenSettingsPage,
-        client: widget.client,
+        client: widget.args.client,
       );
 }
