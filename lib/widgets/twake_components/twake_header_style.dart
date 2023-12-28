@@ -12,6 +12,12 @@ class TwakeHeaderStyle {
   static const double textBorderRadius = 24.0;
   static const int flexTitle = 6;
   static const int flexActions = 3;
+  static const double avatarSize = 36;
+
+  static double get avatarFontSizeInAppBar => 14.0;
+  static const double avatarOfMultipleAccountSize = 48.0;
+  static const double logoAppOfMultipleHeight = 28.0;
+  static const double logoAppOfMultipleWidth = 152.0;
 
   static bool isDesktop(BuildContext context) => responsive.isDesktop(context);
 
@@ -20,6 +26,9 @@ class TwakeHeaderStyle {
         ? AlignmentDirectional.centerStart
         : AlignmentDirectional.center;
   }
+
+  static const EdgeInsetsDirectional logoAppOfMultiplePadding =
+      EdgeInsetsDirectional.all(16);
 
   static const EdgeInsetsDirectional actionsPadding =
       EdgeInsetsDirectional.only(

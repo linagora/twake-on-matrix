@@ -104,7 +104,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: master
+      ref: multiple-account-picker
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
