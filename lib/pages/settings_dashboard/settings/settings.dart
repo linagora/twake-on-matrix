@@ -83,10 +83,12 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         OkCancelResult.cancel) {
       return;
     }
-    await tryLogoutSso(context);
-    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
-    await hiveCollectionToMDatabase.clear();
     final matrix = Matrix.of(context);
+    if (matrix.twakeIsSupported) {
+      await tryLogoutSso(context);
+      final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+      await hiveCollectionToMDatabase.clear();
+    }
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         if (matrix.backgroundPush != null) {

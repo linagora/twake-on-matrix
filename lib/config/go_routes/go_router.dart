@@ -148,7 +148,9 @@ abstract class AppRoutes {
                 state.fullPath?.startsWith('/rooms/settings') == false
             ? AppAdaptiveScaffold(
                 body: AppAdaptiveScaffoldBody(
-                  activeRoomId: state.pathParameters['roomid'],
+                  args: AppAdaptiveScaffoldBodyArgs(
+                    activeRoomId: state.pathParameters['roomid'],
+                  ),
                 ),
                 secondaryBody: child,
               )
@@ -163,9 +165,17 @@ abstract class AppRoutes {
             !_responsive.isMobile(context)
                 ? const ChatBlank()
                 : AppAdaptiveScaffoldBody(
-                    activeRoomId: state.pathParameters['roomid'],
-                    client:
-                        state.extra is Client? ? state.extra as Client? : null,
+                    args: AppAdaptiveScaffoldBodyArgs(
+                      activeRoomId: state.pathParameters['roomid'],
+                      client: state.extra is AppAdaptiveScaffoldBodyArgs
+                          ? (state.extra as AppAdaptiveScaffoldBodyArgs).client
+                          : null,
+                      isLogoutMultipleAccount:
+                          state.extra is AppAdaptiveScaffoldBodyArgs
+                              ? (state.extra as AppAdaptiveScaffoldBodyArgs)
+                                  .isLogoutMultipleAccount
+                              : false,
+                    ),
                   ),
           ),
           routes: [
