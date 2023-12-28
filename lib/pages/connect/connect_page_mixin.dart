@@ -153,4 +153,15 @@ mixin ConnectPageMixin {
     }
     return list;
   }
+
+  bool isSingleAccountOnHomeserver(
+    MatrixState matrix,
+    Uri homeserver,
+  ) {
+    if (matrix.client.isLogged() && matrix.client.homeserver == homeserver) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
