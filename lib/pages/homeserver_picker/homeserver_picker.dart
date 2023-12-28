@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -144,6 +145,15 @@ class HomeserverPickerController extends State<HomeserverPicker>
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
+
+      if (isSingleAccountOnHomeserver(matrix, homeserver)) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.isSingleAccountOnHomeserver,
+        );
+        state = HomeserverState.wrongServerName;
+        return;
+      }
 
       matrix.loginHomeserverSummary =
           await matrix.getLoginClient().checkHomeserver(homeserver);
