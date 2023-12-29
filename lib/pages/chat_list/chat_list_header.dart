@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
