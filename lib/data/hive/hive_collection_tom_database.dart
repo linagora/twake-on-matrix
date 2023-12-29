@@ -130,8 +130,4 @@ class HiveCollectionToMDatabase {
       await _collection.deleteFromDisk();
     }
   }
-
-  Future<void> clearCache() async {
-    await tomConfigurationsBox.clear();
-  }
 }
