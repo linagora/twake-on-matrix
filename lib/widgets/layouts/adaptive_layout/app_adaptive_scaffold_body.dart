@@ -1,10 +1,11 @@
-import 'package:equatable/equatable.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
+import 'package:fluffychat/presentation/enum/settings/settings_action_enum.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
+import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -19,31 +20,14 @@ typedef OnClientSelectedSetting = void Function(
 typedef OnDestinationSelected = void Function(int index);
 typedef OnPopInvoked = void Function(bool);
 
-class AppAdaptiveScaffoldBodyArgs extends Equatable {
-  final String? activeRoomId;
-  final Client? client;
-  final bool isLogoutMultipleAccount;
-
-  const AppAdaptiveScaffoldBodyArgs({
-    this.activeRoomId,
-    this.client,
-    this.isLogoutMultipleAccount = false,
-  });
-
-  @override
-  List<Object?> get props => [
-        activeRoomId,
-        client,
-        isLogoutMultipleAccount,
-      ];
-}
-
 class AppAdaptiveScaffoldBody extends StatefulWidget {
-  final AppAdaptiveScaffoldBodyArgs args;
+  final AbsAppAdaptiveScaffoldBodyArgs? args;
+  final String? activeRoomId;
 
   const AppAdaptiveScaffoldBody({
     super.key,
     required this.args,
+    this.activeRoomId,
   });
 
   @override
@@ -137,18 +121,14 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
     }
   }
 
-  void _onLogoutMultipleAccountSuccess(
-    covariant AppAdaptiveScaffoldBody oldWidget,
-  ) {
+  void _handleLogout(AppAdaptiveScaffoldBody oldWidget) {
     Logs().d(
-      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():oldWidget.isLogoutMultipleAccount: ${oldWidget.args.isLogoutMultipleAccount}',
+      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():oldWidget - ${oldWidget.args}',
     );
     Logs().d(
-      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():newIsLogoutMultipleAccount: ${widget.args.isLogoutMultipleAccount}',
+      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():newWidget - ${widget.args}',
     );
-    if (oldWidget.args.isLogoutMultipleAccount !=
-            widget.args.isLogoutMultipleAccount &&
-        widget.args.isLogoutMultipleAccount) {
+    if (oldWidget.args != widget.args && widget.args is LogoutBodyArgs) {
       activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
       pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
     }
@@ -158,14 +138,14 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
 
   @override
   void initState() {
-    activeRoomIdNotifier.value = widget.args.activeRoomId;
+    activeRoomIdNotifier.value = widget.activeRoomId;
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
-    activeRoomIdNotifier.value = widget.args.activeRoomId;
-    _onLogoutMultipleAccountSuccess(oldWidget);
+    activeRoomIdNotifier.value = widget.activeRoomId;
+    _handleLogout(oldWidget);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -189,6 +169,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onClientSelected: clientSelected,
         onPopInvoked: _onPopInvoked,
         onOpenSettings: _onOpenSettingsPage,
-        client: widget.args.client,
+        adaptiveScaffoldBodyArgs: widget.args,
       );
 }
