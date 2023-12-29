@@ -64,7 +64,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: add-callback-migrating-database
+      ref: twake-supported-0.22.6
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
   native_imaging: ^0.1.0
@@ -104,7 +104,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: multiple-account-picker
+      ref: master
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git

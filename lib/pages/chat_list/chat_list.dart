@@ -7,7 +7,7 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/twake_id/twake_id.dart';
+import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
@@ -17,8 +17,6 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
-import 'package:fluffychat/presentation/multiple_account/profile_bundle.dart';
-import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -26,6 +24,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/foundation.dart';
@@ -33,7 +32,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../../utils/account_bundles.dart';
@@ -51,7 +49,7 @@ class ChatList extends StatefulWidget {
 
   final VoidCallback? onOpenSettings;
 
-  final Client? newClient;
+  final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   const ChatList({
     Key? key,
@@ -59,7 +57,7 @@ class ChatList extends StatefulWidget {
     this.bottomNavigationBar,
     this.onOpenSearchPage,
     this.onOpenSettings,
-    this.newClient,
+    this.adaptiveScaffoldBodyArgs,
   }) : super(key: key);
 
   @override
@@ -136,15 +134,6 @@ class ChatListController extends State<ChatList>
 
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
   List<Room> get spaces => activeClient.rooms.where((r) => r.isSpace).toList();
-
-  List<String?> get bundles => matrixState.accountBundles.keys.toList()
-    ..sort(
-      (pre, next) => pre!.isValidMatrixId == next!.isValidMatrixId
-          ? 0
-          : pre.isValidMatrixId && !next.isValidMatrixId
-              ? -1
-              : 1,
-    );
 
   ValueNotifier<String?> activeRoomIdNotifier = ValueNotifier(null);
 
@@ -461,18 +450,6 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  void setActiveClient(Client client) {
-    context.go('/rooms');
-    _getCurrentProfile(client);
-    activeFilter = AppConfig.separateChatTypes
-        ? ActiveFilter.messages
-        : ActiveFilter.allChats;
-    activeSpaceId = null;
-    conversationSelectionNotifier.value.clear();
-    Matrix.of(context).setActiveClient(client);
-    _clientStream.add(client);
-  }
-
   void setActiveBundle(String bundle) {
     context.go('/rooms');
     setState(() {
@@ -752,69 +729,32 @@ class ChatListController extends State<ChatList>
     currentProfileNotifier.value = profile;
   }
 
-  Future<List<ProfileBundlePresentation?>> getProfileBundles() async {
-    final profiles = await Future.wait(
-      bundles.expand((bundle) {
-        return (matrixState.accountBundles[bundle]!).map((clientBundle) async {
-          if (clientBundle != null) {
-            final profileBundle = await clientBundle.fetchOwnProfile();
-            return ProfileBundlePresentation(
-              profileBundle: profileBundle,
-              client: clientBundle,
-            );
-          }
-          return null;
-        });
-      }),
-    );
-
-    return profiles.toList();
-  }
-
-  void onSetAccountAsActive({
-    required List<TwakeChatPresentationAccount> multipleAccounts,
-    required TwakePresentationAccount account,
-  }) {
-    final client = multipleAccounts
-        .firstWhereOrNull(
-          (element) => element.accountId == account.accountId,
-        )
-        ?.clientAccount;
-    if (client == null) return;
-    setActiveClient(client);
-  }
-
   void onGoToAccountSettings() {
     widget.onOpenSettings?.call();
   }
 
-  void onAddAnotherAccount() {
-    context.go(
-      '/rooms/addaccount',
-      extra: const TwakeIdArg(
-        twakeIdType: TwakeIdType.multiLogin,
-      ),
+  void onClickAvatar() {
+    MultipleAccountsPickerController(context: context)
+        .showMultipleAccountsPicker(
+      activeClient,
+      onGoToAccountSettings: onGoToAccountSettings,
     );
-  }
-
-  void initSetActiveClient() {
-    if (widget.newClient != null) {
-      setActiveClient(widget.newClient!);
-    } else {
-      _getCurrentProfile(activeClient);
-    }
   }
 
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
     Logs().d(
-      "ChatList::didUpdateWidget(): OldClient $activeClient",
+      "ChatList::didUpdateWidget(): Old Args ${oldWidget.adaptiveScaffoldBodyArgs} - UserId ${oldWidget.adaptiveScaffoldBodyArgs?.newActiveClient?.userID}",
     );
+    final newActiveClient = widget.adaptiveScaffoldBodyArgs?.newActiveClient;
     Logs().d(
-      "ChatList::didUpdateWidget(): NewClient ${widget.newClient?.clientName}",
+      "ChatList::didUpdateWidget(): New Args ${widget.adaptiveScaffoldBodyArgs} - UserId ${newActiveClient?.userID}",
     );
-    if (widget.newClient != activeClient) {
-      initSetActiveClient();
+    if (newActiveClient != null && newActiveClient.userID != null) {
+      setState(() {
+        _getCurrentProfile(newActiveClient);
+        _clientStream.add(newActiveClient);
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -826,16 +766,16 @@ class ChatListController extends State<ChatList>
     }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
-    initSetActiveClient();
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
     CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
+        await matrixState.retrievePersistedActiveClient();
+        _getCurrentProfile(activeClient);
       }
     });
-
     _checkTorBrowser();
     super.initState();
   }

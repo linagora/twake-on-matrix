@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
+import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
@@ -13,10 +14,12 @@ import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_dataso
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
+import 'package:fluffychat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
+import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_manager.dart';
 import 'package:fluffychat/data/network/contact/lookup_api.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
@@ -28,6 +31,7 @@ import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
+import 'package:fluffychat/data/repository/multiple_account/multiple_account_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_search_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
@@ -38,6 +42,7 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
+import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
@@ -87,7 +92,7 @@ class GetItInitializer {
 
   GetItInitializer._internal();
 
-  void setUp() async {
+  void setUp() {
     bindingGlobal();
     bindingQueue();
     bindingAPI();
@@ -99,9 +104,9 @@ class GetItInitializer {
   }
 
   void bindingGlobal() {
-    HiveDI().bind();
     setupDioCache();
     NetworkDI().bind();
+    HiveDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
     getIt.registerSingleton(TwakeEventDispatcher());
@@ -148,6 +153,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerSearchDatasource>(
       () => ServerSearchDatasourceImpl(),
+    );
+    getIt.registerFactory<MultipleAccountDatasource>(
+      () => MultipleAccountDatasourceImpl(),
     );
   }
 
@@ -200,6 +208,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerSearchRepository>(
       () => ServerSearchRepositoryImpl(),
+    );
+    getIt.registerFactory<MultipleAccountRepository>(
+      () => MultipleAccountRepositoryImpl(),
     );
   }
 

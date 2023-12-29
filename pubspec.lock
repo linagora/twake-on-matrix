@@ -1508,8 +1508,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: multiple-account-picker
-      resolved-ref: "908bb487d1073f3dd5727aaeb5ab3d9ddae4c0e4"
+      ref: master
+      resolved-ref: "8791ca92d1f9e6df6cead1921949b8c7f1ea60d6"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
@@ -1589,8 +1589,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: add-callback-migrating-database
-      resolved-ref: "10d717db2f368bbafb035290a4bc7df558c2e3df"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: "239609368f4278e4711e28949738f513b1a8bbcf"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

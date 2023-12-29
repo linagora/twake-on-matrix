@@ -84,7 +84,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       return;
     }
     final matrix = Matrix.of(context);
-    if (matrix.twakeIsSupported) {
+    if (matrix.twakeSupported == true) {
       await tryLogoutSso(context);
       final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
       await hiveCollectionToMDatabase.clear();

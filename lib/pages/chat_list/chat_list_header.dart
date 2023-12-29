@@ -1,16 +1,27 @@
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
+import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 class ChatListHeader extends StatelessWidget {
   final VoidCallback? onOpenSearchPage;
-  final ChatListController controller;
+  final ValueNotifier<SelectMode> selectModeNotifier;
+  final ValueNotifier<List<ConversationSelectionPresentation>>
+      conversationSelectionNotifier;
+  final ValueNotifier<Profile> currentProfileNotifier;
+  final VoidCallback onClickAvatar;
+  final VoidCallback onClickClearSelection;
 
   const ChatListHeader({
     Key? key,
-    required this.controller,
     this.onOpenSearchPage,
+    required this.selectModeNotifier,
+    required this.conversationSelectionNotifier,
+    required this.currentProfileNotifier,
+    required this.onClickAvatar,
+    required this.onClickClearSelection,
   }) : super(key: key);
 
   @override
@@ -18,7 +29,11 @@ class ChatListHeader extends StatelessWidget {
     return Column(
       children: [
         TwakeHeader(
-          controller: controller,
+          selectModeNotifier: selectModeNotifier,
+          conversationSelectionNotifier: conversationSelectionNotifier,
+          currentProfileNotifier: currentProfileNotifier,
+          onClickClearSelection: onClickClearSelection,
+          onClickAvatar: onClickAvatar,
         ),
         Container(
           height: ChatListHeaderStyle.searchBarContainerHeight,

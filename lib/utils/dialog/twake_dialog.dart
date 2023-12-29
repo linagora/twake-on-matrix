@@ -56,6 +56,7 @@ class TwakeDialog {
 
   static Future<bool?> showDialogFullScreen({
     required Widget Function() builder,
+    bool barrierDismissible = true,
   }) {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -67,7 +68,7 @@ class TwakeDialog {
     return showDialog(
       context: twakeContext,
       builder: (context) => builder(),
-      barrierDismissible: true,
+      barrierDismissible: barrierDismissible,
       useRootNavigator: false,
     );
   }

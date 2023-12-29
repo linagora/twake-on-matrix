@@ -1,18 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileBundlePresentation extends Equatable {
-  final Profile profileBundle;
+class ClientProfilePresentation extends Equatable {
+  final Profile profile;
   final Client client;
 
-  const ProfileBundlePresentation({
-    required this.profileBundle,
+  const ClientProfilePresentation({
+    required this.profile,
     required this.client,
   });
 
   @override
   List<Object?> get props => [
-        profileBundle,
+        profile,
         client,
       ];
 }

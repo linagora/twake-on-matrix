@@ -8,12 +8,12 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
+import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide WidgetBuilder;
-import 'package:matrix/matrix.dart';
 
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
@@ -24,7 +24,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final OnClientSelectedSetting onClientSelected;
   final PageController pageController;
   final VoidCallback onOpenSettings;
-  final Client? client;
+  final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   final ValueNotifier<String?> activeRoomIdNotifier;
 
@@ -47,7 +47,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onClientSelected,
     required this.destinations,
     required this.onOpenSettings,
-    this.client,
+    this.adaptiveScaffoldBodyArgs,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -115,7 +115,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                               destinations: destinations,
                               bottomNavigationKey: bottomNavigationKey,
                               onOpenSettings: onOpenSettings,
-                              client: client,
+                              adaptiveScaffoldBodyArgs:
+                                  adaptiveScaffoldBodyArgs,
                             );
                           },
                         );
@@ -143,7 +144,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                 destinations: destinations,
                 bottomNavigationKey: bottomNavigationKey,
                 onOpenSettings: onOpenSettings,
-                client: client,
+                adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
               ),
             ),
           ],
@@ -170,7 +171,7 @@ class _ColumnPageView extends StatelessWidget {
   final ValueKey bottomNavigationKey;
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
-  final Client? client;
+  final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   const _ColumnPageView({
     required this.activeNavigationBar,
@@ -183,7 +184,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.destinations,
     required this.bottomNavigationKey,
     required this.onOpenSettings,
-    required this.client,
+    required this.adaptiveScaffoldBodyArgs,
   });
 
   @override
@@ -206,7 +207,7 @@ class _ColumnPageView extends StatelessWidget {
           onOpenSearchPage: onOpenSearchPage,
           activeRoomIdNotifier: activeRoomIdNotifier,
           onOpenSettings: onOpenSettings,
-          newClient: client,
+          adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
         ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,

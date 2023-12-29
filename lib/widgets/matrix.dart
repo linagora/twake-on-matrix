@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:equatable/equatable.dart';
 import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
@@ -13,17 +14,19 @@ import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/domain/model/tom_configurations.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
+import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +85,13 @@ class MatrixState extends State<Matrix>
   String? loginUsername;
   LoginType? loginType;
   bool? loginRegistrationSupported;
-  bool? _twakeSupported;
+
+  bool get twakeSupported {
+    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    );
+    return tomServerUrlInterceptor.baseUrl != null;
+  }
 
   BackgroundPush? backgroundPush;
 
@@ -102,8 +111,6 @@ class MatrixState extends State<Matrix>
       PlatformInfos.isWindows ||
       PlatformInfos.isMacOS;
 
-  bool get twakeIsSupported => _twakeSupported ?? false;
-
   VoipPlugin? voipPlugin;
 
   bool get isMultiAccount => widget.clients.length > 1;
@@ -114,15 +121,18 @@ class MatrixState extends State<Matrix>
   late String currentClientSecret;
   RequestTokenResponse? currentThreepidCreds;
 
-  void setActiveClient(Client? newClient) {
-    _checkHomeserverExists(newClient);
+  Future<SetActiveClientState> setActiveClient(Client? newClient) async {
     final index = widget.clients.indexWhere((client) => client == newClient);
     if (index != -1) {
       _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
+      _setUpToMServicesWhenChangingActiveClient(newClient);
+      await _storePersistActiveAccount(newClient!);
+      return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
+      return SetActiveClientState.unknownClient;
     }
   }
 
@@ -181,7 +191,7 @@ class MatrixState extends State<Matrix>
           .stream
           .where((l) => l == LoginState.loggedIn)
           .first
-          .then((_) {
+          .then((_) async {
         Logs().d(
           'MatrixState::getLoginClient() Login successful - Client ${_loginClientCandidate!.clientName}',
         );
@@ -191,21 +201,29 @@ class MatrixState extends State<Matrix>
         ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
         Logs().d('MatrixState::getLoginClient() Registering subs');
         _registerSubs(_loginClientCandidate!.clientName);
-        TwakeApp.router.go(
-          '/rooms',
-          extra: AppAdaptiveScaffoldBodyArgs(
-            client: getClientByName(
-              _loginClientCandidate!.clientName,
-            ),
-          ),
+        final activeClient = getClientByName(
+          _loginClientCandidate!.clientName,
         );
-        _loginClientCandidate = null;
+        if (activeClient == null) return;
+        final result = await setActiveClient(activeClient);
+        if (result.isSuccess) {
+          TwakeApp.router.go(
+            '/rooms',
+            extra: LoggedInBodyArgs(
+              newActiveClient: activeClient,
+            ),
+          );
+          _loginClientCandidate = null;
+        }
       });
     return candidate;
   }
 
   Client? getClientByName(String name) =>
       widget.clients.firstWhereOrNull((c) => c.clientName == name);
+
+  Client? getClientByUserId(String userId) =>
+      widget.clients.firstWhereOrNull((c) => c.userID == userId);
 
   Map<String, dynamic>? get shareContent => _shareContent;
 
@@ -288,16 +306,17 @@ class MatrixState extends State<Matrix>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _migrateToMDatabase(client);
-    initMatrix();
-    initReceiveSharingIntent();
-    if (PlatformInfos.isWeb) {
-      initConfig().then((_) => initSettings());
-    } else {
-      initSettings();
-    }
-    initLoadingDialog();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addObserver(this);
+      initMatrix();
+      initReceiveSharingIntent();
+      if (PlatformInfos.isWeb) {
+        initConfig().then((_) => initSettings());
+      } else {
+        initSettings();
+      }
+      initLoadingDialog();
+    });
   }
 
   void initLoadingDialog() {
@@ -329,6 +348,9 @@ class MatrixState extends State<Matrix>
         'Attempted to register subscriptions for non-existing client $name',
       );
       return;
+    }
+    if (PlatformInfos.isMobile) {
+      await HiveCollectionToMDatabase.databaseBuilder();
     }
     onRoomKeyRequestSub[name] ??=
         c.onRoomKeyRequest.stream.listen((RoomKeyRequest request) async {
@@ -369,12 +391,12 @@ class MatrixState extends State<Matrix>
           TwakeApp.routerKey.currentContext!,
           L10n.of(context)!.oneClientLoggedOut,
         );
-
-        if (state != LoginState.loggedIn) {
+        final result = await setActiveClient(widget.clients.first);
+        if (state != LoginState.loggedIn && result.isSuccess) {
           TwakeApp.router.go(
             '/rooms',
-            extra: const AppAdaptiveScaffoldBodyArgs(
-              isLogoutMultipleAccount: true,
+            extra: LogoutBodyArgs(
+              newActiveClient: widget.clients.first,
             ),
           );
         }
@@ -382,11 +404,18 @@ class MatrixState extends State<Matrix>
         if (state == LoginState.loggedIn) {
           Logs().v('[MATRIX] Log in successful');
           setUpToMServicesInLogin(c);
-          TwakeApp.router.go('/rooms');
+          _storePersistActiveAccount(c);
+          TwakeApp.router.go(
+            '/rooms',
+            extra: LoggedInBodyArgs(
+              newActiveClient: c,
+            ),
+          );
         } else {
           Logs().v('[MATRIX] Log out successful');
           if (PlatformInfos.isMobile) {
-            TwakeApp.router.go('/twakeid');
+            _deletePersistActiveAccount(state);
+            TwakeApp.router.go('/home/twakeid');
           } else {
             TwakeApp.router.go('/home', extra: true);
           }
@@ -407,6 +436,20 @@ class MatrixState extends State<Matrix>
             )
             .listen(showLocalNotification);
       });
+    }
+  }
+
+  void _deletePersistActiveAccount(LoginState state) async {
+    try {
+      final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
+      await multipleAccountRepository.deletePersistActiveAccount();
+      Logs().d(
+        'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
+      );
+    } catch (e) {
+      Logs().e(
+        'MatrixState::_handleLogoutWithMultipleAccount: Error - $e',
+      );
     }
   }
 
@@ -512,7 +555,6 @@ class MatrixState extends State<Matrix>
       );
       authUrl = toMConfigurations.authUrl;
       loginType = toMConfigurations.loginType;
-      setTakeSupported(supported: true);
     } catch (e) {
       Logs().e('MatrixState::_retrieveToMConfiguration: $e');
     }
@@ -571,16 +613,14 @@ class MatrixState extends State<Matrix>
     authorizationInterceptor.accessToken = client.accessToken;
   }
 
-  void _setUpToMServer(ToMServerInformation tomServer) {
-    if (tomServer.baseUrl != null) {
-      final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-        instanceName: NetworkDI.tomServerUrlInterceptorName,
-      );
-      Logs().d(
-        'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
-      );
-      tomServerUrlInterceptor.changeBaseUrl(tomServer.baseUrl!.toString());
-    }
+  void _setUpToMServer(ToMServerInformation? tomServer) {
+    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    );
+    Logs().d(
+      'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
+    );
+    tomServerUrlInterceptor.changeBaseUrl(tomServer?.baseUrl?.toString());
   }
 
   void _setUpHomeServer(Uri homeServerUri) {
@@ -630,45 +670,70 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void setTakeSupported({
-    required bool supported,
-  }) {
-    _twakeSupported = supported;
+  void _setUpToMServicesWhenChangingActiveClient(Client? client) async {
     Logs().d(
-      'Matrix::setTakeSupported: _twakeSupported - $_twakeSupported',
-    );
-  }
-
-  void _checkHomeserverExists(Client? client) async {
-    Logs().d(
-      'Matrix::_checkHomeserverExists: _twakeSupported - $_twakeSupported',
+      'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
     );
     if (client == null && client?.userID == null) return;
     try {
-      await tomConfigurationRepository.getTomConfigurations(client!.userID!);
-      setTakeSupported(supported: true);
+      final toMConfigurations = await getTomConfigurations(client!.userID!);
+      Logs().d(
+        'Matrix::_checkHomeserverExists: toMConfigurations - $toMConfigurations',
+      );
+      if (toMConfigurations == null) {
+        _setUpToMServer(null);
+      } else {
+        _setUpToMServer(toMConfigurations.tomServerInformation);
+      }
     } catch (e) {
-      setTakeSupported(supported: false);
+      _setUpToMServer(null);
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
+    }
+    Logs().d(
+      'Matrix::_checkHomeserverExists: New twakeSupported - $twakeSupported',
+    );
+  }
+
+  Future<void> retrievePersistedActiveClient() async {
+    try {
+      final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
+      final persistActiveAccount =
+          await multipleAccountRepository.getPersistActiveAccount();
+      if (persistActiveAccount == null) {
+        _storePersistActiveAccount(client);
+        return;
+      } else {
+        final newActiveClient = getClientByUserId(persistActiveAccount);
+        if (newActiveClient != null) {
+          setActiveClient(newActiveClient);
+        }
+      }
+    } catch (e) {
+      Logs().e(
+        'Matrix::_retrievePersistedActiveAccount(): Error - $e',
+      );
     }
   }
 
-  void _migrateToMDatabase(Client client) async {
-    if (!FlutterHiveCollectionsDatabase.canMigrateToMDatabase) return;
-    Logs().d(
-      'Matrix::_checkHomeserverExists: Start migration to ToMDatabase',
-    );
-    if (client.userID == null) return;
-    final hiveCollectionToMDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    final currentToMConfigurations = await getTomConfigurations(client.userID!);
-    if (currentToMConfigurations != null) {
-      await hiveCollectionToMDatabase.clearCache();
-      _storeToMConfiguration(client, currentToMConfigurations);
+  Future<void> _storePersistActiveAccount(Client newClient) async {
+    if (newClient.userID == null) return;
+    try {
+      Logs().e(
+        'Matrix::_storePersistActiveAccount: clientName - ${newClient.clientName}',
+      );
+      Logs().e(
+        'Matrix::_storePersistActiveAccount: userId - ${newClient.userID}',
+      );
+      final MultipleAccountRepository multipleAccountRepository =
+          getIt.get<MultipleAccountRepository>();
+      await multipleAccountRepository.storePersistActiveAccount(
+        newClient.userID!,
+      );
+    } catch (e) {
+      Logs().e(
+        'Matrix::_storePersistActiveAccount(): Error - $e',
+      );
     }
-    Logs().d(
-      'Matrix::_checkHomeserverExists: Finish migration to ToMDatabase',
-    );
   }
 
   @override
@@ -784,9 +849,12 @@ class FixedThreepidCreds extends ThreepidCreds {
   }
 }
 
-class _AccountBundleWithClient {
+class _AccountBundleWithClient extends Equatable {
   final Client? client;
   final AccountBundle? bundle;
 
-  _AccountBundleWithClient({this.client, this.bundle});
+  const _AccountBundleWithClient({this.client, this.bundle});
+
+  @override
+  List<Object?> get props => [client, bundle];
 }
