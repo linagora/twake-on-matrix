@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
@@ -43,8 +44,13 @@ class ChatListView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(
-          controller: controller,
           onOpenSearchPage: onOpenSearchPage,
+          selectModeNotifier: controller.selectModeNotifier,
+          conversationSelectionNotifier:
+              controller.conversationSelectionNotifier,
+          currentProfileNotifier: controller.currentProfileNotifier,
+          onClickClearSelection: controller.onClickClearSelection,
+          onClickAvatar: controller.onClickAvatar,
         ),
       ),
       bottomNavigationBar: ValueListenableBuilder(
@@ -64,7 +70,12 @@ class ChatListView extends StatelessWidget {
           }
         },
       ),
-      body: ChatListBodyView(controller),
+      body: StreamBuilder<Client>(
+        stream: controller.clientStream,
+        builder: (context, snapshot) {
+          return ChatListBodyView(controller);
+        },
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: ValueListenableBuilder(
         valueListenable: controller.selectModeNotifier,
