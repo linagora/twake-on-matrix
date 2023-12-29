@@ -93,6 +93,7 @@ abstract class AppConfig {
   static const String iOSKeychainSharingId = 'KUT463DS29.app.twake.ios.chat';
   static const String iOSKeychainSharingAccount = 'app.twake.ios.chat.sessions';
   static const int maxFilesSendPerDialog = 6;
+  static const bool supportMultipleAccountsInTheSameHomeserver = false;
 
   static String? issueId;
 

@@ -10,18 +10,18 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 enum TwakeIdType {
-  login,
-  multiLogin,
+  firstAccount,
+  otherAccounts,
 }
 
 class TwakeIdArg extends Equatable {
   final TwakeIdType twakeIdType;
 
   const TwakeIdArg({
-    this.twakeIdType = TwakeIdType.login,
+    this.twakeIdType = TwakeIdType.firstAccount,
   });
 
-  bool get isAddAnotherAccount => twakeIdType == TwakeIdType.multiLogin;
+  bool get isAddAnotherAccount => twakeIdType == TwakeIdType.otherAccounts;
 
   @override
   List<Object?> get props => [twakeIdType];
@@ -38,7 +38,7 @@ class TwakeId extends StatefulWidget {
 class TwakeIdController extends State<TwakeId> {
   void goToHomeserverPicker() {
     if (widget.arg?.isAddAnotherAccount == true) {
-      context.push('/rooms/homeserverpicker');
+      context.push('/rooms/addhomeserver');
     } else {
       context.push('/home/homeserverpicker');
     }

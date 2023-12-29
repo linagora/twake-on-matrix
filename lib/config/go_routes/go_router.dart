@@ -43,6 +43,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_s
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_up/signup.dart';
+import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
@@ -98,7 +99,9 @@ abstract class AppRoutes {
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
             TwakeId(
-              arg: state.extra as TwakeIdArg?,
+              arg: state.extra is TwakeIdArg?
+                  ? state.extra as TwakeIdArg?
+                  : null,
             ),
           ),
           redirect: loggedInRedirect,
@@ -148,9 +151,10 @@ abstract class AppRoutes {
                 state.fullPath?.startsWith('/rooms/settings') == false
             ? AppAdaptiveScaffold(
                 body: AppAdaptiveScaffoldBody(
-                  args: AppAdaptiveScaffoldBodyArgs(
-                    activeRoomId: state.pathParameters['roomid'],
-                  ),
+                  activeRoomId: state.pathParameters['roomid'],
+                  args: state.extra is AbsAppAdaptiveScaffoldBodyArgs
+                      ? state.extra as AbsAppAdaptiveScaffoldBodyArgs
+                      : null,
                 ),
                 secondaryBody: child,
               )
@@ -165,17 +169,10 @@ abstract class AppRoutes {
             !_responsive.isMobile(context)
                 ? const ChatBlank()
                 : AppAdaptiveScaffoldBody(
-                    args: AppAdaptiveScaffoldBodyArgs(
-                      activeRoomId: state.pathParameters['roomid'],
-                      client: state.extra is AppAdaptiveScaffoldBodyArgs
-                          ? (state.extra as AppAdaptiveScaffoldBodyArgs).client
-                          : null,
-                      isLogoutMultipleAccount:
-                          state.extra is AppAdaptiveScaffoldBodyArgs
-                              ? (state.extra as AppAdaptiveScaffoldBodyArgs)
-                                  .isLogoutMultipleAccount
-                              : false,
-                    ),
+                    activeRoomId: state.pathParameters['roomid'],
+                    args: state.extra is AbsAppAdaptiveScaffoldBodyArgs
+                        ? state.extra as AbsAppAdaptiveScaffoldBodyArgs
+                        : null,
                   ),
           ),
           routes: [
@@ -371,7 +368,9 @@ abstract class AppRoutes {
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
                 TwakeId(
-                  arg: state.extra as TwakeIdArg?,
+                  arg: state.extra is TwakeIdArg?
+                      ? state.extra as TwakeIdArg?
+                      : null,
                 ),
               ),
             ),
@@ -384,7 +383,7 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'homeserverpicker',
+              path: 'addhomeserver',
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
                 const HomeserverPicker(),

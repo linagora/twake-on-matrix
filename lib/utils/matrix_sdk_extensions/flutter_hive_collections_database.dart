@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:fluffychat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -19,17 +20,18 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String name,
     String path, {
     HiveCipher? key,
-    StartMigrationProcess? startMigrationProcess,
+    OnStartMigrating? onStartMigrating,
   }) : super(
           name,
           path,
           key: key,
-          startMigrationProcess: startMigrationProcess,
+          onStartMigrating: onStartMigrating,
         );
 
-  static const String cipherStorageKey = 'hive_encryption_key';
+  @override
+  int get version => 7;
 
-  static bool canMigrateToMDatabase = false;
+  static const String cipherStorageKey = 'hive_encryption_key';
 
   static Future<FlutterHiveCollectionsDatabase> databaseBuilder(
     Client client,
@@ -77,15 +79,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       'hive_collections_${client.clientName.replaceAll(' ', '_').toLowerCase()}',
       await _findDatabasePath(client),
       key: hiverCipher,
-      startMigrationProcess: (currentVersion, newVersion) async {
-        Logs().d(
-          'FlutterHiveCollectionsDatabase::startMigrationProcess() Starting migration process',
-        );
-        Logs().d(
-          'FlutterHiveCollectionsDatabase::startMigrationProcess() CurrentVersion - $currentVersion || NewVersion - $newVersion',
-        );
-        canMigrateToMDatabase = true;
-      },
+      onStartMigrating: _onStartMigrating,
     );
     try {
       Logs().i('FlutterHiveCollectionsDatabase()::databaseBuilder()::open()');
@@ -244,5 +238,14 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       await KeychainSharingManager.delete(userId: null);
     }
     return super.clear(supportDeleteCollections: supportDeleteCollections);
+  }
+
+  static void _onStartMigrating(int currentVersion, int newVersion) async {
+    Logs().d(
+      'FlutterHiveCollectionsDatabase::startMigrationProcess() CurrentVersion - $currentVersion || NewVersion - $newVersion',
+    );
+    if (currentVersion == 6 && newVersion == 7) {
+      await MigrateV6ToV7().onMigrate(currentVersion, newVersion);
+    }
   }
 }

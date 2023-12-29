@@ -146,7 +146,11 @@ class HomeserverPickerController extends State<HomeserverPicker>
       }
       final matrix = Matrix.of(context);
 
-      if (isSingleAccountOnHomeserver(matrix, homeserver)) {
+      final homeserverExists =
+          homeserver == matrix.client.homeserver && matrix.client.isLogged();
+
+      if (homeserverExists &&
+          !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
         TwakeSnackBar.show(
           context,
           L10n.of(context)!.isSingleAccountOnHomeserver,
