@@ -63,6 +63,7 @@ dependencies:
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
   keyboard_shortcuts: ^0.1.4
+  latlong2: ^0.8.1
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
