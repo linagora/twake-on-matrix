@@ -59,7 +59,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'send_file_dialog.dart';
-import 'send_location_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
@@ -616,14 +615,6 @@ class ChatController extends State<Chat>
       emojiPickerType = EmojiPickerType.keyboard;
       showEmojiPickerNotifier.value = true;
     }
-  }
-
-  void sendLocationAction() async {
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendLocationDialog(room: room!),
-    );
   }
 
   void copySingleEventAction() async {
