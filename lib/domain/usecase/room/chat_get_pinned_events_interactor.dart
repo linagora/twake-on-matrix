@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -16,9 +17,11 @@ class ChatGetPinnedEventsInteractor {
     yield Right(ChatGetPinnedEventsLoading());
     try {
       final pinnedEvents = room.pinnedEventIds;
-      final result = await Future.wait(
-        pinnedEvents.map(room.getEventById),
-      );
+      final result = (await Future.wait(
+        pinnedEvents.map((eventId) async => await room.getEventById(eventId)),
+      ))
+          .whereNotNull()
+          .toList();
 
       if (result.isEmpty) {
         yield Left(ChatGetPinnedEventsNoResult());
@@ -28,9 +31,8 @@ class ChatGetPinnedEventsInteractor {
           "ChatGetPinnedEventsInteractor()::execute()::result: ${result.length}",
         );
         result.sort((currentEvent, nextEvent) {
-          final currentPinnedTime =
-              currentEvent?.originServerTs ?? DateTime.now();
-          final nextPinnedTime = nextEvent?.originServerTs ?? DateTime.now();
+          final currentPinnedTime = currentEvent.originServerTs;
+          final nextPinnedTime = nextEvent.originServerTs;
           return currentPinnedTime.compareTo(nextPinnedTime);
         });
         yield Right(ChatGetPinnedEventsSuccess(pinnedEvents: result));
