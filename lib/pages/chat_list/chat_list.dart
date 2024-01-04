@@ -25,6 +25,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/foundation.dart';
@@ -741,6 +742,15 @@ class ChatListController extends State<ChatList>
     );
   }
 
+  void _handleRecovery() {
+    if (widget.adaptiveScaffoldBodyArgs is LoggedInOtherAccountBodyArgs) {
+      Logs().d(
+        "ChatList::_handleAnotherAccountAdded(): Handle recovery data for another account",
+      );
+      _waitForFirstSync();
+    }
+  }
+
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
     Logs().d(
@@ -754,6 +764,7 @@ class ChatListController extends State<ChatList>
       setState(() {
         _getCurrentProfile(newActiveClient);
         _clientStream.add(newActiveClient);
+        _handleRecovery();
       });
     }
     super.didUpdateWidget(oldWidget);

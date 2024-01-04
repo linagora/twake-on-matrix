@@ -25,6 +25,7 @@ import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -209,7 +210,7 @@ class MatrixState extends State<Matrix>
         if (result.isSuccess) {
           TwakeApp.router.go(
             '/rooms',
-            extra: LoggedInBodyArgs(
+            extra: LoggedInOtherAccountBodyArgs(
               newActiveClient: activeClient,
             ),
           );
