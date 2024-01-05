@@ -340,16 +340,15 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       room: room,
       onEnter: _onEnter,
       child: TypeAheadField<Map<String, String?>>(
-        direction: VerticalDirection.up,
+        direction: AxisDirection.up,
         hideOnEmpty: true,
         hideOnLoading: true,
-        hideOnSelect: false,
+        keepSuggestionsOnSuggestionSelected: true,
         debounceDuration: debounceDuration,
         autoFlipDirection: true,
         scrollController: suggestionScrollController,
-        controller: controller,
         // show suggestions after 50ms idle time (default is 300)
-        builder: (context, controller, focusNode) => TextField(
+        textFieldConfiguration: TextFieldConfiguration(
           minLines: minLines,
           maxLines: maxLines,
           keyboardType: keyboardType,
@@ -386,13 +385,13 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           suggestion: suggestion,
           client: Matrix.of(context).client,
         ),
-        onSelected: insertSuggestion,
+        onSuggestionSelected: insertSuggestion,
         errorBuilder: (BuildContext context, Object? error) => Container(),
         loadingBuilder: (BuildContext context) => Container(),
         // fix loading briefly flickering a dark box
-        emptyBuilder: (BuildContext context) =>
+        noItemsFoundBuilder: (BuildContext context) =>
             Container(), // fix loading briefly showing no suggestions
-        listBuilder: (context, widgets) => FocusSuggestionList(
+        layoutArchitecture: (widgets, _) => FocusSuggestionList(
           items: widgets,
           scrollController: suggestionScrollController,
           focusSuggestionController: focusSuggestionController,
