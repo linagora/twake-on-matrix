@@ -73,13 +73,11 @@ jobs:
 
       - name: Prepare iOS release
         if: matrix.os == 'ios'
-        run: ../scripts/prepare-ios.sh
-        working-directory: ${{ matrix.os }}
+        run: ./scripts/prepare-ios.sh
 
       - name: Release on Play Store internal track
         if: matrix.os == 'android'
-        run: ../scripts/release-playstore-beta.sh
-        working-directory: ${{ matrix.os }}
+        run: ./scripts/release-playstore-beta.sh
 
       - name: Release on TestFlight
         if: matrix.os == 'ios'
