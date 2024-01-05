@@ -1,3 +1,16 @@
+## [2.4.12+2330] - 2024-01-05
+### Added
+- upgrade flutter 3.16.5
+- paste multiple images to web platform
+
+### Fixed
+- change solution to copy/paste in composer
+- handle receive login token in direct URL
+
+### Removed
+- location, geolocator related functions
+- microphone usage
+
 ## [2.4.10+2330] - 2023-12-27
 
 ### Added
@@ -2122,8 +2135,8 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.12+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.12
 [2.4.10+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.10
-
 [2.4.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.6
 [2.4.5+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.5
 [2.4.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.2
