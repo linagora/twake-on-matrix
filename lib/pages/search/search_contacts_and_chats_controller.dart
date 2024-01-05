@@ -83,7 +83,10 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
     final recentChatPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
         .where((contact) {
-      return contact.displayName!.toLowerCase().contains(keyword.toLowerCase());
+      return contact.displayName!
+              .toLowerCase()
+              .contains(keyword.toLowerCase()) ||
+          contact.email?.toLowerCase().contains(keyword.toLowerCase()) == true;
     }).toList();
     _searchRecentChatInteractor
         .execute(
