@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 
 abstract class PresentationSearch extends Equatable {
   final String? displayName;
-
+  final String? email;
   final String? directChatMatrixID;
 
   String get id;
@@ -15,20 +15,21 @@ abstract class PresentationSearch extends Equatable {
 
   const PresentationSearch({
     this.displayName,
+    this.email,
     this.directChatMatrixID,
   });
 }
 
 class ContactPresentationSearch extends PresentationSearch {
   final String? matrixId;
-  final String? email;
 
   const ContactPresentationSearch({
     this.matrixId,
-    this.email,
+    String? email,
     String? displayName,
   }) : super(
           displayName: displayName,
+          email: email,
         );
 
   @override
