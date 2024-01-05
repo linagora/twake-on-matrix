@@ -10,6 +10,8 @@ class FocusSuggestionController {
     currentIndex.value = 0;
   }
 
+  bool get hasSuggestions => _suggestions.isNotEmpty;
+
   final currentIndex = ValueNotifier(0);
 
   void up() {
