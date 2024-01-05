@@ -1036,18 +1036,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_typeahead
-      sha256: "1f6b248bb4f3ebb4cf1ee0354aa23c77be457fb2d26d6847ecc33a917f65e58e"
+      sha256: b9942bd5b7611a6ec3f0730c477146cffa4cd4b051077983ba67ddfc9e7ee818
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.1"
+    version: "4.8.0"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
       name: flutter_web_auth_2
-      sha256: "8a255c782b7a15fcf35e423babb04ebad2840b30eddced4e51c65e3fe8e26d96"
+      sha256: "3ea3a0cc539ca74319f4f2f7484f62742fe5b2ff9a0fca37575426d6e6f07901"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "3.1.1"
   flutter_web_auth_2_platform_interface:
     dependency: transitive
     description:

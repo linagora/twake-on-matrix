@@ -144,41 +144,39 @@ class HomeserverTextField extends StatelessWidget {
     BuildContext context,
   ) {
     return TypeAheadField(
-      builder: (context, value, focusNode) {
-        return TextField(
-          onEditingComplete: () => controller.loginButtonPressed(),
-          autofocus: controller.state != HomeserverState.ssoLoginServer,
-          focusNode: controller.homeserverFocusNode,
-          autocorrect: false,
-          enabled: true,
-          controller: controller.homeserverController,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).colorScheme.outline),
-            ),
-            focusedBorder: controller.state == HomeserverState.wrongServerName
-                ? OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.error,
-                      width: 2.0,
-                    ),
-                  )
-                : null,
-            labelText: controller.state != HomeserverState.wrongServerName
-                ? L10n.of(context)!.homeserver
-                : L10n.of(context)!.wrongServerName,
-            labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  letterSpacing: 0.4,
-                  color: controller.state != HomeserverState.wrongServerName
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.error,
-                ),
-            hintText: L10n.of(context)!.enterYourHomeserver,
-            contentPadding: const EdgeInsets.all(16.0),
+      textFieldConfiguration: TextFieldConfiguration(
+        onEditingComplete: () => controller.loginButtonPressed(),
+        autofocus: controller.state != HomeserverState.ssoLoginServer,
+        focusNode: controller.homeserverFocusNode,
+        autocorrect: false,
+        enabled: true,
+        controller: controller.homeserverController,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
-        );
-      },
+          focusedBorder: controller.state == HomeserverState.wrongServerName
+              ? OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.error,
+                    width: 2.0,
+                  ),
+                )
+              : null,
+          labelText: controller.state != HomeserverState.wrongServerName
+              ? L10n.of(context)!.homeserver
+              : L10n.of(context)!.wrongServerName,
+          labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                letterSpacing: 0.4,
+                color: controller.state != HomeserverState.wrongServerName
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.error,
+              ),
+          hintText: L10n.of(context)!.enterYourHomeserver,
+          contentPadding: const EdgeInsets.all(16.0),
+        ),
+      ),
       itemBuilder: (BuildContext context, HomeserverBenchmarkResult server) {
         return ListTile(
           trailing: IconButton(
@@ -202,18 +200,12 @@ class HomeserverTextField extends StatelessWidget {
           ),
         );
       },
-      decorationBuilder: ((context, child) {
-        return Container(
-          constraints: const BoxConstraints(maxHeight: 200),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-          child: child,
-        );
-      }),
+      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        constraints: BoxConstraints(maxHeight: 200),
+      ),
       debounceDuration: const Duration(milliseconds: 300),
-      direction: VerticalDirection.up,
-      onSelected: (HomeserverBenchmarkResult suggestion) {
+      onSuggestionSelected: (HomeserverBenchmarkResult suggestion) {
         controller.setServer(suggestion.homeserver.baseUrl.host);
       },
       suggestionsCallback: (String searchTerm) async {

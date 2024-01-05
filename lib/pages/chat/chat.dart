@@ -443,7 +443,6 @@ class ChatController extends State<Chat>
     _jumpToEventIdSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
-    focusSuggestionController.dispose();
     super.dispose();
   }
 
