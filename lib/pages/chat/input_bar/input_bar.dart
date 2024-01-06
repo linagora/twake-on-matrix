@@ -377,6 +377,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           textCapitalization: TextCapitalization.sentences,
         ),
         suggestionsCallback: (text) {
+          if (room!.isDirectChat) return {};
           final suggestions = getSuggestions(text);
           focusSuggestionController.suggestions = suggestions;
           return suggestions;
@@ -386,11 +387,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           client: Matrix.of(context).client,
         ),
         onSuggestionSelected: insertSuggestion,
-        errorBuilder: (BuildContext context, Object? error) => Container(),
-        loadingBuilder: (BuildContext context) => Container(),
+        errorBuilder: (BuildContext context, Object? error) => const SizedBox(),
+        loadingBuilder: (BuildContext context) => const SizedBox(),
         // fix loading briefly flickering a dark box
-        noItemsFoundBuilder: (BuildContext context) =>
-            Container(), // fix loading briefly showing no suggestions
+        noItemsFoundBuilder: (BuildContext context) => const SizedBox(),
+        // fix loading briefly showing no suggestions
         layoutArchitecture: (widgets, _) => FocusSuggestionList(
           items: widgets,
           scrollController: suggestionScrollController,
