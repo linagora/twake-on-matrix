@@ -386,6 +386,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           suggestion: suggestion,
           client: Matrix.of(context).client,
         ),
+        suggestionsBoxDecoration: SuggestionsBoxDecoration(
+          borderRadius: BorderRadius.circular(
+            InputBarStyle.suggestionBorderRadius,
+          ),
+        ),
         onSuggestionSelected: insertSuggestion,
         errorBuilder: (BuildContext context, Object? error) => const SizedBox(),
         loadingBuilder: (BuildContext context) => const SizedBox(),
