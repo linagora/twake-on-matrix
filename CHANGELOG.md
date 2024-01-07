@@ -1,3 +1,7 @@
+## [2.4.14+2330] - 2024-01-07
+### Fixed
+- Hide tag suggestion in Direct Chat
+
 ## [2.4.12+2330] - 2024-01-05
 ### Added
 - upgrade flutter 3.16.5
@@ -2135,6 +2139,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.14+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.14
 [2.4.12+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.12
 [2.4.10+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.10
 [2.4.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.6
