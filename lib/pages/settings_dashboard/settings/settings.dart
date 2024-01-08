@@ -55,6 +55,10 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
 
+  final ValueNotifier<bool?> showChatBackupSwitch = ValueNotifier(null);
+
+  MatrixState get matrix => Matrix.of(context);
+
   String get displayName =>
       displayNameNotifier.value ??
       client.mxid(context).localpart ??
@@ -64,7 +68,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       settingEnum == optionsSelectNotifier.value;
 
   void logoutAction() async {
-    final noBackup = showChatBackupBanner == true;
+    final noBackup = showChatBackupSwitch.value == true;
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
       Logs().e(
@@ -127,16 +131,11 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             client.encryption?.crossSigning.enabled == false ||
             crossSigning == false;
     final isUnknownSession = client.isUnknownSession;
-    setState(() {
-      showChatBackupBanner = needsBootstrap || isUnknownSession;
-    });
+    showChatBackupSwitch.value = needsBootstrap || isUnknownSession;
   }
 
-  bool? crossSigningCached;
-  bool? showChatBackupBanner;
-
   void firstRunBootstrapAction([_]) async {
-    if (showChatBackupBanner != true) {
+    if (showChatBackupSwitch.value != true) {
       showOkAlertDialog(
         context: context,
         title: L10n.of(context)!.chatBackup,
