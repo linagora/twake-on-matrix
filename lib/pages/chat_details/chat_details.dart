@@ -265,6 +265,7 @@ class ChatDetailsController extends State<ChatDetails>
         context,
         path,
         event: event,
+        isReplacement: false,
       ),
     );
   }
