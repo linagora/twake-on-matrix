@@ -109,7 +109,9 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                   switch (downloadState) {
                     case DownloadVideoState.loading:
                       return InkWell(
-                        onTap: _downloadAction,
+                        onTap: downloadState == DownloadVideoState.loading
+                            ? null
+                            : _downloadAction,
                         child: Center(
                           child: Stack(
                             children: [
