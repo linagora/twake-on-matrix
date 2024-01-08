@@ -4,7 +4,6 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -95,7 +94,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
   Widget build(BuildContext context) {
     _wipe ??= widget.wipe;
     final buttons = <AdaptiveFlatButton>[];
-    Widget body = const CupertinoActivityIndicator();
+    Widget body = const CircularProgressIndicator.adaptive();
     titleText = L10n.of(context)!.loadingPleaseWait;
 
     if (bootstrap.newSsssKey?.recoveryKey != null &&
@@ -446,11 +445,22 @@ class BootstrapDialogState extends State<BootstrapDialog> {
       }
     }
 
-    final title = Text(titleText!);
-    return CupertinoAlertDialog(
-      title: title,
-      content: body,
-      actions: buttons,
+    return AlertDialog(
+      content: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: body,
+          ),
+          Expanded(
+            child: Text(
+              titleText!,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      actions: buttons.isNotEmpty ? buttons : null,
     );
   }
 }
