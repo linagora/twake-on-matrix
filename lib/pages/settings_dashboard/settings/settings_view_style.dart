@@ -19,6 +19,11 @@ class SettingsViewStyle {
     horizontal: 8,
   );
 
+  static EdgeInsetsDirectional backupSwitchPadding =
+      const EdgeInsetsDirectional.symmetric(
+    horizontal: 24,
+  );
+
   static EdgeInsetsDirectional avatarPadding =
       const EdgeInsetsDirectional.only(end: 8);
 }

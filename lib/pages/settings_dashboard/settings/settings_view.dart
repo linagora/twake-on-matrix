@@ -142,6 +142,25 @@ class SettingsView extends StatelessWidget {
               ),
             ),
             const Divider(thickness: 1),
+            if (!controller.matrix.twakeSupported)
+              ValueListenableBuilder(
+                valueListenable: controller.showChatBackupSwitch,
+                builder: (context, backUpAvailable, child) {
+                  return SwitchListTile(
+                    controlAffinity: ListTileControlAffinity.trailing,
+                    contentPadding: SettingsViewStyle.backupSwitchPadding,
+                    value: backUpAvailable == false,
+                    secondary: const Icon(Icons.backup_outlined),
+                    title: Text(L10n.of(context)!.chatBackup),
+                    onChanged: controller.firstRunBootstrapAction,
+                  );
+                },
+                child: ListTile(
+                  leading: const Icon(Icons.backup_outlined),
+                  title: Text(L10n.of(context)!.chatBackup),
+                  trailing: const CircularProgressIndicator.adaptive(),
+                ),
+              ),
             Column(
               children: controller.getListSettingItem.map((item) {
                 return Padding(
