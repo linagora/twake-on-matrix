@@ -189,34 +189,10 @@ class MatrixState extends State<Matrix>
     final candidate = _loginClientCandidate ??= ClientManager.createClient(
       '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
     )..onLoginStateChanged
-          .stream
-          .where((l) => l == LoginState.loggedIn)
-          .first
-          .then((_) async {
-        Logs().d(
-          'MatrixState::getLoginClient() Login successful - Client ${_loginClientCandidate!.clientName}',
-        );
-        if (!widget.clients.contains(_loginClientCandidate)) {
-          widget.clients.add(_loginClientCandidate!);
-        }
-        ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
-        Logs().d('MatrixState::getLoginClient() Registering subs');
-        _registerSubs(_loginClientCandidate!.clientName);
-        final activeClient = getClientByName(
-          _loginClientCandidate!.clientName,
-        );
-        if (activeClient == null) return;
-        final result = await setActiveClient(activeClient);
-        if (result.isSuccess) {
-          TwakeApp.router.go(
-            '/rooms',
-            extra: LoggedInOtherAccountBodyArgs(
-              newActiveClient: activeClient,
-            ),
-          );
-          _loginClientCandidate = null;
-        }
-      });
+        .stream
+        .where((l) => l == LoginState.loggedIn)
+        .first
+        .then((_) => _handleAddAnotherAccount());
     return candidate;
   }
 
@@ -343,8 +319,8 @@ class MatrixState extends State<Matrix>
   }
 
   void _registerSubs(String name) async {
-    final c = getClientByName(name);
-    if (c == null) {
+    final currentClient = getClientByName(name);
+    if (currentClient == null) {
       Logs().w(
         'Attempted to register subscriptions for non-existing client $name',
       );
@@ -353,8 +329,8 @@ class MatrixState extends State<Matrix>
     if (PlatformInfos.isMobile) {
       await HiveCollectionToMDatabase.databaseBuilder();
     }
-    onRoomKeyRequestSub[name] ??=
-        c.onRoomKeyRequest.stream.listen((RoomKeyRequest request) async {
+    onRoomKeyRequestSub[name] ??= currentClient.onRoomKeyRequest.stream
+        .listen((RoomKeyRequest request) async {
       if (widget.clients.any(
         ((cl) =>
             cl.userID == request.requestingDevice.userId &&
@@ -366,7 +342,8 @@ class MatrixState extends State<Matrix>
         await request.forwardKey();
       }
     });
-    onKeyVerificationRequestSub[name] ??= c.onKeyVerificationRequest.stream
+    onKeyVerificationRequestSub[name] ??= currentClient
+        .onKeyVerificationRequest.stream
         .listen((KeyVerification request) async {
       var hidPopup = false;
       request.onUpdate = () {
@@ -381,62 +358,109 @@ class MatrixState extends State<Matrix>
       hidPopup = true;
       await KeyVerificationDialog(request: request).show(context);
     });
-    onLoginStateChanged[name] ??=
-        c.onLoginStateChanged.stream.listen((state) async {
-      final loggedInWithMultipleClients = widget.clients.length > 1;
-      if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
-        _cancelSubs(c.clientName);
-        widget.clients.remove(c);
-        ClientManager.removeClientNameFromStore(c.clientName);
-        TwakeSnackBar.show(
-          TwakeApp.routerKey.currentContext!,
-          L10n.of(context)!.oneClientLoggedOut,
-        );
-        final result = await setActiveClient(widget.clients.first);
-        if (state != LoginState.loggedIn && result.isSuccess) {
-          TwakeApp.router.go(
-            '/rooms',
-            extra: LogoutBodyArgs(
-              newActiveClient: widget.clients.first,
-            ),
-          );
-        }
-      } else {
-        if (state == LoginState.loggedIn) {
-          Logs().v('[MATRIX] Log in successful');
-          setUpToMServicesInLogin(c);
-          _storePersistActiveAccount(c);
-          TwakeApp.router.go(
-            '/rooms',
-            extra: LoggedInBodyArgs(
-              newActiveClient: c,
-            ),
-          );
-        } else {
-          Logs().v('[MATRIX] Log out successful');
-          if (PlatformInfos.isMobile) {
-            _deletePersistActiveAccount(state);
-            TwakeApp.router.go('/home/twakeid');
-          } else {
-            TwakeApp.router.go('/home', extra: true);
-          }
-        }
-      }
-    });
-    onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
+    onLoginStateChanged[name] ??= currentClient.onLoginStateChanged.stream
+        .listen((state) => _listenLoginStateChanged(state, currentClient));
+    onUiaRequest[name] ??=
+        currentClient.onUiaRequest.stream.listen(uiaRequestHandler);
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
-      c.onSync.stream.first.then((s) {
+      currentClient.onSync.stream.first.then((s) {
         html.Notification.requestPermission();
-        onNotification[name] ??= c.onEvent.stream
+        onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>
                   e.type == EventUpdateType.timeline &&
                   [EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted]
                       .contains(e.content['type']) &&
-                  e.content['sender'] != c.userID,
+                  e.content['sender'] != currentClient.userID,
             )
             .listen(showLocalNotification);
       });
+    }
+  }
+
+  void _listenLoginStateChanged(LoginState state, Client client) async {
+    final loggedInWithMultipleClients = widget.clients.length > 1;
+    if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
+      _handleLogoutWithMultipleAccount(state, client);
+    } else {
+      if (state == LoginState.loggedIn) {
+        Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
+        _handleFirstLoggedIn(client);
+      } else {
+        Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
+        if (PlatformInfos.isMobile) {
+          _deletePersistActiveAccount(state);
+          TwakeApp.router.go('/home/twakeid');
+        } else {
+          TwakeApp.router.go('/home', extra: true);
+        }
+      }
+    }
+  }
+
+  void _handleLogoutWithMultipleAccount(
+    LoginState state,
+    Client currentClient,
+  ) async {
+    _cancelSubs(currentClient.clientName);
+    widget.clients.remove(currentClient);
+    ClientManager.removeClientNameFromStore(currentClient.clientName);
+    TwakeSnackBar.show(
+      TwakeApp.routerKey.currentContext!,
+      L10n.of(context)!.oneClientLoggedOut,
+    );
+    final result = await setActiveClient(widget.clients.first);
+    Logs().v(
+      '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
+    );
+    if (state != LoginState.loggedIn && result.isSuccess) {
+      TwakeApp.router.go(
+        '/rooms',
+        extra: LogoutBodyArgs(
+          newActiveClient: widget.clients.first,
+        ),
+      );
+    }
+  }
+
+  void _handleFirstLoggedIn(Client newActiveClient) {
+    setUpToMServicesInLogin(newActiveClient);
+    _storePersistActiveAccount(newActiveClient);
+    TwakeApp.router.go(
+      '/rooms',
+      extra: LoggedInBodyArgs(
+        newActiveClient: newActiveClient,
+      ),
+    );
+  }
+
+  Future<void> _handleAddAnotherAccount() async {
+    Logs().d(
+      'MatrixState::_handleAddAnotherAccount() - Add another account successful',
+    );
+    Logs().d(
+      'MatrixState::_handleAddAnotherAccount() - New Client ${_loginClientCandidate!.clientName}',
+    );
+    if (!widget.clients.contains(_loginClientCandidate)) {
+      widget.clients.add(_loginClientCandidate!);
+    }
+    ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
+    Logs().d('MatrixState::_handleAddAnotherAccount() - Registering subs');
+    _registerSubs(_loginClientCandidate!.clientName);
+    final activeClient = getClientByName(
+      _loginClientCandidate!.clientName,
+    );
+    if (activeClient == null) return;
+    setUpToMServicesInLogin(activeClient);
+    final result = await setActiveClient(activeClient);
+    if (result.isSuccess) {
+      TwakeApp.router.go(
+        '/rooms',
+        extra: LoggedInOtherAccountBodyArgs(
+          newActiveClient: activeClient,
+        ),
+      );
+      _loginClientCandidate = null;
     }
   }
 

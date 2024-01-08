@@ -126,12 +126,24 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     }
     final crossSigning =
         await client.encryption?.crossSigning.isCached() ?? false;
+    Logs().d(
+      "SettingsController::checkBootstrap() - crossSigning: $crossSigning",
+    );
     final needsBootstrap =
         await client.encryption?.keyManager.isCached() == false ||
             client.encryption?.crossSigning.enabled == false ||
             crossSigning == false;
+    Logs().d(
+      "SettingsController::checkBootstrap() - needsBootstrap: $needsBootstrap",
+    );
     final isUnknownSession = client.isUnknownSession;
+    Logs().d(
+      "SettingsController::checkBootstrap() - isUnknownSession: $isUnknownSession",
+    );
     showChatBackupSwitch.value = needsBootstrap || isUnknownSession;
+    Logs().d(
+      "SettingsController::checkBootstrap() - showChatBackupSwitch: ${showChatBackupSwitch.value}",
+    );
   }
 
   void firstRunBootstrapAction([_]) async {
