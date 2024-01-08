@@ -49,7 +49,11 @@ class ChatDetailsNavigator extends StatelessWidget {
                 roomId: roomId!,
               );
             default:
-              return const SizedBox();
+              return ChatDetails(
+                roomId: roomId!,
+                onBack: onBack,
+                isInStack: isInStack,
+              );
           }
         },
       ),

@@ -86,16 +86,6 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
       child: Stack(
         alignment: Alignment.topLeft,
         children: [
-          TwakeIconButton(
-            margin: VideoViewerStyle.backButtonMargin(context),
-            tooltip: L10n.of(context)!.back,
-            icon: Icons.close,
-            onTap: () {
-              cancelToken.cancel();
-              Navigator.of(context).pop();
-            },
-            iconColor: Theme.of(context).colorScheme.surface,
-          ),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -179,6 +169,16 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                 },
               ),
             ],
+          ),
+          TwakeIconButton(
+            margin: VideoViewerStyle.backButtonMargin(context),
+            tooltip: L10n.of(context)!.back,
+            icon: Icons.close,
+            onTap: () {
+              cancelToken.cancel();
+              Navigator.of(context).pop();
+            },
+            iconColor: Theme.of(context).colorScheme.surface,
           ),
         ],
       ),
