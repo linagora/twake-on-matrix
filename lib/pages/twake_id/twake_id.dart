@@ -29,6 +29,7 @@ class TwakeIdArg extends Equatable {
 
 class TwakeId extends StatefulWidget {
   final TwakeIdArg? arg;
+
   const TwakeId({super.key, this.arg});
 
   @override
@@ -53,25 +54,17 @@ class TwakeIdController extends State<TwakeId> {
   String loginUrl =
       "${AppConfig.registrationUrl}?$postLoginRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
 
+  String signupUrl =
+      "${AppConfig.registrationUrl}?$postRegisteredRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
+
   MatrixState get matrix => Matrix.of(context);
 
-  void onClickSignIn() async {
-    matrix.loginHomeserverSummary =
-        await matrix.getLoginClient().checkHomeserver(
-              Uri.parse(AppConfig.twakeWorkplaceHomeserver),
-            );
-    final uri = await FlutterWebAuth2.authenticate(
-      url: loginUrl,
-      callbackUrlScheme: AppConfig.appOpenUrlScheme,
-      options: const FlutterWebAuth2Options(
-        intentFlags: ephemeralIntentFlags,
-      ),
-    );
-    Logs().d("TwakeIdController: onClickSignIn: uri: $uri");
-    _handleLoginToken(uri);
+  void onClickSignIn() {
+    Logs().d("TwakeIdController::onClickSignIn: Login Url - $loginUrl");
+    _redirectRegistrationUrl(loginUrl);
   }
 
-  void _handleLoginToken(String uri) async {
+  void _handleTokenFromRegistrationSite(String uri) async {
     final token = Uri.parse(uri).queryParameters['loginToken'];
     Logs().d("TwakeIdController: _handleLoginToken: token: $token");
     if (token?.isEmpty ?? false) return;
@@ -83,6 +76,28 @@ class TwakeIdController extends State<TwakeId> {
             initialDeviceDisplayName: PlatformInfos.clientName,
           ),
     );
+  }
+
+  void _redirectRegistrationUrl(String url) async {
+    matrix.loginHomeserverSummary =
+        await matrix.getLoginClient().checkHomeserver(
+              Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+            );
+    final uri = await FlutterWebAuth2.authenticate(
+      url: url,
+      callbackUrlScheme: AppConfig.appOpenUrlScheme,
+      options: const FlutterWebAuth2Options(
+        intentFlags: ephemeralIntentFlags,
+      ),
+    );
+    Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
+    _handleTokenFromRegistrationSite(uri);
+  }
+
+  void onClickCreateTwakeId() {
+    Logs()
+        .d("TwakeIdController::onClickCreateTwakeId: Signup Url - $signupUrl");
+    _redirectRegistrationUrl(signupUrl);
   }
 
   @override

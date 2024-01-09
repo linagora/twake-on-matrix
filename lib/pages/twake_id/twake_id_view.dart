@@ -23,6 +23,7 @@ class TwakeIdView extends StatelessWidget {
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
       onSignInOnTap: controller.onClickSignIn,
+      onCreateTwakeIdOnTap: controller.onClickCreateTwakeId,
       backButton: Padding(
         padding: const EdgeInsets.only(left: 8),
         child: TwakeIconButton(
