@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
@@ -154,40 +155,46 @@ class Message extends StatelessWidget {
                   content: L10n.of(context)!.unreadMessages,
                 ),
               ],
-              SwipeableMessage(
-                event: event,
-                onSwipe: onSwipe,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: event.isOwnMessage
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onLongPress: () => selectMode ? onSelect!(event) : null,
-                      onTap: () => selectMode
-                          ? onSelect!(event)
-                          : hideKeyboardChatScreen?.call(),
-                      child: Center(
-                        child: Container(
-                          margin: EdgeInsetsDirectional.only(
-                            start: selected ? 0.0 : 8.0,
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
+                ),
+                alignment: Alignment.bottomCenter,
+                child: SwipeableMessage(
+                  event: event,
+                  onSwipe: onSwipe,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: event.isOwnMessage
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onLongPress: () => selectMode ? onSelect!(event) : null,
+                        onTap: () => selectMode
+                            ? onSelect!(event)
+                            : hideKeyboardChatScreen?.call(),
+                        child: Center(
+                          child: Container(
+                            margin: EdgeInsetsDirectional.only(
+                              start: selected ? 0.0 : 8.0,
+                            ),
+                            padding: EdgeInsets.only(
+                              right: selected
+                                  ? 0
+                                  : event.isOwnMessage ||
+                                          responsiveUtils.isDesktop(context)
+                                      ? 8.0
+                                      : 16.0,
+                              top: selected ? 0 : 1.0,
+                              bottom: selected ? 0 : 1.0,
+                            ),
+                            child: _messageSelectedWidget(context, row),
                           ),
-                          padding: EdgeInsets.only(
-                            right: selected
-                                ? 0
-                                : event.isOwnMessage ||
-                                        responsiveUtils.isDesktop(context)
-                                    ? 8.0
-                                    : 16.0,
-                            top: selected ? 0 : 1.0,
-                            bottom: selected ? 0 : 1.0,
-                          ),
-                          child: _messageSelectedWidget(context, row),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
