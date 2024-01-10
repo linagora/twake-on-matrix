@@ -2983,5 +2983,6 @@
   "descriptionTwakeId": "To start, please create a TwakeID \nthat will allow you to use \nchat, mail and drive",
   "countFilesSendPerDialog": "The maximum files when sending is {count}.",
   "sendFiles": "Send {count} files",
-  "failedToSendFiles": "Failed to send files"
+  "failedToSendFiles": "Failed to send files",
+  "noResults": "No Results"
 }
