@@ -1,10 +1,10 @@
-import 'package:equatable/equatable.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side.dart';
 import 'package:matrix/matrix.dart';
 
-class PresentationServerSideSearch extends Equatable {
+class PresentationServerSideSearch extends PresentationServerSide {
   final List<Result> searchResults;
 
-  const PresentationServerSideSearch({
+  PresentationServerSideSearch({
     required this.searchResults,
   });
 
