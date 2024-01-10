@@ -8,9 +8,9 @@ import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_style.dart';
 import 'package:fluffychat/pages/search/server_search_controller.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
@@ -19,11 +19,11 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -84,7 +84,8 @@ class _ServerSearchView extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: serverSearchController.searchResultsNotifier,
           builder: (context, searchResults, child) {
-            final events = searchResults.searchResults
+            final events = (searchResults as PresentationServerSideSearch)
+                .searchResults
                 .map((result) => result.getEvent(context))
                 .whereNotNull()
                 .toList();
@@ -164,23 +165,8 @@ class _EmptyView extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable:
             controller.sameTypeEventsBuilderController!.emptyNotifier,
-        builder: (context, isEmpty, child) => isEmpty
-            ? Padding(
-                padding: ChatSearchStyle.emptyPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(L10n.of(context)!.noResultsFound),
-                    const SizedBox(height: ChatSearchStyle.emptyGap),
-                    Center(
-                      child: SvgPicture.asset(
-                        ImagePaths.icNoResultsFound,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : const SizedBox(),
+        builder: (context, isEmpty, child) =>
+            isEmpty ? const EmptySearchWidget() : const SizedBox(),
       ),
     );
   }

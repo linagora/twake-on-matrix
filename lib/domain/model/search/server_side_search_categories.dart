@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:matrix/matrix.dart';
 
-class ServerSideSearchCategories extends Equatable {
+class ServerSideSearchCategories with EquatableMixin {
   final String searchTerm;
   final SearchFilter? searchFilter;
 
