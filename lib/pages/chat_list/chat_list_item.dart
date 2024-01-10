@@ -43,7 +43,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   void clickAction(BuildContext context) async {
     if (onTap != null) return onTap!();
-    if (activeChat) return;
     switch (room.membership) {
       case Membership.ban:
         TwakeSnackBar.show(
