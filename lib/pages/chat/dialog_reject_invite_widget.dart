@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/dialog_reject_invite_style.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -19,6 +20,9 @@ class DialogRejectInviteWidget extends StatelessWidget {
       child: PopScope(
         canPop: false,
         onPopInvoked: (didPop) async {
+          if (PlatformInfos.isWeb) {
+            return;
+          }
           Navigator.of(context).pop(DialogRejectInviteResult.cancel);
         },
         child: Center(
