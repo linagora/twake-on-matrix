@@ -344,7 +344,7 @@ class ChatController extends State<Chat>
 
   @override
   void initState() {
-    registerListeners();
+    registerPasteShortcutListeners();
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
@@ -435,7 +435,7 @@ class ChatController extends State<Chat>
 
   @override
   void dispose() {
-    unregisterListeners();
+    unregisterPasteShortcutListeners();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
@@ -443,6 +443,7 @@ class ChatController extends State<Chat>
     _jumpToEventIdSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
+    sendController.dispose();
     super.dispose();
   }
 
