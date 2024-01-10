@@ -63,58 +63,62 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                     ),
                     if (controller.room!.canSendDefaultMessages &&
                         controller.room!.membership == Membership.join)
-                      Container(
-                        constraints: const BoxConstraints(
-                          maxWidth: TwakeThemes.columnWidth * 2.5,
+                      Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: TwakeThemes.columnWidth * 2.5,
+                          ),
+                          alignment: Alignment.center,
+                          child: controller.room?.isAbandonedDMRoom == true
+                              ? Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom:
+                                        ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                    left: ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                    right: ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.all(16),
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .error,
+                                        ),
+                                        icon: const Icon(
+                                          Icons.archive_outlined,
+                                        ),
+                                        onPressed: controller.leaveChat,
+                                        label: Text(
+                                          L10n.of(context)!.leave,
+                                        ),
+                                      ),
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.all(16),
+                                        ),
+                                        icon: const Icon(
+                                          Icons.chat_outlined,
+                                        ),
+                                        onPressed: controller.recreateChat,
+                                        label: Text(
+                                          L10n.of(context)!.reopenChat,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : _inputMessageWidget(),
                         ),
-                        alignment: Alignment.center,
-                        child: controller.room?.isAbandonedDMRoom == true
-                            ? Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: ChatViewBodyStyle.bottomSheetPadding(
-                                    context,
-                                  ),
-                                  left: ChatViewBodyStyle.bottomSheetPadding(
-                                    context,
-                                  ),
-                                  right: ChatViewBodyStyle.bottomSheetPadding(
-                                    context,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    TextButton.icon(
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.all(16),
-                                        foregroundColor:
-                                            Theme.of(context).colorScheme.error,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.archive_outlined,
-                                      ),
-                                      onPressed: controller.leaveChat,
-                                      label: Text(
-                                        L10n.of(context)!.leave,
-                                      ),
-                                    ),
-                                    TextButton.icon(
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.all(16),
-                                      ),
-                                      icon: const Icon(
-                                        Icons.chat_outlined,
-                                      ),
-                                      onPressed: controller.recreateChat,
-                                      label: Text(
-                                        L10n.of(context)!.reopenChat,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : _inputMessageWidget(),
                       ),
                   ],
                 ),
@@ -156,7 +160,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
   Widget _inputMessageWidget() {
     return Container(
       constraints: BoxConstraints(
-        maxWidth: ChatViewBodyStyle.inputMessageWidgetMaxWidth,
+        maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
       ),
       padding: ChatViewBodyStyle.inputBarPadding,
       child: Column(
