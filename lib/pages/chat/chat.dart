@@ -253,7 +253,7 @@ class ChatController extends State<Chat>
     context.go('/rooms/$roomId');
   }
 
-  void leaveChat() async {
+  Future<void> leaveChat() async {
     final room = this.room;
     if (room == null) {
       throw Exception(
@@ -1475,7 +1475,7 @@ class ChatController extends State<Chat>
   void onRejectInvitation(BuildContext context) async {
     final result = await showDialog<DialogRejectInviteResult>(
       context: TwakeApp.routerKey.currentContext ?? context,
-      useRootNavigator: false,
+      useRootNavigator: PlatformInfos.isWeb,
       builder: (c) => const DialogRejectInviteWidget(),
     );
 
@@ -1485,7 +1485,8 @@ class ChatController extends State<Chat>
       case DialogRejectInviteResult.cancel:
         return;
       case DialogRejectInviteResult.reject:
-        return leaveChat();
+        await leaveChat();
+        return;
     }
   }
 
