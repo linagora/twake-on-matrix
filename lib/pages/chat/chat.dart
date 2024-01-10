@@ -207,6 +207,10 @@ class ChatController extends State<Chat>
           .firstWhereOrNull((eventId) => eventId == event.eventId) !=
       null;
 
+  void updateInputTextNotifier() {
+    inputText.value = sendController.text;
+  }
+
   String? _findUnreadReceivedMessageLocation() {
     final events = timeline!.events;
     if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
@@ -350,6 +354,7 @@ class ChatController extends State<Chat>
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
     _tryLoadTimeline();
+    sendController.addListener(updateInputTextNotifier);
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (room == null) {
@@ -443,6 +448,7 @@ class ChatController extends State<Chat>
     _jumpToEventIdSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
+    sendController.removeListener(updateInputTextNotifier);
     sendController.dispose();
     super.dispose();
   }
