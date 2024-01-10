@@ -26,20 +26,20 @@ class ServerSearchMessagesList extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable:
             searchController.serverSearchController.searchResultsNotifier,
-        builder: (context, severSearchNotifier, child) {
-          if (severSearchNotifier is PresentationServerSideEmptySearch) {
+        builder: (context, serverSearchNotifier, child) {
+          if (serverSearchNotifier is PresentationServerSideEmptySearch) {
             return child!;
           }
 
-          if (severSearchNotifier is PresentationServerSideSearch) {
+          if (serverSearchNotifier is PresentationServerSideSearch) {
             return ListView.builder(
               shrinkWrap: true,
               physics: const ClampingScrollPhysics(),
-              itemCount: severSearchNotifier.searchResults.length,
+              itemCount: serverSearchNotifier.searchResults.length,
               padding: ServerSearchViewStyle.paddingListItem,
               itemBuilder: ((context, index) {
                 final searchResult =
-                    severSearchNotifier.searchResults[index].result;
+                    serverSearchNotifier.searchResults[index].result;
                 final room = Matrix.of(context).client.getRoomById(
                       searchResult?.roomId ?? '',
                     );

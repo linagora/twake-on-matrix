@@ -1,7 +1,7 @@
-import 'package:fluffychat/presentation/model/search/presentation_server_side.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
 import 'package:matrix/matrix.dart';
 
-class PresentationServerSideSearch extends PresentationServerSide {
+class PresentationServerSideSearch extends PresentationServerSideUIState {
   final List<Result> searchResults;
 
   PresentationServerSideSearch({
