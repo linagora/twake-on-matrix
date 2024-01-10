@@ -396,6 +396,9 @@ class ChatController extends State<Chat>
       }
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
+        Future.delayed(const Duration(seconds: 5), () {
+          setReadMarker(eventId: room?.lastEvent?.eventId);
+        });
       }
       if (!mounted) return;
     } catch (e, s) {
