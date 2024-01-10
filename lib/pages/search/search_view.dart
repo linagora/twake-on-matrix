@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -72,16 +73,20 @@ class SearchView extends StatelessWidget {
             ValueListenableBuilder(
               valueListenable:
                   searchController.serverSearchController.searchResultsNotifier,
-              builder: ((context, searchResults, _) {
-                if (searchResults.searchResults.isEmpty) {
-                  return _EmptySliverBox();
+              builder: ((context, searchResults, child) {
+                if (searchResults is PresentationServerSideSearch) {
+                  if (searchResults.searchResults.isEmpty) {
+                    return child!;
+                  }
+                  return _SearchHeader(
+                    header: L10n.of(context)!.messages,
+                    searchController: searchController,
+                    needShowMore: false,
+                  );
                 }
-                return _SearchHeader(
-                  header: L10n.of(context)!.messages,
-                  searchController: searchController,
-                  needShowMore: false,
-                );
+                return child!;
               }),
+              child: _EmptySliverBox(),
             ),
             ServerSearchMessagesList(searchController: searchController),
             ValueListenableBuilder(
