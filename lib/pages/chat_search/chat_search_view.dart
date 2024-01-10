@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
@@ -16,6 +14,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
@@ -41,7 +40,7 @@ class ChatSearchView extends StatelessWidget {
     return PopScope(
       canPop: false,
       onPopInvoked: (isPop) async {
-        if (Platform.isAndroid) {
+        if (PlatformInfos.isAndroid) {
           controller.onBack();
         }
       },
