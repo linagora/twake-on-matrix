@@ -1,5 +1,8 @@
+import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank_style.dart';
+import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,7 +12,9 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatBlank extends StatelessWidget {
   final bool loading;
+
   const ChatBlank({this.loading = false, Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +68,7 @@ class _ChatBlankNotChat extends StatelessWidget {
   }
 }
 
-class _ChatBlankRichText extends StatelessWidget {
+class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
   const _ChatBlankRichText({
     required this.context,
   });
@@ -95,17 +100,57 @@ class _ChatBlankRichText extends StatelessWidget {
   WidgetSpan _buildIconTitle(BuildContext context) {
     return WidgetSpan(
       alignment: PlaceholderAlignment.middle,
-      child: IconButton(
-        onPressed: () {
-          context.go('/rooms/newprivatechat');
-        },
-        icon: Icon(
-          Icons.mode_edit_outline_outlined,
-          size: ChatBlankStyle.iconSize,
-          color: Theme.of(context).primaryColor,
+      child: MenuAnchor(
+        menuChildren: [
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.chat),
+            onPressed: goToNewPrivateChat,
+            child: Text(L10n.of(context)!.newDirectMessage),
+          ),
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.group),
+            onPressed: () => goToNewGroupChat(
+              innerNavigatorContext(),
+            ),
+            child: Text(L10n.of(context)!.newChat),
+          ),
+        ],
+        style: const MenuStyle(
+          alignment: Alignment.topLeft,
         ),
+        builder: (context, menuController, _) {
+          return InkWell(
+            onTap: () => menuController.open(),
+            child: Icon(
+              Icons.mode_edit_outline_outlined,
+              size: ChatBlankStyle.iconSize,
+              color: Theme.of(context).primaryColor,
+            ),
+          );
+        },
       ),
     );
+  }
+
+  bool get goRouteAvailableInFirstColumn =>
+      FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn();
+
+  BuildContext innerNavigatorContext() {
+    if (!goRouteAvailableInFirstColumn) {
+      return FirstColumnInnerRoutes
+          .innerNavigatorNotOneColumnKey.currentState!.context;
+    } else {
+      return FirstColumnInnerRoutes
+          .innerNavigatorOneColumnKey.currentState!.context;
+    }
+  }
+
+  void goToNewPrivateChat() {
+    if (!goRouteAvailableInFirstColumn) {
+      innerNavigatorContext().pushInner('innernavigator/newprivatechat');
+    } else {
+      innerNavigatorContext().push('/rooms/newprivatechat');
+    }
   }
 }
 
