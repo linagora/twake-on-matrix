@@ -7,6 +7,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/search/server_side_search_categories.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
@@ -21,10 +23,8 @@ class ServerSearchController with SearchDebouncerMixin {
 
   final _serverSearchInteractor = getIt.get<ServerSearchInteractor>();
 
-  final searchResultsNotifier = ValueNotifier<PresentationServerSideSearch>(
-    const PresentationServerSideSearch(
-      searchResults: [],
-    ),
+  final searchResultsNotifier = ValueNotifier<PresentationServerSide>(
+    PresentationServerSide(),
   );
 
   static const int _limitServerSideSearchFilter = 20;
@@ -36,6 +36,9 @@ class ServerSearchController with SearchDebouncerMixin {
   String? _nextBatch;
 
   ServerSideSearchCategories? _searchCategories;
+
+  bool get searchTermIsNotEmpty =>
+      _searchCategories?.searchTerm.isNotEmpty == true;
 
   void initSearch({
     Function(String)? onSearchEncryptedMessage,
@@ -71,19 +74,24 @@ class ServerSearchController with SearchDebouncerMixin {
       (success) {
         if (success is ServerSearchChatSuccess) {
           updateNextBatch(success.nextBatch);
-          searchResultsNotifier.value = PresentationServerSideSearch(
-            searchResults: [
-              ...searchResultsNotifier.value.searchResults,
-              ...success.results ?? [],
-            ],
-          );
+          if (success.results?.isEmpty == true) {
+            searchResultsNotifier.value = PresentationServerSideEmptySearch();
+          } else {
+            searchResultsNotifier.value = PresentationServerSideSearch(
+              searchResults: [
+                ...(searchResultsNotifier.value as PresentationServerSideSearch)
+                    .searchResults,
+                ...success.results ?? [],
+              ],
+            );
+          }
         }
       },
     );
   }
 
   void resetSearchResults() {
-    searchResultsNotifier.value = const PresentationServerSideSearch(
+    searchResultsNotifier.value = PresentationServerSideSearch(
       searchResults: [],
     );
   }
@@ -126,7 +134,9 @@ class ServerSearchController with SearchDebouncerMixin {
   void loadMore() {
     if (_searchCategories == null ||
         isLoadingMoreNotifier.value ||
-        searchResultsNotifier.value.searchResults.isEmpty ||
+        (searchResultsNotifier.value as PresentationServerSideSearch)
+            .searchResults
+            .isEmpty ||
         _nextBatch == null) {
       return;
     }
