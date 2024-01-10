@@ -32,13 +32,15 @@ class SettingsProfileView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: LinagoraSysColors.material().onPrimary,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            size: SettingsProfileViewStyle.sizeIcon,
-          ),
-          onPressed: () => context.pop(),
-        ),
+        leading: responsive.isMobile(context)
+            ? IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  size: SettingsProfileViewStyle.sizeIcon,
+                ),
+                onPressed: () => context.pop(),
+              )
+            : const SizedBox.shrink(),
         title: Text(
           L10n.of(context)!.profile,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
