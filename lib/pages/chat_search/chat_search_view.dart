@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_style.dart';
 import 'package:fluffychat/pages/search/server_search_controller.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
@@ -84,23 +85,35 @@ class _ServerSearchView extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: serverSearchController.searchResultsNotifier,
           builder: (context, searchResults, child) {
-            final events = (searchResults as PresentationServerSideSearch)
-                .searchResults
-                .map((result) => result.getEvent(context))
-                .whereNotNull()
-                .toList();
-            return SliverList.builder(
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                final event = events[index];
-                return _SearchItem(
-                  event: event,
-                  searchWord: controller.serverSearchController.debouncerValue,
-                  onTap: controller.onEventTap,
-                );
-              },
-            );
+            if (searchResults is PresentationServerSideSearch) {
+              final events = searchResults.searchResults
+                  .map((result) => result.getEvent(context))
+                  .whereNotNull()
+                  .toList();
+              return SliverList.builder(
+                itemCount: events.length,
+                itemBuilder: (context, index) {
+                  final event = events[index];
+                  return _SearchItem(
+                    event: event,
+                    searchWord:
+                        controller.serverSearchController.debouncerValue,
+                    onTap: controller.onEventTap,
+                  );
+                },
+              );
+            }
+
+            if (searchResults is PresentationServerSideEmptySearch) {
+              return const SliverToBoxAdapter(
+                child: EmptySearchWidget(),
+              );
+            }
+            return child!;
           },
+          child: const SliverToBoxAdapter(
+            child: SizedBox(),
+          ),
         ),
         ValueListenableBuilder(
           valueListenable: serverSearchController.isLoadingMoreNotifier,
