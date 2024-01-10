@@ -3,6 +3,7 @@ import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interac
 import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog_view.dart';
+import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -51,7 +52,7 @@ class SendFileDialogController extends State<SendFileDialog> {
   void sendMediaWithCaption() {
     if (widget.room == null) {
       Logs().e("sendMediaWithCaption:: room is null");
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
       return;
     }
     sendMediaOnWebWithCaptionInteractor.execute(
@@ -59,13 +60,13 @@ class SendFileDialogController extends State<SendFileDialog> {
       media: widget.files.first,
       caption: textEditingController.text,
     );
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
   void sendFilesWithCaption() {
     if (widget.room == null) {
       Logs().e("sendFilesWithCaption:: room is null");
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
       return;
     }
     sendFilesOnWebWithCaptionInteractor.execute(
@@ -73,7 +74,7 @@ class SendFileDialogController extends State<SendFileDialog> {
       files: widget.files,
       caption: textEditingController.text,
     );
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
   void send() {
