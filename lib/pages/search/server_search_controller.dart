@@ -7,7 +7,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/search/server_side_search_categories.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side.dart';
+import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +23,8 @@ class ServerSearchController with SearchDebouncerMixin {
 
   final _serverSearchInteractor = getIt.get<ServerSearchInteractor>();
 
-  final searchResultsNotifier = ValueNotifier<PresentationServerSide>(
-    PresentationServerSide(),
+  final searchResultsNotifier = ValueNotifier<PresentationServerSideUIState>(
+    PresentationServerSideInitial(),
   );
 
   static const int _limitServerSideSearchFilter = 20;
@@ -79,8 +79,10 @@ class ServerSearchController with SearchDebouncerMixin {
           } else {
             searchResultsNotifier.value = PresentationServerSideSearch(
               searchResults: [
-                ...(searchResultsNotifier.value as PresentationServerSideSearch)
-                    .searchResults,
+                if (searchResultsNotifier.value is PresentationServerSideSearch)
+                  ...(searchResultsNotifier.value
+                          as PresentationServerSideSearch)
+                      .searchResults,
                 ...success.results ?? [],
               ],
             );
@@ -134,9 +136,10 @@ class ServerSearchController with SearchDebouncerMixin {
   void loadMore() {
     if (_searchCategories == null ||
         isLoadingMoreNotifier.value ||
-        (searchResultsNotifier.value as PresentationServerSideSearch)
-            .searchResults
-            .isEmpty ||
+        ((searchResultsNotifier.value is PresentationServerSideSearch) &&
+            (searchResultsNotifier.value as PresentationServerSideSearch)
+                .searchResults
+                .isEmpty) ||
         _nextBatch == null) {
       return;
     }
