@@ -14,11 +14,11 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
 
   TextEditingController get sendController;
 
-  void registerListeners() {
+  void registerPasteShortcutListeners() {
     ClipboardEvents.instance?.registerPasteEventListener(_onPasteEvent);
   }
 
-  void unregisterListeners() {
+  void unregisterPasteShortcutListeners() {
     ClipboardEvents.instance?.unregisterPasteEventListener(_onPasteEvent);
   }
 
