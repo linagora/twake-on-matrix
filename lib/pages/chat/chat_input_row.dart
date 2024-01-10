@@ -103,10 +103,18 @@ class ChatInputRow extends StatelessWidget {
               ),
               ValueListenableBuilder(
                 valueListenable: controller.inputText,
-                builder: (context, value, child) {
-                  if (!PlatformInfos.isMobile || value.isNotEmpty) {
+                builder: (context, textInput, child) {
+                  if (PlatformInfos.isWeb && textInput.isEmpty) {
+                    return Opacity(
+                      opacity: ChatInputRowStyle.inputComposerOpacity,
+                      child: child!,
+                    );
+                  }
+
+                  if (textInput.isNotEmpty) {
                     return child!;
                   }
+
                   return const SizedBox();
                 },
                 child: Padding(

@@ -24,4 +24,6 @@ class ChatInputRowStyle {
     left: 8,
     bottom: 6,
   );
+
+  static const double inputComposerOpacity = 0.38;
 }
