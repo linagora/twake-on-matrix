@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
 import 'package:fluffychat/presentation/extensions/localizations/locale_extension.dart';
@@ -16,12 +17,12 @@ class SettingsAppLanguageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
+      appBar: SettingsAppBar(
         title: Text(
           L10n.of(context)!.appLanguage,
           style: Theme.of(context).textTheme.titleLarge,
         ),
+        context: context,
       ),
       body: SingleChildScrollView(
         padding: SettingsAppLanguageViewStyle.paddingBody,

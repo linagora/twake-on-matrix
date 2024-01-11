@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +20,9 @@ class SettingsIgnoreListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
+      appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.ignoredUsers),
+        context: context,
       ),
       body: MaxWidthBody(
         child: Column(

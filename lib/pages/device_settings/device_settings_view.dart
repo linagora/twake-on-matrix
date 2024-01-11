@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -14,9 +15,11 @@ class DevicesSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
-        title: Text(L10n.of(context)!.devices),
+      appBar: SettingsAppBar(
+        context: context,
+        title: Text(
+          L10n.of(context)!.deviceKeys,
+        ),
       ),
       body: MaxWidthBody(
         child: FutureBuilder<bool>(
