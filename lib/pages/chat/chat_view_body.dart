@@ -170,6 +170,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             const ConnectionStatusHeader(),
             // Currently we can't support reactions
             // ReactionsPicker(controller),
+            const SizedBox(height: 8.0),
             ChatInputRow(controller),
             const SizedBox(height: 8),
           ].map(
