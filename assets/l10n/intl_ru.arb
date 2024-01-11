@@ -2957,5 +2957,70 @@
   "hasInvitedYouToAChat": " пригласил(-а) вас в чат. Принять или отклонить и удалить беседу?",
   "@hasInvitedYouToAChat": {},
   "doYouReallyWantToDeclineThisInvitation": "Вы действительно хотите отклонить это приглашение и удалить чат? Это действие нельзя отменить.",
-  "@doYouReallyWantToDeclineThisInvitation": {}
+  "@doYouReallyWantToDeclineThisInvitation": {},
+  "pinnedMessages": "{count, plural, =1{1 закрепленное сообщение} other{{count} закрепленных сообщения}}}",
+  "@pinnedMessages": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "languageVietnamese": "Вьетнамский",
+  "@languageVietnamese": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "sendImages": "{count, plural, =1{Отправлено 1 изображение} other{Отправлены {count} изображений}}",
+  "@sendImages": {},
+  "activeNow": "Активен",
+  "@activeNow": {},
+  "descriptionWelcomeTo": "мессенджер с открытым исходным кодом\nна Matrix-протоколе, который позволяет\nшифровать ваши данные",
+  "@descriptionWelcomeTo": {},
+  "startMessaging": "Начать общение",
+  "@startMessaging": {},
+  "signIn": "Войти",
+  "@signIn": {},
+  "languageEnglish": "Английский",
+  "@languageEnglish": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "languageFrench": "Французский",
+  "@languageFrench": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "languageRussian": "Русский",
+  "@languageRussian": {
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  },
+  "settingsLanguageDescription": "Выберите язык Twake Chat",
+  "@settingsLanguageDescription": {},
+  "enterCaption": "Добавить описание",
+  "@enterCaption": {},
+  "failToSend": "Отправить не удалось, повторите попытку",
+  "@failToSend": {},
+  "showLess": "Свернуть",
+  "@showLess": {},
+  "showMore": "Развернуть",
+  "@showMore": {},
+  "unreadMessages": "Непрочитанные сообщения",
+  "@unreadMessages": {},
+  "createTwakeId": "Создать Twake ID",
+  "@createTwakeId": {},
+  "useYourCompanyServer": "Корпоративный сервер",
+  "@useYourCompanyServer": {},
+  "descriptionTwakeId": "Создайте Twake ID,\nчтобы получить доступ\nк чату, почте и диску",
+  "@descriptionTwakeId": {},
+  "countFilesSendPerDialog": "Максимальный размер файла: {count}.",
+  "@countFilesSendPerDialog": {},
+  "sendFiles": "Отправить {count} файлов",
+  "@sendFiles": {},
+  "failedToSendFiles": "Ошибка отправки файлов",
+  "@failedToSendFiles": {}
 }
