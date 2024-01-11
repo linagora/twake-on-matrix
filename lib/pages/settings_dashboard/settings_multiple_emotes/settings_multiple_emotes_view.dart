@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -17,9 +18,9 @@ class MultipleEmotesSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
+      appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.emotePacks),
+        context: context,
       ),
       body: StreamBuilder(
         stream: room.onUpdate.stream,

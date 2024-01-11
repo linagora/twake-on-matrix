@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +17,7 @@ class Settings3PidView extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.request ??= Matrix.of(context).client.getAccount3PIDs();
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
+      appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.passwordRecovery),
         actions: [
           IconButton(
@@ -26,6 +26,7 @@ class Settings3PidView extends StatelessWidget {
             tooltip: L10n.of(context)!.addEmail,
           ),
         ],
+        context: context,
       ),
       body: MaxWidthBody(
         child: FutureBuilder<List<ThirdPartyIdentifier>?>(
