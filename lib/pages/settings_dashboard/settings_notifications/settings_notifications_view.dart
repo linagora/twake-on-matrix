@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -19,9 +20,9 @@ class SettingsNotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
+      appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.notifications),
+        context: context,
       ),
       body: MaxWidthBody(
         withScrolling: true,

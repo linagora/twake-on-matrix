@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
@@ -13,7 +14,10 @@ class SettingsSecurityView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(L10n.of(context)!.security)),
+      appBar: SettingsAppBar(
+        title: Text(L10n.of(context)!.security),
+        context: context,
+      ),
       body: ListTileTheme(
         iconColor: Theme.of(context).colorScheme.onBackground,
         child: MaxWidthBody(
