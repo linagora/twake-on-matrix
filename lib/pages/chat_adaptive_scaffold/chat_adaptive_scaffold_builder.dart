@@ -1,8 +1,10 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
@@ -31,10 +33,27 @@ class ChatAdaptiveScaffoldBuilderController
 
   void hideRightColumn() {
     rightColumnTypeNotifier.value = null;
+    if (responsiveUtils.isMobile(context)) {
+      Navigator.of(context).pop();
+    }
   }
 
+  final responsiveUtils = getIt.get<ResponsiveUtils>();
+
   void setRightColumnType(RightColumnType type) {
-    rightColumnTypeNotifier.value = type;
+    if (responsiveUtils.isMobile(context)) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => widget.rightBuilder(
+            this,
+            isInStack: true,
+            type: type,
+          ),
+        ),
+      );
+    } else {
+      rightColumnTypeNotifier.value = type;
+    }
   }
 
   @override
@@ -59,17 +78,9 @@ class ChatAdaptiveScaffoldBuilderController
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
-                  builder: (_) => Stack(
-                    children: [
-                      body!,
-                      if (rightColumnType != null)
-                        widget.rightBuilder(
-                          this,
-                          isInStack: true,
-                          type: rightColumnType,
-                        ),
-                    ],
-                  ),
+                  builder: (_) {
+                    return body!;
+                  },
                 ),
                 const WidthPlatformBreakpoint(
                   begin: breakpoint,
