@@ -62,8 +62,8 @@ class SearchableAppBar extends StatelessWidget {
                           .goRouteAvailableInFirstColumn()) {
                         Navigator.of(context).maybePop();
                       } else {
-                        if (context.canPop()) {
-                          context.pop();
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
                         } else {
                           context.go('/rooms');
                         }
