@@ -6,11 +6,11 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 
 class ProfileInfo extends StatefulWidget {
@@ -62,10 +62,15 @@ class ProfileInfoController extends State<ProfileInfo> {
   }
 
   void goToProfileShared() {
-    if (widget.isDraftInfo) return;
-    Navigator.of(context).pushNamed(
-      ProfileInfoRoutes.profileInfoShared,
-      arguments: widget.roomId,
+    if (widget.isDraftInfo || widget.roomId == null) return;
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) {
+          return ProfileInfoShared(
+            roomId: widget.roomId!,
+          );
+        },
+      ),
     );
   }
 
