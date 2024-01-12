@@ -19,36 +19,33 @@ class ContactsSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ContactsSelectionViewStyle.parentPadding,
-      child: Scaffold(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        appBar: PreferredSize(
-          preferredSize: SearchableAppBarStyle.maxPreferredSize(context),
-          child: SearchableAppBar(
-            focusNode: controller.searchFocusNode,
-            title: controller.getTitle(context),
-            searchModeNotifier: controller.isSearchModeNotifier,
-            hintText: controller.getHintText(context),
-            textEditingController: controller.textEditingController,
-            openSearchBar: controller.openSearchBar,
-            closeSearchBar: controller.closeSearchBar,
-            isFullScreen: controller.isFullScreen,
-          ),
+    return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
+      appBar: PreferredSize(
+        preferredSize: controller.isFullScreen
+            ? SearchableAppBarStyle.preferredSize(context)
+            : SearchableAppBarStyle.maxPreferredSize(context),
+        child: SearchableAppBar(
+          focusNode: controller.searchFocusNode,
+          title: controller.getTitle(context),
+          searchModeNotifier: controller.isSearchModeNotifier,
+          hintText: controller.getHintText(context),
+          textEditingController: controller.textEditingController,
+          openSearchBar: controller.openSearchBar,
+          closeSearchBar: controller.closeSearchBar,
+          isFullScreen: controller.isFullScreen,
         ),
-        body: Column(
+      ),
+      body: Padding(
+        padding: ContactsSelectionViewStyle.parentPadding,
+        child: Column(
           children: [
             Expanded(
               child: ValueListenableBuilder<bool>(
                 valueListenable: controller
                     .selectedContactsMapNotifier.haveSelectedContactsNotifier,
                 builder: (context, haveSelectedContact, child) {
-                  return Padding(
-                    padding: ContactsSelectionViewStyle.getSelectionListPadding(
-                      haveSelectedContact: haveSelectedContact,
-                    ),
-                    child: child,
-                  );
+                  return child!;
                 },
                 child: CustomScrollView(
                   slivers: [
@@ -82,23 +79,23 @@ class ContactsSelectionView extends StatelessWidget {
             if (!controller.isFullScreen) _webActionButton(context),
           ],
         ),
-        floatingActionButton: controller.isFullScreen
-            ? ValueListenableBuilder<bool>(
-                valueListenable: controller
-                    .selectedContactsMapNotifier.haveSelectedContactsNotifier,
-                builder: (context, haveSelectedContacts, child) {
-                  if (!haveSelectedContacts) {
-                    return const SizedBox.shrink();
-                  }
-                  return child!;
-                },
-                child: TwakeFloatingActionButton(
-                  icon: Icons.arrow_forward,
-                  onTap: () => controller.trySubmit(context),
-                ),
-              )
-            : null,
       ),
+      floatingActionButton: controller.isFullScreen
+          ? ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+              builder: (context, haveSelectedContacts, child) {
+                if (!haveSelectedContacts) {
+                  return const SizedBox.shrink();
+                }
+                return child!;
+              },
+              child: TwakeFloatingActionButton(
+                icon: Icons.arrow_forward,
+                onTap: () => controller.trySubmit(context),
+              ),
+            )
+          : null,
     );
   }
 
