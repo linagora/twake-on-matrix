@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class PinnedMessagesScreen extends StatelessWidget {
   final PinnedMessagesController controller;
@@ -23,11 +24,15 @@ class PinnedMessagesScreen extends StatelessWidget {
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
         backgroundColor: LinagoraSysColors.material().onPrimary,
+        centerTitle: true,
         title: ValueListenableBuilder(
           valueListenable: controller.eventsNotifier,
           builder: (context, events, child) {
             return Text(
               L10n.of(context)!.pinnedMessages(events.length),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             );
           },
         ),
