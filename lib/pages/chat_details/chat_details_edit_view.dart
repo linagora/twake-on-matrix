@@ -279,6 +279,7 @@ class _GroupNameField extends StatelessWidget {
     return Padding(
       padding: ChatDetailEditViewStyle.textFieldPadding,
       child: TextField(
+        style: ChatDetailEditViewStyle.textFieldStyle(context),
         controller: controller.groupNameTextEditingController,
         focusNode: controller.groupNameFocusNode,
         decoration: InputDecoration(
@@ -290,6 +291,25 @@ class _GroupNameField extends StatelessWidget {
           hintText: L10n.of(context)!.enterGroupName,
           hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
           contentPadding: ChatDetailEditViewStyle.contentPadding,
+          suffixIcon: ValueListenableBuilder<bool>(
+            valueListenable: controller.groupNameEmptyNotifier,
+            builder: (context, isGroupNameEmpty, child) {
+              if (isGroupNameEmpty) {
+                return child!;
+              }
+
+              return IconButton(
+                onPressed: () =>
+                    controller.groupNameTextEditingController.clear(),
+                icon: Icon(
+                  Icons.cancel_outlined,
+                  size: ChatDetailEditViewStyle.clearIconSize,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              );
+            },
+            child: const SizedBox.shrink(),
+          ),
         ),
       ),
     );
@@ -311,6 +331,7 @@ class _DescriptionField extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            style: ChatDetailEditViewStyle.textFieldStyle(context),
             controller: controller.descriptionTextEditingController,
             focusNode: controller.descriptionFocusNode,
             decoration: InputDecoration(
@@ -323,6 +344,25 @@ class _DescriptionField extends StatelessWidget {
               hintText: L10n.of(context)!.description,
               hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
               contentPadding: ChatDetailEditViewStyle.contentPadding,
+              suffixIcon: ValueListenableBuilder<bool>(
+                valueListenable: controller.descriptionEmptyNotifier,
+                builder: (context, isDescriptionEmpty, child) {
+                  if (isDescriptionEmpty) {
+                    return child!;
+                  }
+
+                  return IconButton(
+                    onPressed: () =>
+                        controller.descriptionTextEditingController.clear(),
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      size: ChatDetailEditViewStyle.clearIconSize,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  );
+                },
+                child: const SizedBox.shrink(),
+              ),
             ),
           ),
           const SizedBox(
