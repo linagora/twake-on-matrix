@@ -34,17 +34,25 @@ class ChatDetailEditViewStyle {
       EdgeInsets.symmetric(horizontal: 8.0);
 
   static TextStyle? textFieldLabelStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodySmall?.copyWith(
+      Theme.of(context).textTheme.labelSmall?.copyWith(
             fontSize: 16,
             letterSpacing: 0.4,
             color: Theme.of(context).colorScheme.onSurface,
           );
 
   static TextStyle? textFieldHintStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodyLarge?.copyWith(
+      Theme.of(context).textTheme.bodyMedium?.copyWith(
             letterSpacing: -0.15,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.outline,
           );
+
+  static TextStyle? textFieldStyle(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.copyWith(
+            letterSpacing: -0.15,
+            color: Colors.black,
+          );
+
+  static const double clearIconSize = 20.0;
 
   static const EdgeInsetsDirectional contentPadding =
       EdgeInsetsDirectional.all(16.0);

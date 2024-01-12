@@ -52,9 +52,11 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   Room? room;
 
   final groupNameTextEditingController = TextEditingController();
+  final groupNameEmptyNotifier = ValueNotifier<bool>(false);
   final groupNameFocusNode = FocusNode();
 
   final descriptionTextEditingController = TextEditingController();
+  final descriptionEmptyNotifier = ValueNotifier<bool>(false);
   final descriptionFocusNode = FocusNode();
   final updateGroupAvatarNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(ChatDetailsUploadAvatarInitial()),
@@ -453,33 +455,34 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
   void _setupGroupNameTextEditingController() {
     groupNameTextEditingController.text = room?.name ?? '';
+    groupNameEmptyNotifier.value = groupNameTextEditingController.text.isEmpty;
+
     groupNameTextEditingController.addListener(() {
-      if (_isEditAvatar || _isEditDescription) {
+      if (_isEditAvatar) {
         return;
       }
-      if (groupNameTextEditingController.text.isEmpty &&
-          groupNameTextEditingController.text != '') {
-        isEditedGroupInfoNotifier.toggle();
-        return;
-      }
+
       isEditedGroupInfoNotifier.value =
-          groupNameTextEditingController.text != (room?.name ?? '');
+          groupNameTextEditingController.text != room?.name;
+      groupNameEmptyNotifier.value =
+          groupNameTextEditingController.text.isEmpty;
     });
   }
 
   void _setupDescriptionTextEditingController() {
     descriptionTextEditingController.text = room?.topic ?? '';
+    descriptionEmptyNotifier.value =
+        descriptionTextEditingController.text.isEmpty;
+
     descriptionTextEditingController.addListener(() {
-      if (_isEditAvatar || _isEditGroupName) {
+      if (_isEditAvatar) {
         return;
       }
-      if (descriptionTextEditingController.text.isEmpty &&
-          descriptionTextEditingController.text != '') {
-        isEditedGroupInfoNotifier.toggle();
-        return;
-      }
+
+      descriptionEmptyNotifier.value =
+          descriptionTextEditingController.text.isEmpty;
       isEditedGroupInfoNotifier.value =
-          descriptionTextEditingController.text != (room?.topic ?? '');
+          descriptionTextEditingController.text != room?.topic;
     });
   }
 
