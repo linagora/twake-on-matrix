@@ -1,6 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_navigator.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
@@ -20,6 +20,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
@@ -180,6 +181,16 @@ class ChatDetailsController extends State<ChatDetails>
   }
 
   void openDialogInvite() {
+    if (PlatformInfos.isMobile) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (_) => InvitationSelection(
+            roomId: roomId!,
+          ),
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -284,7 +295,15 @@ class ChatDetailsController extends State<ChatDetails>
   }
 
   void onTapEditButton() {
-    Navigator.pushNamed(context, ChatDetailsRoutes.chatDetailsEdit);
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) {
+          return ChatDetailsEdit(
+            roomId: roomId!,
+          );
+        },
+      ),
+    );
   }
 
   void onTapInviteLink(BuildContext context, String inviteLink) async {
