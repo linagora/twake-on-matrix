@@ -1,7 +1,7 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,16 +32,15 @@ class ChatAdaptiveScaffoldBuilderController
   final rightColumnTypeNotifier = ValueNotifier<RightColumnType?>(null);
 
   void hideRightColumn() {
-    rightColumnTypeNotifier.value = null;
-    if (responsiveUtils.isMobile(context)) {
+    if (PlatformInfos.isMobile) {
       Navigator.of(context).pop();
+    } else {
+      rightColumnTypeNotifier.value = null;
     }
   }
 
-  final responsiveUtils = getIt.get<ResponsiveUtils>();
-
   void setRightColumnType(RightColumnType type) {
-    if (responsiveUtils.isMobile(context)) {
+    if (PlatformInfos.isMobile) {
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) => widget.rightBuilder(
@@ -78,9 +77,17 @@ class ChatAdaptiveScaffoldBuilderController
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
-                  builder: (_) {
-                    return body!;
-                  },
+                  builder: (_) => Stack(
+                    children: [
+                      body!,
+                      if (rightColumnType != null && PlatformInfos.isWeb)
+                        widget.rightBuilder(
+                          this,
+                          isInStack: true,
+                          type: rightColumnType,
+                        ),
+                    ],
+                  ),
                 ),
                 const WidthPlatformBreakpoint(
                   begin: breakpoint,
