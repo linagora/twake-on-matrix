@@ -184,7 +184,7 @@ class ChatDetailsController extends State<ChatDetails>
       context: context,
       barrierDismissible: false,
       useSafeArea: false,
-      useRootNavigator: PlatformInfos.isMobile ? false : true,
+      useRootNavigator: !PlatformInfos.isMobile,
       builder: (context) {
         return SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{

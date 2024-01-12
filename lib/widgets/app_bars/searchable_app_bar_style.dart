@@ -13,6 +13,7 @@ class SearchableAppBarStyle {
   static Size maxPreferredSize(BuildContext context) => Size.fromHeight(
         maxToolbarHeight(context),
       );
+
   static double maxToolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 112;
 
