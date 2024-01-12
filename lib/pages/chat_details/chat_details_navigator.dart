@@ -1,8 +1,9 @@
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
-import 'package:flutter/material.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:flutter/material.dart';
 
 class ChatDetailsRoutes {
   static const String chatDetails = '/groupChatDetails';
@@ -25,6 +26,13 @@ class ChatDetailsNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PlatformInfos.isMobile) {
+      return ChatDetails(
+        roomId: roomId!,
+        onBack: onBack,
+        isInStack: isInStack,
+      );
+    }
     return Navigator(
       initialRoute: ChatDetailsRoutes.chatDetails,
       onGenerateRoute: (settings) => MaterialPageRoute(
