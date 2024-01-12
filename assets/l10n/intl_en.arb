@@ -2984,5 +2984,15 @@
   "countFilesSendPerDialog": "The maximum files when sending is {count}.",
   "sendFiles": "Send {count} files",
   "failedToSendFiles": "Failed to send files",
-  "noResults": "No Results"
+  "noResults": "No Results",
+  "addAnotherAccount": "Add another account",
+  "accountSettings": "Account settings",
+  "isSingleAccountOnHomeserver": "We do not yet support multiple accounts on a single homeserver",
+  "messageSelected": "{count, plural, =0{No Messages} =1{1 Message} other{{count} Messages}} selected",
+  "@messageSelected": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
