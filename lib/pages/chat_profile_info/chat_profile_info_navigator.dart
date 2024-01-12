@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
@@ -27,6 +28,15 @@ class ProfileInfoNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (PlatformInfos.isMobile) {
+      return ProfileInfo(
+        onBack: onBack,
+        isInStack: isInStack,
+        roomId: roomId,
+        contact: contact,
+        isDraftInfo: isDraftInfo,
+      );
+    }
     return Navigator(
       initialRoute: ProfileInfoRoutes.profileInfo,
       onGenerateRoute: (route) => CupertinoPageRoute(
