@@ -45,7 +45,13 @@ extension TextEdittingControllerExtension on TextEditingController {
   }
 
   void addNewLine() {
-    text = '$text\n';
-    selection = TextSelection.collapsed(offset: text.length);
+    final start = selection.start;
+    final end = selection.end;
+    if (start != end) {
+      text = text.replaceRange(start, end, "\n");
+    } else {
+      text = "${text.substring(0, start)}\n${text.substring(end, text.length)}";
+    }
+    selection = TextSelection.collapsed(offset: start + 1);
   }
 }
