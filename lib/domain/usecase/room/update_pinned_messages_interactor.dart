@@ -14,10 +14,16 @@ class UpdatePinnedMessagesInteractor {
     try {
       yield Right(UpdatePinnedEventsInitial());
       final currentPinnedEvents = room.pinnedEventIds.toSet();
-      if (action == PinnedMessagesActionEnum.pin) {
-        currentPinnedEvents.addAll(eventIds);
-      } else {
-        currentPinnedEvents.removeAll(eventIds);
+      switch (action) {
+        case PinnedMessagesActionEnum.pin:
+          currentPinnedEvents.addAll(eventIds);
+          break;
+        case PinnedMessagesActionEnum.unpin:
+          currentPinnedEvents.removeAll(eventIds);
+          break;
+        case PinnedMessagesActionEnum.unpinAll:
+          currentPinnedEvents.clear();
+          break;
       }
       final result = await room.setPinnedEvents(currentPinnedEvents.toList());
       yield Right(UpdatePinnedEventsSuccess(result));
