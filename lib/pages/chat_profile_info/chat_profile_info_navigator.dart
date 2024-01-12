@@ -1,5 +1,5 @@
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
@@ -29,7 +29,7 @@ class ProfileInfoNavigator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Navigator(
       initialRoute: ProfileInfoRoutes.profileInfo,
-      onGenerateRoute: (route) => MaterialPageRoute(
+      onGenerateRoute: (route) => CupertinoPageRoute(
         builder: (context) {
           switch (route.name) {
             case ProfileInfoRoutes.profileInfo:
