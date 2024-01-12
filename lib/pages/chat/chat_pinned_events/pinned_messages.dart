@@ -1,5 +1,7 @@
+import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/update_pinned_events_state.dart';
+import 'package:fluffychat/domain/enums/pinned_messages_action_enum.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/presentation/model/chat/pop_up_menu_item_model.dart';
@@ -38,6 +40,11 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   Room? get room => widget.pinnedEvents.first?.room;
 
+  ValueNotifier<List<Event>> selectedEvents = ValueNotifier([]);
+
+  List<String> get selectedPinnedEventsIds =>
+      selectedEvents.value.map((event) => event.eventId).toList();
+
   List<ContextMenuItemModel> get pinnedMessagesActionsList => [
         ContextMenuItemModel(
           text: L10n.of(context)!.unpin,
@@ -75,19 +82,12 @@ class PinnedMessagesController extends State<PinnedMessages>
     updatePinnedMessagesInteractor
         .execute(room: room!, eventIds: [eventId]).listen((event) {
       event.fold((failure) {
-        if (failure is UnpinEventsFailure) {
-          TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
-        } else if (failure is UpdatePinnedEventsFailure) {
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toLocalizedString(context),
-          );
-        }
+        _showErrorSnackbar(failure);
       }, (success) {
         if (success is UpdatePinnedEventsSuccess) {
-          eventsNotifier.value
-              .removeWhere((element) => element?.eventId == eventId);
-          eventsNotifier.value = List.from(eventsNotifier.value);
+          eventsNotifier.value = eventsNotifier.value
+              .where((event) => event?.eventId != eventId)
+              .toList();
           if (eventsNotifier.value.isEmpty) {
             Navigator.of(context).pop(eventsNotifier.value);
           }
@@ -98,14 +98,74 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void unpinAll() {
     updatePinnedMessagesInteractor
-        .execute(room: room!, eventIds: []).listen((event) {
-      if (event is UpdatePinnedEventsSuccess) {
-        eventsNotifier.value = [];
-        Navigator.of(context).pop();
-      } else if (event is UnpinEventsFailure) {
-        TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
-      }
+        .execute(
+      room: room!,
+      eventIds: [],
+      action: PinnedMessagesActionEnum.unpinAll,
+    )
+        .listen((event) {
+      event.fold(
+        (failure) {
+          _showErrorSnackbar(failure);
+        },
+        (success) {
+          if (success is UpdatePinnedEventsSuccess) {
+            eventsNotifier.value = [];
+            Navigator.of(context).pop();
+          }
+        },
+      );
     });
+  }
+
+  void unpinSelectedEvents() {
+    updatePinnedMessagesInteractor
+        .execute(
+      room: room!,
+      eventIds: selectedPinnedEventsIds,
+    )
+        .listen(
+      (event) {
+        event.fold(
+          (failure) {
+            _showErrorSnackbar(failure);
+          },
+          (success) {
+            if (success is UpdatePinnedEventsSuccess) {
+              eventsNotifier.value = eventsNotifier.value
+                  .where(
+                    (event) =>
+                        !selectedPinnedEventsIds.contains(event?.eventId),
+                  )
+                  .toList();
+              selectedEvents.value = [];
+              if (eventsNotifier.value.isEmpty) {
+                Navigator.of(context).pop();
+              }
+            }
+          },
+        );
+      },
+    );
+  }
+
+  void _showErrorSnackbar(Failure failure) {
+    if (failure is UnpinEventsFailure) {
+      TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
+    } else if (failure is UpdatePinnedEventsFailure) {
+      TwakeSnackBar.show(
+        context,
+        failure.exception.toLocalizedString(context),
+      );
+    }
+  }
+
+  bool isSelected(Event event) => selectedEvents.value.any(
+        (e) => e.eventId == event.eventId,
+      );
+
+  void closeSelectionMode() {
+    selectedEvents.value = [];
   }
 
   void handleContextMenuActionInMore(
@@ -127,6 +187,17 @@ class PinnedMessagesController extends State<PinnedMessages>
         ),
       ],
     );
+  }
+
+  void onSelectMessage(Event event) {
+    if (!event.redacted) {
+      if (selectedEvents.value.contains(event)) {
+        selectedEvents.value =
+            selectedEvents.value.where((element) => element != event).toList();
+      } else {
+        selectedEvents.value = [...selectedEvents.value, event];
+      }
+    }
   }
 
   @override

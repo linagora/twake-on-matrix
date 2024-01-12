@@ -38,6 +38,10 @@ class PinnedEventsView extends StatelessWidget {
             switch (success.runtimeType) {
               case ChatGetPinnedEventsSuccess:
                 final data = success as ChatGetPinnedEventsSuccess;
+                if (data.pinnedEvents.isEmpty) {
+                  return child!;
+                }
+
                 return Material(
                   color: LinagoraSysColors.material().onPrimary,
                   child: InkWell(
@@ -115,15 +119,14 @@ class PinnedEventsView extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    if (data.pinnedEvents.isNotEmpty)
-                                      _PinnedEventsContentWidget(
-                                        countPinnedEvents: controller
-                                            .pinnedEventsController
-                                            .currentIndexOfPinnedMessage(
-                                          data.pinnedEvents.reversed.toList(),
-                                        ),
-                                        currentEvent: currentEvent,
+                                    _PinnedEventsContentWidget(
+                                      countPinnedEvents: controller
+                                          .pinnedEventsController
+                                          .currentIndexOfPinnedMessage(
+                                        data.pinnedEvents.reversed.toList(),
                                       ),
+                                      currentEvent: currentEvent,
+                                    ),
                                     TwakeIconButton(
                                       tooltip: L10n.of(context)!
                                           .pinnedMessagesTooltip,
@@ -150,7 +153,7 @@ class PinnedEventsView extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const SizedBox(),
+                            child: const SizedBox.shrink(),
                           ),
                         ],
                       ),
