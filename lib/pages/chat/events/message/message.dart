@@ -12,6 +12,7 @@ import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
@@ -88,6 +89,9 @@ class Message extends StatelessWidget {
             EventTypes.CallInvite,
           }.contains(event.type)) {
             if (event.type.startsWith('m.call.')) {
+              return const SizedBox();
+            }
+            if (event.isJoinedByRoomCreator()) {
               return const SizedBox();
             }
             return StateMessage(event);

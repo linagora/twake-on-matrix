@@ -93,4 +93,11 @@ extension IsStateExtension on Event {
   bool isActivateEndToEndEncryption() {
     return type == EventTypes.Encryption;
   }
+
+  bool isJoinedByRoomCreator() {
+    return type == EventTypes.RoomMember &&
+        content['membership'] == 'join' &&
+        stateKey == senderId &&
+        senderId == room.getState(EventTypes.RoomCreate)?.senderId;
+  }
 }
