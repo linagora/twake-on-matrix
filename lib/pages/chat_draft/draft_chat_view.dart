@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
@@ -11,6 +12,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -33,6 +35,7 @@ class DraftChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = getIt.get<ResponsiveUtils>();
     if (controller.showEmojiPicker == true &&
         controller.emojiPickerType == EmojiPickerType.reaction) {
       return Container();
@@ -53,16 +56,18 @@ class DraftChatView extends StatelessWidget {
           automaticallyImplyLeading: false,
           title: Row(
             children: [
-              TwakeIconButton(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                tooltip: L10n.of(context)!.back,
-                icon: Icons.arrow_back,
-                onTap: () => context.pop(),
-                paddingAll: 8.0,
-                margin: const EdgeInsets.symmetric(vertical: 12.0),
-              ),
+              responsive.isMobile(context)
+                  ? TwakeIconButton(
+                      splashColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      tooltip: L10n.of(context)!.back,
+                      icon: Icons.arrow_back,
+                      onTap: () => context.pop(),
+                      paddingAll: 8.0,
+                      margin: const EdgeInsets.symmetric(vertical: 12.0),
+                    )
+                  : const SizedBox.shrink(),
               Expanded(
                 child: _EmptyChatTitle(
                   receiverId: controller.presentationContact!.matrixId!,
