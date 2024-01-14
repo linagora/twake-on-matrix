@@ -34,7 +34,6 @@ class SearchableAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: SearchableAppBarStyle.maxToolbarHeight(context),
       bottom: PreferredSize(
         preferredSize: const Size(double.infinity, 4),
         child: Container(
