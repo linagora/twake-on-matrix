@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'settings_style.dart';
 
 class SettingsStyleView extends StatelessWidget {
@@ -17,11 +18,12 @@ class SettingsStyleView extends StatelessWidget {
     const colorPickerSize = 32.0;
     final wallpaper = Matrix.of(context).wallpaper;
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         leading: const BackButton(),
         title: Text(L10n.of(context)!.changeTheme),
       ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
       body: MaxWidthBody(
         withScrolling: true,
         child: Column(

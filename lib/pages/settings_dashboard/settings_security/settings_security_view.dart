@@ -5,6 +5,7 @@ import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'settings_security.dart';
 
 class SettingsSecurityView extends StatelessWidget {
@@ -14,6 +15,7 @@ class SettingsSecurityView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.security),
         context: context,

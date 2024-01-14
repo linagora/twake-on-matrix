@@ -7,6 +7,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class PinnedMessagesScreen extends StatelessWidget {
@@ -19,7 +20,9 @@ class PinnedMessagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         title: ValueListenableBuilder(
           valueListenable: controller.eventsNotifier,
           builder: (context, events, child) {
