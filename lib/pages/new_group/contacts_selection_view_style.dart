@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:flutter/widgets.dart';
 
 class ContactsSelectionViewStyle {
@@ -9,6 +10,10 @@ class ContactsSelectionViewStyle {
 
   static EdgeInsets parentPadding =
       const EdgeInsets.symmetric(horizontal: 12.0);
+
+  static Size preferredSize(BuildContext context) => Size.fromHeight(
+        AppConfig.toolbarHeight(context),
+      );
 
   static EdgeInsetsDirectional webActionsButtonPadding =
       const EdgeInsetsDirectional.symmetric(
