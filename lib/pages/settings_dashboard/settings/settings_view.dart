@@ -7,7 +7,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'settings.dart';
 
@@ -24,7 +24,9 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         toolbarHeight: AppConfig.toolbarHeight(context),
         title: Text(
           L10n.of(context)!.settings,
@@ -48,7 +50,7 @@ class SettingsView extends StatelessWidget {
                 color: controller.optionsSelectNotifier.value ==
                         SettingEnum.profile
                     ? Theme.of(context).colorScheme.secondaryContainer
-                    : null,
+                    : LinagoraSysColors.material().onPrimary,
                 child: InkWell(
                   onTap: () => controller.goToSettingsProfile(),
                   child: Padding(

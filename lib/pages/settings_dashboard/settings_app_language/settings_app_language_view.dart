@@ -17,6 +17,7 @@ class SettingsAppLanguageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: SettingsAppBar(
         title: Text(
           L10n.of(context)!.appLanguage,
