@@ -20,7 +20,9 @@ class ChatDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.room == null) {
       return Scaffold(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
         appBar: AppBar(
+          backgroundColor: LinagoraSysColors.material().onPrimary,
           title: Text(L10n.of(context)!.oopsSomethingWentWrong),
         ),
         body: Center(
@@ -93,6 +95,7 @@ class ChatDetailsView extends StatelessWidget {
                   handle:
                       NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   sliver: SliverAppBar(
+                    backgroundColor: LinagoraSysColors.material().onPrimary,
                     toolbarHeight:
                         ChatDetailViewStyle.toolbarHeightSliverAppBar,
                     title: Column(
@@ -222,9 +225,6 @@ class ChatDetailsView extends StatelessWidget {
               child: Container(
                 width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
                 padding: ChatDetailViewStyle.paddingTabBarView,
-                decoration: BoxDecoration(
-                  color: LinagoraRefColors.material().primary[100],
-                ),
                 child: TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
                   controller: controller.tabController,

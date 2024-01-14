@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/new_group/contacts_selection_view_style.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -14,37 +15,41 @@ class NewPrivateChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: PreferredSize(
-        preferredSize: SearchableAppBarStyle.preferredSize(context),
-        child: SearchableAppBar(
-          title: L10n.of(context)!.newChat,
-          searchModeNotifier: controller.isSearchModeNotifier,
-          textEditingController: controller.textEditingController,
-          openSearchBar: controller.openSearchBar,
-          closeSearchBar: controller.closeSearchBar,
-          focusNode: controller.searchFocusNode,
+    return Padding(
+      padding: ContactsSelectionViewStyle.parentPadding,
+      child: Scaffold(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
+        appBar: PreferredSize(
+          preferredSize: SearchableAppBarStyle.preferredSize(context),
+          child: SearchableAppBar(
+            title: L10n.of(context)!.newChat,
+            searchModeNotifier: controller.isSearchModeNotifier,
+            textEditingController: controller.textEditingController,
+            openSearchBar: controller.openSearchBar,
+            closeSearchBar: controller.closeSearchBar,
+            focusNode: controller.searchFocusNode,
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        keyboardDismissBehavior: PlatformInfos.isMobile
-            ? ScrollViewKeyboardDismissBehavior.manual
-            : ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.only(left: 8.0, right: 10.0),
-        controller: controller.scrollController,
-        child: ExpansionList(
-          presentationContactsNotifier: controller.presentationContactNotifier,
-          goToNewGroupChat: () => controller.goToNewGroupChat(context),
-          isShowContactsNotifier: controller.isShowContactsNotifier,
-          onContactTap: controller.onContactAction,
-          onExternalContactTap: controller.onExternalContactAction,
-          toggleContactsList: controller.toggleContactsList,
-          textEditingController: controller.textEditingController,
-          warningBannerNotifier: controller.warningBannerNotifier,
-          closeContactsWarningBanner: controller.closeContactsWarningBanner,
-          goToSettingsForPermissionActions:
-              controller.goToSettingsForPermissionActions,
+        body: SingleChildScrollView(
+          keyboardDismissBehavior: PlatformInfos.isMobile
+              ? ScrollViewKeyboardDismissBehavior.manual
+              : ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+          controller: controller.scrollController,
+          child: ExpansionList(
+            presentationContactsNotifier:
+                controller.presentationContactNotifier,
+            goToNewGroupChat: () => controller.goToNewGroupChat(context),
+            isShowContactsNotifier: controller.isShowContactsNotifier,
+            onContactTap: controller.onContactAction,
+            onExternalContactTap: controller.onExternalContactAction,
+            toggleContactsList: controller.toggleContactsList,
+            textEditingController: controller.textEditingController,
+            warningBannerNotifier: controller.warningBannerNotifier,
+            closeContactsWarningBanner: controller.closeContactsWarningBanner,
+            goToSettingsForPermissionActions:
+                controller.goToSettingsForPermissionActions,
+          ),
         ),
       ),
     );

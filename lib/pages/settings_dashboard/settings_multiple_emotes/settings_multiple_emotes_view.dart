@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/settings_dashboard/settings_multiple_emotes/settings_multiple_emotes.dart';
@@ -18,6 +19,7 @@ class MultipleEmotesSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.emotePacks),
         context: context,
