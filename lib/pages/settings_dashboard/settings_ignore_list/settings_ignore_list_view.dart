@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -20,6 +21,7 @@ class SettingsIgnoreListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: SettingsAppBar(
         title: Text(L10n.of(context)!.ignoredUsers),
         context: context,

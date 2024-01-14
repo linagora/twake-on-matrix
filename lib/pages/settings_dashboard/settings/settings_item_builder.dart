@@ -1,7 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsItemBuilder extends StatelessWidget {
   final String title;
@@ -26,8 +26,9 @@ class SettingsItemBuilder extends StatelessWidget {
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
-      color:
-          isSelected ? Theme.of(context).colorScheme.secondaryContainer : null,
+      color: isSelected
+          ? Theme.of(context).colorScheme.secondaryContainer
+          : LinagoraSysColors.material().onPrimary,
       child: InkWell(
         onTap: onTap,
         child: Padding(
