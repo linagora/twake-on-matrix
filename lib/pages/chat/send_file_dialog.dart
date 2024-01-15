@@ -33,6 +33,11 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   final TextEditingController textEditingController = TextEditingController();
 
+  final FocusNode captionsFocusNode = FocusNode();
+
+  final ValueKey sendFileDialogTypeAheadKey =
+      const ValueKey('sendFileDialogTypeAhead');
+
   bool isSendMediaWithCaption = true;
 
   List<MatrixFile> get files => widget.files;
@@ -41,12 +46,17 @@ class SendFileDialogController extends State<SendFileDialog> {
   void initState() {
     super.initState();
     isSendMediaWithCaption = _isShowSendMediaDialog(widget.files, widget.room);
+    requestFocusCaptions();
   }
 
   @override
   void dispose() {
     textEditingController.dispose();
     super.dispose();
+  }
+
+  void requestFocusCaptions() {
+    captionsFocusNode.requestFocus();
   }
 
   void sendMediaWithCaption() {

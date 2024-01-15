@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,6 +39,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     OnCameraPicked? onCameraPicked,
     FocusSuggestionController? focusSuggestionController,
     TextEditingController? captionController,
+    ValueKey? typeAheadKey,
   }) async {
     final currentPermissionPhotos = await getCurrentMediaPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
@@ -53,6 +55,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         onCameraPicked: onCameraPicked,
         focusSuggestionController: focusSuggestionController,
         captionController: captionController,
+        typeAheadKey: typeAheadKey,
       );
     }
   }
@@ -69,6 +72,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     Widget? inputBar,
     FocusSuggestionController? focusSuggestionController,
     TextEditingController? captionController,
+    ValueKey? typeAheadKey,
   }) async {
     final numberSelectedImagesNotifier = ValueNotifier<int>(0);
     imagePickerController.addListener(() {
@@ -182,8 +186,10 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                       children: [
                         Expanded(
                           child: InputBar(
+                            typeAheadKey: typeAheadKey,
                             maxLines: 5,
                             minLines: 1,
+                            textInputAction: null,
                             focusSuggestionController:
                                 focusSuggestionController ??
                                     FocusSuggestionController(),
@@ -194,7 +200,13 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                               context,
                             ),
                             keyboardType: TextInputType.multiline,
-                            enablePasteImage: false,
+                            autofocus: !PlatformInfos.isMobile,
+                            onSubmitted: (_) {
+                              if (onSendTap != null) {
+                                onSendTap();
+                              }
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ),
                         Padding(

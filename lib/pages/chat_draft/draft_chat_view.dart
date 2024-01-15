@@ -164,6 +164,8 @@ class DraftChatView extends StatelessWidget {
                                                 children: [
                                                   Expanded(
                                                     child: InputBar(
+                                                      typeAheadKey: controller
+                                                          .draftChatComposerTypeAheadKey,
                                                       minLines:
                                                           DraftChatViewStyle
                                                               .minLinesInputBar,
