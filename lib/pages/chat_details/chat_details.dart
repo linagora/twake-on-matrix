@@ -92,7 +92,7 @@ class ChatDetailsController extends State<ChatDetails>
 
   TabController? tabController;
 
-  List<User>? members;
+  ValueNotifier<List<User>?> membersNotifier = ValueNotifier(null);
 
   String? get roomId => widget.roomId;
 
@@ -133,7 +133,7 @@ class ChatDetailsController extends State<ChatDetails>
     });
     room = Matrix.of(context).client.getRoomById(roomId!);
     muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
-    members ??=
+    membersNotifier.value ??=
         Matrix.of(context).client.getRoomById(roomId!)!.getParticipants();
   }
 
@@ -176,7 +176,7 @@ class ChatDetailsController extends State<ChatDetails>
       future: () => room!.requestParticipants(),
     );
     if (participants.error == null) {
-      setState(() => members = participants.result);
+      membersNotifier.value = participants.result;
     }
   }
 
@@ -221,6 +221,11 @@ class ChatDetailsController extends State<ChatDetails>
     );
   }
 
+  Future<void> onUpdateMembers() async {
+    final members = await room!.requestParticipantsFromServer();
+    membersNotifier.value = members;
+  }
+
   List<ChatDetailsPageModel> chatDetailsPages() => chatDetailsPageView.map(
         (page) {
           switch (page) {
@@ -229,13 +234,14 @@ class ChatDetailsController extends State<ChatDetails>
                 page: page,
                 child: ChatDetailsMembersPage(
                   key: const PageStorageKey("members"),
-                  members: members ?? [],
+                  membersNotifier: membersNotifier,
                   actualMembersCount: actualMembersCount,
                   canRequestMoreMembers:
-                      (members?.length ?? 0) < actualMembersCount,
+                      (membersNotifier.value?.length ?? 0) < actualMembersCount,
                   requestMoreMembersAction: requestMoreMembersAction,
                   openDialogInvite: openDialogInvite,
                   isMobileAndTablet: isMobileAndTablet,
+                  onUpdatedMembers: onUpdateMembers,
                 ),
               );
             case ChatDetailsPage.media:
