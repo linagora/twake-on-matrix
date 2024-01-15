@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:universal_html/html.dart' as html;
@@ -31,7 +32,6 @@ import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/utils/account_bundles.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -1329,7 +1329,7 @@ class ChatController extends State<Chat>
   }
 
   void _handleStateContextMenu() {
-    openingPopupMenu.value = !openingPopupMenu.value;
+    openingPopupMenu.toggle();
   }
 
   List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
@@ -1351,6 +1351,7 @@ class ChatController extends State<Chat>
     BuildContext context,
     ChatHorizontalActionMenu actions,
     Event event,
+    PointerDownEvent pointerDownEvent,
   ) {
     switch (actions) {
       case ChatHorizontalActionMenu.reply:
@@ -1361,7 +1362,11 @@ class ChatController extends State<Chat>
         forwardEventsAction();
         break;
       case ChatHorizontalActionMenu.more:
-        handleContextMenuAction(context, event);
+        handleContextMenuAction(
+          context,
+          event,
+          pointerDownEvent,
+        );
         break;
     }
   }
@@ -1430,11 +1435,20 @@ class ChatController extends State<Chat>
   void handleContextMenuAction(
     BuildContext context,
     Event event,
+    PointerDownEvent pointerDownEvent,
   ) {
+    final screenSize = MediaQuery.of(context).size;
+    final offset = pointerDownEvent.position;
+    final position = RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy + ChatViewStyle.paddingBottomContextMenu,
+      screenSize.width - offset.dx,
+      screenSize.height - offset.dy,
+    );
     _handleStateContextMenu();
     openPopupMenuAction(
       context,
-      context.getCurrentRelativeRectOfWidget(),
+      position,
       _popupMenuActionTile(context, event),
       onClose: () {
         _handleStateContextMenu();
@@ -1451,11 +1465,6 @@ class ChatController extends State<Chat>
   void handleOnClickKeyboardAction() {
     showEmojiPickerNotifier.toggle();
     inputFocus.requestFocus();
-  }
-
-  void handleOnLongPressMessage(Event event) {
-    onSelectMessage(event);
-    handleContextMenuAction(context, event);
   }
 
   void onPushDetails() async {
