@@ -6,7 +6,7 @@ class SendFileDialogStyle {
 
   static const double dialogWidth = 360;
 
-  static const double maxDialogHeight = 560;
+  static const double maxDialogHeight = 620;
 
   static const double imageBorderRadius = 8.0;
 
