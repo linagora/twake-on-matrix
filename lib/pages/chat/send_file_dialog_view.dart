@@ -58,16 +58,27 @@ class SendFileDialogView extends StatelessWidget {
                       room: controller.widget.room,
                     ),
               const SizedBox(height: 16.0),
-              InputBar(
-                maxLines: 5,
-                minLines: 1,
-                focusSuggestionController: controller.focusSuggestionController,
-                room: controller.widget.room,
-                controller: controller.textEditingController,
-                decoration:
-                    SendFileDialogStyle.bottomBarInputDecoration(context),
-                keyboardType: TextInputType.multiline,
-                enablePasteImage: false,
+              InkWell(
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                onTap: controller.requestFocusCaptions,
+                child: InputBar(
+                  typeAheadKey: controller.sendFileDialogTypeAheadKey,
+                  maxLines: 5,
+                  minLines: 1,
+                  focusSuggestionController:
+                      controller.focusSuggestionController,
+                  room: controller.widget.room,
+                  controller: controller.textEditingController,
+                  textInputAction: null,
+                  decoration:
+                      SendFileDialogStyle.bottomBarInputDecoration(context),
+                  keyboardType: TextInputType.multiline,
+                  focusNode: controller.captionsFocusNode,
+                  autofocus: !PlatformInfos.isMobile,
+                  onSubmitted: (_) => controller.send(),
+                ),
               ),
               SendFileDialogStyle.spaceBwInputBarAndButton,
               Row(
