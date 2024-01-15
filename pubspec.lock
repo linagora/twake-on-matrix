@@ -430,10 +430,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_drop
-      sha256: "4ca4d960f4b11c032e9adfd2a0a8ac615bc3fddb4cbe73dcf840dd8077582186"
+      sha256: d55a010fe46c8e8fcff4ea4b451a9ff84a162217bdb3b2a0aa1479776205e15d
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.4"
   desktop_lifecycle:
     dependency: "direct main"
     description:
@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "a2bb3edb413986207563c4d812b54e060809572f"
+      resolved-ref: a2bb3edb413986207563c4d812b54e060809572f
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
