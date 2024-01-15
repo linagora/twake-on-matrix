@@ -10,7 +10,13 @@ import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 class ParticipantListItem extends StatelessWidget {
   final User user;
 
-  const ParticipantListItem(this.user, {Key? key}) : super(key: key);
+  final VoidCallback? onUpdatedMembers;
+
+  const ParticipantListItem(
+    this.user, {
+    Key? key,
+    this.onUpdatedMembers,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +35,20 @@ class ParticipantListItem extends StatelessWidget {
     return Opacity(
       opacity: user.membership == Membership.join ? 1 : 0.5,
       child: ListTile(
-        onTap: () => showAdaptiveBottomSheet(
-          context: context,
-          builder: (c) => UserBottomSheet(
-            user: user,
-            outerContext: context,
-          ),
-        ),
+        onTap: () async {
+          final result = await showAdaptiveBottomSheet(
+            context: context,
+            builder: (c) => UserBottomSheet(
+              user: user,
+              outerContext: context,
+            ),
+          );
+          if (result is ChatMembersStatus) {
+            if (result == ChatMembersStatus.updated) {
+              onUpdatedMembers?.call();
+            }
+          }
+        },
         title: Row(
           children: <Widget>[
             Flexible(

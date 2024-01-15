@@ -30,8 +30,6 @@ class ChatDetailsView extends StatelessWidget {
         ),
       );
     }
-
-    controller.members!.removeWhere((u) => u.membership == Membership.leave);
     return StreamBuilder(
       stream: controller.room?.onUpdate.stream,
       builder: (context, snapshot) {

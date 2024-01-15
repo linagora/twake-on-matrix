@@ -7,60 +7,72 @@ import 'package:matrix/matrix.dart';
 class ChatDetailsMembersPage extends StatelessWidget {
   static const int addMemberItemCount = 1;
 
-  final List<User> members;
+  final ValueNotifier<List<User>?> membersNotifier;
   final int actualMembersCount;
   final VoidCallback openDialogInvite;
   final VoidCallback requestMoreMembersAction;
+  final VoidCallback? onUpdatedMembers;
   final bool canRequestMoreMembers;
   final bool isMobileAndTablet;
 
   const ChatDetailsMembersPage({
     super.key,
-    required this.members,
+    required this.membersNotifier,
     required this.actualMembersCount,
     required this.openDialogInvite,
     required this.requestMoreMembersAction,
     required this.canRequestMoreMembers,
     required this.isMobileAndTablet,
+    this.onUpdatedMembers,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: members.length +
-                (canRequestMoreMembers ? 1 : 0) +
-                addMemberItemCount,
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return _listMemberInfoMobileAndTablet(context);
-              }
-              if (index - addMemberItemCount < members.length) {
-                return ParticipantListItem(members[index - addMemberItemCount]);
-              }
+    return ValueListenableBuilder(
+      valueListenable: membersNotifier,
+      builder: (context, members, child) {
+        members ??= [];
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: members.length +
+                    (canRequestMoreMembers ? 1 : 0) +
+                    addMemberItemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return _listMemberInfoMobileAndTablet(context);
+                  }
+                  if (index - addMemberItemCount < members!.length) {
+                    return ParticipantListItem(
+                      members[index - addMemberItemCount],
+                      onUpdatedMembers: onUpdatedMembers,
+                    );
+                  }
 
-              return ListTile(
-                title: Text(
-                  L10n.of(context)!.loadCountMoreParticipants(
-                    (actualMembersCount - members.length).toString(),
-                  ),
-                ),
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  child: const Icon(
-                    Icons.refresh,
-                    color: Colors.grey,
-                  ),
-                ),
-                onTap: requestMoreMembersAction,
-              );
-            },
-          ),
-        ),
-      ],
+                  return ListTile(
+                    title: Text(
+                      L10n.of(context)!.loadCountMoreParticipants(
+                        (actualMembersCount - members.length).toString(),
+                      ),
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      child: const Icon(
+                        Icons.refresh,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    onTap: requestMoreMembersAction,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
