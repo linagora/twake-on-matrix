@@ -21,7 +21,12 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-typedef OnMenuAction = Function(BuildContext, ChatHorizontalActionMenu, Event);
+typedef OnMenuAction = Function(
+  BuildContext,
+  ChatHorizontalActionMenu,
+  Event,
+  PointerDownEvent,
+);
 
 class Message extends StatelessWidget {
   final Event event;
