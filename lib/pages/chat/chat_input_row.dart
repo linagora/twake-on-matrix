@@ -165,6 +165,7 @@ class ChatInputRow extends StatelessWidget {
 
   InputBar _buildInputBar(BuildContext context) {
     return InputBar(
+      typeAheadKey: controller.chatComposerTypeAheadKey,
       room: controller.room!,
       minLines: 1,
       maxLines: 8,
