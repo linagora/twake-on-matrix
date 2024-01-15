@@ -22,6 +22,11 @@ enum UserBottomSheetAction {
   ignore,
 }
 
+enum ChatMembersStatus {
+  updated,
+  notUpdated,
+}
+
 class UserBottomSheet extends StatefulWidget {
   final User user;
   final Function? onMention;
@@ -95,7 +100,8 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
         break;
       case UserBottomSheetAction.mention:
-        Navigator.of(context, rootNavigator: false).pop();
+        Navigator.of(context, rootNavigator: false)
+            .pop(ChatMembersStatus.notUpdated);
         widget.onMention!();
         break;
       case UserBottomSheetAction.ban:
@@ -103,7 +109,8 @@ class UserBottomSheetController extends State<UserBottomSheet> {
           await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.ban(),
           );
-          Navigator.of(context, rootNavigator: false).pop();
+          Navigator.of(context, rootNavigator: false)
+              .pop(ChatMembersStatus.updated);
         }
         break;
       case UserBottomSheetAction.unban:
@@ -111,7 +118,8 @@ class UserBottomSheetController extends State<UserBottomSheet> {
           await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.unban(),
           );
-          Navigator.of(context, rootNavigator: false).pop();
+          Navigator.of(context, rootNavigator: false)
+              .pop(ChatMembersStatus.updated);
         }
         break;
       case UserBottomSheetAction.kick:
@@ -119,7 +127,8 @@ class UserBottomSheetController extends State<UserBottomSheet> {
           await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.kick(),
           );
-          Navigator.of(context, rootNavigator: false).pop();
+          Navigator.of(context, rootNavigator: false)
+              .pop(ChatMembersStatus.updated);
         }
         break;
       case UserBottomSheetAction.permission:
@@ -132,7 +141,7 @@ class UserBottomSheetController extends State<UserBottomSheet> {
           await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => widget.user.setPower(newPermission),
           );
-          context.pop();
+          context.pop(ChatMembersStatus.updated);
         }
         break;
       case UserBottomSheetAction.message:
@@ -142,7 +151,8 @@ class UserBottomSheetController extends State<UserBottomSheet> {
         );
         if (roomIdResult.error != null) return;
         context.go('/rooms/${roomIdResult.result!}');
-        Navigator.of(context, rootNavigator: false).pop();
+        Navigator.of(context, rootNavigator: false)
+            .pop(ChatMembersStatus.notUpdated);
         break;
       case UserBottomSheetAction.ignore:
         if (await askConfirmation()) {
