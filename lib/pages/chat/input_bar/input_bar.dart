@@ -32,7 +32,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final InputDecoration decoration;
   final ValueChanged<String>? onChanged;
   final bool autofocus;
-  final bool enablePasteImage;
+  final ValueKey? typeAheadKey;
 
   InputBar({
     this.room,
@@ -47,8 +47,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.autofocus = false,
     this.textInputAction,
     this.suggestionScrollController,
-    this.enablePasteImage = true,
     required this.focusSuggestionController,
+    this.typeAheadKey,
     Key? key,
   }) : super(key: key);
 
@@ -340,6 +340,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       room: room,
       onEnter: _onEnter,
       child: TypeAheadField<Map<String, String?>>(
+        key: typeAheadKey,
         direction: AxisDirection.up,
         hideOnEmpty: true,
         hideOnLoading: true,

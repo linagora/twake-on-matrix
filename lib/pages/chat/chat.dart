@@ -104,6 +104,12 @@ class ChatController extends State<Chat>
 
   PinnedEventsController pinnedEventsController = PinnedEventsController();
 
+  final ValueKey chatComposerTypeAheadKey =
+      const ValueKey('chatComposerTypeAheadKey');
+
+  final ValueKey _chatMediaPickerTypeAheadKey =
+      const ValueKey('chatMediaPickerTypeAheadKey');
+
   @override
   Room? room;
 
@@ -1308,6 +1314,7 @@ class ChatController extends State<Chat>
       onCameraPicked: (_) => sendMedia(imagePickerController, room: room),
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
+      typeAheadKey: _chatMediaPickerTypeAheadKey,
     );
   }
 

@@ -68,6 +68,12 @@ class DraftChatController extends State<DraftChat>
   final FocusSuggestionController focusSuggestionController =
       FocusSuggestionController();
 
+  final ValueKey draftChatComposerTypeAheadKey =
+      const ValueKey('draftChatComposerTypeAheadKey');
+
+  final ValueKey _draftChatMediaPickerTypeAheadKey =
+      const ValueKey('draftChatMediaPickerTypeAheadKey');
+
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
 
@@ -296,6 +302,7 @@ class DraftChatController extends State<DraftChat>
       ),
       onSendTap: () => sendMedia(imagePickerController),
       onCameraPicked: (_) => sendMedia(imagePickerController),
+      typeAheadKey: _draftChatMediaPickerTypeAheadKey,
     );
   }
 
