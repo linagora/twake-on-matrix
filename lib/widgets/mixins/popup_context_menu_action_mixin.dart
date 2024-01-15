@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -15,6 +16,7 @@ mixin PopupContextMenuActionMixin {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       items: popupMenuItems,
+      useRootNavigator: PlatformInfos.isWeb,
     ).then((value) {
       onClose?.call();
     });

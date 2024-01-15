@@ -224,15 +224,18 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
           children: listHorizontalActionMenu.map((item) {
             return Padding(
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
-              child: TwakeIconButton(
-                icon: item.action.getIcon(),
-                imagePath: item.action.getImagePath(),
-                tooltip: item.action.getTitle(context),
-                preferBelow: false,
-                onTapDown: (context) => onMenuAction!(
+              child: Listener(
+                onPointerDown: (pointerEvent) => onMenuAction!.call(
                   context,
                   item.action,
                   event,
+                  pointerEvent,
+                ),
+                child: TwakeIconButton(
+                  icon: item.action.getIcon(),
+                  imagePath: item.action.getImagePath(),
+                  tooltip: item.action.getTitle(context),
+                  preferBelow: false,
                 ),
               ),
             );
