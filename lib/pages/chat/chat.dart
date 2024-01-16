@@ -352,39 +352,6 @@ class ChatController extends State<Chat>
     }
   }
 
-  @override
-  void initState() {
-    registerPasteShortcutListeners();
-    keyboardVisibilityController.onChange.listen(_keyboardListener);
-    scrollController.addListener(_updateScrollController);
-    inputFocus.addListener(_inputFocusListener);
-    _loadDraft();
-    _tryLoadTimeline();
-    sendController.addListener(updateInputTextNotifier);
-    super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (room == null) {
-        return context.go("/error");
-      }
-      _handleReceivedShareFiles();
-
-      pinnedEventsController.getPinnedMessageAction(
-        room: room!,
-        isInitial: true,
-      );
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant Chat oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final highlightEventId =
-        GoRouterState.of(context).uri.queryParameters['event'];
-    if (highlightEventId != null) {
-      scrollToEventId(highlightEventId, highlight: true);
-    }
-  }
-
   void _initUnreadLocation(String fullyRead) {
     _markerReadLocation = fullyRead;
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
@@ -394,7 +361,9 @@ class ChatController extends State<Chat>
   void _tryLoadTimeline() async {
     loadTimelineFuture = _getTimeline();
     try {
-      await loadTimelineFuture;
+      await loadTimelineFuture?.then((_) {
+        _initializePinnedEvents();
+      });
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();
@@ -446,24 +415,6 @@ class ChatController extends State<Chat>
       Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
     }
   }
-
-  @override
-  void dispose() {
-    unregisterPasteShortcutListeners();
-    timeline?.cancelSubscriptions();
-    timeline = null;
-    inputFocus.removeListener(_inputFocusListener);
-    focusSuggestionController.dispose();
-    _jumpToEventIdSubscription?.cancel();
-    pinnedEventsController.dispose();
-    _captionsController.dispose();
-    sendController.removeListener(updateInputTextNotifier);
-    sendController.dispose();
-    super.dispose();
-  }
-
-  @override
-  final TextEditingController sendController = TextEditingController();
 
   final FocusSuggestionController focusSuggestionController =
       FocusSuggestionController();
@@ -1550,6 +1501,59 @@ class ChatController extends State<Chat>
       pinnedEventsController.handlePopBack(popResult);
     }
   }
+
+  void _initializePinnedEvents() {
+    pinnedEventsController.getPinnedMessageAction(
+      room: room!,
+      isInitial: true,
+    );
+  }
+
+  @override
+  void initState() {
+    registerPasteShortcutListeners();
+    keyboardVisibilityController.onChange.listen(_keyboardListener);
+    scrollController.addListener(_updateScrollController);
+    inputFocus.addListener(_inputFocusListener);
+    _loadDraft();
+    _tryLoadTimeline();
+    sendController.addListener(updateInputTextNotifier);
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (room == null) {
+        return context.go("/error");
+      }
+      _handleReceivedShareFiles();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant Chat oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final highlightEventId =
+        GoRouterState.of(context).uri.queryParameters['event'];
+    if (highlightEventId != null) {
+      scrollToEventId(highlightEventId, highlight: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    unregisterPasteShortcutListeners();
+    timeline?.cancelSubscriptions();
+    timeline = null;
+    inputFocus.removeListener(_inputFocusListener);
+    focusSuggestionController.dispose();
+    _jumpToEventIdSubscription?.cancel();
+    pinnedEventsController.dispose();
+    _captionsController.dispose();
+    sendController.removeListener(updateInputTextNotifier);
+    sendController.dispose();
+    super.dispose();
+  }
+
+  @override
+  final TextEditingController sendController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
