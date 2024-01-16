@@ -4,6 +4,9 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
 
+  static Color? get pinnedIconColor =>
+      LinagoraRefColors.material().tertiary[30];
+
   static const double readIconSize = 20;
 
   static const double groupIconSize = 16;
