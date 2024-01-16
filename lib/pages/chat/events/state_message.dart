@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import '../../../config/app_config.dart';
 
 class StateMessage extends StatelessWidget {
   final Event event;
@@ -20,10 +20,6 @@ class StateMessage extends StatelessWidget {
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          ),
           child: FutureBuilder<String>(
             future: event.calcLocalizedBody(MatrixLocals(L10n.of(context)!)),
             builder: (context, snapshot) {
@@ -34,7 +30,7 @@ class StateMessage extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: LinagoraRefColors.material().tertiary[20],
                       decoration:
                           event.redacted ? TextDecoration.lineThrough : null,
                       letterSpacing: 0.4,
