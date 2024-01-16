@@ -1,3 +1,19 @@
+## [2.4.15+2330] - 2024-01-16
+### Fixed
+- Change date format to dd/mm/yy
+- Create chat in blank page
+- Cancel file picker in web
+- Fixed crashed when reject invitation
+- \[web\] Open current chat when stay in profile
+- fixed width of chat along side with width of composer
+- Remove back button in some screen in web only
+- Fix Shift + Enter
+- Hide event join of author in chat
+- Added no result in search
+- Fix new group and invitation padding
+- Group info style
+- Fix navigation in mobile
+
 ## [2.4.14+2330] - 2024-01-07
 ### Fixed
 - Hide tag suggestion in Direct Chat
@@ -2139,6 +2155,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.15+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.15+2330
 [2.4.14+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.14
 [2.4.12+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.12
 [2.4.10+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.10
