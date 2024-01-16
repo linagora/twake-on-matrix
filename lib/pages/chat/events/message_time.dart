@@ -66,7 +66,7 @@ class MessageTime extends StatelessWidget {
                   TextStyle(
                     color: timelineOverlayMessage
                         ? Colors.white
-                        : LinagoraRefColors.material().neutral[50],
+                        : LinagoraRefColors.material().tertiary[30],
                     letterSpacing: 0.4,
                   ),
                 ),
