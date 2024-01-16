@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -8,15 +9,13 @@ import 'package:fluffychat/domain/app_state/room/chat_get_pinned_events_state.da
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
+
+typedef JumpToPinnedMessageCallback = void Function(int index);
 
 class PinnedEventsController {
   static const _timeDelayGetPinnedMessage = Duration(seconds: 1);
 
   final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
-
-  final AutoScrollController pinnedMessageScrollController =
-      AutoScrollController();
 
   final ValueNotifier<Event?> currentPinnedEventNotifier = ValueNotifier(null);
 
@@ -32,26 +31,35 @@ class PinnedEventsController {
   }
 
   void getPinnedMessageAction({
-    required Room room,
+    required String roomId,
+    required Client client,
     bool isInitial = false,
+    bool isUnpin = false,
     String? eventId,
+    JumpToPinnedMessageCallback? jumpToPinnedMessageCallback,
   }) async {
     await Future.delayed(_timeDelayGetPinnedMessage);
     _pinnedEventsSubscription = getPinnedMessageInteractor
         .execute(
-      room: room,
+      roomId: roomId,
+      client: client,
+      isInitial: isInitial,
     )
         .listen((event) {
       getPinnedMessageNotifier.value = event;
       event.fold((_) => null, (success) {
         if (success is ChatGetPinnedEventsSuccess) {
           if (success.pinnedEvents.isNotEmpty) {
-            if (isInitial) {
-              initialPinnedMessage(success.pinnedEvents);
+            if (isInitial || isUnpin) {
+              updatePinnedMessage(
+                success.pinnedEvents,
+                jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
+              );
             } else {
               jumpToCurrentMessage(
                 success.pinnedEvents,
                 eventId: eventId,
+                jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
               );
             }
           }
@@ -71,7 +79,6 @@ class PinnedEventsController {
     );
     if (event != null) {
       currentPinnedEventNotifier.value = event;
-      pinnedMessageScrollController.scrollToIndex(nextIndex);
       if (scrollToEventId != null) {
         scrollToEventId.call(event.eventId);
       }
@@ -95,23 +102,34 @@ class PinnedEventsController {
     return index;
   }
 
-  void initialPinnedMessage(List<Event?> pinnedEvents) {
+  void updatePinnedMessage(
+    List<Event?> pinnedEvents, {
+    JumpToPinnedMessageCallback? jumpToPinnedMessageCallback,
+  }) {
     currentPinnedEventNotifier.value = pinnedEvents.last;
-    pinnedMessageScrollController.scrollToIndex(
-      pinnedEvents.length - 1,
-    );
+    if (pinnedEvents.isNotEmpty) {
+      jumpToPinnedMessageCallback?.call(
+        pinnedEvents.length - 1,
+      );
+    }
   }
 
-  void handlePopBack(Object? popResult) {
+  void handlePopBack({
+    required Client client,
+    Object? popResult,
+  }) {
     Logs().d(
       "PinnedEventsController()::handlePopBack(): popResult: $popResult",
     );
     if (popResult is List<Event?>) {
+      if (popResult.isEmpty) {
+        return;
+      }
       final room = popResult.first?.room;
       if (room != null) {
         getPinnedMessageAction(
-          room: room,
-          isInitial: true,
+          roomId: room.id,
+          client: client,
         );
       }
     }
@@ -119,23 +137,24 @@ class PinnedEventsController {
 
   void jumpToCurrentMessage(
     List<Event?> pinnedEvents, {
+    JumpToPinnedMessageCallback? jumpToPinnedMessageCallback,
     String? eventId,
   }) async {
-    final currentEvent = pinnedEvents.firstWhere(
+    final currentEvent = pinnedEvents.firstWhereOrNull(
       (event) => event?.eventId == eventId,
     );
+    if (currentEvent == null) return;
     int index = pinnedEvents.indexOf(currentEvent);
     if (index == -1) {
       index = 0;
     }
     currentPinnedEventNotifier.value = currentEvent;
-    pinnedMessageScrollController.scrollToIndex(index);
+    jumpToPinnedMessageCallback?.call(index);
   }
 
   void dispose() {
     currentPinnedEventNotifier.dispose();
     getPinnedMessageNotifier.dispose();
-    pinnedMessageScrollController.dispose();
     _pinnedEventsSubscription?.cancel();
   }
 }
