@@ -137,7 +137,6 @@ class LinkPreviewLarge extends StatelessWidget {
             child: Text(
               urlPreviewPresentation.title!,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
               maxLines: 2,
