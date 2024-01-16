@@ -13,6 +13,8 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -200,10 +202,29 @@ class PinnedMessagesController extends State<PinnedMessages>
     }
   }
 
+  void _initPinnedEvents() {
+    if (widget.pinnedEvents.isNotEmpty) {
+      eventsNotifier.value = widget.pinnedEvents;
+    } else {
+      final currentRoomId = GoRouterState.of(context).pathParameters['roomid'];
+      if (currentRoomId != null) {
+        context.go('/rooms/$currentRoomId');
+      }
+    }
+  }
+
+  void onClickBackButton() {
+    Navigator.of(context).pop(
+      eventsNotifier.value != widget.pinnedEvents ? eventsNotifier.value : null,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    eventsNotifier.value = widget.pinnedEvents;
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      _initPinnedEvents();
+    });
   }
 
   @override

@@ -102,7 +102,7 @@ class ChatController extends State<Chat>
 
   final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
 
-  PinnedEventsController pinnedEventsController = PinnedEventsController();
+  final pinnedEventsController = getIt.get<PinnedEventsController>();
 
   final ValueKey chatComposerTypeAheadKey =
       const ValueKey('chatComposerTypeAheadKey');
@@ -158,6 +158,9 @@ class ChatController extends State<Chat>
 
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
+
+  final AutoScrollController pinnedMessageScrollController =
+      AutoScrollController();
 
   final TextEditingController _captionsController = TextEditingController();
 
@@ -361,9 +364,7 @@ class ChatController extends State<Chat>
   void _tryLoadTimeline() async {
     loadTimelineFuture = _getTimeline();
     try {
-      await loadTimelineFuture?.then((_) {
-        _initializePinnedEvents();
-      });
+      await loadTimelineFuture;
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();
@@ -1114,9 +1115,10 @@ class ChatController extends State<Chat>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room.setPinnedEvents(pinnedEventIds),
     );
-    pinnedEventsController.getPinnedMessageAction(
-      isInitial: unpin,
-      room: room,
+    _getPinnedEvents(
+      isUnpin: unpin,
+      roomId: room.id,
+      client: room.client,
       eventId: selectedEventIds,
     );
   }
@@ -1498,19 +1500,44 @@ class ChatController extends State<Chat>
     if (popResult is Event) {
       scrollToEventIdAndHighlight(popResult.eventId);
     } else if (popResult is List<Event?>) {
-      pinnedEventsController.handlePopBack(popResult);
+      pinnedEventsController.handlePopBack(
+        popResult: popResult,
+        client: client,
+      );
     }
   }
 
   void _initializePinnedEvents() {
-    pinnedEventsController.getPinnedMessageAction(
-      room: room!,
+    if (roomId == null) return;
+    _getPinnedEvents(
+      client: client,
+      roomId: roomId!,
       isInitial: true,
+    );
+  }
+
+  void _getPinnedEvents({
+    required Client client,
+    required String roomId,
+    bool isInitial = false,
+    bool isUnpin = false,
+    String? eventId,
+  }) {
+    pinnedEventsController.getPinnedMessageAction(
+      client: client,
+      roomId: roomId,
+      isInitial: isInitial,
+      isUnpin: isUnpin,
+      eventId: eventId,
+      jumpToPinnedMessageCallback: (index) {
+        pinnedMessageScrollController.scrollToIndex(index);
+      },
     );
   }
 
   @override
   void initState() {
+    _initializePinnedEvents();
     registerPasteShortcutListeners();
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);

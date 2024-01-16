@@ -71,6 +71,7 @@ import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interac
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -94,6 +95,7 @@ class GetItInitializer {
     bindingDatasourceImpl();
     bindingRepositories();
     bindingInteractor();
+    _bindingControllers();
   }
 
   void bindingGlobal() {
@@ -271,6 +273,12 @@ class GetItInitializer {
     );
     getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
       () => SendFilesOnWebWithCaptionInteractor(),
+    );
+  }
+
+  void _bindingControllers() {
+    getIt.registerFactory<PinnedEventsController>(
+      () => PinnedEventsController(),
     );
   }
 }

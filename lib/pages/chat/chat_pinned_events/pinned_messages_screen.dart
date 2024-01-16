@@ -39,7 +39,7 @@ class PinnedMessagesScreen extends StatelessWidget {
         leading: TwakeIconButton(
           tooltip: L10n.of(context)!.back,
           icon: Icons.arrow_back,
-          onTap: () => Navigator.of(context).pop(),
+          onTap: controller.onClickBackButton,
         ),
         actions: [
           if (!responsiveUtils.isMobile(context))

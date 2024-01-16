@@ -38,10 +38,6 @@ class PinnedEventsView extends StatelessWidget {
             switch (success.runtimeType) {
               case ChatGetPinnedEventsSuccess:
                 final data = success as ChatGetPinnedEventsSuccess;
-                if (data.pinnedEvents.isEmpty) {
-                  return child!;
-                }
-
                 return Material(
                   color: LinagoraSysColors.material().onPrimary,
                   child: InkWell(
@@ -76,7 +72,6 @@ class PinnedEventsView extends StatelessWidget {
                                                 .copyWith(scrollbars: false),
                                         child: ListView.separated(
                                           controller: controller
-                                              .pinnedEventsController
                                               .pinnedMessageScrollController,
                                           shrinkWrap: true,
                                           physics:
@@ -95,7 +90,6 @@ class PinnedEventsView extends StatelessWidget {
                                             return _PinnedEventsIndicator(
                                               currentEvent: currentEvent,
                                               scrollController: controller
-                                                  .pinnedEventsController
                                                   .pinnedMessageScrollController,
                                               color:
                                                   LinagoraSysColors.material()

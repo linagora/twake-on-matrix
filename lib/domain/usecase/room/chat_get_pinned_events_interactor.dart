@@ -8,14 +8,32 @@ import 'package:matrix/matrix.dart';
 
 class ChatGetPinnedEventsInteractor {
   Stream<Either<Failure, Success>> execute({
-    required Room room,
+    required String roomId,
+    required Client client,
+    bool isInitial = false,
   }) async* {
     Logs().d(
-      "ChatGetPinnedEventsInteractor()::execute()::roomId: ${room.id}",
+      "ChatGetPinnedEventsInteractor()::execute()::roomId: $roomId",
     );
-    yield Right(ChatGetPinnedEventsLoading());
+    if (isInitial) {
+      yield Right(ChatGetPinnedEventsLoading());
+    }
     try {
+      final room = client.getRoomById(roomId);
+      if (room == null) {
+        Logs().d(
+          "ChatGetPinnedEventsInteractor()::execute(): Room is Null",
+        );
+        yield Left(CannotGetPinnedMessages());
+        return;
+      }
+      if (isInitial) {
+        await room.getTimeline();
+      }
       final pinnedEvents = room.pinnedEventIds;
+      Logs().d(
+        "ChatGetPinnedEventsInteractor()::execute()::pinnedEvents: $pinnedEvents",
+      );
       final result = (await Future.wait(
         pinnedEvents.map(room.getEventById),
       ))

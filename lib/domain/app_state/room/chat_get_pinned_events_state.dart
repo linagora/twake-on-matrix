@@ -29,6 +29,11 @@ class ChatGetPinnedEventsNoResult extends Failure {
   List<Object?> get props => [];
 }
 
+class CannotGetPinnedMessages extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
 class ChatGetPinnedEventsFailure extends Failure {
   final dynamic exception;
 
