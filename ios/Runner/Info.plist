@@ -74,6 +74,8 @@
 	<string>Open photos from your gallery and share them with your contacts on Twake Chat.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>Record voice message and share them with your contacts on Twake Chat.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>
