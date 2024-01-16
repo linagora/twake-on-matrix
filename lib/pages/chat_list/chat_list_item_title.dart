@@ -66,7 +66,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                       child: Icon(
                         Icons.push_pin_outlined,
                         size: ChatListItemStyle.readIconSize,
-                        color: ChatListItemStyle.readIconColor,
+                        color: ChatListItemStyle.pinnedIconColor,
                       ),
                     ),
                   if (isMuted)
@@ -75,7 +75,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                       child: Icon(
                         Icons.volume_off_outlined,
                         size: ChatListItemStyle.readIconSize,
-                        color: ChatListItemStyle.readIconColor,
+                        color: ChatListItemStyle.pinnedIconColor,
                       ),
                     ),
                 ],
