@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class DisplayNameWidget extends StatelessWidget {
@@ -27,9 +28,7 @@ class DisplayNameWidget extends StatelessWidget {
               maxCharacters: maxCharactersDisplayNameBubble,
             ),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary,
+                  color: LinagoraSysColors.material().secondary,
                 ),
             maxLines: 2,
             overflow: TextOverflow.clip,
