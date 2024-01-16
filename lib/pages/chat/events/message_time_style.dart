@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class MessageTimeStyle {
   static Color? timelineColor(bool timelineOverlayMessage) =>
@@ -15,7 +15,9 @@ class MessageTimeStyle {
     bool timelineOverlayMessage,
     BuildContext context,
   ) =>
-      timelineOverlayMessage ? Colors.white : Theme.of(context).primaryColor;
+      timelineOverlayMessage
+          ? Colors.white
+          : LinagoraSysColors.material().secondary;
   static Color? seenByRowIconSecondaryColor(
     bool timelineOverlayMessage,
     BuildContext context,
