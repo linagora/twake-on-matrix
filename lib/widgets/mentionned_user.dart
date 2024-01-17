@@ -17,10 +17,11 @@ class MentionnedUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         onTap?.call(url);
       },
+      mouseCursor: SystemMouseCursors.click,
       child: Text(
         displayName,
         style: textStyle,
