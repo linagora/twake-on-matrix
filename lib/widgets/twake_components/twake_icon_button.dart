@@ -71,6 +71,7 @@ class TwakeIconButton extends StatelessWidget {
         decoration:
             buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           onTap: onTap,
           onTapDown: onTapDown != null ? (_) => onTapDown!.call(context) : null,
           customBorder: const CircleBorder(),
