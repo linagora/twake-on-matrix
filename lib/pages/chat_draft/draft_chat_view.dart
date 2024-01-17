@@ -8,7 +8,7 @@ import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat_empty_view.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -100,8 +100,8 @@ class DraftChatView extends StatelessWidget {
                             controller.handleDragDone(details),
                         onDragEntered: controller.onDragEntered,
                         onDragExited: controller.onDragExited,
-                        child: DirectDraftChatView(
-                          onTap: controller.inputFocus.requestFocus,
+                        child: DraftChatEmpty(
+                          onTap: () => controller.handleDraftAction(context),
                         ),
                       ),
                     ),

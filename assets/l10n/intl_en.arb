@@ -2994,5 +2994,15 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "draftChatHookPhrase": "Hi {user}! I would like to chat with you.",
+  "@draftChatHookPhrase": {
+    "placeholders": {
+      "user": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "twakeChatUser": "Twake Chat User"
 }

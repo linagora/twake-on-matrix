@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class DirectDraftChatView extends StatelessWidget {
+class DraftChatEmpty extends StatelessWidget {
   final void Function()? onTap;
 
-  const DirectDraftChatView({
+  const DraftChatEmpty({
     Key? key,
     this.onTap,
   }) : super(key: key);

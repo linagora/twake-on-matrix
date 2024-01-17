@@ -345,6 +345,16 @@ class DraftChatController extends State<DraftChat>
     widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
   }
 
+  void handleDraftAction(BuildContext context) {
+    inputFocus.requestFocus();
+
+    sendController.value = TextEditingValue(
+      text: L10n.of(context)!.draftChatHookPhrase(
+        presentationContact!.displayName ?? L10n.of(context)!.twakeChatUser,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraftChatView(controller: this);
