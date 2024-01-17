@@ -36,7 +36,8 @@ class TwakeLinkView extends StatelessWidget {
       return _buildWidgetNoPreview(context);
     }
 
-    return GestureDetector(
+    return InkWell(
+      mouseCursor: SystemMouseCursors.click,
       onTap: () {
         if (firstValidUrl == null) return;
         UrlLauncher(context, url: firstValidUrl).launchUrl();
