@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: a2bb3edb413986207563c4d812b54e060809572f
+      resolved-ref: "77bcef3b702aa69d42b986c4bb40b2d7c24af5bd"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
