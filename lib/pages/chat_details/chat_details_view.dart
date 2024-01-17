@@ -251,13 +251,14 @@ class _AddMembersButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => controller.onTapAddMembers(),
+      borderRadius: ChatDetailViewStyle.borderRadiusButton,
       child: Container(
-        constraints: const BoxConstraints(
-          maxWidth: 156,
+        constraints: BoxConstraints(
+          maxWidth: ChatDetailViewStyle.addMemberMaxWidth,
         ),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: ChatDetailViewStyle.borderRadiusButton,
         ),
         child: IntrinsicHeight(
           child: Padding(
