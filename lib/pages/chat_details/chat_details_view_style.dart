@@ -31,4 +31,10 @@ class ChatDetailViewStyle {
 
   static const EdgeInsetsGeometry mainPadding =
       EdgeInsets.symmetric(horizontal: 20, vertical: 16);
+
+  static BorderRadius borderRadiusButton = const BorderRadius.all(
+    Radius.circular(28.0),
+  );
+
+  static double addMemberMaxWidth = 156;
 }
