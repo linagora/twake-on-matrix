@@ -926,7 +926,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "3197b5d5013517016592eb0ea89c5cb8833cb3fe"
+      resolved-ref: "4d4b93952a3b2d47a3c4df7455ba37b002551fdf"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "77bcef3b702aa69d42b986c4bb40b2d7c24af5bd"
+      resolved-ref: "71d0dad43345ff9408282b738ea76a83096263ba"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
