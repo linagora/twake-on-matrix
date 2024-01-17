@@ -16,6 +16,7 @@ class SearchableAppBar extends StatelessWidget {
   final TextEditingController textEditingController;
   final Function() openSearchBar;
   final Function() closeSearchBar;
+  final double? toolbarHeight;
   final bool isFullScreen;
 
   const SearchableAppBar({
@@ -27,6 +28,7 @@ class SearchableAppBar extends StatelessWidget {
     required this.textEditingController,
     required this.openSearchBar,
     required this.closeSearchBar,
+    this.toolbarHeight,
     this.isFullScreen = true,
   });
 
@@ -34,6 +36,7 @@ class SearchableAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      toolbarHeight: toolbarHeight,
       bottom: PreferredSize(
         preferredSize: const Size(double.infinity, 4),
         child: Container(

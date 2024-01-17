@@ -3,7 +3,6 @@ import 'package:fluffychat/pages/new_group/contacts_selection_view_style.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
-import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
@@ -24,8 +23,9 @@ class ContactsSelectionView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: controller.isFullScreen
             ? ContactsSelectionViewStyle.preferredSize(context)
-            : SearchableAppBarStyle.maxPreferredSize(context),
+            : ContactsSelectionViewStyle.maxPreferredSize(context),
         child: SearchableAppBar(
+          toolbarHeight: ContactsSelectionViewStyle.maxToolbarHeight(context),
           focusNode: controller.searchFocusNode,
           title: controller.getTitle(context),
           searchModeNotifier: controller.isSearchModeNotifier,
