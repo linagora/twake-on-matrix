@@ -75,7 +75,7 @@ class SendFileDialogView extends StatelessWidget {
                   decoration:
                       SendFileDialogStyle.bottomBarInputDecoration(context),
                   keyboardType: TextInputType.multiline,
-                  focusNode: controller.captionsFocusNode,
+                  typeAheadFocusNode: controller.captionsFocusNode,
                   autofocus: !PlatformInfos.isMobile,
                   onSubmitted: (_) => controller.send(),
                 ),

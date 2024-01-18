@@ -12,6 +12,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' as service;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -25,7 +26,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final TextInputType keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
-  final FocusNode? focusNode;
+  final FocusNode? typeAheadFocusNode;
+  final FocusNode? rawKeyboardFocusNode;
   final TextEditingController? controller;
   final ScrollController? suggestionScrollController;
   final FocusSuggestionController focusSuggestionController;
@@ -40,7 +42,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.maxLines,
     this.keyboardType = TextInputType.text,
     this.onSubmitted,
-    this.focusNode,
+    this.typeAheadFocusNode,
     this.controller,
     this.decoration = const InputDecoration(),
     this.onChanged,
@@ -49,6 +51,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.suggestionScrollController,
     required this.focusSuggestionController,
     this.typeAheadKey,
+    this.rawKeyboardFocusNode,
     Key? key,
   }) : super(key: key);
 
@@ -332,6 +335,31 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     }
   }
 
+  KeyEventResult _onBlockUpDownArrowEvent(FocusNode _, RawKeyEvent event) {
+    if (event.isKeyPressed(service.LogicalKeyboardKey.arrowUp) ||
+        event.isKeyPressed(service.LogicalKeyboardKey.arrowDown)) {
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  KeyEventResult _onIgnoreUpDownArrowEvent(FocusNode _, RawKeyEvent event) {
+    return KeyEventResult.ignored;
+  }
+
+  void onRawKeyEvent(RawKeyEvent event) {
+    if (focusSuggestionController.hasSuggestions) {
+      typeAheadFocusNode?.onKey = _onBlockUpDownArrowEvent;
+      if (event.isKeyPressed(service.LogicalKeyboardKey.arrowUp)) {
+        focusSuggestionController.up();
+      } else if (event.isKeyPressed(service.LogicalKeyboardKey.arrowDown)) {
+        focusSuggestionController.down();
+      }
+    } else {
+      typeAheadFocusNode?.onKey = _onIgnoreUpDownArrowEvent;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InputBarShortcuts(
@@ -339,69 +367,77 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       focusSuggestionController: focusSuggestionController,
       room: room,
       onEnter: _onEnter,
-      child: TypeAheadField<Map<String, String?>>(
+      child: RawKeyboardListener(
         key: typeAheadKey,
-        direction: AxisDirection.up,
-        hideOnEmpty: true,
-        hideOnLoading: true,
-        keepSuggestionsOnSuggestionSelected: true,
-        debounceDuration: debounceDuration,
-        autoFlipDirection: true,
-        scrollController: suggestionScrollController,
-        // show suggestions after 50ms idle time (default is 300)
-        textFieldConfiguration: TextFieldConfiguration(
-          minLines: minLines,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          autofocus: autofocus,
-          style: InputBarStyle.getTypeAheadTextStyle(context),
-          controller: controller,
-          decoration: decoration,
-          focusNode: focusNode,
-          onChanged: (text) {
-            if (onChanged != null) {
-              onChanged!(text);
-            }
-          },
-          onTap: () async {
-            await Future.delayed(debounceDurationTap);
-            FocusScope.of(context).requestFocus(focusNode);
-          },
-          onSubmitted: PlatformInfos.isMobile
-              ? (text) {
-                  if (onSubmitted != null) {
-                    onSubmitted!(text);
-                  }
-                }
-              : null,
-          textCapitalization: TextCapitalization.sentences,
-        ),
-        suggestionsCallback: (text) {
-          if (room!.isDirectChat) return {};
-          final suggestions = getSuggestions(text);
-          focusSuggestionController.suggestions = suggestions;
-          return suggestions;
+        focusNode: rawKeyboardFocusNode ?? FocusNode(),
+        onKey: (event) {
+          onRawKeyEvent(event);
         },
-        itemBuilder: (context, suggestion) => SuggestionTile(
-          suggestion: suggestion,
-          client: Matrix.of(context).client,
-        ),
-        suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          borderRadius: BorderRadius.circular(
-            InputBarStyle.suggestionBorderRadius,
-          ),
-        ),
-        onSuggestionSelected: insertSuggestion,
-        errorBuilder: (BuildContext context, Object? error) => const SizedBox(),
-        loadingBuilder: (BuildContext context) => const SizedBox(),
-        // fix loading briefly flickering a dark box
-        noItemsFoundBuilder: (BuildContext context) => const SizedBox(),
-        // fix loading briefly showing no suggestions
-        layoutArchitecture: (widgets, _) => FocusSuggestionList(
-          items: widgets,
+        child: TypeAheadField<Map<String, String?>>(
+          direction: AxisDirection.up,
+          hideOnEmpty: true,
+          hideOnLoading: true,
+          keepSuggestionsOnSuggestionSelected: true,
+          debounceDuration: debounceDuration,
+          autoFlipDirection: true,
           scrollController: suggestionScrollController,
-          focusSuggestionController: focusSuggestionController,
+          // show suggestions after 50ms idle time (default is 300)
+          textFieldConfiguration: TextFieldConfiguration(
+            minLines: minLines,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            autofocus: autofocus,
+            style: InputBarStyle.getTypeAheadTextStyle(context),
+            controller: controller,
+            decoration: decoration,
+            focusNode: typeAheadFocusNode,
+            onChanged: (text) {
+              if (onChanged != null) {
+                onChanged!(text);
+              }
+            },
+            onTap: () async {
+              await Future.delayed(debounceDurationTap);
+              FocusScope.of(context).requestFocus(typeAheadFocusNode);
+            },
+            onSubmitted: PlatformInfos.isMobile
+                ? (text) {
+                    if (onSubmitted != null) {
+                      onSubmitted!(text);
+                    }
+                  }
+                : null,
+            textCapitalization: TextCapitalization.sentences,
+          ),
+          suggestionsCallback: (text) {
+            if (room!.isDirectChat) return {};
+            final suggestions = getSuggestions(text);
+            focusSuggestionController.suggestions = suggestions;
+            return suggestions;
+          },
+          itemBuilder: (context, suggestion) => SuggestionTile(
+            suggestion: suggestion,
+            client: Matrix.of(context).client,
+          ),
+          suggestionsBoxDecoration: const SuggestionsBoxDecoration(
+            borderRadius: BorderRadius.all(
+              Radius.circular(InputBarStyle.suggestionBorderRadius),
+            ),
+          ),
+          onSuggestionSelected: insertSuggestion,
+          errorBuilder: (BuildContext context, Object? error) =>
+              const SizedBox(),
+          loadingBuilder: (BuildContext context) => const SizedBox.shrink(),
+          // fix loading briefly flickering a dark box
+          noItemsFoundBuilder: (BuildContext context) =>
+              const SizedBox.shrink(),
+          // fix loading briefly showing no suggestions
+          layoutArchitecture: (widgets, _) => FocusSuggestionList(
+            items: widgets,
+            scrollController: suggestionScrollController,
+            focusSuggestionController: focusSuggestionController,
+          ),
         ),
       ),
     );
