@@ -1,6 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/pages/twake_id/twake_id_view.dart';
+import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -9,34 +9,33 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-enum TwakeIdType {
+enum TwakeWelcomeType {
   firstAccount,
   otherAccounts,
 }
 
-class TwakeIdArg extends Equatable {
-  final TwakeIdType twakeIdType;
+class TwakeWelcomeArg extends Equatable {
+  final TwakeWelcomeType twakeIdType;
 
-  const TwakeIdArg({
-    this.twakeIdType = TwakeIdType.firstAccount,
+  const TwakeWelcomeArg({
+    this.twakeIdType = TwakeWelcomeType.firstAccount,
   });
 
-  bool get isAddAnotherAccount => twakeIdType == TwakeIdType.otherAccounts;
+  bool get isAddAnotherAccount => twakeIdType == TwakeWelcomeType.otherAccounts;
 
   @override
   List<Object?> get props => [twakeIdType];
 }
 
-class TwakeId extends StatefulWidget {
-  final TwakeIdArg? arg;
-
-  const TwakeId({super.key, this.arg});
+class TwakeWelcome extends StatefulWidget {
+  final TwakeWelcomeArg? arg;
+  const TwakeWelcome({super.key, this.arg});
 
   @override
-  State<TwakeId> createState() => TwakeIdController();
+  State<TwakeWelcome> createState() => TwakeWelcomeController();
 }
 
-class TwakeIdController extends State<TwakeId> {
+class TwakeWelcomeController extends State<TwakeWelcome> {
   void goToHomeserverPicker() {
     if (widget.arg?.isAddAnotherAccount == true) {
       context.push('/rooms/addhomeserver');
@@ -102,6 +101,6 @@ class TwakeIdController extends State<TwakeId> {
 
   @override
   Widget build(BuildContext context) {
-    return TwakeIdView(controller: this);
+    return TwakeWelcomeView(controller: this);
   }
 }
