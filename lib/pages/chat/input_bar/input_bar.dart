@@ -17,6 +17,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:slugify/slugify.dart';
 
 class InputBar extends StatelessWidget with PasteImageMixin {
@@ -29,7 +30,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final FocusNode? typeAheadFocusNode;
   final FocusNode? rawKeyboardFocusNode;
   final TextEditingController? controller;
-  final ScrollController? suggestionScrollController;
+  final AutoScrollController? suggestionScrollController;
   final FocusSuggestionController focusSuggestionController;
   final InputDecoration decoration;
   final ValueChanged<String>? onChanged;
@@ -381,7 +382,6 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           debounceDuration: debounceDuration,
           autoFlipDirection: true,
           scrollController: suggestionScrollController,
-          // show suggestions after 50ms idle time (default is 300)
           textFieldConfiguration: TextFieldConfiguration(
             minLines: minLines,
             maxLines: maxLines,
