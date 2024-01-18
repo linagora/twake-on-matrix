@@ -774,10 +774,10 @@ class ChatController extends State<Chat>
         .any((cl) => selectedEvents.first.senderId == cl!.userID);
   }
 
-  void forwardEventsAction() async {
-    if (selectedEvents.length == 1) {
+  void forwardEventsAction({Event? event}) async {
+    if (selectedEvents.isEmpty && event != null) {
       Matrix.of(context).shareContent =
-          selectedEvents.first.getDisplayEvent(timeline!).content;
+          event.getDisplayEvent(timeline!).content;
       Logs().d(
         "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
       );
@@ -1358,8 +1358,7 @@ class ChatController extends State<Chat>
         replyAction(replyTo: event);
         break;
       case ChatHorizontalActionMenu.forward:
-        onSelectMessage(event);
-        forwardEventsAction();
+        forwardEventsAction(event: event);
         break;
       case ChatHorizontalActionMenu.more:
         handleContextMenuAction(
@@ -1413,15 +1412,13 @@ class ChatController extends State<Chat>
         onSelectMessage(event);
         break;
       case ChatContextMenuActions.copyMessage:
-        onSelectMessage(event);
-        copySingleEventAction();
+        event.copy(context, timeline!);
         break;
       case ChatContextMenuActions.pinChat:
         pinEventAction(event);
         break;
       case ChatContextMenuActions.forward:
-        onSelectMessage(event);
-        forwardEventsAction();
+        forwardEventsAction(event: event);
         break;
       case ChatContextMenuActions.downloadFile:
         downloadFileAction(context, event);
