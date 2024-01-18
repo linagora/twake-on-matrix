@@ -211,7 +211,7 @@ class ChatController extends State<Chat>
 
   String pendingText = '';
 
-  ScrollController suggestionScrollController = ScrollController();
+  AutoScrollController suggestionScrollController = AutoScrollController();
 
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds

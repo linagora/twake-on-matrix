@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:flutter/material.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class FocusSuggestionList extends StatefulWidget {
   final Iterable<Widget> items;
-  final ScrollController? scrollController;
+  final AutoScrollController? scrollController;
   final FocusSuggestionController focusSuggestionController;
 
   const FocusSuggestionList({
@@ -22,7 +23,7 @@ class FocusSuggestionList extends StatefulWidget {
 
 class _FocusSuggestionListState extends State<FocusSuggestionList> {
   static const _suggestionMaxVisible = 4.5;
-  static const _scrollAnimationDuration = Duration(milliseconds: 300);
+  static const _scrollAnimationDuration = Duration(milliseconds: 10);
 
   @override
   void initState() {
@@ -39,12 +40,10 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
   }
 
   void _suggestionIndexChanged() {
-    final offset = (widget.focusSuggestionController.currentIndex.value - 2) *
-        InputBarStyle.suggestionSize;
-    widget.scrollController?.animateTo(
-      offset,
+    widget.scrollController?.scrollToIndex(
+      widget.focusSuggestionController.currentIndex.value,
+      preferPosition: AutoScrollPosition.middle,
       duration: _scrollAnimationDuration,
-      curve: Curves.linear,
     );
   }
 
@@ -62,15 +61,21 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
           vertical: InputBarStyle.suggestionListPadding,
         ),
         itemCount: widget.items.length,
-        itemBuilder: (context, index) => ValueListenableBuilder(
-          valueListenable: widget.focusSuggestionController.currentIndex,
-          builder: (context, currentIndex, child) {
-            return Container(
-              color: currentIndex == index ? ThemeData().hoverColor : null,
-              child: child,
-            );
-          },
-          child: widget.items.elementAt(index),
+        itemBuilder: (context, index) => AutoScrollTag(
+          key: ValueKey(index),
+          index: index,
+          highlightColor: ThemeData().hoverColor,
+          controller: widget.scrollController ?? AutoScrollController(),
+          child: ValueListenableBuilder(
+            valueListenable: widget.focusSuggestionController.currentIndex,
+            builder: (context, currentIndex, child) {
+              return Container(
+                color: currentIndex == index ? ThemeData().hoverColor : null,
+                child: child,
+              );
+            },
+            child: widget.items.elementAt(index),
+          ),
         ),
       ),
     );
