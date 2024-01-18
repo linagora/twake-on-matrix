@@ -372,9 +372,10 @@ class ChatController extends State<Chat>
       }
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
-        Future.delayed(const Duration(seconds: 5), () {
-          setReadMarker(eventId: room?.lastEvent?.eventId);
-        });
+      }
+      if (timeline!.events.any((event) => event.eventId == fullyRead)) {
+        setReadMarker();
+        return;
       }
       if (!mounted) return;
     } catch (e, s) {
@@ -852,6 +853,7 @@ class ChatController extends State<Chat>
     if (scrollController.positions.isNotEmpty) {
       scrollController.jumpTo(0);
     }
+    setReadMarker();
   }
 
   int getDisplayEventIndex(int eventIndex) {
@@ -1127,6 +1129,7 @@ class ChatController extends State<Chat>
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
   void onInputBarChanged(String text) {
+    setReadMarker();
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       final prefs = await SharedPreferences.getInstance();
