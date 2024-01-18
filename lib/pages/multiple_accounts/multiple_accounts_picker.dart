@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/pages/twake_id/twake_id.dart';
+import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
 import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
@@ -120,8 +120,8 @@ class MultipleAccountsPickerController {
   void _onAddAnotherAccount() {
     context.go(
       '/rooms/addaccount',
-      extra: const TwakeIdArg(
-        twakeIdType: TwakeIdType.otherAccounts,
+      extra: const TwakeWelcomeArg(
+        twakeIdType: TwakeWelcomeType.otherAccounts,
       ),
     );
   }
