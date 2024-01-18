@@ -1,11 +1,10 @@
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
-import 'package:fluffychat/pages/twake_welcome/twake_welcome_view_style.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/twake_screen/twake_welcome_screen_style.dart';
 
 class AutoHomeserverPickerView extends StatelessWidget {
   final AutoHomeserverPickerController controller;
@@ -33,11 +32,11 @@ class AutoHomeserverPickerView extends StatelessWidget {
                 ),
                 SvgPicture.asset(
                   ImagePaths.logoTwakeWelcome,
-                  width: TwakeWelcomeViewStyle.logoWidth,
-                  height: TwakeWelcomeViewStyle.logoHeight,
+                  width: AutoHomeserverPickerViewStyle.logoWidth,
+                  height: AutoHomeserverPickerViewStyle.logoHeight,
                 ),
                 Padding(
-                  padding: TwakeWelcomeScreenStyle.descriptionPadding,
+                  padding: AutoHomeserverPickerViewStyle.descriptionPadding,
                   child: Text(
                     L10n.of(context)!.descriptionWelcomeTo,
                     textAlign: TextAlign.center,
@@ -66,7 +65,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                   return const SizedBox();
                 },
                 child: Padding(
-                  padding: TwakeWelcomeScreenStyle.buttonPadding,
+                  padding: AutoHomeserverPickerViewStyle.buttonPadding,
                   child: InkWell(
                     highlightColor: Colors.transparent,
                     splashColor: Colors.transparent,
@@ -74,7 +73,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                     hoverColor: Colors.transparent,
                     onTap: controller.retryCheckHomeserver,
                     child: Container(
-                      height: TwakeWelcomeScreenStyle.buttonHeight,
+                      height: AutoHomeserverPickerViewStyle.buttonHeight,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 40,
                       ),
@@ -83,7 +82,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                         color: LinagoraSysColors.material().primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            TwakeWelcomeScreenStyle.buttonRadius,
+                            AutoHomeserverPickerViewStyle.buttonRadius,
                           ),
                         ),
                       ),
