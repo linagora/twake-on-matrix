@@ -173,6 +173,8 @@ class ChatController extends State<Chat>
   @override
   FocusNode chatFocusNode = FocusNode();
 
+  final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+
   String selectionText = "";
 
   Timer? typingCoolDown;

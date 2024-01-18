@@ -44,19 +44,6 @@ class InputBarShortcuts extends StatelessWidget {
         ): () {
           onEnter?.call(controller?.text ?? '');
         },
-        if (focusSuggestionController != null &&
-            focusSuggestionController!.hasSuggestions) ...{
-          const SingleActivator(
-            flutter.LogicalKeyboardKey.arrowUp,
-          ): () {
-            focusSuggestionController?.up();
-          },
-          const SingleActivator(
-            flutter.LogicalKeyboardKey.arrowDown,
-          ): () {
-            focusSuggestionController?.down();
-          },
-        },
       },
       child: child,
     );
