@@ -81,6 +81,7 @@ class MessageTime extends StatelessWidget {
                 eventId: event.eventId,
               ),
               eventStatus: event.status,
+              event: event,
             ),
           ],
         ],

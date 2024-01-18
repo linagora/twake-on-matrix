@@ -14,6 +14,7 @@ class SeenByRow extends StatelessWidget {
   final List<User> participants;
   final EventStatus? eventStatus;
   final bool timelineOverlayMessage;
+  final Event event;
 
   const SeenByRow({
     this.eventStatus,
@@ -21,18 +22,27 @@ class SeenByRow extends StatelessWidget {
     required this.getSeenByUsers,
     required this.participants,
     required this.timelineOverlayMessage,
+    required this.event,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return getEventIcon(context, eventStatus, getSeenByUsers);
+    return getEventIcon(
+      context,
+      getSeenByUsers,
+      eventStatus: eventStatus,
+    );
   }
 
   MessageStatus getMessageStatus(
     BuildContext context,
+    List<User> seenByUsers, {
     EventStatus? eventStatus,
-    List<User> seenByUsers,
-  ) {
+  }) {
+    Logs().d(
+      "SeenByRow::getMessageStatus: Content - ${event.content} - EventStatus $eventStatus - seenByUsers ${seenByUsers.length}",
+    );
+
     if (eventStatus == null || eventStatus == EventStatus.sending) {
       return MessageStatus.sending;
     }
@@ -50,10 +60,15 @@ class SeenByRow extends StatelessWidget {
 
   Widget getEventIcon(
     BuildContext context,
+    List<User> seenByUsers, {
+    bool? oldMessageFullyRead,
     EventStatus? eventStatus,
-    List<User> seenByUsers,
-  ) {
-    final messageStatus = getMessageStatus(context, eventStatus, seenByUsers);
+  }) {
+    final messageStatus = getMessageStatus(
+      context,
+      seenByUsers,
+      eventStatus: eventStatus,
+    );
     switch (messageStatus) {
       case MessageStatus.sending:
         return Icon(
