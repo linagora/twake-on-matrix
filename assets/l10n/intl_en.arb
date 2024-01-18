@@ -2980,7 +2980,7 @@
   "signIn": "Sign in",
   "createTwakeId": "Create Twake ID",
   "useYourCompanyServer": "Use your company server",
-  "descriptionTwakeId": "To start, please create a TwakeID \nthat will allow you to use \nchat, mail and drive",
+  "descriptionTwakeId": "An open source messenger encrypt\nyour data with matrix protocol",
   "countFilesSendPerDialog": "The maximum files when sending is {count}.",
   "sendFiles": "Send {count} files",
   "failedToSendFiles": "Failed to send files",

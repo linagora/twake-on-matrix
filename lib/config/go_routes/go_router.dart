@@ -13,7 +13,6 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
-import 'package:fluffychat/pages/twake_id/twake_id.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
@@ -98,9 +97,9 @@ abstract class AppRoutes {
           path: 'twakeid',
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
-            TwakeId(
-              arg: state.extra is TwakeIdArg?
-                  ? state.extra as TwakeIdArg?
+            TwakeWelcome(
+              arg: state.extra is TwakeWelcomeArg?
+                  ? state.extra as TwakeWelcomeArg?
                   : null,
             ),
           ),
@@ -367,9 +366,9 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
-                TwakeId(
-                  arg: state.extra is TwakeIdArg?
-                      ? state.extra as TwakeIdArg?
+                TwakeWelcome(
+                  arg: state.extra is TwakeWelcomeArg?
+                      ? state.extra as TwakeWelcomeArg?
                       : null,
                 ),
               ),
