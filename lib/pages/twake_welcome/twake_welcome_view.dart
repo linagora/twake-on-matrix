@@ -1,5 +1,5 @@
+import 'package:fluffychat/pages/twake_welcome/twake_id_view_style.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
-import 'package:fluffychat/pages/twake_welcome/twake_welcome_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -18,13 +18,16 @@ class TwakeWelcomeView extends StatelessWidget {
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       overlayColor: MaterialStateProperty.all(Colors.transparent),
+      signInTitle: L10n.of(context)!.signIn,
+      createTwakeIdTitle: L10n.of(context)!.createTwakeId,
       useCompanyServerTitle: L10n.of(context)!.useYourCompanyServer,
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
+      onSignInOnTap: controller.onClickSignIn,
       logo: SvgPicture.asset(
         ImagePaths.logoTwakeWelcome,
-        width: TwakeWelcomeViewStyle.logoWidth,
-        height: TwakeWelcomeViewStyle.logoHeight,
+        width: TwakeIdViewStyle.logoWidth,
+        height: TwakeIdViewStyle.logoHeight,
       ),
     );
   }
