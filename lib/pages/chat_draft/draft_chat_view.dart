@@ -180,7 +180,7 @@ class DraftChatView extends StatelessWidget {
                                                       textInputAction: null,
                                                       onSubmitted: controller
                                                           .onInputBarSubmitted,
-                                                      focusNode:
+                                                      typeAheadFocusNode:
                                                           controller.inputFocus,
                                                       controller: controller
                                                           .sendController,
