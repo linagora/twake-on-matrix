@@ -79,9 +79,7 @@ extension RoomStatusExtension on Room {
         }
       }
       lastReceipts.removeWhere(
-        (user) =>
-            user.id == client.userID ||
-            user.id == timeline.events.first.senderId,
+        (user) => user.id == client.userID,
       );
     }
     return lastReceipts.toList();
