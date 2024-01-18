@@ -166,6 +166,7 @@ class ChatInputRow extends StatelessWidget {
   InputBar _buildInputBar(BuildContext context) {
     return InputBar(
       typeAheadKey: controller.chatComposerTypeAheadKey,
+      rawKeyboardFocusNode: controller.rawKeyboardListenerFocusNode,
       room: controller.room!,
       minLines: 1,
       maxLines: 8,
@@ -173,7 +174,7 @@ class ChatInputRow extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       textInputAction: null,
       onSubmitted: controller.onInputBarSubmitted,
-      focusNode: controller.inputFocus,
+      typeAheadFocusNode: controller.inputFocus,
       controller: controller.sendController,
       focusSuggestionController: controller.focusSuggestionController,
       decoration: InputDecoration(
