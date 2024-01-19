@@ -32,7 +32,14 @@ mixin PasteImageMixin {
         .where(
           (matrixFile) => matrixFile != null,
         )
-        .cast<MatrixFile>()
+        .map(
+          (matrixFile) => MatrixImageFile(
+            name: matrixFile!.name,
+            mimeType: matrixFile.mimeType,
+            bytes: matrixFile.bytes,
+          ),
+        )
+        .cast<MatrixImageFile>()
         .toList();
     await showDialog(
       context: context,
