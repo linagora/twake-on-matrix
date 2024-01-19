@@ -44,17 +44,18 @@ abstract class ClientManager {
               ),
         ),
       );
-    }
-    if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
-      final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
-      for (final client in loggedOutClients) {
-        Logs().w(
-          'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
-        );
-        clientNames.remove(client.clientName);
-        clients.remove(client);
+      if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
+        final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
+        for (final client in loggedOutClients) {
+          Logs().w(
+            'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
+          );
+          clientNames.remove(client.clientName);
+          clients.remove(client);
+        }
+        await Store()
+            .setItem(clientNamespace, jsonEncode(clientNames.toList()));
       }
-      await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
     }
     return clients;
   }
@@ -62,6 +63,9 @@ abstract class ClientManager {
   static Future<void> addClientNameToStore(String clientName) async {
     final clientNamesList = <String>[];
     final rawClientNames = await Store().getItem(clientNamespace);
+    Logs().v(
+      'ClientManager::addClientNameToStore():Adding client $clientName to store: $clientNamesList',
+    );
     if (rawClientNames != null) {
       final stored = (jsonDecode(rawClientNames) as List).cast<String>();
       clientNamesList.addAll(stored);

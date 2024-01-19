@@ -26,6 +26,8 @@ import 'package:fluffychat/domain/model/extensions/push/push_notification_extens
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
@@ -86,7 +89,7 @@ class BackgroundPush {
         onUnregistered: _upUnregistered,
         onMessage: _onUpMessage,
       );
-      fcmSharedIsolate?.setListeners(
+      fcmSharedIsolate.setListeners(
         onMessage: (message) {
           onReceiveNotification(message);
         },
@@ -148,6 +151,7 @@ class BackgroundPush {
     String? token,
     Set<String?>? oldTokens,
     bool useDeviceSpecificAppId = false,
+    required Client client,
   }) async {
     final clientName = PlatformInfos.clientName;
     oldTokens ??= <String>{};
@@ -260,7 +264,7 @@ class BackgroundPush {
         (await UnifiedPush.getDistributors()).isNotEmpty) {
       await setupUp();
     } else {
-      await setupPushGateway();
+      await setupPushGateway(client);
     }
 
     // ignore: unawaited_futures
@@ -300,13 +304,13 @@ class BackgroundPush {
     });
   }
 
-  Future<void> setupPushGateway() async {
+  Future<void> setupPushGateway(Client client) async {
     Logs().v('Setup Push Gateway');
     if (_pushToken?.isEmpty ?? true) {
       try {
         if (PlatformInfos.isIOS) {
           // Request iOS permission before getting the token
-          await fcmSharedIsolate?.requestPermission();
+          await fcmSharedIsolate.requestPermission();
         } else if (Platform.isAndroid) {
           await _flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
@@ -315,7 +319,7 @@ class BackgroundPush {
         }
         _pushToken = await (Platform.isIOS
             ? apnChannel.invokeMethod("getToken")
-            : fcmSharedIsolate?.getToken());
+            : fcmSharedIsolate.getToken());
         Logs().d('BackgroundPush::pushToken: $_pushToken');
         if (_pushToken == null) throw ('PushToken is null');
       } catch (e, s) {
@@ -327,6 +331,7 @@ class BackgroundPush {
     await setupPusher(
       gatewayUrl: AppConfig.pushNotificationsGatewayUrl,
       token: _pushToken,
+      client: client,
     );
   }
 
@@ -348,12 +353,16 @@ class BackgroundPush {
     goToRoom(roomId);
   }
 
-  void onReceiveNotification(dynamic message) {
+  void onReceiveNotification(dynamic message) async {
     Logs().d(
       'BackgroundPush::onReceiveNotification(): Message $message}',
     );
     final notification = _parseMessagePayload(message);
-    pushHelper(
+    client = await getClientFromRoomId(
+      currentClient: client,
+      roomId: notification.roomId,
+    );
+    await pushHelper(
       notification,
       client: client,
       l10n: l10n,
@@ -374,6 +383,7 @@ class BackgroundPush {
       if (_matrixState == null || roomId == null) {
         return;
       }
+      client = await getClientFromRoomId(currentClient: client, roomId: roomId);
       await client.roomsLoading;
       await client.accountDataLoading;
       // ignore: unused_local_variable
@@ -387,9 +397,25 @@ class BackgroundPush {
         Logs().v('[Push] Room $roomId not found, syncing...');
         await client.waitForRoomInSync(roomId);
       }
-      TwakeApp.router.go('/rooms/$roomId');
+
+      await goToRoomOfNewClient(roomId);
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
+    }
+  }
+
+  Future<void> goToRoomOfNewClient(String roomId) async {
+    final state = await _matrixState?.setActiveClient(client);
+    if (state == SetActiveClientState.success) {
+      TwakeApp.routerKey.currentContext?.go(
+        '/rooms',
+        extra: LoggedInBodyArgs(
+          newActiveClient: client,
+          roomIdFromNoti: roomId,
+        ),
+      );
+    } else {
+      Logs().v('goToRoomOfNewClient:: Failed to set active client');
     }
   }
 
@@ -429,7 +455,7 @@ class BackgroundPush {
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
     final oldTokens = <String?>{};
     try {
-      final fcmToken = await fcmSharedIsolate?.getToken();
+      final fcmToken = await fcmSharedIsolate.getToken();
       oldTokens.add(fcmToken);
     } catch (_) {}
     await setupPusher(
@@ -437,6 +463,7 @@ class BackgroundPush {
       token: newEndpoint,
       oldTokens: oldTokens,
       useDeviceSpecificAppId: true,
+      client: client,
     );
     await store.setItem(SettingKeys.unifiedPushEndpoint, newEndpoint);
     await store.setItemBool(SettingKeys.unifiedPushRegistered, true);
@@ -452,6 +479,7 @@ class BackgroundPush {
       // remove the old pusher
       await setupPusher(
         oldTokens: {oldEndpoint},
+        client: client,
       );
     }
   }
@@ -463,8 +491,13 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    final notification = PushNotification.fromJson(data);
+    client = await getClientFromRoomId(
+      currentClient: client,
+      roomId: notification.roomId,
+    );
     await pushHelper(
-      PushNotification.fromJson(data),
+      notification,
       client: client,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
@@ -606,6 +639,7 @@ class BackgroundPush {
     if (_pushToken == null) return;
     await setupPusher(
       oldTokens: {_pushToken},
+      client: client,
     );
   }
 
