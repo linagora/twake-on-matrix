@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/data/hive/hive_client_name_box.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,8 @@ class HiveCollectionToMDatabase {
 
   String get _tomConfigurationsBoxName => 'tom_configurations_box';
   late CollectionBox<Map> tomConfigurationsBox;
+
+  final HiveClientInRoomBox hiveClientInRoomBox = HiveClientInRoomBox();
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -114,7 +117,7 @@ class HiveCollectionToMDatabase {
   Future<void> open() async {
     _collection = await BoxCollection.open(
       name,
-      {_tomConfigurationsBoxName},
+      {_tomConfigurationsBoxName, hiveClientInRoomBox.name},
       path: path,
       key: key,
     );
@@ -122,6 +125,8 @@ class HiveCollectionToMDatabase {
       _tomConfigurationsBoxName,
       preload: true,
     );
+
+    await hiveClientInRoomBox.init(collection: _collection, dbName: name);
   }
 
   Future<void> clear() async {
