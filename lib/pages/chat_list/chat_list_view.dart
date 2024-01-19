@@ -45,12 +45,7 @@ class ChatListView extends StatelessWidget {
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(
           onOpenSearchPage: onOpenSearchPage,
-          selectModeNotifier: controller.selectModeNotifier,
-          conversationSelectionNotifier:
-              controller.conversationSelectionNotifier,
-          currentProfileNotifier: controller.currentProfileNotifier,
-          onClickClearSelection: controller.onClickClearSelection,
-          onClickAvatar: controller.onClickAvatar,
+          controller: controller,
         ),
       ),
       bottomNavigationBar: ValueListenableBuilder(

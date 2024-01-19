@@ -129,7 +129,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
       'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():newWidget - ${widget.args}',
     );
     if (oldWidget.args != widget.args && widget.args is LogoutBodyArgs) {
-      activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+      activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
       pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
     }
   }

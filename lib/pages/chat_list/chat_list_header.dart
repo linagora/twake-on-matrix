@@ -1,15 +1,16 @@
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 
 class ChatListHeader extends StatelessWidget {
   final ChatListController controller;
-  final VoidCallback onClearSelection;
+  final VoidCallback? onOpenSearchPage;
 
   const ChatListHeader({
     Key? key,
     required this.controller,
-    required this.onClearSelection,
+    this.onOpenSearchPage,
   }) : super(key: key);
 
   @override
@@ -18,7 +19,7 @@ class ChatListHeader extends StatelessWidget {
       children: [
         TwakeHeader(
           controller: controller,
-          onClearSelection: onClearSelection,
+          onClearSelection: controller.onClickClearSelection,
         ),
         Container(
           height: ChatListHeaderStyle.searchBarContainerHeight,

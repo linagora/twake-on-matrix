@@ -27,12 +27,6 @@ abstract class AppConfig {
 
   static String homeserver = 'https://example.com/';
 
-  static const String postLoginRedirectUrlPathParams =
-      'post_login_redirect_url';
-
-  static const String postRegisteredRedirectUrlPathParams =
-      'post_registered_redirect_url';
-
   static String? platform;
 
   static double toolbarHeight(BuildContext context) =>
