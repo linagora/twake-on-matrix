@@ -1533,8 +1533,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "twake-supported-0.22.6"
-      resolved-ref: "71d0dad43345ff9408282b738ea76a83096263ba"
+      ref: "hot-fix/support-multiple-break-lines"
+      resolved-ref: "26e1fa9ae60b3861ea61a062f7635025071f3541"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
