@@ -101,7 +101,8 @@ class ChatListBodyView extends StatelessWidget {
                                       .paddingTextStartNewChatMessage,
                                   child: Text(
                                     L10n.of(context)!.startNewChatMessage,
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -152,8 +153,8 @@ class ChatListBodyView extends StatelessWidget {
                                     controller.filteredRoomsForPin.length,
                                   ),
                                   isExpanded: isExpanded,
-                                  onTap:
-                                      controller.expandRoomsForPinNotifier.toggle,
+                                  onTap: controller
+                                      .expandRoomsForPinNotifier.toggle,
                                 ),
                                 if (isExpanded) child!,
                               ],
