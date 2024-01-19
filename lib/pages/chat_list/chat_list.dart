@@ -6,7 +6,9 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:fluffychat/domain/repository/client_in_room_repository.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/update_client_in_rooms_interactor.dart';
 import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
@@ -111,6 +113,9 @@ class ChatListController extends State<ChatList>
   bool waitForFirstSync = false;
 
   bool scrolledToTop = true;
+
+  final updateClientInRoomInteractor =
+      getIt.get<UpdateClientInRoomInteractor>();
 
   Client get activeClient => matrixState.client;
 
@@ -751,6 +756,22 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  Future<void> updateClientNameBox(Client client) async {
+    final clientInRoomRepository = getIt.get<ClientInRoomRepository>();
+    if (client.rooms.isNotEmpty) {
+      Logs()
+          .d('MatrixState::updateClientNameBox: storing in hiveClientNameBox');
+      await Future.wait(
+        client.rooms.map(
+          (room) => clientInRoomRepository.insertClientName(
+            room.id,
+            client.clientName,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
     Logs().d(
@@ -768,6 +789,13 @@ class ChatListController extends State<ChatList>
       });
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  Future<void> listenToOnSyncUpdate(SyncUpdate syncUpdate) async {
+    await updateClientInRoomInteractor.execute(
+      syncUpdate: syncUpdate,
+      clientName: activeClient.clientName,
+    );
   }
 
   @override
