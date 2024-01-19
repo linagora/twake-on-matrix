@@ -24,6 +24,7 @@ class TwakeWelcomeView extends StatelessWidget {
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
       onSignInOnTap: controller.onClickSignIn,
+      onCreateTwakeIdOnTap: controller.onClickCreateTwakeId,
       logo: SvgPicture.asset(
         ImagePaths.logoTwakeWelcome,
         width: TwakeIdViewStyle.logoWidth,
