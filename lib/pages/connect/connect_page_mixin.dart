@@ -14,7 +14,12 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
+typedef OnSAASRegistrationTimeoutCallback = void Function();
+typedef OnSAASRegistrationErrorCallback = void Function(Object?);
+
 mixin ConnectPageMixin {
+  static const saasRegistrationTimeout = Duration(seconds: 120);
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -49,6 +54,15 @@ mixin ConnectPageMixin {
         '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
+  }
+
+  String generatePublicPlatformAuthenticationUrl({
+    required BuildContext context,
+    required String id,
+    required String redirectUrl,
+  }) {
+    final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
+    return '${AppConfig.registrationUrl}?post_registered_redirect_url=$redirectUrlEncode';
   }
 
   String? _getLogoutUrl(
@@ -117,6 +131,42 @@ mixin ConnectPageMixin {
     }
   }
 
+  Future<void> registerPublicPlatformAction({
+    required BuildContext context,
+    required String id,
+    OnSAASRegistrationTimeoutCallback? saasRegistrationTimeoutCallback,
+    OnSAASRegistrationErrorCallback? saasRegistrationErrorCallback,
+  }) async {
+    final redirectUrl = _generateRedirectUrl();
+    final url = generatePublicPlatformAuthenticationUrl(
+      context: context,
+      id: id,
+      redirectUrl: redirectUrl,
+    );
+    final urlScheme = _getRedirectUrlScheme(redirectUrl);
+    final uri = await FlutterWebAuth2.authenticate(
+      url: url,
+      callbackUrlScheme: urlScheme,
+      options: const FlutterWebAuth2Options(
+        intentFlags: ephemeralIntentFlags,
+      ),
+    ).timeout(
+      saasRegistrationTimeout,
+      onTimeout: () {
+        saasRegistrationTimeoutCallback?.call();
+        throw CheckHomeserverTimeoutException();
+      },
+    ).onError((error, stackTrace) {
+      saasRegistrationErrorCallback?.call(error);
+      return "";
+    });
+    Logs().d("ConnectPageMixin:_redirectRegistrationUrl: URI - $uri");
+    handleTokenFromRegistrationSite(
+      matrix: Matrix.of(context),
+      uri: uri,
+    );
+  }
+
   String _generatePostLogoutRedirectUrl() {
     if (kIsWeb) {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
@@ -152,5 +202,24 @@ mixin ConnectPageMixin {
       list.sort((a, b) => a.brand == 'apple' ? -1 : 1);
     }
     return list;
+  }
+
+  void handleTokenFromRegistrationSite({
+    required MatrixState matrix,
+    required String uri,
+  }) async {
+    final token = Uri.parse(uri).queryParameters['loginToken'];
+    Logs().d(
+      "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
+    );
+    if (token == null || token.isEmpty == true) return;
+    matrix.loginType = LoginType.mLoginToken;
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => matrix.getLoginClient().login(
+            LoginType.mLoginToken,
+            token: token,
+            initialDeviceDisplayName: PlatformInfos.clientName,
+          ),
+    );
   }
 }

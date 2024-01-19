@@ -1,8 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -29,13 +28,14 @@ class TwakeWelcomeArg extends Equatable {
 
 class TwakeWelcome extends StatefulWidget {
   final TwakeWelcomeArg? arg;
+
   const TwakeWelcome({super.key, this.arg});
 
   @override
   State<TwakeWelcome> createState() => TwakeWelcomeController();
 }
 
-class TwakeWelcomeController extends State<TwakeWelcome> {
+class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   void goToHomeserverPicker() {
     if (widget.arg?.isAddAnotherAccount == true) {
       context.push('/rooms/addhomeserver');
@@ -63,20 +63,6 @@ class TwakeWelcomeController extends State<TwakeWelcome> {
     _redirectRegistrationUrl(loginUrl);
   }
 
-  void _handleTokenFromRegistrationSite(String uri) async {
-    final token = Uri.parse(uri).queryParameters['loginToken'];
-    Logs().d("TwakeIdController: _handleLoginToken: token: $token");
-    if (token?.isEmpty ?? false) return;
-    Matrix.of(context).loginType = LoginType.mLoginToken;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).getLoginClient().login(
-            LoginType.mLoginToken,
-            token: token,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          ),
-    );
-  }
-
   void _redirectRegistrationUrl(String url) async {
     matrix.loginHomeserverSummary =
         await matrix.getLoginClient().checkHomeserver(
@@ -90,12 +76,13 @@ class TwakeWelcomeController extends State<TwakeWelcome> {
       ),
     );
     Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
-    _handleTokenFromRegistrationSite(uri);
+    handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
   }
 
   void onClickCreateTwakeId() {
-    Logs()
-        .d("TwakeIdController::onClickCreateTwakeId: Signup Url - $signupUrl");
+    Logs().d(
+      "TwakeIdController::onClickCreateTwakeId: Signup Url - $signupUrl",
+    );
     _redirectRegistrationUrl(signupUrl);
   }
 
