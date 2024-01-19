@@ -37,6 +37,4 @@ class ChatViewStyle {
       active
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).colorScheme.onBackground;
-
-  static const paddingBottomContextMenu = 16.0;
 }

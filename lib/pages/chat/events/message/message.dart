@@ -25,7 +25,6 @@ typedef OnMenuAction = Function(
   BuildContext,
   ChatHorizontalActionMenu,
   Event,
-  PointerDownEvent,
 );
 
 class Message extends StatelessWidget {

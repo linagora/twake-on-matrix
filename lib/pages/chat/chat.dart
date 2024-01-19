@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -1309,7 +1309,6 @@ class ChatController extends State<Chat>
     BuildContext context,
     ChatHorizontalActionMenu actions,
     Event event,
-    PointerDownEvent pointerDownEvent,
   ) {
     switch (actions) {
       case ChatHorizontalActionMenu.reply:
@@ -1323,7 +1322,6 @@ class ChatController extends State<Chat>
         handleContextMenuAction(
           context,
           event,
-          pointerDownEvent,
         );
         break;
     }
@@ -1393,20 +1391,11 @@ class ChatController extends State<Chat>
   void handleContextMenuAction(
     BuildContext context,
     Event event,
-    PointerDownEvent pointerDownEvent,
   ) {
-    final screenSize = MediaQuery.of(context).size;
-    final offset = pointerDownEvent.position;
-    final position = RelativeRect.fromLTRB(
-      offset.dx,
-      offset.dy + ChatViewStyle.paddingBottomContextMenu,
-      screenSize.width - offset.dx,
-      screenSize.height - offset.dy,
-    );
     _handleStateContextMenu();
     openPopupMenuAction(
       context,
-      position,
+      context.getCurrentRelativeRectOfWidget(),
       _popupMenuActionTile(context, event),
       onClose: () {
         _handleStateContextMenu();
