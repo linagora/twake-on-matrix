@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';

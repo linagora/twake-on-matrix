@@ -54,6 +54,7 @@ class MockGetTomContactsInteractor extends _i1.Mock
           Invocation.getter(#contactRepository),
         ),
       ) as _i2.ContactRepository);
+
   @override
   _i4.Stream<_i5.Either<_i6.Failure, _i7.Success>> execute(
           {required int? limit}) =>
