@@ -27,6 +27,14 @@ abstract class AppConfig {
 
   static String homeserver = 'https://example.com/';
 
+  static const String postLoginRedirectUrlPathParams =
+      'post_login_redirect_url';
+
+  static const String postRegisteredRedirectUrlPathParams =
+      'post_registered_redirect_url';
+
+  static String? platform;
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -153,6 +161,9 @@ abstract class AppConfig {
     }
     if (json['issue_id'] is String?) {
       issueId = json['issue_id'];
+    }
+    if (json['platform'] is String?) {
+      platform = json['platform'];
     }
   }
 }
