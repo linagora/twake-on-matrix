@@ -142,7 +142,7 @@ class SettingsView extends StatelessWidget {
               ),
             ),
             const Divider(thickness: 1),
-            if (!controller.matrix.twakeSupported)
+            if (!controller.matrix.tomSupported)
               ValueListenableBuilder(
                 valueListenable: controller.showChatBackupSwitch,
                 builder: (context, backUpAvailable, child) {
