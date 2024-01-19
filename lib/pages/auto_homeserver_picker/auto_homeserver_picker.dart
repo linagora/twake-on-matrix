@@ -24,11 +24,18 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
     with ConnectPageMixin {
   static const Duration autoHomeserverPickerTimeout = Duration(seconds: 30);
 
+  static const _saasPlatform = 'saas';
+
   final showButtonRetryNotifier = ValueNotifier<bool>(false);
 
   MatrixState get matrix => Matrix.of(context);
 
-  void _autoCheckHomeserver() async {
+  bool get _isSaasPlatform =>
+      AppConfig.platform != null &&
+      AppConfig.platform!.isNotEmpty &&
+      AppConfig.platform == _saasPlatform;
+
+  void _autoConnectHomeserver() async {
     try {
       matrix.loginHomeserverSummary = await matrix
           .getLoginClient()
@@ -93,18 +100,71 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   void retryCheckHomeserver() {
     showButtonRetryNotifier.toggle();
-    _autoCheckHomeserver();
+    if (_isSaasPlatform) {
+      _autoConnectSaas();
+    } else {
+      _autoConnectHomeserver();
+    }
   }
 
-  @override
-  void initState() {
+  void _autoConnectSaas() async {
+    matrix.loginHomeserverSummary =
+        await matrix.getLoginClient().checkHomeserver(
+              Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+            );
+    Map<String, dynamic>? rawLoginTypes;
+    await Matrix.of(context)
+        .getLoginClient()
+        .request(
+          RequestType.GET,
+          '/client/r0/login',
+        )
+        .then((loginTypes) => rawLoginTypes = loginTypes)
+        .timeout(
+      autoHomeserverPickerTimeout,
+      onTimeout: () {
+        throw CheckHomeserverTimeoutException();
+      },
+    );
+    final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
+    if (identitiesProvider?.length == 1) {
+      registerPublicPlatformAction(
+        context: context,
+        id: identitiesProvider!.single.id!,
+        saasRegistrationErrorCallback: (object) {
+          Logs().e(
+            "AutoHomeserverPickerController: _saasAutoRegistration: Error - $object",
+          );
+        },
+        saasRegistrationTimeoutCallback: () {
+          Logs().e(
+            "AutoHomeserverPickerController: _saasAutoRegistration: Timeout",
+          );
+        },
+      );
+    }
+  }
+
+  void _setupAutoHomeserverPicker() {
     if (widget.loggedOut == null) {
-      _autoCheckHomeserver();
+      Logs().d(
+        "AutoHomeserverPickerController: _initializeAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
+      );
+      if (_isSaasPlatform) {
+        _autoConnectSaas();
+      } else {
+        _autoConnectHomeserver();
+      }
     } else {
       if (widget.loggedOut == true) {
         showButtonRetryNotifier.toggle();
       }
     }
+  }
+
+  @override
+  void initState() {
+    _setupAutoHomeserverPicker();
     super.initState();
   }
 

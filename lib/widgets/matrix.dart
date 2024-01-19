@@ -283,7 +283,6 @@ class MatrixState extends State<Matrix>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
-      _migrateToMDatabase(client);
       if (PlatformInfos.isWeb) {
         html.window.addEventListener('focus', onWindowFocus);
         html.window.addEventListener('blur', onWindowBlur);
@@ -393,7 +392,7 @@ class MatrixState extends State<Matrix>
         Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
         if (PlatformInfos.isMobile) {
           _deletePersistActiveAccount(state);
-          TwakeApp.router.go('/home/twakeid');
+          TwakeApp.router.go('/home/twakeWelcome');
         } else {
           TwakeApp.router.go('/home', extra: true);
         }
@@ -762,24 +761,6 @@ class MatrixState extends State<Matrix>
         'Matrix::_storePersistActiveAccount(): Error - $e',
       );
     }
-  }
-
-  void _migrateToMDatabase(Client client) async {
-    if (!FlutterHiveCollectionsDatabase.canMigrateToMDatabase) return;
-    Logs().d(
-      'Matrix::_checkHomeserverExists: Start migration to ToMDatabase',
-    );
-    if (client.userID == null) return;
-    final hiveCollectionToMDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    final currentToMConfigurations = await getTomConfigurations(client.userID!);
-    if (currentToMConfigurations != null) {
-      await hiveCollectionToMDatabase.clearCache();
-      _storeToMConfiguration(client, currentToMConfigurations);
-    }
-    Logs().d(
-      'Matrix::_checkHomeserverExists: Finish migration to ToMDatabase',
-    );
   }
 
   void onWindowFocus(html.Event e) {
