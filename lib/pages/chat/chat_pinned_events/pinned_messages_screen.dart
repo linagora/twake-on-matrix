@@ -88,8 +88,12 @@ class PinnedMessagesScreen extends StatelessWidget {
                               nextEvent: nextEvent,
                               timeline: controller.widget.timeline!,
                               isHoverNotifier: controller.isHoverNotifier,
-                              listHorizontalActionMenu: const [],
-                              longPressSelect: true,
+                              listHorizontalActionMenu:
+                                  controller.listHorizontalActionMenuBuilder(),
+                              onMenuAction:
+                                  controller.handleHorizontalActionMenu,
+                              onHover: (isHover, event) =>
+                                  controller.onHover(isHover, index, event),
                               selectMode: selectedEvents.isNotEmpty,
                               onSelect: controller.onSelectMessage,
                               selected: controller.isSelected(event),

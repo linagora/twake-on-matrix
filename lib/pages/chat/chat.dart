@@ -226,6 +226,10 @@ class ChatController extends State<Chat>
     inputText.value = sendController.text;
   }
 
+  bool isSelected(Event event) => selectedEvents.any(
+        (e) => e.eventId == event.eventId,
+      );
+
   String? _findUnreadReceivedMessageLocation() {
     final events = timeline!.events;
     if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
@@ -1352,6 +1356,7 @@ class ChatController extends State<Chat>
           action.getTitle(
             context,
             unpin: isUnpinEvent(event),
+            isSelected: isSelected(event),
           ),
           iconAction: action.getIcon(
             unpin: isUnpinEvent(event),

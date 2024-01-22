@@ -39,7 +39,6 @@ class Message extends StatelessWidget {
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
   final ValueNotifier<String?> isHoverNotifier;
-  final bool longPressSelect;
   final bool selected;
   final Timeline timeline;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
@@ -53,7 +52,6 @@ class Message extends StatelessWidget {
     this.event, {
     this.previousEvent,
     this.nextEvent,
-    this.longPressSelect = false,
     this.onSelect,
     this.onAvatarTap,
     this.onHover,
@@ -126,7 +124,6 @@ class Message extends StatelessWidget {
               child: MessageContentWithTimestampBuilder(
                 event: event,
                 nextEvent: nextEvent,
-                longPressSelect: longPressSelect,
                 onSelect: onSelect,
                 scrollToEventId: scrollToEventId,
                 selected: selected,
@@ -188,9 +185,6 @@ class Message extends StatelessWidget {
                             : hideKeyboardChatScreen?.call(),
                         child: Center(
                           child: Container(
-                            margin: EdgeInsetsDirectional.only(
-                              start: selected ? 0.0 : 8.0,
-                            ),
                             padding: EdgeInsets.only(
                               right: selected
                                   ? 0
@@ -242,8 +236,8 @@ class Message extends StatelessWidget {
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: selected ? 1 : 0,
+      padding: EdgeInsets.only(
+        left: selectMode ? 12.0 : 8.0,
       ),
       color: selected
           ? LinagoraSysColors.material().secondaryContainer
@@ -257,9 +251,8 @@ class Message extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start:
-                      (selected || responsiveUtils.isDesktop(context)) ? 16 : 8,
+                padding: const EdgeInsetsDirectional.only(
+                  start: 16.0,
                 ),
                 child: Icon(
                   selected ? Icons.check_circle_rounded : Icons.circle_outlined,
