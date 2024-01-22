@@ -1309,7 +1309,7 @@ class ChatController extends State<Chat>
     BuildContext context,
     ChatHorizontalActionMenu actions,
     Event event,
-    PointerDownEvent pointerDownEvent,
+    TapDownDetails tapDownDetails,
   ) {
     switch (actions) {
       case ChatHorizontalActionMenu.reply:
@@ -1323,7 +1323,7 @@ class ChatController extends State<Chat>
         handleContextMenuAction(
           context,
           event,
-          pointerDownEvent,
+          tapDownDetails,
         );
         break;
     }
@@ -1393,10 +1393,10 @@ class ChatController extends State<Chat>
   void handleContextMenuAction(
     BuildContext context,
     Event event,
-    PointerDownEvent pointerDownEvent,
+    TapDownDetails tapDownDetails,
   ) {
     final screenSize = MediaQuery.of(context).size;
-    final offset = pointerDownEvent.position;
+    final offset = tapDownDetails.globalPosition;
     final position = RelativeRect.fromLTRB(
       offset.dx,
       offset.dy + ChatViewStyle.paddingBottomContextMenu,

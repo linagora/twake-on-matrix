@@ -25,7 +25,7 @@ typedef OnMenuAction = Function(
   BuildContext,
   ChatHorizontalActionMenu,
   Event,
-  PointerDownEvent,
+  TapDownDetails,
 );
 
 class Message extends StatelessWidget {
@@ -47,6 +47,7 @@ class Message extends StatelessWidget {
   final bool selectMode;
   final VoidCallback? hideKeyboardChatScreen;
   final ContextMenuBuilder? menuChildren;
+  final FocusNode? focusNode;
 
   const Message(
     this.event, {
@@ -68,6 +69,7 @@ class Message extends StatelessWidget {
     Key? key,
     this.onMenuAction,
     this.markedUnreadLocation,
+    this.focusNode,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -134,6 +136,7 @@ class Message extends StatelessWidget {
                 listHorizontalActionMenu: listHorizontalActionMenu,
                 onMenuAction: onMenuAction,
                 menuChildren: menuChildren,
+                focusNode: focusNode,
               ),
             ),
           ];
