@@ -768,11 +768,13 @@ class ChatController extends State<Chat>
   }
 
   void replyAction({Event? replyTo}) {
+    if (!inputFocus.hasFocus) {
+      FocusScope.of(context).requestFocus(inputFocus);
+    }
     setState(() {
       replyEvent = replyTo ?? selectedEvents.first;
       selectedEvents.clear();
     });
-    inputFocus.requestFocus();
   }
 
   Future<void> scrollToEventIdAndHighlight(String eventId) async {
