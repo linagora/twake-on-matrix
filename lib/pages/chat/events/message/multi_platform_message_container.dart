@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -39,44 +38,31 @@ class MultiPlatformsMessageContainer extends StatelessWidget {
 }
 
 class MultiPlatformSelectionMode extends StatelessWidget {
-  final bool longPressSelect;
-
   final void Function(Event event)? onSelect;
 
   final Event event;
 
   final Widget child;
 
-  final bool useInkWell;
+  final bool isClickable;
 
   const MultiPlatformSelectionMode({
     super.key,
-    required this.longPressSelect,
     this.onSelect,
-    this.useInkWell = true,
+    this.isClickable = true,
     required this.event,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!useInkWell) {
+    if (!isClickable) {
       return child;
     }
-    return Material(
-      color: Colors.transparent,
-      borderRadius: MessageStyle.bubbleBorderRadius,
-      borderOnForeground: false,
-      child: InkWell(
-        onTap: () => onSelect?.call(event),
-        onLongPress: !longPressSelect ? null : () => onSelect?.call(event),
-        borderRadius: MessageStyle.bubbleBorderRadius,
-        hoverColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        child: child,
-      ),
+
+    return GestureDetector(
+      onLongPress: () => onSelect?.call(event),
+      child: child,
     );
   }
 }

@@ -136,7 +136,6 @@ class ChatEventList extends StatelessWidget {
                       selectMode: controller.selectMode,
                       scrollToEventId: (String eventId) =>
                           controller.scrollToEventId(eventId),
-                      longPressSelect: controller.selectedEvents.isEmpty,
                       selected: controller.selectedEvents
                           .any((e) => e.eventId == event.eventId),
                       timeline: controller.timeline!,

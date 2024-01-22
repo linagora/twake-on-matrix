@@ -10,17 +10,18 @@ enum ChatContextMenuActions {
 
   String getTitle(
     BuildContext context, {
+    bool isSelected = false,
     bool unpin = false,
   }) {
     switch (this) {
       case ChatContextMenuActions.select:
-        return L10n.of(context)!.select;
+        return isSelected
+            ? L10n.of(context)!.unselect
+            : L10n.of(context)!.select;
       case ChatContextMenuActions.copyMessage:
         return L10n.of(context)!.copyMessageText;
       case ChatContextMenuActions.pinChat:
-        return unpin
-            ? L10n.of(context)!.unpinThisChat
-            : L10n.of(context)!.pinChat;
+        return unpin ? L10n.of(context)!.unpin : L10n.of(context)!.pinChat;
       case ChatContextMenuActions.forward:
         return L10n.of(context)!.forward;
       case ChatContextMenuActions.downloadFile:
@@ -29,11 +30,12 @@ enum ChatContextMenuActions {
   }
 
   IconData getIcon({
+    bool isSelected = false,
     bool unpin = false,
   }) {
     switch (this) {
       case ChatContextMenuActions.select:
-        return Icons.check_circle_outline;
+        return isSelected ? Icons.circle_outlined : Icons.check_circle_outline;
       case ChatContextMenuActions.copyMessage:
         return Icons.content_copy;
       case ChatContextMenuActions.pinChat:
