@@ -31,6 +31,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final OnMenuAction? onMenuAction;
   final bool selectMode;
   final ContextMenuBuilder? menuChildren;
+  final FocusNode? focusNode;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -48,6 +49,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     required this.listHorizontalActionMenu,
     this.onMenuAction,
     this.menuChildren,
+    this.focusNode,
   });
 
   @override
@@ -224,19 +226,17 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
           children: listHorizontalActionMenu.map((item) {
             return Padding(
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
-              child: Listener(
-                onPointerDown: (pointerEvent) => onMenuAction!.call(
+              child: TwakeIconButton(
+                onTapDown: (tapDownDetails) => onMenuAction?.call(
                   context,
                   item.action,
                   event,
-                  pointerEvent,
+                  tapDownDetails,
                 ),
-                child: TwakeIconButton(
-                  icon: item.action.getIcon(),
-                  imagePath: item.action.getImagePath(),
-                  tooltip: item.action.getTitle(context),
-                  preferBelow: false,
-                ),
+                icon: item.action.getIcon(),
+                imagePath: item.action.getImagePath(),
+                tooltip: item.action.getTitle(context),
+                preferBelow: false,
               ),
             );
           }).toList(),
