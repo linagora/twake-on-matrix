@@ -1509,10 +1509,10 @@ packages:
     dependency: transitive
     description:
       name: markdown
-      sha256: acf35edccc0463a9d7384e437c015a3535772e09714cf60e07eeef3a15870dcd
+      sha256: "1b134d9f8ff2da15cb298efe6cd8b7d2a78958c1b00384ebcbdf13fe340a6c90"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.1"
+    version: "7.2.1"
   matcher:
     dependency: transitive
     description:
@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: "hot-fix/support-multiple-break-lines"
-      resolved-ref: "26e1fa9ae60b3861ea61a062f7635025071f3541"
+      resolved-ref: a8b0a3597338fe75d590e2e5b8d078c455b3d5d9
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
