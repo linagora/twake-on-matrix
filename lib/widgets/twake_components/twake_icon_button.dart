@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 typedef OnTapIconButtonCallbackAction = void Function();
 typedef OnTapDownIconButtonCallbackAction = void Function(
-  BuildContext,
+  TapDownDetails,
 );
 
 class TwakeIconButton extends StatelessWidget {
@@ -73,7 +73,9 @@ class TwakeIconButton extends StatelessWidget {
         child: InkWell(
           mouseCursor: SystemMouseCursors.click,
           onTap: onTap,
-          onTapDown: onTapDown != null ? (_) => onTapDown!.call(context) : null,
+          onTapDown: onTapDown != null
+              ? (tapDownDetails) => onTapDown!.call(tapDownDetails)
+              : null,
           customBorder: const CircleBorder(),
           radius: paddingAll,
           hoverColor: hoverColor,

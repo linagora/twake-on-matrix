@@ -53,7 +53,7 @@ class TwakeTextButton extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
-        onTapDown: (_) => onTapDown?.call(context),
+        onTapDown: (tapDownDetails) => onTapDown?.call(tapDownDetails),
         radius: paddingAll,
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
