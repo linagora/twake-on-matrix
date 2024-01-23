@@ -51,4 +51,8 @@ class SendFileDialogStyle {
   static const double listViewBorderRadius = 8.0;
 
   static const paddingFileTile = EdgeInsets.symmetric(vertical: 4.0);
+
+  static const double inkwellSplashBorderRadius = 8.0;
+
+  static const EdgeInsets paddingRemoveButton = EdgeInsets.only(right: 8.0);
 }

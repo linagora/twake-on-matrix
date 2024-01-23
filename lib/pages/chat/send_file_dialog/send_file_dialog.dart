@@ -2,6 +2,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/presentation/list_notifier.dart';
 import 'send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
@@ -40,19 +42,48 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   bool isSendMediaWithCaption = true;
 
-  List<MatrixFile> get files => widget.files;
+  ListNotifier<MatrixFile> filesNotifier = ListNotifier([]);
+
+  Map<MatrixFile, MatrixImageFile?> thumbnails = {};
 
   @override
   void initState() {
     super.initState();
-    isSendMediaWithCaption = _isShowSendMediaDialog(widget.files, widget.room);
+    filesNotifier = ListNotifier(widget.files);
+    isSendMediaWithCaption = _isShowSendMediaDialog(
+      filesNotifier.value,
+      widget.room,
+    );
     requestFocusCaptions();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      loadThumbnailsForMedia();
+    });
   }
 
   @override
   void dispose() {
     textEditingController.dispose();
     super.dispose();
+  }
+
+  Future<void> loadThumbnailsForMedia() async {
+    if (widget.room == null) {
+      return;
+    }
+    final results = await Future.wait<MatrixImageFile?>(
+      filesNotifier.value.map((file) {
+        if (file is MatrixImageFile) {
+          return widget.room!.generateThumbnail(file);
+        } else if (file is MatrixVideoFile) {
+          return widget.room!.generateVideoThumbnail(file);
+        }
+        return Future.value(null);
+      }),
+    );
+    for (int i = 0; i < filesNotifier.value.length; i++) {
+      thumbnails[filesNotifier.value[i]] = results[i];
+    }
+    filesNotifier.notify();
   }
 
   void requestFocusCaptions() {
@@ -65,9 +96,12 @@ class SendFileDialogController extends State<SendFileDialog> {
       Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
       return;
     }
+    if (filesNotifier.value.isEmpty) {
+      return;
+    }
     sendMediaOnWebWithCaptionInteractor.execute(
       room: widget.room!,
-      media: widget.files.first,
+      media: filesNotifier.value.first,
       caption: textEditingController.text,
     );
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
@@ -81,14 +115,14 @@ class SendFileDialogController extends State<SendFileDialog> {
     }
     sendFilesOnWebWithCaptionInteractor.execute(
       room: widget.room!,
-      files: widget.files,
+      files: filesNotifier.value,
       caption: textEditingController.text,
     );
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
   void send() {
-    if (_isShowSendMediaDialog(widget.files, widget.room)) {
+    if (_isShowSendMediaDialog(filesNotifier.value, widget.room)) {
       sendMediaWithCaption();
     } else {
       sendFilesWithCaption();
@@ -99,6 +133,13 @@ class SendFileDialogController extends State<SendFileDialog> {
       matrixFilesList.length == 1 &&
       matrixFilesList.first is MatrixImageFile &&
       room != null;
+
+  void onRemoveFile(MatrixFile matrixFile) {
+    filesNotifier.remove(matrixFile);
+    if (filesNotifier.value.isEmpty) {
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
