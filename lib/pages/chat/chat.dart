@@ -60,7 +60,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'send_file_dialog.dart';
+import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
