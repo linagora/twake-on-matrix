@@ -14,9 +14,18 @@ class TwakeLinkPreviewItem extends StatelessWidget {
     required this.urlPreviewPresentation,
   });
 
+  static const linkPreviewNoImageKey = ValueKey('LinkPreviewNoImageKey');
+
+  static const linkPreviewLargeKey = ValueKey('LinkPreviewLargeKey');
+
+  static const linkPreviewSmallKey = ValueKey('LinkPreviewSmallKey');
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: ValueKey(
+        'ContainerKey:TwakeLinkPreviewItem${urlPreviewPresentation.description}',
+      ),
       constraints: const BoxConstraints(
         minWidth: double.infinity,
         maxHeight: double.infinity,
@@ -42,17 +51,20 @@ class TwakeLinkPreviewItem extends StatelessWidget {
         urlPreviewPresentation.imageWidth == null ||
         urlPreviewPresentation.imageHeight == null) {
       return LinkPreviewNoImage(
+        key: linkPreviewNoImageKey,
         urlPreviewPresentation: urlPreviewPresentation,
       );
     }
 
     if (urlPreviewPresentation.imageHeight! > 200) {
       return LinkPreviewLarge(
+        key: linkPreviewLargeKey,
         urlPreviewPresentation: urlPreviewPresentation,
       );
     }
 
     return LinkPreviewSmall(
+      key: linkPreviewSmallKey,
       urlPreviewPresentation: urlPreviewPresentation,
     );
   }
@@ -73,8 +85,14 @@ class LinkPreviewNoImage extends StatelessWidget {
       children: [
         if (urlPreviewPresentation.title != null)
           Padding(
+            key: ValueKey(
+              'PaddingTitleKey:LinkPreviewNoImage${urlPreviewPresentation.title}',
+            ),
             padding: TwakeLinkPreviewItemStyle.paddingTitle,
             child: Text(
+              key: ValueKey(
+                'TextTitleKey:LinkPreviewNoImage${urlPreviewPresentation.title}',
+              ),
               urlPreviewPresentation.title!,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
@@ -86,8 +104,14 @@ class LinkPreviewNoImage extends StatelessWidget {
           ),
         if (urlPreviewPresentation.description != null)
           Padding(
+            key: ValueKey(
+              'PaddingSubtitleKey:LinkPreviewNoImage${urlPreviewPresentation.description}',
+            ),
             padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
             child: Text(
+              key: ValueKey(
+                'TextSubtitleKey:LinkPreviewNoImage${urlPreviewPresentation.description}',
+              ),
               urlPreviewPresentation.description!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: LinagoraRefColors.material().neutral[50],
@@ -116,6 +140,9 @@ class LinkPreviewLarge extends StatelessWidget {
       children: [
         if (urlPreviewPresentation.imageUri != null)
           ClipRRect(
+            key: const ValueKey(
+              'ClipRRectKey:LinkPreviewLarge',
+            ),
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(
                 TwakeLinkPreviewItemStyle.radiusBorder,
@@ -124,6 +151,9 @@ class LinkPreviewLarge extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: MxcImage(
+                key: ValueKey(
+                  'MxcImageKey:LinkPreviewLarge${urlPreviewPresentation.imageUri}',
+                ),
                 uri: urlPreviewPresentation.imageUri,
                 fit: BoxFit.cover,
                 isThumbnail: false,
@@ -133,8 +163,14 @@ class LinkPreviewLarge extends StatelessWidget {
           ),
         if (urlPreviewPresentation.title != null)
           Padding(
+            key: ValueKey(
+              'PaddingTitleKey:LinkPreviewLarge${urlPreviewPresentation.title}',
+            ),
             padding: TwakeLinkPreviewItemStyle.paddingTitle,
             child: Text(
+              key: ValueKey(
+                'TextTitleKey:LinkPreviewLarge${urlPreviewPresentation.title}',
+              ),
               urlPreviewPresentation.title!,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -145,8 +181,14 @@ class LinkPreviewLarge extends StatelessWidget {
           ),
         if (urlPreviewPresentation.description != null)
           Padding(
+            key: ValueKey(
+              'PaddingSubtitleKey:LinkPreviewLarge${urlPreviewPresentation.description}',
+            ),
             padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
             child: Text(
+              key: ValueKey(
+                'TextSubtitleKey:LinkPreviewLarge${urlPreviewPresentation.description}',
+              ),
               urlPreviewPresentation.description!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: LinagoraRefColors.material().neutral[50],
@@ -177,6 +219,9 @@ class LinkPreviewSmall extends StatelessWidget {
           Padding(
             padding: TwakeLinkPreviewItemStyle.paddingPreviewImage,
             child: ClipRRect(
+              key: const ValueKey(
+                'ClipRRectKey:LinkPreviewSmall',
+              ),
               borderRadius: const BorderRadius.all(
                 Radius.circular(
                   TwakeLinkPreviewItemStyle.radiusBorder,
@@ -186,6 +231,9 @@ class LinkPreviewSmall extends StatelessWidget {
                 height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 child: MxcImage(
+                  key: ValueKey(
+                    'MxcImageKey:LinkPreviewSmall${urlPreviewPresentation.imageUri}',
+                  ),
                   height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                   width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                   uri: urlPreviewPresentation.imageUri,
@@ -202,8 +250,14 @@ class LinkPreviewSmall extends StatelessWidget {
             children: [
               if (urlPreviewPresentation.title != null)
                 Padding(
+                  key: ValueKey(
+                    'PaddingTitleKey:LinkPreviewSmall${urlPreviewPresentation.title}',
+                  ),
                   padding: TwakeLinkPreviewItemStyle.paddingTitle,
                   child: Text(
+                    key: ValueKey(
+                      'TextTitleKey:LinkPreviewSmall${urlPreviewPresentation.title}',
+                    ),
                     urlPreviewPresentation.title!,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -214,8 +268,14 @@ class LinkPreviewSmall extends StatelessWidget {
                 ),
               if (urlPreviewPresentation.description != null)
                 Padding(
+                  key: ValueKey(
+                    'PaddingSubtitleKey:LinkPreviewSmall${urlPreviewPresentation.description}',
+                  ),
                   padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
                   child: Text(
+                    key: ValueKey(
+                      'TextSubtitleKey:LinkPreviewSmall${urlPreviewPresentation.description}',
+                    ),
                     urlPreviewPresentation.description!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: LinagoraRefColors.material().neutral[50],
