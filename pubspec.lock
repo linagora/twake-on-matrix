@@ -926,7 +926,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "4d4b93952a3b2d47a3c4df7455ba37b002551fdf"
+      resolved-ref: "3606f467a6b355b6c5a02b24682ecceccfb86421"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1509,10 +1509,10 @@ packages:
     dependency: transitive
     description:
       name: markdown
-      sha256: acf35edccc0463a9d7384e437c015a3535772e09714cf60e07eeef3a15870dcd
+      sha256: "1b134d9f8ff2da15cb298efe6cd8b7d2a78958c1b00384ebcbdf13fe340a6c90"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.1"
+    version: "7.2.1"
   matcher:
     dependency: transitive
     description:
@@ -1534,7 +1534,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "71d0dad43345ff9408282b738ea76a83096263ba"
+      resolved-ref: "1c1d5299d06ff676e48a5b3f220fed049a1067fb"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
