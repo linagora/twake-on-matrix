@@ -6,7 +6,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';

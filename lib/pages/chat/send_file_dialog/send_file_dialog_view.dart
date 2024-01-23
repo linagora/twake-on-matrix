@@ -1,5 +1,5 @@
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
+import 'send_file_dialog.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
@@ -9,7 +9,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog_style.dart';
+import 'send_file_dialog_style.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
