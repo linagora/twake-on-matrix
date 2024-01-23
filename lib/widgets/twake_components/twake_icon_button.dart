@@ -15,7 +15,7 @@ class TwakeIconButton extends StatelessWidget {
 
   final double? imageSize;
 
-  final String tooltip;
+  final String? tooltip;
 
   final EdgeInsets margin;
 
@@ -43,7 +43,7 @@ class TwakeIconButton extends StatelessWidget {
 
   const TwakeIconButton({
     Key? key,
-    required this.tooltip,
+    this.tooltip,
     this.onTap,
     this.icon,
     this.imagePath,
@@ -81,26 +81,31 @@ class TwakeIconButton extends StatelessWidget {
           hoverColor: hoverColor,
           highlightColor: highlightColor,
           splashColor: splashColor,
-          child: Tooltip(
-            preferBelow: preferBelow,
-            message: tooltip,
-            child: Padding(
-              padding: EdgeInsets.all(paddingAll ?? 8.0),
-              child: icon != null
-                  ? Icon(
-                      icon,
-                      size: size,
-                      fill: fill,
-                      weight: weight,
-                      color: iconColor,
-                    )
-                  : imagePath != null
-                      ? SvgPicture.asset(
-                          imagePath!,
-                          height: imageSize,
-                          width: imageSize,
-                        )
-                      : null,
+          child: TooltipVisibility(
+            visible: tooltip != null ? true : false,
+            child: Tooltip(
+              showDuration: const Duration(seconds: 1),
+              waitDuration: const Duration(seconds: 1),
+              preferBelow: preferBelow,
+              message: tooltip ?? "",
+              child: Padding(
+                padding: EdgeInsets.all(paddingAll ?? 8.0),
+                child: icon != null
+                    ? Icon(
+                        icon,
+                        size: size,
+                        fill: fill,
+                        weight: weight,
+                        color: iconColor,
+                      )
+                    : imagePath != null
+                        ? SvgPicture.asset(
+                            imagePath!,
+                            height: imageSize,
+                            width: imageSize,
+                          )
+                        : null,
+              ),
             ),
           ),
         ),
