@@ -46,6 +46,10 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
     with GetPreviewUrlMixin {
   String? get firstValidUrl => widget.text.getFirstValidUrl();
 
+  static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
+
+  static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
+
   @override
   String debugLabel = 'TwakeLinkPreviewController';
 
@@ -60,6 +64,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
   @override
   Widget build(BuildContext context) {
     return TwakeLinkView(
+      key: twakeLinkViewKey,
       text: widget.text,
       textStyle: widget.textStyle,
       linkStyle: widget.linkStyle,
@@ -76,6 +81,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               if (success is GetPreviewUrlSuccess) {
                 final previewLink = success.urlPreview.toPresentation();
                 return TwakeLinkPreviewItem(
+                  key: twakeLinkPreviewItemKey,
                   ownMessage: widget.ownMessage,
                   urlPreviewPresentation: previewLink,
                 );

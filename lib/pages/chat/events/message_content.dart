@@ -212,6 +212,7 @@ class MessageContent extends StatelessWidget
                       hideReply: true,
                     );
                 return TwakeLinkPreview(
+                  key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
                   text: text,
                   textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,

@@ -14,6 +14,8 @@ class TwakeLinkPreviewItem extends StatelessWidget {
     required this.urlPreviewPresentation,
   });
 
+  static const linkPreviewBodyKey = ValueKey('TwakeLinkPreviewBodyKey');
+
   static const linkPreviewNoImageKey = ValueKey('LinkPreviewNoImageKey');
 
   static const linkPreviewLargeKey = ValueKey('LinkPreviewLargeKey');
@@ -23,9 +25,7 @@ class TwakeLinkPreviewItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: ValueKey(
-        'ContainerKey:TwakeLinkPreviewItem${urlPreviewPresentation.description}',
-      ),
+      key: linkPreviewBodyKey,
       constraints: const BoxConstraints(
         minWidth: double.infinity,
         maxHeight: double.infinity,
@@ -78,6 +78,14 @@ class LinkPreviewNoImage extends StatelessWidget {
 
   final UrlPreviewPresentation urlPreviewPresentation;
 
+  static const paddingTitleKey = ValueKey('PaddingTitleKey');
+
+  static const paddingSubtitleKey = ValueKey('PaddingSubtitleKey');
+
+  static const titleKey = ValueKey('TextTitleKey');
+
+  static const subtitleKey = ValueKey('TextSubtitleKey');
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -85,14 +93,10 @@ class LinkPreviewNoImage extends StatelessWidget {
       children: [
         if (urlPreviewPresentation.title != null)
           Padding(
-            key: ValueKey(
-              'PaddingTitleKey:LinkPreviewNoImage${urlPreviewPresentation.title}',
-            ),
+            key: paddingTitleKey,
             padding: TwakeLinkPreviewItemStyle.paddingTitle,
             child: Text(
-              key: ValueKey(
-                'TextTitleKey:LinkPreviewNoImage${urlPreviewPresentation.title}',
-              ),
+              key: titleKey,
               urlPreviewPresentation.title!,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
@@ -104,14 +108,10 @@ class LinkPreviewNoImage extends StatelessWidget {
           ),
         if (urlPreviewPresentation.description != null)
           Padding(
-            key: ValueKey(
-              'PaddingSubtitleKey:LinkPreviewNoImage${urlPreviewPresentation.description}',
-            ),
+            key: paddingSubtitleKey,
             padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
             child: Text(
-              key: ValueKey(
-                'TextSubtitleKey:LinkPreviewNoImage${urlPreviewPresentation.description}',
-              ),
+              key: subtitleKey,
               urlPreviewPresentation.description!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: LinagoraRefColors.material().neutral[50],
@@ -133,6 +133,18 @@ class LinkPreviewLarge extends StatelessWidget {
 
   final UrlPreviewPresentation urlPreviewPresentation;
 
+  static const clipRRectKey = ValueKey('ClipRRectKey');
+
+  static const mxcImageKey = ValueKey('MxcImageKey');
+
+  static const paddingTitleKey = ValueKey('PaddingTitleKey');
+
+  static const paddingSubtitleKey = ValueKey('PaddingSubtitleKey');
+
+  static const titleKey = ValueKey('TextTitleKey');
+
+  static const subtitleKey = ValueKey('TextSubtitleKey');
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -140,9 +152,7 @@ class LinkPreviewLarge extends StatelessWidget {
       children: [
         if (urlPreviewPresentation.imageUri != null)
           ClipRRect(
-            key: const ValueKey(
-              'ClipRRectKey:LinkPreviewLarge',
-            ),
+            key: clipRRectKey,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(
                 TwakeLinkPreviewItemStyle.radiusBorder,
@@ -151,9 +161,7 @@ class LinkPreviewLarge extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: MxcImage(
-                key: ValueKey(
-                  'MxcImageKey:LinkPreviewLarge${urlPreviewPresentation.imageUri}',
-                ),
+                key: mxcImageKey,
                 uri: urlPreviewPresentation.imageUri,
                 fit: BoxFit.cover,
                 isThumbnail: false,
@@ -163,14 +171,10 @@ class LinkPreviewLarge extends StatelessWidget {
           ),
         if (urlPreviewPresentation.title != null)
           Padding(
-            key: ValueKey(
-              'PaddingTitleKey:LinkPreviewLarge${urlPreviewPresentation.title}',
-            ),
+            key: paddingTitleKey,
             padding: TwakeLinkPreviewItemStyle.paddingTitle,
             child: Text(
-              key: ValueKey(
-                'TextTitleKey:LinkPreviewLarge${urlPreviewPresentation.title}',
-              ),
+              key: titleKey,
               urlPreviewPresentation.title!,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -181,14 +185,10 @@ class LinkPreviewLarge extends StatelessWidget {
           ),
         if (urlPreviewPresentation.description != null)
           Padding(
-            key: ValueKey(
-              'PaddingSubtitleKey:LinkPreviewLarge${urlPreviewPresentation.description}',
-            ),
+            key: paddingSubtitleKey,
             padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
             child: Text(
-              key: ValueKey(
-                'TextSubtitleKey:LinkPreviewLarge${urlPreviewPresentation.description}',
-              ),
+              key: titleKey,
               urlPreviewPresentation.description!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: LinagoraRefColors.material().neutral[50],
@@ -210,6 +210,18 @@ class LinkPreviewSmall extends StatelessWidget {
 
   final UrlPreviewPresentation urlPreviewPresentation;
 
+  static const clipRRectKey = ValueKey('ClipRRectKey');
+
+  static const mxcImageKey = ValueKey('MxcImageKey');
+
+  static const paddingTitleKey = ValueKey('PaddingTitleKey');
+
+  static const paddingSubtitleKey = ValueKey('PaddingSubtitleKey');
+
+  static const titleKey = ValueKey('TextTitleKey');
+
+  static const subtitleKey = ValueKey('TextSubtitleKey');
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -219,9 +231,7 @@ class LinkPreviewSmall extends StatelessWidget {
           Padding(
             padding: TwakeLinkPreviewItemStyle.paddingPreviewImage,
             child: ClipRRect(
-              key: const ValueKey(
-                'ClipRRectKey:LinkPreviewSmall',
-              ),
+              key: clipRRectKey,
               borderRadius: const BorderRadius.all(
                 Radius.circular(
                   TwakeLinkPreviewItemStyle.radiusBorder,
@@ -231,9 +241,7 @@ class LinkPreviewSmall extends StatelessWidget {
                 height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                 child: MxcImage(
-                  key: ValueKey(
-                    'MxcImageKey:LinkPreviewSmall${urlPreviewPresentation.imageUri}',
-                  ),
+                  key: mxcImageKey,
                   height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                   width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
                   uri: urlPreviewPresentation.imageUri,
@@ -250,14 +258,10 @@ class LinkPreviewSmall extends StatelessWidget {
             children: [
               if (urlPreviewPresentation.title != null)
                 Padding(
-                  key: ValueKey(
-                    'PaddingTitleKey:LinkPreviewSmall${urlPreviewPresentation.title}',
-                  ),
+                  key: paddingTitleKey,
                   padding: TwakeLinkPreviewItemStyle.paddingTitle,
                   child: Text(
-                    key: ValueKey(
-                      'TextTitleKey:LinkPreviewSmall${urlPreviewPresentation.title}',
-                    ),
+                    key: titleKey,
                     urlPreviewPresentation.title!,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -268,14 +272,10 @@ class LinkPreviewSmall extends StatelessWidget {
                 ),
               if (urlPreviewPresentation.description != null)
                 Padding(
-                  key: ValueKey(
-                    'PaddingSubtitleKey:LinkPreviewSmall${urlPreviewPresentation.description}',
-                  ),
+                  key: paddingSubtitleKey,
                   padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
                   child: Text(
-                    key: ValueKey(
-                      'TextSubtitleKey:LinkPreviewSmall${urlPreviewPresentation.description}',
-                    ),
+                    key: subtitleKey,
                     urlPreviewPresentation.description!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: LinagoraRefColors.material().neutral[50],

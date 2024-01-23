@@ -1,4 +1,5 @@
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -40,33 +42,94 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, true);
 
-          final containerFinder = find.byType(Container);
+          final twakeLinkPreviewItemFind = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewBodyKey,
+          );
 
-          expect(containerFinder, findsOneWidget);
+          expect(twakeLinkPreviewItemFind, findsOneWidget);
 
-          final Container containerWidget = tester.widget(containerFinder);
+          final Container twakeLinkPreviewItemBody =
+              tester.widget(twakeLinkPreviewItemFind);
 
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
+          expect(twakeLinkPreviewItemBody.decoration != null, true);
 
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
+          final ShapeDecoration twakeLinkPreviewItemBodyDecoration =
+              twakeLinkPreviewItemBody.decoration as ShapeDecoration;
+
+          expect(
+            twakeLinkPreviewItemBodyDecoration.color,
+            LinagoraRefColors.material().primary[95],
+          );
+
+          expect(twakeLinkPreviewItemBodyDecoration.shape, isNotNull);
 
           final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
+              twakeLinkPreviewItemBodyDecoration.shape
+                  as RoundedRectangleBorder;
 
           expect(
             shape.borderRadius,
             BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
           );
 
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
-
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
+          final linkPreviewNoImageBody = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewNoImageKey,
           );
 
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          expect(linkPreviewNoImageBody, findsOneWidget);
+
+          final paddingTitleFind = find.byKey(
+            LinkPreviewNoImage.paddingTitleKey,
+          );
+
+          final paddingSubtitleKey = find.byKey(
+            LinkPreviewNoImage.paddingSubtitleKey,
+          );
+
+          final Padding paddingTitleWidget = tester.widget(
+            paddingTitleFind,
+          );
+
+          final Padding paddingSubtitleWidget = tester.widget(
+            paddingSubtitleKey,
+          );
+
+          expect(
+            paddingTitleWidget.padding,
+            TwakeLinkPreviewItemStyle.paddingTitle,
+          );
+
+          expect(
+            paddingSubtitleWidget.padding,
+            TwakeLinkPreviewItemStyle.paddingSubtitle,
+          );
+
+          final titleTextFind = find.byKey(
+            LinkPreviewNoImage.titleKey,
+          );
+
+          final textSubtitleKeyTextFind = find.byKey(
+            LinkPreviewNoImage.subtitleKey,
+          );
+
+          expect(titleTextFind, findsOneWidget);
+
+          expect(textSubtitleKeyTextFind, findsOneWidget);
+
+          final Text titleTextWidget = tester.widget(titleTextFind);
+
+          final Text subtitleTextWidget =
+              tester.widget(textSubtitleKeyTextFind);
+
+          expect(
+            titleTextWidget.data,
+            urlPreviewPresentation.title,
+          );
+
+          expect(
+            subtitleTextWidget.data,
+            urlPreviewPresentation.description,
+          );
 
           expect(find.byType(MxcImage), findsNothing);
         },
@@ -86,6 +149,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -101,41 +165,64 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, true);
 
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final BoxConstraints constraints =
-              containerWidget.constraints as BoxConstraints;
-
-          expect(constraints.minWidth, double.infinity);
-
-          expect(constraints.maxHeight, double.infinity);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final linkPreviewNoImageBody = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewNoImageKey,
           );
 
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
+          expect(linkPreviewNoImageBody, findsOneWidget);
 
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
+          final paddingTitleFind = find.byKey(
+            LinkPreviewNoImage.paddingTitleKey,
           );
 
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          final paddingSubtitleKey = find.byKey(
+            LinkPreviewNoImage.paddingSubtitleKey,
+          );
 
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          final Padding paddingTitleWidget = tester.widget(
+            paddingTitleFind,
+          );
+
+          final Padding paddingSubtitleWidget = tester.widget(
+            paddingSubtitleKey,
+          );
+
+          expect(
+            paddingTitleWidget.padding,
+            TwakeLinkPreviewItemStyle.paddingTitle,
+          );
+
+          expect(
+            paddingSubtitleWidget.padding,
+            TwakeLinkPreviewItemStyle.paddingSubtitle,
+          );
+
+          final titleTextFind = find.byKey(
+            LinkPreviewNoImage.titleKey,
+          );
+
+          final textSubtitleKeyTextFind = find.byKey(
+            LinkPreviewNoImage.subtitleKey,
+          );
+
+          expect(titleTextFind, findsOneWidget);
+
+          expect(textSubtitleKeyTextFind, findsOneWidget);
+
+          final Text titleTextWidget = tester.widget(titleTextFind);
+
+          final Text subtitleTextWidget =
+              tester.widget(textSubtitleKeyTextFind);
+
+          expect(
+            titleTextWidget.data,
+            urlPreviewPresentation.title,
+          );
+
+          expect(
+            subtitleTextWidget.data,
+            urlPreviewPresentation.description,
+          );
 
           expect(find.byType(MxcImage), findsNothing);
         },
@@ -156,6 +243,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -169,41 +257,11 @@ void main() {
             ),
           );
 
-          expect(twakeLinkPreviewItem.ownMessage, true);
-
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final BoxConstraints constraints =
-              containerWidget.constraints as BoxConstraints;
-
-          expect(constraints.minWidth, double.infinity);
-
-          expect(constraints.maxHeight, double.infinity);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final linkPreviewNoImageBody = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewNoImageKey,
           );
 
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
-
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
-          );
-
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          expect(linkPreviewNoImageBody, findsOneWidget);
 
           expect(find.byType(MxcImage), findsNothing);
         },
@@ -224,6 +282,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -239,32 +298,11 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, true);
 
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final linkPreviewNoImageBody = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewNoImageKey,
           );
 
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
-
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
-          );
-
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          expect(linkPreviewNoImageBody, findsOneWidget);
 
           expect(find.byType(MxcImage), findsNothing);
         },
@@ -275,7 +313,7 @@ void main() {
         'AND an image height > 200 \n'
         'AND an image width is not empty\n'
         'AND only title and description\n'
-        'THEN not display MxcImage widget',
+        'THEN display MxcImage widget large',
         (WidgetTester tester) async {
           // Define a UrlPreviewPresentation object
           final urlPreviewPresentation = UrlPreviewPresentation(
@@ -287,6 +325,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -302,63 +341,34 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, true);
 
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final BoxConstraints constraints =
-              containerWidget.constraints as BoxConstraints;
-
-          expect(constraints.minWidth, double.infinity);
-
-          expect(constraints.maxHeight, double.infinity);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final linkPreviewLargeBody = find.byKey(
+            TwakeLinkPreviewItem.linkPreviewLargeKey,
           );
 
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
+          expect(linkPreviewLargeBody, findsOneWidget);
 
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
+          final clipRRectMxcImage = find.byKey(
+            LinkPreviewLarge.clipRRectKey,
           );
 
-          expect(find.byType(LinkPreviewLarge), findsOneWidget);
+          expect(clipRRectMxcImage, findsOneWidget);
 
-          expect(find.byType(MxcImage), findsOneWidget);
-
-          final clipRRectFinder = find.byType(ClipRRect);
-
-          expect(clipRRectFinder, findsOneWidget);
-
-          final ClipRRect clipRRectWidget = tester.widget(clipRRectFinder);
-
-          final BorderRadius borderRadius =
-              clipRRectWidget.borderRadius as BorderRadius;
+          final ClipRRect clipRRectWidget = tester.widget(clipRRectMxcImage);
 
           expect(
-            borderRadius.topLeft,
-            const Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+            clipRRectWidget.borderRadius,
+            equals(
+              const BorderRadius.vertical(
+                top: Radius.circular(
+                  TwakeLinkPreviewItemStyle.radiusBorder,
+                ),
+              ),
+            ),
           );
 
-          expect(
-            borderRadius.topRight,
-            const Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final mxcImageFinder = find.byKey(
+            LinkPreviewLarge.mxcImageKey,
           );
-
-          final mxcImageFinder = find.byType(MxcImage);
 
           expect(mxcImageFinder, findsOneWidget);
 
@@ -377,7 +387,7 @@ void main() {
         'AND an image height < 200 \n'
         'AND an image width is not empty\n'
         'AND only title and description\n'
-        'THEN not display MxcImage widget',
+        'THEN display MxcImage widget small',
         (WidgetTester tester) async {
           // Define a UrlPreviewPresentation object
           final urlPreviewPresentation = UrlPreviewPresentation(
@@ -389,6 +399,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -404,61 +415,8 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, true);
 
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final BoxConstraints constraints =
-              containerWidget.constraints as BoxConstraints;
-
-          expect(constraints.minWidth, double.infinity);
-
-          expect(constraints.maxHeight, double.infinity);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-          expect(decoration.color, LinagoraRefColors.material().primary[95]);
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
-          );
-
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
-
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
-          );
-
-          expect(find.byType(LinkPreviewSmall), findsOneWidget);
-
-          final mxcImageFinder = find.byType(MxcImage);
-
-          expect(mxcImageFinder, findsOneWidget);
-
-          final clipRRectFinder = find.byType(ClipRRect);
-
-          expect(clipRRectFinder, findsOneWidget);
-
-          final ClipRRect clipRRectWidget = tester.widget(clipRRectFinder);
-
-          final BorderRadius borderRadius =
-              clipRRectWidget.borderRadius as BorderRadius;
-
-          expect(
-            borderRadius.topLeft,
-            const Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
-          );
-
-          expect(
-            borderRadius.topRight,
-            const Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+          final mxcImageFinder = find.byKey(
+            LinkPreviewSmall.mxcImageKey,
           );
 
           final MxcImage mxcImage = tester.widget(mxcImageFinder);
@@ -500,6 +458,7 @@ void main() {
           );
 
           final twakeLinkPreviewItem = TwakeLinkPreviewItem(
+            key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
             ownMessage: ownMessage,
             urlPreviewPresentation: urlPreviewPresentation,
           );
@@ -514,44 +473,6 @@ void main() {
           );
 
           expect(twakeLinkPreviewItem.ownMessage, false);
-
-          final containerFinder = find.byType(Container);
-
-          expect(containerFinder, findsOneWidget);
-
-          final Container containerWidget = tester.widget(containerFinder);
-
-          final BoxConstraints constraints =
-              containerWidget.constraints as BoxConstraints;
-
-          expect(constraints.minWidth, double.infinity);
-
-          expect(constraints.maxHeight, double.infinity);
-
-          final ShapeDecoration decoration =
-              containerWidget.decoration as ShapeDecoration;
-
-          expect(
-            decoration.color,
-            LinagoraStateLayer(
-              LinagoraSysColors.material().surfaceTint,
-            ).opacityLayer1,
-          );
-
-          final RoundedRectangleBorder shape =
-              decoration.shape as RoundedRectangleBorder;
-
-          expect(
-            shape.borderRadius,
-            BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
-          );
-
-          expect(find.text(urlPreviewPresentation.title ?? ''), findsOneWidget);
-
-          expect(
-            find.text(urlPreviewPresentation.description ?? ''),
-            findsOneWidget,
-          );
 
           expect(find.byType(LinkPreviewNoImage), findsOneWidget);
 
