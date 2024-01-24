@@ -222,12 +222,12 @@ class ChatListController extends State<ChatList>
   void toggleSelectMode() {
     selectModeNotifier.value =
         isSelectMode ? SelectMode.normal : SelectMode.select;
+    _clearSelectionItem();
   }
 
   Future<void> actionWithToggleSelectMode(Function action) async {
     await action();
     toggleSelectMode();
-    _clearSelectionItem();
   }
 
   void _clearSelectionItem() {
@@ -573,11 +573,7 @@ class ChatListController extends State<ChatList>
         );
         return;
       case ChatListSelectionActions.pin:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
-          },
-        );
+        await togglePin(room);
         return;
       case ChatListSelectionActions.mute:
         await TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -593,6 +589,14 @@ class ChatListController extends State<ChatList>
       case ChatListSelectionActions.more:
         return;
     }
+  }
+
+  Future<void> togglePin(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
+      },
+    );
   }
 
   List<ChatListSelectionActions> _getNavigationDestinations() {
