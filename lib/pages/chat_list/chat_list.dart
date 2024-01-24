@@ -6,6 +6,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
@@ -538,7 +539,7 @@ class ChatListController extends State<ChatList>
     Room room,
   ) {
     final listAction = [
-      if (room.membership != Membership.invite) ...[
+      if (!room.isInvitation) ...[
         ChatListSelectionActions.read,
         ChatListSelectionActions.pin,
       ],
@@ -594,7 +595,7 @@ class ChatListController extends State<ChatList>
   Future<void> togglePin(Room room) async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
+        await room.setFavourite(!room.isFavourite);
       },
     );
   }
