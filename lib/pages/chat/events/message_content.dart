@@ -123,7 +123,7 @@ class MessageContent extends StatelessWidget
                 !event.redacted &&
                 event.isRichMessage &&
                 containedLink.isEmpty) {
-              var html = event.formattedText.unMarkdownLinks(event.text);
+              var html = event.formattedText;
 
               if (event.messageType == MessageTypes.Emote) {
                 html = '* $html';
