@@ -22,7 +22,9 @@ class SendFileDialogView extends StatelessWidget {
         borderRadius:
             BorderRadius.circular(SendFileDialogStyle.dialogBorderRadius),
         child: Container(
-          width: SendFileDialogStyle.dialogWidth,
+          width: controller.isSendMediaWithCaption
+              ? SendFileDialogStyle.dialogWidthForMedia
+              : SendFileDialogStyle.maxDialogWidth,
           constraints: const BoxConstraints(
             maxHeight: SendFileDialogStyle.maxDialogHeight,
           ),
@@ -37,12 +39,38 @@ class SendFileDialogView extends StatelessWidget {
                     padding: SendFileDialogStyle.headerPadding,
                     child: ValueListenableBuilder(
                       valueListenable: controller.filesNotifier,
-                      builder: (context, files, child) {
-                        return Text(
-                          controller.isSendMediaWithCaption
-                              ? L10n.of(context)!.sendImages(1)
-                              : L10n.of(context)!.sendFiles(files.length),
-                          style: Theme.of(context).textTheme.titleLarge,
+                      builder: (context, files, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.isSendMediaWithCaption
+                                  ? L10n.of(context)!.sendImages(1)
+                                  : L10n.of(context)!.sendFiles(files.length),
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            ValueListenableBuilder(
+                              valueListenable:
+                                  controller.haveErrorFilesNotifier,
+                              builder: (context, haveError, child) {
+                                if (haveError) {
+                                  return child!;
+                                }
+                                return const SizedBox.shrink();
+                              },
+                              child: SizedBox(
+                                width: SendFileDialogStyle.errorSubHeaderWidth,
+                                child: Text(
+                                  L10n.of(context)!.errorSendingFiles,
+                                  style:
+                                      SendFileDialogStyle.subHeaderErrorStyle(
+                                    context,
+                                  ),
+                                  maxLines: 3,
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -51,12 +79,16 @@ class SendFileDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 16.0),
               controller.isSendMediaWithCaption
-                  ? MediaPageViewWidget(files: controller.filesNotifier)
+                  ? MediaPageViewWidget(
+                      filesNotifier: controller.filesNotifier,
+                      thumbnails: controller.thumbnails,
+                    )
                   : FilesListViewWidget(
                       filesNotifier: controller.filesNotifier,
                       room: controller.widget.room,
                       onRemoveFile: controller.onRemoveFile,
                       thumbnails: controller.thumbnails,
+                      maxMediaSizeNotifier: controller.maxMediaSizeNotifier,
                     ),
               const SizedBox(height: 16.0),
               InkWell(
