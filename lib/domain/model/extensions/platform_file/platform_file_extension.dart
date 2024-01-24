@@ -7,6 +7,8 @@ extension PlatformFileListExtension on PlatformFile {
       bytes: bytes,
       name: name,
       filePath: '',
+      readStream: readStream,
+      sizeInBytes: size,
     );
   }
 }
