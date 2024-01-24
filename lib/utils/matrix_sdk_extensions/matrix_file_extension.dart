@@ -156,4 +156,6 @@ extension MatrixFileExtension on MatrixFile {
 
   bool get isFileHaveThumbnail =>
       this is MatrixImageFile || this is MatrixVideoFile;
+
+  bool isFileHaveError(double maxSize) => size > maxSize;
 }
