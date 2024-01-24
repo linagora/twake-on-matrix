@@ -57,4 +57,8 @@ extension RoomExtension on Room {
     sendingFilePlaceholders[txid] = matrixFile;
     return txid;
   }
+
+  bool get isInvitation {
+    return membership == Membership.invite;
+  }
 }

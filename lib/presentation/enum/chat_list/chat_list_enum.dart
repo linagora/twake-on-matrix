@@ -5,7 +5,9 @@ import 'package:matrix/matrix.dart';
 
 enum SelectMode {
   normal,
-  select,
+  select;
+
+  bool get isSelectMode => this == SelectMode.select;
 }
 
 enum PopupMenuAction {

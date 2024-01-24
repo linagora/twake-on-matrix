@@ -1,8 +1,13 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
+import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatListViewBuilder extends StatelessWidget {
   final ChatListController controller;
@@ -21,49 +26,113 @@ class ChatListViewBuilder extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: rooms.length,
       itemBuilder: (BuildContext context, int index) {
-        return ValueListenableBuilder(
+        return ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
-          builder: (context, _, __) {
-            return ValueListenableBuilder(
-              valueListenable: controller.widget.activeRoomIdNotifier,
-              builder: (context, activeRoomId, child) {
-                return ChatListItem(
-                  rooms[index],
-                  key: Key('chat_list_item_${rooms[index].id}'),
-                  isEnableSelectMode: controller.isSelectMode,
-                  onTap: controller.isSelectMode
-                      ? () => controller.toggleSelection(rooms[index].id)
-                      : null,
-                  onSecondaryTap: () => controller.handleContextMenuAction(
-                    context,
-                    rooms[index],
-                  ),
-                  onLongPress: () => controller.onLongPressChatListItem(
-                    rooms[index],
-                  ),
-                  checkBoxWidget: ValueListenableBuilder(
-                    valueListenable: controller.conversationSelectionNotifier,
-                    builder: (context, conversationSelection, __) {
-                      final conversation =
-                          conversationSelection.firstWhereOrNull(
-                        (conversation) =>
-                            conversation.roomId.contains(rooms[index].id),
-                      );
-                      return Checkbox(
-                        value: conversation?.isSelected == true,
-                        onChanged: (_) {
-                          controller.toggleSelection(rooms[index].id);
-                        },
-                      );
-                    },
-                  ),
-                  activeChat: activeRoomId == rooms[index].id,
-                );
-              },
-            );
+          builder: (context, selectMode, child) {
+            if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
+                !selectMode.isSelectMode) {
+              return _SlidableChatListItem(
+                controller: controller,
+                room: rooms[index],
+                chatListItem: child!,
+              );
+            }
+
+            return child!;
           },
+          child: _CommonChatListItem(
+            controller: controller,
+            room: rooms[index],
+          ),
         );
       },
+    );
+  }
+}
+
+class _CommonChatListItem extends StatelessWidget {
+  const _CommonChatListItem({
+    required this.controller,
+    required this.room,
+  });
+
+  final ChatListController controller;
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.widget.activeRoomIdNotifier,
+      builder: (context, activeRoomId, child) {
+        return ChatListItem(
+          room,
+          key: Key('chat_list_item_${room.id}'),
+          isEnableSelectMode: controller.isSelectMode,
+          onTap: controller.isSelectMode
+              ? () => controller.toggleSelection(room.id)
+              : null,
+          onSecondaryTap: () => controller.handleContextMenuAction(
+            context,
+            room,
+          ),
+          onLongPress: () => controller.onLongPressChatListItem(
+            room,
+          ),
+          checkBoxWidget: ValueListenableBuilder(
+            valueListenable: controller.conversationSelectionNotifier,
+            builder: (context, conversationSelection, __) {
+              final conversation = conversationSelection.firstWhereOrNull(
+                (conversation) => conversation.roomId.contains(room.id),
+              );
+              return Checkbox(
+                value: conversation?.isSelected == true,
+                onChanged: (_) {
+                  controller.toggleSelection(room.id);
+                },
+              );
+            },
+          ),
+          activeChat: activeRoomId == room.id,
+        );
+      },
+    );
+  }
+}
+
+class _SlidableChatListItem extends StatelessWidget {
+  const _SlidableChatListItem({
+    required this.controller,
+    required this.room,
+    required this.chatListItem,
+  });
+
+  final ChatListController controller;
+  final Room room;
+  final Widget chatListItem;
+
+  @override
+  Widget build(BuildContext context) {
+    return Slidable(
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        extentRatio: ChatListViewStyle.slidableExtentRatio,
+        children: [
+          if (!room.isInvitation) ...[
+            SlidableAction(
+              autoClose: true,
+              label: room.isFavourite
+                  ? L10n.of(context)!.unpin
+                  : L10n.of(context)!.pin,
+              icon: room.isFavourite ? Icons.push_pin_outlined : Icons.push_pin,
+              onPressed: (_) => controller.togglePin(room),
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: Colors.greenAccent[700] ??
+                  ChatListViewStyle.pinSlidableColorRaw,
+            ),
+          ],
+        ],
+      ),
+      child: chatListItem,
     );
   }
 }
