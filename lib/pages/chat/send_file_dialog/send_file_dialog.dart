@@ -4,6 +4,7 @@ import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interac
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,10 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   Map<MatrixFile, MatrixImageFile?> thumbnails = {};
 
+  ValueNotifier<double> maxMediaSizeNotifier = ValueNotifier(double.infinity);
+
+  ValueNotifier<bool> haveErrorFilesNotifier = ValueNotifier(false);
+
   @override
   void initState() {
     super.initState();
@@ -55,8 +60,9 @@ class SendFileDialogController extends State<SendFileDialog> {
       widget.room,
     );
     requestFocusCaptions();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      loadThumbnailsForMedia();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await loadMaxMediaSize();
+      await loadThumbnailsForMedia();
     });
   }
 
@@ -66,12 +72,32 @@ class SendFileDialogController extends State<SendFileDialog> {
     super.dispose();
   }
 
+  Future<void> loadMaxMediaSize() async {
+    if (widget.room == null) {
+      return;
+    }
+    final mediaConfig = await widget.room?.client.getConfig();
+    maxMediaSizeNotifier.value =
+        mediaConfig?.mUploadSize?.toDouble() ?? double.infinity;
+    updateHaveErrorFilesNotifier();
+  }
+
+  void updateHaveErrorFilesNotifier() {
+    haveErrorFilesNotifier.value = filesNotifier.value.any(
+      (file) => file.size > maxMediaSizeNotifier.value,
+    );
+  }
+
   Future<void> loadThumbnailsForMedia() async {
     if (widget.room == null) {
       return;
     }
+    List<MatrixFile> files = await getFilesNotError();
+    files = await convertFilesToBytes(files);
+    final filesHaveThumbnail =
+        files.where((file) => file.isFileHaveThumbnail).toList();
     final results = await Future.wait<MatrixImageFile?>(
-      filesNotifier.value.map((file) {
+      filesHaveThumbnail.map((file) async {
         if (file is MatrixImageFile) {
           return widget.room!.generateThumbnail(file);
         } else if (file is MatrixVideoFile) {
@@ -80,8 +106,15 @@ class SendFileDialogController extends State<SendFileDialog> {
         return Future.value(null);
       }),
     );
-    for (int i = 0; i < filesNotifier.value.length; i++) {
-      thumbnails[filesNotifier.value[i]] = results[i];
+    updateThumbnailsForMediaFiles(filesHaveThumbnail, results);
+  }
+
+  void updateThumbnailsForMediaFiles(
+    List<MatrixFile> filesHaveThumbnail,
+    List<MatrixImageFile?> results,
+  ) {
+    for (int i = 0; i < filesHaveThumbnail.length; i++) {
+      thumbnails[filesHaveThumbnail[i]] = results[i];
     }
     filesNotifier.notify();
   }
@@ -107,16 +140,38 @@ class SendFileDialogController extends State<SendFileDialog> {
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
-  void sendFilesWithCaption() {
+  Future<List<MatrixFile>> getFilesNotError() async {
+    return filesNotifier.value
+        .where((file) => !file.isFileHaveError(maxMediaSizeNotifier.value))
+        .toList();
+  }
+
+  Future<List<MatrixFile>> convertFilesToBytes(List<MatrixFile> files) async {
+    final results = await Future.wait(
+      files
+          .map(
+            (file) => file.convertReadStreamToBytes(),
+          )
+          .toList(),
+    );
+    for (int i = 0; i < files.length; i++) {
+      filesNotifier.update(files[i], results[i]);
+    }
+    return results;
+  }
+
+  void sendFilesWithCaption() async {
     if (widget.room == null) {
       Logs().e("sendFilesWithCaption:: room is null");
       Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
       return;
     }
+
     sendFilesOnWebWithCaptionInteractor.execute(
       room: widget.room!,
-      files: filesNotifier.value,
+      files: await getFilesNotError(),
       caption: textEditingController.text,
+      thumbnails: thumbnails,
     );
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
@@ -136,6 +191,7 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   void onRemoveFile(MatrixFile matrixFile) {
     filesNotifier.remove(matrixFile);
+    updateHaveErrorFilesNotifier();
     if (filesNotifier.value.isEmpty) {
       Navigator.of(context).pop();
     }
