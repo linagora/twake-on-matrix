@@ -1541,8 +1541,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "TW-1381/add-read-stream-to-matrix-file"
-      resolved-ref: add710175c8fc2a382c9b7a9f4bb39c20143edd1
+      ref: "twake-supported-0.22.6"
+      resolved-ref: "1199dfd69f37a91d038cdd81754be97bc2ed9bd5"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

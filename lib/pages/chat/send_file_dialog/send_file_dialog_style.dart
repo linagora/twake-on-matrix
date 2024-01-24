@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class SendFileDialogStyle {
   static const dialogBorderRadius = 16.0;
 
-  static const double dialogWidth = 360;
+  static const double maxDialogWidth = 480;
+
+  static const double dialogWidthForMedia = 360;
 
   static const double maxDialogHeight = 620;
 
@@ -43,6 +46,7 @@ class SendFileDialogStyle {
   static const EdgeInsets paddingFilesListView = EdgeInsets.only(
     top: 4.0,
     bottom: 4.0,
+    right: 4.0,
   );
 
   static Color? listViewBackgroundColor(BuildContext context) =>
@@ -55,4 +59,18 @@ class SendFileDialogStyle {
   static const double inkwellSplashBorderRadius = 8.0;
 
   static const EdgeInsets paddingRemoveButton = EdgeInsets.only(right: 8.0);
+
+  static const double removeButonSize = 16.0;
+
+  static Color? removeButtonColor(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12);
+
+  static const double paddingAllRemoveButton = 4.0;
+
+  static TextStyle? subHeaderErrorStyle(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: LinagoraRefColors.material().error[30],
+          );
+
+  static const double errorSubHeaderWidth = 340;
 }
