@@ -8,7 +8,7 @@ class ChatListHeader extends StatelessWidget {
   final ValueNotifier<SelectMode> selectModeNotifier;
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier;
-  final VoidCallback openSelectMode;
+  final VoidCallback onToggleSelectMode;
   final VoidCallback? onOpenSearchPage;
   final VoidCallback onClearSelection;
 
@@ -16,7 +16,7 @@ class ChatListHeader extends StatelessWidget {
     Key? key,
     this.onOpenSearchPage,
     required this.selectModeNotifier,
-    required this.openSelectMode,
+    required this.onToggleSelectMode,
     required this.conversationSelectionNotifier,
     required this.onClearSelection,
   }) : super(key: key);
@@ -28,7 +28,7 @@ class ChatListHeader extends StatelessWidget {
         TwakeHeader(
           conversationSelectionNotifier: conversationSelectionNotifier,
           selectModeNotifier: selectModeNotifier,
-          openSelectMode: openSelectMode,
+          toggleSelectMode: onToggleSelectMode,
           onClearSelection: onClearSelection,
         ),
         Container(
