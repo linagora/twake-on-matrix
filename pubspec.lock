@@ -1453,7 +1453,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: f3371287c4f66e2cff23a8c5d8aaf30aa3b7bf6b
+      resolved-ref: ea9d98ed3bab8f362a46cb0d48ff57eb1332630c
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
