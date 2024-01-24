@@ -12,13 +12,13 @@ class TwakeHeader extends StatelessWidget
   final ValueNotifier<SelectMode> selectModeNotifier;
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier;
-  final VoidCallback openSelectMode;
+  final VoidCallback toggleSelectMode;
   final VoidCallback onClearSelection;
 
   const TwakeHeader({
     Key? key,
     required this.selectModeNotifier,
-    required this.openSelectMode,
+    required this.toggleSelectMode,
     required this.conversationSelectionNotifier,
     required this.onClearSelection,
   }) : super(key: key);
@@ -106,7 +106,7 @@ class TwakeHeader extends StatelessWidget
                               borderRadius: BorderRadius.circular(
                                 TwakeHeaderStyle.textBorderRadius,
                               ),
-                              onTap: openSelectMode,
+                              onTap: toggleSelectMode,
                               child: Padding(
                                 padding: TwakeHeaderStyle.textButtonPadding,
                                 child: Text(
