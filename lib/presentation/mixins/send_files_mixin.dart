@@ -59,8 +59,9 @@ mixin SendFilesMixin {
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {
     final result = await FilePicker.platform.pickFiles(
-      withData: true,
+      withData: false,
       allowMultiple: true,
+      withReadStream: true,
     );
     if (result == null || result.files.isEmpty) return [];
     return result.files.map((file) => file.toMatrixFile()).toList();
