@@ -10,14 +10,12 @@ class TwakeWelcome extends StatefulWidget {
 }
 
 class TwakeWelcomeController extends State<TwakeWelcome> {
-  void goToTwakeIdScreen() {
-    context.push('/home/twakeid');
+  void goToHomeserverPicker() {
+    context.push('/home/homeserverpicker');
   }
 
   @override
   Widget build(BuildContext context) {
-    return TwakeWelcomeView(
-      controller: this,
-    );
+    return TwakeWelcomeView(controller: this);
   }
 }
