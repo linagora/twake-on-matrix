@@ -6,6 +6,7 @@ class SendFilesOnWebWithCaptionInteractor {
   Future<void> execute({
     required Room room,
     required List<MatrixFile> files,
+    Map<MatrixFile, MatrixImageFile?>? thumbnails,
     String? caption,
   }) async {
     try {
@@ -33,10 +34,13 @@ class SendFilesOnWebWithCaptionInteractor {
 
       for (final txId in txIdsMapFileEvents.keys) {
         if (txIdsMapFileEvents[txId] != null) {
+          final matrixFile = txIdsMapFileEvents[txId]!.$1;
+          final syncUpdate = txIdsMapFileEvents[txId]!.$2;
           await room.sendFileOnWebEvent(
-            txIdsMapFileEvents[txId]!.$1,
-            fakeImageEvent: txIdsMapFileEvents[txId]!.$2,
+            matrixFile,
+            fakeImageEvent: syncUpdate,
             txid: txId,
+            thumbnail: thumbnails?[matrixFile],
           );
         }
       }
