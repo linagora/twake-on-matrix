@@ -220,8 +220,18 @@ class ChatListController extends State<ChatList>
   }
 
   void toggleSelectMode() {
-    selectModeNotifier.value =
-        isSelectMode ? SelectMode.normal : SelectMode.select;
+    // selectModeNotifier.value =
+    //     isSelectMode ? SelectMode.normal : SelectMode.select;
+    TwakeDialog.showStreamDialogFullScreen(
+      future: () => Future.delayed(
+        const Duration(seconds: 10),
+      ),
+      listen: (state) {
+        Logs().d(
+          'ChatListController:: LISTEN State: $state',
+        );
+      },
+    );
   }
 
   Future<void> actionWithToggleSelectMode(Function action) async {
