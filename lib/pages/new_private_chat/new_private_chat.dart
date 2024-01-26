@@ -58,7 +58,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
         ),
       );
     } else {
-      context.go('/rooms/$roomId');
+      context.push('/rooms/$roomId');
     }
   }
 
