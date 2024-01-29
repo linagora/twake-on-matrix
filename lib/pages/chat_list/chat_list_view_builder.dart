@@ -21,31 +21,33 @@ class ChatListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: rooms.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ValueListenableBuilder<SelectMode>(
-          valueListenable: controller.selectModeNotifier,
-          builder: (context, selectMode, child) {
-            if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
-                !selectMode.isSelectMode) {
-              return _SlidableChatListItem(
-                controller: controller,
-                room: rooms[index],
-                chatListItem: child!,
-              );
-            }
+    return SlidableAutoCloseBehavior(
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: rooms.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ValueListenableBuilder<SelectMode>(
+            valueListenable: controller.selectModeNotifier,
+            builder: (context, selectMode, child) {
+              if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
+                  !selectMode.isSelectMode) {
+                return _SlidableChatListItem(
+                  controller: controller,
+                  room: rooms[index],
+                  chatListItem: child!,
+                );
+              }
 
-            return child!;
-          },
-          child: _CommonChatListItem(
-            controller: controller,
-            room: rooms[index],
-          ),
-        );
-      },
+              return child!;
+            },
+            child: _CommonChatListItem(
+              controller: controller,
+              room: rooms[index],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -113,6 +115,8 @@ class _SlidableChatListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slidable(
+      // Slidables must have the same groupTag for SlidableAutoCloseBehavior to work properly
+      groupTag: 'slidable_list',
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
         extentRatio: ChatListViewStyle.slidableExtentRatio,
