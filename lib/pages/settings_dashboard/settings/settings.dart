@@ -306,6 +306,14 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   @override
+  void didUpdateWidget(Settings oldWidget) {
+    if (oldWidget != widget) {
+      _getCurrentProfile(client);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     onAccountDataSubscription?.cancel();
     if (avatarUriNotifier.value != null) {
