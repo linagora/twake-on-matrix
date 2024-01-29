@@ -11,8 +11,18 @@ class ChatEmojiPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.showEmojiPickerNotifier,
-      builder: (context, showEmojiPicker, _) {
+      builder: (context, showEmojiPicker, child) {
+        if (!showEmojiPicker) return child!;
+
         return AnimatedContainer(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1,
+              ),
+            ),
+          ),
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
           width: MediaQuery.sizeOf(context).width,
@@ -31,6 +41,7 @@ class ChatEmojiPicker extends StatelessWidget {
               : null,
         );
       },
+      child: const SizedBox.shrink(),
     );
   }
 }
