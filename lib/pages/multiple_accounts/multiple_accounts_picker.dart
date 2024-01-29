@@ -13,6 +13,8 @@ import 'package:linagora_design_flutter/multiple_account/models/twake_presentati
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
+typedef OnGoToAccountSettings = void Function(TwakePresentationAccount account);
+
 class MultipleAccountsPickerController {
   final BuildContext context;
 
