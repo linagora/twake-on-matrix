@@ -2,10 +2,10 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
 
@@ -69,6 +69,11 @@ class SendFileDialogController extends State<SendFileDialog> {
   @override
   void dispose() {
     textEditingController.dispose();
+    focusSuggestionController.dispose();
+    captionsFocusNode.dispose();
+    filesNotifier.dispose();
+    maxMediaSizeNotifier.dispose();
+    haveErrorFilesNotifier.dispose();
     super.dispose();
   }
 
