@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/send_file_dialog/hover_actions_widget.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -6,7 +7,6 @@ import 'package:fluffychat/widgets/file_widget/file_error_tile_widget_style.dart
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:flutter/material.dart';
-import 'send_file_dialog_style.dart';
 
 import 'package:matrix/matrix.dart';
 
