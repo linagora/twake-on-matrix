@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
@@ -7,7 +8,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
 import 'package:flutter/material.dart';
-import 'send_file_dialog_style.dart';
 
 import 'package:matrix/matrix.dart';
 
