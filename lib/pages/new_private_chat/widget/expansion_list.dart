@@ -86,11 +86,10 @@ class ExpansionList extends StatelessWidget {
             }
 
             if (success is PresentationContactsSuccess) {
-              final isSearchEmpty = textEditingController.text.isEmpty;
+              final textControllerIsEmpty = textEditingController.text.isEmpty;
               final contacts = success.contacts;
-              if (isSearchEmpty && contacts.isEmpty) {
+              if (!textControllerIsEmpty && contacts.isEmpty) {
                 return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(
                       height: 12,
@@ -98,7 +97,6 @@ class ExpansionList extends StatelessWidget {
                     NoContactsFound(
                       keyword: textEditingController.text,
                     ),
-                    _MoreListTile(),
                     ..._buildResponsiveButtons(context),
                   ],
                 );
@@ -140,9 +138,8 @@ class ExpansionList extends StatelessWidget {
               ];
 
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (isSearchEmpty) ...[
+                  if (textControllerIsEmpty) ...[
                     const SizedBox(
                       height: 12,
                     ),
@@ -151,12 +148,12 @@ class ExpansionList extends StatelessWidget {
                     for (final child in expansionList) ...[child],
                   ] else ...[
                     for (final child in expansionList) ...[child],
-                    _MoreListTile(),
                     ..._buildResponsiveButtons(context),
                   ],
                 ],
               );
             }
+
             return child!;
           },
         );
@@ -297,22 +294,6 @@ class _NewGroupButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: Icons.supervisor_account_outlined,
       text: L10n.of(context)!.newGroupChat,
-    );
-  }
-}
-
-class _MoreListTile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-      child: Text(
-        L10n.of(context)!.more,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              letterSpacing: 0.1,
-              color: LinagoraRefColors.material().neutral[40],
-            ),
-      ),
     );
   }
 }
