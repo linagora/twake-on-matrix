@@ -12,6 +12,7 @@ import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
@@ -20,6 +21,7 @@ import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -29,6 +31,7 @@ import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -60,6 +63,8 @@ class SettingsProfileController extends State<SettingsProfile>
   Profile? currentProfile;
   AssetEntity? assetEntity;
   FilePickerResult? filePickerResult;
+
+  ValueNotifier<bool> haveMultipleAccountsNotifier = ValueNotifier(false);
 
   final TwakeEventDispatcher twakeEventDispatcher =
       getIt.get<TwakeEventDispatcher>();
@@ -538,6 +543,21 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
+  Future<int> get accountsCount async
+      // FIXME: Change to false after merging TW-1262
+      =>
+      (await ClientManager.getClients(initialize: true)).length;
+
+  void onBottomButtonTap() {
+    MultipleAccountsPickerController(context: context)
+        .showMultipleAccountsPicker(
+      client,
+      onGoToAccountSettings: () {
+        context.go('/rooms/profile');
+      },
+    );
+  }
+
   void _handleViewState() {
     settingsProfileUIState.addListener(() {
       Logs().d(
@@ -583,6 +603,9 @@ class SettingsProfileController extends State<SettingsProfile>
   void initState() {
     _handleViewState();
     _getCurrentProfile(client);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      haveMultipleAccountsNotifier.value = await accountsCount > 1;
+    });
     super.initState();
   }
 

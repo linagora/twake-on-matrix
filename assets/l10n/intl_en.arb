@@ -3060,6 +3060,8 @@
       "user": {}
     }
   },
+  "switchAccounts": "Switch accounts",
+  "selectAccount": "Select account",
   "privacyPolicy": "Privacy Policy",
   "byContinuingYourAgreeingToOur": "By continuing, you're agreeing to our"
 }
