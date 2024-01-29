@@ -4,10 +4,12 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnOpenSearchPage = Function();
@@ -128,6 +130,13 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
     activeRoomIdNotifier.value = widget.activeRoomId;
     _handleLogout(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (widget.args is! LoggedInBodyArgs) return;
+      final args = widget.args as LoggedInBodyArgs;
+      if (args.roomIdFromNoti?.isNotEmpty == true) {
+        context.go('/rooms/${args.roomIdFromNoti}');
+      }
+    });
     super.didUpdateWidget(oldWidget);
   }
 

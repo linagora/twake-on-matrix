@@ -4,7 +4,9 @@ import 'dart:ui';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/domain/repository/client_in_room_repository.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -98,8 +100,10 @@ Future<void> _tryPushHelper(
     onDidReceiveNotificationResponse: onSelectNotification,
     //onDidReceiveBackgroundNotificationResponse: onSelectNotification,
   );
-
-  client ??= (await ClientManager.getClients(initialize: false)).first;
+  if (client == null) {
+    Logs().v('_tryPushHelper::Push helper has no client. Stop here.');
+    return;
+  }
   final event = await client.getEventByPushNotification(
     notification,
     storeInDatabase: isBackgroundMessage,
@@ -259,4 +263,52 @@ Future<int> mapRoomIdToInt(String roomId) async {
   idMap[roomId] = nCurrentInt;
   await store.setString(SettingKeys.notificationCurrentIds, json.encode(idMap));
   return nCurrentInt;
+}
+
+Future<Client> getClientFromRoomId({
+  required Client currentClient,
+  String? roomId,
+}) async {
+  if (roomId == null) {
+    Logs().v('getClientFromRoomId:Push helper has no $roomId.');
+    return currentClient;
+  }
+
+  final clientInRoomRepository = getIt.get<ClientInRoomRepository>();
+  final clientName = await clientInRoomRepository.getClientName(roomId);
+  if (currentClient.clientName == clientName) {
+    return currentClient;
+  }
+  final clients = await ClientManager.getClients();
+  if (clientName == null) {
+    return await _tryGetClientFromHomeserver(
+          clients: clients,
+          roomId: roomId,
+          clientInRoomRepository: clientInRoomRepository,
+        ) ??
+        currentClient;
+  }
+
+  Logs().v(
+    'getClientFromRoomId:Push helper has ${clients.map((client) => client.clientName).toList()}',
+  );
+  return clients.firstWhere(
+    (client) => client.clientName == clientName,
+    orElse: () => currentClient,
+  );
+}
+
+Future<Client?> _tryGetClientFromHomeserver({
+  required List<Client> clients,
+  required String roomId,
+  ClientInRoomRepository? clientInRoomRepository,
+}) async {
+  for (final client in clients) {
+    await client.roomsLoading;
+    if (client.rooms.any((room) => room.id == roomId)) {
+      await clientInRoomRepository?.insertClientName(roomId, client.clientName);
+      return client;
+    }
+  }
+  return null;
 }

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/repository/client_in_room_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
@@ -88,11 +88,11 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       return;
     }
     final matrix = Matrix.of(context);
-    if (matrix.twakeSupported == true) {
+    if (matrix.tomSupported == true) {
       await tryLogoutSso(context);
-      final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
-      await hiveCollectionToMDatabase.clear();
     }
+    final clientInRoomRepository = getIt.get<ClientInRoomRepository>();
+    await clientInRoomRepository.clear(client: matrix.client);
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         if (matrix.backgroundPush != null) {

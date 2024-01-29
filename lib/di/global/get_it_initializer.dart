@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:fluffychat/data/datasource/client_in_room_datasource.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
@@ -9,6 +10,7 @@ import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
+import 'package:fluffychat/data/datasource_impl/client_in_room_datasourec_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
@@ -26,6 +28,7 @@ import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
+import 'package:fluffychat/data/repository/client_in_room_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
@@ -39,6 +42,7 @@ import 'package:fluffychat/di/global/hive_di.dart';
 import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/repository/client_in_room_repository.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
@@ -61,6 +65,7 @@ import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/update_client_in_rooms_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
@@ -157,6 +162,10 @@ class GetItInitializer {
     getIt.registerFactory<MultipleAccountDatasource>(
       () => MultipleAccountDatasourceImpl(),
     );
+
+    getIt.registerFactory<ClientInRoomDatasource>(
+      () => ClientInRoomDatasourceImpl(),
+    );
   }
 
   void bindingDatasourceImpl() {
@@ -211,6 +220,10 @@ class GetItInitializer {
     );
     getIt.registerFactory<MultipleAccountRepository>(
       () => MultipleAccountRepositoryImpl(),
+    );
+
+    getIt.registerFactory<ClientInRoomRepository>(
+      () => ClientInRoomRepositoryImpl(),
     );
   }
 
@@ -293,6 +306,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
       () => SendFilesOnWebWithCaptionInteractor(),
+    );
+    getIt.registerFactory<UpdateClientInRoomInteractor>(
+      () => UpdateClientInRoomInteractor(),
     );
   }
 }

@@ -87,7 +87,7 @@ class MatrixState extends State<Matrix>
   LoginType? loginType;
   bool? loginRegistrationSupported;
 
-  bool get twakeSupported {
+  bool get tomSupported {
     final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.tomServerUrlInterceptorName,
     );
@@ -123,7 +123,12 @@ class MatrixState extends State<Matrix>
   RequestTokenResponse? currentThreepidCreds;
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
-    final index = widget.clients.indexWhere((client) => client == newClient);
+    if (newClient != null) {
+      await backgroundPush?.setupPushGateway(newClient);
+    }
+
+    final index = widget.clients
+        .indexWhere((client) => client.clientName == newClient?.clientName);
     if (index != -1) {
       _activeClient = index;
       // TODO: Multi-client VoiP support
@@ -697,7 +702,7 @@ class MatrixState extends State<Matrix>
 
   void _setUpToMServicesWhenChangingActiveClient(Client? client) async {
     Logs().d(
-      'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
+      'Matrix::_checkHomeserverExists: Old tomSupported - $tomSupported',
     );
     if (client == null && client?.userID == null) return;
     try {
@@ -715,7 +720,7 @@ class MatrixState extends State<Matrix>
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
     Logs().d(
-      'Matrix::_checkHomeserverExists: New twakeSupported - $twakeSupported',
+      'Matrix::_checkHomeserverExists: New tomSupported - $tomSupported',
     );
   }
 

@@ -14,6 +14,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChatListBodyView extends StatelessWidget {
   final ChatListController controller;
@@ -48,7 +49,9 @@ class ChatListBodyView extends StatelessWidget {
           ),
           stream: controller.activeClient.onSync.stream
               .where((s) => s.hasRoomUpdate)
-              .rateLimit(const Duration(seconds: 1)),
+              .doOnData((event) {
+            controller.listenToOnSyncUpdate(event);
+          }).rateLimit(const Duration(seconds: 1)),
           builder: (context, _) {
             if (controller.activeFilter == ActiveFilter.spaces) {
               return SpaceView(
