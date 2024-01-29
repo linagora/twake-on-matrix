@@ -462,6 +462,7 @@ class ChatController extends State<Chat>
 
   Future<void> send() async {
     scrollDown();
+    showEmojiPickerNotifier.value = false;
 
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
@@ -604,13 +605,13 @@ class ChatController extends State<Chat>
   }
 
   void emojiPickerAction() {
+    emojiPickerType = EmojiPickerType.keyboard;
+    showEmojiPickerNotifier.toggle();
     if (showEmojiPickerNotifier.value) {
       inputFocus.requestFocus();
     } else {
       inputFocus.unfocus();
     }
-    emojiPickerType = EmojiPickerType.keyboard;
-    showEmojiPickerNotifier.toggle();
   }
 
   void _inputFocusListener() {
@@ -925,6 +926,7 @@ class ChatController extends State<Chat>
       case EmojiPickerType.keyboard:
         typeEmoji(emoji);
         onInputBarChanged(sendController.text);
+        inputFocus.requestFocus();
         break;
     }
   }
@@ -979,6 +981,7 @@ class ChatController extends State<Chat>
           ..selection = TextSelection.fromPosition(
             TextPosition(offset: sendController.text.length),
           );
+        inputFocus.requestFocus();
         break;
     }
   }
@@ -1103,7 +1106,7 @@ class ChatController extends State<Chat>
     return index + 1;
   }
 
-  void onInputBarSubmitted(_) async {
+  void onInputBarSubmitted() async {
     await Future.delayed(const Duration(milliseconds: 100));
     await send();
     FocusScope.of(context).requestFocus(inputFocus);
