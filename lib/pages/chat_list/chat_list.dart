@@ -9,7 +9,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
@@ -760,16 +759,8 @@ class ChatListController extends State<ChatList>
     currentProfileNotifier.value = profile;
   }
 
-  void onGoToAccountSettings() {
-    widget.onOpenSettings?.call();
-  }
-
   void onClickAvatar() {
-    MultipleAccountsPickerController(context: context)
-        .showMultipleAccountsPicker(
-      activeClient,
-      onGoToAccountSettings: onGoToAccountSettings,
-    );
+    context.push('/rooms/profile');
   }
 
   void _handleRecovery() {
