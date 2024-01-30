@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -5,6 +7,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -13,7 +16,6 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -70,23 +72,28 @@ class ChatEventList extends StatelessWidget {
         }
         return false;
       },
-      child: SelectionTextContainer(
-        chatController: controller,
-        focusNode: controller.selectionFocusNode,
-        child: ListView.custom(
-          padding: EdgeInsets.only(
-            top: 16,
-            bottom: 8.0,
-            left: horizontalPadding,
-            right: horizontalPadding,
-          ),
-          reverse: true,
-          controller: controller.scrollController,
-          keyboardDismissBehavior: PlatformInfos.isMobile
-              ? ScrollViewKeyboardDismissBehavior.manual
-              : ScrollViewKeyboardDismissBehavior.onDrag,
-          childrenDelegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
+          },
+        ),
+        child: SelectionTextContainer(
+          chatController: controller,
+          focusNode: controller.selectionFocusNode,
+          child: InViewNotifierList(
+            padding: EdgeInsets.only(
+              top: 16,
+              bottom: 8.0,
+              left: horizontalPadding,
+              right: horizontalPadding,
+            ),
+            reverse: true,
+            controller: controller.scrollController,
+            itemCount: events.length + 2,
+            builder: (context, index) {
               // Footer to display typing indicator and read receipts:
               if (index == 0) {
                 if (controller.timeline!.isRequestingFuture) {
@@ -133,60 +140,59 @@ class ChatEventList extends StatelessWidget {
               final nextEvent = index < controller.timeline!.events.length
                   ? controller.timeline!.events[currentEventIndex + 1]
                   : null;
-              return VisibilityDetector(
-                key: ValueKey(event.eventId),
-                onVisibilityChanged: (visibilityInfo) {
-                  if (visibilityInfo.visibleFraction > 0.4) {
+              return InViewNotifierWidget(
+                id: event.eventId,
+                builder: (context, bool isInView, _) {
+                  if (isInView) {
                     controller.handleDisplayStickyTimestamp(
                       event.originServerTs,
                     );
                   }
+                  return AutoScrollTag(
+                    key: ValueKey(event.eventId),
+                    index: index,
+                    controller: controller.scrollController,
+                    highlightColor: LinagoraRefColors.material().primary[99],
+                    child: event.isVisibleInGui
+                        ? Message(
+                            event,
+                            onSwipe: (direction) =>
+                                controller.replyAction(replyTo: event),
+                            onAvatarTap: (Event event) =>
+                                controller.onContactTap(
+                              contactPresentationSearch: event
+                                  .senderFromMemoryOrFallback
+                                  .toContactPresentationSearch(),
+                              context: context,
+                              path: 'rooms',
+                            ),
+                            onSelect: controller.onSelectMessage,
+                            selectMode: controller.selectMode,
+                            scrollToEventId: (String eventId) =>
+                                controller.scrollToEventId(eventId),
+                            selected: controller.selectedEvents
+                                .any((e) => e.eventId == event.eventId),
+                            timeline: controller.timeline!,
+                            previousEvent: previousEvent,
+                            nextEvent: nextEvent,
+                            onHover: (isHover, event) =>
+                                controller.onHover(isHover, index, event),
+                            isHoverNotifier: controller.focusHover,
+                            listHorizontalActionMenu:
+                                controller.listHorizontalActionMenuBuilder(),
+                            onMenuAction: controller.handleHorizontalActionMenu,
+                            hideKeyboardChatScreen:
+                                controller.hideKeyboardChatScreen,
+                            markedUnreadLocation:
+                                controller.unreadReceivedMessageLocation,
+                            hideTimeStamp: isInView,
+                          )
+                        : const SizedBox(),
+                  );
                 },
-                child: AutoScrollTag(
-                  key: ValueKey(event.eventId),
-                  index: index,
-                  controller: controller.scrollController,
-                  highlightColor: LinagoraRefColors.material().primary[99],
-                  child: event.isVisibleInGui
-                      ? Message(
-                          event,
-                          onSwipe: (direction) =>
-                              controller.replyAction(replyTo: event),
-                          onAvatarTap: (Event event) => controller.onContactTap(
-                            contactPresentationSearch: event
-                                .senderFromMemoryOrFallback
-                                .toContactPresentationSearch(),
-                            context: context,
-                            path: 'rooms',
-                          ),
-                          onSelect: controller.onSelectMessage,
-                          selectMode: controller.selectMode,
-                          scrollToEventId: (String eventId) =>
-                              controller.scrollToEventId(eventId),
-                          longPressSelect: controller.selectedEvents.isEmpty,
-                          selected: controller.selectedEvents
-                              .any((e) => e.eventId == event.eventId),
-                          timeline: controller.timeline!,
-                          previousEvent: previousEvent,
-                          nextEvent: nextEvent,
-                          onHover: (isHover, event) =>
-                              controller.onHover(isHover, index, event),
-                          isHoverNotifier: controller.focusHover,
-                          listHorizontalActionMenu:
-                              controller.listHorizontalActionMenuBuilder(),
-                          onMenuAction: controller.handleHorizontalActionMenu,
-                          hideKeyboardChatScreen:
-                              controller.hideKeyboardChatScreen,
-                          markedUnreadLocation:
-                              controller.unreadReceivedMessageLocation,
-                        )
-                      : Container(),
-                ),
               );
             },
-            childCount: events.length + 2,
-            findChildIndexCallback: (key) =>
-                controller.findChildIndexCallback(key, thisEventsKeyMap),
+            isInViewPortCondition: controller.isInViewPortCondition,
           ),
         ),
       ),
