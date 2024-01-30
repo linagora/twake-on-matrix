@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
@@ -35,6 +36,7 @@ class NetworkDI extends BaseDI {
   @override
   void setUp(GetIt get) {
     _bindBaseOption(get);
+    _bindMemCache(get);
     _bindInterceptor(get);
     _bindDio(get);
     _bindMethodSupportHiveCache(get);
@@ -161,6 +163,10 @@ class NetworkDI extends BaseDI {
         instanceName: hiveCacheDioInterceptorName,
       ),
     );
+  }
+
+  void _bindMemCache(GetIt get) {
+    get.registerSingleton<MemCacheStore>(MemCacheStore());
   }
 
   void _bindMethodSupportHiveCache(GetIt get) {

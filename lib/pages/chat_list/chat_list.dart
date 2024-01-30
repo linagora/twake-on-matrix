@@ -4,6 +4,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -388,9 +389,17 @@ class ChatListController extends State<ChatList>
     conversationSelectionNotifier.value.clear();
   }
 
+  Future<void> setupAdditionalDioCacheOption(String userId) async {
+    Logs().d('ChatList::setupAdditionalDioCacheOption: $userId');
+    DioCacheInterceptorForClient(userId).setup(getIt);
+  }
+
   Future<void> _waitForFirstSync() async {
     await client.roomsLoading;
     await client.accountDataLoading;
+    if (client.userID != null) {
+      await setupAdditionalDioCacheOption(client.userID!);
+    }
     if (client.prevBatch == null) {
       await client.onSync.stream.first;
       await client.initCompleter?.future;
