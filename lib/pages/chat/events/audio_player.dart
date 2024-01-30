@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
+import 'package:collection/collection.dart';
+import 'package:fluffychat/pages/chat/events/audio_player_style.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,17 +16,14 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
-import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
-  final Color color;
   final Event event;
-
+  final bool ownMessage;
   static String? currentId;
+  static const int maxWavesCount = 40;
 
-  static const int wavesCount = 40;
-
-  const AudioPlayerWidget(this.event, {this.color = Colors.black, Key? key})
+  const AudioPlayerWidget(this.event, {this.ownMessage = false, Key? key})
       : super(key: key);
 
   @override
@@ -119,7 +120,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         statusText =
             '${state.inMinutes.toString().padLeft(2, '0')}:${(state.inSeconds % 60).toString().padLeft(2, '0')}';
         currentPosition = ((state.inMilliseconds.toDouble() / maxPosition) *
-                AudioPlayerWidget.wavesCount)
+                AudioPlayerWidget.maxWavesCount)
             .round();
       });
     });
@@ -160,20 +161,22 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
         ?.tryGetList<int>('waveform');
     if (eventWaveForm == null) {
-      return List<int>.filled(AudioPlayerWidget.wavesCount, 500);
+      return List<int>.generate(
+          AudioPlayerWidget.maxWavesCount, (i) => Random().nextInt(150) + 50);
     }
-    while (eventWaveForm.length < AudioPlayerWidget.wavesCount) {
+    while (eventWaveForm.length < AudioPlayerWidget.maxWavesCount) {
       for (var i = 0; i < eventWaveForm.length; i = i + 2) {
         eventWaveForm.insert(i, eventWaveForm[i]);
       }
     }
     var i = 0;
-    final step = (eventWaveForm.length / AudioPlayerWidget.wavesCount).round();
-    while (eventWaveForm.length > AudioPlayerWidget.wavesCount) {
+    final step =
+        (eventWaveForm.length / AudioPlayerWidget.maxWavesCount).round();
+    while (eventWaveForm.length > AudioPlayerWidget.maxWavesCount) {
       eventWaveForm.removeAt(i);
-      i = (i + step) % AudioPlayerWidget.wavesCount;
+      i = (i + step) % AudioPlayerWidget.maxWavesCount;
     }
-    return eventWaveForm.map((i) => i > 1024 ? 1024 : i).toList();
+    return eventWaveForm;
   }
 
   late final List<int> waveform;
@@ -192,22 +195,24 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const SizedBox(width: 4),
           SizedBox(
             width: buttonSize,
             height: buttonSize,
             child: status == AudioPlayerStatus.downloading
-                ? CircularProgressIndicator(strokeWidth: 2, color: widget.color)
+                ? CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
                 : InkWell(
                     borderRadius: BorderRadius.circular(64),
                     child: Material(
-                      color: widget.color.withAlpha(64),
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(64),
                       child: Icon(
                         audioPlayer?.playerState.playing == true
-                            ? Icons.pause_outlined
-                            : Icons.play_arrow_outlined,
-                        color: widget.color,
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                     onLongPress: () => widget.event.saveFile(context),
@@ -220,50 +225,49 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                     },
                   ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AudioPlayerStyle.playAndWaveGap),
           Expanded(
-            child: Row(
+            child: Column(
               children: [
-                for (var i = 0; i < AudioPlayerWidget.wavesCount; i++)
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => audioPlayer?.seek(
-                        Duration(
-                          milliseconds:
-                              (maxPosition / AudioPlayerWidget.wavesCount)
+                Row(
+                  children: [
+                    for (var i = 0; i < AudioPlayerWidget.maxWavesCount; i++)
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => audioPlayer?.seek(
+                            Duration(
+                              milliseconds: (maxPosition /
+                                          AudioPlayerWidget.maxWavesCount)
                                       .round() *
                                   i,
-                        ),
-                      ),
-                      child: Container(
-                        height: 32,
-                        alignment: Alignment.center,
-                        child: Opacity(
-                          opacity: currentPosition > i ? 1 : 0.5,
+                            ),
+                          ),
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 1),
                             decoration: BoxDecoration(
-                              color: widget.color,
+                              color: AudioPlayerStyle.waveColor(
+                                      context, widget.ownMessage)
+                                  ?.withOpacity(currentPosition > i ? 1 : 0.5),
                               borderRadius: BorderRadius.circular(64),
                             ),
-                            height: 32 * (waveform[i] / 1024),
+                            height: AudioPlayerStyle.waveHeight(
+                                waveform[i], waveform.max),
                           ),
                         ),
                       ),
-                    ),
+                  ],
+                ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    statusText,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AudioPlayerStyle.timerColor(
+                              context, widget.ownMessage),
+                        ),
                   ),
+                ),
               ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            alignment: Alignment.centerRight,
-            width: 42,
-            child: Text(
-              statusText,
-              style: TextStyle(
-                color: widget.color,
-              ),
             ),
           ),
         ],

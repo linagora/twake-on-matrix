@@ -88,7 +88,7 @@ class RecordingDialogState extends State<RecordingDialog> {
     await _audioRecorder.stop();
     final path = _recordedPath;
     if (path == null) throw ('Recording failed!');
-    const waveCount = AudioPlayerWidget.wavesCount;
+    const waveCount = AudioPlayerWidget.maxWavesCount;
     final step = amplitudeTimeline.length < waveCount
         ? 1
         : (amplitudeTimeline.length / waveCount).round();

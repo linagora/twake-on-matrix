@@ -79,7 +79,7 @@ class MessageContent extends StatelessWidget
                 ) {
               return AudioPlayerWidget(
                 event,
-                color: textColor,
+                ownMessage: ownMessage,
               );
             }
             return MessageDownloadContent(
