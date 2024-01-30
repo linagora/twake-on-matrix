@@ -85,24 +85,31 @@ mixin ChatListItemMixin {
   }
 
   Widget chatListItemSubtitleForGroup({
+    required BuildContext context,
     required Room room,
   }) {
+    if (room.membership == Membership.invite) {
+      return Text(
+        L10n.of(context)!.youAreInvitedToThisChat,
+        softWrap: false,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+      );
+    }
+
     return FutureBuilder<User?>(
       future: room.lastEvent?.fetchSenderUser(),
       builder: (context, snapshot) {
         if (snapshot.data == null) return const SizedBox.shrink();
-        final youAreInvitedToThisChat =
-            L10n.of(context)!.youAreInvitedToThisChat;
-        final subscriptions = room.membership == Membership.invite
-            ? youAreInvitedToThisChat
-            : room.lastEvent?.calcLocalizedBodyFallback(
-                  MatrixLocals(L10n.of(context)!),
-                  hideReply: true,
-                  hideEdit: true,
-                  plaintextBody: true,
-                  removeMarkdown: true,
-                ) ??
-                L10n.of(context)!.emptyChat;
+        final subscriptions = room.lastEvent?.calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)!),
+              hideReply: true,
+              hideEdit: true,
+              plaintextBody: true,
+              removeMarkdown: true,
+            ) ??
+            L10n.of(context)!.emptyChat;
 
         return Text(
           "${snapshot.data!.calcDisplayname()}: $subscriptions",
