@@ -9,7 +9,7 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
-import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
+import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
