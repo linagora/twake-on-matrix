@@ -1351,6 +1351,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.18.1"
+  inview_notifier_list:
+    dependency: "direct main"
+    description:
+      name: inview_notifier_list
+      sha256: "1ca80ee39aa585e84a4b9dc1fe7211c5f64614ce3064b0007d9396073e852e14"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   io:
     dependency: transitive
     description:
@@ -2894,7 +2902,7 @@ packages:
     source: git
     version: "1.0.0"
   visibility_detector:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: visibility_detector
       sha256: "15c54a459ec2c17b4705450483f3d5a2858e733aee893dcee9d75fd04814940d"

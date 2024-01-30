@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -101,6 +102,9 @@ class ChatController extends State<Chat>
   static const double _isPortionAvailableToScroll = 64;
 
   static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
+
+  final GlobalKey stickyTimestampKey =
+      GlobalKey(debugLabel: 'stickyTimestampKey');
 
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -1560,36 +1564,47 @@ class ChatController extends State<Chat>
   }
 
   void handleDisplayStickyTimestamp(DateTime dateTime) {
-    Logs().d('Chat::handleDisplayStickyTimestamp() Event Time - $dateTime');
-    if (_currentChatScrollState.isEndScroll) return;
-    if (!scrollController.hasClients) return;
-    _currentDateTimeEvent = dateTime;
-    if (scrollController.offset > 0) {
-      stickyTimestampNotifier.value ??= dateTime;
-      if (stickyTimestampNotifier.value?.day != dateTime.day) {
-        Logs().d(
-          'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
-        );
-        Logs().d(
-          'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
-        );
-        stickyTimestampNotifier.value = dateTime;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentChatScrollState.isEndScroll) return;
+      _currentDateTimeEvent = dateTime;
+      if (scrollController.offset > 0) {
+        stickyTimestampNotifier.value ??= dateTime;
+        if (stickyTimestampNotifier.value?.day != dateTime.day) {
+          Logs().d(
+            'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+          );
+          Logs().d(
+            'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+          );
+          stickyTimestampNotifier.value = dateTime;
+        }
       }
-    }
+    });
+  }
+
+  bool isInViewPortCondition(
+    double deltaTop,
+    double deltaBottom,
+    double viewPortDimension,
+  ) {
+    final stickyTimestampHeight =
+        stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
+    return deltaTop < viewPortDimension - stickyTimestampHeight &&
+        deltaBottom > viewPortDimension - stickyTimestampHeight;
   }
 
   void _handleHideStickyTimestamp() {
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
-    if (stickyTimestampNotifier.value != null) {
-      stickyTimestampNotifier.value = null;
-    }
+    stickyTimestampNotifier.value = null;
   }
 
   void handleScrollEndNotification() async {
     Logs().d('Chat::handleScrollEndNotification() - End of scroll');
-    _currentChatScrollState = ChatScrollState.endScroll;
-    await Future.delayed(_delayHideStickyTimestampHeader);
-    _handleHideStickyTimestamp();
+    if (PlatformInfos.isMobile) {
+      _currentChatScrollState = ChatScrollState.endScroll;
+      await Future.delayed(_delayHideStickyTimestampHeader);
+      _handleHideStickyTimestamp();
+    }
   }
 
   void handleScrollStartNotification() {
