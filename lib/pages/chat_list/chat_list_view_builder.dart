@@ -30,11 +30,13 @@ class ChatListViewBuilder extends StatelessWidget {
           return ValueListenableBuilder<SelectMode>(
             valueListenable: controller.selectModeNotifier,
             builder: (context, selectMode, child) {
+              final slidables = _getSlidables(context, rooms[index]);
               if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
-                  !selectMode.isSelectMode) {
+                  !selectMode.isSelectMode &&
+                  slidables.isNotEmpty) {
                 return _SlidableChatListItem(
                   controller: controller,
-                  room: rooms[index],
+                  slidables: slidables,
                   chatListItem: child!,
                 );
               }
@@ -49,6 +51,24 @@ class ChatListViewBuilder extends StatelessWidget {
         },
       ),
     );
+  }
+
+  List<Widget> _getSlidables(BuildContext context, Room room) {
+    return [
+      if (!room.isInvitation) ...[
+        SlidableAction(
+          autoClose: true,
+          label: room.isFavourite
+              ? L10n.of(context)!.unpin
+              : L10n.of(context)!.pin,
+          icon: room.isFavourite ? Icons.push_pin_outlined : Icons.push_pin,
+          onPressed: (_) => controller.togglePin(room),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor:
+              Colors.greenAccent[700] ?? ChatListViewStyle.pinSlidableColorRaw,
+        ),
+      ],
+    ];
   }
 }
 
@@ -104,12 +124,12 @@ class _CommonChatListItem extends StatelessWidget {
 class _SlidableChatListItem extends StatelessWidget {
   const _SlidableChatListItem({
     required this.controller,
-    required this.room,
+    required this.slidables,
     required this.chatListItem,
   });
 
   final ChatListController controller;
-  final Room room;
+  final List<Widget> slidables;
   final Widget chatListItem;
 
   @override
@@ -120,21 +140,7 @@ class _SlidableChatListItem extends StatelessWidget {
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
         extentRatio: ChatListViewStyle.slidableExtentRatio,
-        children: [
-          if (!room.isInvitation) ...[
-            SlidableAction(
-              autoClose: true,
-              label: room.isFavourite
-                  ? L10n.of(context)!.unpin
-                  : L10n.of(context)!.pin,
-              icon: room.isFavourite ? Icons.push_pin_outlined : Icons.push_pin,
-              onPressed: (_) => controller.togglePin(room),
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              backgroundColor: Colors.greenAccent[700] ??
-                  ChatListViewStyle.pinSlidableColorRaw,
-            ),
-          ],
-        ],
+        children: slidables,
       ),
       child: chatListItem,
     );
