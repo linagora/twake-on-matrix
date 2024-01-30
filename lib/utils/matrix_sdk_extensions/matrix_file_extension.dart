@@ -125,7 +125,6 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   Future<Uint8List> _streamToUint8List(Stream<List<int>> stream) async {
-    final completer = Completer<Uint8List>();
     var byteData = ByteData(0);
     var length = 0;
 
@@ -150,8 +149,7 @@ extension MatrixFileExtension on MatrixFile {
       length = newLength;
     }
 
-    completer.complete(Uint8List.view(byteData.buffer, 0, length));
-    return completer.future;
+    return Uint8List.view(byteData.buffer, 0, length);
   }
 
   bool get isFileHaveThumbnail =>
