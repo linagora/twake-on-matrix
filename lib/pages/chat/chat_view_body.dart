@@ -7,7 +7,9 @@ import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
+import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +134,19 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    ValueListenableBuilder(
+                      valueListenable: controller.stickyTimestampNotifier,
+                      builder: (context, stickyTimestamp, child) {
+                        if (stickyTimestamp == null) {
+                          return child!;
+                        }
+                        return StickyTimestampWidget(
+                          isStickyHeader: true,
+                          content: stickyTimestamp.relativeTime(context),
+                        );
+                      },
+                      child: const SizedBox.shrink(),
+                    ),
                   ],
                 ),
               ],

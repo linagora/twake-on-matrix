@@ -4,6 +4,18 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 enum PickerType { gallery, documents, location, contact }
 
+enum ChatScrollState {
+  scrolling,
+  startScroll,
+  endScroll;
+
+  bool get isScrolling => this == ChatScrollState.scrolling;
+
+  bool get isStartScroll => this == ChatScrollState.startScroll;
+
+  bool get isEndScroll => this == ChatScrollState.endScroll;
+}
+
 extension PickerTypeExtension on PickerType {
   String getTitle(BuildContext context) {
     switch (this) {

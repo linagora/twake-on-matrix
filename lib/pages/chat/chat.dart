@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
@@ -99,6 +100,8 @@ class ChatController extends State<Chat>
 
   static const double _isPortionAvailableToScroll = 64;
 
+  static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
+
   final responsive = getIt.get<ResponsiveUtils>();
 
   final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
@@ -157,6 +160,8 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
+  final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
 
@@ -211,6 +216,10 @@ class ChatController extends State<Chat>
   final inputText = ValueNotifier('');
 
   String pendingText = '';
+
+  DateTime _currentDateTimeEvent = DateTime.now();
+
+  ChatScrollState _currentChatScrollState = ChatScrollState.endScroll;
 
   AutoScrollController suggestionScrollController = AutoScrollController();
 
@@ -320,7 +329,6 @@ class ChatController extends State<Chat>
     } else if (scrollController.position.pixels <= 0) {
       showScrollDownButtonNotifier.value = false;
     }
-
     if (scrollController.position.pixels == 0 ||
         scrollController.position.pixels == _isPortionAvailableToScroll) {
       requestFuture();
@@ -864,6 +872,7 @@ class ChatController extends State<Chat>
       scrollController.jumpTo(0);
     }
     setReadMarker();
+    _handleHideStickyTimestamp();
   }
 
   int getDisplayEventIndex(int eventIndex) {
@@ -1550,6 +1559,47 @@ class ChatController extends State<Chat>
     );
   }
 
+  void handleDisplayStickyTimestamp(DateTime dateTime) {
+    Logs().d('Chat::handleDisplayStickyTimestamp() Event Time - $dateTime');
+    if (_currentChatScrollState.isEndScroll) return;
+    if (!scrollController.hasClients) return;
+    _currentDateTimeEvent = dateTime;
+    if (scrollController.offset > 0) {
+      stickyTimestampNotifier.value ??= dateTime;
+      if (stickyTimestampNotifier.value?.day != dateTime.day) {
+        Logs().d(
+          'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+        );
+        Logs().d(
+          'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+        );
+        stickyTimestampNotifier.value = dateTime;
+      }
+    }
+  }
+
+  void _handleHideStickyTimestamp() {
+    Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
+    if (stickyTimestampNotifier.value != null) {
+      stickyTimestampNotifier.value = null;
+    }
+  }
+
+  void handleScrollEndNotification() async {
+    Logs().d('Chat::handleScrollEndNotification() - End of scroll');
+    _currentChatScrollState = ChatScrollState.endScroll;
+    await Future.delayed(_delayHideStickyTimestampHeader);
+    _handleHideStickyTimestamp();
+  }
+
+  void handleScrollStartNotification() {
+    _currentChatScrollState = ChatScrollState.startScroll;
+  }
+
+  void handleScrollUpdateNotification() {
+    _currentChatScrollState = ChatScrollState.scrolling;
+  }
+
   @override
   void initState() {
     _initializePinnedEvents();
@@ -1601,6 +1651,7 @@ class ChatController extends State<Chat>
     sendController.removeListener(updateInputTextNotifier);
     sendController.dispose();
     suggestionsController.dispose();
+    stickyTimestampNotifier.dispose();
     super.dispose();
   }
 
