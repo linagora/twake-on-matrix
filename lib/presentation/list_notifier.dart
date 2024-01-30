@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class ListNotifier<T> extends ChangeNotifier
     implements ValueListenable<List<T>> {
-  List<T> _elements;
+  final List<T> _elements;
 
   ListNotifier(this._elements);
 
@@ -26,7 +26,7 @@ class ListNotifier<T> extends ChangeNotifier
 
   void update(T oldValue, T newValue) {
     final index = _elements.indexOf(oldValue);
-    if (index != -1) {
+    if (index >= 0 && index < _elements.length) {
       _elements[index] = newValue;
       notifyListeners();
     }
@@ -34,9 +34,4 @@ class ListNotifier<T> extends ChangeNotifier
 
   @override
   List<T> get value => _elements;
-
-  set value(List<T> value) {
-    _elements = value;
-    notifyListeners();
-  }
 }

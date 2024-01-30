@@ -16,10 +16,21 @@ class HomeserverEndpoint {
   static final ServicePath searchPath = ServicePath(
     '/search',
   );
+
+  static final ServicePath configPath = ServicePath(
+    '/config',
+  );
 }
 
 extension ServicePathHomeserver on ServicePath {
   String generateHomeserverMediaEndpoint({
+    String rootPath = HomeserverEndpoint.homeserverMediaPath,
+    String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
+  }) {
+    return '$rootPath/$apiVersion$path';
+  }
+
+  String generateHomeserverConfigEndpoint({
     String rootPath = HomeserverEndpoint.homeserverMediaPath,
     String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
   }) {
