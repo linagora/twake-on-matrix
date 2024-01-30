@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SendFilesOnWebWithCaptionInteractor {
@@ -11,7 +12,10 @@ class SendFilesOnWebWithCaptionInteractor {
   }) async {
     try {
       final txIdsMapFileEvents = <String, (MatrixFile, SyncUpdate)>{};
-      for (final file in files) {
+      for (MatrixFile file in files) {
+        if (file.readStream != null && file.bytes == null) {
+          file = await file.convertReadStreamToBytes();
+        }
         final txid = room.client.generateUniqueTransactionId();
         room.sendingFilePlaceholders[txid] = file;
         final fakeFileEvent = await room.sendFakeFileEvent(
