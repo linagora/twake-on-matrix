@@ -34,6 +34,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               ? typingTextWidget(typingText, context)
               : (isGroup
                   ? chatListItemSubtitleForGroup(
+                      context: context,
                       room: room,
                     )
                   : textContentWidget(
