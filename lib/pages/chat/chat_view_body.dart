@@ -134,18 +134,19 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
-                    ValueListenableBuilder(
-                      valueListenable: controller.stickyTimestampNotifier,
-                      builder: (context, stickyTimestamp, child) {
-                        if (stickyTimestamp == null) {
-                          return child!;
-                        }
-                        return StickyTimestampWidget(
-                          isStickyHeader: true,
-                          content: stickyTimestamp.relativeTime(context),
-                        );
-                      },
-                      child: const SizedBox.shrink(),
+                    SizedBox(
+                      key: controller.stickyTimestampKey,
+                      child: ValueListenableBuilder(
+                        valueListenable: controller.stickyTimestampNotifier,
+                        builder: (context, stickyTimestamp, child) {
+                          return StickyTimestampWidget(
+                            isStickyHeader: stickyTimestamp != null,
+                            content: stickyTimestamp != null
+                                ? stickyTimestamp.relativeTime(context)
+                                : '',
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),

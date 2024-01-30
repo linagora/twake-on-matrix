@@ -47,6 +47,7 @@ class Message extends StatelessWidget {
   final VoidCallback? hideKeyboardChatScreen;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
+  final bool? hideTimeStamp;
 
   const Message(
     this.event, {
@@ -68,6 +69,7 @@ class Message extends StatelessWidget {
     this.onMenuAction,
     this.markedUnreadLocation,
     this.focusNode,
+    this.hideTimeStamp = false,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -147,7 +149,9 @@ class Message extends StatelessWidget {
             children: [
               if (displayTime)
                 StickyTimestampWidget(
-                  content: event.originServerTs.relativeTime(context),
+                  content: hideTimeStamp == false
+                      ? event.originServerTs.relativeTime(context)
+                      : '',
                 ),
               if (markedUnreadLocation != null &&
                   markedUnreadLocation == event.eventId) ...[
