@@ -2758,7 +2758,7 @@
   "@askToInvite": {},
   "select": "Select",
   "@select": {},
-  "copyMessageText": "Copy message text",
+  "copyMessageText": "Copy",
   "@copyMessageText": {},
   "pinThisChat": "Pin this chat",
   "@pinThisChat": {},
