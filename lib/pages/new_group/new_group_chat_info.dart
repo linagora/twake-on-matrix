@@ -294,17 +294,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   }
 
   void _getDefaultGroupName(Set<PresentationContact> contactList) async {
-    if (contactList.length <= 3) {
-      final groupName =
-          contactList.map((contact) => contact.displayName).join(", ");
-      groupNameTextEditingController.text = groupName;
-      groupNameTextEditingController.selection = TextSelection.fromPosition(
-        TextPosition(offset: groupNameTextEditingController.text.length),
-      );
-      groupNameFocusNode.requestFocus();
-    } else {
-      groupNameTextEditingController.clear();
-    }
+    groupNameFocusNode.requestFocus();
+    groupNameTextEditingController.clear();
   }
 
   ImagePickerGridController createImagePickerController() {
