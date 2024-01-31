@@ -51,6 +51,9 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
   Room? room;
 
+  static const Duration _delayedUpdateAvatarDuration =
+      Duration(milliseconds: 500);
+
   final groupNameTextEditingController = TextEditingController();
   final groupNameEmptyNotifier = ValueNotifier<bool>(false);
   final groupNameFocusNode = FocusNode();
@@ -81,6 +84,9 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   bool get _isEditAvatar =>
       avatarFilePicker != null || avatarAssetEntity != null;
 
+  bool get _enableDeleteAvatarButton =>
+      (room?.avatar != null || _isEditAvatar) && !_isDeleteAvatar;
+
   void onBack() {
     Navigator.of(context).pop();
   }
@@ -90,7 +96,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   ) {
     final listAction = [
       EditChatAvatarContextMenuActions.edit,
-      EditChatAvatarContextMenuActions.delete,
+      if (_enableDeleteAvatarButton) EditChatAvatarContextMenuActions.delete,
     ];
     return listAction.map((action) {
       return PopupMenuItem(
@@ -404,12 +410,15 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           );
         }
       },
-      (success) {
+      (success) async {
         if (success is UpdateAvatarGroupChatSuccess) {
           Logs().d(
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateAvatarGroupChatSuccess',
           );
           _handleSaveIconOnUpdateSuccess();
+          await Future.delayed(_delayedUpdateAvatarDuration).then((_) {
+            room = Matrix.of(context).client.getRoomById(widget.roomId);
+          });
           _isDeleteAvatar = false;
           avatarFilePicker = null;
           avatarAssetEntity = null;
