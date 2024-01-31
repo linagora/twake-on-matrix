@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:fluffychat/presentation/model/clipboard/clipboard_image_info.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as flutter;
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -25,9 +26,7 @@ class Clipboard {
   ];
 
   Future<void> copyText(String text) async {
-    final item = DataWriterItem();
-    item.add(Formats.plainText(text));
-    await SystemClipboard.instance?.write([item]);
+    flutter.Clipboard.setData(flutter.ClipboardData(text: text));
   }
 
   Future<void> copyImageAsStream(File image, {String? mimeType}) async {
