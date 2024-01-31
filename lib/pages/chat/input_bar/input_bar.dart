@@ -403,6 +403,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                 onChanged!(text);
               }
             },
+            contextMenuBuilder: null,
             onTap: () async {
               await Future.delayed(debounceDurationTap);
               FocusScope.of(context).requestFocus(focusNode);
