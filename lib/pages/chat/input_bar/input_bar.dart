@@ -320,7 +320,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   Future<void> handlePaste(BuildContext context) async {
-    if (await Clipboard.instance.isReadableImageFormat() && room != null) {
+    if (await TwakeClipboard.instance.isReadableImageFormat() && room != null) {
       await pasteImage(context, room!);
     } else {
       await controller?.pasteText();

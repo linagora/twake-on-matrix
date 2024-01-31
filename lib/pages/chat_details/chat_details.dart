@@ -314,7 +314,7 @@ class ChatDetailsController extends State<ChatDetails>
   }
 
   void onTapInviteLink(BuildContext context, String inviteLink) async {
-    await Clipboard.instance.copyText(inviteLink);
+    await TwakeClipboard.instance.copyText(inviteLink);
     TwakeSnackBar.show(
       context,
       L10n.of(context)!.copiedToClipboard,

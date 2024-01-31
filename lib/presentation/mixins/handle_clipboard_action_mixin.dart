@@ -27,7 +27,7 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
       return;
     }
     final clipboardReader = await event.getClipboardReader();
-    if (await Clipboard.instance
+    if (await TwakeClipboard.instance
             .isReadableImageFormat(clipboardReader: clipboardReader) &&
         room != null) {
       await pasteImage(context, room!, clipboardReader: clipboardReader);

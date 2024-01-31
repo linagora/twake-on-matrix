@@ -1,21 +1,20 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:fluffychat/presentation/model/clipboard/clipboard_image_info.dart';
-import 'package:flutter/services.dart' as flutter;
+import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
-class Clipboard {
-  static final _clipboard = Clipboard._();
+class TwakeClipboard {
+  static final _clipboard = TwakeClipboard._();
 
-  Clipboard._();
+  TwakeClipboard._();
 
   ClipboardReader? _reader;
 
-  static Clipboard get instance => _clipboard;
+  static TwakeClipboard get instance => _clipboard;
 
   static const allImageFormatsSupported = [
     Formats.png,
@@ -26,7 +25,7 @@ class Clipboard {
   ];
 
   Future<void> copyText(String text) async {
-    flutter.Clipboard.setData(flutter.ClipboardData(text: text));
+    Clipboard.setData(ClipboardData(text: text));
   }
 
   Future<void> copyImageAsStream(File image, {String? mimeType}) async {
