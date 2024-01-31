@@ -1342,6 +1342,7 @@ class ChatController extends State<Chat>
   ) {
     final listAction = [
       ChatContextMenuActions.select,
+      if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
       ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,

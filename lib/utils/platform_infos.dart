@@ -36,11 +36,16 @@ abstract class PlatformInfos {
 
   static bool get platformCanRecord => (isMobile || isMacOS);
 
-  static bool get isMacKeyboardPlatform =>
-      isMacOS ||
-      (kIsWeb &&
-          html.window.navigator.platform != null &&
-          html.window.navigator.platform!.toLowerCase().contains('mac'));
+  static bool get isMacKeyboardPlatform => isMacOS || isWebInMac;
+
+  static bool get isWebInMac =>
+      kIsWeb &&
+      html.window.navigator.platform != null &&
+      html.window.navigator.platform!.toLowerCase().contains('mac');
+
+  static bool get isFireFoxBrowser =>
+      kIsWeb &&
+      html.window.navigator.userAgent.toLowerCase().contains('firefox');
 
   static String get clientName =>
       '${AppConfig.applicationName} ${isWeb ? 'web' : Platform.operatingSystem}${kReleaseMode ? '' : 'Debug'}';
