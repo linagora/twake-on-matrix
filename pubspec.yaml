@@ -148,7 +148,7 @@ dependencies:
   media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
   js: ^0.6.7
-  super_clipboard: ^0.8.4
+  super_clipboard: 0.8.4
   google_fonts: ^4.0.4
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
