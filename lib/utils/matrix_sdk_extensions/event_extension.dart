@@ -61,6 +61,8 @@ extension LocalizedBody on Event {
   bool get isVideoOrImage =>
       [MessageTypes.Image, MessageTypes.Video].contains(messageType);
 
+  bool get isCopyable => messageType == MessageTypes.Text;
+
   bool isContains(String? searchTerm) =>
       plaintextBody.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
 
