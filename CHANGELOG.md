@@ -1,3 +1,22 @@
+## [2.4.16+2330] - 2024-01-31
+### Added
+- Add test widget for Twake Preview Link
+
+### Fixed
+- Padding in new group chat
+- Padding in inviation member screen
+- Update Members list when have changes in Chat
+- \#1283 Handle refresh pinned list
+- handle hover to link, mention tag
+- \#1328 Change bullet point size
+- \#1165 Change the way of marking read
+- \#1351 Draft Chat catch pharse
+- \#1354 handle arrow keyboard in composer and suggestion in web app
+- \#1358 remove unnecessary selection
+- \#1358 fix thumbnail size
+- \#1349 auto focus in composer
+- comeback to the original solution of break line
+
 ## [2.4.15+2330] - 2024-01-16
 ### Fixed
 - Change date format to dd/mm/yy
@@ -2155,7 +2174,8 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
-[2.4.15+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.15+2330
+[2.4.16+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.16
+[2.4.15+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.15
 [2.4.14+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.14
 [2.4.12+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.12
 [2.4.10+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.10
