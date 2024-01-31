@@ -317,7 +317,7 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
           ),
           color: LinagoraRefColors.material().tertiary[40],
           onPressed: () {
-            Clipboard.instance.copyText(text);
+            TwakeClipboard.instance.copyText(text);
             TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
           },
         ),
@@ -373,7 +373,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
           color: LinagoraRefColors.material().tertiary[40],
           focusColor: Theme.of(context).primaryColor,
           onPressed: () {
-            Clipboard.instance.copyText(text);
+            TwakeClipboard.instance.copyText(text);
             TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
           },
         ),
