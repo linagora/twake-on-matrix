@@ -6,6 +6,9 @@ class ChatDetailEditViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
   static const double fixedWidth = 360.0;
 
+  static Offset contextMenuAlignmentOffset(BuildContext context) =>
+      responsive.isMobile(context) ? const Offset(-60, 0) : const Offset(0, 0);
+
   static const EdgeInsets navigationAppBarPadding =
       EdgeInsets.symmetric(horizontal: 4.0);
   static const EdgeInsetsGeometry backIconPadding =
