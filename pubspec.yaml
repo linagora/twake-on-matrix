@@ -148,12 +148,7 @@ dependencies:
   media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
   js: ^0.6.7
-  # TODO:update when super_clipboard release a new version higher than 0.8.0
-  super_clipboard:
-    git:
-      url: https://github.com/superlistapp/super_native_extensions.git
-      ref: main
-      path: super_clipboard
+  super_clipboard: ^0.8.4
   google_fonts: ^4.0.4
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
@@ -217,12 +212,6 @@ msix_config:
   install_certificate: false
 
 dependency_overrides:
-  # TODO:remove when super_clipboard release a new version higher than 0.8.0
-  super_native_extensions:
-    git:
-      url: https://github.com/superlistapp/super_native_extensions.git
-      ref: main
-      path: super_native_extensions
   # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
   ffi: ^2.0.0
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
