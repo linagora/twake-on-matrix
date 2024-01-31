@@ -256,7 +256,7 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  Future<void> toggleUnread() async {
+  Future<void> toggleUnreadSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final markUnread = anySelectedRoomNotMarkedUnread;
@@ -514,7 +514,7 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (chatListBottomNavigatorBar) {
       case ChatListSelectionActions.read:
-        await actionWithToggleSelectMode(toggleUnread);
+        await actionWithToggleSelectMode(toggleUnreadSelections);
         return;
       case ChatListSelectionActions.mute:
         await actionWithToggleSelectMode(toggleMuted);
@@ -576,11 +576,7 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (action) {
       case ChatListSelectionActions.read:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.markUnread(!room.markedUnread);
-          },
-        );
+        await toggleRead(room);
         return;
       case ChatListSelectionActions.pin:
         await togglePin(room);
@@ -599,6 +595,22 @@ class ChatListController extends State<ChatList>
       case ChatListSelectionActions.more:
         return;
     }
+  }
+
+  Future<void> toggleRead(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        if (room.isUnread) {
+          await room.markUnread(false);
+          await room.setReadMarker(
+            room.lastEvent!.eventId,
+            mRead: room.lastEvent!.eventId,
+          );
+        } else {
+          await room.markUnread(true);
+        }
+      },
+    );
   }
 
   Future<void> togglePin(Room room) async {

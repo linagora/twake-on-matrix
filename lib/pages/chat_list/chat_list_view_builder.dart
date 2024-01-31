@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -21,35 +22,32 @@ class ChatListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SlidableAutoCloseBehavior(
-      child: ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: rooms.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ValueListenableBuilder<SelectMode>(
-            valueListenable: controller.selectModeNotifier,
-            builder: (context, selectMode, child) {
-              final slidables = _getSlidables(context, rooms[index]);
-              if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
-                  !selectMode.isSelectMode &&
-                  slidables.isNotEmpty) {
-                return _SlidableChatListItem(
-                  controller: controller,
-                  slidables: slidables,
-                  chatListItem: child!,
-                );
-              }
-
-              return child!;
-            },
-            child: _CommonChatListItem(
-              controller: controller,
-              room: rooms[index],
-            ),
-          );
-        },
-      ),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: rooms.length,
+      itemBuilder: (BuildContext context, int index) {
+        return ValueListenableBuilder<SelectMode>(
+          valueListenable: controller.selectModeNotifier,
+          builder: (context, selectMode, child) {
+            final slidables = _getSlidables(context, rooms[index]);
+            if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
+                !selectMode.isSelectMode &&
+                slidables.isNotEmpty) {
+              return _SlidableChatListItem(
+                controller: controller,
+                slidables: slidables,
+                chatListItem: child!,
+              );
+            }
+            return child!;
+          },
+          child: _CommonChatListItem(
+            controller: controller,
+            room: rooms[index],
+          ),
+        );
+      },
     );
   }
 
@@ -58,6 +56,18 @@ class ChatListViewBuilder extends StatelessWidget {
       if (!room.isInvitation) ...[
         SlidableAction(
           autoClose: true,
+          padding: ChatListViewStyle.slidablePadding,
+          label:
+              room.isUnread ? L10n.of(context)!.read : L10n.of(context)!.unread,
+          icon: room.isUnread ? Icons.mark_chat_read : Icons.mark_chat_unread,
+          onPressed: (_) => controller.toggleRead(room),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: LinagoraRefColors.material().neutral[70] ??
+              ChatListViewStyle.readSlidableColorRaw,
+        ),
+        SlidableAction(
+          autoClose: true,
+          padding: ChatListViewStyle.slidablePadding,
           label: room.isFavourite
               ? L10n.of(context)!.unpin
               : L10n.of(context)!.pin,
@@ -139,7 +149,7 @@ class _SlidableChatListItem extends StatelessWidget {
       groupTag: 'slidable_list',
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
-        extentRatio: ChatListViewStyle.slidableExtentRatio,
+        extentRatio: ChatListViewStyle.slidableExtentRatio(slidables.length),
         children: slidables,
       ),
       child: chatListItem,
