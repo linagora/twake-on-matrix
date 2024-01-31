@@ -6,9 +6,9 @@ extension TextEdittingControllerExtension on TextEditingController {
   Future<void> pasteText({ClipboardReader? clipboardReader}) async {
     final start = selection.start;
     final end = selection.end;
-    Clipboard.instance.initReader();
-    final pastedText =
-        await Clipboard.instance.pasteText(clipboardReader: clipboardReader);
+    TwakeClipboard.instance.initReader();
+    final pastedText = await TwakeClipboard.instance
+        .pasteText(clipboardReader: clipboardReader);
     if (pastedText != null) {
       if (start == -1 || end == -1) {
         text = pastedText + text;
@@ -30,7 +30,7 @@ extension TextEdittingControllerExtension on TextEditingController {
     final start = selection.start;
     final end = selection.end;
     if (start < end) {
-      await Clipboard.instance.copyText(text.substring(start, end));
+      await TwakeClipboard.instance.copyText(text.substring(start, end));
     }
   }
 
@@ -38,7 +38,7 @@ extension TextEdittingControllerExtension on TextEditingController {
     final start = selection.start;
     final end = selection.end;
     if (start < end) {
-      await Clipboard.instance.copyText(text.substring(start, end));
+      await TwakeClipboard.instance.copyText(text.substring(start, end));
       text = text.replaceRange(start, end, "");
       selection = TextSelection.collapsed(offset: start);
     }

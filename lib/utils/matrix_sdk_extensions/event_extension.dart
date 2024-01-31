@@ -179,12 +179,12 @@ extension LocalizedBody on Event {
           );
       try {
         if (matrixFile.filePath != null) {
-          await Clipboard.instance.copyImageAsStream(
+          await TwakeClipboard.instance.copyImageAsStream(
             File(matrixFile.filePath!),
             mimeType: mimeType,
           );
         } else if (matrixFile.bytes != null) {
-          await Clipboard.instance.copyImageAsBytes(
+          await TwakeClipboard.instance.copyImageAsBytes(
             matrixFile.bytes!,
             mimeType: mimeType,
           );
@@ -201,7 +201,7 @@ extension LocalizedBody on Event {
   }
 
   Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
-    await Clipboard.instance
+    await TwakeClipboard.instance
         .copyText(getSelectedEventString(context, timeline));
   }
 
