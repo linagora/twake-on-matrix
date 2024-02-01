@@ -84,6 +84,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
                   key: twakeLinkPreviewItemKey,
                   ownMessage: widget.ownMessage,
                   urlPreviewPresentation: previewLink,
+                  previewLink: firstValidUrl,
                 );
               }
               return const SizedBox();
