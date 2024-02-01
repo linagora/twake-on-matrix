@@ -19,7 +19,16 @@ class SettingsAppLanguage extends StatefulWidget {
 class SettingsAppLanguageController extends State<SettingsAppLanguage> {
   final saveLanguageInteractor = getIt.get<SaveLanguageInteractor>();
 
-  final supportedLocales = LocalizationService.supportedLocales;
+  List<Locale> get supportedLocales {
+    final List<Locale> copySupportedLocales =
+        List.from(LocalizationService.supportedLocales);
+
+    copySupportedLocales.sort(
+      (a, b) => a.languageCode.compareTo(b.languageCode),
+    );
+
+    return copySupportedLocales;
+  }
 
   ValueNotifier<Locale> get currentLocale => LocalizationService.currentLocale;
 
