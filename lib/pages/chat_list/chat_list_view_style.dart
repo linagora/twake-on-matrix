@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatListViewStyle {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -10,12 +11,25 @@ class ChatListViewStyle {
   static Size preferredSizeAppBar(BuildContext context) =>
       const Size.fromHeight(120);
 
-  // Between 0 and 1, scale on actions length
+  // Slidable Ratio of one slidable item
   static const double slidableSizeRatio = 0.23;
   static double slidableExtentRatio(int slidablesLength) {
     return slidableSizeRatio * slidablesLength;
   }
 
-  static const Color pinSlidableColorRaw = Color(0xFF00C853);
-  static const Color readSlidableColorRaw = Color(0xFFAEAAAE);
+  static const EdgeInsets slidablePadding = EdgeInsets.all(4.0);
+  static const double slidableIconTextGap = 4.0;
+
+  static const double slidableIconSize = 24.0;
+  static Color? pinSlidableColor(bool isFavourite) {
+    return isFavourite
+        ? LinagoraRefColors.material().neutral[70]
+        : Colors.greenAccent[700];
+  }
+
+  static Color? readSlidableColor(bool isUnread) {
+    return isUnread
+        ? LinagoraRefColors.material().neutral[70]
+        : LinagoraRefColors.material().primary[40];
+  }
 }
