@@ -9,7 +9,6 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
-import 'package:fluffychat/presentation/model/chat/pop_up_menu_item_model.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -58,38 +57,58 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
-  List<ContextMenuItemModel> get pinnedMessagesActionsList => [
-        ContextMenuItemModel(
-          text: L10n.of(context)!.unpin,
-          imagePath: ImagePaths.icUnpin,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event) {
-              unpin(extra.eventId);
-            }
-          },
+  List<Widget> pinnedMessagesActionsList(
+    BuildContext context,
+    Event event,
+  ) {
+    final listAction = [
+      ChatContextMenuActions.select,
+      ChatContextMenuActions.copyMessage,
+      ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.forward,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatContextMenuActions.downloadFile,
+    ];
+    return listAction.map((action) {
+      return InkWell(
+        onTap: () async {
+          await _handleClickOnContextMenuItem(action, event);
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          height: PinnedMessagesStyle.heightContextMenuItem,
+          padding: const EdgeInsets.all(
+            PinnedMessagesStyle.paddingAllContextMenuItem,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                action.getIcon(
+                  unpin: event.isPinned,
+                  isSelected: isSelected(event),
+                ),
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              PinnedMessagesStyle.paddingIconAndUnpin,
+              Flexible(
+                child: Text(
+                  action.getTitle(
+                    context,
+                    unpin: event.isPinned,
+                    isSelected: isSelected(event),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
-        ContextMenuItemModel(
-          text: L10n.of(context)!.jumpToMessage,
-          imagePath: ImagePaths.icJumpTo,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event) {
-              Navigator.pop(context, extra);
-            }
-          },
-        ),
-        ContextMenuItemModel(
-          text: L10n.of(context)!.copy,
-          iconData: Icons.content_copy,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event && widget.timeline != null) {
-              await extra.copy(context, widget.timeline!);
-            }
-          },
-        ),
-      ];
+      );
+    }).toList();
+  }
 
   void unpin(String eventId) {
     updatePinnedMessagesInteractor
@@ -307,16 +326,16 @@ class PinnedMessagesController extends State<PinnedMessages>
     }).toList();
   }
 
-  void _handleClickOnContextMenuItem(
+  Future<void> _handleClickOnContextMenuItem(
     ChatContextMenuActions action,
     Event event,
-  ) {
+  ) async {
     switch (action) {
       case ChatContextMenuActions.select:
         onSelectMessage(event);
         break;
       case ChatContextMenuActions.copyMessage:
-        event.copy(context, widget.timeline!);
+        await event.copy(context, widget.timeline!);
         break;
       case ChatContextMenuActions.pinChat:
         unpin(event.eventId);
@@ -325,7 +344,7 @@ class PinnedMessagesController extends State<PinnedMessages>
         forwardEventAction(event);
         break;
       case ChatContextMenuActions.downloadFile:
-        event.saveFile(context);
+        await event.saveFile(context);
         break;
       default:
         break;

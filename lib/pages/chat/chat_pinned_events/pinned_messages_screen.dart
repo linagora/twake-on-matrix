@@ -6,7 +6,6 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -98,57 +97,7 @@ class PinnedMessagesScreen extends StatelessWidget {
                               onSelect: controller.onSelectMessage,
                               selected: controller.isSelected(event),
                               menuChildren: (context) => controller
-                                  .pinnedMessagesActionsList
-                                  .map(
-                                    (action) => InkWell(
-                                      onTap: () {
-                                        action.onTap?.call(extra: event);
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Container(
-                                        height: PinnedMessagesStyle
-                                            .heightContextMenuItem,
-                                        padding: const EdgeInsets.all(
-                                          PinnedMessagesStyle
-                                              .paddingAllContextMenuItem,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            if (action.imagePath != null)
-                                              SvgPicture.asset(
-                                                action.imagePath!,
-                                                colorFilter: ColorFilter.mode(
-                                                  action.color ??
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .primary,
-                                                  BlendMode.srcIn,
-                                                ),
-                                              ),
-                                            if (action.iconData != null)
-                                              Icon(
-                                                action.iconData,
-                                                color: action.color,
-                                              ),
-                                            if (action.imagePath != null ||
-                                                action.iconData != null)
-                                              PinnedMessagesStyle
-                                                  .paddingIconAndUnpin,
-                                            Text(
-                                              action.text,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge
-                                                  ?.copyWith(
-                                                    color: action.color,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
+                                  .pinnedMessagesActionsList(context, event),
                             );
                           },
                         );
