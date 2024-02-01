@@ -10,7 +10,7 @@ class ContextMenuItemModel with EquatableMixin {
 
   final Color? color;
 
-  final void Function({Object? extra})? onTap;
+  final void Function()? onTap;
 
   ContextMenuItemModel({
     required this.text,
