@@ -4,9 +4,10 @@ import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -54,31 +55,84 @@ class ChatListViewBuilder extends StatelessWidget {
   List<Widget> _getSlidables(BuildContext context, Room room) {
     return [
       if (!room.isInvitation) ...[
-        SlidableAction(
-          autoClose: true,
-          padding: ChatListViewStyle.slidablePadding,
+        _ChatCustomSlidableAction(
           label:
               room.isUnread ? L10n.of(context)!.read : L10n.of(context)!.unread,
-          icon: room.isUnread ? Icons.mark_chat_read : Icons.mark_chat_unread,
+          icon: Icon(
+            room.isUnread
+                ? Icons.mark_chat_read_outlined
+                : Icons.mark_chat_unread_outlined,
+            size: ChatListViewStyle.slidableIconSize,
+          ),
           onPressed: (_) => controller.toggleRead(room),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: LinagoraRefColors.material().neutral[70] ??
-              ChatListViewStyle.readSlidableColorRaw,
+          backgroundColor: ChatListViewStyle.readSlidableColor(room.isUnread)!,
         ),
-        SlidableAction(
-          autoClose: true,
-          padding: ChatListViewStyle.slidablePadding,
+        _ChatCustomSlidableAction(
           label: room.isFavourite
               ? L10n.of(context)!.unpin
               : L10n.of(context)!.pin,
-          icon: room.isFavourite ? Icons.push_pin_outlined : Icons.push_pin,
+          icon: room.isFavourite
+              ? SvgPicture.asset(
+                  ImagePaths.icUnpin,
+                  width: ChatListViewStyle.slidableIconSize,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onPrimary,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : const Icon(
+                  Icons.push_pin_outlined,
+                  size: ChatListViewStyle.slidableIconSize,
+                ),
           onPressed: (_) => controller.togglePin(room),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           backgroundColor:
-              Colors.greenAccent[700] ?? ChatListViewStyle.pinSlidableColorRaw,
+              ChatListViewStyle.pinSlidableColor(room.isFavourite)!,
         ),
       ],
     ];
+  }
+}
+
+class _ChatCustomSlidableAction extends StatelessWidget {
+  const _ChatCustomSlidableAction({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final Widget icon;
+  final String label;
+  final SlidableActionCallback? onPressed;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomSlidableAction(
+      autoClose: true,
+      padding: ChatListViewStyle.slidablePadding,
+      onPressed: onPressed,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          icon,
+          const SizedBox(height: ChatListViewStyle.slidableIconTextGap),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: foregroundColor,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
