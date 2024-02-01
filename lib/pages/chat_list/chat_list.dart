@@ -605,7 +605,8 @@ class ChatListController extends State<ChatList>
       ChatListSelectionActions.read,
       ChatListSelectionActions.mute,
       ChatListSelectionActions.pin,
-      ChatListSelectionActions.more,
+      //TODO: Enable when more action is implemented
+      // ChatListSelectionActions.more,
     ];
   }
 
