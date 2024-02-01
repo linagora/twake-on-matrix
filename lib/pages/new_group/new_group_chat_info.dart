@@ -293,11 +293,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     }
   }
 
-  void _getDefaultGroupName(Set<PresentationContact> contactList) async {
-    groupNameFocusNode.requestFocus();
-    groupNameTextEditingController.clear();
-  }
-
   ImagePickerGridController createImagePickerController() {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.single),
@@ -330,7 +325,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   void initState() {
     listenGroupNameChanged();
     contactsList = widget.contactsList;
-    _getDefaultGroupName(contactsList ?? {});
     super.initState();
   }
 
@@ -338,9 +332,12 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   void dispose() {
     super.dispose();
     haveGroupNameNotifier.dispose();
+    enableEncryptionNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
     avatarFilePickerNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
+    groupNameTextEditingController.dispose();
+    groupNameFocusNode.dispose();
   }
 
   @override
