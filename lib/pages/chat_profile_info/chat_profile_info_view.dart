@@ -254,7 +254,7 @@ class _Information extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          L10n.of(context)!.sharedMediaAndFiles,
+                          L10n.of(context)!.sharedMediaAndLinks,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),

@@ -34,7 +34,7 @@ class ProfileInfoSharedView extends StatelessWidget {
         ),
         leadingWidth: ChatProfileInfoSharedViewStyle.leadingWidth,
         title: Text(
-          L10n.of(context)!.sharedMediaAndFiles,
+          L10n.of(context)!.sharedMediaAndLinks,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
