@@ -2842,8 +2842,6 @@
   },
   "blankChatTitle": "Choisissez une discussion ou appuyez sur #EditIcon# pour en créer une.",
   "@blankChatTitle": {},
-  "editWorkIdentitiesDescriptions": "Modifiez les paramètres de votre identité professionnelle, tels que l'identifiant Matrix, l'adresse électronique ou le nom de l'entreprise.",
-  "@editWorkIdentitiesDescriptions": {},
   "links": "Liens",
   "@links": {},
   "downloadImageSuccess": "Image sauvegardée dans Images",

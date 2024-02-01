@@ -36,8 +36,4 @@ extension StringColor on String {
     _colorCache[this] ??= {};
     return _colorCache[this]![0.5] ??= _getColorLight(0.5);
   }
-
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
-  }
 }

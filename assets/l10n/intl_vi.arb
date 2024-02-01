@@ -2829,8 +2829,6 @@
   "@displayName": {},
   "select": "Chọn",
   "@select": {},
-  "editWorkIdentitiesDescriptions": "Chỉnh sửa định danh công việc.",
-  "@editWorkIdentitiesDescriptions": {},
   "links": "Liên kết",
   "@links": {},
   "downloadImageSuccess": "Lưu trữ hình ảnh",
