@@ -255,16 +255,6 @@ class SettingsProfileViewWeb extends StatelessWidget {
                   ],
                 ),
               ),
-              Padding(
-                padding:
-                    SettingsProfileViewWebStyle.paddingWidgetEditProfileInfo,
-                child: Text(
-                  L10n.of(context)!.editWorkIdentitiesDescriptions,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
-                ),
-              ),
             ],
           ),
         ),
