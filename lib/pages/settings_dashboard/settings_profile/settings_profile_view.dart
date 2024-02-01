@@ -74,7 +74,7 @@ class SettingsProfileView extends StatelessWidget {
       ),
       backgroundColor: responsive.isWebDesktop(context)
           ? Theme.of(context).colorScheme.surface
-          : null,
+          : LinagoraSysColors.material().onPrimary,
       body: SingleChildScrollView(
         padding: SettingsProfileViewStyle.paddingBody,
         child: SlotLayout(
