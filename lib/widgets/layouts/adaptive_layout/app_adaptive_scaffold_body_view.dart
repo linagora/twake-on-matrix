@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view_style.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
@@ -231,12 +232,16 @@ class _ColumnPageView extends StatelessWidget {
           builder: (_) {
             return Container(
               height: ResponsiveUtils.heightBottomNavigation,
-              color: Theme.of(context).colorScheme.surface,
+              color: LinagoraSysColors.material().surface,
+              padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
               child: ListView(
+                padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   NavigationBar(
-                    height: ResponsiveUtils.heightBottomNavigation,
+                    backgroundColor: LinagoraSysColors.material().surface,
+                    elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
+                    height: ResponsiveUtils.heightBottomNavigationBar,
                     selectedIndex: _getActiveBottomNavigationBarIndex(),
                     destinations: getNavigationDestinations(context),
                     onDestinationSelected: onDestinationSelected,
