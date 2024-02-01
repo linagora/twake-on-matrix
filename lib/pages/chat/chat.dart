@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -212,6 +213,9 @@ class ChatController extends State<Chat>
   String pendingText = '';
 
   AutoScrollController suggestionScrollController = AutoScrollController();
+
+  SuggestionsController<Map<String, String?>> suggestionsController =
+      SuggestionsController();
 
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
@@ -1587,6 +1591,7 @@ class ChatController extends State<Chat>
     suggestionScrollController.dispose();
     sendController.removeListener(updateInputTextNotifier);
     sendController.dispose();
+    suggestionsController.dispose();
     super.dispose();
   }
 
