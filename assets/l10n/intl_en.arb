@@ -2864,8 +2864,6 @@
   "@editProfileDescriptions": {},
   "workIdentitiesInfo": "WORK IDENTITIES INFO",
   "@workIdentitiesInfo": {},
-  "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
-  "@editWorkIdentitiesDescriptions": {},
   "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
   "@copiedMatrixIdToClipboard": {},
   "changeProfileAvatar": "Change profile avatar",
@@ -2969,7 +2967,6 @@
   "groupName": "Group name",
   "descriptionHelper": "You can provide an optional description for your group.",
   "groupNameCannotBeEmpty": "Group name cannot be empty",
-  "sharedMediaAndLinks": "Shared media and links",
   "unpinAllMessages": "Unpin all messages",
   "pinnedMessagesTooltip": "Pinned messages",
   "jumpToMessage": "Jump to message",
@@ -3004,5 +3001,6 @@
       }
     }
   },
-  "twakeChatUser": "Twake Chat User"
+  "twakeChatUser": "Twake Chat User",
+  "sharedMediaAndLinks": "Shared media and links"
 }
