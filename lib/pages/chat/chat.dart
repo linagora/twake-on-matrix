@@ -604,13 +604,13 @@ class ChatController extends State<Chat>
     });
   }
 
-  void emojiPickerAction() {
+  void onEmojiAction() {
     emojiPickerType = EmojiPickerType.keyboard;
     showEmojiPickerNotifier.toggle();
-    if (showEmojiPickerNotifier.value) {
-      inputFocus.requestFocus();
+    if (PlatformInfos.isMobile) {
+      hideKeyboardChatScreen();
     } else {
-      inputFocus.unfocus();
+      inputFocus.requestFocus();
     }
   }
 
@@ -918,7 +918,7 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void onEmojiSelected(_, Emoji? emoji) {
+  void onEmojiSelected(Emoji? emoji) {
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
         senEmojiReaction(emoji);
@@ -926,7 +926,6 @@ class ChatController extends State<Chat>
       case EmojiPickerType.keyboard:
         typeEmoji(emoji);
         onInputBarChanged(sendController.text);
-        inputFocus.requestFocus();
         break;
     }
   }
@@ -981,7 +980,10 @@ class ChatController extends State<Chat>
           ..selection = TextSelection.fromPosition(
             TextPosition(offset: sendController.text.length),
           );
-        inputFocus.requestFocus();
+
+        if (PlatformInfos.isWeb) {
+          inputFocus.requestFocus();
+        }
         break;
     }
   }
@@ -1446,7 +1448,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void handleOnClickKeyboardAction() {
+  void onKeyboardAction() {
     showEmojiPickerNotifier.toggle();
     inputFocus.requestFocus();
   }

@@ -178,7 +178,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       constraints: BoxConstraints(
         maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
       ),
-      padding: ChatViewBodyStyle.inputBarPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -187,12 +186,19 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             // Currently we can't support reactions
             // ReactionsPicker(controller),
             const SizedBox(height: 8.0),
-            ChatInputRow(controller),
+            Padding(
+              padding: ChatViewBodyStyle.inputBarPadding,
+              child: ChatInputRow(controller),
+            ),
             const SizedBox(height: 8),
           ].map(
             (widget) => widget,
           ),
-          ChatEmojiPicker(controller),
+          ChatEmojiPicker(
+            showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
+            onEmojiSelected: controller.onEmojiSelected,
+            emojiPickerBackspace: controller.emojiPickerBackspace,
+          ),
         ],
       ),
     );
