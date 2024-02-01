@@ -26,8 +26,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
   List<PickerType> get listChatActions => [
         PickerType.gallery,
         PickerType.documents,
-        PickerType.location,
-        PickerType.contact,
+        //TODO: Enable when we have location and contact picker
+        // PickerType.location,
+        // PickerType.contact,
       ];
 
   void showMediaPickerBottomSheetAction({
