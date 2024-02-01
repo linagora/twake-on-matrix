@@ -45,7 +45,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     SettingEnum.chatSettings,
     SettingEnum.privacyAndSecurity,
     SettingEnum.notificationAndSounds,
-    SettingEnum.chatFolders,
     SettingEnum.appLanguage,
     SettingEnum.devices,
     SettingEnum.help,
