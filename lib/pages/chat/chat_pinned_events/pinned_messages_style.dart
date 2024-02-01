@@ -12,7 +12,7 @@ class PinnedMessagesStyle {
         vertical: responsiveUtils.isMobile(context) ? 4.0 : 16.0,
       );
 
-  static const SizedBox paddingIconAndUnpin = SizedBox(width: 4.0);
+  static const SizedBox paddingIconAndUnpin = SizedBox(width: 6.0);
 
   static const double unpinButtonHeight = 56;
   static const double unpinButtonWidth = 556;
