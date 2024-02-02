@@ -93,6 +93,7 @@ abstract class TwakeThemes {
         snackBarTheme: const SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
         ),
+        scaffoldBackgroundColor: LinagoraSysColors.material().onPrimary,
         dividerColor: brightness == Brightness.light
             ? Colors.blueGrey.shade50
             : Colors.blueGrey.shade900,
@@ -126,9 +127,7 @@ abstract class TwakeThemes {
           foregroundColor: brightness == Brightness.light
               ? LinagoraSysColors.material().onBackground
               : LinagoraSysColors.material().onBackgroundDark,
-          backgroundColor: brightness == Brightness.light
-              ? LinagoraSysColors.material().background
-              : LinagoraSysColors.material().backgroundDark,
+          backgroundColor: LinagoraSysColors.material().onPrimary,
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
