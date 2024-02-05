@@ -124,7 +124,7 @@ dependencies:
   fluttertoast: ^8.2.2
   rxdart: ^0.27.7
   photo_manager: ^3.0.0-dev.5
-  flutter_inappwebview: ^5.8.0
+  flutter_inappwebview: ^6.0.0
   tuple: ^2.0.2
   lottie: ^2.3.2
   wechat_camera_picker: ^4.0.2

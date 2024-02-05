@@ -223,12 +223,10 @@ class UrlLauncher with GoToDraftChatMixin {
     if (url != null) {
       if (PlatformInfos.isMobile) {
         await browser.open(
-          url: Uri.parse(url!),
-          options: ChromeSafariBrowserClassOptions(
-            android: AndroidChromeCustomTabsOptions(
-              shareState: CustomTabsShareState.SHARE_STATE_ON,
-            ),
-            ios: IOSSafariOptions(barCollapsingEnabled: true),
+          url: WebUri.uri(Uri.parse(url!)),
+          settings: ChromeSafariBrowserSettings(
+            shareState: CustomTabsShareState.SHARE_STATE_ON,
+            barCollapsingEnabled: true,
           ),
         );
       } else {
