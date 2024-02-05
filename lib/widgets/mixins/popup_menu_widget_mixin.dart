@@ -1,8 +1,8 @@
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 mixin PopupMenuWidgetMixin {
   Widget popupItemByTwakeAppRouter(
@@ -82,35 +82,35 @@ mixin PopupMenuWidgetMixin {
     EdgeInsets? padding,
   }) {
     return Padding(
-      padding: padding ?? const EdgeInsetsDirectional.all(12),
+      padding: padding ?? PopupMenuWidgetStyle.defaultItemPadding,
       child: SizedBox(
         child: Row(
           children: [
             if (iconAction != null)
               Icon(
                 iconAction,
-                size: iconSize ?? 20,
-                color: colorIcon ?? Colors.black,
+                size: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
+                color: colorIcon ??
+                    PopupMenuWidgetStyle.defaultItemColorIcon(context),
               ),
             if (imagePath != null)
               SvgPicture.asset(
                 imagePath,
-                width: iconSize ?? 20,
-                height: iconSize ?? 20,
+                width: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
+                height: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
                 fit: BoxFit.fill,
                 colorFilter: ColorFilter.mode(
-                  colorIcon ?? Colors.black,
+                  colorIcon ??
+                      PopupMenuWidgetStyle.defaultItemColorIcon(context)!,
                   BlendMode.srcIn,
                 ),
               ),
-            const SizedBox(width: 12),
+            const SizedBox(width: PopupMenuWidgetStyle.defaultItemElementsGap),
             Expanded(
               child: Text(
                 nameAction,
                 style: styleName ??
-                    Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
+                    PopupMenuWidgetStyle.defaultItemTextStyle(context),
               ),
             ),
           ],
