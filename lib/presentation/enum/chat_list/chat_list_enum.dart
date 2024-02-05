@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -68,7 +69,7 @@ enum ChatListSelectionActions {
           return Icons.mark_chat_unread;
         }
       case ChatListSelectionActions.mute:
-        if (room.pushRuleState == PushRuleState.notify) {
+        if (room.isMuted) {
           return Icons.volume_off;
         } else {
           return Icons.volume_up;
@@ -97,10 +98,10 @@ enum ChatListSelectionActions {
           return L10n.of(context)!.markThisChatAsUnRead;
         }
       case ChatListSelectionActions.mute:
-        if (room.pushRuleState == PushRuleState.notify) {
-          return L10n.of(context)!.muteThisChat;
-        } else {
+        if (room.isMuted) {
           return L10n.of(context)!.unmuteThisChat;
+        } else {
+          return L10n.of(context)!.muteThisChat;
         }
       case ChatListSelectionActions.pin:
         if (room.isFavourite) {
