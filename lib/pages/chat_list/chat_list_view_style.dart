@@ -32,4 +32,10 @@ class ChatListViewStyle {
         ? LinagoraRefColors.material().neutral[70]
         : LinagoraRefColors.material().primary[40];
   }
+
+  static Color? muteSlidableColor(bool isMuted) {
+    return isMuted
+        ? LinagoraRefColors.material().primary[20]
+        : Colors.amber[700];
+  }
 }

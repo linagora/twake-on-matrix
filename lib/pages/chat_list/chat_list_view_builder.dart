@@ -54,7 +54,7 @@ class ChatListViewBuilder extends StatelessWidget {
 
   List<Widget> _getSlidables(BuildContext context, Room room) {
     return [
-      if (!room.isInvitation) ...[
+      if (!room.isInvitation)
         _ChatCustomSlidableAction(
           label:
               room.isUnread ? L10n.of(context)!.read : L10n.of(context)!.unread,
@@ -68,6 +68,19 @@ class ChatListViewBuilder extends StatelessWidget {
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           backgroundColor: ChatListViewStyle.readSlidableColor(room.isUnread)!,
         ),
+      _ChatCustomSlidableAction(
+        label: room.isMuted ? L10n.of(context)!.unmute : L10n.of(context)!.mute,
+        icon: Icon(
+          room.isMuted
+              ? Icons.notifications_off_outlined
+              : Icons.notifications_on_outlined,
+          size: ChatListViewStyle.slidableIconSize,
+        ),
+        onPressed: (_) => controller.toggleMuteRoom(room),
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: ChatListViewStyle.muteSlidableColor(room.isMuted)!,
+      ),
+      if (!room.isInvitation)
         _ChatCustomSlidableAction(
           label: room.isFavourite
               ? L10n.of(context)!.unpin
@@ -90,7 +103,6 @@ class ChatListViewBuilder extends StatelessWidget {
           backgroundColor:
               ChatListViewStyle.pinSlidableColor(room.isFavourite)!,
         ),
-      ],
     ];
   }
 }
@@ -129,6 +141,7 @@ class _ChatCustomSlidableAction extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: foregroundColor,
                 ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
