@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_component.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -69,8 +70,7 @@ class MuteChatListSubtitleTextStyleDecorator
 
   @override
   TextStyle textStyle(Room room) {
-    final isMuted = room.pushRuleState != PushRuleState.notify;
-    if (isMuted) {
+    if (room.isMuted) {
       return _interfaceTextStyleComponent.textStyle(room).copyWith(
             color: LinagoraRefColors.material().tertiary[20],
           );

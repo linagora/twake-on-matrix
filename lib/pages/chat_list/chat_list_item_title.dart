@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/title_text_style_decorator/title_text_style_view.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
@@ -31,7 +32,6 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
     final displayName = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
-    final isMuted = room.pushRuleState != PushRuleState.notify;
     return Row(
       children: <Widget>[
         Expanded(
@@ -69,7 +69,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                         color: ChatListItemStyle.pinnedIconColor,
                       ),
                     ),
-                  if (isMuted)
+                  if (room.isMuted)
                     Padding(
                       padding: ChatListItemTitleStyle.paddingLeftIcon,
                       child: Icon(

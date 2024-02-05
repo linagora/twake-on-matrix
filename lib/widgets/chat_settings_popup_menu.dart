@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -159,14 +160,12 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                 break;
               case 'mute':
                 await TwakeDialog.showFutureLoadingDialogFullScreen(
-                  future: () =>
-                      widget.room.setPushRuleState(PushRuleState.mentionsOnly),
+                  future: () => widget.room.mute(),
                 );
                 break;
               case 'unmute':
                 await TwakeDialog.showFutureLoadingDialogFullScreen(
-                  future: () =>
-                      widget.room.setPushRuleState(PushRuleState.notify),
+                  future: () => widget.room.unmute(),
                 );
                 break;
               case 'details':
