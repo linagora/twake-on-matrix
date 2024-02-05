@@ -46,6 +46,10 @@ extension RoomExtension on Room {
     await setPushRuleState(PushRuleState.notify);
   }
 
+  bool get isMuted {
+    return pushRuleState != PushRuleState.notify;
+  }
+
   String storePlaceholderFileInMem({
     required FileInfo fileInfo,
     String? txid,

@@ -284,7 +284,7 @@ class ChatListController extends State<ChatList>
     );
   }
 
-  Future<void> toggleMuted() async {
+  Future<void> toggleMutedSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         for (final conversation in conversationSelectionNotifier.value) {
@@ -517,7 +517,7 @@ class ChatListController extends State<ChatList>
         await actionWithToggleSelectMode(toggleUnreadSelections);
         return;
       case ChatListSelectionActions.mute:
-        await actionWithToggleSelectMode(toggleMuted);
+        await actionWithToggleSelectMode(toggleMutedSelections);
         return;
       case ChatListSelectionActions.pin:
         await actionWithToggleSelectMode(toggleFavouriteRoom);
@@ -582,15 +582,7 @@ class ChatListController extends State<ChatList>
         await togglePin(room);
         return;
       case ChatListSelectionActions.mute:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.setPushRuleState(
-                  room.pushRuleState == PushRuleState.notify
-                      ? PushRuleState.mentionsOnly
-                      : PushRuleState.notify,
-                );
-          },
-        );
+        await toggleMuteRoom(room);
         return;
       case ChatListSelectionActions.more:
         return;
@@ -617,6 +609,18 @@ class ChatListController extends State<ChatList>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         await room.setFavourite(!room.isFavourite);
+      },
+    );
+  }
+
+  Future<void> toggleMuteRoom(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        if (room.isMuted) {
+          await room.unmute();
+        } else {
+          await room.mute();
+        }
       },
     );
   }
