@@ -1,4 +1,5 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
 import 'twake_context_menu_area.dart';
@@ -80,14 +81,17 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
       duration: _kShortDuration,
       child: SizedBox.shrink(
         child: Card(
+          elevation: PopupMenuWidgetStyle.menuElevation,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius:
+                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius:
+                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
             child: Material(
-              color: Theme.of(context).colorScheme.surface,
+              color: PopupMenuWidgetStyle.defaultMenuColor(context),
               child: ListView(
                 primary: false,
                 physics: const NeverScrollableScrollPhysics(),

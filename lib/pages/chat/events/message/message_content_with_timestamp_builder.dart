@@ -72,7 +72,6 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
       children: [
         if (event.isOwnMessage) _menuActionsRowBuilder(context),
         TwakeContextMenuArea(
-          width: MessageStyle.contextMenuWidth,
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
               : null,
