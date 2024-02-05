@@ -57,59 +57,6 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
-  List<Widget> pinnedMessagesActionsList(
-    BuildContext context,
-    Event event,
-  ) {
-    final listAction = [
-      ChatContextMenuActions.select,
-      ChatContextMenuActions.copyMessage,
-      ChatContextMenuActions.pinChat,
-      ChatContextMenuActions.forward,
-      if (PlatformInfos.isWeb && event.hasAttachment)
-        ChatContextMenuActions.downloadFile,
-    ];
-    return listAction.map((action) {
-      return InkWell(
-        onTap: () async {
-          await _handleClickOnContextMenuItem(action, event);
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          height: PinnedMessagesStyle.heightContextMenuItem,
-          padding: const EdgeInsets.all(
-            PinnedMessagesStyle.paddingAllContextMenuItem,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                action.getIcon(
-                  unpin: event.isPinned,
-                  isSelected: isSelected(event),
-                ),
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              PinnedMessagesStyle.paddingIconAndUnpin,
-              Flexible(
-                child: Text(
-                  action.getTitle(
-                    context,
-                    unpin: event.isPinned,
-                    isSelected: isSelected(event),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }).toList();
-  }
-
   void unpin(String eventId) {
     updatePinnedMessagesInteractor
         .execute(room: room!, eventIds: [eventId]).listen((event) {
@@ -294,7 +241,8 @@ class PinnedMessagesController extends State<PinnedMessages>
     openingPopupMenu.toggle();
   }
 
-  List<PopupMenuItem> _popupMenuActionTile(
+  // Used for "Right Click" Context Menu
+  List<Widget> pinnedMessagesActionsList(
     BuildContext context,
     Event event,
   ) {
@@ -307,23 +255,34 @@ class PinnedMessagesController extends State<PinnedMessages>
         ChatContextMenuActions.downloadFile,
     ];
     return listAction.map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: popupItemByTwakeAppRouter(
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(
           context,
-          action.getTitle(
-            context,
-            unpin: event.isPinned,
-            isSelected: isSelected(event),
-          ),
-          iconAction: action.getIcon(unpin: event.isPinned),
-          onCallbackAction: () => _handleClickOnContextMenuItem(
-            action,
-            event,
-          ),
+          unpin: event.isPinned,
+          isSelected: isSelected(event),
+        ),
+        iconAction: action.getIcon(unpin: event.isPinned),
+        onCallbackAction: () => _handleClickOnContextMenuItem(
+          action,
+          event,
         ),
       );
     }).toList();
+  }
+
+  // Used for "More" Context Menu
+  List<PopupMenuItem> _pinnedMessagesActionsTileList(
+    BuildContext context,
+    Event event,
+  ) {
+    final actionTiles = pinnedMessagesActionsList(context, event).map((action) {
+      return PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: action,
+      );
+    }).toList();
+    return actionTiles;
   }
 
   Future<void> _handleClickOnContextMenuItem(
@@ -382,7 +341,7 @@ class PinnedMessagesController extends State<PinnedMessages>
     openPopupMenuAction(
       context,
       position,
-      _popupMenuActionTile(context, event),
+      _pinnedMessagesActionsTileList(context, event),
       onClose: () {
         _handleStateContextMenu();
       },
