@@ -81,30 +81,39 @@ mixin PopupMenuWidgetMixin {
     TextStyle? styleName,
     EdgeInsets? padding,
   }) {
+    Widget buildIcon() {
+      // We try to get the SVG first and then the IconData
+      if (imagePath != null) {
+        return SvgPicture.asset(
+          imagePath,
+          width: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
+          height: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
+          fit: BoxFit.fill,
+          colorFilter: ColorFilter.mode(
+            colorIcon ?? PopupMenuWidgetStyle.defaultItemColorIcon(context)!,
+            BlendMode.srcIn,
+          ),
+        );
+      }
+
+      if (iconAction != null) {
+        return Icon(
+          iconAction,
+          size: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
+          color:
+              colorIcon ?? PopupMenuWidgetStyle.defaultItemColorIcon(context),
+        );
+      }
+
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: padding ?? PopupMenuWidgetStyle.defaultItemPadding,
       child: SizedBox(
         child: Row(
           children: [
-            if (iconAction != null)
-              Icon(
-                iconAction,
-                size: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
-                color: colorIcon ??
-                    PopupMenuWidgetStyle.defaultItemColorIcon(context),
-              ),
-            if (imagePath != null)
-              SvgPicture.asset(
-                imagePath,
-                width: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
-                height: iconSize ?? PopupMenuWidgetStyle.defaultItemIconSize,
-                fit: BoxFit.fill,
-                colorFilter: ColorFilter.mode(
-                  colorIcon ??
-                      PopupMenuWidgetStyle.defaultItemColorIcon(context)!,
-                  BlendMode.srcIn,
-                ),
-              ),
+            buildIcon(),
             const SizedBox(width: PopupMenuWidgetStyle.defaultItemElementsGap),
             Expanded(
               child: Text(

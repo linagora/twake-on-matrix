@@ -1,3 +1,4 @@
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -6,7 +7,8 @@ enum ChatContextMenuActions {
   copyMessage,
   pinChat,
   forward,
-  downloadFile;
+  downloadFile,
+  jumpToMessage;
 
   String getTitle(
     BuildContext context, {
@@ -26,10 +28,12 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.forward;
       case ChatContextMenuActions.downloadFile:
         return L10n.of(context)!.download;
+      case ChatContextMenuActions.jumpToMessage:
+        return L10n.of(context)!.jumpToMessage;
     }
   }
 
-  IconData getIcon({
+  IconData? getIconData({
     bool isSelected = false,
     bool unpin = false,
   }) {
@@ -44,6 +48,17 @@ enum ChatContextMenuActions {
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:
         return Icons.download;
+      default:
+        return null;
+    }
+  }
+
+  String? getImagePath() {
+    switch (this) {
+      case ChatContextMenuActions.jumpToMessage:
+        return ImagePaths.icGoTo;
+      default:
+        return null;
     }
   }
 }

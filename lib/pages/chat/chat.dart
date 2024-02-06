@@ -1338,8 +1338,8 @@ class ChatController extends State<Chat>
   ) {
     final listAction = [
       ChatContextMenuActions.select,
-      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -1354,9 +1354,10 @@ class ChatController extends State<Chat>
             unpin: isUnpinEvent(event),
             isSelected: isSelected(event),
           ),
-          iconAction: action.getIcon(
+          iconAction: action.getIconData(
             unpin: isUnpinEvent(event),
           ),
+          imagePath: action.getImagePath(),
           onCallbackAction: () => _handleClickOnContextMenuItem(
             action,
             event,
@@ -1385,6 +1386,8 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.downloadFile:
         downloadFileAction(context, event);
+        break;
+      default:
         break;
     }
   }
