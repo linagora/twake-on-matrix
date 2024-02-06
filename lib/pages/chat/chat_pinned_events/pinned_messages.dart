@@ -247,9 +247,10 @@ class PinnedMessagesController extends State<PinnedMessages>
     Event event,
   ) {
     final listAction = [
-      ChatContextMenuActions.select,
-      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.select,
+      ChatContextMenuActions.jumpToMessage,
+      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -262,7 +263,8 @@ class PinnedMessagesController extends State<PinnedMessages>
           unpin: event.isPinned,
           isSelected: isSelected(event),
         ),
-        iconAction: action.getIcon(unpin: event.isPinned),
+        iconAction: action.getIconData(unpin: event.isPinned),
+        imagePath: action.getImagePath(),
         onCallbackAction: () => _handleClickOnContextMenuItem(
           action,
           event,
@@ -305,9 +307,18 @@ class PinnedMessagesController extends State<PinnedMessages>
       case ChatContextMenuActions.downloadFile:
         await event.saveFile(context);
         break;
+      case ChatContextMenuActions.jumpToMessage:
+        jumpToMessage(context, event);
+        break;
       default:
         break;
     }
+  }
+
+  void jumpToMessage(BuildContext context, Event event) {
+    context.go(
+      '/rooms/${event.roomId}?event=${event.eventId}',
+    );
   }
 
   void forwardEventAction(Event event) async {
