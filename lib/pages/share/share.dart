@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
@@ -34,7 +33,7 @@ class ShareController extends State<Share>
 
   final searchFocusNode = FocusNode();
 
-  final selectedRoomsNotifier = ValueNotifier(<String>[]);
+  final selectedChatNotifier = ValueNotifier<String>('');
 
   @override
   void initState() {
@@ -53,20 +52,13 @@ class ShareController extends State<Share>
     isSearchModeNotifier.dispose();
     recentChatScrollController.dispose();
     searchFocusNode.dispose();
-    selectedRoomsNotifier.dispose();
+    selectedChatNotifier.dispose();
     disposeSearchRecentChat();
     super.dispose();
   }
 
-  void onSelectChat(String id) {
-    if (selectedRoomsNotifier.value.contains(id)) {
-      selectedRoomsNotifier.value.remove(id);
-    } else {
-      selectedRoomsNotifier.value.add(id);
-    }
-    selectedRoomsNotifier.value = selectedRoomsNotifier.value.sorted(
-      (current, next) => current.compareTo(next),
-    );
+  void onToggleSelectChat(String id) {
+    selectedChatNotifier.value = id;
   }
 
   void toggleSearchMode() {
@@ -81,7 +73,7 @@ class ShareController extends State<Share>
 
   void shareTo(String roomId) async {
     final room = Room(
-      id: selectedRoomsNotifier.value.first,
+      id: selectedChatNotifier.value,
       client: Matrix.of(context).client,
     );
     final shareContentList = Matrix.of(context).shareContentList;

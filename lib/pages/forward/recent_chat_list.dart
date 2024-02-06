@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/pages/forward/recent_chat_list_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
@@ -11,23 +12,25 @@ class RecentChatList extends StatelessWidget {
     super.key,
     required this.rooms,
     required this.recentChatScrollController,
-    required this.selectedEventsNotifier,
     required this.onSelectedChat,
+    required this.selectedChatNotifier,
   });
 
   final List<Room> rooms;
 
   final ScrollController recentChatScrollController;
 
-  final ValueNotifier<List<String>> selectedEventsNotifier;
+  final ValueNotifier<String> selectedChatNotifier;
 
   final void Function(String roomId) onSelectedChat;
 
+  static const durationToggleItem = Duration(milliseconds: 200);
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-      valueListenable: selectedEventsNotifier,
-      builder: (context, selectedEvents, child) {
+    return ValueListenableBuilder<String>(
+      valueListenable: selectedChatNotifier,
+      builder: (context, selectedChat, child) {
         return ListView.builder(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
@@ -35,42 +38,48 @@ class RecentChatList extends StatelessWidget {
           itemCount: rooms.length,
           itemBuilder: (BuildContext context, int index) {
             final room = rooms[index];
-            final selected = selectedEvents.contains(room.id);
+            final selected = selectedChat == room.id;
             return Material(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: RecentChatListStyle.borderRadiusItem,
               child: InkWell(
-                borderRadius: BorderRadius.circular(16.0),
+                borderRadius: RecentChatListStyle.borderRadiusItem,
                 onTap: () => onSelectedChat(room.id),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: selected,
-                      onChanged: (value) => onSelectedChat(room.id),
-                    ),
-                    Avatar(
-                      mxContent: room.avatar,
-                      name: room.getLocalizedDisplayname(
-                        MatrixLocals(L10n.of(context)!),
-                      ),
-                      onTap: null,
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          top: 8.0,
-                          bottom: 8.0,
-                          start: 8.0,
-                          end: 6.0,
+                child: Padding(
+                  padding: RecentChatListStyle.paddingVerticalBetweenItem,
+                  child: Row(
+                    children: [
+                      AnimatedCrossFade(
+                        duration: durationToggleItem,
+                        firstChild: Checkbox(
+                          value: selected,
+                          onChanged: (value) => onSelectedChat(room.id),
                         ),
-                        child: Column(
-                          children: [
-                            ChatListItemTitle(room: room),
-                            ChatListItemSubtitle(room: room),
-                          ],
+                        secondChild: const SizedBox.shrink(),
+                        crossFadeState: selected
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                      ),
+                      Avatar(
+                        mxContent: room.avatar,
+                        name: room.getLocalizedDisplayname(
+                          MatrixLocals(L10n.of(context)!),
+                        ),
+                        onTap: null,
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding:
+                              RecentChatListStyle.paddingHorizontalBetweenItem,
+                          child: Column(
+                            children: [
+                              ChatListItemTitle(room: room),
+                              ChatListItemSubtitle(room: room),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -46,7 +45,7 @@ class ForwardController extends State<Forward> with SearchRecentChat {
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
 
-  final selectedEventsNotifier = ValueNotifier(<String>[]);
+  final ValueNotifier<String> selectedRoomIdNotifier = ValueNotifier('');
 
   @override
   void initState() {
@@ -68,18 +67,12 @@ class ForwardController extends State<Forward> with SearchRecentChat {
     recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
     disposeSearchRecentChat();
+    selectedRoomIdNotifier.dispose();
     super.dispose();
   }
 
-  void onSelectChat(String id) {
-    if (selectedEventsNotifier.value.contains(id)) {
-      selectedEventsNotifier.value.remove(id);
-    } else {
-      selectedEventsNotifier.value.add(id);
-    }
-    selectedEventsNotifier.value = selectedEventsNotifier.value.sorted(
-      (current, next) => current.compareTo(next),
-    );
+  void onToggleSelectChat(String id) {
+    selectedRoomIdNotifier.value = id;
   }
 
   final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
@@ -91,7 +84,7 @@ class ForwardController extends State<Forward> with SearchRecentChat {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
-          selectedEvents: selectedEventsNotifier.value,
+          selectedEvents: [selectedRoomIdNotifier.value],
           matrixState: Matrix.of(context),
         )
         .listen(

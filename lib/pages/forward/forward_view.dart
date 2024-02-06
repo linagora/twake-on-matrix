@@ -51,9 +51,9 @@ class ForwardView extends StatelessWidget {
                   if (rooms.isNotEmpty) {
                     return RecentChatList(
                       rooms: rooms,
-                      selectedEventsNotifier: controller.selectedEventsNotifier,
+                      selectedChatNotifier: controller.selectedRoomIdNotifier,
                       onSelectedChat: (roomId) =>
-                          controller.onSelectChat(roomId),
+                          controller.onToggleSelectChat(roomId),
                       recentChatScrollController:
                           controller.recentChatScrollController,
                     );
@@ -68,7 +68,7 @@ class ForwardView extends StatelessWidget {
       ),
       floatingActionButton: ForwardButton(
         forwardAction: controller.forwardAction,
-        selectedEventsNotifier: controller.selectedEventsNotifier,
+        selectedChatNotifier: controller.selectedRoomIdNotifier,
         forwardMessageNotifier: controller.forwardMessageNotifier,
       ),
     );
@@ -78,12 +78,12 @@ class ForwardView extends StatelessWidget {
 class ForwardButton extends StatelessWidget {
   const ForwardButton({
     super.key,
-    required this.selectedEventsNotifier,
+    required this.selectedChatNotifier,
     required this.forwardMessageNotifier,
     required this.forwardAction,
   });
 
-  final ValueNotifier<List<String>> selectedEventsNotifier;
+  final ValueNotifier<String> selectedChatNotifier;
 
   final void Function() forwardAction;
 
@@ -91,10 +91,10 @@ class ForwardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-      valueListenable: selectedEventsNotifier,
-      builder: ((context, selectedEvents, child) {
-        if (selectedEvents.length != 1) {
+    return ValueListenableBuilder<String>(
+      valueListenable: selectedChatNotifier,
+      builder: ((context, selectedChat, child) {
+        if (selectedChat.isEmpty) {
           return const SizedBox();
         }
 
