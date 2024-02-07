@@ -133,6 +133,7 @@ class ChatEventList extends StatelessWidget {
                         path: 'rooms',
                       ),
                       onSelect: controller.onSelectMessage,
+                      onLongPress: controller.onSelectMessage,
                       selectMode: controller.selectMode,
                       scrollToEventId: (String eventId) =>
                           controller.scrollToEventId(eventId),

@@ -34,6 +34,7 @@ class Message extends StatelessWidget {
   final Event? nextEvent;
   final String? markedUnreadLocation;
   final void Function(Event)? onSelect;
+  final void Function(Event)? onLongPress;
   final void Function(Event)? onAvatarTap;
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection)? onSwipe;
@@ -53,6 +54,7 @@ class Message extends StatelessWidget {
     this.previousEvent,
     this.nextEvent,
     this.onSelect,
+    this.onLongPress,
     this.onAvatarTap,
     this.onHover,
     this.scrollToEventId,
@@ -125,6 +127,7 @@ class Message extends StatelessWidget {
                 event: event,
                 nextEvent: nextEvent,
                 onSelect: onSelect,
+                onLongPress: onLongPress,
                 scrollToEventId: scrollToEventId,
                 selected: selected,
                 selectMode: selectMode,

@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -168,6 +169,14 @@ class PinnedMessagesController extends State<PinnedMessages>
     );
   }
 
+  void onLongPress(Event event) async {
+    if (PlatformInfos.isMobile) {
+      await _showBottomSheetMobile(event);
+    } else {
+      onSelectMessage(event);
+    }
+  }
+
   void onSelectMessage(Event event) {
     if (!event.redacted) {
       if (selectedEvents.value.contains(event)) {
@@ -177,6 +186,19 @@ class PinnedMessagesController extends State<PinnedMessages>
         selectedEvents.value = [...selectedEvents.value, event];
       }
     }
+  }
+
+  Future<void> _showBottomSheetMobile(Event event) async {
+    await showAdaptiveBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: pinnedMessagesActionsList(context, event),
+        );
+      },
+    );
   }
 
   void _initPinnedEvents() {

@@ -97,6 +97,7 @@ class PinnedMessagesScreen extends StatelessWidget {
                                   controller.onHover(isHover, index, event),
                               selectMode: selectedEvents.isNotEmpty,
                               onSelect: controller.onSelectMessage,
+                              onLongPress: controller.onLongPress,
                               selected: controller.isSelected(event),
                               menuChildren: (context) => controller
                                   .pinnedMessagesActionsList(context, event),

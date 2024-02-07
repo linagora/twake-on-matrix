@@ -9,9 +9,11 @@ Future<T?> showAdaptiveBottomSheet<T>({
   required Widget Function(BuildContext) builder,
   bool isDismissible = true,
   bool isScrollControlled = false,
+  bool showDragHandle = false,
 }) =>
     showModalBottomSheet(
       context: context,
+      showDragHandle: showDragHandle,
       builder: builder,
       useRootNavigator: !PlatformInfos.isMobile,
       isDismissible: isDismissible,
