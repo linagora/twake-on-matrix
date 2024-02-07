@@ -1583,14 +1583,14 @@ class ChatController extends State<Chat>
   }
 
   bool isInViewPortCondition(
-    double deltaTop,
-    double deltaBottom,
+    double deltaTopReversed,
+    double deltaBottomReversed,
     double viewPortDimension,
   ) {
     final stickyTimestampHeight =
         stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
-    return deltaTop < viewPortDimension - stickyTimestampHeight &&
-        deltaBottom > viewPortDimension - stickyTimestampHeight;
+    return deltaTopReversed < viewPortDimension - stickyTimestampHeight &&
+        deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
   }
 
   void _handleHideStickyTimestamp() {
