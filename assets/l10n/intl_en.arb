@@ -2897,7 +2897,7 @@
   "clearAllSelected": "Clear all selected",
   "newDirectMessage": "New direct message",
   "contactInfo": "Contact info",
-  "countPinnedMessage": "{count, plural, =0{Pinned Message} other{Pinned Message #{count}}}",
+  "countPinnedMessage": "{count, plural, =1{Pinned Message} other{Pinned Message #{count}}}",
   "@countPinnedMessage": {
     "type": "text",
     "placeholders": {

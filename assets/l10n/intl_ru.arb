@@ -2917,7 +2917,7 @@
   "@linagoraContactsCount": {},
   "contactsCount": "Контакты ({count})",
   "@contactsCount": {},
-  "countPinnedMessage": "{count, plural, =0{Закрепленное сообщение} other{Закрепленное сообщение #{count}}}",
+  "countPinnedMessage": "{count, plural, =1{Закрепленное сообщение} other{Закрепленное сообщение #{count}}}",
   "@countPinnedMessage": {
     "type": "text",
     "placeholders": {

@@ -211,6 +211,8 @@ class _PinnedEventsContentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pinnedEventsOrder = countPinnedEvents + 1;
+
     return Expanded(
       child: Padding(
         padding: PinnedEventsStyle.paddingContentPinned,
@@ -218,7 +220,7 @@ class _PinnedEventsContentWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              L10n.of(context)!.countPinnedMessage(countPinnedEvents),
+              L10n.of(context)!.countPinnedMessage(pinnedEventsOrder),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: LinagoraSysColors.material().secondary,
                   ),
