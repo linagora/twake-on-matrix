@@ -358,6 +358,7 @@ class DraftChatController extends State<DraftChat>
         presentationContact!.displayName ?? L10n.of(context)!.twakeChatUser,
       ),
     );
+    onInputBarChanged(sendController.text);
   }
 
   void hideKeyboardChatScreen() {
