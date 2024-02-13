@@ -452,12 +452,12 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Comparez les emojis suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
+  "compareEmojiMatch": "Comparez les emojis suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
   "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
-  "compareNumbersMatch": "Comparez les chiffres suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
+  "compareNumbersMatch": "Comparez les chiffres suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
   "@compareNumbersMatch": {
     "type": "text",
     "placeholders": {}
@@ -2139,7 +2139,7 @@
   "@yourUserId": {},
   "unverified": "Non vérifié",
   "@unverified": {},
-  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas !",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas !",
   "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Veuillez saisir une adresse électronique valide.",
   "@pleaseEnterValidEmail": {},
@@ -3044,5 +3044,30 @@
   "useYourCompanyServer": "Utiliser le serveur de votre entreprise",
   "@useYourCompanyServer": {},
   "countFilesSendPerDialog": "Le nombre maximum de fichiers envoyés est {count}.",
-  "@countFilesSendPerDialog": {}
+  "@countFilesSendPerDialog": {},
+  "declineAndRemove": "Refuser et supprimer",
+  "@declineAndRemove": {},
+  "notNow": "Pas maintenant",
+  "@notNow": {},
+  "contactsCount": "Contacts ({count})",
+  "@contactsCount": {},
+  "doYouReallyWantToDeclineThisInvitation": "Voulez-vous vraiment refuser cette invitation et supprimer la conversation ? Vous ne pourrez pas annuler cette action.",
+  "@doYouReallyWantToDeclineThisInvitation": {},
+  "linagoraContactsCount": "Contacts Linagora ({count})",
+  "@linagoraContactsCount": {},
+  "youNeedToAcceptTheInvitation": "Vous devez accepter l'invitation avant de commencer à discuter",
+  "@youNeedToAcceptTheInvitation": {},
+  "hasInvitedYouToAChat": " vous a invité à discuter. Accepter ou refuser et supprimer la conversation ?",
+  "@hasInvitedYouToAChat": {},
+  "declineTheInvitation": "Refuser l'invitation ?",
+  "@declineTheInvitation": {},
+  "pinnedMessages": "{count, plural, =1{1 Message épinglé} other{{count} Messages épinglés}}",
+  "@pinnedMessages": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "contactsWarningBannerTitle": "Pour vous assurer que vous pouvez vous connecter avec tous vos contacts, veuillez autoriser Twake d'accéder aux contacts de votre appareil. Merci pour votre compréhension.",
+  "@contactsWarningBannerTitle": {}
 }
