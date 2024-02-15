@@ -73,7 +73,7 @@ class ResponsiveUtils {
   }
 
   bool isHeightShortest(BuildContext context) {
-    return MediaQuery.of(context).size.shortestSide < heightShortest;
+    return MediaQuery.sizeOf(context).shortestSide < heightShortest;
   }
 
   bool hasLeftMenuDrawerActive(BuildContext context) {

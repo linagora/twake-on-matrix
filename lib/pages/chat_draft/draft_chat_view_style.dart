@@ -18,7 +18,7 @@ class DraftChatViewStyle {
     BuildContext context,
     bool isShowEmojiPicker,
   ) =>
-      isShowEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0;
+      isShowEmojiPicker ? MediaQuery.sizeOf(context).height / 3 : 0;
 
   static int get minLinesInputBar => 1;
 

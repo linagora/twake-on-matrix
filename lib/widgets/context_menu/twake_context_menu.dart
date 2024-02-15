@@ -53,20 +53,20 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
     final heightsNotAvailable = children.length - _heights.length;
     height += heightsNotAvailable * _kMinTileHeight;
 
-    if (height > MediaQuery.of(context).size.height) {
-      height = MediaQuery.of(context).size.height;
+    if (height > MediaQuery.sizeOf(context).height) {
+      height = MediaQuery.sizeOf(context).height;
     }
 
     double paddingLeft = widget.position.dx;
     double paddingTop = widget.position.dy;
     double paddingRight =
-        MediaQuery.of(context).size.width - widget.position.dx - widget.width;
+        MediaQuery.sizeOf(context).width - widget.position.dx - widget.width;
     if (paddingRight < 0) {
       paddingLeft -= widget.width;
       paddingRight = widget.width + paddingRight;
     }
     double paddingBottom =
-        MediaQuery.of(context).size.height - widget.position.dy - height;
+        MediaQuery.sizeOf(context).height - widget.position.dy - height;
     if (paddingBottom < 0) {
       paddingTop += paddingBottom;
       paddingBottom = 0;

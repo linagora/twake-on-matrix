@@ -309,7 +309,7 @@ class DraftChatView extends StatelessWidget {
                         child: AnimatedContainer(
                           duration: TwakeThemes.animationDuration,
                           curve: TwakeThemes.animationCurve,
-                          width: MediaQuery.of(context).size.width,
+                          width: MediaQuery.sizeOf(context).width,
                           height: DraftChatViewStyle.animatedContainerHeight(
                             context,
                             controller.showEmojiPicker == true,

@@ -15,8 +15,8 @@ class ChatEmojiPicker extends StatelessWidget {
         return AnimatedContainer(
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
-          width: MediaQuery.of(context).size.width,
-          height: showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
+          width: MediaQuery.sizeOf(context).width,
+          height: showEmojiPicker ? MediaQuery.sizeOf(context).height / 3 : 0,
           child: showEmojiPicker
               ? EmojiPicker(
                   onEmojiSelected: controller.onEmojiSelected,
