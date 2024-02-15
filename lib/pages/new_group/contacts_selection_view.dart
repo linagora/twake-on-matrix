@@ -36,49 +36,46 @@ class ContactsSelectionView extends StatelessWidget {
           isFullScreen: controller.isFullScreen,
         ),
       ),
-      body: Padding(
-        padding: ContactsSelectionViewStyle.parentPadding,
-        child: Column(
-          children: [
-            Expanded(
-              child: ValueListenableBuilder<bool>(
-                valueListenable: controller
-                    .selectedContactsMapNotifier.haveSelectedContactsNotifier,
-                builder: (context, haveSelectedContact, child) {
-                  return child!;
-                },
-                child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: ContactsWarningBannerView(
-                        warningBannerNotifier: controller.warningBannerNotifier,
-                        closeContactsWarningBanner:
-                            controller.closeContactsWarningBanner,
-                        goToSettingsForPermissionActions:
-                            controller.goToSettingsForPermissionActions,
-                      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+              builder: (context, haveSelectedContact, child) {
+                return child!;
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: ContactsWarningBannerView(
+                      warningBannerNotifier: controller.warningBannerNotifier,
+                      closeContactsWarningBanner:
+                          controller.closeContactsWarningBanner,
+                      goToSettingsForPermissionActions:
+                          controller.goToSettingsForPermissionActions,
                     ),
-                    SliverToBoxAdapter(
-                      child: SelectedParticipantsList(
-                        contactsSelectionController: controller,
-                      ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SelectedParticipantsList(
+                      contactsSelectionController: controller,
                     ),
-                    ContactsSelectionList(
-                      presentationContactNotifier:
-                          controller.presentationContactNotifier,
-                      selectedContactsMapNotifier:
-                          controller.selectedContactsMapNotifier,
-                      onSelectedContact: controller.onSelectedContact,
-                      disabledContactIds: controller.disabledContactIds,
-                      textEditingController: controller.textEditingController,
-                    ),
-                  ],
-                ),
+                  ),
+                  ContactsSelectionList(
+                    presentationContactNotifier:
+                        controller.presentationContactNotifier,
+                    selectedContactsMapNotifier:
+                        controller.selectedContactsMapNotifier,
+                    onSelectedContact: controller.onSelectedContact,
+                    disabledContactIds: controller.disabledContactIds,
+                    textEditingController: controller.textEditingController,
+                  ),
+                ],
               ),
             ),
-            if (!controller.isFullScreen) _webActionButton(context),
-          ],
-        ),
+          ),
+          if (!controller.isFullScreen) _webActionButton(context),
+        ],
       ),
       floatingActionButton: controller.isFullScreen
           ? ValueListenableBuilder<bool>(
@@ -99,65 +96,58 @@ class ContactsSelectionView extends StatelessWidget {
     );
   }
 
-  Padding _webActionButton(BuildContext context) {
+  Widget _webActionButton(BuildContext context) {
     return Padding(
-      padding: ContactsSelectionViewStyle.webActionsButtonMargin,
-      child: SizedBox(
-        height: ContactsSelectionViewStyle.webActionsButtonHeight,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TwakeTextButton(
-              onTap: () => context.pop(),
-              message: L10n.of(context)!.cancel,
-              paddingAll: ContactsSelectionViewStyle.webActionsButtonPaddingAll,
-              margin: ContactsSelectionViewStyle.webActionsButtonMargin,
-              borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
-              buttonDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                  ContactsSelectionViewStyle.webActionsButtonBorder,
-                ),
+      padding: ContactsSelectionViewStyle.webActionsButtonPadding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TwakeTextButton(
+            onTap: () => context.pop(),
+            message: L10n.of(context)!.cancel,
+            borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
+            margin: ContactsSelectionViewStyle.webActionsButtonMargin,
+            buttonDecoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                ContactsSelectionViewStyle.webActionsButtonBorder,
               ),
-              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: LinagoraSysColors.material().primary,
-                  ),
             ),
-            const SizedBox(width: 8.0),
-            ValueListenableBuilder<bool>(
-              valueListenable: controller
-                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
-              builder: (context, haveSelectedContacts, _) {
-                return TwakeTextButton(
-                  onTap: () => haveSelectedContacts
-                      ? controller.trySubmit(context)
-                      : null,
-                  message: L10n.of(context)!.add,
-                  paddingAll:
-                      ContactsSelectionViewStyle.webActionsButtonPaddingAll,
-                  margin: ContactsSelectionViewStyle.webActionsButtonMargin,
-                  borderHover:
-                      ContactsSelectionViewStyle.webActionsButtonBorder,
-                  buttonDecoration: BoxDecoration(
-                    color: haveSelectedContacts
-                        ? LinagoraSysColors.material().primary
-                        : LinagoraStateLayer(
-                            LinagoraSysColors.material().onSurface,
-                          ).opacityLayer2,
-                    borderRadius: BorderRadius.circular(
-                      ContactsSelectionViewStyle.webActionsButtonBorder,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: LinagoraSysColors.material().primary,
+                ),
+          ),
+          const SizedBox(width: 8.0),
+          ValueListenableBuilder<bool>(
+            valueListenable: controller
+                .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+            builder: (context, haveSelectedContacts, _) {
+              return TwakeTextButton(
+                onTap: () =>
+                    haveSelectedContacts ? controller.trySubmit(context) : null,
+                message: L10n.of(context)!.add,
+                margin: ContactsSelectionViewStyle.webActionsButtonMargin,
+                borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
+                buttonDecoration: BoxDecoration(
+                  color: haveSelectedContacts
+                      ? LinagoraSysColors.material().primary
+                      : LinagoraStateLayer(
+                          LinagoraSysColors.material().onSurface,
+                        ).opacityLayer2,
+                  borderRadius: BorderRadius.circular(
+                    ContactsSelectionViewStyle.webActionsButtonBorder,
+                  ),
+                ),
+                styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: haveSelectedContacts
+                          ? LinagoraSysColors.material().onPrimary
+                          : LinagoraSysColors.material()
+                              .inverseSurface
+                              .withOpacity(0.6),
                     ),
-                  ),
-                  styleMessage:
-                      Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: haveSelectedContacts
-                                ? LinagoraSysColors.material().onPrimary
-                                : LinagoraSysColors.material().onSurface,
-                          ),
-                );
-              },
-            ),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
