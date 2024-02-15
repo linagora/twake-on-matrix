@@ -14,7 +14,7 @@ abstract class TwakeThemes {
   static bool isColumnModeByWidth(double width) => width > columnWidth * 2 + 64;
 
   static bool isColumnMode(BuildContext context) =>
-      isColumnModeByWidth(MediaQuery.of(context).size.width);
+      isColumnModeByWidth(MediaQuery.sizeOf(context).width);
 
   static bool getDisplayNavigationRail(BuildContext context) =>
       !(GoRouterState.of(context).path?.startsWith('/settings') == true);

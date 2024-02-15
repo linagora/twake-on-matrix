@@ -6,7 +6,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ChatBlankStyle {
   static const double minWidth = 200;
   static double width(BuildContext context) =>
-      min<double>(MediaQuery.of(context).size.width, ChatBlankStyle.minWidth) /
+      min<double>(MediaQuery.sizeOf(context).width, ChatBlankStyle.minWidth) /
       2;
   static const EdgeInsets elementsPadding =
       EdgeInsets.only(top: 32.0, bottom: 12.0);

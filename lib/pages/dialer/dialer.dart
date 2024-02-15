@@ -248,18 +248,17 @@ class MyCallingPage extends State<Calling> {
 
   void _resizeLocalVideo(Orientation orientation) {
     final shortSide = min(
-      MediaQuery.of(context).size.width,
-      MediaQuery.of(context).size.height,
+      MediaQuery.sizeOf(context).width,
+      MediaQuery.sizeOf(context).height,
     );
     _localVideoMargin = remoteStream != null
         ? const EdgeInsets.only(top: 20.0, right: 20.0)
         : EdgeInsets.zero;
-    _localVideoWidth = remoteStream != null
-        ? shortSide / 3
-        : MediaQuery.of(context).size.width;
+    _localVideoWidth =
+        remoteStream != null ? shortSide / 3 : MediaQuery.sizeOf(context).width;
     _localVideoHeight = remoteStream != null
         ? shortSide / 4
-        : MediaQuery.of(context).size.height;
+        : MediaQuery.sizeOf(context).height;
   }
 
   void _handleCallState(CallState state) {
