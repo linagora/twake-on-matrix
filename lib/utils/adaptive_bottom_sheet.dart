@@ -17,7 +17,7 @@ Future<T?> showAdaptiveBottomSheet<T>({
       isDismissible: isDismissible,
       isScrollControlled: isScrollControlled,
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height - 128,
+        maxHeight: MediaQuery.sizeOf(context).height - 128,
         maxWidth: TwakeThemes.columnWidth * 1.5,
       ),
       clipBehavior: Clip.hardEdge,
