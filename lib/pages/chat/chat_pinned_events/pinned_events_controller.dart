@@ -46,25 +46,31 @@ class PinnedEventsController {
       isInitial: isInitial,
     )
         .listen((event) {
-      getPinnedMessageNotifier.value = event;
-      event.fold((_) => null, (success) {
-        if (success is ChatGetPinnedEventsSuccess) {
-          if (success.pinnedEvents.isNotEmpty) {
-            if (isInitial || isUnpin) {
-              updatePinnedMessage(
-                success.pinnedEvents,
-                jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
-              );
-            } else {
-              jumpToCurrentMessage(
-                success.pinnedEvents,
-                eventId: eventId,
-                jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
-              );
+      try {
+        getPinnedMessageNotifier.value = event;
+        event.fold((_) => null, (success) {
+          if (success is ChatGetPinnedEventsSuccess) {
+            if (success.pinnedEvents.isNotEmpty) {
+              if (isInitial || isUnpin) {
+                updatePinnedMessage(
+                  success.pinnedEvents,
+                  jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
+                );
+              } else {
+                jumpToCurrentMessage(
+                  success.pinnedEvents,
+                  eventId: eventId,
+                  jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
+                );
+              }
             }
           }
-        }
-      });
+        });
+      } on FlutterError catch (error) {
+        Logs().e(
+          "PinnedEventsController()::getPinnedMessageAction(): FlutterError: $error",
+        );
+      }
     });
   }
 
