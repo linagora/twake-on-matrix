@@ -418,6 +418,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: (text) {
+            if (room!.isDirectChat) return [];
             final suggestions = getSuggestions(text);
             if (suggestions.isNotEmpty) {
               suggestionsController?.open();
