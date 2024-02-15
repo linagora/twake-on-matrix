@@ -130,7 +130,7 @@ class _ContactItem extends StatelessWidget {
             },
       borderRadius: BorderRadius.circular(16.0),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery.sizeOf(context).width,
         child: Padding(
           padding: EdgeInsets.only(
             left: 8.0,

@@ -1418,7 +1418,7 @@ class ChatController extends State<Chat>
     Event event,
     TapDownDetails tapDownDetails,
   ) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     final offset = tapDownDetails.globalPosition;
     final position = RelativeRect.fromLTRB(
       offset.dx,

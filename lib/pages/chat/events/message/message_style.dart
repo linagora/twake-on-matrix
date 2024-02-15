@@ -68,7 +68,7 @@ class MessageStyle {
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
       mobile:
-          MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
+          MediaQuery.sizeOf(context).width * messageBubbleMobileRatioMaxWidth,
     );
   }
 
