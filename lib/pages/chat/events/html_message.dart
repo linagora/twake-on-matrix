@@ -1,9 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/mentionned_user.dart';
+import 'package:fluffychat/widgets/mentioned_user.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -178,8 +179,8 @@ class HtmlMessage extends StatelessWidget {
       pillBuilder: (identifier, url, onTap, getMxcUrl) {
         final user = room.getUser(identifier);
         final displayName = user?.displayName ?? identifier;
-        return MentionnedUser(
-          displayName: displayName,
+        return MentionedUser(
+          displayName: displayName.displayMentioned,
           url: url,
           onTap: !room.isDirectChat ? onTap : null,
           textStyle: !room.isDirectChat
