@@ -36,5 +36,5 @@ class ContactsSelectionViewStyle {
   static const double webActionsButtonBorder = 100.0;
 
   static double maxToolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 48 : 112;
+      responsive.isMobile(context) ? 48 : 136;
 }
