@@ -22,7 +22,10 @@ class SearchableAppBarStyle {
     start: 16,
     end: 16,
     bottom: 8,
+    top: 8,
   );
+
+  static const paddingTitleFullScreen = SizedBox(height: 16.0);
 
   static EdgeInsetsDirectional textFieldContentPadding =
       const EdgeInsetsDirectional.only(top: 10);
