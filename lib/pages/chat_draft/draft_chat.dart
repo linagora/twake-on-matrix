@@ -150,6 +150,8 @@ class DraftChatController extends State<DraftChat>
     sendController.dispose();
     forwardListController.dispose();
     focusSuggestionController.dispose();
+    inputText.dispose();
+    showEmojiPickerNotifier.dispose();
     super.dispose();
   }
 
