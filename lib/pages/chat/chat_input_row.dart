@@ -155,6 +155,7 @@ class ChatInputRow extends StatelessWidget {
       controller: controller.sendController,
       focusSuggestionController: controller.focusSuggestionController,
       suggestionScrollController: controller.suggestionScrollController,
+      showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
         hintText: L10n.of(context)!.chatMessage,
         hintMaxLines: 1,
