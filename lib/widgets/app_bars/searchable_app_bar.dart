@@ -1,5 +1,4 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
@@ -52,11 +51,12 @@ class SearchableAppBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!isFullScreen) SearchableAppBarStyle.paddingTitleFullScreen,
             Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (isFullScreen == true) ...[
+                if (isFullScreen) ...[
                   TwakeIconButton(
                     icon: Icons.arrow_back,
                     onTap: () {
@@ -138,6 +138,13 @@ class SearchableAppBar extends StatelessWidget {
               ],
             ),
             if (!isFullScreen)
+              Divider(
+                height: 1,
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer3,
+              ),
+            if (!isFullScreen)
               Padding(
                 padding: SearchableAppBarStyle.textFieldWebPadding,
                 child: _textFieldBuilder(context),
@@ -170,15 +177,7 @@ class SearchableAppBar extends StatelessWidget {
       decoration: InputDecoration(
         contentPadding: SearchableAppBarStyle.textFieldContentPadding,
         isCollapsed: true,
-        filled: !isFullScreen,
         hintText: hintText,
-        fillColor: Theme.of(context).colorScheme.surface,
-        border: OutlineInputBorder(
-          borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(
-            ChatListHeaderStyle.searchRadiusBorder,
-          ),
-        ),
         prefixIcon: !isFullScreen
             ? Icon(
                 Icons.search_outlined,

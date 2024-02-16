@@ -43,7 +43,7 @@ class InvitationSelectionController
 
   @override
   String getHintText(BuildContext context) {
-    return L10n.of(context)!.whoWouldYouLikeToAdd;
+    return L10n.of(context)!.searchContacts;
   }
 
   @override

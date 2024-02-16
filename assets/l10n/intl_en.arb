@@ -3005,5 +3005,6 @@
   "sharedMediaAndLinks": "Shared media and links",
   "errorSendingFiles": "Some files aren’t sendable due to size, format restrictions, or unexpected errors. They’ll be omitted.",
   "removeFileBeforeSend": "Remove error files before send",
-  "unselect": "Unselect"
+  "unselect": "Unselect",
+  "searchContacts": "Search contacts"
 }
