@@ -18,14 +18,12 @@ class ChatEmojiPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: showEmojiPickerNotifier,
-      builder: (context, showEmojiPicker, child) {
-        if (!showEmojiPicker) return child!;
-
+      builder: (context, showEmojiPicker, _) {
         return AnimatedContainer(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: Border(
               top: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
+                color: Colors.transparent,
                 width: 1,
               ),
             ),
@@ -33,20 +31,21 @@ class ChatEmojiPicker extends StatelessWidget {
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
           width: MediaQuery.sizeOf(context).width,
-          height: MediaQuery.sizeOf(context).height / 3,
-          child: EmojiPicker(
-            onEmojiSelected: (_, emoji) => onEmojiSelected(emoji),
-            onBackspacePressed: emojiPickerBackspace,
-            config: Config(
-              backspaceColor: Theme.of(context).colorScheme.primary,
-              bgColor: Theme.of(context).colorScheme.surface,
-              indicatorColor: Theme.of(context).colorScheme.primary,
-              iconColorSelected: Theme.of(context).colorScheme.primary,
-            ),
-          ),
+          height: showEmojiPicker ? MediaQuery.sizeOf(context).height / 3 : 0,
+          child: showEmojiPicker
+              ? EmojiPicker(
+                  onEmojiSelected: (_, emoji) => onEmojiSelected(emoji),
+                  onBackspacePressed: emojiPickerBackspace,
+                  config: Config(
+                    backspaceColor: Theme.of(context).colorScheme.primary,
+                    bgColor: Theme.of(context).colorScheme.surface,
+                    indicatorColor: Theme.of(context).colorScheme.primary,
+                    iconColorSelected: Theme.of(context).colorScheme.primary,
+                  ),
+                )
+              : null,
         );
       },
-      child: const SizedBox.shrink(),
     );
   }
 }

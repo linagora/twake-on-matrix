@@ -36,6 +36,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final ValueChanged<String>? onChanged;
   final bool autofocus;
   final ValueKey? typeAheadKey;
+  final ValueNotifier<bool>? showEmojiPickerNotifier;
   final SuggestionsController<Map<String, String?>>? suggestionsController;
 
   InputBar({
@@ -55,6 +56,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.typeAheadKey,
     this.rawKeyboardFocusNode,
     this.suggestionsController,
+    this.showEmojiPickerNotifier,
     Key? key,
   }) : super(key: key);
 
@@ -387,7 +389,6 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           suggestionsController: suggestionsController,
           controller: controller,
           focusNode: typeAheadFocusNode,
-          // show suggestions after 50ms idle time (default is 300)
           builder: (context, controller, focusNode) => TextField(
             minLines: minLines,
             maxLines: maxLines,
@@ -424,7 +425,10 @@ class InputBar extends StatelessWidget with PasteImageMixin {
               suggestionsController?.open();
             } else {
               suggestionsController?.close();
-              typeAheadFocusNode?.requestFocus();
+              if (PlatformInfos.isWeb ||
+                  showEmojiPickerNotifier?.value == false) {
+                typeAheadFocusNode?.requestFocus();
+              }
             }
             focusSuggestionController.suggestions = suggestions;
             return suggestions;
