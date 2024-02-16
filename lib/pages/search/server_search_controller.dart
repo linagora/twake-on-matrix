@@ -68,25 +68,34 @@ class ServerSearchController with SearchDebouncerMixin {
     _searchCategories = null;
   }
 
+  List<Result>? get currentSearchResults =>
+      searchResultsNotifier.value is PresentationServerSideSearch
+          ? (searchResultsNotifier.value as PresentationServerSideSearch)
+              .searchResults
+          : null;
+
   void _handleListenServerSearch(Either<Failure, Success> searchResult) {
     searchResult.fold(
       (failure) => resetNextBatch(),
       (success) {
         if (success is ServerSearchChatSuccess) {
           updateNextBatch(success.nextBatch);
-          if (success.results?.isEmpty == true) {
+          final loadMoreSearchResults = success.results;
+
+          if (loadMoreSearchResults?.isEmpty == true &&
+              currentSearchResults?.isEmpty == true) {
             searchResultsNotifier.value = PresentationServerSideEmptySearch();
           } else {
             searchResultsNotifier.value = PresentationServerSideSearch(
               searchResults: [
-                if (searchResultsNotifier.value is PresentationServerSideSearch)
-                  ...(searchResultsNotifier.value
-                          as PresentationServerSideSearch)
-                      .searchResults,
-                ...success.results ?? [],
+                ...currentSearchResults ?? [],
+                ...loadMoreSearchResults ?? [],
               ],
             );
           }
+        } else if (success is ServerSearchLoading) {
+          Logs().d('ServerSearchController::_handleListenServerSearch(): '
+              'ServerSearchLoading');
         }
       },
     );

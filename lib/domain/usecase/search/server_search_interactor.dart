@@ -17,7 +17,7 @@ class ServerSearchInteractor {
   }) async* {
     try {
       if (nextBatch == null) {
-        yield Right(ServerSearchInitial());
+        yield const Right(ServerSearchLoading());
       }
       final response = await _repository.search(
         nextBatch: nextBatch,

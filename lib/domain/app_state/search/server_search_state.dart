@@ -35,3 +35,10 @@ class ServerSearchChatFailed extends Failure {
   @override
   List<Object?> get props => [exception];
 }
+
+class ServerSearchLoading extends Success {
+  const ServerSearchLoading();
+
+  @override
+  List<Object?> get props => [];
+}
