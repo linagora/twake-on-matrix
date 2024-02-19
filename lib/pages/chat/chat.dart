@@ -1448,6 +1448,13 @@ class ChatController extends State<Chat>
     }
   }
 
+  void onHideKeyboardAndEmoji() {
+    hideKeyboardChatScreen();
+    if (!PlatformInfos.isWeb) {
+      showEmojiPickerNotifier.value = false;
+    }
+  }
+
   void onKeyboardAction() {
     showEmojiPickerNotifier.toggle();
     inputFocus.requestFocus();
