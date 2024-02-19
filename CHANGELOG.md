@@ -1,8 +1,57 @@
+## [2.4.18+2330] - 2024-02-19
+
+### Fixed
+
+- Translated using Weblate (French)
+- Translated using Weblate (Vietnamese)
+- \#1152: Support can search by email on chat list
+- Update code owner for project
+- \#1450: fix greating popup input text sync
+- \#1031: Improve Emoji Picker
+- hot-fix: reenable context menu in mobile and other devices
+- \#1271: Update UI for dialog invitation
+- \#1240: Use try catch for `ValueNotifier`
+- \#1423: Update padding for reply content
+- \#1314: Change format date time from MM/dd/yy to dd/MM/yy
+- \#1196: Update display pill with display name
+- \#1394: Add Slidable Chat List Item - Mute/Unmute
+- improve perf: change MediaQuery.of to sizeOf to reduce rebuild
+- \#217: update new UX for share and forward screen
+- \#344: Using visibility_detector for detect message in chat and display sticky timestamp
+- \#1429: change Clipboard to TwakeClipboard
+- \#1442: Harmonize Context Menu Styles across the app
+- \#1371: Improve selection message behavior
+- \#1360: Add Slidable Chat List Item - Read/Unread
+- \#1402: cannot tag user in safari
+- \#1381: Improve send_file_dialog component
+- Update background color for all app
+- \#1437: Update bottom navigator bar
+- \#1418: Sort languages in alphabetical order and start them with a capital letter
+- \#1412: Change naming in other users' profile information
+- \#1437: Remove extra text in for profile information
+- \#1437: Disable More button when select message in chat list
+- \#1437: Remove emote settings
+- \#1437: Remove chat folders button in settings
+- \#1437: Disable location and contact button
+- \#382: remove auto fill chat group name
+- hot-fix: hover at link only
+- \#1297: Improve for hide/show btn delete avatar in edit group
+- \#1383: Update position of context menu in edit group
+- \#888: Add unit test for `ContactsManager`
+- \#1411: Update padding for no search result in selection members
+- \#1411: Improve for search no result in create chat
+- fix: invitation text after getting new room events
+- \#1359: Add Slidable Chat List Item - Pin/Unpin
+- fix: clear selection bottom bar after done on mobile
+
 ## [2.4.16+2330] - 2024-01-31
+
 ### Added
+
 - Add test widget for Twake Preview Link
 
 ### Fixed
+
 - Padding in new group chat
 - Padding in inviation member screen
 - Update Members list when have changes in Chat
@@ -2173,6 +2222,8 @@ interesting devices. If you have one, I would very like to see some screenshots 
 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
+
+[2.4.18+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.18
 
 [2.4.16+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.16
 [2.4.15+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.15
