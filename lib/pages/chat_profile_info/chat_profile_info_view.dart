@@ -254,7 +254,7 @@ class _Information extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          L10n.of(context)!.sharedMediaAndFiles,
+                          L10n.of(context)!.sharedMediaAndLinks,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),
@@ -317,7 +317,7 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
           ),
           color: LinagoraRefColors.material().tertiary[40],
           onPressed: () {
-            Clipboard.instance.copyText(text);
+            TwakeClipboard.instance.copyText(text);
             TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
           },
         ),
@@ -373,7 +373,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
           color: LinagoraRefColors.material().tertiary[40],
           focusColor: Theme.of(context).primaryColor,
           onPressed: () {
-            Clipboard.instance.copyText(text);
+            TwakeClipboard.instance.copyText(text);
             TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
           },
         ),

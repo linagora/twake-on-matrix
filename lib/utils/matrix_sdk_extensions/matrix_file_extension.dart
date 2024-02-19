@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -109,4 +110,50 @@ extension MatrixFileExtension on MatrixFile {
 
   String? get fileExtension =>
       name.contains('.') ? name.split('.').last.toUpperCase() : null;
+
+  Future<MatrixFile> convertReadStreamToBytes() async {
+    if (bytes != null || readStream == null) {
+      return this;
+    }
+
+    return MatrixFile(
+      bytes: await _streamToUint8List(readStream!),
+      name: name,
+      mimeType: mimeType,
+      filePath: filePath,
+    ).detectFileType;
+  }
+
+  Future<Uint8List> _streamToUint8List(Stream<List<int>> stream) async {
+    var byteData = ByteData(0);
+    var length = 0;
+
+    await for (final chunk in stream) {
+      final chunkLength = chunk.length;
+      final newLength = length + chunkLength;
+
+      if (newLength > byteData.lengthInBytes) {
+        final newByteData = ByteData(newLength);
+
+        for (var i = 0; i < length; i++) {
+          newByteData.setUint8(i, byteData.getUint8(i));
+        }
+
+        byteData = newByteData;
+      }
+
+      for (var i = 0; i < chunkLength; i++) {
+        byteData.setUint8(length + i, chunk[i]);
+      }
+
+      length = newLength;
+    }
+
+    return Uint8List.view(byteData.buffer, 0, length);
+  }
+
+  bool get isFileHaveThumbnail =>
+      this is MatrixImageFile || this is MatrixVideoFile;
+
+  bool isFileHaveError(double maxSize) => size > maxSize;
 }

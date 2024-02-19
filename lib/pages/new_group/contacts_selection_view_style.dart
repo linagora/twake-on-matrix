@@ -13,7 +13,7 @@ class ContactsSelectionViewStyle {
   );
 
   static EdgeInsets parentPadding =
-      const EdgeInsets.symmetric(horizontal: 12.0);
+      const EdgeInsets.symmetric(horizontal: 16.0);
 
   static Size preferredSize(BuildContext context) => Size.fromHeight(
         AppConfig.toolbarHeight(context),
@@ -24,16 +24,17 @@ class ContactsSelectionViewStyle {
       );
 
   static EdgeInsetsDirectional webActionsButtonPadding =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 16.0,
+      const EdgeInsetsDirectional.only(
+    top: 24,
+    bottom: 16,
+    start: 16,
+    end: 16,
   );
-
-  static const double webActionsButtonHeight = 72.0;
 
   static const double webActionsButtonPaddingAll = 10.0;
 
   static const double webActionsButtonBorder = 100.0;
 
   static double maxToolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 48 : 112;
+      responsive.isMobile(context) ? 48 : 136;
 }

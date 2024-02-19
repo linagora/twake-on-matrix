@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -60,7 +63,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'send_file_dialog.dart';
+import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
 class Chat extends StatefulWidget {
@@ -97,6 +100,11 @@ class ChatController extends State<Chat>
       getIt.get<NetworkConnectionService>();
 
   static const double _isPortionAvailableToScroll = 64;
+
+  static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
+
+  final GlobalKey stickyTimestampKey =
+      GlobalKey(debugLabel: 'stickyTimestampKey');
 
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -156,6 +164,8 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
+  final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
 
@@ -211,7 +221,14 @@ class ChatController extends State<Chat>
 
   String pendingText = '';
 
+  DateTime _currentDateTimeEvent = DateTime.now();
+
+  ChatScrollState _currentChatScrollState = ChatScrollState.endScroll;
+
   AutoScrollController suggestionScrollController = AutoScrollController();
+
+  SuggestionsController<Map<String, String?>> suggestionsController =
+      SuggestionsController();
 
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
@@ -221,6 +238,10 @@ class ChatController extends State<Chat>
   void updateInputTextNotifier() {
     inputText.value = sendController.text;
   }
+
+  bool isSelected(Event event) => selectedEvents.any(
+        (e) => e.eventId == event.eventId,
+      );
 
   String? _findUnreadReceivedMessageLocation() {
     final events = timeline!.events;
@@ -312,7 +333,6 @@ class ChatController extends State<Chat>
     } else if (scrollController.position.pixels <= 0) {
       showScrollDownButtonNotifier.value = false;
     }
-
     if (scrollController.position.pixels == 0 ||
         scrollController.position.pixels == _isPortionAvailableToScroll) {
       requestFuture();
@@ -442,6 +462,7 @@ class ChatController extends State<Chat>
 
   Future<void> send() async {
     scrollDown();
+    showEmojiPickerNotifier.value = false;
 
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
@@ -583,14 +604,14 @@ class ChatController extends State<Chat>
     });
   }
 
-  void emojiPickerAction() {
-    if (showEmojiPickerNotifier.value) {
-      inputFocus.requestFocus();
-    } else {
-      inputFocus.unfocus();
-    }
+  void onEmojiAction() {
     emojiPickerType = EmojiPickerType.keyboard;
     showEmojiPickerNotifier.toggle();
+    if (PlatformInfos.isMobile) {
+      hideKeyboardChatScreen();
+    } else {
+      inputFocus.requestFocus();
+    }
   }
 
   void _inputFocusListener() {
@@ -856,6 +877,7 @@ class ChatController extends State<Chat>
       scrollController.jumpTo(0);
     }
     setReadMarker();
+    _handleHideStickyTimestamp();
   }
 
   int getDisplayEventIndex(int eventIndex) {
@@ -896,7 +918,7 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void onEmojiSelected(_, Emoji? emoji) {
+  void onEmojiSelected(Emoji? emoji) {
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
         senEmojiReaction(emoji);
@@ -958,6 +980,10 @@ class ChatController extends State<Chat>
           ..selection = TextSelection.fromPosition(
             TextPosition(offset: sendController.text.length),
           );
+
+        if (PlatformInfos.isWeb) {
+          inputFocus.requestFocus();
+        }
         break;
     }
   }
@@ -1082,7 +1108,7 @@ class ChatController extends State<Chat>
     return index + 1;
   }
 
-  void onInputBarSubmitted(_) async {
+  void onInputBarSubmitted() async {
     await Future.delayed(const Duration(milliseconds: 100));
     await send();
     FocusScope.of(context).requestFocus(inputFocus);
@@ -1334,8 +1360,9 @@ class ChatController extends State<Chat>
   ) {
     final listAction = [
       ChatContextMenuActions.select,
-      ChatContextMenuActions.copyMessage,
+      if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -1348,10 +1375,12 @@ class ChatController extends State<Chat>
           action.getTitle(
             context,
             unpin: isUnpinEvent(event),
+            isSelected: isSelected(event),
           ),
-          iconAction: action.getIcon(
+          iconAction: action.getIconData(
             unpin: isUnpinEvent(event),
           ),
+          imagePath: action.getImagePath(),
           onCallbackAction: () => _handleClickOnContextMenuItem(
             action,
             event,
@@ -1381,6 +1410,8 @@ class ChatController extends State<Chat>
       case ChatContextMenuActions.downloadFile:
         downloadFileAction(context, event);
         break;
+      default:
+        break;
     }
   }
 
@@ -1392,7 +1423,7 @@ class ChatController extends State<Chat>
     Event event,
     TapDownDetails tapDownDetails,
   ) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.sizeOf(context);
     final offset = tapDownDetails.globalPosition;
     final position = RelativeRect.fromLTRB(
       offset.dx,
@@ -1417,7 +1448,14 @@ class ChatController extends State<Chat>
     }
   }
 
-  void handleOnClickKeyboardAction() {
+  void onHideKeyboardAndEmoji() {
+    hideKeyboardChatScreen();
+    if (!PlatformInfos.isWeb) {
+      showEmojiPickerNotifier.value = false;
+    }
+  }
+
+  void onKeyboardAction() {
     showEmojiPickerNotifier.toggle();
     inputFocus.requestFocus();
   }
@@ -1537,6 +1575,58 @@ class ChatController extends State<Chat>
     );
   }
 
+  void handleDisplayStickyTimestamp(DateTime dateTime) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentChatScrollState.isEndScroll) return;
+      _currentDateTimeEvent = dateTime;
+      if (scrollController.offset > 0) {
+        stickyTimestampNotifier.value ??= dateTime;
+        if (stickyTimestampNotifier.value?.day != dateTime.day) {
+          Logs().d(
+            'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+          );
+          Logs().d(
+            'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+          );
+          stickyTimestampNotifier.value = dateTime;
+        }
+      }
+    });
+  }
+
+  bool isInViewPortCondition(
+    double deltaTopReversed,
+    double deltaBottomReversed,
+    double viewPortDimension,
+  ) {
+    final stickyTimestampHeight =
+        stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
+    return deltaTopReversed < viewPortDimension - stickyTimestampHeight &&
+        deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
+  }
+
+  void _handleHideStickyTimestamp() {
+    Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
+    stickyTimestampNotifier.value = null;
+  }
+
+  void handleScrollEndNotification() async {
+    Logs().d('Chat::handleScrollEndNotification() - End of scroll');
+    if (PlatformInfos.isMobile) {
+      _currentChatScrollState = ChatScrollState.endScroll;
+      await Future.delayed(_delayHideStickyTimestampHeader);
+      _handleHideStickyTimestamp();
+    }
+  }
+
+  void handleScrollStartNotification() {
+    _currentChatScrollState = ChatScrollState.startScroll;
+  }
+
+  void handleScrollUpdateNotification() {
+    _currentChatScrollState = ChatScrollState.scrolling;
+  }
+
   @override
   void initState() {
     _initializePinnedEvents();
@@ -1587,6 +1677,8 @@ class ChatController extends State<Chat>
     suggestionScrollController.dispose();
     sendController.removeListener(updateInputTextNotifier);
     sendController.dispose();
+    suggestionsController.dispose();
+    stickyTimestampNotifier.dispose();
     super.dispose();
   }
 

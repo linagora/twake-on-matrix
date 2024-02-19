@@ -9,7 +9,6 @@ import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'settings_chat.dart';
@@ -32,12 +31,6 @@ class SettingsChatView extends StatelessWidget {
           withScrolling: true,
           child: Column(
             children: [
-              ListTile(
-                title: Text(L10n.of(context)!.emoteSettings),
-                onTap: () => context.go('/emotes'),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                leading: const Icon(Icons.emoji_emotions_outlined),
-              ),
               const Divider(),
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context)!.renderRichContent,

@@ -117,52 +117,51 @@ class _ContactItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final contactNotifier =
         selectedContactsMapNotifier.getNotifierAtContact(contact);
-    return InkWell(
-      key: ValueKey(contact.matrixId),
-      onTap: disabled
-          ? null
-          : () {
-              onSelectedContact?.call();
-              selectedContactsMapNotifier.onContactTileTap(
-                context,
-                contact,
-              );
-            },
-      borderRadius: BorderRadius.circular(16.0),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 8.0,
-            right: 16,
-            top: paddingTop,
-          ),
-          child: Row(
-            children: [
-              ValueListenableBuilder<bool>(
-                valueListenable: contactNotifier,
-                builder: (context, isCurrentSelected, child) {
-                  return Checkbox(
-                    value: disabled || contactNotifier.value,
-                    onChanged: disabled
-                        ? null
-                        : (newValue) {
-                            onSelectedContact?.call();
-                            selectedContactsMapNotifier.onContactTileTap(
-                              context,
-                              contact,
-                            );
-                          },
-                  );
-                },
-              ),
-              Expanded(
-                child: ExpansionContactListTile(
-                  contact: contact,
-                  highlightKeyword: highlightKeyword,
+    return Padding(
+      padding: ContactsSelectionListStyle.contactItemPadding,
+      child: InkWell(
+        key: ValueKey(contact.matrixId),
+        onTap: disabled
+            ? null
+            : () {
+                onSelectedContact?.call();
+                selectedContactsMapNotifier.onContactTileTap(
+                  context,
+                  contact,
+                );
+              },
+        borderRadius: ContactsSelectionListStyle.contactItemBorderRadius,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: ContactsSelectionListStyle.checkBoxPadding(paddingTop),
+            child: Row(
+              children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: contactNotifier,
+                  builder: (context, isCurrentSelected, child) {
+                    return Checkbox(
+                      value: disabled || contactNotifier.value,
+                      onChanged: disabled
+                          ? null
+                          : (newValue) {
+                              onSelectedContact?.call();
+                              selectedContactsMapNotifier.onContactTileTap(
+                                context,
+                                contact,
+                              );
+                            },
+                    );
+                  },
                 ),
-              ),
-            ],
+                Expanded(
+                  child: ExpansionContactListTile(
+                    contact: contact,
+                    highlightKeyword: highlightKeyword,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

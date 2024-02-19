@@ -2758,7 +2758,7 @@
   "@askToInvite": {},
   "select": "Select",
   "@select": {},
-  "copyMessageText": "Copy message text",
+  "copyMessageText": "Copy",
   "@copyMessageText": {},
   "pinThisChat": "Pin this chat",
   "@pinThisChat": {},
@@ -2864,8 +2864,6 @@
   "@editProfileDescriptions": {},
   "workIdentitiesInfo": "WORK IDENTITIES INFO",
   "@workIdentitiesInfo": {},
-  "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
-  "@editWorkIdentitiesDescriptions": {},
   "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
   "@copiedMatrixIdToClipboard": {},
   "changeProfileAvatar": "Change profile avatar",
@@ -2969,7 +2967,6 @@
   "groupName": "Group name",
   "descriptionHelper": "You can provide an optional description for your group.",
   "groupNameCannotBeEmpty": "Group name cannot be empty",
-  "sharedMediaAndFiles": "Shared media and files",
   "unpinAllMessages": "Unpin all messages",
   "pinnedMessagesTooltip": "Pinned messages",
   "jumpToMessage": "Jump to message",
@@ -3004,5 +3001,10 @@
       }
     }
   },
-  "twakeChatUser": "Twake Chat User"
+  "twakeChatUser": "Twake Chat User",
+  "sharedMediaAndLinks": "Shared media and links",
+  "errorSendingFiles": "Some files aren’t sendable due to size, format restrictions, or unexpected errors. They’ll be omitted.",
+  "removeFileBeforeSend": "Remove error files before send",
+  "unselect": "Unselect",
+  "searchContacts": "Search contacts"
 }

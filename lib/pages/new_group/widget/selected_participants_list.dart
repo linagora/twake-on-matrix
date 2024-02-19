@@ -31,7 +31,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
       alignment: Alignment.bottomCenter,
       duration: const Duration(milliseconds: 250),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery.sizeOf(context).width,
         child: ListenableBuilder(
           listenable: contactsNotifier,
           builder: (context, Widget? child) {

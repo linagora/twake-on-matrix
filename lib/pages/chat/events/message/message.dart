@@ -9,7 +9,7 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
-import 'package:fluffychat/pages/chat/sticky_timstamp_widget.dart';
+import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -39,7 +39,6 @@ class Message extends StatelessWidget {
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
   final ValueNotifier<String?> isHoverNotifier;
-  final bool longPressSelect;
   final bool selected;
   final Timeline timeline;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
@@ -48,12 +47,12 @@ class Message extends StatelessWidget {
   final VoidCallback? hideKeyboardChatScreen;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
+  final bool? hideTimeStamp;
 
   const Message(
     this.event, {
     this.previousEvent,
     this.nextEvent,
-    this.longPressSelect = false,
     this.onSelect,
     this.onAvatarTap,
     this.onHover,
@@ -70,6 +69,7 @@ class Message extends StatelessWidget {
     this.onMenuAction,
     this.markedUnreadLocation,
     this.focusNode,
+    this.hideTimeStamp = false,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -126,7 +126,6 @@ class Message extends StatelessWidget {
               child: MessageContentWithTimestampBuilder(
                 event: event,
                 nextEvent: nextEvent,
-                longPressSelect: longPressSelect,
                 onSelect: onSelect,
                 scrollToEventId: scrollToEventId,
                 selected: selected,
@@ -150,7 +149,9 @@ class Message extends StatelessWidget {
             children: [
               if (displayTime)
                 StickyTimestampWidget(
-                  content: event.originServerTs.relativeTime(context),
+                  content: hideTimeStamp == false
+                      ? event.originServerTs.relativeTime(context)
+                      : '',
                 ),
               if (markedUnreadLocation != null &&
                   markedUnreadLocation == event.eventId) ...[
@@ -188,9 +189,6 @@ class Message extends StatelessWidget {
                             : hideKeyboardChatScreen?.call(),
                         child: Center(
                           child: Container(
-                            margin: EdgeInsetsDirectional.only(
-                              start: selected ? 0.0 : 8.0,
-                            ),
                             padding: EdgeInsets.only(
                               right: selected
                                   ? 0
@@ -242,8 +240,8 @@ class Message extends StatelessWidget {
 
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: selected ? 1 : 0,
+      padding: EdgeInsets.only(
+        left: selectMode ? 12.0 : 8.0,
       ),
       color: selected
           ? LinagoraSysColors.material().secondaryContainer
@@ -257,9 +255,8 @@ class Message extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start:
-                      (selected || responsiveUtils.isDesktop(context)) ? 16 : 8,
+                padding: const EdgeInsetsDirectional.only(
+                  start: 16.0,
                 ),
                 child: Icon(
                   selected ? Icons.check_circle_rounded : Icons.circle_outlined,

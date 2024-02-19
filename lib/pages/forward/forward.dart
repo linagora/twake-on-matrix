@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -46,7 +45,7 @@ class ForwardController extends State<Forward> with SearchRecentChat {
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
 
-  final selectedEventsNotifier = ValueNotifier(<String>[]);
+  final ValueNotifier<String> selectedRoomIdNotifier = ValueNotifier('');
 
   @override
   void initState() {
@@ -68,18 +67,12 @@ class ForwardController extends State<Forward> with SearchRecentChat {
     recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
     disposeSearchRecentChat();
+    selectedRoomIdNotifier.dispose();
     super.dispose();
   }
 
-  void onSelectChat(String id) {
-    if (selectedEventsNotifier.value.contains(id)) {
-      selectedEventsNotifier.value.remove(id);
-    } else {
-      selectedEventsNotifier.value.add(id);
-    }
-    selectedEventsNotifier.value = selectedEventsNotifier.value.sorted(
-      (current, next) => current.compareTo(next),
-    );
+  void onToggleSelectChat(String id) {
+    selectedRoomIdNotifier.value = id;
   }
 
   final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
@@ -91,7 +84,7 @@ class ForwardController extends State<Forward> with SearchRecentChat {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
-          selectedEvents: selectedEventsNotifier.value,
+          selectedEvents: [selectedRoomIdNotifier.value],
           matrixState: Matrix.of(context),
         )
         .listen(

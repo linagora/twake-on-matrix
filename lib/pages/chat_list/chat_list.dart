@@ -4,8 +4,10 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
@@ -222,12 +224,12 @@ class ChatListController extends State<ChatList>
   void toggleSelectMode() {
     selectModeNotifier.value =
         isSelectMode ? SelectMode.normal : SelectMode.select;
+    _clearSelectionItem();
   }
 
   Future<void> actionWithToggleSelectMode(Function action) async {
     await action();
     toggleSelectMode();
-    _clearSelectionItem();
   }
 
   void _clearSelectionItem() {
@@ -254,7 +256,7 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  Future<void> toggleUnread() async {
+  Future<void> toggleUnreadSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final markUnread = anySelectedRoomNotMarkedUnread;
@@ -282,7 +284,7 @@ class ChatListController extends State<ChatList>
     );
   }
 
-  Future<void> toggleMuted() async {
+  Future<void> toggleMutedSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         for (final conversation in conversationSelectionNotifier.value) {
@@ -387,9 +389,17 @@ class ChatListController extends State<ChatList>
     conversationSelectionNotifier.value.clear();
   }
 
+  Future<void> setupAdditionalDioCacheOption(String userId) async {
+    Logs().d('ChatList::setupAdditionalDioCacheOption: $userId');
+    DioCacheInterceptorForClient(userId).setup(getIt);
+  }
+
   Future<void> _waitForFirstSync() async {
     await client.roomsLoading;
     await client.accountDataLoading;
+    if (client.userID != null) {
+      await setupAdditionalDioCacheOption(client.userID!);
+    }
     if (client.prevBatch == null) {
       await client.onSync.stream.first;
       await client.initCompleter?.future;
@@ -504,10 +514,10 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (chatListBottomNavigatorBar) {
       case ChatListSelectionActions.read:
-        await actionWithToggleSelectMode(toggleUnread);
+        await actionWithToggleSelectMode(toggleUnreadSelections);
         return;
       case ChatListSelectionActions.mute:
-        await actionWithToggleSelectMode(toggleMuted);
+        await actionWithToggleSelectMode(toggleMutedSelections);
         return;
       case ChatListSelectionActions.pin:
         await actionWithToggleSelectMode(toggleFavouriteRoom);
@@ -538,7 +548,7 @@ class ChatListController extends State<ChatList>
     Room room,
   ) {
     final listAction = [
-      if (room.membership != Membership.invite) ...[
+      if (!room.isInvitation) ...[
         ChatListSelectionActions.read,
         ChatListSelectionActions.pin,
       ],
@@ -566,33 +576,53 @@ class ChatListController extends State<ChatList>
   ) async {
     switch (action) {
       case ChatListSelectionActions.read:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.markUnread(!room.markedUnread);
-          },
-        );
+        await toggleRead(room);
         return;
       case ChatListSelectionActions.pin:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.setFavourite(!room.isFavourite);
-          },
-        );
+        await togglePin(room);
         return;
       case ChatListSelectionActions.mute:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async {
-            await client.getRoomById(room.id)!.setPushRuleState(
-                  room.pushRuleState == PushRuleState.notify
-                      ? PushRuleState.mentionsOnly
-                      : PushRuleState.notify,
-                );
-          },
-        );
+        await toggleMuteRoom(room);
         return;
       case ChatListSelectionActions.more:
         return;
     }
+  }
+
+  Future<void> toggleRead(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        if (room.isUnread) {
+          await room.markUnread(false);
+          await room.setReadMarker(
+            room.lastEvent!.eventId,
+            mRead: room.lastEvent!.eventId,
+          );
+        } else {
+          await room.markUnread(true);
+        }
+      },
+    );
+  }
+
+  Future<void> togglePin(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        await room.setFavourite(!room.isFavourite);
+      },
+    );
+  }
+
+  Future<void> toggleMuteRoom(Room room) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        if (room.isMuted) {
+          await room.unmute();
+        } else {
+          await room.mute();
+        }
+      },
+    );
   }
 
   List<ChatListSelectionActions> _getNavigationDestinations() {
@@ -600,7 +630,8 @@ class ChatListController extends State<ChatList>
       ChatListSelectionActions.read,
       ChatListSelectionActions.mute,
       ChatListSelectionActions.pin,
-      ChatListSelectionActions.more,
+      //TODO: Enable when more action is implemented
+      // ChatListSelectionActions.more,
     ];
   }
 

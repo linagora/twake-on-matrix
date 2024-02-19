@@ -17,7 +17,8 @@ class ResponsiveUtils {
   static const double bodyRadioWidth = 472;
 
   static const double defaultSizeBodyLayoutDesktop = 280;
-  static const double heightBottomNavigation = 90;
+  static const double heightBottomNavigation = 72;
+  static const double heightBottomNavigationBar = 56;
 
   static const double bodyWithRightColumnRatio = 0.7;
 
@@ -72,7 +73,7 @@ class ResponsiveUtils {
   }
 
   bool isHeightShortest(BuildContext context) {
-    return MediaQuery.of(context).size.shortestSide < heightShortest;
+    return MediaQuery.sizeOf(context).shortestSide < heightShortest;
   }
 
   bool hasLeftMenuDrawerActive(BuildContext context) {

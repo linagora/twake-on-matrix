@@ -7,7 +7,9 @@ import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
+import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +134,20 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    SizedBox(
+                      key: controller.stickyTimestampKey,
+                      child: ValueListenableBuilder(
+                        valueListenable: controller.stickyTimestampNotifier,
+                        builder: (context, stickyTimestamp, child) {
+                          return StickyTimestampWidget(
+                            isStickyHeader: stickyTimestamp != null,
+                            content: stickyTimestamp != null
+                                ? stickyTimestamp.relativeTime(context)
+                                : '',
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -162,7 +178,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       constraints: BoxConstraints(
         maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
       ),
-      padding: ChatViewBodyStyle.inputBarPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -171,12 +186,19 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             // Currently we can't support reactions
             // ReactionsPicker(controller),
             const SizedBox(height: 8.0),
-            ChatInputRow(controller),
+            Padding(
+              padding: ChatViewBodyStyle.inputBarPadding,
+              child: ChatInputRow(controller),
+            ),
             const SizedBox(height: 8),
           ].map(
             (widget) => widget,
           ),
-          ChatEmojiPicker(controller),
+          ChatEmojiPicker(
+            showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
+            onEmojiSelected: controller.onEmojiSelected,
+            emojiPickerBackspace: controller.emojiPickerBackspace,
+          ),
         ],
       ),
     );

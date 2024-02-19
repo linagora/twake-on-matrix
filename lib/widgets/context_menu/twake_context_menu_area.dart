@@ -1,5 +1,6 @@
 // reference to: https://pub.dev/packages/contextmenu
 import 'package:animations/animations.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 
 import 'twake_context_menu.dart';
@@ -53,7 +54,7 @@ class TwakeContextMenuArea extends StatelessWidget {
     required this.child,
     this.builder,
     this.verticalPadding = 8,
-    this.width = 320,
+    this.width = PopupMenuWidgetStyle.menuMaxWidth,
   }) : super(key: key);
 
   @override

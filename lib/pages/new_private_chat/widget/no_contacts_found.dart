@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -40,6 +41,13 @@ class NoContactsFound extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(
+            height: 8.0,
+          ),
+          const Align(
+            alignment: Alignment.center,
+            child: EmptySearchWidget(),
           ),
         ],
       ),

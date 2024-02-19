@@ -68,7 +68,7 @@ class MessageStyle {
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
       mobile:
-          MediaQuery.of(context).size.width * messageBubbleMobileRatioMaxWidth,
+          MediaQuery.sizeOf(context).width * messageBubbleMobileRatioMaxWidth,
     );
   }
 
@@ -143,6 +143,4 @@ class MessageStyle {
   static const double pushpinIconSize = 14.0;
 
   static const double paddingAllPushpin = 0;
-
-  static const double contextMenuWidth = 200;
 }

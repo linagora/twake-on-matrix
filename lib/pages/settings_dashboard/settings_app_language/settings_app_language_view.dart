@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.da
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
 import 'package:fluffychat/presentation/extensions/localizations/locale_extension.dart';
+import 'package:fluffychat/utils/extension/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -51,7 +52,8 @@ class SettingsAppLanguageView extends StatelessWidget {
                       ),
                       title: Text(
                         controller.supportedLocales[index]
-                            .getLanguageNameByCurrentLocale(context),
+                            .getLanguageNameByCurrentLocale(context)
+                            .capitalize(),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       subtitle: Text(

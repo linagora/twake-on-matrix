@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -5,6 +7,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -52,112 +55,145 @@ class ChatEventList extends StatelessWidget {
       );
     }
 
-    return SelectionTextContainer(
-      chatController: controller,
-      focusNode: controller.selectionFocusNode,
-      child: ListView.custom(
-        padding: EdgeInsets.only(
-          top: 16,
-          bottom: 8.0,
-          left: horizontalPadding,
-          right: horizontalPadding,
-        ),
-        reverse: true,
-        controller: controller.scrollController,
-        keyboardDismissBehavior: PlatformInfos.isMobile
-            ? ScrollViewKeyboardDismissBehavior.manual
-            : ScrollViewKeyboardDismissBehavior.onDrag,
-        childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            // Footer to display typing indicator and read receipts:
-            if (index == 0) {
-              if (controller.timeline!.isRequestingFuture) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                );
-              }
-              if (controller.timeline!.canRequestFuture) {
-                Center(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                    ),
-                    onPressed: controller.requestFuture,
-                    child: Text(L10n.of(context)!.loadMore),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            }
-            // Request history button or progress indicator:
-            if (index == events.length + 1) {
-              if (controller.timeline!.isRequestingHistory) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                );
-              }
-              if (controller.timeline!.canRequestHistory) {
-                return Center(
-                  child: IconButton(
-                    onPressed: controller.requestHistory,
-                    icon: const Icon(Icons.refresh_outlined),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            }
-            final currentEventIndex = index - 1;
-            final event = controller.timeline!.events[currentEventIndex];
-            final previousEvent = currentEventIndex > 0
-                ? controller.timeline!.events[currentEventIndex - 1]
-                : null;
-            final nextEvent = index < controller.timeline!.events.length
-                ? controller.timeline!.events[currentEventIndex + 1]
-                : null;
-            return AutoScrollTag(
-              key: ValueKey(event.eventId),
-              index: index,
-              controller: controller.scrollController,
-              highlightColor: LinagoraRefColors.material().primary[99],
-              child: event.isVisibleInGui
-                  ? Message(
-                      event,
-                      onSwipe: (direction) =>
-                          controller.replyAction(replyTo: event),
-                      onAvatarTap: (Event event) => controller.onContactTap(
-                        contactPresentationSearch: event
-                            .senderFromMemoryOrFallback
-                            .toContactPresentationSearch(),
-                        context: context,
-                        path: 'rooms',
-                      ),
-                      onSelect: controller.onSelectMessage,
-                      selectMode: controller.selectMode,
-                      scrollToEventId: (String eventId) =>
-                          controller.scrollToEventId(eventId),
-                      longPressSelect: controller.selectedEvents.isEmpty,
-                      selected: controller.selectedEvents
-                          .any((e) => e.eventId == event.eventId),
-                      timeline: controller.timeline!,
-                      previousEvent: previousEvent,
-                      nextEvent: nextEvent,
-                      onHover: (isHover, event) =>
-                          controller.onHover(isHover, index, event),
-                      isHoverNotifier: controller.focusHover,
-                      listHorizontalActionMenu:
-                          controller.listHorizontalActionMenuBuilder(),
-                      onMenuAction: controller.handleHorizontalActionMenu,
-                      hideKeyboardChatScreen: controller.hideKeyboardChatScreen,
-                      markedUnreadLocation:
-                          controller.unreadReceivedMessageLocation,
-                    )
-                  : Container(),
-            );
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        switch (notification.runtimeType) {
+          case ScrollStartNotification:
+            controller.handleScrollStartNotification();
+            break;
+          case ScrollEndNotification:
+            controller.handleScrollEndNotification();
+            break;
+          case ScrollUpdateNotification:
+            controller.handleScrollUpdateNotification();
+            break;
+          default:
+            break;
+        }
+        return false;
+      },
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
           },
-          childCount: events.length + 2,
-          findChildIndexCallback: (key) =>
-              controller.findChildIndexCallback(key, thisEventsKeyMap),
+        ),
+        child: SelectionTextContainer(
+          chatController: controller,
+          focusNode: controller.selectionFocusNode,
+          child: InViewNotifierList(
+            padding: EdgeInsets.only(
+              top: 16,
+              bottom: 8.0,
+              left: horizontalPadding,
+              right: horizontalPadding,
+            ),
+            reverse: true,
+            controller: controller.scrollController,
+            itemCount: events.length + 2,
+            builder: (context, index) {
+              // Footer to display typing indicator and read receipts:
+              if (index == 0) {
+                if (controller.timeline!.isRequestingFuture) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                  );
+                }
+                if (controller.timeline!.canRequestFuture) {
+                  Center(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      onPressed: controller.requestFuture,
+                      child: Text(L10n.of(context)!.loadMore),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }
+              // Request history button or progress indicator:
+              if (index == events.length + 1) {
+                if (controller.timeline!.isRequestingHistory) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                  );
+                }
+                if (controller.timeline!.canRequestHistory) {
+                  return Center(
+                    child: IconButton(
+                      onPressed: controller.requestHistory,
+                      icon: const Icon(Icons.refresh_outlined),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }
+              final currentEventIndex = index - 1;
+              final event = controller.timeline!.events[currentEventIndex];
+              final previousEvent = currentEventIndex > 0
+                  ? controller.timeline!.events[currentEventIndex - 1]
+                  : null;
+              final nextEvent = index < controller.timeline!.events.length
+                  ? controller.timeline!.events[currentEventIndex + 1]
+                  : null;
+              return InViewNotifierWidget(
+                id: event.eventId,
+                builder: (context, bool isInView, _) {
+                  if (isInView) {
+                    controller.handleDisplayStickyTimestamp(
+                      event.originServerTs,
+                    );
+                  }
+                  return AutoScrollTag(
+                    key: ValueKey(event.eventId),
+                    index: index,
+                    controller: controller.scrollController,
+                    highlightColor: LinagoraRefColors.material().primary[99],
+                    child: event.isVisibleInGui
+                        ? Message(
+                            event,
+                            onSwipe: (direction) =>
+                                controller.replyAction(replyTo: event),
+                            onAvatarTap: (Event event) =>
+                                controller.onContactTap(
+                              contactPresentationSearch: event
+                                  .senderFromMemoryOrFallback
+                                  .toContactPresentationSearch(),
+                              context: context,
+                              path: 'rooms',
+                            ),
+                            onSelect: controller.onSelectMessage,
+                            selectMode: controller.selectMode,
+                            scrollToEventId: (String eventId) =>
+                                controller.scrollToEventId(eventId),
+                            selected: controller.selectedEvents
+                                .any((e) => e.eventId == event.eventId),
+                            timeline: controller.timeline!,
+                            previousEvent: previousEvent,
+                            nextEvent: nextEvent,
+                            onHover: (isHover, event) =>
+                                controller.onHover(isHover, index, event),
+                            isHoverNotifier: controller.focusHover,
+                            listHorizontalActionMenu:
+                                controller.listHorizontalActionMenuBuilder(),
+                            onMenuAction: controller.handleHorizontalActionMenu,
+                            hideKeyboardChatScreen:
+                                controller.onHideKeyboardAndEmoji,
+                            markedUnreadLocation:
+                                controller.unreadReceivedMessageLocation,
+                            hideTimeStamp: isInView,
+                          )
+                        : const SizedBox(),
+                  );
+                },
+              );
+            },
+            isInViewPortCondition: controller.isInViewPortCondition,
+          ),
         ),
       ),
     );

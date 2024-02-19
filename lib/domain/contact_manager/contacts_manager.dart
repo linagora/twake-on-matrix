@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
@@ -12,17 +11,22 @@ import 'package:flutter/foundation.dart';
 class ContactsManager {
   static const int _lookupChunkSize = 50;
 
+  final GetTomContactsInteractor getTomContactsInteractor;
+
+  final PhonebookContactInteractor phonebookContactInteractor;
+
   bool _doNotShowWarningContactsBannerAgain = false;
-
-  final _getTomContactsInteractor = getIt.get<GetTomContactsInteractor>();
-
-  final _phonebookContactInteractor = getIt.get<PhonebookContactInteractor>();
 
   final ValueNotifier<Either<Failure, Success>> _contactsNotifier =
       ValueNotifier(const Right(ContactsInitial()));
 
   final ValueNotifier<Either<Failure, Success>> _phonebookContactsNotifier =
       ValueNotifier(const Right(GetPhonebookContactsInitial()));
+
+  ContactsManager({
+    required this.getTomContactsInteractor,
+    required this.phonebookContactInteractor,
+  });
 
   ValueNotifier<Either<Failure, Success>> getContactsNotifier() =>
       _contactsNotifier;
@@ -54,17 +58,16 @@ class ContactsManager {
   void _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
   }) {
-    _getTomContactsInteractor
-        .execute(limit: AppConfig.maxFetchContacts)
-        .listen(
-          (event) => _contactsNotifier.value = event,
-        )
-        .onDone(
-          () => _fetchPhonebookContacts(
-            isAvailableSupportPhonebookContacts:
-                isAvailableSupportPhonebookContacts,
-          ),
-        );
+    getTomContactsInteractor.execute(limit: AppConfig.maxFetchContacts).listen(
+      (event) {
+        _contactsNotifier.value = event;
+      },
+    ).onDone(
+      () => _fetchPhonebookContacts(
+        isAvailableSupportPhonebookContacts:
+            isAvailableSupportPhonebookContacts,
+      ),
+    );
   }
 
   void _fetchPhonebookContacts({
@@ -73,10 +76,12 @@ class ContactsManager {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
-    _phonebookContactInteractor
+    phonebookContactInteractor
         .execute(lookupChunkSize: _lookupChunkSize)
         .listen(
-          (event) => _phonebookContactsNotifier.value = event,
-        );
+      (event) {
+        _phonebookContactsNotifier.value = event;
+      },
+    );
   }
 }

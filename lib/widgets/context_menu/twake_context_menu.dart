@@ -1,4 +1,5 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
 import 'twake_context_menu_area.dart';
@@ -52,20 +53,20 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
     final heightsNotAvailable = children.length - _heights.length;
     height += heightsNotAvailable * _kMinTileHeight;
 
-    if (height > MediaQuery.of(context).size.height) {
-      height = MediaQuery.of(context).size.height;
+    if (height > MediaQuery.sizeOf(context).height) {
+      height = MediaQuery.sizeOf(context).height;
     }
 
     double paddingLeft = widget.position.dx;
     double paddingTop = widget.position.dy;
     double paddingRight =
-        MediaQuery.of(context).size.width - widget.position.dx - widget.width;
+        MediaQuery.sizeOf(context).width - widget.position.dx - widget.width;
     if (paddingRight < 0) {
       paddingLeft -= widget.width;
       paddingRight = widget.width + paddingRight;
     }
     double paddingBottom =
-        MediaQuery.of(context).size.height - widget.position.dy - height;
+        MediaQuery.sizeOf(context).height - widget.position.dy - height;
     if (paddingBottom < 0) {
       paddingTop += paddingBottom;
       paddingBottom = 0;
@@ -80,14 +81,17 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
       duration: _kShortDuration,
       child: SizedBox.shrink(
         child: Card(
+          elevation: PopupMenuWidgetStyle.menuElevation,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius:
+                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius:
+                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
             child: Material(
-              color: Theme.of(context).colorScheme.surface,
+              color: PopupMenuWidgetStyle.defaultMenuColor(context),
               child: ListView(
                 primary: false,
                 physics: const NeverScrollableScrollPhysics(),

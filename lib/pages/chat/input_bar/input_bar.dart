@@ -36,6 +36,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final ValueChanged<String>? onChanged;
   final bool autofocus;
   final ValueKey? typeAheadKey;
+  final ValueNotifier<bool>? showEmojiPickerNotifier;
+  final SuggestionsController<Map<String, String?>>? suggestionsController;
 
   InputBar({
     this.room,
@@ -53,6 +55,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     required this.focusSuggestionController,
     this.typeAheadKey,
     this.rawKeyboardFocusNode,
+    this.suggestionsController,
+    this.showEmojiPickerNotifier,
     Key? key,
   }) : super(key: key);
 
@@ -318,7 +322,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   Future<void> handlePaste(BuildContext context) async {
-    if (await Clipboard.instance.isReadableImageFormat() && room != null) {
+    if (await TwakeClipboard.instance.isReadableImageFormat() && room != null) {
       await pasteImage(context, room!);
     } else {
       await controller?.pasteText();
@@ -375,14 +379,17 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           onRawKeyEvent(event);
         },
         child: TypeAheadField<Map<String, String?>>(
-          direction: AxisDirection.up,
+          direction: VerticalDirection.up,
           hideOnEmpty: true,
           hideOnLoading: true,
-          keepSuggestionsOnSuggestionSelected: true,
+          hideOnSelect: false,
           debounceDuration: debounceDuration,
           autoFlipDirection: true,
           scrollController: suggestionScrollController,
-          textFieldConfiguration: TextFieldConfiguration(
+          suggestionsController: suggestionsController,
+          controller: controller,
+          focusNode: typeAheadFocusNode,
+          builder: (context, controller, focusNode) => TextField(
             minLines: minLines,
             maxLines: maxLines,
             keyboardType: keyboardType,
@@ -391,15 +398,21 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             style: InputBarStyle.getTypeAheadTextStyle(context),
             controller: controller,
             decoration: decoration,
-            focusNode: typeAheadFocusNode,
+            focusNode: focusNode,
             onChanged: (text) {
               if (onChanged != null) {
                 onChanged!(text);
               }
             },
+            contextMenuBuilder: PlatformInfos.isWeb
+                ? null
+                : (_, editableTextState) =>
+                    AdaptiveTextSelectionToolbar.editableText(
+                      editableTextState: editableTextState,
+                    ),
             onTap: () async {
               await Future.delayed(debounceDurationTap);
-              FocusScope.of(context).requestFocus(typeAheadFocusNode);
+              FocusScope.of(context).requestFocus(focusNode);
             },
             onSubmitted: PlatformInfos.isMobile
                 ? (text) {
@@ -411,8 +424,17 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: (text) {
-            if (room!.isDirectChat) return {};
+            if (room!.isDirectChat) return [];
             final suggestions = getSuggestions(text);
+            if (suggestions.isNotEmpty) {
+              suggestionsController?.open();
+            } else {
+              suggestionsController?.close();
+              if (PlatformInfos.isWeb ||
+                  showEmojiPickerNotifier?.value == false) {
+                typeAheadFocusNode?.requestFocus();
+              }
+            }
             focusSuggestionController.suggestions = suggestions;
             return suggestions;
           },
@@ -420,20 +442,14 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             suggestion: suggestion,
             client: Matrix.of(context).client,
           ),
-          suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(InputBarStyle.suggestionBorderRadius),
-            ),
-          ),
-          onSuggestionSelected: insertSuggestion,
+          onSelected: insertSuggestion,
           errorBuilder: (BuildContext context, Object? error) =>
-              const SizedBox(),
+              const SizedBox.shrink(),
           loadingBuilder: (BuildContext context) => const SizedBox.shrink(),
           // fix loading briefly flickering a dark box
-          noItemsFoundBuilder: (BuildContext context) =>
-              const SizedBox.shrink(),
-          // fix loading briefly showing no suggestions
-          layoutArchitecture: (widgets, _) => FocusSuggestionList(
+          emptyBuilder: (BuildContext context) => const SizedBox
+              .shrink(), // fix loading briefly showing no suggestions
+          listBuilder: (context, widgets) => FocusSuggestionList(
             items: widgets,
             scrollController: suggestionScrollController,
             focusSuggestionController: focusSuggestionController,
@@ -598,6 +614,6 @@ class SuggestionTile extends StatelessWidget {
         ),
       );
     }
-    return Container();
+    return const SizedBox.shrink();
   }
 }

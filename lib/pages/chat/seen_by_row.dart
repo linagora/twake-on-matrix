@@ -39,10 +39,6 @@ class SeenByRow extends StatelessWidget {
     List<User> seenByUsers, {
     EventStatus? eventStatus,
   }) {
-    Logs().d(
-      "SeenByRow::getMessageStatus: Content - ${event.content} - EventStatus $eventStatus - seenByUsers ${seenByUsers.length}",
-    );
-
     if (eventStatus == null || eventStatus == EventStatus.sending) {
       return MessageStatus.sending;
     }

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_matrix_html/text_parser.dart';
 
-class MentionnedUser extends StatelessWidget {
+class MentionedUser extends StatelessWidget {
   final String displayName;
   final String url;
   final OnPillTap? onTap;
   final TextStyle? textStyle;
+  final int? maxLines;
 
-  const MentionnedUser({
+  const MentionedUser({
     Key? key,
     required this.displayName,
     required this.url,
     this.textStyle,
     this.onTap,
+    this.maxLines,
   }) : super(key: key);
 
   @override
@@ -25,7 +27,7 @@ class MentionnedUser extends StatelessWidget {
       child: Text(
         displayName,
         style: textStyle,
-        maxLines: 1,
+        maxLines: maxLines,
         overflow: TextOverflow.clip,
       ),
     );

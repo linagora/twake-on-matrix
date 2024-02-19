@@ -41,9 +41,9 @@ class ShareView extends StatelessWidget {
                   if (rooms.isNotEmpty) {
                     return RecentChatList(
                       rooms: rooms,
-                      selectedEventsNotifier: controller.selectedRoomsNotifier,
+                      selectedChatNotifier: controller.selectedChatNotifier,
                       onSelectedChat: (roomId) =>
-                          controller.onSelectChat(roomId),
+                          controller.onToggleSelectChat(roomId),
                       recentChatScrollController:
                           controller.recentChatScrollController,
                     );
@@ -57,8 +57,8 @@ class ShareView extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ValueListenableBuilder<List<String>>(
-        valueListenable: controller.selectedRoomsNotifier,
+      floatingActionButton: ValueListenableBuilder<String>(
+        valueListenable: controller.selectedChatNotifier,
         builder: ((context, selectedEvents, child) {
           if (selectedEvents.length != 1) {
             return const SizedBox();
@@ -73,7 +73,7 @@ class ShareView extends StatelessWidget {
             child: TwakeIconButton(
               paddingAll: 0,
               onTap: () => controller.shareTo(
-                controller.selectedRoomsNotifier.value.first,
+                controller.selectedChatNotifier.value,
               ),
               tooltip: L10n.of(context)!.send,
               imagePath: ImagePaths.icSend,

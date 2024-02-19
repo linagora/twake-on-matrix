@@ -12,8 +12,6 @@ class PinnedMessagesStyle {
         vertical: responsiveUtils.isMobile(context) ? 4.0 : 16.0,
       );
 
-  static const SizedBox paddingIconAndUnpin = SizedBox(width: 4.0);
-
   static const double unpinButtonHeight = 56;
   static const double unpinButtonWidth = 556;
   static const EdgeInsets actionBarParentPadding = EdgeInsets.all(16.0);
@@ -23,8 +21,4 @@ class PinnedMessagesStyle {
   static const double actionBarBorderRadius = 16.0;
 
   static Widget unpinIcon() => SvgPicture.asset(ImagePaths.icUnpin, height: 18);
-
-  static const double paddingAllContextMenuItem = 12;
-
-  static const double heightContextMenuItem = 48;
 }

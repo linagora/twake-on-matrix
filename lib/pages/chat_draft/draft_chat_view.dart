@@ -1,27 +1,17 @@
-import 'package:animations/animations.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
-import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
+import 'package:fluffychat/pages/chat/chat_emoji_picker.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
-import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -35,11 +25,6 @@ class DraftChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final responsive = getIt.get<ResponsiveUtils>();
-    if (controller.showEmojiPicker == true &&
-        controller.emojiPickerType == EmojiPickerType.reaction) {
-      return Container();
-    }
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isSendingNotifier,
       builder: (context, isIgnorePointer, child) {
@@ -56,7 +41,7 @@ class DraftChatView extends StatelessWidget {
           automaticallyImplyLeading: false,
           title: Row(
             children: [
-              responsive.isMobile(context)
+              DraftChatViewStyle.responsive.isMobile(context)
                   ? TwakeIconButton(
                       splashColor: Colors.transparent,
                       hoverColor: Colors.transparent,
@@ -108,231 +93,15 @@ class DraftChatView extends StatelessWidget {
                   ),
                   Column(
                     children: [
-                      Padding(
-                        padding: DraftChatViewStyle.inputWidgetPadding,
-                        child: Container(
-                          alignment: Alignment.center,
-                          constraints: const BoxConstraints(
-                            maxWidth: DraftChatViewStyle.maxInputBarWidth,
-                          ),
-                          padding: const EdgeInsets.only(
-                            left: 16.0,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  padding: DraftChatViewStyle.bottomBarPadding,
-                                  decoration: BoxDecoration(
-                                    borderRadius: ChatInputRowStyle
-                                        .chatInputRowBorderRadius,
-                                    color:
-                                        LinagoraSysColors.material().onPrimary,
-                                    border: Border.all(
-                                      color:
-                                          LinagoraRefColors.material().tertiary,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        bottom: 12,
-                                        child: TwakeIconButton(
-                                          tooltip: L10n.of(context)!.more,
-                                          margin: DraftChatViewStyle
-                                              .buttonAddMoreMargin,
-                                          icon: Icons.add_circle_outline,
-                                          onTap: () => controller
-                                              .onSendFileClick(context),
-                                          paddingAll: 0,
-                                          splashColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          const SizedBox(width: 32.0),
-                                          Expanded(
-                                            child: Padding(
-                                              padding: DraftChatViewStyle
-                                                  .inputBarPadding,
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: InputBar(
-                                                      typeAheadKey: controller
-                                                          .draftChatComposerTypeAheadKey,
-                                                      minLines:
-                                                          DraftChatViewStyle
-                                                              .minLinesInputBar,
-                                                      maxLines:
-                                                          DraftChatViewStyle
-                                                              .maxLinesInputBar,
-                                                      autofocus: !PlatformInfos
-                                                          .isMobile,
-                                                      keyboardType:
-                                                          TextInputType
-                                                              .multiline,
-                                                      textInputAction: null,
-                                                      onSubmitted: controller
-                                                          .onInputBarSubmitted,
-                                                      typeAheadFocusNode:
-                                                          controller.inputFocus,
-                                                      controller: controller
-                                                          .sendController,
-                                                      decoration: DraftChatViewStyle
-                                                          .bottomBarInputDecoration(
-                                                        context,
-                                                      ),
-                                                      onChanged: controller
-                                                          .onInputBarChanged,
-                                                      focusSuggestionController:
-                                                          controller
-                                                              .focusSuggestionController,
-                                                    ),
-                                                  ),
-                                                  KeyBoardShortcuts(
-                                                    keysToPress: {
-                                                      LogicalKeyboardKey
-                                                          .altLeft,
-                                                      LogicalKeyboardKey.keyE,
-                                                    },
-                                                    onKeysPressed: controller
-                                                        .emojiPickerAction,
-                                                    helpLabel: L10n.of(context)!
-                                                        .emojis,
-                                                    child: InkWell(
-                                                      onTap: controller
-                                                          .emojiPickerAction,
-                                                      child:
-                                                          PageTransitionSwitcher(
-                                                        transitionBuilder: (
-                                                          Widget child,
-                                                          Animation<double>
-                                                              primaryAnimation,
-                                                          Animation<double>
-                                                              secondaryAnimation,
-                                                        ) {
-                                                          return SharedAxisTransition(
-                                                            animation:
-                                                                primaryAnimation,
-                                                            secondaryAnimation:
-                                                                secondaryAnimation,
-                                                            transitionType:
-                                                                SharedAxisTransitionType
-                                                                    .scaled,
-                                                            fillColor: Colors
-                                                                .transparent,
-                                                            child: child,
-                                                          );
-                                                        },
-                                                        child: null,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          if (PlatformInfos.platformCanRecord &&
-                                              controller.inputText.isEmpty)
-                                            Container(
-                                              alignment: Alignment.center,
-                                              child: TwakeIconButton(
-                                                margin: DraftChatViewStyle
-                                                    .bottomBarButtonRecordMargin,
-                                                paddingAll: DraftChatViewStyle
-                                                    .bottomBarButtonRecordPaddingAll,
-                                                onTap: controller
-                                                    .emojiPickerAction,
-                                                tooltip: L10n.of(context)!.send,
-                                                icon: Icons.tag_faces,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              if (!PlatformInfos.isMobile ||
-                                  controller.inputText.isNotEmpty)
-                                Container(
-                                  alignment: Alignment.center,
-                                  child: ValueListenableBuilder<bool>(
-                                    valueListenable:
-                                        controller.isSendingNotifier,
-                                    builder: (context, isSending, child) {
-                                      if (isSending) {
-                                        return const Padding(
-                                          padding: DraftChatViewStyle
-                                              .iconLoadingPadding,
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator
-                                                  .adaptive(),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      return Padding(
-                                        padding:
-                                            DraftChatViewStyle.iconSendPadding,
-                                        child: TwakeIconButton(
-                                          hoverColor: Colors.transparent,
-                                          splashColor: Colors.transparent,
-                                          size:
-                                              ChatInputRowStyle.sendIconBtnSize,
-                                          onTap: controller.sendText,
-                                          tooltip: L10n.of(context)!.send,
-                                          imagePath: ImagePaths.icSend,
-                                          paddingAll: 0,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
+                      DraftChatInputRow(controller),
+                      const SizedBox(
+                        height: DraftChatViewStyle.bottomBarInputPadding,
                       ),
-                      Container(
-                        constraints:
-                            DraftChatViewStyle.containerMaxWidthConstraints,
-                        alignment: Alignment.center,
-                        child: AnimatedContainer(
-                          duration: TwakeThemes.animationDuration,
-                          curve: TwakeThemes.animationCurve,
-                          width: MediaQuery.of(context).size.width,
-                          height: DraftChatViewStyle.animatedContainerHeight(
-                            context,
-                            controller.showEmojiPicker == true,
-                          ),
-                          child: controller.showEmojiPicker == true
-                              ? EmojiPicker(
-                                  onEmojiSelected:
-                                      controller.onEmojiBottomSheetSelected,
-                                  onBackspacePressed:
-                                      controller.emojiPickerBackspace,
-                                  config: Config(
-                                    backspaceColor:
-                                        Theme.of(context).colorScheme.primary,
-                                    bgColor:
-                                        Theme.of(context).colorScheme.surface,
-                                    indicatorColor:
-                                        Theme.of(context).colorScheme.primary,
-                                    iconColorSelected:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                )
-                              : null,
-                        ),
+                      ChatEmojiPicker(
+                        showEmojiPickerNotifier:
+                            controller.showEmojiPickerNotifier,
+                        onEmojiSelected: controller.onEmojiBottomSheetSelected,
+                        emojiPickerBackspace: controller.emojiPickerBackspace,
                       ),
                     ],
                   ),

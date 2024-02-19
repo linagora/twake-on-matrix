@@ -5,31 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class DraftChatViewStyle {
-  static const double maxInputBarWidth = 800.0;
-
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
-
-  static double toolbarHeight = 56;
 
   static BoxConstraints get containerMaxWidthConstraints =>
       const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5);
 
-  static double animatedContainerHeight(
-    BuildContext context,
-    bool isShowEmojiPicker,
-  ) =>
-      isShowEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0;
-
   static int get minLinesInputBar => 1;
-
   static int get maxLinesInputBar => 8;
-
-  // Bottom Bar Style
-  static EdgeInsetsGeometry get bottomBarPadding =>
-      const EdgeInsetsDirectional.only(start: 12.0);
-
-  static BorderRadiusGeometry get bottomBarBorderRadius =>
-      const BorderRadius.all(Radius.circular(25));
 
   static InputDecoration bottomBarInputDecoration(BuildContext context) =>
       InputDecoration(
@@ -44,19 +26,7 @@ class DraftChatViewStyle {
             .copyWith(letterSpacing: -0.15),
       );
 
-  static double bottomBarButtonPaddingAll(bool isInputEmpty) =>
-      isInputEmpty ? 5.0 : 12.0;
-
-  static EdgeInsets get bottomBarButtonRecordMargin =>
-      const EdgeInsets.only(right: 7.0);
-
-  static double get bottomBarButtonRecordPaddingAll => 5.0;
-
-  static EdgeInsets get buttonAddMoreMargin =>
-      const EdgeInsets.only(right: 4.0);
-
-  static EdgeInsetsGeometry get inputWidgetPadding =>
-      const EdgeInsetsDirectional.only(bottom: 8.0);
+  static const double bottomBarInputPadding = 8.0;
 
   // Empty Chat Style
   static EdgeInsetsGeometry get emptyChatParentPadding =>
@@ -68,15 +38,4 @@ class DraftChatViewStyle {
 
   static const EdgeInsetsGeometry iconSendPadding =
       EdgeInsetsDirectional.only(end: 8.0, start: 8, bottom: 8);
-
-  static const EdgeInsetsGeometry iconLoadingPadding =
-      EdgeInsetsDirectional.only(
-    top: 8.0,
-    bottom: 16.0,
-    start: 16.0,
-    end: 8.0,
-  );
-
-  static const EdgeInsetsGeometry inputBarPadding =
-      EdgeInsetsDirectional.symmetric(horizontal: 8);
 }

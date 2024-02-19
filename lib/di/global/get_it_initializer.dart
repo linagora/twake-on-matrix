@@ -5,6 +5,7 @@ import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
+import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
@@ -14,6 +15,7 @@ import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
+import 'package:fluffychat/data/datasource_impl/server_config_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
@@ -23,12 +25,14 @@ import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
+import 'package:fluffychat/data/network/server_config_api.dart';
 import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
+import 'package:fluffychat/data/repository/server_config_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_search_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
 import 'package:fluffychat/di/global/hive_di.dart';
@@ -40,6 +44,7 @@ import 'package:fluffychat/domain/repository/localizations/localizations_reposit
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
+import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
@@ -48,6 +53,7 @@ import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.d
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -123,6 +129,7 @@ class GetItInitializer {
     getIt.registerFactory<LookupAPI>(() => LookupAPI());
     getIt.registerSingleton<MediaAPI>(MediaAPI());
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
+    getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
   }
 
   void bindingDatasource() {
@@ -139,6 +146,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerSearchDatasource>(
       () => ServerSearchDatasourceImpl(),
+    );
+    getIt.registerFactory<ServerConfigDatasource>(
+      () => ServerConfigDatasourceImpl(),
     );
   }
 
@@ -164,6 +174,10 @@ class GetItInitializer {
       () => LocalizationsDataSourceImpl(
         getIt.get<LanguageCacheManager>(),
       ),
+    );
+
+    getIt.registerFactory<ServerSearchDatasourceImpl>(
+      () => ServerSearchDatasourceImpl(),
     );
   }
 
@@ -191,6 +205,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerSearchRepository>(
       () => ServerSearchRepositoryImpl(),
+    );
+    getIt.registerFactory<ServerConfigRepository>(
+      () => ServerConfigRepositoryImpl(),
     );
   }
 
@@ -252,7 +269,12 @@ class GetItInitializer {
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(ContactsManager());
+    getIt.registerSingleton<ContactsManager>(
+      ContactsManager(
+        getTomContactsInteractor: getIt.get<GetTomContactsInteractor>(),
+        phonebookContactInteractor: getIt.get<PhonebookContactInteractor>(),
+      ),
+    );
     getIt.registerLazySingleton<SaveLanguageInteractor>(
       () => SaveLanguageInteractor(
         getIt.get<LocalizationsRepository>(),
@@ -273,6 +295,10 @@ class GetItInitializer {
     );
     getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
       () => SendFilesOnWebWithCaptionInteractor(),
+    );
+
+    getIt.registerFactory<GenerateThumbnailsMediaInteractor>(
+      () => GenerateThumbnailsMediaInteractor(),
     );
   }
 

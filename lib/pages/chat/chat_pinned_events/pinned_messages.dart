@@ -3,13 +3,21 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/update_pinned_events_state.dart';
 import 'package:fluffychat/domain/enums/pinned_messages_action_enum.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
+import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
+import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
-import 'package:fluffychat/presentation/model/chat/pop_up_menu_item_model.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
+import 'package:fluffychat/pages/chat/chat_view_style.dart';
+import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
+import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
@@ -47,38 +55,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   List<String> get selectedPinnedEventsIds =>
       selectedEvents.value.map((event) => event.eventId).toList();
 
-  List<ContextMenuItemModel> get pinnedMessagesActionsList => [
-        ContextMenuItemModel(
-          text: L10n.of(context)!.unpin,
-          imagePath: ImagePaths.icUnpin,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event) {
-              unpin(extra.eventId);
-            }
-          },
-        ),
-        ContextMenuItemModel(
-          text: L10n.of(context)!.jumpToMessage,
-          imagePath: ImagePaths.icJumpTo,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event) {
-              Navigator.pop(context, extra);
-            }
-          },
-        ),
-        ContextMenuItemModel(
-          text: L10n.of(context)!.copy,
-          iconData: Icons.content_copy,
-          color: Theme.of(context).colorScheme.onSurface,
-          onTap: ({extra}) async {
-            if (extra is Event && widget.timeline != null) {
-              await extra.copy(context, widget.timeline!);
-            }
-          },
-        ),
-      ];
+  final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
   void unpin(String eventId) {
     updatePinnedMessagesInteractor
@@ -216,6 +193,169 @@ class PinnedMessagesController extends State<PinnedMessages>
   void onClickBackButton() {
     Navigator.of(context).pop(
       eventsNotifier.value != widget.pinnedEvents ? eventsNotifier.value : null,
+    );
+  }
+
+  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
+    final listAction = [
+      ChatHorizontalActionMenu.more,
+    ];
+    return listAction
+        .map(
+          (action) => ContextMenuItemChatAction(
+            action,
+            action.getContextMenuItemState(),
+          ),
+        )
+        .toList();
+  }
+
+  void onHover(bool isHovered, int index, Event event) {
+    if (widget.pinnedEvents.asMap().containsKey(index) &&
+        PinnedMessagesStyle.responsiveUtils.isWebDesktop(context) &&
+        !openingPopupMenu.value) {
+      isHoverNotifier.value = isHovered ? event.eventId : null;
+    }
+  }
+
+  void handleHorizontalActionMenu(
+    BuildContext context,
+    ChatHorizontalActionMenu actions,
+    Event event,
+    TapDownDetails tapDownDetails,
+  ) {
+    switch (actions) {
+      case ChatHorizontalActionMenu.more:
+        handleContextMenuAction(
+          context,
+          event,
+          tapDownDetails,
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleStateContextMenu() {
+    openingPopupMenu.toggle();
+  }
+
+  // Used for "Right Click" Context Menu
+  List<Widget> pinnedMessagesActionsList(
+    BuildContext context,
+    Event event,
+  ) {
+    final listAction = [
+      ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.select,
+      ChatContextMenuActions.jumpToMessage,
+      ChatContextMenuActions.copyMessage,
+      ChatContextMenuActions.forward,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatContextMenuActions.downloadFile,
+    ];
+    return listAction.map((action) {
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(
+          context,
+          unpin: event.isPinned,
+          isSelected: isSelected(event),
+        ),
+        iconAction: action.getIconData(unpin: event.isPinned),
+        imagePath: action.getImagePath(),
+        onCallbackAction: () => _handleClickOnContextMenuItem(
+          action,
+          event,
+        ),
+      );
+    }).toList();
+  }
+
+  // Used for "More" Context Menu
+  List<PopupMenuItem> _pinnedMessagesActionsTileList(
+    BuildContext context,
+    Event event,
+  ) {
+    final actionTiles = pinnedMessagesActionsList(context, event).map((action) {
+      return PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: action,
+      );
+    }).toList();
+    return actionTiles;
+  }
+
+  Future<void> _handleClickOnContextMenuItem(
+    ChatContextMenuActions action,
+    Event event,
+  ) async {
+    switch (action) {
+      case ChatContextMenuActions.select:
+        onSelectMessage(event);
+        break;
+      case ChatContextMenuActions.copyMessage:
+        await event.copy(context, widget.timeline!);
+        break;
+      case ChatContextMenuActions.pinChat:
+        unpin(event.eventId);
+        break;
+      case ChatContextMenuActions.forward:
+        forwardEventAction(event);
+        break;
+      case ChatContextMenuActions.downloadFile:
+        await event.saveFile(context);
+        break;
+      case ChatContextMenuActions.jumpToMessage:
+        jumpToMessage(context, event);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void jumpToMessage(BuildContext context, Event event) {
+    context.go(
+      '/rooms/${event.roomId}?event=${event.eventId}',
+    );
+  }
+
+  void forwardEventAction(Event event) async {
+    Matrix.of(context).shareContent =
+        event.getDisplayEvent(widget.timeline!).content;
+    Logs().d(
+      "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
+    );
+    context.go(
+      '/rooms/forward',
+      extra: ForwardArgument(
+        fromRoomId: event.roomId ?? '',
+      ),
+    );
+  }
+
+  void handleContextMenuAction(
+    BuildContext context,
+    Event event,
+    TapDownDetails tapDownDetails,
+  ) {
+    final screenSize = MediaQuery.of(context).size;
+    final offset = tapDownDetails.globalPosition;
+    final position = RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy + ChatViewStyle.paddingBottomContextMenu,
+      screenSize.width - offset.dx,
+      screenSize.height - offset.dy,
+    );
+    _handleStateContextMenu();
+    openPopupMenuAction(
+      context,
+      position,
+      _pinnedMessagesActionsTileList(context, event),
+      onClose: () {
+        _handleStateContextMenu();
+      },
     );
   }
 

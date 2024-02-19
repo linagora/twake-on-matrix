@@ -15,6 +15,7 @@ class FileTileWidget extends StatelessWidget {
     this.highlightText,
     this.sizeString,
     this.backgroundColor,
+    this.fileTileIcon,
     this.imageBytes,
     this.style = const FileTileWidgetStyle(),
   });
@@ -26,6 +27,7 @@ class FileTileWidget extends StatelessWidget {
   final Color? backgroundColor;
   final String? fileType;
   final Uint8List? imageBytes;
+  final String? fileTileIcon;
   final FileTileWidgetStyle style;
 
   @override
@@ -56,7 +58,7 @@ class FileTileWidget extends StatelessWidget {
             ),
           if (imageBytes == null)
             SvgPicture.asset(
-              mimeType.getIcon(fileType: fileType),
+              fileTileIcon ?? mimeType.getIcon(fileType: fileType),
               width: style.iconSize,
               height: style.iconSize,
             ),

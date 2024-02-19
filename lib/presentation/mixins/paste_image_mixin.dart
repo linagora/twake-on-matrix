@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat/send_file_dialog.dart';
+import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -13,7 +13,7 @@ mixin PasteImageMixin {
     Room room, {
     ClipboardReader? clipboardReader,
   }) async {
-    if (!(await Clipboard.instance
+    if (!(await TwakeClipboard.instance
         .isReadableImageFormat(clipboardReader: clipboardReader))) {
       TwakeSnackBar.show(context, L10n.of(context)!.fileFormatNotSupported);
       Logs().e('PasteImageMixin::pasteImage(): not readable image format');
@@ -21,7 +21,7 @@ mixin PasteImageMixin {
     }
     List<MatrixFile?>? matrixFiles;
     if (PlatformInfos.isWeb) {
-      matrixFiles = await Clipboard.instance
+      matrixFiles = await TwakeClipboard.instance
           .pasteImagesUsingBytes(reader: clipboardReader);
     }
     if (matrixFiles == null || matrixFiles.isEmpty) {

@@ -26,6 +26,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
@@ -79,15 +80,18 @@ class DraftChatController extends State<DraftChat>
 
   bool showScrollDownButton = false;
 
-  String inputText = '';
+  ValueNotifier<String> inputText = ValueNotifier('');
 
-  bool showEmojiPicker = false;
+  ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   final isSendingNotifier = ValueNotifier(false);
 
   PresentationContact? get presentationContact => widget.contact;
+
+  final KeyboardVisibilityController keyboardVisibilityController =
+      KeyboardVisibilityController();
 
   final sendMediaWithCaptionInteractor =
       getIt.get<SendMediaOnWebWithCaptionInteractor>();
@@ -136,7 +140,7 @@ class DraftChatController extends State<DraftChat>
   @override
   void initState() {
     scrollController.addListener(_updateScrollController);
-    inputFocus.addListener(_inputFocusListener);
+    keyboardVisibilityController.onChange.listen(_keyboardListener);
     super.initState();
   }
 
@@ -145,8 +149,9 @@ class DraftChatController extends State<DraftChat>
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
-    inputFocus.removeListener(_inputFocusListener);
     focusSuggestionController.dispose();
+    inputText.dispose();
+    showEmojiPickerNotifier.dispose();
     super.dispose();
   }
 
@@ -212,22 +217,18 @@ class DraftChatController extends State<DraftChat>
     });
   }
 
-  void emojiPickerAction() {
-    if (showEmojiPicker) {
-      inputFocus.requestFocus();
-    } else {
-      inputFocus.unfocus();
-    }
-    emojiPickerType = EmojiPickerType.keyboard;
-    setState(() => showEmojiPicker = !showEmojiPicker);
+  void onKeyboardAction() {
+    showEmojiPickerNotifier.value = false;
+    inputFocus.requestFocus();
   }
 
-  void _inputFocusListener() {
-    if (showEmojiPicker && inputFocus.hasFocus) {
-      emojiPickerType = EmojiPickerType.keyboard;
-      if (mounted) {
-        setState(() => showEmojiPicker = false);
-      }
+  void onEmojiAction() {
+    emojiPickerType = EmojiPickerType.keyboard;
+    showEmojiPickerNotifier.value = true;
+    if (PlatformInfos.isMobile) {
+      hideKeyboardChatScreen();
+    } else {
+      inputFocus.requestFocus();
     }
   }
 
@@ -237,9 +238,12 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
-  void onEmojiBottomSheetSelected(_, Emoji? emoji) {
+  void onEmojiBottomSheetSelected(Emoji? emoji) {
     typeEmoji(emoji);
     onInputBarChanged(sendController.text);
+    if (PlatformInfos.isWeb) {
+      inputFocus.requestFocus();
+    }
   }
 
   void typeEmoji(Emoji? emoji) {
@@ -264,20 +268,23 @@ class DraftChatController extends State<DraftChat>
       ..selection = TextSelection.fromPosition(
         TextPosition(offset: sendController.text.length),
       );
+
+    if (PlatformInfos.isWeb) {
+      inputFocus.requestFocus();
+    }
   }
 
-  void onInputBarSubmitted(_) {
+  void onInputBarSubmitted() {
     sendText(
       onCreateRoomFailed: () {
         TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
-
-        FocusScope.of(context).requestFocus(inputFocus);
+        inputFocus.requestFocus();
       },
     );
   }
 
   void onInputBarChanged(String text) {
-    setState(() => inputText = text);
+    inputText.value = text;
   }
 
   void onSendFileClick(BuildContext context) async {
@@ -353,6 +360,19 @@ class DraftChatController extends State<DraftChat>
         presentationContact!.displayName ?? L10n.of(context)!.twakeChatUser,
       ),
     );
+    onInputBarChanged(sendController.text);
+  }
+
+  void hideKeyboardChatScreen() {
+    if (keyboardVisibilityController.isVisible || inputFocus.hasFocus) {
+      inputFocus.unfocus();
+    }
+  }
+
+  void _keyboardListener(bool isKeyboardVisible) {
+    if (isKeyboardVisible && showEmojiPickerNotifier.value == true) {
+      showEmojiPickerNotifier.value = false;
+    }
   }
 
   @override

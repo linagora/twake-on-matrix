@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_input_row_mobile.dart';
+import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
@@ -101,34 +102,9 @@ class ChatInputRow extends StatelessWidget {
                         ? _buildMobileInputRow(context)
                         : _buildWebInputRow(context),
               ),
-              ValueListenableBuilder(
-                valueListenable: controller.inputText,
-                builder: (context, textInput, child) {
-                  if (PlatformInfos.isWeb && textInput.isEmpty) {
-                    return Opacity(
-                      opacity: ChatInputRowStyle.inputComposerOpacity,
-                      child: child!,
-                    );
-                  }
-
-                  if (textInput.isNotEmpty) {
-                    return child!;
-                  }
-
-                  return const SizedBox();
-                },
-                child: Padding(
-                  padding: ChatInputRowStyle.sendIconPadding,
-                  child: TwakeIconButton(
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    size: ChatInputRowStyle.sendIconBtnSize,
-                    onTap: controller.send,
-                    tooltip: L10n.of(context)!.send,
-                    imagePath: ImagePaths.icSend,
-                    paddingAll: 0,
-                  ),
-                ),
+              ChatInputRowSendBtn(
+                inputText: controller.inputText,
+                onTap: controller.onInputBarSubmitted,
               ),
             ],
     );
@@ -143,8 +119,8 @@ class ChatInputRow extends StatelessWidget {
         ],
       ),
       emojiPickerNotifier: controller.showEmojiPickerNotifier,
-      onEmojiAction: controller.emojiPickerAction,
-      onKeyboardAction: controller.handleOnClickKeyboardAction,
+      onEmojiAction: controller.onEmojiAction,
+      onKeyboardAction: controller.onKeyboardAction,
     );
   }
 
@@ -158,8 +134,8 @@ class ChatInputRow extends StatelessWidget {
       ),
       emojiPickerNotifier: controller.showEmojiPickerNotifier,
       onTapMoreBtn: () => controller.onSendFileClick(context),
-      onEmojiAction: controller.emojiPickerAction,
-      onKeyboardAction: controller.handleOnClickKeyboardAction,
+      onEmojiAction: controller.onEmojiAction,
+      onKeyboardAction: controller.onKeyboardAction,
     );
   }
 
@@ -173,11 +149,13 @@ class ChatInputRow extends StatelessWidget {
       autofocus: !PlatformInfos.isMobile,
       keyboardType: TextInputType.multiline,
       textInputAction: null,
-      onSubmitted: controller.onInputBarSubmitted,
+      onSubmitted: (_) => controller.onInputBarSubmitted(),
+      suggestionsController: controller.suggestionsController,
       typeAheadFocusNode: controller.inputFocus,
       controller: controller.sendController,
       focusSuggestionController: controller.focusSuggestionController,
       suggestionScrollController: controller.suggestionScrollController,
+      showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
         hintText: L10n.of(context)!.chatMessage,
         hintMaxLines: 1,

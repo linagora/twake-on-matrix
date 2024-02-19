@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'chat.dart';
 
 class ChatEmojiPicker extends StatelessWidget {
-  final ChatController controller;
-  const ChatEmojiPicker(this.controller, {Key? key}) : super(key: key);
+  final ValueNotifier<bool> showEmojiPickerNotifier;
+  final void Function(Emoji? emoji) onEmojiSelected;
+  final void Function() emojiPickerBackspace;
+
+  const ChatEmojiPicker({
+    Key? key,
+    required this.showEmojiPickerNotifier,
+    required this.onEmojiSelected,
+    required this.emojiPickerBackspace,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.showEmojiPickerNotifier,
+      valueListenable: showEmojiPickerNotifier,
       builder: (context, showEmojiPicker, _) {
         return AnimatedContainer(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Colors.transparent,
+                width: 1,
+              ),
+            ),
+          ),
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
-          width: MediaQuery.of(context).size.width,
-          height: showEmojiPicker ? MediaQuery.of(context).size.height / 3 : 0,
+          width: MediaQuery.sizeOf(context).width,
+          height: showEmojiPicker ? MediaQuery.sizeOf(context).height / 3 : 0,
           child: showEmojiPicker
               ? EmojiPicker(
-                  onEmojiSelected: controller.onEmojiSelected,
-                  onBackspacePressed: controller.emojiPickerBackspace,
+                  onEmojiSelected: (_, emoji) => onEmojiSelected(emoji),
+                  onBackspacePressed: emojiPickerBackspace,
                   config: Config(
                     backspaceColor: Theme.of(context).colorScheme.primary,
                     bgColor: Theme.of(context).colorScheme.surface,

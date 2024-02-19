@@ -1,5 +1,4 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
@@ -9,8 +8,8 @@ import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +23,9 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
   final ValueNotifier<String?> isHoverNotifier;
-  final bool longPressSelect;
   final bool selected;
   final Timeline timeline;
-  final List<ContextMenuItemChatAction> listHorizontalActionMenu;
+  final List<ContextMenuItemAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
   final ContextMenuBuilder? menuChildren;
@@ -39,7 +37,6 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     super.key,
     required this.event,
     this.nextEvent,
-    this.longPressSelect = false,
     this.onSelect,
     this.scrollToEventId,
     this.selected = false,
@@ -73,10 +70,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
           event.isOwnMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (event.isOwnMessage)
-          _menuActionsRowBuilder(context, event.isOwnMessage),
+        if (event.isOwnMessage) _menuActionsRowBuilder(context),
         TwakeContextMenuArea(
-          width: MessageStyle.contextMenuWidth,
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
               : null,
@@ -92,8 +87,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             ),
             child: MultiPlatformSelectionMode(
               event: event,
-              longPressSelect: longPressSelect,
-              useInkWell: !PlatformInfos.isWeb,
+              isClickable: responsiveUtils.isMobileOrTablet(context),
               onSelect: onSelect,
               child: Stack(
                 alignment: event.isOwnMessage
@@ -153,19 +147,13 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                           child: Padding(
                                             padding:
                                                 MessageStyle.paddingMessageTime,
-                                            child: MultiPlatformSelectionMode(
-                                              useInkWell: PlatformInfos.isWeb,
-                                              longPressSelect: longPressSelect,
-                                              onSelect: onSelect,
+                                            child: MessageTime(
+                                              timelineOverlayMessage:
+                                                  event.timelineOverlayMessage,
+                                              room: event.room,
                                               event: event,
-                                              child: MessageTime(
-                                                timelineOverlayMessage: event
-                                                    .timelineOverlayMessage,
-                                                room: event.room,
-                                                event: event,
-                                                ownMessage: event.isOwnMessage,
-                                                timeline: timeline,
-                                              ),
+                                              ownMessage: event.isOwnMessage,
+                                              timeline: timeline,
                                             ),
                                           ),
                                         ),
@@ -201,17 +189,16 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             ),
           ),
         ),
-        if (!event.isOwnMessage)
-          _menuActionsRowBuilder(context, event.isOwnMessage),
+        if (!event.isOwnMessage) _menuActionsRowBuilder(context),
       ],
     );
   }
 
-  Widget _menuActionsRowBuilder(BuildContext context, bool ownMessage) {
+  Widget _menuActionsRowBuilder(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: isHoverNotifier,
       builder: (context, isHover, child) {
-        if (isHover != null && isHover.contains(event.eventId) && !selected) {
+        if (isHover != null && isHover.contains(event.eventId)) {
           return child!;
         }
         return const SizedBox();

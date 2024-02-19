@@ -41,7 +41,7 @@ enum SettingEnum {
   String subtitleSettings(BuildContext context) {
     switch (this) {
       case SettingEnum.chatSettings:
-        return L10n.of(context)!.settingsChatSubtitle;
+        return '';
       case SettingEnum.privacyAndSecurity:
         return L10n.of(context)!.settingsPrivacyAndSecuritySubtitle;
       case SettingEnum.notificationAndSounds:

@@ -42,6 +42,7 @@ class SelectedContactsMapChangeNotifier extends ChangeNotifier {
       selectedContactsMap[contact]!.value = false;
     }
     _selectedContactsList = {};
+    haveSelectedContactsNotifier.value = false;
     notifyListeners();
   }
 

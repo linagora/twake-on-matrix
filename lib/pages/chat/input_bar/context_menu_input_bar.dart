@@ -34,7 +34,7 @@ class ContextMenuInputBar extends StatelessWidget {
             event.buttons == kSecondaryMouseButton) {
           // FIXME: the contextMenuBuilder.editable can do this but its style in web is not customizable
           // currently this is only solution
-          final screenSize = MediaQuery.of(context).size;
+          final screenSize = MediaQuery.sizeOf(context);
           final offset = event.position;
           final position = RelativeRect.fromLTRB(
             offset.dx,
