@@ -403,7 +403,12 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                 onChanged!(text);
               }
             },
-            contextMenuBuilder: null,
+            contextMenuBuilder: PlatformInfos.isWeb
+                ? null
+                : (_, editableTextState) =>
+                    AdaptiveTextSelectionToolbar.editableText(
+                      editableTextState: editableTextState,
+                    ),
             onTap: () async {
               await Future.delayed(debounceDurationTap);
               FocusScope.of(context).requestFocus(focusNode);
