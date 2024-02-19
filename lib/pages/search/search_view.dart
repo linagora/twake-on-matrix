@@ -76,6 +76,10 @@ class SearchView extends StatelessWidget {
                   searchController.serverSearchController.searchResultsNotifier,
               builder: ((context, searchResults, child) {
                 if (searchResults is PresentationServerSideEmptySearch) {
+                  if (searchController.searchContactAndRecentChatController!
+                      .recentAndContactsNotifier.value.isNotEmpty) {
+                    return child!;
+                  }
                   return _SearchHeader(
                     header: L10n.of(context)!.messages,
                     searchController: searchController,
