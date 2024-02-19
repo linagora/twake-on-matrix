@@ -2883,7 +2883,7 @@
   "@noResults": {},
   "addAnotherAccount": "Thêm tài khoản khác",
   "@addAnotherAccount": {},
-  "messageSelected": "đã chọn {count, số nhiều, =0{Không có tin nhắn} =1{1 Tin nhắn} other{{count} Tin nhắn}}",
+  "messageSelected": "{count, plural, =0{Không có tin nhắn} =1{1 Tin nhắn} other{{count} Tin nhắn}}",
   "@messageSelected": {
     "type": "text",
     "placeholders": {
