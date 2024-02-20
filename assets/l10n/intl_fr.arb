@@ -30,7 +30,7 @@
       "username": {}
     }
   },
-  "addEmail": "Ajouter un courriel",
+  "addEmail": "Ajouter une adresse e-mail",
   "@addEmail": {
     "type": "text",
     "placeholders": {}
@@ -760,7 +760,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "enterAnEmailAddress": "Saisissez une adresse de courriel",
+  "enterAnEmailAddress": "Saisissez une adresse e-mail",
   "@enterAnEmailAddress": {
     "type": "text",
     "placeholders": {}
@@ -1380,7 +1380,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseClickOnLink": "Veuillez cliquer sur le lien contenu dans le courriel puis continuez.",
+  "pleaseClickOnLink": "Veuillez cliquer sur le lien contenu dans le message puis continuez.",
   "@pleaseClickOnLink": {
     "type": "text",
     "placeholders": {}
@@ -2035,7 +2035,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "weSentYouAnEmail": "Nous vous avons envoyé un courriel",
+  "weSentYouAnEmail": "Nous vous avons envoyé un message",
   "@weSentYouAnEmail": {
     "type": "text",
     "placeholders": {}
@@ -2115,7 +2115,7 @@
   "@sendOnEnter": {},
   "homeserver": "Serveur d'accueil",
   "@homeserver": {},
-  "serverRequiresEmail": "Ce serveur doit valider votre adresse électronique pour l'inscription.",
+  "serverRequiresEmail": "Ce serveur doit valider votre adresse e-mail pour l'inscription.",
   "@serverRequiresEmail": {},
   "enableMultiAccounts": "(BETA) Activer les comptes multiples sur cet appareil",
   "@enableMultiAccounts": {},
@@ -2141,7 +2141,7 @@
   "@unverified": {},
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas !",
   "@passwordsDoNotMatch": {},
-  "pleaseEnterValidEmail": "Veuillez saisir une adresse électronique valide.",
+  "pleaseEnterValidEmail": "Veuillez saisir une adresse e-mail valide.",
   "@pleaseEnterValidEmail": {},
   "repeatPassword": "Répétez le mot de passe",
   "@repeatPassword": {},
@@ -2275,7 +2275,7 @@
   "@videoCallsBetaWarning": {},
   "experimentalVideoCalls": "Appels vidéo expérimentaux",
   "@experimentalVideoCalls": {},
-  "emailOrUsername": "Courriel ou identifiant",
+  "emailOrUsername": "Adresse e-mail ou identifiant",
   "@emailOrUsername": {},
   "switchToAccount": "Passer au compte {number}",
   "@switchToAccount": {
@@ -2398,7 +2398,7 @@
   "@indexedDbErrorTitle": {},
   "stories": "Histoires",
   "@stories": {},
-  "noEmailWarning": "Veuillez saisir une adresse électronique valide. Sinon, vous ne pourrez pas réinitialiser votre mot de passe. Si vous ne voulez pas le faire, appuyez à nouveau sur le bouton pour continuer.",
+  "noEmailWarning": "Veuillez saisir une adresse e-mail valide. Sinon, vous ne pourrez pas réinitialiser votre mot de passe. Si vous ne voulez pas le faire, appuyez à nouveau sur le bouton pour continuer.",
   "@noEmailWarning": {},
   "dehydrate": "Exporter la session et effacer l'appareil",
   "@dehydrate": {},
@@ -2643,7 +2643,7 @@
   "@startNewChatMessage": {},
   "searchResultNotFound2": "• Il se peut que l'utilisateur ne figure pas dans votre carnet d'adresses.\n",
   "@searchResultNotFound2": {},
-  "serverNameWrongExplain": "L'adresse du serveur vous a été envoyée par l'administrateur de l'entreprise. Vérifiez l'e-mail d'invitation.",
+  "serverNameWrongExplain": "L'adresse du serveur vous a été envoyée par l'administrateur de l'entreprise. Vérifiez le message d'invitation.",
   "@serverNameWrongExplain": {},
   "wrongServerName": "Mauvais nom de serveur",
   "@wrongServerName": {},
@@ -2687,7 +2687,7 @@
   "@errorPageTitle": {},
   "forwardTo": "Transférer à...",
   "@forwardTo": {},
-  "chatFolders": "Dossiers & Groupes",
+  "chatFolders": "Dossiers de discussion",
   "@chatFolders": {},
   "errorPageDescription": "Cette page n'existe pas.",
   "@errorPageDescription": {},
@@ -3067,5 +3067,15 @@
     }
   },
   "contactsWarningBannerTitle": "Pour vous vous connecter avec tous vos contacts, veuillez permettre à Twake d'accéder aux contacts de votre appareil.",
-  "@contactsWarningBannerTitle": {}
+  "@contactsWarningBannerTitle": {},
+  "sharedMediaAndLinks": "Fichiers et liens partagés",
+  "@sharedMediaAndLinks": {},
+  "removeFileBeforeSend": "Supprimer les fichiers avec des erreurs avant l'envoi",
+  "@removeFileBeforeSend": {},
+  "errorSendingFiles": "Certains fichiers ne peuvent pas être envoyés en raison de limite de taille, de format ou d'erreurs inattendues. Ils seront omis.",
+  "@errorSendingFiles": {},
+  "unselect": "Désélectionner",
+  "@unselect": {},
+  "searchContacts": "Rechercher des contacts",
+  "@searchContacts": {}
 }
