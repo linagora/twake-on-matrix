@@ -23,6 +23,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
   final PageController pageController;
+  final OnPopInvoked onPopInvoked;
 
   final ValueNotifier<String?> activeRoomIdNotifier;
 
@@ -44,6 +45,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
+    required this.onPopInvoked,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -52,94 +54,108 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Row(
-        children: [
-          if (!responsiveUtils.isMobile(context)) ...[
-            SlotLayout(
-              config: <Breakpoint, SlotLayoutConfig>{
-                const WidthPlatformBreakpoint(
-                  begin: ResponsiveUtils.minDesktopWidth,
-                ): SlotLayout.from(
-                  key: primaryNavigationKey,
-                  builder: (_) {
-                    return ValueListenableBuilder(
-                      valueListenable: activeNavigationBar,
-                      builder: (_, navigatorBar, child) {
-                        switch (navigatorBar) {
-                          case AdaptiveDestinationEnum.contacts:
-                          case AdaptiveDestinationEnum.rooms:
-                          default:
-                            return _PrimaryNavigationBarBuilder(
-                              activeNavigationBar: activeNavigationBar,
-                              onDestinationSelected: onDestinationSelected,
-                              destinations: getNavigationDestinations(context),
-                            );
-                        }
-                      },
-                    );
-                  },
-                ),
-              },
-            ),
-          ],
-          if (!FirstColumnInnerRoutes.instance
-              .goRouteAvailableInFirstColumn()) ...[
-            Expanded(
-              child: ClipRRect(
-                borderRadius: AppScaffoldViewStyle.borderRadiusBody,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: LinagoraRefColors.material().primary[100],
-                  ),
-                  child: Navigator(
-                    key: !responsiveUtils.isSingleColumnLayout(context)
-                        ? FirstColumnInnerRoutes.innerNavigatorNotOneColumnKey
-                        : FirstColumnInnerRoutes.innerNavigatorOneColumnKey,
-                    initialRoute: 'innernavigator/rooms',
-                    onGenerateRoute: (settings) {
-                      if (settings.name == 'innernavigator/rooms') {
-                        return MaterialPageRoute(
-                          builder: (context) {
-                            return _ColumnPageView(
-                              activeRoomIdNotifier: activeRoomIdNotifier,
-                              activeNavigationBar: activeNavigationBar,
-                              pageController: pageController,
-                              onOpenSearchPage: onOpenSearchPage,
-                              onCloseSearchPage: onCloseSearchPage,
-                              onDestinationSelected: onDestinationSelected,
-                              onClientSelected: onClientSelected,
-                              destinations: destinations,
-                              bottomNavigationKey: bottomNavigationKey,
-                            );
-                          },
-                        );
-                      } else {
-                        return FirstColumnInnerRoutes.routes(
-                          settings.name,
-                          arguments: settings.arguments,
-                        );
-                      }
+      body: ValueListenableBuilder(
+        valueListenable: activeNavigationBar,
+        builder: (context, _, __) {
+          return PopScope(
+            canPop: activeNavigationBar.value == AdaptiveDestinationEnum.rooms,
+            onPopInvoked: onPopInvoked,
+            child: Row(
+              children: [
+                if (!responsiveUtils.isMobile(context)) ...[
+                  SlotLayout(
+                    config: <Breakpoint, SlotLayoutConfig>{
+                      const WidthPlatformBreakpoint(
+                        begin: ResponsiveUtils.minDesktopWidth,
+                      ): SlotLayout.from(
+                        key: primaryNavigationKey,
+                        builder: (_) {
+                          return ValueListenableBuilder(
+                            valueListenable: activeNavigationBar,
+                            builder: (_, navigatorBar, child) {
+                              switch (navigatorBar) {
+                                case AdaptiveDestinationEnum.contacts:
+                                case AdaptiveDestinationEnum.rooms:
+                                default:
+                                  return _PrimaryNavigationBarBuilder(
+                                    activeNavigationBar: activeNavigationBar,
+                                    onDestinationSelected:
+                                        onDestinationSelected,
+                                    destinations:
+                                        getNavigationDestinations(context),
+                                  );
+                              }
+                            },
+                          );
+                        },
+                      ),
                     },
                   ),
-                ),
-              ),
+                ],
+                if (!FirstColumnInnerRoutes.instance
+                    .goRouteAvailableInFirstColumn()) ...[
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: AppScaffoldViewStyle.borderRadiusBody,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: LinagoraRefColors.material().primary[100],
+                        ),
+                        child: Navigator(
+                          key: !responsiveUtils.isSingleColumnLayout(context)
+                              ? FirstColumnInnerRoutes
+                                  .innerNavigatorNotOneColumnKey
+                              : FirstColumnInnerRoutes
+                                  .innerNavigatorOneColumnKey,
+                          initialRoute: 'innernavigator/rooms',
+                          onGenerateRoute: (settings) {
+                            if (settings.name == 'innernavigator/rooms') {
+                              return MaterialPageRoute(
+                                builder: (context) {
+                                  return _ColumnPageView(
+                                    activeRoomIdNotifier: activeRoomIdNotifier,
+                                    activeNavigationBar: activeNavigationBar,
+                                    pageController: pageController,
+                                    onOpenSearchPage: onOpenSearchPage,
+                                    onCloseSearchPage: onCloseSearchPage,
+                                    onDestinationSelected:
+                                        onDestinationSelected,
+                                    onClientSelected: onClientSelected,
+                                    destinations: destinations,
+                                    bottomNavigationKey: bottomNavigationKey,
+                                  );
+                                },
+                              );
+                            } else {
+                              return FirstColumnInnerRoutes.routes(
+                                settings.name,
+                                arguments: settings.arguments,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Expanded(
+                    child: _ColumnPageView(
+                      activeRoomIdNotifier: activeRoomIdNotifier,
+                      activeNavigationBar: activeNavigationBar,
+                      pageController: pageController,
+                      onOpenSearchPage: onOpenSearchPage,
+                      onCloseSearchPage: onCloseSearchPage,
+                      onDestinationSelected: onDestinationSelected,
+                      onClientSelected: onClientSelected,
+                      destinations: destinations,
+                      bottomNavigationKey: bottomNavigationKey,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ] else ...[
-            Expanded(
-              child: _ColumnPageView(
-                activeRoomIdNotifier: activeRoomIdNotifier,
-                activeNavigationBar: activeNavigationBar,
-                pageController: pageController,
-                onOpenSearchPage: onOpenSearchPage,
-                onCloseSearchPage: onCloseSearchPage,
-                onDestinationSelected: onDestinationSelected,
-                onClientSelected: onClientSelected,
-                destinations: destinations,
-                bottomNavigationKey: bottomNavigationKey,
-              ),
-            ),
-          ],
-        ],
+          );
+        },
       ),
     );
   }
