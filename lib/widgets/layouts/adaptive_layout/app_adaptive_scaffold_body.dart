@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
@@ -11,6 +12,7 @@ typedef OnOpenSearchPage = Function();
 typedef OnCloseSearchPage = Function();
 typedef OnClientSelectedSetting = Function(Object object, BuildContext context);
 typedef OnDestinationSelected = Function(int index);
+typedef OnPopInvoked = Function(bool);
 
 class AppAdaptiveScaffoldBody extends StatefulWidget {
   final String? activeRoomId;
@@ -98,6 +100,19 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
     pageController.jumpToPage(activeNavigationBar.value.index);
   }
 
+  void _onPopInvoked(_) {
+    if (!PlatformInfos.isAndroid) {
+      return;
+    }
+    final inChatList =
+        activeNavigationBar.value == AdaptiveDestinationEnum.rooms;
+    if (inChatList) {
+      return;
+    } else {
+      onDestinationSelected(AdaptiveDestinationEnum.rooms.index);
+    }
+  }
+
   MatrixState get matrix => Matrix.of(context);
 
   @override
@@ -113,6 +128,14 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   }
 
   @override
+  void dispose() {
+    activeRoomIdNotifier.dispose();
+    activeNavigationBar.dispose();
+    pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => AppAdaptiveScaffoldBodyView(
         destinations: destinations,
         activeRoomIdNotifier: activeRoomIdNotifier,
@@ -122,5 +145,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         onCloseSearchPage: _onCloseSearchPage,
         onDestinationSelected: onDestinationSelected,
         onClientSelected: clientSelected,
+        onPopInvoked: _onPopInvoked,
       );
 }
