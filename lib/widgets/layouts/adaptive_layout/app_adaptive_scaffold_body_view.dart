@@ -17,7 +17,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart'
 
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
-  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final OnOpenSearchPage onOpenSearchPage;
   final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
@@ -39,7 +39,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     Key? key,
     required this.activeRoomIdNotifier,
     required this.pageController,
-    required this.activeNavigationBar,
+    required this.activeNavigationBarNotifier,
     required this.onOpenSearchPage,
     required this.onCloseSearchPage,
     required this.onDestinationSelected,
@@ -55,10 +55,10 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: ValueListenableBuilder(
-        valueListenable: activeNavigationBar,
-        builder: (context, _, __) {
+        valueListenable: activeNavigationBarNotifier,
+        builder: (context, activeNavigationBar, __) {
           return PopScope(
-            canPop: activeNavigationBar.value == AdaptiveDestinationEnum.rooms,
+            canPop: activeNavigationBar == AdaptiveDestinationEnum.rooms,
             onPopInvoked: onPopInvoked,
             child: Row(
               children: [
@@ -71,14 +71,15 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                         key: primaryNavigationKey,
                         builder: (_) {
                           return ValueListenableBuilder(
-                            valueListenable: activeNavigationBar,
+                            valueListenable: activeNavigationBarNotifier,
                             builder: (_, navigatorBar, child) {
                               switch (navigatorBar) {
                                 case AdaptiveDestinationEnum.contacts:
                                 case AdaptiveDestinationEnum.rooms:
                                 default:
                                   return _PrimaryNavigationBarBuilder(
-                                    activeNavigationBar: activeNavigationBar,
+                                    activeNavigationBar:
+                                        activeNavigationBarNotifier,
                                     onDestinationSelected:
                                         onDestinationSelected,
                                     destinations:
@@ -114,7 +115,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                 builder: (context) {
                                   return _ColumnPageView(
                                     activeRoomIdNotifier: activeRoomIdNotifier,
-                                    activeNavigationBar: activeNavigationBar,
+                                    activeNavigationBarNotifier:
+                                        activeNavigationBarNotifier,
                                     pageController: pageController,
                                     onOpenSearchPage: onOpenSearchPage,
                                     onCloseSearchPage: onCloseSearchPage,
@@ -141,7 +143,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                   Expanded(
                     child: _ColumnPageView(
                       activeRoomIdNotifier: activeRoomIdNotifier,
-                      activeNavigationBar: activeNavigationBar,
+                      activeNavigationBarNotifier: activeNavigationBarNotifier,
                       pageController: pageController,
                       onOpenSearchPage: onOpenSearchPage,
                       onCloseSearchPage: onCloseSearchPage,
@@ -169,7 +171,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
 
 class _ColumnPageView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
-  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar;
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final PageController pageController;
   final OnOpenSearchPage onOpenSearchPage;
   final OnCloseSearchPage onCloseSearchPage;
@@ -179,7 +181,7 @@ class _ColumnPageView extends StatelessWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
 
   const _ColumnPageView({
-    required this.activeNavigationBar,
+    required this.activeNavigationBarNotifier,
     required this.activeRoomIdNotifier,
     required this.pageController,
     required this.onOpenSearchPage,
@@ -228,7 +230,7 @@ class _ColumnPageView extends StatelessWidget {
     required Widget navigatorBarWidget,
   }) {
     return ValueListenableBuilder<AdaptiveDestinationEnum>(
-      valueListenable: activeNavigationBar,
+      valueListenable: activeNavigationBarNotifier,
       builder: (context, currentNavigatorBar, child) {
         if (navigatorBarType == currentNavigatorBar) {
           return navigatorBarWidget;
@@ -278,7 +280,7 @@ class _ColumnPageView extends StatelessWidget {
   }
 
   int _getActiveBottomNavigationBarIndex() {
-    return destinations.indexOf(activeNavigationBar.value);
+    return destinations.indexOf(activeNavigationBarNotifier.value);
   }
 }
 

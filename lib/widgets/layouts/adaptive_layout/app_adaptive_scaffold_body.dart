@@ -8,11 +8,14 @@ import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart'
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
-typedef OnOpenSearchPage = Function();
-typedef OnCloseSearchPage = Function();
-typedef OnClientSelectedSetting = Function(Object object, BuildContext context);
-typedef OnDestinationSelected = Function(int index);
-typedef OnPopInvoked = Function(bool);
+typedef OnOpenSearchPage = void Function();
+typedef OnCloseSearchPage = void Function();
+typedef OnClientSelectedSetting = void Function(
+  Object object,
+  BuildContext context,
+);
+typedef OnDestinationSelected = void Function(int index);
+typedef OnPopInvoked = void Function(bool);
 
 class AppAdaptiveScaffoldBody extends StatefulWidget {
   final String? activeRoomId;
@@ -28,7 +31,7 @@ class AppAdaptiveScaffoldBody extends StatefulWidget {
 }
 
 class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
-  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBar =
+  final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
@@ -46,7 +49,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
 
   void onDestinationSelected(int index) {
     final destinationType = destinations[index];
-    activeNavigationBar.value = destinationType;
+    activeNavigationBarNotifier.value = destinationType;
     pageController.jumpToPage(index);
     clearNavigatorScreen();
   }
@@ -83,7 +86,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   }
 
   void _onOpenSettingsPage() {
-    activeNavigationBar.value = AdaptiveDestinationEnum.settings;
+    activeNavigationBarNotifier.value = AdaptiveDestinationEnum.settings;
     _jumpToPageByIndex();
   }
 
@@ -92,12 +95,12 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   }
 
   void _onCloseSearchPage() {
-    activeNavigationBar.value = AdaptiveDestinationEnum.rooms;
+    activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
     _jumpToPageByIndex();
   }
 
   void _jumpToPageByIndex() {
-    pageController.jumpToPage(activeNavigationBar.value.index);
+    pageController.jumpToPage(activeNavigationBarNotifier.value.index);
   }
 
   void _onPopInvoked(_) {
@@ -105,7 +108,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
       return;
     }
     final inChatList =
-        activeNavigationBar.value == AdaptiveDestinationEnum.rooms;
+        activeNavigationBarNotifier.value == AdaptiveDestinationEnum.rooms;
     if (inChatList) {
       return;
     } else {
@@ -130,7 +133,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   @override
   void dispose() {
     activeRoomIdNotifier.dispose();
-    activeNavigationBar.dispose();
+    activeNavigationBarNotifier.dispose();
     pageController.dispose();
     super.dispose();
   }
@@ -139,7 +142,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   Widget build(BuildContext context) => AppAdaptiveScaffoldBodyView(
         destinations: destinations,
         activeRoomIdNotifier: activeRoomIdNotifier,
-        activeNavigationBar: activeNavigationBar,
+        activeNavigationBarNotifier: activeNavigationBarNotifier,
         pageController: pageController,
         onOpenSearchPage: _onOpenSearchPage,
         onCloseSearchPage: _onCloseSearchPage,
