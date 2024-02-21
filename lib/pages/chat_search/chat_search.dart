@@ -98,7 +98,7 @@ class ChatSearchController extends State<ChatSearch> {
     if (widget.isInStack) {
       await onBack();
     }
-    context.goToRoomWithEvent(event);
+    context.goToRoomWithEvent(event.room.id, event.eventId);
   }
 
   Future onBack() async {
