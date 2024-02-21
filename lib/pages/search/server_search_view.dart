@@ -57,7 +57,8 @@ class ServerSearchMessagesList extends StatelessWidget {
                 return Padding(
                   padding: ServerSearchViewStyle.paddingListItem,
                   child: InkWell(
-                    onTap: () => context.goToRoomWithEvent(event),
+                    onTap: () =>
+                        context.goToRoomWithEvent(event.room.id, event.eventId),
                     borderRadius: ServerSearchViewStyle.itemBorderRadius,
                     child: Padding(
                       padding: ServerSearchViewStyle.paddingInsideListItem,
