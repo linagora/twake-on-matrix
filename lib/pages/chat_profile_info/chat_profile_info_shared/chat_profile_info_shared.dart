@@ -69,6 +69,7 @@ class ProfileInfoSharedController extends State<ProfileInfoShared>
                         ),
                         controller: mediaListController!,
                         handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
+                        onCloseRightColumn: widget.onCloseRightColumn,
                       ),
               );
             case ChatDetailsPage.links:
