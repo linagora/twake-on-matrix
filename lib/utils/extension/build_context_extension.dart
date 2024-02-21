@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
+
+typedef OnPopUntilDoneWithResult = void Function(dynamic result);
 
 extension ContextExtensionss on BuildContext {
+  static const String resultKeySettingRoute = 'popResult';
+
   /// The same of [MediaQuery.sizeOf(context)]
   Size get mediaQuerySize => MediaQuery.sizeOf(this);
 
@@ -186,7 +189,7 @@ extension ContextExtensionss on BuildContext {
     Navigator.of(this).popUntil((route) => route.isFirst);
   }
 
-  void goToRoomWithEvent(MatrixEvent event) {
-    go('/rooms/${event.roomId}?event=${event.eventId}');
+  void goToRoomWithEvent(String roomId, String eventId) {
+    go('/rooms/$roomId?event=$eventId');
   }
 }

@@ -11,14 +11,14 @@ class ChatDetailsRoutes {
 }
 
 class ChatDetailsNavigator extends StatelessWidget {
-  final VoidCallback? onBack;
+  final VoidCallback? onCloseRightColumn;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
 
   const ChatDetailsNavigator({
     Key? key,
-    this.onBack,
+    this.onCloseRightColumn,
     this.roomId,
     this.contact,
     required this.isInStack,
@@ -29,7 +29,7 @@ class ChatDetailsNavigator extends StatelessWidget {
     if (PlatformInfos.isMobile) {
       return ChatDetails(
         roomId: roomId!,
-        onBack: onBack,
+        onCloseRightColumn: onCloseRightColumn,
         isInStack: isInStack,
       );
     }
@@ -41,7 +41,7 @@ class ChatDetailsNavigator extends StatelessWidget {
             case ChatDetailsRoutes.chatDetails:
               return ChatDetails(
                 roomId: roomId!,
-                onBack: onBack,
+                onCloseRightColumn: onCloseRightColumn,
                 isInStack: isInStack,
               );
             case ChatDetailsRoutes.chatDetailsEdit:
@@ -51,7 +51,7 @@ class ChatDetailsNavigator extends StatelessWidget {
             default:
               return ChatDetails(
                 roomId: roomId!,
-                onBack: onBack,
+                onCloseRightColumn: onCloseRightColumn,
                 isInStack: isInStack,
               );
           }

@@ -10,5 +10,5 @@ class ContextMenuItemImageViewerStyle {
   static Color dividerColor(BuildContext context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16);
 
-  static double titleLetterSpace = -0.15;
+  static SizedBox get paddingBetweenItems => const SizedBox(width: 12);
 }

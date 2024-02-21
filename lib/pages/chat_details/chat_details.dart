@@ -37,13 +37,13 @@ enum AliasActions { copy, delete, setCanonical }
 class ChatDetails extends StatefulWidget {
   final String roomId;
   final bool isInStack;
-  final VoidCallback? onBack;
+  final VoidCallback? onCloseRightColumn;
 
   const ChatDetails({
     super.key,
     required this.roomId,
     required this.isInStack,
-    this.onBack,
+    this.onCloseRightColumn,
   });
 
   @override
@@ -254,6 +254,7 @@ class ChatDetailsController extends State<ChatDetails>
                         controller: mediaListController!,
                         cacheMap: _mediaCacheMap,
                         handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
+                        onCloseRightColumn: widget.onCloseRightColumn,
                       ),
               );
             case ChatDetailsPage.links:
