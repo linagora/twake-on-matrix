@@ -15,12 +15,14 @@ class ChatDetailsMediaPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
   final Map<EventId, ImageData>? cacheMap;
   final DownloadVideoEventCallback handleDownloadVideoEvent;
+  final VoidCallback? onCloseRightColumn;
 
   const ChatDetailsMediaPage({
     Key? key,
     required this.controller,
     required this.handleDownloadVideoEvent,
     this.cacheMap,
+    this.onCloseRightColumn,
   }) : super(key: key);
 
   @override
@@ -43,6 +45,7 @@ class ChatDetailsMediaPage extends StatelessWidget {
                   ? _ImageItem(
                       event: events[index],
                       cacheMap: cacheMap,
+                      onCloseRightColumn: onCloseRightColumn,
                     )
                   : _VideoItem(
                       event: events[index],
@@ -58,10 +61,12 @@ class ChatDetailsMediaPage extends StatelessWidget {
 class _ImageItem extends StatelessWidget {
   final Event event;
   final Map<EventId, ImageData>? cacheMap;
+  final VoidCallback? onCloseRightColumn;
 
   const _ImageItem({
     required this.event,
     this.cacheMap,
+    this.onCloseRightColumn,
   });
 
   @override
@@ -77,6 +82,7 @@ class _ImageItem extends StatelessWidget {
       ),
       cacheKey: event.eventId,
       cacheMap: cacheMap,
+      onCloseRightColumn: onCloseRightColumn,
     );
   }
 }

@@ -39,7 +39,7 @@ class ContextMenuItemImageViewer extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const SizedBox(width: 12),
+                    ContextMenuItemImageViewerStyle.paddingBetweenItems,
                     if (icon != null)
                       Icon(
                         icon,
@@ -53,14 +53,12 @@ class ContextMenuItemImageViewer extends StatelessWidget {
                           BlendMode.srcIn,
                         ),
                       ),
-                    const SizedBox(width: 12),
+                    ContextMenuItemImageViewerStyle.paddingBetweenItems,
                     Text(
                       title,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: color ??
                                 Theme.of(context).colorScheme.onSurface,
-                            letterSpacing: ContextMenuItemImageViewerStyle
-                                .titleLetterSpace,
                           ),
                       overflow: TextOverflow.ellipsis,
                     ),

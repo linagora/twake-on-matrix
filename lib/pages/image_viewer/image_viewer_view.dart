@@ -102,7 +102,9 @@ class ImageViewerView extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(
-                    Icons.arrow_back_rounded,
+                    controller.responsiveUtils.isMobile(context)
+                        ? Icons.arrow_back_rounded
+                        : Icons.close,
                     color: LinagoraSysColors.material().onPrimary,
                   ),
                   onPressed: () {

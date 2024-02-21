@@ -424,6 +424,7 @@ abstract class AppRoutes {
                     case ChatRouterInputArgumentType.draft:
                       if (extra.data is String?) {
                         return CupertinoPage(
+                          name: '/room',
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(state.pathParameters['roomid']!),
@@ -432,6 +433,7 @@ abstract class AppRoutes {
                         );
                       }
                       return CupertinoPage(
+                        name: '/room',
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
@@ -439,6 +441,7 @@ abstract class AppRoutes {
                       );
                     case ChatRouterInputArgumentType.share:
                       return CupertinoPage(
+                        name: '/room',
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
@@ -448,6 +451,7 @@ abstract class AppRoutes {
                   }
                 }
                 return CupertinoPage(
+                  name: '/room',
                   child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(state.pathParameters['roomid']!),
