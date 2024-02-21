@@ -38,7 +38,6 @@ class RecentChatList extends StatelessWidget {
           itemCount: rooms.length,
           itemBuilder: (BuildContext context, int index) {
             final room = rooms[index];
-            final selected = selectedChat == room.id;
             return Material(
               borderRadius: RecentChatListStyle.borderRadiusItem,
               child: InkWell(
@@ -48,16 +47,10 @@ class RecentChatList extends StatelessWidget {
                   padding: RecentChatListStyle.paddingVerticalBetweenItem,
                   child: Row(
                     children: [
-                      AnimatedCrossFade(
-                        duration: durationToggleItem,
-                        firstChild: Checkbox(
-                          value: selected,
-                          onChanged: (value) => onSelectedChat(room.id),
-                        ),
-                        secondChild: const SizedBox.shrink(),
-                        crossFadeState: selected
-                            ? CrossFadeState.showFirst
-                            : CrossFadeState.showSecond,
+                      Radio<String>(
+                        groupValue: room.id,
+                        value: selectedChat,
+                        onChanged: (value) => onSelectedChat(room.id),
                       ),
                       Avatar(
                         mxContent: room.avatar,

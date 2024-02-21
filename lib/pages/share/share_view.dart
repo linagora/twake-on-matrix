@@ -60,7 +60,7 @@ class ShareView extends StatelessWidget {
       floatingActionButton: ValueListenableBuilder<String>(
         valueListenable: controller.selectedChatNotifier,
         builder: ((context, selectedEvents, child) {
-          if (selectedEvents.length != 1) {
+          if (selectedEvents.isEmpty) {
             return const SizedBox();
           }
 
