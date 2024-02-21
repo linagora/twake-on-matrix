@@ -2748,7 +2748,7 @@
   "@downloadImageError": {},
   "appLanguage": "Ngôn ngữ",
   "@appLanguage": {},
-  "copyMessageText": "Sao chép tin nhắn",
+  "copyMessageText": "Sao chép",
   "@copyMessageText": {},
   "membersInfo": "Thành viên ({count})",
   "@membersInfo": {
@@ -3052,5 +3052,15 @@
   "sendFiles": "Gửi {count}tệp",
   "@sendFiles": {},
   "failedToSendFiles": "Không gửi được tập tin",
-  "@failedToSendFiles": {}
+  "@failedToSendFiles": {},
+  "searchContacts": "Tìm kiếm liên hệ",
+  "@searchContacts": {},
+  "unselect": "Bỏ chọn",
+  "@unselect": {},
+  "sharedMediaAndLinks": "Phương tiện và liên kết chia sẻ",
+  "@sharedMediaAndLinks": {},
+  "errorSendingFiles": "Một số tệp không thể gửi do hạn chế về kích thước, định dạng hoặc các lỗi không mong đợi. Những tệp này sẽ không được bao gồm trong quá trình gửi.",
+  "@errorSendingFiles": {},
+  "removeFileBeforeSend": "Loại bỏ các tệp lỗi trước khi gửi",
+  "@removeFileBeforeSend": {}
 }
