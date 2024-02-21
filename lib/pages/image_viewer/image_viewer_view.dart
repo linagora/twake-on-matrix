@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/image_viewer/context_menu_item_image_viewer.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -63,6 +66,7 @@ class ImageViewerView extends StatelessWidget {
 
     return Center(
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
             if (PlatformInfos.isWeb) {
@@ -98,28 +102,17 @@ class ImageViewerView extends StatelessWidget {
               children: [
                 IconButton(
                   icon: Icon(
-                    Icons.close,
+                    Icons.arrow_back_rounded,
                     color: LinagoraSysColors.material().onPrimary,
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   color: LinagoraSysColors.material().onPrimary,
-                  tooltip: L10n.of(context)!.close,
+                  tooltip: L10n.of(context)!.back,
                 ),
                 Row(
                   children: [
-                    if (controller.widget.event != null)
-                      IconButton(
-                        icon: Icon(
-                          Icons.save_alt,
-                          color: LinagoraSysColors.material().onPrimary,
-                        ),
-                        onPressed: () => controller.saveFileAction(context),
-                        color: LinagoraSysColors.material().onPrimary,
-                        tooltip: L10n.of(context)!.saveFile,
-                      ),
-                    //FIXME: https://github.com/linagora/twake-on-matrix/issues/435
                     if (PlatformInfos.isMobile)
                       Builder(
                         builder: (context) => IconButton(
@@ -141,6 +134,45 @@ class ImageViewerView extends StatelessWidget {
                         onPressed: controller.forwardAction,
                         color: LinagoraSysColors.material().onPrimary,
                         tooltip: L10n.of(context)!.share,
+                      ),
+                    if (controller.widget.event != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: MenuAnchor(
+                            controller: controller.menuController,
+                            style: const MenuStyle(
+                              alignment: Alignment.bottomRight,
+                            ),
+                            menuChildren: [
+                              ContextMenuItemImageViewer(
+                                icon: Icons.file_download_outlined,
+                                title: L10n.of(context)!.saveFile,
+                                onTap: () => controller.saveFileAction(),
+                              ),
+                              ContextMenuItemImageViewer(
+                                title: L10n.of(context)!.showInChat,
+                                imagePath: ImagePaths.icShowInChat,
+                                onTap: () => controller.showInChat(),
+                                haveDivider: false,
+                              ),
+                            ],
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(100),
+                              onTap: () => controller.toggleShowMoreActions(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TwakeIconButton(
+                                  paddingAll: 0.0,
+                                  icon: Icons.more_vert,
+                                  iconColor:
+                                      LinagoraSysColors.material().onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                   ],
                 ),

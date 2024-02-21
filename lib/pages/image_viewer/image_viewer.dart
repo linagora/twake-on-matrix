@@ -1,10 +1,14 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
+import 'package:fluffychat/presentation/model/chat/image_viewer_argument.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -13,12 +17,14 @@ class ImageViewer extends StatefulWidget {
   final Event? event;
   final Uint8List? imageData;
   final String? filePath;
+  final VoidCallback? onBack;
 
   const ImageViewer({
     Key? key,
     this.event,
     this.imageData,
     this.filePath,
+    this.onBack,
   }) : super(key: key);
 
   @override
@@ -32,6 +38,10 @@ class ImageViewerController extends State<ImageViewer> {
   final double zoomScale = 3;
 
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
+
+  final MenuController menuController = MenuController();
+
+  final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   @override
   void initState() {
@@ -58,12 +68,44 @@ class ImageViewerController extends State<ImageViewer> {
     }
   }
 
+  void toggleShowMoreActions() {
+    if (menuController.isOpen) {
+      menuController.close();
+    } else {
+      menuController.open();
+    }
+  }
+
+  void showInChat() {
+    if (!PlatformInfos.isMobile) {
+      handleShowInChatInWeb();
+    } else {
+      handleShowInChatInMobile();
+    }
+  }
+
+  void handleShowInChatInWeb() {
+    Navigator.of(context).pop();
+    widget.onBack?.call();
+    context.goToRoomWithEvent(widget.event!.roomId!, widget.event!.eventId);
+    return;
+  }
+
+  void handleShowInChatInMobile() {
+    context.popUntilWithResult(
+      name: '/room',
+      result: ImageViewerArgument(
+        showInChatEventId: widget.event?.eventId,
+        roomId: widget.event?.roomId,
+      ),
+    );
+  }
+
   void toggleAppbarPreview() {
     showAppbarPreview.value = !showAppbarPreview.value;
   }
 
-  /// Save this file with a system call.
-  void saveFileAction(BuildContext context) => widget.event?.saveFile(context);
+  void saveFileAction() => widget.event?.saveFile(context);
 
   /// Save this file with a system call.
   void shareFileAction(BuildContext context) =>
