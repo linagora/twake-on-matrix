@@ -2,12 +2,15 @@ import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 typedef OnSendPhotosTap = void Function()?;
 
 mixin CommonMediaPickerMixin {
+  static const _audioAccessDeniedCode = 'AudioAccessDeniedWithoutPrompt';
+
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
 
@@ -17,6 +20,10 @@ mixin CommonMediaPickerMixin {
 
   Future<PermissionStatus>? getCurrentCameraPermission() {
     return _permissionHandlerService.requestPermissionForCameraActions();
+  }
+
+  Future<PermissionStatus>? getCurrentMicroPermission() {
+    return _permissionHandlerService.requestPermissionForMircoActions();
   }
 
   Future<void> goToSettings(BuildContext context) async {
@@ -50,6 +57,17 @@ mixin CommonMediaPickerMixin {
     }
   }
 
+  void _onError({
+    required BuildContext context,
+    required Object error,
+  }) {
+    if (error is! CameraException) return;
+    Logs().e("CommonMediaPickerMixin:: _onError", error.code);
+    if (error.code.contains(_audioAccessDeniedCode)) {
+      Navigator.of(context).maybePop();
+    }
+  }
+
   Future<AssetEntity?> pickMediaFromCameraAction({
     required BuildContext context,
     bool onlyImage = false,
@@ -57,12 +75,11 @@ mixin CommonMediaPickerMixin {
     Navigator.pop(context);
     return await CameraPicker.pickFromCamera(
       context,
-      pickerConfig: onlyImage
-          ? const CameraPickerConfig()
-          : const CameraPickerConfig(
-              enableRecording: true,
-              enableAudio: true,
-            ),
+      pickerConfig: CameraPickerConfig(
+        enableRecording: onlyImage,
+        enableAudio: !onlyImage,
+        onError: (e, a) => _onError(context: context, error: e),
+      ),
       locale: View.of(context).platformDispatcher.locale,
     );
   }
