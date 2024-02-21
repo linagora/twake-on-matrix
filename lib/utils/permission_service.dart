@@ -46,6 +46,17 @@ class PermissionHandlerService {
     }
   }
 
+  Future<PermissionStatus> requestPermissionForMircoActions() async {
+    final currentStatus = await Permission.microphone.status;
+    if (currentStatus == PermissionStatus.denied ||
+        currentStatus == PermissionStatus.permanentlyDenied) {
+      final newStatus = await Permission.microphone.request();
+      return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+    } else {
+      return currentStatus;
+    }
+  }
+
   Future<PermissionStatus> _handlePhotosPermissionIOSAction() async {
     final currentStatus = await Permission.photos.status;
     return _handlePhotoPermission(currentStatus);

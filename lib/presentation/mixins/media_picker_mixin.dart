@@ -44,12 +44,16 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
   }) async {
     final currentPermissionPhotos = await getCurrentMediaPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
-    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+    final currentPermissionMicro = await getCurrentMicroPermission();
+    if (currentPermissionPhotos != null &&
+        currentPermissionCamera != null &&
+        currentPermissionMicro != null) {
       showMediasPickerBottomSheet(
         context: context,
         imagePickerController: imagePickerGridController,
         permissionStatusPhotos: currentPermissionPhotos,
         permissionStatusCamera: currentPermissionCamera,
+        permissionStatusMicro: currentPermissionMicro,
         onSendTap: onSendTap,
         room: room,
         onPickerTypeTap: onPickerTypeTap,
@@ -67,6 +71,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     required ImagePickerGridController imagePickerController,
     required PermissionStatus permissionStatusPhotos,
     required PermissionStatus permissionStatusCamera,
+    required PermissionStatus permissionStatusMicro,
     OnSendPhotosTap onSendTap,
     OnPickerTypeTap? onPickerTypeTap,
     OnCameraPicked? onCameraPicked,
@@ -256,7 +261,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         ],
       ),
       cameraWidget: UseCameraWidget(
-        onPressed: permissionStatusCamera == PermissionStatus.granted
+        onPressed: permissionStatusCamera == PermissionStatus.granted &&
+                permissionStatusMicro == PermissionStatus.granted
             ? () => _pickFromCameraAction(
                   context: context,
                   imagePickerGridController: imagePickerController,
