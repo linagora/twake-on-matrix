@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
-import 'package:fluffychat/presentation/model/chat/image_viewer_argument.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -17,14 +16,14 @@ class ImageViewer extends StatefulWidget {
   final Event? event;
   final Uint8List? imageData;
   final String? filePath;
-  final VoidCallback? onBack;
+  final VoidCallback? onCloseRightColumn;
 
   const ImageViewer({
     Key? key,
     this.event,
     this.imageData,
     this.filePath,
-    this.onBack,
+    this.onCloseRightColumn,
   }) : super(key: key);
 
   @override
@@ -51,6 +50,7 @@ class ImageViewerController extends State<ImageViewer> {
   @override
   void dispose() {
     transformationController.dispose();
+    showAppbarPreview.dispose();
     super.dispose();
   }
 
@@ -85,20 +85,33 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   void handleShowInChatInWeb() {
-    Navigator.of(context).pop();
-    widget.onBack?.call();
-    context.goToRoomWithEvent(widget.event!.roomId!, widget.event!.eventId);
+    backToChatScreenInWeb();
+    scrollToEventInChat();
     return;
   }
 
   void handleShowInChatInMobile() {
-    context.popUntilWithResult(
-      name: '/room',
-      result: ImageViewerArgument(
-        showInChatEventId: widget.event?.eventId,
-        roomId: widget.event?.roomId,
-      ),
+    backToChatScreenInMobile();
+    scrollToEventInChat();
+  }
+
+  void backToChatScreenInWeb() {
+    Navigator.of(context).pop();
+    if (responsiveUtils.isTablet(context)) {
+      widget.onCloseRightColumn?.call();
+    }
+  }
+
+  void backToChatScreenInMobile() {
+    Navigator.of(context).popUntil(
+      (Route route) => route.settings.name == '/room',
     );
+  }
+
+  void scrollToEventInChat() {
+    if (widget.event != null) {
+      context.goToRoomWithEvent(widget.event!.room.id, widget.event!.eventId);
+    }
   }
 
   void toggleAppbarPreview() {

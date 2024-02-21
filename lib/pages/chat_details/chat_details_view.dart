@@ -58,7 +58,7 @@ class ChatDetailsView extends StatelessWidget {
                       splashColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
-                      onPressed: controller.widget.onBack,
+                      onPressed: controller.widget.onCloseRightColumn,
                       icon: controller.widget.isInStack
                           ? const Icon(Icons.arrow_back)
                           : const Icon(Icons.close),

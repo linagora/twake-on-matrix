@@ -40,6 +40,8 @@ class MxcImage extends StatefulWidget {
   /// Cache for screen locally, if null, use global cache
   final Map<EventId, ImageData>? cacheMap;
 
+  final VoidCallback? onCloseRightColumn;
+
   const MxcImage({
     this.uri,
     this.event,
@@ -61,6 +63,7 @@ class MxcImage extends StatefulWidget {
     this.isPreview = false,
     this.cacheMap,
     this.noResize = false,
+    this.onCloseRightColumn,
     Key? key,
   }) : super(key: key);
 
@@ -210,7 +213,10 @@ class _MxcImageState extends State<MxcImage>
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
-              itemBuilder: ImageViewer(event: widget.event!),
+              itemBuilder: ImageViewer(
+                event: widget.event!,
+                onCloseRightColumn: widget.onCloseRightColumn,
+              ),
             );
           },
         ),

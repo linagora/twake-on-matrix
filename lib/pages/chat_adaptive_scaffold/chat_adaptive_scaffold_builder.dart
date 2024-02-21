@@ -8,14 +8,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
+typedef ChatAdaptiveScaffoldBodyBuilder = Widget Function(
+  ChatAdaptiveScaffoldBuilderController controller,
+);
+
+typedef ChatAdaptiveScaffoldRightBuilder = Widget Function(
+  ChatAdaptiveScaffoldBuilderController controller, {
+  required bool isInStack,
+  required RightColumnType type,
+});
+
 class ChatAdaptiveScaffoldBuilder extends StatefulWidget {
-  final Widget Function(ChatAdaptiveScaffoldBuilderController controller)
-      bodyBuilder;
-  final Widget Function(
-    ChatAdaptiveScaffoldBuilderController controller, {
-    required bool isInStack,
-    required RightColumnType type,
-  }) rightBuilder;
+  final ChatAdaptiveScaffoldBodyBuilder bodyBuilder;
+
+  final ChatAdaptiveScaffoldRightBuilder rightBuilder;
+
   const ChatAdaptiveScaffoldBuilder({
     super.key,
     required this.bodyBuilder,
