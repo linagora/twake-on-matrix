@@ -19,6 +19,8 @@ dependencies:
       url: git@github.com:krabbenprgr/receive_sharing_intent.git
       ref: receive-.txt-v2
 
+  # TODO: Android native lib build error: https://github.com/jonataslaw/VideoCompress/issues/240
+  # video_compress: ^3.1.1
   video_compress:
     git:
       url: git@github.com:SpectoraSoftware/VideoCompress.git
@@ -38,16 +40,20 @@ dependencies:
       url: git@github.com:linagora/flutter_contacts.git
       ref: master
 
+  # TODO: Remove it after this PR merged
+  # https://github.com/justsoft/video_thumbnail/pull/135
   video_thumbnail:
     git:
       url: https://github.com/maRci002/video_thumbnail.git
       ref: feat-web_implementation
       path: video_thumbnail
 
+  # TODO: We will change it when the PR in upstream repository will be merged
+  # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
   inview_notifier_list:
     git:
       url: git@github.com:linagora/inview_notifier_list.git
-      ref: support-all-listview-properties
+      ref: master
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
@@ -125,8 +131,6 @@ dependencies:
   universal_html: ^2.0.8
   url_launcher: ^6.0.20
   vibration: ^1.7.4-nullsafety.0
-  # TO DO: Android native lib build error: https://github.com/jonataslaw/VideoCompress/issues/240
-  # video_compress: ^3.1.1
   go_router: ^10.0.0
   wakelock: ^0.6.2
   webrtc_interface: ^1.0.10
@@ -154,8 +158,6 @@ dependencies:
   image_gallery_saver: ^2.0.3
   file_saver: ^0.1.1
   flutter_keyboard_visibility: ^6.0.0
-  # TODO: Remove it after this PR merged
-  # https://github.com/justsoft/video_thumbnail/pull/135
   media_kit: ^1.1.7
   media_kit_video: ^1.1.8
   media_kit_libs_video: ^1.0.1

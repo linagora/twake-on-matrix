@@ -1355,8 +1355,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: support-all-listview-properties
-      resolved-ref: "0a4f3775ce24fb724c22d81d6487fcebe6bcbe88"
+      ref: master
+      resolved-ref: f7a29ac1c4de3ea26d749c38781a6f5e9b1b932d
       url: "git@github.com:linagora/inview_notifier_list.git"
     source: git
     version: "3.0.0"
