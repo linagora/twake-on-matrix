@@ -39,7 +39,7 @@ class ChatSearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvoked: (isPop) async {
         if (PlatformInfos.isAndroid) {
           controller.onBack();
