@@ -1354,10 +1354,11 @@ packages:
   inview_notifier_list:
     dependency: "direct main"
     description:
-      name: inview_notifier_list
-      sha256: "1ca80ee39aa585e84a4b9dc1fe7211c5f64614ce3064b0007d9396073e852e14"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: support-all-listview-properties
+      resolved-ref: "0a4f3775ce24fb724c22d81d6487fcebe6bcbe88"
+      url: "git@github.com:linagora/inview_notifier_list.git"
+    source: git
     version: "3.0.0"
   io:
     dependency: transitive
