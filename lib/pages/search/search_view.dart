@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -27,9 +28,11 @@ class SearchView extends StatelessWidget {
         child: _buildAppBarSearch(context),
       ),
       body: PopScope(
-        canPop: true,
+        canPop: false,
         onPopInvoked: (didPop) async {
-          searchController.goToRoomsShellBranch();
+          if (PlatformInfos.isAndroid) {
+            searchController.goToRoomsShellBranch();
+          }
         },
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
