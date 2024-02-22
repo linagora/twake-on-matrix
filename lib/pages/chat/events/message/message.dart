@@ -18,6 +18,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -28,7 +29,7 @@ typedef OnMenuAction = Function(
   TapDownDetails,
 );
 
-class Message extends StatelessWidget {
+class Message extends StatefulWidget {
   final Event event;
   final Event? previousEvent;
   final Event? nextEvent;
@@ -47,7 +48,7 @@ class Message extends StatelessWidget {
   final VoidCallback? hideKeyboardChatScreen;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
-  final bool? hideTimeStamp;
+  final void Function(Event)? timestampCallback;
 
   const Message(
     this.event, {
@@ -69,7 +70,7 @@ class Message extends StatelessWidget {
     this.onMenuAction,
     this.markedUnreadLocation,
     this.focusNode,
-    this.hideTimeStamp = false,
+    this.timestampCallback,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -79,12 +80,66 @@ class Message extends StatelessWidget {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   @override
+  State<Message> createState() => _MessageState();
+}
+
+class _MessageState extends State<Message> {
+  InViewState? inViewState;
+
+  final inviewNotifier = ValueNotifier(false);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _initialInviewState();
+    });
+  }
+
+  @override
+  void dispose() {
+    inViewState?.removeContext(context: context);
+    inviewNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(Message oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event.eventId != widget.event.eventId) {
+      inViewState?.removeContext(context: context);
+      inViewState?.addContext(context: context, id: widget.event.eventId);
+    }
+  }
+
+  void _initialInviewState() {
+    inViewState = InViewNotifierListCustom.of(context);
+    inViewState?.addListener(_inviewStateListener);
+    inViewState?.addContext(context: context, id: widget.event.eventId);
+  }
+
+  void _inviewStateListener() {
+    _updateInViewNotifier(inViewState?.inView(widget.event.eventId));
+    if (inViewState?.inView(widget.event.eventId) == true) {
+      widget.timestampCallback?.call(widget.event);
+    }
+  }
+
+  void _updateInViewNotifier(bool? inView) {
+    try {
+      inviewNotifier.value = inView ?? inviewNotifier.value;
+    } on FlutterError catch (e) {
+      Logs().d('_MessageState:: _updateInViewNotifier: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiPlatformsMessageContainer(
-      onTap: hideKeyboardChatScreen,
+      onTap: widget.hideKeyboardChatScreen,
       onHover: (hover) {
-        if (onHover != null) {
-          onHover!(hover, event);
+        if (widget.onHover != null) {
+          widget.onHover!(hover, widget.event);
         }
       },
       child: LayoutBuilder(
@@ -94,48 +149,52 @@ class Message extends StatelessWidget {
             EventTypes.Sticker,
             EventTypes.Encrypted,
             EventTypes.CallInvite,
-          }.contains(event.type)) {
-            if (event.type.startsWith('m.call.')) {
+          }.contains(widget.event.type)) {
+            if (widget.event.type.startsWith('m.call.')) {
               return const SizedBox();
             }
-            if (event.isJoinedByRoomCreator()) {
+            if (widget.event.isJoinedByRoomCreator()) {
               return const SizedBox();
             }
-            return StateMessage(event);
+            return StateMessage(widget.event);
           }
 
-          if (event.type == EventTypes.Message &&
-              event.messageType == EventTypes.KeyVerificationRequest) {
-            return VerificationRequestContent(event: event, timeline: timeline);
+          if (widget.event.type == EventTypes.Message &&
+              widget.event.messageType == EventTypes.KeyVerificationRequest) {
+            return VerificationRequestContent(
+              event: widget.event,
+              timeline: widget.timeline,
+            );
           }
 
-          final displayTime = event.type == EventTypes.RoomCreate ||
-              nextEvent == null ||
-              !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-          final rowMainAxisAlignment = event.isOwnMessage
+          final displayTime = widget.event.type == EventTypes.RoomCreate ||
+              widget.nextEvent == null ||
+              !widget.event.originServerTs
+                  .sameEnvironment(widget.nextEvent!.originServerTs);
+          final rowMainAxisAlignment = widget.event.isOwnMessage
               ? MainAxisAlignment.end
               : MainAxisAlignment.start;
 
           final rowChildren = <Widget>[
             _placeHolderWidget(
-              event.isSameSenderWith(previousEvent),
-              event.isOwnMessage,
-              event,
+              widget.event.isSameSenderWith(widget.previousEvent),
+              widget.event.isOwnMessage,
+              widget.event,
             ),
             Expanded(
               child: MessageContentWithTimestampBuilder(
-                event: event,
-                nextEvent: nextEvent,
-                onSelect: onSelect,
-                scrollToEventId: scrollToEventId,
-                selected: selected,
-                selectMode: selectMode,
-                timeline: timeline,
-                isHoverNotifier: isHoverNotifier,
-                listHorizontalActionMenu: listHorizontalActionMenu,
-                onMenuAction: onMenuAction,
-                menuChildren: menuChildren,
-                focusNode: focusNode,
+                event: widget.event,
+                nextEvent: widget.nextEvent,
+                onSelect: widget.onSelect,
+                scrollToEventId: widget.scrollToEventId,
+                selected: widget.selected,
+                selectMode: widget.selectMode,
+                timeline: widget.timeline,
+                isHoverNotifier: widget.isHoverNotifier,
+                listHorizontalActionMenu: widget.listHorizontalActionMenu,
+                onMenuAction: widget.onMenuAction,
+                menuChildren: widget.menuChildren,
+                focusNode: widget.focusNode,
               ),
             ),
           ];
@@ -148,13 +207,18 @@ class Message extends StatelessWidget {
           return Column(
             children: [
               if (displayTime)
-                StickyTimestampWidget(
-                  content: hideTimeStamp == false
-                      ? event.originServerTs.relativeTime(context)
-                      : '',
+                ValueListenableBuilder(
+                  valueListenable: inviewNotifier,
+                  builder: (context, inView, _) {
+                    return StickyTimestampWidget(
+                      content: !inView
+                          ? widget.event.originServerTs.relativeTime(context)
+                          : '',
+                    );
+                  },
                 ),
-              if (markedUnreadLocation != null &&
-                  markedUnreadLocation == event.eventId) ...[
+              if (widget.markedUnreadLocation != null &&
+                  widget.markedUnreadLocation == widget.event.eventId) ...[
                 Padding(
                   padding: MessageStyle.paddingDividerUnreadMessage,
                   child: Divider(
@@ -174,30 +238,33 @@ class Message extends StatelessWidget {
                 ),
                 alignment: Alignment.bottomCenter,
                 child: SwipeableMessage(
-                  event: event,
-                  onSwipe: onSwipe,
+                  event: widget.event,
+                  onSwipe: widget.onSwipe,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: event.isOwnMessage
+                    crossAxisAlignment: widget.event.isOwnMessage
                         ? CrossAxisAlignment.end
                         : CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
-                        onLongPress: () => selectMode ? onSelect!(event) : null,
-                        onTap: () => selectMode
-                            ? onSelect!(event)
-                            : hideKeyboardChatScreen?.call(),
+                        onLongPress: () => widget.selectMode
+                            ? widget.onSelect!(widget.event)
+                            : null,
+                        onTap: () => widget.selectMode
+                            ? widget.onSelect!(widget.event)
+                            : widget.hideKeyboardChatScreen?.call(),
                         child: Center(
                           child: Container(
                             padding: EdgeInsets.only(
-                              right: selected
+                              right: widget.selected
                                   ? 0
-                                  : event.isOwnMessage ||
-                                          responsiveUtils.isDesktop(context)
+                                  : widget.event.isOwnMessage ||
+                                          Message.responsiveUtils
+                                              .isDesktop(context)
                                       ? 8.0
                                       : 16.0,
-                              top: selected ? 0 : 1.0,
-                              bottom: selected ? 0 : 1.0,
+                              top: widget.selected ? 0 : 1.0,
+                              bottom: widget.selected ? 0 : 1.0,
                             ),
                             child: _messageSelectedWidget(context, row),
                           ),
@@ -215,7 +282,7 @@ class Message extends StatelessWidget {
   }
 
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
-    if (selectMode || event.room.isDirectChat) {
+    if (widget.selectMode || event.room.isDirectChat) {
       return const SizedBox();
     }
 
@@ -229,7 +296,7 @@ class Message extends StatelessWidget {
             fontSize: MessageStyle.fontSize,
             mxContent: user.avatarUrl,
             name: user.calcDisplayname(),
-            onTap: () => onAvatarTap!(event),
+            onTap: () => widget.onAvatarTap!(event),
           );
         },
       );
@@ -241,9 +308,9 @@ class Message extends StatelessWidget {
   Widget _messageSelectedWidget(BuildContext context, Widget child) {
     return Container(
       padding: EdgeInsets.only(
-        left: selectMode ? 12.0 : 8.0,
+        left: widget.selectMode ? 12.0 : 8.0,
       ),
-      color: selected
+      color: widget.selected
           ? LinagoraSysColors.material().secondaryContainer
           : Theme.of(context).primaryColor.withAlpha(0),
       constraints:
@@ -251,7 +318,7 @@ class Message extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          if (selectMode)
+          if (widget.selectMode)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(
@@ -259,8 +326,10 @@ class Message extends StatelessWidget {
                   start: 16.0,
                 ),
                 child: Icon(
-                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: selected
+                  widget.selected
+                      ? Icons.check_circle_rounded
+                      : Icons.circle_outlined,
+                  color: widget.selected
                       ? LinagoraSysColors.material().primary
                       : Colors.black,
                   size: 20,
