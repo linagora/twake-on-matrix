@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/dialog_reject_invite_style.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -17,84 +16,73 @@ class DialogRejectInviteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-          if (PlatformInfos.isWeb) {
-            return;
-          }
-          Navigator.of(context).pop(DialogRejectInviteResult.cancel);
-        },
-        child: Center(
-          child: UnconstrainedBox(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                  DialogAcceptInviteStyle.borderRadiusDialog,
+      child: Center(
+        child: UnconstrainedBox(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                DialogAcceptInviteStyle.borderRadiusDialog,
+              ),
+              color: Theme.of(context).colorScheme.surface,
+            ),
+            margin: DialogAcceptInviteStyle.marginDialog,
+            padding: DialogAcceptInviteStyle.paddingDialog,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: DialogAcceptInviteStyle.paddingTitle,
+                  child: Column(
+                    children: [
+                      Text(
+                        L10n.of(context)!.declineTheInvitation,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      SizedBox(
+                        width: DialogAcceptInviteStyle.dialogTextWidth,
+                        child: Text(
+                          L10n.of(context)!
+                              .doYouReallyWantToDeclineThisInvitation,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                color: Theme.of(context).colorScheme.surface,
-              ),
-              margin: DialogAcceptInviteStyle.marginDialog,
-              padding: DialogAcceptInviteStyle.paddingDialog,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: DialogAcceptInviteStyle.paddingTitle,
-                    child: Column(
-                      children: [
-                        Text(
-                          L10n.of(context)!.declineTheInvitation,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                        ),
-                        const SizedBox(height: 16.0),
-                        SizedBox(
-                          width: DialogAcceptInviteStyle.dialogTextWidth,
-                          child: Text(
-                            L10n.of(context)!
-                                .doYouReallyWantToDeclineThisInvitation,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
+                Padding(
+                  padding: DialogAcceptInviteStyle.paddingButton,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _ActionButton(
+                        context: context,
+                        text: L10n.of(context)!.declineAndRemove,
+                        onPressed: () => Navigator.of(context)
+                            .pop(DialogRejectInviteResult.reject),
+                      ),
+                      const SizedBox(width: 8),
+                      _ActionButton(
+                        context: context,
+                        text: L10n.of(context)!.cancel,
+                        onPressed: () => Navigator.of(context)
+                            .pop(DialogRejectInviteResult.cancel),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: DialogAcceptInviteStyle.paddingButton,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _ActionButton(
-                          context: context,
-                          text: L10n.of(context)!.declineAndRemove,
-                          onPressed: () => Navigator.of(context)
-                              .pop(DialogRejectInviteResult.reject),
-                        ),
-                        const SizedBox(width: 8),
-                        _ActionButton(
-                          context: context,
-                          text: L10n.of(context)!.cancel,
-                          onPressed: () => Navigator.of(context)
-                              .pop(DialogRejectInviteResult.cancel),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
