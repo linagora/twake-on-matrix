@@ -43,17 +43,11 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     ValueKey? typeAheadKey,
   }) async {
     final currentPermissionPhotos = await getCurrentMediaPermission();
-    final currentPermissionCamera = await getCurrentCameraPermission();
-    final currentPermissionMicro = await getCurrentMicroPermission();
-    if (currentPermissionPhotos != null &&
-        currentPermissionCamera != null &&
-        currentPermissionMicro != null) {
+    if (currentPermissionPhotos != null) {
       showMediasPickerBottomSheet(
         context: context,
         imagePickerController: imagePickerGridController,
         permissionStatusPhotos: currentPermissionPhotos,
-        permissionStatusCamera: currentPermissionCamera,
-        permissionStatusMicro: currentPermissionMicro,
         onSendTap: onSendTap,
         room: room,
         onPickerTypeTap: onPickerTypeTap,
@@ -70,8 +64,6 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     Room? room,
     required ImagePickerGridController imagePickerController,
     required PermissionStatus permissionStatusPhotos,
-    required PermissionStatus permissionStatusCamera,
-    required PermissionStatus permissionStatusMicro,
     OnSendPhotosTap onSendTap,
     OnPickerTypeTap? onPickerTypeTap,
     OnCameraPicked? onCameraPicked,
@@ -261,25 +253,36 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         ],
       ),
       cameraWidget: UseCameraWidget(
-        onPressed: permissionStatusCamera == PermissionStatus.granted &&
-                permissionStatusMicro == PermissionStatus.granted
-            ? () => _pickFromCameraAction(
-                  context: context,
-                  imagePickerGridController: imagePickerController,
-                  room: room,
-                  onCameraPicked: onCameraPicked,
-                )
-            : () => goToSettings(context),
+        onPressed: () => _onPressedCamera(context, imagePickerController),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
     );
+  }
+
+  void _onPressedCamera(
+    BuildContext context,
+    ImagePickerGridController imagePickerController,
+  ) async {
+    final currentPermissionMicro = await getCurrentMicroPermission();
+    final currentPermissionCamera = await getCurrentCameraPermission();
+    if (currentPermissionMicro == PermissionStatus.granted &&
+        currentPermissionCamera == PermissionStatus.granted) {
+      _pickFromCameraAction(
+        context: context,
+        imagePickerGridController: imagePickerController,
+        onCameraPicked: (assetEntity) {
+          Navigator.of(context).pop();
+        },
+      );
+    } else {
+      goToSettings(context);
+    }
   }
 
   void _pickFromCameraAction({
     required BuildContext context,
     required ImagePickerGridController imagePickerGridController,
     OnCameraPicked? onCameraPicked,
-    Room? room,
     bool onlyImage = false,
   }) async {
     final assetEntity =
