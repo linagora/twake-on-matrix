@@ -26,8 +26,8 @@ mixin CommonMediaPickerMixin {
     return _permissionHandlerService.requestPermissionForMircoActions();
   }
 
-  Future<void> goToSettings(BuildContext context) async {
-    final result = await showDialog<bool?>(
+  void goToSettings(BuildContext context) {
+    showDialog<bool?>(
       context: context,
       useRootNavigator: false,
       builder: (c) => PermissionDialog(
@@ -51,10 +51,6 @@ mixin CommonMediaPickerMixin {
             PermissionHandlerService().goToSettingsForPermissionActions(),
       ),
     );
-
-    if (result == true) {
-      Navigator.pop(context);
-    }
   }
 
   void _onError({
@@ -75,11 +71,14 @@ mixin CommonMediaPickerMixin {
     Navigator.pop(context);
     return await CameraPicker.pickFromCamera(
       context,
-      pickerConfig: CameraPickerConfig(
-        enableRecording: onlyImage,
-        enableAudio: !onlyImage,
-        onError: (e, a) => _onError(context: context, error: e),
-      ),
+      pickerConfig: onlyImage
+          ? CameraPickerConfig(
+              onError: (e, a) => _onError(context: context, error: e),
+            )
+          : CameraPickerConfig(
+              enableRecording: true,
+              onError: (e, a) => _onError(context: context, error: e),
+            ),
       locale: View.of(context).platformDispatcher.locale,
     );
   }

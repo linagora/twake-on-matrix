@@ -23,10 +23,9 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
   Future<void> showImagePickerBottomSheet(
     BuildContext context,
     PermissionStatus? permissionStatusPhotos,
-    PermissionStatus? permissionStatusCamera,
     ImagePickerGridController imagePickerController,
   ) async {
-    if (permissionStatusPhotos != null && permissionStatusCamera != null) {
+    if (permissionStatusPhotos != null) {
       return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
         context: context,
         controller: imagePickerController,
@@ -54,9 +53,14 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
           ],
         ),
         cameraWidget: UseCameraWidget(
-          onPressed: permissionStatusCamera == PermissionStatus.granted
-              ? () => pickImageFromCamera(context, imagePickerController)
-              : () => goToSettings(context),
+          onPressed: () async {
+            final currentPermissionCamera = await getCurrentCameraPermission();
+            if (currentPermissionCamera == PermissionStatus.granted) {
+              pickImageFromCamera(context, imagePickerController);
+            } else {
+              goToSettings(context);
+            }
+          },
           backgroundImage: const AssetImage("assets/verification.png"),
         ),
       );

@@ -280,14 +280,12 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission();
-    final currentPermissionCamera = await getCurrentCameraPermission();
-    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+    if (currentPermissionPhotos != null) {
       final imagePickerController = createImagePickerController();
       groupNameFocusNode.unfocus();
       showImagePickerBottomSheet(
         context,
         currentPermissionPhotos,
-        currentPermissionCamera,
         imagePickerController,
       );
     }
