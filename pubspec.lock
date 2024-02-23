@@ -1469,8 +1469,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: ea9d98ed3bab8f362a46cb0d48ff57eb1332630c
+      ref: "TW-1742/prevent-user-can-select-video-in-change-avatar-function"
+      resolved-ref: "8c06fe05d911eaead7063ac937629fd46a9827b1"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
