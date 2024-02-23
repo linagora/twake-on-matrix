@@ -1,5 +1,6 @@
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' hide Contact;
 
 class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
@@ -8,63 +9,75 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
     final phonebookContacts =
         await FlutterContacts.getContacts(withProperties: true);
 
-    final listAllContacts = phonebookContacts
+    final listPhoneContacts = phonebookContacts
         .expand(
-          (contact) => [
-            ...contact.emails.map(
-              (email) => Contact(
-                email: email.address,
-                displayName: contact.displayName,
-              ),
+          (contact) => contact.phones.map(
+            (phone) => Contact(
+              phoneNumber: phone.number,
+              displayName: contact.displayName,
             ),
-            ...contact.phones.map(
-              (phone) => Contact(
-                phoneNumber: phone.number,
-                displayName: contact.displayName,
-              ),
-            ),
-          ],
+          ),
         )
         .toList();
 
-    return removeDuplicatedPhoneNumbers(listAllContacts);
+    final listEmailContacts = phonebookContacts
+        .expand(
+          (contact) => contact.emails.map(
+            (email) => Contact(
+              email: email.address,
+              displayName: contact.displayName,
+            ),
+          ),
+        )
+        .toList();
+
+    final listAllContacts = [
+      ..._removeDuplicatedPhoneNumbers(listPhoneContacts),
+      ...listEmailContacts,
+    ];
+
+    return listAllContacts;
   }
 
-  List<Contact> removeDuplicatedPhoneNumbers(List<Contact> listContacts) {
+  List<Contact> _removeDuplicatedPhoneNumbers(List<Contact> listContacts) {
     final listVisitedPhoneNumbers = <String>[];
     final listFilteredContacts = <Contact>[];
 
-    for (final contact in listContacts) {
+    final listContactHasPhoneNumber =
+        listContacts.where((contact) => contact.phoneNumber != null).toList();
+
+    for (final contact in listContactHasPhoneNumber) {
       final phoneNumber = contact.phoneNumber;
-      if (phoneNumber != null) {
-        final normalizedPhoneNumber = normalizePhoneNumber(phoneNumber);
-        if (listVisitedPhoneNumbers.contains(normalizedPhoneNumber)) {
-          final contactsWithSamePhoneNumber =
-              listFilteredContacts.where((filteredContact) {
-            final filteredPhoneNumber = filteredContact.phoneNumber;
-            if (filteredPhoneNumber != null) {
-              return filteredContact.displayName == contact.displayName &&
-                  normalizePhoneNumber(filteredPhoneNumber) ==
-                      normalizedPhoneNumber;
-            }
-            return false;
-          });
-          if (contactsWithSamePhoneNumber.isEmpty) {
-            listFilteredContacts.add(contact);
-          } else {
-            continue;
-          }
-        } else {
-          listVisitedPhoneNumbers.add(normalizedPhoneNumber);
+      final normalizedPhoneNumber = phoneNumber!.normalizePhoneNumber();
+
+      if (listVisitedPhoneNumbers.contains(normalizedPhoneNumber)) {
+        final hasSameFilteredContact = _hasSameFilteredContact(
+          listFilteredContacts,
+          contact.displayName ?? '',
+          normalizedPhoneNumber,
+        );
+        if (!hasSameFilteredContact) {
           listFilteredContacts.add(contact);
         }
+      } else {
+        listVisitedPhoneNumbers.add(normalizedPhoneNumber);
+        listFilteredContacts.add(contact);
       }
     }
 
     return listFilteredContacts;
   }
 
-  String normalizePhoneNumber(String phoneNumber) {
-    return phoneNumber.replaceAll(RegExp(r'\D'), '');
+  bool _hasSameFilteredContact(
+    List<Contact> listFilteredContacts,
+    String contactName,
+    String phoneNumberNormalized,
+  ) {
+    return listFilteredContacts.any(
+      (filteredContact) =>
+          filteredContact.displayName == contactName &&
+          filteredContact.phoneNumber?.normalizePhoneNumber() ==
+              phoneNumberNormalized,
+    );
   }
 }
