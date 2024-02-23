@@ -26,7 +26,10 @@ mixin CommonMediaPickerMixin {
     return _permissionHandlerService.requestPermissionForMircoActions();
   }
 
-  void goToSettings(BuildContext context) {
+  void goToSettings(
+    BuildContext context, {
+    bool isMicrophone = false,
+  }) {
     showDialog<bool?>(
       context: context,
       useRootNavigator: false,
@@ -34,11 +37,13 @@ mixin CommonMediaPickerMixin {
         permission: Permission.camera,
         explainTextRequestPermission: RichText(
           text: TextSpan(
-            text: '${L10n.of(context)!.tapToAllowAccessToYourCamera} ',
+            text: isMicrophone
+                ? L10n.of(context)!.tapToAllowAccessToYourMicrophone
+                : L10n.of(context)!.tapToAllowAccessToYourCamera,
             style: Theme.of(context).textTheme.titleSmall,
             children: <TextSpan>[
               TextSpan(
-                text: '${L10n.of(context)!.twake}.',
+                text: ' ${L10n.of(context)!.twake}.',
                 style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -47,8 +52,10 @@ mixin CommonMediaPickerMixin {
           ),
         ),
         icon: const Icon(Icons.camera_alt),
-        onAcceptButton: () =>
-            PermissionHandlerService().goToSettingsForPermissionActions(),
+        onAcceptButton: () {
+          Navigator.of(context).pop();
+          PermissionHandlerService().goToSettingsForPermissionActions();
+        },
       ),
     );
   }
