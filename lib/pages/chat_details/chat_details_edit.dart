@@ -132,13 +132,11 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission();
-    final currentPermissionCamera = await getCurrentCameraPermission();
-    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+    if (currentPermissionPhotos != null) {
       final imagePickerController = createImagePickerController();
       showImagePickerBottomSheet(
         context,
         currentPermissionPhotos,
-        currentPermissionCamera,
         imagePickerController,
       );
     }

@@ -190,13 +190,11 @@ class SettingsProfileController extends State<SettingsProfile>
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission();
-    final currentPermissionCamera = await getCurrentCameraPermission();
-    if (currentPermissionPhotos != null && currentPermissionCamera != null) {
+    if (currentPermissionPhotos != null) {
       final imagePickerController = createImagePickerController();
       showImagePickerBottomSheet(
         context,
         currentPermissionPhotos,
-        currentPermissionCamera,
         imagePickerController,
       );
     }
