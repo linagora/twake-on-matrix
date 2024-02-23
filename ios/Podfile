@@ -33,9 +33,9 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
-  target 'Twake Share' do
-    inherit! :search_paths
-  end
+  ##target 'Twake Share' do
+  ##  inherit! :search_paths
+  ##end
 end
 
 post_install do |installer|
@@ -55,7 +55,7 @@ post_install do |installer|
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
         '$(inherited)',
         ## dart: PermissionGroup.microphone
-        # 'PERMISSION_MICROPHONE=1',
+        'PERMISSION_MICROPHONE=1',
         ## dart: PermissionGroup.contacts
         'PERMISSION_CONTACTS=1',
         ## dart: PermissionGroup.camera
