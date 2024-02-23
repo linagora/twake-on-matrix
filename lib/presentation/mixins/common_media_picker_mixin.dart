@@ -73,6 +73,7 @@ mixin CommonMediaPickerMixin {
       context,
       pickerConfig: onlyImage
           ? CameraPickerConfig(
+              enableAudio: false,
               onError: (e, a) => _onError(context: context, error: e),
             )
           : CameraPickerConfig(
