@@ -1614,8 +1614,8 @@ class ChatController extends State<Chat>
 
   void handleScrollEndNotification() {
     Logs().d('Chat::handleScrollEndNotification() - End of scroll');
-    _timestampTimer?.cancel();
     if (PlatformInfos.isMobile) {
+      _timestampTimer?.cancel();
       _currentChatScrollState = ChatScrollState.endScroll;
       _timestampTimer =
           Timer(_delayHideStickyTimestampHeader, _handleHideStickyTimestamp);
@@ -1624,7 +1624,7 @@ class ChatController extends State<Chat>
 
   void handleScrollStartNotification() {
     Logs().d('Chat::handleScrollStartNotification() - Start of scroll');
-    _timestampTimer?.cancel();
+    if (PlatformInfos.isMobile) _timestampTimer?.cancel();
     _currentChatScrollState = ChatScrollState.startScroll;
   }
 
