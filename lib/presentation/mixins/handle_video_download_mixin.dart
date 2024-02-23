@@ -22,7 +22,7 @@ mixin HandleVideoDownloadMixin {
     lastSelectedVideoEventId = event.eventId;
     if (PlatformInfos.isWeb) {
       final videoBytes = await event.downloadAndDecryptAttachment();
-      final url = videoBytes.bytes?.toWebUrl();
+      final url = videoBytes.bytes?.toWebUrl(mimeType: videoBytes.mimeType);
       if (url == null) {
         throw Exception('$videoBytes is null');
       }

@@ -292,7 +292,7 @@ extension SendFileWebExtension on Room {
   ) async {
     if (originalFile.bytes == null) return null;
     try {
-      final url = originalFile.bytes?.toWebUrl();
+      final url = originalFile.bytes?.toWebUrl(mimeType: originalFile.mimeType);
       if (url == null) {
         throw Exception('Missing bytes in $originalFile');
       }
@@ -328,7 +328,7 @@ extension SendFileWebExtension on Room {
       return null;
     }
     try {
-      final url = originalFile.bytes?.toWebUrl();
+      final url = originalFile.bytes?.toWebUrl(mimeType: originalFile.mimeType);
       if (url == null) {
         throw Exception('$originalFile is empty');
       }
