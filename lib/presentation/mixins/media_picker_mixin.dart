@@ -275,7 +275,10 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         },
       );
     } else {
-      goToSettings(context);
+      goToSettings(
+        context,
+        isMicrophone: currentPermissionMicro != PermissionStatus.granted,
+      );
     }
   }
 
