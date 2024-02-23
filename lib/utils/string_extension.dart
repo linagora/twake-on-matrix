@@ -337,4 +337,8 @@ extension StringCasingExtension on String {
   String get sha256Hash {
     return sha256.convert(utf8.encode(this)).toString();
   }
+
+  String normalizePhoneNumber() {
+    return replaceAll(RegExp(r'\D'), '');
+  }
 }
