@@ -5,6 +5,11 @@ class SettingsViewStyle {
 
   static const double fontSizeAvatar = 9 * 2.5;
 
+  static const AlignmentGeometry alignment = AlignmentDirectional.centerStart;
+
+  static const EdgeInsetsDirectional titlePadding =
+      EdgeInsetsDirectional.only(start: 16);
+
   static EdgeInsetsDirectional itemBuilderPadding =
       const EdgeInsetsDirectional.all(16.0);
 

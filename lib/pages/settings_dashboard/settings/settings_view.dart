@@ -28,13 +28,18 @@ class SettingsView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: LinagoraSysColors.material().onPrimary,
         toolbarHeight: AppConfig.toolbarHeight(context),
-        title: Text(
-          L10n.of(context)!.settings,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+        title: Align(
+          alignment: SettingsViewStyle.alignment,
+          child: Padding(
+            padding: SettingsViewStyle.titlePadding,
+            child: Text(
+              L10n.of(context)!.settings,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+          ),
         ),
-        centerTitle: true,
       ),
       bottomNavigationBar: bottomNavigationBar,
       body: ListTileTheme(
