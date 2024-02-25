@@ -15,15 +15,16 @@ class TwakeHeaderStyle {
 
   static bool isDesktop(BuildContext context) => responsive.isDesktop(context);
 
-  static AlignmentGeometry alignment(BuildContext context) {
-    return isDesktop(context)
-        ? AlignmentDirectional.centerStart
-        : AlignmentDirectional.center;
-  }
+  static AlignmentGeometry alignment = AlignmentDirectional.centerStart;
 
   static const EdgeInsetsDirectional actionsPadding =
       EdgeInsetsDirectional.only(
     end: 16,
+  );
+
+  static const EdgeInsetsDirectional paddingTitleHeader =
+      EdgeInsetsDirectional.only(
+    start: 16,
   );
 
   static const EdgeInsetsDirectional leadingPadding =

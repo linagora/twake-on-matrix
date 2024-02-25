@@ -34,59 +34,12 @@ class TwakeHeader extends StatelessWidget
         valueListenable: selectModeNotifier,
         builder: (context, selectMode, _) {
           return Align(
-            alignment: TwakeHeaderStyle.alignment(context),
+            alignment: TwakeHeaderStyle.alignment,
             child: Row(
               children: [
-                Expanded(
-                  flex: TwakeHeaderStyle.flexActions,
-                  child: Padding(
-                    padding: TwakeHeaderStyle.leadingPadding,
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: selectMode == SelectMode.select
-                              ? onClearSelection
-                              : null,
-                          borderRadius: BorderRadius.circular(
-                            TwakeHeaderStyle.closeIconSize,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            size: TwakeHeaderStyle.closeIconSize,
-                            color: selectMode == SelectMode.select
-                                ? Theme.of(context).colorScheme.onSurfaceVariant
-                                : Colors.transparent,
-                          ),
-                        ),
-                        ValueListenableBuilder(
-                          valueListenable: conversationSelectionNotifier,
-                          builder: (context, conversationSelection, _) {
-                            return Padding(
-                              padding: TwakeHeaderStyle.counterSelectionPadding,
-                              child: Text(
-                                conversationSelection.length.toString(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                      color: selectMode == SelectMode.select
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                          : Colors.transparent,
-                                    ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: TwakeHeaderStyle.flexTitle,
-                  child: Align(
-                    alignment: Alignment.center,
+                if (selectMode != SelectMode.select) ...[
+                  Padding(
+                    padding: TwakeHeaderStyle.paddingTitleHeader,
                     child: Text(
                       L10n.of(context)!.chats,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -94,7 +47,57 @@ class TwakeHeader extends StatelessWidget
                           ),
                     ),
                   ),
-                ),
+                ] else ...[
+                  Expanded(
+                    flex: TwakeHeaderStyle.flexActions,
+                    child: Padding(
+                      padding: TwakeHeaderStyle.leadingPadding,
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: selectMode == SelectMode.select
+                                ? onClearSelection
+                                : null,
+                            borderRadius: BorderRadius.circular(
+                              TwakeHeaderStyle.closeIconSize,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: TwakeHeaderStyle.closeIconSize,
+                              color: selectMode == SelectMode.select
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: conversationSelectionNotifier,
+                            builder: (context, conversationSelection, _) {
+                              return Padding(
+                                padding:
+                                    TwakeHeaderStyle.counterSelectionPadding,
+                                child: Text(
+                                  conversationSelection.length.toString(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: selectMode == SelectMode.select
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant
+                                            : Colors.transparent,
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 Expanded(
                   flex: TwakeHeaderStyle.flexActions,
                   child: Padding(
