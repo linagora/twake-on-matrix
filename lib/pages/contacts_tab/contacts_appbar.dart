@@ -33,65 +33,63 @@ class ContactsAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       centerTitle: false,
       title: Padding(
-        padding: ContactsAppbarStyle.paddingTitle,
+        padding: ContactsAppbarStyle.appbarPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              L10n.of(context)!.contacts,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: isSearchModeNotifier,
-                builder: (context, isSearchMode, child) {
-                  return SizedBox(
-                    height: 48,
-                    child: TextField(
-                      onTapOutside: (event) {
-                        dismissKeyboard();
-                      },
-                      focusNode: searchFocusNode,
-                      controller: textEditingController,
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(0),
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24.0),
-                          borderSide: BorderSide.none,
-                        ),
-                        hintText: L10n.of(context)!.searchForContacts,
-                        hintStyle: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              color: LinagoraRefColors.material().neutral[60],
-                            ),
-                        prefixIcon: Icon(
-                          Icons.search_outlined,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        suffixIcon: isSearchMode
-                            ? TwakeIconButton(
-                                tooltip: "Clear",
-                                icon: Icons.close,
-                                onTap: clearSearchBar,
-                                size: 24,
-                                iconColor:
-                                    Theme.of(context).colorScheme.onSurface,
-                              )
-                            : null,
-                      ),
+            Padding(
+              padding: ContactsAppbarStyle.titlePadding,
+              child: Text(
+                L10n.of(context)!.contacts,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                  );
-                },
               ),
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: isSearchModeNotifier,
+              builder: (context, isSearchMode, child) {
+                return SizedBox(
+                  height: 48,
+                  child: TextField(
+                    onTapOutside: (event) {
+                      dismissKeyboard();
+                    },
+                    focusNode: searchFocusNode,
+                    controller: textEditingController,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(0),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      hintText: L10n.of(context)!.searchForContacts,
+                      hintStyle:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: LinagoraRefColors.material().neutral[60],
+                              ),
+                      prefixIcon: Icon(
+                        Icons.search_outlined,
+                        size: 24,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      suffixIcon: isSearchMode
+                          ? TwakeIconButton(
+                              tooltip: "Clear",
+                              icon: Icons.close,
+                              onTap: clearSearchBar,
+                              size: 24,
+                              iconColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                            )
+                          : null,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
