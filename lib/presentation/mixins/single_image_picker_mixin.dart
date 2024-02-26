@@ -24,7 +24,7 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
     BuildContext context,
     PermissionStatus? permissionStatusPhotos,
     ImagePickerGridController imagePickerController, {
-    RequestType type = RequestType.common,
+    RequestType type = RequestType.image,
   }) async {
     if (permissionStatusPhotos != null) {
       return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
