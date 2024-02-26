@@ -36,6 +36,8 @@ class ImageViewerController extends State<ImageViewer> {
   TapDownDetails? tapDownDetails;
   final double zoomScale = 3;
 
+  static const String roomPathName = '/rooms/room';
+
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
 
   final MenuController menuController = MenuController();
@@ -104,7 +106,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   void backToChatScreenInMobile() {
     Navigator.of(context).popUntil(
-      (Route route) => route.settings.name == '/room',
+      (Route route) => route.settings.name == roomPathName,
     );
   }
 
