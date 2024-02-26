@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
@@ -103,6 +104,8 @@ class ChatController extends State<Chat>
 
   static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
 
+  static const int _defaultEventCountDisplay = 30;
+
   final GlobalKey stickyTimestampKey =
       GlobalKey(debugLabel: 'stickyTimestampKey');
 
@@ -126,6 +129,8 @@ class ChatController extends State<Chat>
   Timeline? timeline;
 
   MatrixState? matrix;
+
+  Timer? _timestampTimer;
 
   String _markerReadLocation = '';
 
@@ -387,6 +392,7 @@ class ChatController extends State<Chat>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
+      _listenRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();
@@ -1605,8 +1611,6 @@ class ChatController extends State<Chat>
         deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
   }
 
-  Timer? _timestampTimer;
-
   void _handleHideStickyTimestamp() {
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
     stickyTimestampNotifier.value = null;
@@ -1630,6 +1634,24 @@ class ChatController extends State<Chat>
 
   void handleScrollUpdateNotification() {
     _currentChatScrollState = ChatScrollState.scrolling;
+  }
+
+  void _listenRequestHistory() {
+    if (timeline == null) return;
+
+    final allMembershipEvents = timeline!.events.every(
+      (event) => event.type == EventTypes.RoomMember,
+    );
+
+    final canRequestHistory = timeline!.events
+            .where((event) => event.isVisibleInGui)
+            .toList()
+            .length <
+        _defaultEventCountDisplay;
+
+    if (allMembershipEvents || canRequestHistory) {
+      requestHistory();
+    }
   }
 
   @override
