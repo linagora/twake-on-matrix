@@ -1605,21 +1605,26 @@ class ChatController extends State<Chat>
         deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
   }
 
+  Timer? _timestampTimer;
+
   void _handleHideStickyTimestamp() {
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
     stickyTimestampNotifier.value = null;
   }
 
-  void handleScrollEndNotification() async {
+  void handleScrollEndNotification() {
     Logs().d('Chat::handleScrollEndNotification() - End of scroll');
     if (PlatformInfos.isMobile) {
+      _timestampTimer?.cancel();
       _currentChatScrollState = ChatScrollState.endScroll;
-      await Future.delayed(_delayHideStickyTimestampHeader);
-      _handleHideStickyTimestamp();
+      _timestampTimer =
+          Timer(_delayHideStickyTimestampHeader, _handleHideStickyTimestamp);
     }
   }
 
   void handleScrollStartNotification() {
+    Logs().d('Chat::handleScrollStartNotification() - Start of scroll');
+    if (PlatformInfos.isMobile) _timestampTimer?.cancel();
     _currentChatScrollState = ChatScrollState.startScroll;
   }
 
