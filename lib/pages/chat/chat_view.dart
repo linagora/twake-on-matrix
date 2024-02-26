@@ -193,7 +193,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                   builder: (context, showScrollDownButton, _) {
                     if (showScrollDownButton &&
                         controller.selectedEvents.isEmpty &&
-                        controller.replyEvent == null) {
+                        controller.replyEventNotifier.value == null) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 56.0),
                         child: FloatingActionButton(
@@ -224,7 +224,12 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       return ChatInvitationBody(controller);
     }
 
-    return ChatViewBody(controller);
+    return ValueListenableBuilder(
+      valueListenable: controller.replyEventNotifier,
+      builder: (context, _, __) {
+        return ChatViewBody(controller);
+      },
+    );
   }
 
   Widget _buildBackButton(BuildContext context) => Padding(

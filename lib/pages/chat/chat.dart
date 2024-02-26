@@ -216,7 +216,7 @@ class ChatController extends State<Chat>
 
   final Set<String> unfolded = {};
 
-  Event? replyEvent;
+  final replyEventNotifier = ValueNotifier<Event?>(null);
 
   Event? editEvent;
 
@@ -504,7 +504,7 @@ class ChatController extends State<Chat>
     // ignore: unawaited_futures
     room!.sendTextEvent(
       sendController.text.trim(),
-      inReplyTo: replyEvent,
+      inReplyTo: replyEventNotifier.value,
       editEventId: editEvent?.eventId,
       parseCommands: parseCommands,
     );
@@ -514,8 +514,8 @@ class ChatController extends State<Chat>
     );
     setReadMarker();
     inputText.value = pendingText;
+    _updateReplyEvent();
     setState(() {
-      replyEvent = null;
       editEvent = null;
       pendingText = '';
     });
@@ -614,9 +614,7 @@ class ChatController extends State<Chat>
     //   );
     //   return null;
     // });
-    setState(() {
-      replyEvent = null;
-    });
+    _updateReplyEvent();
   }
 
   void onEmojiAction() {
@@ -625,7 +623,7 @@ class ChatController extends State<Chat>
     if (PlatformInfos.isMobile) {
       hideKeyboardChatScreen();
     } else {
-      inputFocus.requestFocus();
+      _requestInputFocus();
     }
   }
 
@@ -646,9 +644,7 @@ class ChatController extends State<Chat>
     await event.copyTextEvent(context, timeline!);
 
     showEmojiPickerNotifier.value = false;
-    setState(() {
-      selectedEvents.clear();
-    });
+    _clearSelectEvent();
   }
 
   void reportEventAction() async {
@@ -694,9 +690,7 @@ class ChatController extends State<Chat>
     );
     if (result.error != null) return;
     showEmojiPickerNotifier.value = false;
-    setState(() {
-      selectedEvents.clear();
-    });
+    _clearSelectEvent();
     TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
   }
 
@@ -734,9 +728,7 @@ class ChatController extends State<Chat>
       );
     }
     showEmojiPickerNotifier.value = false;
-    setState(() {
-      selectedEvents.clear();
-    });
+    _clearSelectEvent();
   }
 
   List<Client?> get currentRoomBundle {
@@ -780,7 +772,7 @@ class ChatController extends State<Chat>
         "forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}",
       );
     }
-    setState(() => selectedEvents.clear());
+    _clearSelectEvent();
     context.go(
       '/rooms/forward',
       extra: ForwardArgument(
@@ -800,15 +792,17 @@ class ChatController extends State<Chat>
     for (final e in allEditEvents) {
       e.sendAgain();
     }
-    setState(() => selectedEvents.clear());
+    _clearSelectEvent();
   }
 
-  void replyAction({Event? replyTo}) {
-    setState(() {
-      replyEvent = replyTo ?? selectedEvents.first;
-      selectedEvents.clear();
-    });
-    inputFocus.requestFocus();
+  void replyAction({
+    Event? replyTo,
+  }) {
+    _updateReplyEvent(
+      event: replyTo ?? selectedEvents.first,
+    );
+    _clearSelectEvent();
+    _requestInputFocus();
   }
 
   Future<void> scrollToEventIdAndHighlight(String eventId) async {
@@ -997,7 +991,7 @@ class ChatController extends State<Chat>
           );
 
         if (PlatformInfos.isWeb) {
-          inputFocus.requestFocus();
+          _requestInputFocus();
         }
         break;
     }
@@ -1010,8 +1004,8 @@ class ChatController extends State<Chat>
   }
 
   void sendEmojiAction(String? emoji) async {
-    final events = List<Event>.from(selectedEvents);
-    setState(() => selectedEvents.clear());
+    final events = selectedEvents;
+    _clearSelectEvent();
     for (final event in events) {
       await room!.sendReaction(
         event.eventId,
@@ -1023,9 +1017,7 @@ class ChatController extends State<Chat>
   void clearSelectedEvents() {
     showEmojiPickerNotifier.value = false;
 
-    setState(() {
-      selectedEvents.clear();
-    });
+    _clearSelectEvent();
   }
 
   void clearSingleSelectedEvent() {
@@ -1046,15 +1038,16 @@ class ChatController extends State<Chat>
     setState(() {
       pendingText = sendController.text;
       editEvent = selectedEvents.first;
-      inputText.value = sendController.text =
-          editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
-                MatrixLocals(L10n.of(context)!),
-                withSenderNamePrefix: false,
-                hideReply: true,
-              );
-      selectedEvents.clear();
     });
-    inputFocus.requestFocus();
+    inputText.value = sendController.text =
+        editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)!),
+              withSenderNamePrefix: false,
+              hideReply: true,
+            );
+    _clearSelectEvent();
+
+    _requestInputFocus();
   }
 
   void goToNewRoomAction() async {
@@ -1091,13 +1084,9 @@ class ChatController extends State<Chat>
   void onSelectMessage(Event event) {
     if (!event.redacted) {
       if (selectedEvents.contains(event)) {
-        setState(
-          () => selectedEvents.remove(event),
-        );
+        _removeSelectEvent(event);
       } else {
-        setState(
-          () => selectedEvents.add(event),
-        );
+        _addSelectEvent([event]);
       }
       selectedEvents.sort(
         (a, b) => a.originServerTs.compareTo(b.originServerTs),
@@ -1275,7 +1264,7 @@ class ChatController extends State<Chat>
           inputText.value = sendController.text = pendingText;
           pendingText = '';
         }
-        replyEvent = null;
+        _updateReplyEvent();
         editEvent = null;
       });
 
@@ -1472,7 +1461,7 @@ class ChatController extends State<Chat>
 
   void onKeyboardAction() {
     showEmojiPickerNotifier.toggle();
-    inputFocus.requestFocus();
+    _requestInputFocus();
   }
 
   void onPushDetails() async {
@@ -1680,6 +1669,42 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _requestInputFocus() {
+    if (!inputFocus.hasPrimaryFocus) {
+      inputFocus.requestFocus();
+    }
+  }
+
+  void _updateReplyEvent({Event? event}) {
+    try {
+      replyEventNotifier.value = event;
+    } on FlutterError catch (e) {
+      Logs().e(
+        'Chat::_updateReplyEvent():: FlutterError: $e',
+        e.stackTrace,
+      );
+    }
+  }
+
+  void _addSelectEvent(List<Event> events) {
+    setState(() {
+      selectedEvents.addAll(events);
+    });
+  }
+
+  void _removeSelectEvent(Event events) {
+    setState(() {
+      selectedEvents.remove(events);
+    });
+  }
+
+  void _clearSelectEvent() {
+    if (selectedEvents.isEmpty) return;
+    setState(() {
+      selectedEvents.clear();
+    });
+  }
+
   @override
   void initState() {
     _initializePinnedEvents();
@@ -1733,6 +1758,7 @@ class ChatController extends State<Chat>
     suggestionsController.dispose();
     stickyTimestampNotifier.dispose();
     openingChatViewStateNotifier.dispose();
+    replyEventNotifier.dispose();
     super.dispose();
   }
 
