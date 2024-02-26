@@ -30,7 +30,7 @@ class ChatListViewBuilder extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
-          builder: (context, selectMode, child) {
+          builder: (context, selectMode, _) {
             final slidables = _getSlidables(context, rooms[index]);
             if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
                 !selectMode.isSelectMode &&
@@ -38,15 +38,17 @@ class ChatListViewBuilder extends StatelessWidget {
               return _SlidableChatListItem(
                 controller: controller,
                 slidables: slidables,
-                chatListItem: child!,
+                chatListItem: _CommonChatListItem(
+                  controller: controller,
+                  room: rooms[index],
+                ),
               );
             }
-            return child!;
+            return _CommonChatListItem(
+              controller: controller,
+              room: rooms[index],
+            );
           },
-          child: _CommonChatListItem(
-            controller: controller,
-            room: rooms[index],
-          ),
         );
       },
     );
