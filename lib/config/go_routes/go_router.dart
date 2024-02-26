@@ -159,6 +159,7 @@ abstract class AppRoutes {
                 : AppAdaptiveScaffoldBody(
                     activeRoomId: state.pathParameters['roomid'],
                   ),
+            name: '/rooms',
           ),
           routes: [
             GoRoute(
@@ -424,7 +425,7 @@ abstract class AppRoutes {
                     case ChatRouterInputArgumentType.draft:
                       if (extra.data is String?) {
                         return CupertinoPage(
-                          name: '/room',
+                          name: '/rooms/room',
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(state.pathParameters['roomid']!),
@@ -433,7 +434,7 @@ abstract class AppRoutes {
                         );
                       }
                       return CupertinoPage(
-                        name: '/room',
+                        name: '/rooms/room',
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
@@ -441,7 +442,7 @@ abstract class AppRoutes {
                       );
                     case ChatRouterInputArgumentType.share:
                       return CupertinoPage(
-                        name: '/room',
+                        name: '/rooms/room',
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(state.pathParameters['roomid']!),
@@ -451,7 +452,7 @@ abstract class AppRoutes {
                   }
                 }
                 return CupertinoPage(
-                  name: '/room',
+                  name: '/rooms/room',
                   child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(state.pathParameters['roomid']!),
@@ -513,8 +514,13 @@ abstract class AppRoutes {
     ),
   ];
 
-  static Page defaultPageBuilder(BuildContext context, Widget child) =>
+  static Page defaultPageBuilder(
+    BuildContext context,
+    Widget child, {
+    String? name,
+  }) =>
       CustomTransitionPage(
+        name: name,
         child: child,
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             !_responsive.isMobile(context)
