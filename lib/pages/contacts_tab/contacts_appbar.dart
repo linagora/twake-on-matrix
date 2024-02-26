@@ -21,24 +21,18 @@ class ContactsAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: ContactsAppbarStyle.preferredSizeAppBar.height,
-      surfaceTintColor: Theme.of(context).brightness == Brightness.light
-          ? Colors.white
-          : Colors.black,
-      shadowColor: Colors.black.withOpacity(0.15),
-      backgroundColor: Theme.of(context).brightness == Brightness.light
-          ? Colors.white
-          : Colors.black,
-      automaticallyImplyLeading: false,
-      centerTitle: false,
-      title: Padding(
-        padding: ContactsAppbarStyle.appbarPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: ContactsAppbarStyle.titlePadding,
+    return Padding(
+      padding: ContactsAppbarStyle.appbarPadding,
+      child: Column(
+        children: [
+          AppBar(
+            backgroundColor: LinagoraSysColors.material().onPrimary,
+            toolbarHeight: ContactsAppbarStyle.toolbarHeight,
+            automaticallyImplyLeading: false,
+            leadingWidth: ContactsAppbarStyle.leadingWidth,
+            centerTitle: true,
+            title: Align(
+              alignment: ContactsAppbarStyle.alignment,
               child: Text(
                 L10n.of(context)!.contacts,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -46,53 +40,63 @@ class ContactsAppBar extends StatelessWidget {
                     ),
               ),
             ),
-            ValueListenableBuilder<bool>(
-              valueListenable: isSearchModeNotifier,
-              builder: (context, isSearchMode, child) {
-                return SizedBox(
-                  height: 48,
-                  child: TextField(
-                    onTapOutside: (event) {
-                      dismissKeyboard();
-                    },
-                    focusNode: searchFocusNode,
-                    controller: textEditingController,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(0),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24.0),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: L10n.of(context)!.searchForContacts,
-                      hintStyle:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: isSearchModeNotifier,
+            builder: (context, isSearchMode, child) {
+              return SizedBox(
+                height: ContactsAppbarStyle.textFieldHeight,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onTapOutside: (event) {
+                          dismissKeyboard();
+                        },
+                        focusNode: searchFocusNode,
+                        controller: textEditingController,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          contentPadding: ContactsAppbarStyle.contentPadding,
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              ContactsAppbarStyle.textFieldBorderRadius,
+                            ),
+                            borderSide: BorderSide.none,
+                          ),
+                          hintText: L10n.of(context)!.searchForContacts,
+                          hintStyle: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
                                 color: LinagoraRefColors.material().neutral[60],
                               ),
-                      prefixIcon: Icon(
-                        Icons.search_outlined,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.onSurface,
+                          prefixIcon: Icon(
+                            Icons.search_outlined,
+                            size: ContactsAppbarStyle.iconSize,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          suffixIcon: isSearchMode
+                              ? TwakeIconButton(
+                                  tooltip: L10n.of(context)!.clear,
+                                  icon: Icons.close,
+                                  onTap: clearSearchBar,
+                                  size: ContactsAppbarStyle.iconSize,
+                                  iconColor:
+                                      Theme.of(context).colorScheme.onSurface,
+                                )
+                              : null,
+                        ),
                       ),
-                      suffixIcon: isSearchMode
-                          ? TwakeIconButton(
-                              tooltip: "Clear",
-                              icon: Icons.close,
-                              onTap: clearSearchBar,
-                              size: 24,
-                              iconColor:
-                                  Theme.of(context).colorScheme.onSurface,
-                            )
-                          : null,
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
