@@ -17,7 +17,7 @@ class ReactionsPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (controller.showEmojiPickerNotifier.value) return Container();
     final display = controller.editEvent == null &&
-        controller.replyEvent == null &&
+        controller.replyEventNotifier.value == null &&
         controller.room!.canSendDefaultMessages &&
         controller.selectedEvents.isNotEmpty;
     return AnimatedContainer(
