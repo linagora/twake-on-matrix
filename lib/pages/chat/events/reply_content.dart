@@ -131,7 +131,7 @@ class ReplyContent extends StatelessWidget {
                         );
                       },
                     ),
-                  replyBody,
+                  Expanded(child: replyBody),
                 ],
               ),
             ),

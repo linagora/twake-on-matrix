@@ -15,13 +15,15 @@ class ReplyDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: controller.editEvent != null || controller.replyEvent != null
+      padding: controller.editEvent != null ||
+              controller.replyEventNotifier.value != null
           ? ReplyDisplayStyle.replyDisplayPadding
           : EdgeInsets.zero,
       child: AnimatedContainer(
         duration: TwakeThemes.animationDuration,
         curve: TwakeThemes.animationCurve,
-        height: controller.editEvent != null || controller.replyEvent != null
+        height: controller.editEvent != null ||
+                controller.replyEventNotifier.value != null
             ? ReplyDisplayStyle.replyContainerHeight
             : 0,
         clipBehavior: Clip.hardEdge,
@@ -30,9 +32,9 @@ class ReplyDisplay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
-              child: controller.replyEvent != null
+              child: controller.replyEventNotifier.value != null
                   ? ReplyContent(
-                      controller.replyEvent!,
+                      controller.replyEventNotifier.value!,
                       timeline: controller.timeline!,
                     )
                   : _EditContent(
