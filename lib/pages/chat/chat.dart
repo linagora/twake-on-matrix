@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
@@ -145,16 +146,16 @@ class ChatController extends State<Chat>
   final composerDebouncer =
       Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
 
-  bool get isEmptyChat =>
+  bool get hasNoMessageEvents =>
       timeline != null &&
-      !timeline!.events.any(
-        (event) => {
-          EventTypes.Message,
-          EventTypes.Sticker,
-          EventTypes.Encrypted,
-          EventTypes.CallInvite,
-        }.contains(event.type),
-      );
+      !timeline!.events.where((event) => event.isVisibleInGui).any(
+            (event) => {
+              EventTypes.Message,
+              EventTypes.Sticker,
+              EventTypes.Encrypted,
+              EventTypes.CallInvite,
+            }.contains(event.type),
+          );
 
   final AutoScrollController scrollController = AutoScrollController();
 
@@ -170,6 +171,9 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
+  final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
+      ValueNotifier(ViewEventListInitial());
 
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
@@ -310,11 +314,15 @@ class ChatController extends State<Chat>
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
-  void requestHistory() async {
+  Future<void> requestHistory({
+    int? historyCount,
+  }) async {
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
-      await timeline!.requestHistory(historyCount: _loadHistoryCount);
+      return timeline!.requestHistory(
+        historyCount: historyCount ?? _loadHistoryCount,
+      );
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -327,7 +335,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void _updateScrollController() {
+  void _updateScrollController() async {
     if (!mounted) {
       return;
     }
@@ -345,7 +353,7 @@ class ChatController extends State<Chat>
             scrollController.position.maxScrollExtent ||
         scrollController.position.pixels + _isPortionAvailableToScroll ==
             scrollController.position.maxScrollExtent) {
-      requestHistory();
+      await requestHistory();
     }
   }
 
@@ -389,10 +397,11 @@ class ChatController extends State<Chat>
   }
 
   void _tryLoadTimeline() async {
+    _updateOpeningChatViewStateNotifier(ViewEventListLoading());
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
-      _listenRequestHistory();
+      await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();
@@ -1636,7 +1645,7 @@ class ChatController extends State<Chat>
     _currentChatScrollState = ChatScrollState.scrolling;
   }
 
-  void _listenRequestHistory() {
+  Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
 
     final allMembershipEvents = timeline!.events.every(
@@ -1650,7 +1659,24 @@ class ChatController extends State<Chat>
         _defaultEventCountDisplay;
 
     if (allMembershipEvents || canRequestHistory) {
-      requestHistory();
+      try {
+        await requestHistory(historyCount: _defaultEventCountDisplay);
+      } catch (e) {
+        Logs().e(
+          'Chat::_tryRequestHistory():: Error - $e',
+        );
+      }
+      _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+    }
+  }
+
+  void _updateOpeningChatViewStateNotifier(ViewEventListUIState state) {
+    try {
+      openingChatViewStateNotifier.value = state;
+    } on FlutterError catch (e) {
+      Logs().e(
+        'Chat::_updateViewEventListNotifier():: FlutterError - $e',
+      );
     }
   }
 
@@ -1706,6 +1732,7 @@ class ChatController extends State<Chat>
     sendController.dispose();
     suggestionsController.dispose();
     stickyTimestampNotifier.dispose();
+    openingChatViewStateNotifier.dispose();
     super.dispose();
   }
 

@@ -37,7 +37,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[events[i].eventId] = i;
     }
 
-    if (controller.isEmptyChat) {
+    if (controller.hasNoMessageEvents) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
