@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
+import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -51,14 +52,21 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                     Expanded(
                       child: GestureDetector(
                         onTap: controller.clearSingleSelectedEvent,
-                        child: Builder(
-                          builder: (context) {
-                            if (controller.timeline == null) {
+                        child: ValueListenableBuilder(
+                          valueListenable:
+                              controller.openingChatViewStateNotifier,
+                          builder: (context, viewState, __) {
+                            if (viewState is ViewEventListLoading) {
                               return const ChatLoadingView();
                             }
-                            return ChatEventList(
-                              controller: controller,
-                            );
+
+                            if (viewState is ViewEventListSuccess) {
+                              return ChatEventList(
+                                controller: controller,
+                              );
+                            }
+
+                            return const SizedBox.shrink();
                           },
                         ),
                       ),
