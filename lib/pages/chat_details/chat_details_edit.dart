@@ -27,7 +27,7 @@ import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:photo_manager/photo_manager.dart' as photo_manager;
 
 class ChatDetailsEdit extends StatefulWidget {
   final String roomId;
@@ -65,7 +65,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     Right(ChatDetailsUploadAvatarInitial()),
   );
   FilePickerResult? avatarFilePicker;
-  AssetEntity? avatarAssetEntity;
+  photo_manager.AssetEntity? avatarAssetEntity;
 
   final MenuController menuController = MenuController();
 
@@ -138,6 +138,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         context,
         currentPermissionPhotos,
         imagePickerController,
+        type: photo_manager.RequestType.image,
       );
     }
   }
@@ -149,7 +150,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
     imagePickerController.addListener(() {
       final selectedAsset = imagePickerController.selectedAssets.firstOrNull;
-      if (selectedAsset?.asset.type == AssetType.image) {
+      if (selectedAsset?.asset.type == photo_manager.AssetType.image) {
         if (!imagePickerController.pickFromCamera()) {
           Navigator.pop(context);
         }

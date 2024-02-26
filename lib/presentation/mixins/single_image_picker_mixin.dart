@@ -23,8 +23,9 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
   Future<void> showImagePickerBottomSheet(
     BuildContext context,
     PermissionStatus? permissionStatusPhotos,
-    ImagePickerGridController imagePickerController,
-  ) async {
+    ImagePickerGridController imagePickerController, {
+    RequestType type = RequestType.image,
+  }) async {
     if (permissionStatusPhotos != null) {
       return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
         context: context,
@@ -63,6 +64,7 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
           },
           backgroundImage: const AssetImage("assets/verification.png"),
         ),
+        type: type,
       );
     }
   }
