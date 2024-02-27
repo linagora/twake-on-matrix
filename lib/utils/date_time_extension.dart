@@ -41,11 +41,12 @@ extension DateTimeExtension on DateTime {
   /// Returns [localizedTimeOfDay()] if the ChatTime is today, the name of the week
   /// day if the ChatTime is this week and a date string else.
   String localizedTimeShort(BuildContext context, {DateTime? currentTime}) {
-    final now = currentTime ?? DateTime.now();
+    currentTime ??= DateTime.now();
 
-    final sameYear = now.year == year;
+    final sameYear = currentTime.year == year;
 
-    final sameDay = sameYear && now.month == month && now.day == day;
+    final sameDay =
+        sameYear && currentTime.month == month && currentTime.day == day;
 
     final sameWeek = isInCurrentWeek(currentTime: currentTime);
 
@@ -81,9 +82,10 @@ extension DateTimeExtension on DateTime {
   }
 
   bool isInCurrentWeek({DateTime? currentTime}) {
-    final now = currentTime ?? DateTime.now();
+    currentTime ??= DateTime.now();
 
-    final currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
+    final currentWeekStart =
+        currentTime.subtract(Duration(days: currentTime.weekday - 1));
 
     final weekStart = subtract(Duration(days: weekday - 1));
 
