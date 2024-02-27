@@ -115,6 +115,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       EventTypes.RoomPinnedEvents: getPowerLevelUserInChat(),
       EventTypes.RoomName: getPowerLevelUserInChat(),
       EventTypes.RoomAvatar: getPowerLevelUserInChat(),
+      EventTypes.RoomMember: getPowerLevelUserInChat(),
     };
   }
 
