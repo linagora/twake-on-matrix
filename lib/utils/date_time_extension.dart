@@ -40,17 +40,14 @@ extension DateTimeExtension on DateTime {
 
   /// Returns [localizedTimeOfDay()] if the ChatTime is today, the name of the week
   /// day if the ChatTime is this week and a date string else.
-  String localizedTimeShort(BuildContext context) {
-    final now = DateTime.now();
+  String localizedTimeShort(BuildContext context, {DateTime? currentTime}) {
+    final now = currentTime ?? DateTime.now();
 
     final sameYear = now.year == year;
 
     final sameDay = sameYear && now.month == month && now.day == day;
 
-    final sameWeek = sameYear &&
-        !sameDay &&
-        now.millisecondsSinceEpoch - millisecondsSinceEpoch <
-            1000 * 60 * 60 * 24 * 7;
+    final sameWeek = isInCurrentWeek(currentTime: currentTime);
 
     if (sameDay) {
       return localizedTimeOfDay(context);
@@ -71,7 +68,7 @@ extension DateTimeExtension on DateTime {
         case 7:
           return L10n.of(context)!.sunday;
       }
-    } else if (year == DateTime.now().year) {
+    } else if (sameYear) {
       return DateFormat("MMM d").format(this);
     } else {
       return DateFormat("dd/MM/yy").format(this);
@@ -81,6 +78,18 @@ extension DateTimeExtension on DateTime {
       month.toString().padLeft(2, '0'),
       day.toString().padLeft(2, '0'),
     );
+  }
+
+  bool isInCurrentWeek({DateTime? currentTime}) {
+    final now = currentTime ?? DateTime.now();
+
+    final currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
+
+    final weekStart = subtract(Duration(days: weekday - 1));
+
+    return currentWeekStart.year == weekStart.year &&
+        currentWeekStart.month == weekStart.month &&
+        currentWeekStart.day == weekStart.day;
   }
 
   /// If the DateTime is today, this returns [localizedTimeOfDay()], if not it also
