@@ -37,6 +37,8 @@ class CreateNewGroupChatInteractor {
         enableEncryption: createNewGroupChatRequest.enableEncryption,
         preset: createNewGroupChatRequest.createRoomPreset,
         initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
+        powerLevelContentOverride:
+            createNewGroupChatRequest.powerLevelContentOverride,
       );
 
       if (roomId.isNotEmpty) {

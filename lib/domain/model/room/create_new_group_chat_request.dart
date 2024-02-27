@@ -7,6 +7,7 @@ class CreateNewGroupChatRequest extends Equatable {
   final bool? enableEncryption;
   final CreateRoomPreset createRoomPreset;
   final String? urlAvatar;
+  final Map<String, dynamic>? powerLevelContentOverride;
 
   const CreateNewGroupChatRequest({
     this.groupName,
@@ -14,6 +15,7 @@ class CreateNewGroupChatRequest extends Equatable {
     this.enableEncryption,
     this.createRoomPreset = CreateRoomPreset.privateChat,
     this.urlAvatar,
+    this.powerLevelContentOverride,
   });
 
   @override
@@ -23,5 +25,6 @@ class CreateNewGroupChatRequest extends Equatable {
         enableEncryption,
         createRoomPreset,
         urlAvatar,
+        powerLevelContentOverride,
       ];
 }
