@@ -113,6 +113,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   Map<String, dynamic> _getOverridePowerLevelEventForMember() {
     return {
       EventTypes.RoomPinnedEvents: getPowerLevelUserInChat(),
+      EventTypes.RoomName: getPowerLevelUserInChat(),
     };
   }
 
