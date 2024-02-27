@@ -79,6 +79,7 @@ import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dar
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -110,6 +111,7 @@ class GetItInitializer {
     HiveDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
+    getIt.registerSingleton(PowerLevelManager());
     getIt.registerSingleton(TwakeEventDispatcher());
     getIt.registerSingleton(Store());
     getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/power_level_member_in_chat.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
@@ -102,8 +103,21 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             .toList(),
         enableEncryption: enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
+        powerLevelContentOverride: {
+          'events': _getOverridePowerLevelEventForMember(),
+        },
       ),
     );
+  }
+
+  Map<String, dynamic> _getOverridePowerLevelEventForMember() {
+    return {
+      EventTypes.RoomPinnedEvents: getPowerLevelUserInChat(),
+    };
+  }
+
+  int getPowerLevelUserInChat() {
+    return DefaultPowerLevelMemberInChat.user;
   }
 
   void _handleUploadAvatarNewGroupChatOnData(
