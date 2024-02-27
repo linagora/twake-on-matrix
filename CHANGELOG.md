@@ -1,3 +1,15 @@
+## [2.4.19+2330] - 2024-02-27
+### Fixed
+- \#1457 Handle predictive back
+- \#1308 handle pop scope for back button
+- \#1492 handle performance in rebuilding in Chat list
+- \#1269 Play video in safari
+- \#1455 handle Micro permission for iOS and Android in Image Picker
+- \#1472 Prevent select video in change avatar
+- \#1425 Update title position
+- \#713 Jump from media list to chat
+- \#1153 Prevent duplicated phone number
+
 ## [2.4.18+2330] - 2024-02-19
 
 ### Fixed
@@ -2223,6 +2235,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.19+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.19
 [2.4.18+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.18
 
 [2.4.16+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.16
