@@ -1,11 +1,13 @@
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -98,6 +100,8 @@ class _VideoItem extends StatelessWidget {
     this.thumbnailCacheMap,
   });
 
+  static final responsiveUtil = getIt.get<ResponsiveUtils>();
+
   @override
   Widget build(BuildContext context) {
     return EventVideoPlayer(
@@ -107,6 +111,8 @@ class _VideoItem extends StatelessWidget {
       thumbnailCacheKey: event.eventId,
       thumbnailCacheMap: thumbnailCacheMap,
       noResizeThumbnail: true,
+      onCloseRightColumn: onCloseRightColumn,
+      showPlayButton: !responsiveUtil.isDesktop(context),
     );
   }
 }
