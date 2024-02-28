@@ -4,9 +4,12 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix_link_text/link_text.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class TwakeLinkPreview extends StatefulWidget {
   final Uri uri;
@@ -74,7 +77,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
       textSpanBuilder: widget.textSpanBuilder,
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,
-        builder: (context, state, _) {
+        builder: (context, state, child) {
           return state.fold(
             (failure) => const SizedBox.shrink(),
             (success) {
@@ -87,10 +90,84 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
                   previewLink: firstValidUrl,
                 );
               }
-              return const SizedBox();
+              return child!;
             },
           );
         },
+        child: Skeletonizer.zone(
+          child: Container(
+            constraints: const BoxConstraints(
+              minWidth: double.infinity,
+            ),
+            height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
+            decoration: ShapeDecoration(
+              color: widget.ownMessage
+                  ? LinagoraRefColors.material().primary[95]
+                  : LinagoraStateLayer(
+                      LinagoraSysColors.material().surfaceTint,
+                    ).opacityLayer1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  TwakeLinkPreviewItemStyle.radiusBorder,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Bone.button(
+                  width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
+                  height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(
+                      TwakeLinkPreviewItemStyle.radiusBorder,
+                    ),
+                    bottom: Radius.circular(
+                      TwakeLinkPreviewItemStyle.radiusBorder,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        key: LinkPreviewBuilder.paddingTitleKey,
+                        padding: TwakeLinkPreviewItemStyle.paddingTitle,
+                        child: Column(
+                          children: [
+                            Bone.text(
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
+                            Bone.text(
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        key: LinkPreviewBuilder.paddingSubtitleKey,
+                        padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
+                        child: Column(
+                          children: [
+                            Bone.text(
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
+                            Bone.text(
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

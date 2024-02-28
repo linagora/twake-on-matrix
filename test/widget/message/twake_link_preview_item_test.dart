@@ -73,17 +73,17 @@ void main() {
           );
 
           final linkPreviewNoImageBody = find.byKey(
-            TwakeLinkPreviewItem.linkPreviewNoImageKey,
+            LinkPreviewBuilder.imageDefaultKey,
           );
 
           expect(linkPreviewNoImageBody, findsOneWidget);
 
           final paddingTitleFind = find.byKey(
-            LinkPreviewNoImage.paddingTitleKey,
+            LinkPreviewBuilder.paddingTitleKey,
           );
 
           final paddingSubtitleKey = find.byKey(
-            LinkPreviewNoImage.paddingSubtitleKey,
+            LinkPreviewBuilder.paddingSubtitleKey,
           );
 
           final Padding paddingTitleWidget = tester.widget(
@@ -105,11 +105,11 @@ void main() {
           );
 
           final titleTextFind = find.byKey(
-            LinkPreviewNoImage.titleKey,
+            LinkPreviewBuilder.titleKey,
           );
 
           final textSubtitleKeyTextFind = find.byKey(
-            LinkPreviewNoImage.subtitleKey,
+            LinkPreviewBuilder.subtitleKey,
           );
 
           expect(titleTextFind, findsOneWidget);
@@ -166,17 +166,17 @@ void main() {
           expect(twakeLinkPreviewItem.ownMessage, true);
 
           final linkPreviewNoImageBody = find.byKey(
-            TwakeLinkPreviewItem.linkPreviewNoImageKey,
+            LinkPreviewBuilder.imageDefaultKey,
           );
 
           expect(linkPreviewNoImageBody, findsOneWidget);
 
           final paddingTitleFind = find.byKey(
-            LinkPreviewNoImage.paddingTitleKey,
+            LinkPreviewBuilder.paddingTitleKey,
           );
 
           final paddingSubtitleKey = find.byKey(
-            LinkPreviewNoImage.paddingSubtitleKey,
+            LinkPreviewBuilder.paddingSubtitleKey,
           );
 
           final Padding paddingTitleWidget = tester.widget(
@@ -198,11 +198,11 @@ void main() {
           );
 
           final titleTextFind = find.byKey(
-            LinkPreviewNoImage.titleKey,
+            LinkPreviewBuilder.titleKey,
           );
 
           final textSubtitleKeyTextFind = find.byKey(
-            LinkPreviewNoImage.subtitleKey,
+            LinkPreviewBuilder.subtitleKey,
           );
 
           expect(titleTextFind, findsOneWidget);
@@ -258,7 +258,7 @@ void main() {
           );
 
           final linkPreviewNoImageBody = find.byKey(
-            TwakeLinkPreviewItem.linkPreviewNoImageKey,
+            LinkPreviewBuilder.imageDefaultKey,
           );
 
           expect(linkPreviewNoImageBody, findsOneWidget);
@@ -299,7 +299,7 @@ void main() {
           expect(twakeLinkPreviewItem.ownMessage, true);
 
           final linkPreviewNoImageBody = find.byKey(
-            TwakeLinkPreviewItem.linkPreviewNoImageKey,
+            LinkPreviewBuilder.imageDefaultKey,
           );
 
           expect(linkPreviewNoImageBody, findsOneWidget);
@@ -348,7 +348,7 @@ void main() {
           expect(linkPreviewLargeBody, findsOneWidget);
 
           final clipRRectMxcImage = find.byKey(
-            LinkPreviewLarge.clipRRectKey,
+            LinkPreviewBuilder.clipRRectKey,
           );
 
           expect(clipRRectMxcImage, findsOneWidget);
@@ -362,12 +362,15 @@ void main() {
                 top: Radius.circular(
                   TwakeLinkPreviewItemStyle.radiusBorder,
                 ),
+                bottom: Radius.circular(
+                  TwakeLinkPreviewItemStyle.radiusBorder,
+                ),
               ),
             ),
           );
 
           final mxcImageFinder = find.byKey(
-            LinkPreviewLarge.mxcImageKey,
+            LinkPreviewBuilder.mxcImageKey,
           );
 
           expect(mxcImageFinder, findsOneWidget);
@@ -416,22 +419,14 @@ void main() {
           expect(twakeLinkPreviewItem.ownMessage, true);
 
           final mxcImageFinder = find.byKey(
-            LinkPreviewSmall.mxcImageKey,
+            LinkPreviewBuilder.mxcImageKey,
           );
+
+          expect(mxcImageFinder, findsOneWidget);
 
           final MxcImage mxcImage = tester.widget(mxcImageFinder);
 
           expect(mxcImage.uri, urlPreviewPresentation.imageUri);
-
-          expect(
-            mxcImage.width,
-            TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-          );
-
-          expect(
-            mxcImage.width,
-            TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-          );
 
           expect(mxcImage.fit, BoxFit.cover);
 
@@ -474,7 +469,10 @@ void main() {
 
           expect(twakeLinkPreviewItem.ownMessage, false);
 
-          expect(find.byType(LinkPreviewNoImage), findsOneWidget);
+          expect(
+            find.byKey(LinkPreviewBuilder.imageDefaultKey),
+            findsOneWidget,
+          );
 
           expect(find.byType(MxcImage), findsNothing);
         },
