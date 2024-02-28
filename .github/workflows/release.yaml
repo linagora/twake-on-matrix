@@ -7,11 +7,11 @@ env:
   FLUTTER_VERSION: 3.16.5
   XCODE_VERSION: ^15.0.1
 
-name: Release app
+name: Release
 
 jobs:
   release_mobile:
-    name: Release on mobile stores
+    name: Release on mobile
     runs-on: ${{ matrix.runner }}
     environment: prod
 
@@ -89,6 +89,16 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         run: ../scripts/release-ios-testflight.sh
         working-directory: ${{ matrix.os }}
+
+      - name: Build Android APK
+        if: matrix.os == 'android'
+        run: ./scripts/release-android-apk.sh
+
+      - uses: actions/upload-artifact@v3
+        if: matrix.os == 'android'
+        with:
+          name: twake-release
+          path: twake-${{ github.ref_name }}*
 
   package_desktop:
     name: Package app on desktops
@@ -170,11 +180,12 @@ jobs:
           name: twake-release
           path: twake-${{ github.ref_name }}*
 
-  release_desktop:
-    name: Release on desktops
+  release_github:
+    name: Release on Github
     runs-on: ubuntu-latest
     needs:
       - package_desktop
+      - release_mobile
     environment: prod
     permissions:
       contents: write
