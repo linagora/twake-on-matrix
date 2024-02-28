@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/power_level_member_in_chat.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
@@ -12,6 +11,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -93,6 +93,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   void createNewGroup({String? urlAvatar}) {
     final client = Matrix.of(context).client;
+    final powerLevelManager = getIt.get<PowerLevelManager>();
     createNewGroupChatAction(
       matrixClient: client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
@@ -104,24 +105,10 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         enableEncryption: enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
         powerLevelContentOverride: {
-          'events': _getOverridePowerLevelEventForMember(),
+          'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
         },
       ),
     );
-  }
-
-  Map<String, dynamic> _getOverridePowerLevelEventForMember() {
-    return {
-      EventTypes.RoomPinnedEvents: getPowerLevelUserInChat(),
-      EventTypes.RoomName: getPowerLevelUserInChat(),
-      EventTypes.RoomAvatar: getPowerLevelUserInChat(),
-      EventTypes.RoomMember: getPowerLevelUserInChat(),
-      EventTypes.RoomTopic: getPowerLevelUserInChat(),
-    };
-  }
-
-  int getPowerLevelUserInChat() {
-    return DefaultPowerLevelMemberInChat.user;
   }
 
   void _handleUploadAvatarNewGroupChatOnData(
