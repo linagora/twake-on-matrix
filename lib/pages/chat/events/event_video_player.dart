@@ -36,6 +36,10 @@ class EventVideoPlayer extends StatelessWidget {
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
 
+  final bool showPlayButton;
+
+  static final responsiveUtils = getIt.get<ResponsiveUtils>();
+
   const EventVideoPlayer(
     this.event, {
     Key? key,
@@ -46,6 +50,8 @@ class EventVideoPlayer extends StatelessWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
+    this.onCloseRightColumn,
+    this.showPlayButton = true,
   }) : super(key: key);
 
   @override
@@ -84,9 +90,10 @@ class EventVideoPlayer extends StatelessWidget {
                       thumbnailOnly: true,
                     ),
                   ),
-                const CenterVideoButton(
-                  icon: Icons.play_arrow,
-                ),
+                if (showPlayButton)
+                  const CenterVideoButton(
+                    icon: Icons.play_arrow,
+                  ),
                 if (showDuration)
                   Positioned(
                     bottom: ChatDetailsMediaStyle.durationPosition,
