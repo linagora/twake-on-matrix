@@ -334,6 +334,172 @@ void main() {
     });
 
     testWidgets(
+        'GIVEN the current time is Sunday\n'
+        'AND the date time to display is Friday of current week\n'
+        'THEN should display Friday\n', (WidgetTester tester) async {
+      const expectedDisplayText = 'Friday';
+      final currentTime = DateTime(2024, 3, 3);
+      final timeToTest = DateTime(2024, 3, 1, 12, 5);
+
+      final textWidgetBuilder = Builder(
+        builder: (BuildContext context) {
+          final displayText = timeToTest.localizedTimeShort(
+            context,
+            currentTime: currentTime,
+          );
+
+          return Text(
+            displayText,
+            key: textWidgetKey,
+          );
+        },
+      );
+
+      await tester.binding.setLocale('en', 'US');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [L10n.delegate],
+          home: textWidgetBuilder,
+        ),
+      );
+
+      final textWidgetFinder = find.byKey(textWidgetKey);
+
+      expect(textWidgetFinder, findsOneWidget);
+
+      final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+      expect(textWidget.data, isNotNull);
+
+      expect(textWidget.data, equals(expectedDisplayText));
+    });
+
+    testWidgets(
+        'GIVEN the current time is Sunday\n'
+        'AND the date time to display is Saturday of current week\n'
+        'THEN should display Saturday\n', (WidgetTester tester) async {
+      const expectedDisplayText = 'Saturday';
+      final currentTime = DateTime(2024, 3, 3);
+      final timeToTest = DateTime(2024, 3, 2, 12, 5);
+
+      final textWidgetBuilder = Builder(
+        builder: (BuildContext context) {
+          final displayText = timeToTest.localizedTimeShort(
+            context,
+            currentTime: currentTime,
+          );
+
+          return Text(
+            displayText,
+            key: textWidgetKey,
+          );
+        },
+      );
+
+      await tester.binding.setLocale('en', 'US');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [L10n.delegate],
+          home: textWidgetBuilder,
+        ),
+      );
+
+      final textWidgetFinder = find.byKey(textWidgetKey);
+
+      expect(textWidgetFinder, findsOneWidget);
+
+      final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+      expect(textWidget.data, isNotNull);
+
+      expect(textWidget.data, equals(expectedDisplayText));
+    });
+
+    testWidgets(
+        'GIVEN current time is Sunday\n'
+        'AND the date time to display is Monday of the next week\n'
+        'THEN should display the date in the format MMM d\n',
+        (WidgetTester tester) async {
+      const expectedDisplayText = 'Mar 4';
+      final currentTime = DateTime(2024, 3, 3);
+      final timeToTest = DateTime(2024, 3, 4, 12, 5);
+
+      final textWidgetBuilder = Builder(
+        builder: (BuildContext context) {
+          final displayText = timeToTest.localizedTimeShort(
+            context,
+            currentTime: currentTime,
+          );
+
+          return Text(
+            displayText,
+            key: textWidgetKey,
+          );
+        },
+      );
+
+      await tester.binding.setLocale('en', 'US');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [L10n.delegate],
+          home: textWidgetBuilder,
+        ),
+      );
+
+      final textWidgetFinder = find.byKey(textWidgetKey);
+
+      expect(textWidgetFinder, findsOneWidget);
+
+      final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+      expect(textWidget.data, isNotNull);
+
+      expect(textWidget.data, equals(expectedDisplayText));
+    });
+
+    testWidgets(
+        'GIVEN current time is Sunday\n'
+        'AND the date time to display is Tuesday of the next week\n'
+        'THEN should display the date in the format MMM d\n',
+        (WidgetTester tester) async {
+      const expectedDisplayText = 'Mar 5';
+      final currentTime = DateTime(2024, 3, 3);
+      final timeToTest = DateTime(2024, 3, 5, 12, 5);
+
+      final textWidgetBuilder = Builder(
+        builder: (BuildContext context) {
+          final displayText = timeToTest.localizedTimeShort(
+            context,
+            currentTime: currentTime,
+          );
+
+          return Text(
+            displayText,
+            key: textWidgetKey,
+          );
+        },
+      );
+
+      await tester.binding.setLocale('en', 'US');
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [L10n.delegate],
+          home: textWidgetBuilder,
+        ),
+      );
+
+      final textWidgetFinder = find.byKey(textWidgetKey);
+
+      expect(textWidgetFinder, findsOneWidget);
+
+      final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+      expect(textWidget.data, isNotNull);
+
+      expect(textWidget.data, equals(expectedDisplayText));
+    });
+
+    testWidgets(
         'GIVEN the date time to display is not in the same week\n'
         'AND in the same year\n'
         'THEN should display the date in the format MMM d\n',
