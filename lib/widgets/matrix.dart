@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
@@ -269,6 +270,10 @@ class MatrixState extends State<Matrix>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (PlatformInfos.isWeb) {
+      html.window.addEventListener('focus', onWindowFocus);
+      html.window.addEventListener('blur', onWindowBlur);
+    }
     initMatrix();
     initReceiveSharingIntent();
     if (PlatformInfos.isWeb) {
@@ -591,9 +596,18 @@ class MatrixState extends State<Matrix>
     }
   }
 
+  void onWindowFocus(html.Event e) {
+    didChangeAppLifecycleState(AppLifecycleState.resumed);
+  }
+
+  void onWindowBlur(html.Event e) {
+    didChangeAppLifecycleState(AppLifecycleState.paused);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    Logs().v('AppLifecycleState = $state');
+    Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
+    Logs().i('didChangeAppLifecycleState: currentTime: ${DateTime.now()}');
     final foreground = state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
@@ -651,6 +665,10 @@ class MatrixState extends State<Matrix>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (PlatformInfos.isWeb) {
+      html.window.removeEventListener('focus', onWindowFocus);
+      html.window.removeEventListener('blur', onWindowBlur);
+    }
     intentDataStreamSubscription?.cancel();
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
