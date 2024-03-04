@@ -49,7 +49,7 @@ class Message extends StatefulWidget {
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
-  final double? contextMenuWidth; 
+  final double? contextMenuWidth;
 
   const Message(
     this.event, {
