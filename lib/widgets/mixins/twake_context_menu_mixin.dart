@@ -13,7 +13,6 @@ mixin TwakeContextMenuMixin {
     double? verticalPadding,
     VoidCallback? onClose,
   }) async {
-    print('showTwakeContextMenu: here');
     await showModal(
       context: context,
       configuration: const FadeScaleTransitionConfiguration(
