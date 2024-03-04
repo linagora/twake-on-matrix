@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
+import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -53,6 +54,8 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   Room? get room => widget.pinnedEvents.first?.room;
 
+  Client get client => Matrix.of(context).client;
+
   ValueNotifier<List<Event>> selectedEvents = ValueNotifier([]);
 
   List<String> get selectedPinnedEventsIds =>
@@ -67,9 +70,11 @@ class PinnedMessagesController extends State<PinnedMessages>
         _showErrorSnackbar(failure);
       }, (success) {
         if (success is UpdatePinnedEventsSuccess) {
-          eventsNotifier.value = eventsNotifier.value
-              .where((event) => event?.eventId != eventId)
-              .toList();
+          _updateEventsNotifier(
+            eventsNotifier.value
+                .where((event) => event?.eventId != eventId)
+                .toList(),
+          );
           if (eventsNotifier.value.isEmpty) {
             Navigator.of(context).pop(eventsNotifier.value);
           }
@@ -92,7 +97,7 @@ class PinnedMessagesController extends State<PinnedMessages>
         },
         (success) {
           if (success is UpdatePinnedEventsSuccess) {
-            eventsNotifier.value = [];
+            _updateEventsNotifier([]);
             Navigator.of(context).pop();
           }
         },
@@ -114,12 +119,14 @@ class PinnedMessagesController extends State<PinnedMessages>
           },
           (success) {
             if (success is UpdatePinnedEventsSuccess) {
-              eventsNotifier.value = eventsNotifier.value
-                  .where(
-                    (event) =>
-                        !selectedPinnedEventsIds.contains(event?.eventId),
-                  )
-                  .toList();
+              _updateEventsNotifier(
+                eventsNotifier.value
+                    .where(
+                      (event) =>
+                          !selectedPinnedEventsIds.contains(event?.eventId),
+                    )
+                    .toList(),
+              );
               selectedEvents.value = [];
               if (eventsNotifier.value.isEmpty) {
                 Navigator.of(context).pop();
@@ -184,7 +191,7 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void _initPinnedEvents() {
     if (widget.pinnedEvents.isNotEmpty) {
-      eventsNotifier.value = widget.pinnedEvents;
+      _updateEventsNotifier(widget.pinnedEvents);
     } else {
       final currentRoomId = GoRouterState.of(context).pathParameters['roomid'];
       if (currentRoomId != null) {
@@ -350,11 +357,70 @@ class PinnedMessagesController extends State<PinnedMessages>
     );
   }
 
+  void _listenRoomUpdateEvent() {
+    if (room == null) return;
+    client.onEvent.stream.listen((eventUpdate) {
+      Logs().d(
+        'PinnedMessages::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
+      );
+      if (eventUpdate.isPinnedEventsHasChanged) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          eventUpdate.updatePinnedMessage(
+            onPinnedMessageUpdated: ({
+              required bool isInitial,
+              required bool isUnpin,
+              String? eventId,
+            }) {
+              _handlePinnedMessageCallBack();
+            },
+          );
+        });
+      }
+    });
+  }
+
+  void _handlePinnedMessageCallBack() async {
+    try {
+      final result =
+          (await Future.wait(room!.pinnedEventIds.map(room!.getEventById)))
+              .nonNulls
+              .toList();
+
+      if (result.isNotEmpty) {
+        _updateEventsNotifier(result);
+      }
+
+      if (eventsNotifier.value.isNotEmpty && result.isEmpty) {
+        _updateEventsNotifier(result);
+        Navigator.of(context).pop();
+      }
+    } on MatrixException catch (exception) {
+      Logs().e(
+        'PinnedMessages::_handlePinnedMessageCallBack():: ErrorCode ${exception.errcode}: ${exception.errorMessage}',
+      );
+    }
+  }
+
+  void _updateEventsNotifier(List<Event?> events) {
+    try {
+      eventsNotifier.value = events;
+    } on FlutterError catch (exception) {
+      Logs().e(
+        'PinnedMessages::_updateEventsNotifier():: FlutterError $exception',
+      );
+    } catch (exception) {
+      Logs().e(
+        'PinnedMessages::_updateEventsNotifier():: ErrorCode $exception',
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       _initPinnedEvents();
+      _listenRoomUpdateEvent();
     });
   }
 
