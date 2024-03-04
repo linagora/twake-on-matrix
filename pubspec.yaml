@@ -156,7 +156,7 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_image_compress: ^2.0.4
   image_gallery_saver: ^2.0.3
-  file_saver: ^0.1.1
+  file_selector: ^1.0.3
   flutter_keyboard_visibility: ^6.0.0
   media_kit: ^1.1.7
   media_kit_video: ^1.1.8
@@ -233,9 +233,6 @@ msix_config:
 dependency_overrides:
   # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
   ffi: ^2.0.0
-  # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
-  file_selector: ^0.9.2+2
-  file_selector_linux: ^0.9.1
   flutter_svg: ^2.0.4
   # fake secure storage plugin for Windows
   # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161

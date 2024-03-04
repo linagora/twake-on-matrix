@@ -2798,6 +2798,8 @@
       "directory": {}
     }
   },
+  "downloadStarted": "Download started",
+  "@downloadStarted": {},
   "notInAChatYet": "You're not in a chat yet",
   "@notInAChatYet": {},
   "blankChatTitle": "Choose a chat or hit #EditIcon# to make one.",

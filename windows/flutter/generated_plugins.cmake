@@ -8,7 +8,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_lifecycle
   dynamic_color
   emoji_picker_flutter
-  file_saver
   file_selector_windows
   flutter_webrtc
   irondash_engine_context

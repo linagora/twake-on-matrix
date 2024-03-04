@@ -1417,8 +1417,8 @@ class ChatController extends State<Chat>
     }
   }
 
-  Future<String?> downloadFileAction(BuildContext context, Event event) async =>
-      await event.saveFile(context);
+  Future<void> downloadFileAction(BuildContext context, Event event) =>
+      event.saveFile(context);
 
   void handleContextMenuAction(
     BuildContext context,

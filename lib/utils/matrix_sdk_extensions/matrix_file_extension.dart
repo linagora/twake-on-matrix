@@ -2,23 +2,20 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:mime/mime.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:file_saver/file_saver.dart';
+import 'package:file_selector/file_selector.dart';
 
 extension MatrixFileExtension on MatrixFile {
-  Future<String?> downloadFile(BuildContext context) async {
+  Future<void> downloadFile(BuildContext context) async {
     if (PlatformInfos.isWeb) {
-      return await downloadFileInWeb(context);
+      return await downloadFileInWeb();
     }
 
     if (PlatformInfos.isMobile) {
@@ -45,25 +42,20 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  Future<String> downloadFileInWeb(BuildContext context) async {
+  Future<void> downloadFileInWeb() async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
 
-    final directory = await FileSaver.instance.saveFile(
-      name,
-      bytes!,
-      extensionFromMime(mimeType),
-      mimeType: mimeType.toMimeTypeEnum(),
-    );
+    final FileSaveLocation? result = await getSaveLocation(suggestedName: name);
+    if (result == null) {
+      // Operation was canceled by the user.
+      return;
+    }
 
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.downloadFileInWeb(directory),
-    );
-
-    return '$directory/$name';
+    final XFile file = XFile.fromData(bytes!, mimeType: mimeType, name: name);
+    await file.saveTo(result.path);
   }
 
-  Future<String> downloadImageInMobile(BuildContext context) async {
+  Future<void> downloadImageInMobile(BuildContext context) async {
     Logs().d(
       "MatrixFileExtension()::downloadImageInMobile()::download on Mobile",
     );
@@ -79,8 +71,6 @@ extension MatrixFileExtension on MatrixFile {
           ? L10n.of(context)!.downloadImageSuccess
           : L10n.of(context)!.downloadImageError,
     );
-
-    return result?['filePath'] ?? '';
   }
 
   FileType get filePickerFileType {
