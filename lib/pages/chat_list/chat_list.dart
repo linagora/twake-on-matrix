@@ -12,6 +12,7 @@ import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -27,6 +28,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +67,8 @@ class ChatListController extends State<ChatList>
         ComparablePresentationContactMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
-        GoToGroupChatMixin {
+        GoToGroupChatMixin,
+        TwakeContextMenuMixin {
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
   final responsive = getIt.get<ResponsiveUtils>();
@@ -535,15 +538,18 @@ class ChatListController extends State<ChatList>
   void handleContextMenuAction(
     BuildContext context,
     Room room,
+    TapDownDetails details,
   ) {
-    openPopupMenuAction(
-      context,
-      context.getCurrentRelativeRectOfWidget(),
-      _popupMenuActionTile(context, room),
+    final offset = details.globalPosition;
+    showTwakeContextMenu(
+      offset: offset,
+      context: context,
+      builder: (context) => _popupMenuActionTile(context, room),
+      width: ChatListViewStyle.contextMenuWidth,
     );
   }
 
-  List<PopupMenuItem> _popupMenuActionTile(
+  List<Widget> _popupMenuActionTile(
     BuildContext context,
     Room room,
   ) {
@@ -555,16 +561,13 @@ class ChatListController extends State<ChatList>
       ChatListSelectionActions.mute,
     ];
     return listAction.map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: popupItemByTwakeAppRouter(
-          context,
-          action.getTitleContextMenuSelection(context, room),
-          iconAction: action.getIconContextMenuSelection(room),
-          onCallbackAction: () => _handleClickOnContextMenuItem(
-            action,
-            room,
-          ),
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitleContextMenuSelection(context, room),
+        iconAction: action.getIconContextMenuSelection(room),
+        onCallbackAction: () => _handleClickOnContextMenuItem(
+          action,
+          room,
         ),
       );
     }).toList();
