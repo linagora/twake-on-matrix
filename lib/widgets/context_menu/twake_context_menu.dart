@@ -1,5 +1,5 @@
 // reference to: https://pub.dev/packages/contextmenu
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
 import 'twake_context_menu_area.dart';
@@ -20,7 +20,7 @@ class TwakeContextMenu extends StatefulWidget {
   final ContextMenuBuilder builder;
 
   /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
-  final double verticalPadding;
+  final double? verticalPadding;
 
   /// The width for the [TwakeContextMenu]. 320 by default according to Material Design specs.
   final double width;
@@ -29,7 +29,7 @@ class TwakeContextMenu extends StatefulWidget {
     Key? key,
     required this.position,
     required this.builder,
-    this.verticalPadding = 8,
+    this.verticalPadding,
     required this.width,
   }) : super(key: key);
 
@@ -44,7 +44,9 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
   Widget build(BuildContext context) {
     final children = widget.builder(context);
 
-    double height = 2 * widget.verticalPadding;
+    double height = 2 *
+        (widget.verticalPadding ??
+            TwakeContextMenuStyle.defaultVerticalPadding);
 
     for (final element in _heights.values) {
       height += element;
@@ -81,22 +83,24 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
       duration: _kShortDuration,
       child: SizedBox.shrink(
         child: Card(
-          elevation: PopupMenuWidgetStyle.menuElevation,
+          elevation: TwakeContextMenuStyle.menuElevation,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius:
-                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
+                BorderRadius.circular(TwakeContextMenuStyle.menuBorderRadius),
           ),
           child: ClipRRect(
             borderRadius:
-                BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
+                BorderRadius.circular(TwakeContextMenuStyle.menuBorderRadius),
             child: Material(
-              color: PopupMenuWidgetStyle.defaultMenuColor(context),
+              color: TwakeContextMenuStyle.defaultMenuColor(context),
               child: ListView(
                 primary: false,
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
+                padding: EdgeInsets.symmetric(
+                    vertical: widget.verticalPadding ??
+                        TwakeContextMenuStyle.defaultVerticalPadding),
                 children: children
                     .map(
                       (e) => _GrowingWidget(
