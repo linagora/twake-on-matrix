@@ -8,6 +8,7 @@ class ChatViewStyle {
   static double get paddingVerticalActionButtons => 8.0;
 
   static const double pinnedMessageHintHeight = 48;
+  static const double contextMenuWidth = 150.0;
 
   static EdgeInsetsDirectional paddingLeading(BuildContext context) =>
       EdgeInsetsDirectional.only(

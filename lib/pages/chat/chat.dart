@@ -6,6 +6,7 @@ import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dar
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
@@ -97,7 +98,8 @@ class ChatController extends State<Chat>
         DragDrogFileMixin,
         GoToDraftChatMixin,
         PasteImageMixin,
-        HandleClipboardActionMixin {
+        HandleClipboardActionMixin,
+        TwakeContextMenuMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1358,7 +1360,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  List<PopupMenuItem> _popupMenuActionTile(
+  List<Widget> _popupMenuActionTile(
     BuildContext context,
     Event event,
   ) {
@@ -1366,29 +1368,25 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.select,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
-      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
     ];
     return listAction.map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: popupItemByTwakeAppRouter(
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(
           context,
-          action.getTitle(
-            context,
-            unpin: isUnpinEvent(event),
-            isSelected: isSelected(event),
-          ),
-          iconAction: action.getIconData(
-            unpin: isUnpinEvent(event),
-          ),
-          imagePath: action.getImagePath(),
-          onCallbackAction: () => _handleClickOnContextMenuItem(
-            action,
-            event,
-          ),
+          unpin: isUnpinEvent(event),
+          isSelected: isSelected(event),
+        ),
+        iconAction: action.getIconData(
+          unpin: isUnpinEvent(event),
+        ),
+        imagePath: action.getImagePath(),
+        onCallbackAction: () => _handleClickOnContextMenuItem(
+          action,
+          event,
         ),
       );
     }).toList();
@@ -1427,22 +1425,14 @@ class ChatController extends State<Chat>
     Event event,
     TapDownDetails tapDownDetails,
   ) {
-    final screenSize = MediaQuery.sizeOf(context);
     final offset = tapDownDetails.globalPosition;
-    final position = RelativeRect.fromLTRB(
-      offset.dx,
-      offset.dy + ChatViewStyle.paddingBottomContextMenu,
-      screenSize.width - offset.dx,
-      screenSize.height - offset.dy,
-    );
     _handleStateContextMenu();
-    openPopupMenuAction(
-      context,
-      position,
-      _popupMenuActionTile(context, event),
-      onClose: () {
-        _handleStateContextMenu();
-      },
+    showTwakeContextMenu(
+      offset: offset,
+      context: context,
+      builder: (context) => _popupMenuActionTile(context, event),
+      width: ChatViewStyle.contextMenuWidth,
+      onClose: _handleStateContextMenu,
     );
   }
 
