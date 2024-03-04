@@ -19,6 +19,7 @@ class PinnedMessagesStyle {
     horizontal: 8.0,
   );
   static const double actionBarBorderRadius = 16.0;
+  static const double contextMenuWidth = 200.0;
 
   static Widget unpinIcon() => SvgPicture.asset(ImagePaths.icUnpin, height: 18);
 }

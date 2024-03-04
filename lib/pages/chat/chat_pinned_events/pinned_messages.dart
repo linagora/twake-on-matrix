@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
-import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -20,6 +19,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
@@ -38,7 +38,10 @@ class PinnedMessages extends StatefulWidget {
 }
 
 class PinnedMessagesController extends State<PinnedMessages>
-    with PopupContextMenuActionMixin, PopupMenuWidgetMixin {
+    with
+        PopupContextMenuActionMixin,
+        PopupMenuWidgetMixin,
+        TwakeContextMenuMixin {
   ValueNotifier<List<Event?>> eventsNotifier = ValueNotifier([]);
 
   final ValueNotifier<String?> isHoverNotifier = ValueNotifier(null);
@@ -274,15 +277,12 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   // Used for "More" Context Menu
-  List<PopupMenuItem> _pinnedMessagesActionsTileList(
+  List<Widget> _pinnedMessagesActionsTileList(
     BuildContext context,
     Event event,
   ) {
     final actionTiles = pinnedMessagesActionsList(context, event).map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: action,
-      );
+      return action;
     }).toList();
     return actionTiles;
   }
@@ -340,22 +340,14 @@ class PinnedMessagesController extends State<PinnedMessages>
     Event event,
     TapDownDetails tapDownDetails,
   ) {
-    final screenSize = MediaQuery.of(context).size;
     final offset = tapDownDetails.globalPosition;
-    final position = RelativeRect.fromLTRB(
-      offset.dx,
-      offset.dy + ChatViewStyle.paddingBottomContextMenu,
-      screenSize.width - offset.dx,
-      screenSize.height - offset.dy,
-    );
     _handleStateContextMenu();
-    openPopupMenuAction(
-      context,
-      position,
-      _pinnedMessagesActionsTileList(context, event),
-      onClose: () {
-        _handleStateContextMenu();
-      },
+    showTwakeContextMenu(
+      context: context,
+      offset: offset,
+      builder: (context) => _pinnedMessagesActionsTileList(context, event),
+      width: PinnedMessagesStyle.contextMenuWidth,
+      onClose: _handleStateContextMenu,
     );
   }
 

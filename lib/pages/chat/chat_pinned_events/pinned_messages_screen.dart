@@ -98,6 +98,8 @@ class PinnedMessagesScreen extends StatelessWidget {
                               selected: controller.isSelected(event),
                               menuChildren: (context) => controller
                                   .pinnedMessagesActionsList(context, event),
+                              contextMenuWidth:
+                                  PinnedMessagesStyle.contextMenuWidth,
                             );
                           },
                         );

@@ -30,6 +30,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final bool selectMode;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
+  final double? contextMenuWidth;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -47,6 +48,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.onMenuAction,
     this.menuChildren,
     this.focusNode,
+    this.contextMenuWidth,
   });
 
   @override
@@ -75,6 +77,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
               : null,
+          width: contextMenuWidth,
           child: Container(
             alignment:
                 event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
