@@ -99,8 +99,9 @@ class TwakeContextMenuState extends State<TwakeContextMenu> {
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(
-                    vertical: widget.verticalPadding ??
-                        TwakeContextMenuStyle.defaultVerticalPadding),
+                  vertical: widget.verticalPadding ??
+                      TwakeContextMenuStyle.defaultVerticalPadding,
+                ),
                 children: children
                     .map(
                       (e) => _GrowingWidget(
