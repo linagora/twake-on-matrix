@@ -270,8 +270,10 @@ class MatrixState extends State<Matrix>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    html.window.addEventListener('focus', onFocus);
-    html.window.addEventListener('blur', onBlur);
+    if (PlatformInfos.isWeb) {
+      html.window.addEventListener('focus', onFocus);
+      html.window.addEventListener('blur', onBlur);
+    }
     initMatrix();
     initReceiveSharingIntent();
     if (PlatformInfos.isWeb) {
@@ -386,6 +388,9 @@ class MatrixState extends State<Matrix>
                   e.content['sender'] != c.userID,
             )
             .listen(showLocalNotification);
+      });
+      c.onSync.stream.listen((s) {
+        debugPrint('onSync: currentTime: ${DateTime.now()}');
       });
     }
   }
@@ -605,6 +610,7 @@ class MatrixState extends State<Matrix>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('AppLifecycleState = $state');
+    debugPrint('currentTime: ${DateTime.now()}');
     final foreground = state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
@@ -662,8 +668,10 @@ class MatrixState extends State<Matrix>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    html.window.removeEventListener('focus', onFocus);
-    html.window.removeEventListener('blur', onBlur);
+    if (PlatformInfos.isWeb) {
+      html.window.removeEventListener('focus', onFocus);
+      html.window.removeEventListener('blur', onBlur);
+    }
     intentDataStreamSubscription?.cancel();
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
