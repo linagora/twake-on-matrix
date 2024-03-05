@@ -15,8 +15,8 @@ class ChatDetailViewStyle {
       EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0);
 
   // Informations Content
-  static const double toolbarHeightSliverAppBar = 590.0;
-  static const double avatarHeight = 340;
+  static const double toolbarHeightSliverAppBar = 340.0;
+  static const double avatarSize = 96;
   static double chatDetailsPageViewWebBorderRadius = 16.0;
   static double chatDetailsPageViewWebWidth = 640.0;
   static EdgeInsetsDirectional paddingTabBarView =
@@ -30,7 +30,7 @@ class ChatDetailViewStyle {
   static const double switchButtonWidth = 38.0;
 
   static const EdgeInsetsGeometry mainPadding =
-      EdgeInsets.symmetric(horizontal: 20, vertical: 16);
+      EdgeInsets.symmetric(horizontal: 20, vertical: 10);
 
   static BorderRadius borderRadiusButton = const BorderRadius.all(
     Radius.circular(28.0),
