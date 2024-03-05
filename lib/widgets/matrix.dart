@@ -270,10 +270,6 @@ class MatrixState extends State<Matrix>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (PlatformInfos.isWeb) {
-      html.window.addEventListener('focus', onFocus);
-      html.window.addEventListener('blur', onBlur);
-    }
     initMatrix();
     initReceiveSharingIntent();
     if (PlatformInfos.isWeb) {
@@ -599,14 +595,6 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void onFocus(html.Event e) {
-    didChangeAppLifecycleState(AppLifecycleState.resumed);
-  }
-
-  void onBlur(html.Event e) {
-    didChangeAppLifecycleState(AppLifecycleState.paused);
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('AppLifecycleState = $state');
@@ -668,10 +656,6 @@ class MatrixState extends State<Matrix>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (PlatformInfos.isWeb) {
-      html.window.removeEventListener('focus', onFocus);
-      html.window.removeEventListener('blur', onBlur);
-    }
     intentDataStreamSubscription?.cancel();
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
