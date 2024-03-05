@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
