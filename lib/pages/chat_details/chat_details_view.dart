@@ -348,73 +348,72 @@ class _GroupInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) => Builder(
-            builder: (context) {
-              final text = displayName?.getShortcutNameForAvatar() ?? '@';
-              final placeholder = Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: text.avatarColors,
-                    stops: RoundAvatarStyle.defaultGradientStops,
-                  ),
-                ),
-                width: constraints.maxWidth,
-                height: ChatDetailViewStyle.avatarHeight,
-                child: Center(
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: ChatDetailViewStyle.avatarFontSize,
-                      color: AvatarStyle.defaultTextColor(true),
-                      fontFamily: AvatarStyle.fontFamily,
-                      fontWeight: AvatarStyle.fontWeight,
-                    ),
-                  ),
-                ),
-              );
-              if (avatarUri == null) {
-                return placeholder;
-              }
-              return MxcImage(
-                uri: avatarUri,
-                width: constraints.maxWidth,
-                height: ChatDetailViewStyle.avatarHeight,
-                fit: BoxFit.cover,
-                placeholder: (_) => placeholder,
-                cacheKey: avatarUri.toString(),
-                noResize: true,
-              );
-            },
-          ),
-        ),
         Padding(
           padding: ChatDetailViewStyle.mainPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                displayName ?? '',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: LinagoraSysColors.material().onSurface,
+          child: LayoutBuilder(
+            builder: (context, constraints) => Builder(
+              builder: (context) {
+                final text = displayName?.getShortcutNameForAvatar() ?? '@';
+                final placeholder = Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: text.avatarColors,
+                      stops: RoundAvatarStyle.defaultGradientStops,
                     ),
-                maxLines: 2,
-              ),
-              Text(
-                membersCount != null
-                    ? L10n.of(context)!.countMembers(membersCount!)
-                    : '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
+                  ),
+                  width: ChatDetailViewStyle.avatarSize,
+                  height: ChatDetailViewStyle.avatarSize,
+                  child: Center(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: ChatDetailViewStyle.avatarFontSize,
+                        color: AvatarStyle.defaultTextColor(true),
+                        fontFamily: AvatarStyle.fontFamily,
+                        fontWeight: AvatarStyle.fontWeight,
+                      ),
                     ),
-                maxLines: 2,
-              ),
-            ],
+                  ),
+                );
+                if (avatarUri == null) {
+                  return placeholder;
+                }
+                return MxcImage(
+                  uri: avatarUri,
+                  width: ChatDetailViewStyle.avatarSize,
+                  height: ChatDetailViewStyle.avatarSize,
+                  fit: BoxFit.cover,
+                  placeholder: (_) => placeholder,
+                  cacheKey: avatarUri.toString(),
+                  noResize: true,
+                );
+              },
+            ),
           ),
+        ),
+        Column(
+          children: [
+            Text(
+              displayName ?? '',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
+              maxLines: 2,
+            ),
+            Text(
+              membersCount != null
+                  ? L10n.of(context)!.countMembers(membersCount!)
+                  : '',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
+              maxLines: 2,
+            ),
+          ],
         ),
       ],
     );
