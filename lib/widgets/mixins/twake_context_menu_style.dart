@@ -6,7 +6,8 @@ class TwakeContextMenuStyle {
   }
 
   static const double defaultVerticalPadding = 8.0;
-  static const double defaultWidth = 256.0;
   static const double menuElevation = 2.0;
   static const double menuBorderRadius = 4.0;
+  static const double menuMinWidth = 160.0;
+  static const double menuMaxWidth = 306.0;
 }

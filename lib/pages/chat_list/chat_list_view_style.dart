@@ -7,7 +7,6 @@ class ChatListViewStyle {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const double editIconSize = 18.0;
-  static const double contextMenuWidth = 256.0;
 
   static Size preferredSizeAppBar(BuildContext context) =>
       const Size.fromHeight(120);

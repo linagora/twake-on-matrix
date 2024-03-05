@@ -545,7 +545,6 @@ class ChatListController extends State<ChatList>
       offset: offset,
       context: context,
       builder: (context) => _popupMenuActionTile(context, room),
-      width: ChatListViewStyle.contextMenuWidth,
     );
   }
 

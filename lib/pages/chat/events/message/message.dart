@@ -49,7 +49,6 @@ class Message extends StatefulWidget {
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
-  final double? contextMenuWidth;
 
   const Message(
     this.event, {
@@ -72,7 +71,6 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
-    this.contextMenuWidth,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -197,7 +195,6 @@ class _MessageState extends State<Message> {
                 onMenuAction: widget.onMenuAction,
                 menuChildren: widget.menuChildren,
                 focusNode: widget.focusNode,
-                contextMenuWidth: widget.contextMenuWidth,
               ),
             ),
           ];

@@ -24,15 +24,11 @@ class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
   /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double? verticalPadding;
 
-  /// The width for the [TwakeContextMenu]. 320 by default according to Material Design specs.
-  final double? width;
-
   const TwakeContextMenuArea({
     Key? key,
     required this.child,
     this.builder,
     this.verticalPadding,
-    this.width,
   }) : super(key: key);
 
   @override
@@ -47,7 +43,6 @@ class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
         builder: builder!,
         verticalPadding:
             verticalPadding ?? TwakeContextMenuStyle.defaultVerticalPadding,
-        width: width ?? TwakeContextMenuStyle.defaultWidth,
       ),
       child: child,
     );

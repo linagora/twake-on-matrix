@@ -1431,7 +1431,6 @@ class ChatController extends State<Chat>
       offset: offset,
       context: context,
       builder: (context) => _popupMenuActionTile(context, event),
-      width: ChatViewStyle.contextMenuWidth,
       onClose: _handleStateContextMenu,
     );
   }

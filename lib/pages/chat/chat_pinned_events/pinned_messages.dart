@@ -346,7 +346,6 @@ class PinnedMessagesController extends State<PinnedMessages>
       context: context,
       offset: offset,
       builder: (context) => _pinnedMessagesActionsTileList(context, event),
-      width: PinnedMessagesStyle.contextMenuWidth,
       onClose: _handleStateContextMenu,
     );
   }
