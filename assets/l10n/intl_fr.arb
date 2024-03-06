@@ -698,7 +698,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "emoteSettings": "Paramètre des émoticônes",
+  "emoteSettings": "Réglage des émoticônes",
   "@emoteSettings": {
     "type": "text",
     "placeholders": {}
@@ -884,12 +884,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Cacher les évènements supprimés",
+  "hideRedactedEvents": "Masquer les événements supprimés",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
   },
-  "hideUnknownEvents": "Cacher les évènements inconnus",
+  "hideUnknownEvents": "Masquer les événements inconnus",
   "@hideUnknownEvents": {
     "type": "text",
     "placeholders": {}
@@ -1236,7 +1236,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notifications activées pour ce compte",
+  "notificationsEnabledForThisAccount": "Les notifications sont activées pour ce compte",
   "@notificationsEnabledForThisAccount": {
     "type": "text",
     "placeholders": {}
@@ -1479,7 +1479,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "removeAllOtherDevices": "Supprimer tous les autres appareils",
+  "removeAllOtherDevices": "Déconnecter tous les autres appareils",
   "@removeAllOtherDevices": {
     "type": "text",
     "placeholders": {}
@@ -1506,7 +1506,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "renderRichContent": "Afficher les contenus riches des messages",
+  "renderRichContent": "Afficher le contenu enrichi des messages",
   "@renderRichContent": {
     "type": "text",
     "placeholders": {}
@@ -1705,7 +1705,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "settings": "Paramètres",
+  "settings": "Réglages",
   "@settings": {
     "type": "text",
     "placeholders": {}
@@ -2388,7 +2388,7 @@
   "@recoveryKey": {},
   "recoveryKeyLost": "Clé de récupération perdue ?",
   "@recoveryKeyLost": {},
-  "indexedDbErrorLong": "Le stockage des messages n'est malheureusement pas activé par défaut en mode privé.\nVeuillez consulter :\n - about:config\n - Définir dom.indexedDB.privateBrowsing.enabled à « vrai ».\nSinon, il n'est pas possible d'exécuter FluffyChat.",
+  "indexedDbErrorLong": "Le stockage des messages n'est malheureusement pas activé par défaut en mode privé, ce qui empêche FluffyChat de fonctionner.\nPour activer le stockage local et pouvoir utiliser FluffyChat, veuillez :\n - sous Firefox : ouvrir l'adresse \"about:config\" (vous devrez accepter le message d'alerte), puis rechercher la clef \"dom.indexedDB.privateBrowsing.enabled\", et la définir à \"true\".",
   "@indexedDbErrorLong": {},
   "saveKeyManuallyDescription": "Enregistrer cette clé manuellement en déclenchant la boîte de dialogue de partage du système ou le presse-papiers.",
   "@saveKeyManuallyDescription": {},
@@ -2428,7 +2428,7 @@
   "@updateAvailable": {},
   "updateNow": "Lancer la mise à jour en arrière-plan",
   "@updateNow": {},
-  "noKeyForThisMessage": "Cela peut se produire si le message a été envoyé avant que vous ne vous soyez connecté à votre compte sur cet appareil.\n\nIl est également possible que l'expéditeur ait bloqué votre appareil ou qu'un problème de connexion Internet se soit produit.\n\nÊtes-vous capable de lire le message sur une autre session ? Vous pouvez alors transférer le message à partir de celle-ci ! Allez dans Paramètres > Appareils et assurez-vous que vos appareils se sont vérifiés mutuellement. Lorsque vous ouvrirez le salon la fois suivante et que les deux sessions seront au premier plan, les clés seront transmises automatiquement.\n\nVous ne voulez pas perdre les clés en vous déconnectant ou en changeant d'appareil ? Assurez-vous que vous avez activé la sauvegarde de la discussion dans les paramètres.",
+  "noKeyForThisMessage": "Cela peut se produire si le message a été envoyé avant que vous ne vous soyez connecté à votre compte sur cet appareil.\n\nIl est également possible que l'expéditeur ait bloqué votre appareil ou qu'un problème de connexion Internet se soit produit.\n\nÊtes-vous capable de lire le message dans une autre session ? Vous pouvez alors transférer le message à partir de celle-ci ! Allez dans Réglages > Appareils et assurez-vous que vos appareils ont été vérifiés mutuellement. Lorsque vous ouvrirez le salon la fois suivante et que les deux sessions seront au premier plan, les clés seront transmises automatiquement.\n\nVous ne voulez pas perdre les clés en vous déconnectant ou en changeant d'appareil ? Assurez-vous que vous avez activé la sauvegarde des discussions dans les Réglages.",
   "@noKeyForThisMessage": {},
   "enterRoom": "Entrer dans le salon",
   "@enterRoom": {},
@@ -2530,7 +2530,7 @@
   "@startFirstChat": {},
   "newSpaceDescription": "Les espaces vous permettent de consolider vos discussions et de construire des communautés privées ou publiques.",
   "@newSpaceDescription": {},
-  "disableEncryptionWarning": "Pour des raisons de sécurité, vous ne pouvez pas désactiver le chiffrement dans une discussion s'il a été activé avant.",
+  "disableEncryptionWarning": "Pour des raisons de sécurité, vous ne pouvez pas désactiver le chiffrement dans une discussion s'il a été activé précédemment.",
   "@disableEncryptionWarning": {},
   "letsStart": "C'est parti",
   "@letsStart": {},
@@ -2580,18 +2580,18 @@
       "hour": {}
     }
   },
-  "cannotEnableKeyBackup": "Impossible d'activer la récupération du salon. Veuillez ressayer dans les paramètres.",
+  "cannotEnableKeyBackup": "Impossible d'activer la sauvegarde du Salon. Veuillez vous rendre dans les Réglages pour réessayer.",
   "@cannotEnableKeyBackup": {
     "type": "text",
     "placeholders": {}
   },
-  "inactive": "Non activé",
+  "inactive": "Compte non activé",
   "@inactive": {},
   "noMoreResult": "Plus de résultat !",
   "@noMoreResult": {},
   "youCreatedGroupChat": "Vous avez créé une discussion de groupe",
   "@youCreatedGroupChat": {},
-  "searchForPeopleAndChannels": "Rechercher des personnes ou salons",
+  "searchForPeopleAndChannels": "Personnes ou Salons",
   "@searchForPeopleAndChannels": {},
   "noResultForKeyword": "Pas de résultat pour \"{keyword}\"",
   "@noResultForKeyword": {
@@ -2625,7 +2625,7 @@
   "@previous": {},
   "owner": "Propriétaire",
   "@owner": {},
-  "active": "Activé",
+  "active": "Compte activé",
   "@active": {},
   "more": "Plus",
   "@more": {},
@@ -2703,7 +2703,7 @@
   "@copyMessageText": {},
   "explainStoragePermission": "Twake Chat a besoin d'accéder à votre espace de stockage pour prévisualiser le fichier",
   "@explainStoragePermission": {},
-  "explainGoToStorageSetting": "Twake Chat a besoin d'accéder à votre espace de stockage pour prévisualiser les fichiers, allez dans les paramètres pour autoriser cette permission",
+  "explainGoToStorageSetting": "Twake Chat a besoin d'accéder à votre espace de stockage pour prévisualiser les fichiers, allez dans les Réglages pour autoriser cette permission",
   "@explainGoToStorageSetting": {},
   "noImagesFound": "Pas d'image trouvée",
   "@noImagesFound": {},
@@ -2884,7 +2884,7 @@
   "@cut": {},
   "continueProcess": "Continuer",
   "@continueProcess": {},
-  "tapToAllowAccessToYourCamera": "Vous pouvez activer l'accès à la caméra dans les paramètres de l'application pour passer des appels vidéo sur",
+  "tapToAllowAccessToYourCamera": "Vous pouvez activer l'accès à la caméra dans les Réglages de l'application pour passer des appels vidéo sur",
   "@tapToAllowAccessToYourCamera": {},
   "unmute": "Réactiver le son",
   "@unmute": {},
@@ -2951,7 +2951,7 @@
   "@noResults": {},
   "addAnotherAccount": "Ajouter un autre compte",
   "@addAnotherAccount": {},
-  "accountSettings": "Paramètres du compte",
+  "accountSettings": "Réglages du compte",
   "@accountSettings": {},
   "isSingleAccountOnHomeserver": "Nous ne prenons pas encore en charge plusieurs comptes sur un seul serveur",
   "@isSingleAccountOnHomeserver": {},
