@@ -80,7 +80,8 @@ class SendingImageInfoWidget extends StatelessWidget {
                     color: LinagoraRefColors.material().primary[100],
                   ),
                   onPressed: () {
-                    mediaCancelToken?.cancel("Upload cancel by user");
+                    mediaCancelToken?.cancel();
+                    event.remove();
                   },
                 ),
               ],

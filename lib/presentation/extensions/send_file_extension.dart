@@ -224,7 +224,6 @@ extension SendFileExtension on Room {
           messageSendingStatusKey,
           EventStatus.error.intValue,
         );
-        // TODO: if (e is DioException && CancelToken.isCancel(e)) {}
         Logs().e('Error: $e');
         Logs().e('Send File into room failed. Try again...');
         return null;

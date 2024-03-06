@@ -263,7 +263,6 @@ class _MessageImageBuilder extends StatelessWidget {
     this.mediaCancelToken,
   });
 
-
   @override
   Widget build(BuildContext context) {
     final matrixFile = event.getMatrixFile();

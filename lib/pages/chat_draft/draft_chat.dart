@@ -301,8 +301,6 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
-  final CancelToken mediaCancelToken = CancelToken();
-
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
@@ -317,11 +315,9 @@ class DraftChatController extends State<DraftChat>
       ),
       onSendTap: () => sendMedia(
         imagePickerController,
-        cancelToken: mediaCancelToken,
       ),
       onCameraPicked: (_) => sendMedia(
         imagePickerController,
-        cancelToken: mediaCancelToken,
       ),
       typeAheadKey: _draftChatMediaPickerTypeAheadKey,
     );
