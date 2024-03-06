@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
@@ -382,14 +382,11 @@ class _GroupInformation extends StatelessWidget {
                 if (avatarUri == null) {
                   return placeholder;
                 }
-                return MxcImage(
-                  uri: avatarUri,
-                  width: ChatDetailViewStyle.avatarSize,
-                  height: ChatDetailViewStyle.avatarSize,
-                  fit: BoxFit.cover,
-                  placeholder: (_) => placeholder,
-                  cacheKey: avatarUri.toString(),
-                  noResize: true,
+                return Avatar(
+                  mxContent: avatarUri,
+                  name: displayName,
+                  size: ChatDetailViewStyle.avatarSize,
+                  fontSize: ChatDetailViewStyle.avatarFontSize,
                 );
               },
             ),
