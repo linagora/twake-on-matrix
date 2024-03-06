@@ -21,7 +21,10 @@ mixin PlayVideoActionMixin {
                   path: uriOrFilePath,
                   event: event,
                 )
-              : VideoViewerDesktopTheme(path: uriOrFilePath),
+              : VideoViewerDesktopTheme(
+                  path: uriOrFilePath,
+                  event: event,
+                ),
         );
       },
     );
