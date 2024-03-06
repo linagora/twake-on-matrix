@@ -232,7 +232,7 @@ msix_config:
 
 dependency_overrides:
   # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
-  ffi: ^2.0.0
+  ffi: 2.1.0
   flutter_svg: ^2.0.4
   # fake secure storage plugin for Windows
   # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161

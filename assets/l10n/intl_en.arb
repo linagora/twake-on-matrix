@@ -2792,6 +2792,8 @@
   "@downloadImageSuccess": {},
   "downloadImageError": "Error saving image",
   "@downloadImageError": {},
+  "downloadFileError": "Error saving file",
+  "@downloadFileError": {},
   "downloadFileInWeb": "File saved to {directory}",
   "@downloadFileInWeb": {
     "placeholders": {

@@ -20,10 +20,15 @@ import 'matrix_file_extension.dart';
 extension LocalizedBody on Event {
   Future<void> saveFile(BuildContext context) async {
     TwakeSnackBar.show(context, L10n.of(context)!.downloadStarted);
-
-    final matrixFile = await downloadAndDecryptAttachment();
-
-    return await matrixFile.downloadFile(context);
+    try {
+      downloadAndDecryptAttachment()
+          .then((matrixFile) => matrixFile.downloadFile(context));
+    } catch (e) {
+      TwakeSnackBar.show(context, L10n.of(context)!.downloadImageError);
+      Logs().e(
+        'saveFile(): failed to save file',
+      );
+    }
   }
 
   String get filename {
