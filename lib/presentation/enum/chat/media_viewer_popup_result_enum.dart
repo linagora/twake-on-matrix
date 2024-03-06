@@ -1,0 +1,3 @@
+enum MediaViewerPopupResultEnum {
+  closeRightColumnFlag,
+}
