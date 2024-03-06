@@ -392,25 +392,31 @@ class _GroupInformation extends StatelessWidget {
             ),
           ),
         ),
-        Column(
-          children: [
-            Text(
-              displayName ?? '',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
-              maxLines: 2,
-            ),
-            Text(
-              membersCount != null
-                  ? L10n.of(context)!.countMembers(membersCount!)
-                  : '',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: LinagoraRefColors.material().tertiary[30],
-                  ),
-              maxLines: 2,
-            ),
-          ],
+        Padding(
+          padding: ChatDetailViewStyle.chatInformationPadding,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                displayName ?? '',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: LinagoraSysColors.material().onSurface,
+                    ),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                membersCount != null
+                    ? L10n.of(context)!.countMembers(membersCount!)
+                    : '',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ],
     );
