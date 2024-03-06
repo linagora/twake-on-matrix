@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
@@ -1693,6 +1694,40 @@ class ChatController extends State<Chat>
     });
   }
 
+  void _listenRoomUpdateEvent() {
+    if (room == null) return;
+    client.onEvent.stream.listen((eventUpdate) {
+      Logs().d(
+        'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
+      );
+      if (eventUpdate.isPinnedEventsHasChanged) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          eventUpdate.updatePinnedMessage(
+            onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+          );
+        });
+      }
+    });
+  }
+
+  void _handlePinnedMessageCallBack({
+    required bool isInitial,
+    required bool isUnpin,
+    String? eventId,
+  }) {
+    if (roomId == null) return;
+    Logs().d(
+      'Chat::_handlePinnedMessageCallBack():: eventId - $eventId',
+    );
+    _getPinnedEvents(
+      client: client,
+      roomId: roomId!,
+      isInitial: isInitial,
+      isUnpin: isUnpin,
+      eventId: eventId,
+    );
+  }
+
   @override
   void initState() {
     _initializePinnedEvents();
@@ -1704,11 +1739,12 @@ class ChatController extends State<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       if (room == null) {
         return context.go("/error");
       }
       _handleReceivedShareFiles();
+      _listenRoomUpdateEvent();
     });
   }
 
