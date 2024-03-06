@@ -29,5 +29,6 @@ class ChatDetailsMediaStyle {
             color: Theme.of(context).colorScheme.onPrimary,
           );
 
-  static const double durationPosition = 10;
+  static double durationPaddingAll(BuildContext context) =>
+      responsive.isDesktop(context) ? 4 : 10;
 }
