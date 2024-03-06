@@ -12,14 +12,12 @@ class ImageViewer extends StatefulWidget {
   final Event? event;
   final Uint8List? imageData;
   final String? filePath;
-  final VoidCallback? onCloseRightColumn;
 
   const ImageViewer({
     Key? key,
     this.event,
     this.imageData,
     this.filePath,
-    this.onCloseRightColumn,
   }) : super(key: key);
 
   @override

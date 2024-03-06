@@ -68,7 +68,7 @@ class ProfileInfoController extends State<ProfileInfo> {
         builder: (context) {
           return ProfileInfoShared(
             roomId: widget.roomId!,
-            onBack: widget.onBack,
+            closeRightColumn: widget.onBack,
           );
         },
       ),

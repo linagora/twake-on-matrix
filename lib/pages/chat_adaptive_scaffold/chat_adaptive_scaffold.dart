@@ -79,7 +79,7 @@ class _RightColumnNavigator extends StatelessWidget {
         );
       case RightColumnType.groupChatDetails:
         return ChatDetailsNavigator(
-          onCloseRightColumn: controller.hideRightColumn,
+          closeRightColumn: controller.hideRightColumn,
           roomId: roomId,
           isInStack: isInStack,
         );
