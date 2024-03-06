@@ -87,10 +87,12 @@ class MediaViewerAppBarController extends State<MediaViewerAppBar> {
   }
 
   void backToChatScreenInWeb() {
-    Navigator.of(context).pop();
     if (responsiveUtils.isTablet(context) ||
         responsiveUtils.isMobile(context)) {
-      widget.onCloseRightColumn?.call();
+      Navigator.of(context)
+          .pop(MediaViewerPopupResultEnum.closeRightColumnFlag);
+    } else {
+      Navigator.of(context).pop();
     }
   }
 
