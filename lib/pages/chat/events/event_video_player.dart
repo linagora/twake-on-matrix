@@ -1,10 +1,13 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
+import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +41,8 @@ class EventVideoPlayer extends StatelessWidget {
 
   final bool showPlayButton;
 
+  final VoidCallback? onPop;
+
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   const EventVideoPlayer(
@@ -50,8 +55,8 @@ class EventVideoPlayer extends StatelessWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
-    this.onCloseRightColumn,
     this.showPlayButton = true,
+    this.onPop,
   }) : super(key: key);
 
   @override
@@ -68,6 +73,7 @@ class EventVideoPlayer extends StatelessWidget {
       child: Material(
         color: Colors.black,
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           onTap: () => _onTapVideo(context),
           child: SizedBox(
             width: MessageContentStyle.imageBubbleWidth(imageWidth),
@@ -88,6 +94,7 @@ class EventVideoPlayer extends StatelessWidget {
                       thumbnailCacheMap: thumbnailCacheMap,
                       noResizeThumbnail: noResizeThumbnail,
                       thumbnailOnly: true,
+                      isPreview: false,
                     ),
                   ),
                 if (showPlayButton)
@@ -96,8 +103,8 @@ class EventVideoPlayer extends StatelessWidget {
                   ),
                 if (showDuration)
                   Positioned(
-                    bottom: ChatDetailsMediaStyle.durationPosition,
-                    right: ChatDetailsMediaStyle.durationPosition,
+                    bottom: ChatDetailsMediaStyle.durationPaddingAll(context),
+                    right: ChatDetailsMediaStyle.durationPaddingAll(context),
                     child: Container(
                       padding: ChatDetailsMediaStyle.durationPadding,
                       decoration: ChatDetailsMediaStyle.durationBoxDecoration(
@@ -118,18 +125,23 @@ class EventVideoPlayer extends StatelessWidget {
   }
 
   Future<void> _onTapVideo(BuildContext context) async {
-    await Navigator.of(
+    final result = await Navigator.of(
       context,
       rootNavigator: PlatformInfos.isWeb,
     ).push(
       HeroPageRoute(
         builder: (context) {
           return InteractiveViewerGallery(
-            itemBuilder: DownloadVideoWidget(event: event),
+            itemBuilder: DownloadVideoWidget(
+              event: event,
+            ),
           );
         },
       ),
     );
+    if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
+      onPop?.call();
+    }
   }
 }
 

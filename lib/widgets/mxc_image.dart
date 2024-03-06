@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -40,7 +41,7 @@ class MxcImage extends StatefulWidget {
   /// Cache for screen locally, if null, use global cache
   final Map<EventId, ImageData>? cacheMap;
 
-  final VoidCallback? onCloseRightColumn;
+  final VoidCallback? closeRightColumn;
 
   const MxcImage({
     this.uri,
@@ -63,7 +64,7 @@ class MxcImage extends StatefulWidget {
     this.isPreview = false,
     this.cacheMap,
     this.noResize = false,
-    this.onCloseRightColumn,
+    this.closeRightColumn,
     Key? key,
   }) : super(key: key);
 
@@ -209,18 +210,21 @@ class _MxcImageState extends State<MxcImage>
   void _onTap(BuildContext context) async {
     if (widget.onTapPreview != null) {
       widget.onTapPreview!();
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      final result =
+          await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
               itemBuilder: ImageViewer(
                 event: widget.event!,
-                onCloseRightColumn: widget.onCloseRightColumn,
               ),
             );
           },
         ),
       );
+      if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
+        widget.closeRightColumn?.call();
+      }
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
       return;
@@ -261,6 +265,7 @@ class _MxcImageState extends State<MxcImage>
     if (widget.isPreview) {
       return Material(
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           borderRadius:
               widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
           onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
