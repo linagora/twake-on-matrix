@@ -188,6 +188,7 @@ class ChatEventList extends StatelessWidget {
                                 event.originServerTs,
                               );
                             },
+                            mediaCancelToken: controller.mediaCancelToken,
                           )
                         : const SizedBox(),
                   );

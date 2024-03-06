@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
@@ -1279,6 +1280,8 @@ class ChatController extends State<Chat>
     }
   }
 
+  final CancelToken mediaCancelToken = CancelToken();
+
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
@@ -1298,10 +1301,15 @@ class ChatController extends State<Chat>
           imagePickerController,
           room: room,
           caption: _captionsController.text,
+          cancelToken: mediaCancelToken,
         );
         _captionsController.clear();
       },
-      onCameraPicked: (_) => sendMedia(imagePickerController, room: room),
+      onCameraPicked: (_) => sendMedia(
+        imagePickerController,
+        room: room,
+        cancelToken: mediaCancelToken,
+      ),
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
       typeAheadKey: _chatMediaPickerTypeAheadKey,

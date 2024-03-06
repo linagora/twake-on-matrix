@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
@@ -15,6 +16,7 @@ class UploadContentInteractor {
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
     required AssetEntity entity,
+    CancelToken? cancelToken,
   }) async* {
     try {
       yield Right(UploadContentLoading());
@@ -35,7 +37,7 @@ class UploadContentInteractor {
           );
         }
 
-        final response = await mediaApi.uploadFile(fileInfo: contentFileInfo);
+        final response = await mediaApi.uploadFile(fileInfo: contentFileInfo, cancelToken: cancelToken);
 
         if (response.contentUri != null) {
           final contentUri = Uri.parse(response.contentUri!);

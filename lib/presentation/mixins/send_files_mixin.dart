@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
@@ -15,6 +16,7 @@ mixin SendFilesMixin {
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
+    CancelToken? cancelToken,
   }) async {
     if (room == null) {
       return;
@@ -24,6 +26,7 @@ mixin SendFilesMixin {
     await sendMediaInteractor.execute(
       room: room,
       caption: caption,
+      cancelToken: cancelToken,
       entities: selectedAssets.map<FileAssetEntity>((entity) {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),
@@ -34,6 +37,7 @@ mixin SendFilesMixin {
     BuildContext context, {
     Room? room,
     List<FileInfo>? fileInfos,
+    CancelToken? cancelToken,
   }) async {
     if (room == null) {}
     final sendFileInteractor = getIt.get<SendFileInteractor>();
@@ -54,7 +58,11 @@ mixin SendFilesMixin {
 
     if (fileInfos == null || fileInfos.isEmpty == true) return;
 
-    sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
+    sendFileInteractor.execute(
+      room: room!,
+      fileInfos: fileInfos,
+      cancelToken: cancelToken,
+    );
   }
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {
@@ -71,12 +79,17 @@ mixin SendFilesMixin {
     required BuildContext context,
     Room? room,
     required PickerType type,
+    CancelToken? cancelToken,
   }) async {
     switch (type) {
       case PickerType.gallery:
         break;
       case PickerType.documents:
-        sendFileAction(context, room: room);
+        sendFileAction(
+          context,
+          room: room,
+          cancelToken: cancelToken,
+        );
         break;
       case PickerType.location:
         break;

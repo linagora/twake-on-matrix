@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
@@ -11,6 +12,7 @@ class SendFileInteractor {
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
+    CancelToken? cancelToken,
     Map<String, dynamic>? extraContent,
   }) async {
     try {
@@ -25,6 +27,7 @@ class SendFileInteractor {
           editEventId: editEventId,
           inReplyTo: inReplyTo,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
+          cancelToken: cancelToken,
         );
       }
     } catch (error) {

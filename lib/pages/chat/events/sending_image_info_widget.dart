@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
@@ -18,7 +19,10 @@ class SendingImageInfoWidget extends StatelessWidget {
     required this.event,
     required this.displayImageInfo,
     this.onTapPreview,
+    this.mediaCancelToken,
   });
+
+  final CancelToken? mediaCancelToken;
 
   final MatrixImageFile matrixFile;
 
@@ -70,9 +74,14 @@ class SendingImageInfoWidget extends StatelessWidget {
                   strokeWidth: 2,
                   color: LinagoraRefColors.material().primary[100],
                 ),
-                Icon(
-                  Icons.close,
-                  color: LinagoraRefColors.material().primary[100],
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: LinagoraRefColors.material().primary[100],
+                  ),
+                  onPressed: () {
+                    mediaCancelToken?.cancel("Upload cancel by user");
+                  },
                 ),
               ],
             ],

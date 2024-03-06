@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
@@ -7,6 +8,7 @@ class SendMediaInteractor {
     required Room room,
     required List<FileAssetEntity> entities,
     String? caption,
+    CancelToken? cancelToken,
   }) async {
     try {
       final txIdMapToFileInfo = await room.sendPlaceholdersForImagePickerFiles(
@@ -36,6 +38,7 @@ class SendMediaInteractor {
           fakeImageEvent: fakeSendingFileInfo.fakeImageEvent,
           shrinkImageMaxDimension: 1600,
           txid: txId,
+          cancelToken: cancelToken,
         );
       }
       if (messageID != null && msgEventContent != null) {

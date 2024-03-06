@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -116,10 +117,15 @@ class DraftChatController extends State<DraftChat>
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
+    CancelToken? cancelToken,
   }) {
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        super.sendMedia(imagePickerController, room: newRoom);
+        super.sendMedia(
+          imagePickerController,
+          room: newRoom,
+          cancelToken: cancelToken,
+        );
       },
     );
   }
@@ -295,6 +301,8 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
+  final CancelToken mediaCancelToken = CancelToken();
+
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
@@ -307,8 +315,14 @@ class DraftChatController extends State<DraftChat>
         type: action,
         context: context,
       ),
-      onSendTap: () => sendMedia(imagePickerController),
-      onCameraPicked: (_) => sendMedia(imagePickerController),
+      onSendTap: () => sendMedia(
+        imagePickerController,
+        cancelToken: mediaCancelToken,
+      ),
+      onCameraPicked: (_) => sendMedia(
+        imagePickerController,
+        cancelToken: mediaCancelToken,
+      ),
       typeAheadKey: _draftChatMediaPickerTypeAheadKey,
     );
   }

@@ -17,7 +17,10 @@ class MediaAPI {
 
   MediaAPI();
 
-  Future<UploadFileResponse> uploadFile({required FileInfo fileInfo}) async {
+  Future<UploadFileResponse> uploadFile({
+    required FileInfo fileInfo,
+    CancelToken? cancelToken,
+  }) async {
     final dioHeaders = _client.getHeaders();
     dioHeaders[HttpHeaders.contentLengthHeader] =
         await File(fileInfo.filePath).length();
@@ -31,6 +34,7 @@ class MediaAPI {
             'fileName': fileInfo.fileName,
           },
           options: Options(headers: dioHeaders),
+          cancelToken: cancelToken,
         )
         .onError((error, stackTrace) => throw Exception(error));
 

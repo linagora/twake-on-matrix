@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
@@ -37,6 +38,7 @@ class MessageContent extends StatelessWidget
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final bool ownMessage;
+  final CancelToken? mediaCancelToken;
 
   const MessageContent(
     this.event, {
@@ -47,6 +49,7 @@ class MessageContent extends StatelessWidget
     this.onTapPreview,
     this.onTapSelectMode,
     required this.ownMessage,
+    this.mediaCancelToken,
   }) : super(key: key);
 
   @override
@@ -63,6 +66,7 @@ class MessageContent extends StatelessWidget
               event: event,
               onTapPreview: onTapPreview,
               onTapSelectMode: onTapSelectMode,
+              mediaCancelToken: mediaCancelToken,
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
@@ -250,11 +254,15 @@ class _MessageImageBuilder extends StatelessWidget {
 
   final void Function()? onTapSelectMode;
 
+  final CancelToken? mediaCancelToken;
+
   const _MessageImageBuilder({
     required this.event,
     this.onTapPreview,
     this.onTapSelectMode,
+    this.mediaCancelToken,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +283,7 @@ class _MessageImageBuilder extends StatelessWidget {
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
+        mediaCancelToken: mediaCancelToken,
       );
     }
     displayImageInfo ??= DisplayImageInfo(
