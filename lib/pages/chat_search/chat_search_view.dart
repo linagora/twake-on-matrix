@@ -15,7 +15,6 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
@@ -38,32 +37,24 @@ class ChatSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (isPop) async {
-        if (PlatformInfos.isAndroid) {
-          controller.onBack();
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
+      appBar: AppBar(
+        toolbarHeight: AppConfig.toolbarHeight(context),
         backgroundColor: LinagoraSysColors.material().onPrimary,
-        appBar: AppBar(
-          toolbarHeight: AppConfig.toolbarHeight(context),
-          backgroundColor: LinagoraSysColors.material().onPrimary,
-          automaticallyImplyLeading: false,
-          title: _ChatSearchAppBar(controller),
-        ),
-        body: controller.sameTypeEventsBuilderController != null
-            ? _TimelineSearchView(
-                controller: controller,
-                sameTypeEventsBuilderController:
-                    controller.sameTypeEventsBuilderController!,
-              )
-            : _ServerSearchView(
-                controller: controller,
-                serverSearchController: controller.serverSearchController,
-              ),
+        automaticallyImplyLeading: false,
+        title: _ChatSearchAppBar(controller),
       ),
+      body: controller.sameTypeEventsBuilderController != null
+          ? _TimelineSearchView(
+              controller: controller,
+              sameTypeEventsBuilderController:
+                  controller.sameTypeEventsBuilderController!,
+            )
+          : _ServerSearchView(
+              controller: controller,
+              serverSearchController: controller.serverSearchController,
+            ),
     );
   }
 }
