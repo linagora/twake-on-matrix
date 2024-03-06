@@ -19,6 +19,7 @@ class ImageBubble extends StatelessWidget {
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
+  final bool isPreview;
   final Uint8List? imageData;
   final Duration animationDuration;
 
@@ -42,6 +43,7 @@ class ImageBubble extends StatelessWidget {
     this.thumbnailCacheKey,
     this.thumbnailCacheMap,
     this.noResizeThumbnail = false,
+    this.isPreview = true,
     Key? key,
   }) : super(key: key);
 
@@ -122,7 +124,7 @@ class ImageBubble extends StatelessWidget {
                 onTapPreview: onTapPreview,
                 onTapSelectMode: onTapSelectMode,
                 imageData: imageData,
-                isPreview: true,
+                isPreview: isPreview,
                 animationDuration: animationDuration,
                 cacheKey: thumbnailCacheKey,
                 cacheMap: thumbnailCacheMap,
