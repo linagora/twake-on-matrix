@@ -14,12 +14,12 @@ import 'package:matrix/matrix.dart';
 
 class ProfileInfoShared extends StatefulWidget {
   final String roomId;
-  final VoidCallback? onBack;
+  final VoidCallback? closeRightColumn;
 
   const ProfileInfoShared({
     super.key,
     required this.roomId,
-    this.onBack,
+    this.closeRightColumn,
   });
 
   @override
@@ -71,7 +71,7 @@ class ProfileInfoSharedController extends State<ProfileInfoShared>
                         ),
                         controller: mediaListController!,
                         handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
-                        onCloseRightColumn: widget.onBack,
+                        closeRightColumn: widget.closeRightColumn,
                       ),
               );
             case ChatDetailsPage.links:
