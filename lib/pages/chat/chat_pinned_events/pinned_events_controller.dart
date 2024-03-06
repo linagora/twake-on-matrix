@@ -97,6 +97,7 @@ class PinnedEventsController {
     );
     if (index < 0) {
       currentPinnedEventNotifier.value = pinnedEvents.first;
+      return 0;
     }
     return index;
   }
