@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_view.dart';
+import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -13,14 +14,12 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 class MediaViewerAppBar extends StatefulWidget {
   const MediaViewerAppBar({
     Key? key,
-    required this.showAppbarPreviewNotifier,
-    this.onCloseRightColumn,
+    this.showAppbarPreviewNotifier,
     this.event,
   }) : super(key: key);
 
-  final ValueNotifier<bool> showAppbarPreviewNotifier;
+  final ValueNotifier<bool>? showAppbarPreviewNotifier;
   final Event? event;
-  final VoidCallback? onCloseRightColumn;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -31,14 +30,20 @@ class MediaViewerAppBar extends StatefulWidget {
 class MediaViewerAppBarController extends State<MediaViewerAppBar> {
   final MenuController menuController = MenuController();
 
+  ValueNotifier<bool>? showAppbarPreview;
+
   final responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
+  @override
+  void initState() {
+    super.initState();
+    showAppbarPreview = widget.showAppbarPreviewNotifier;
+  }
 
   @override
   void dispose() {
     super.dispose();
-    showAppbarPreview.dispose();
+    showAppbarPreview?.dispose();
   }
 
   void toggleShowMoreActions() {
@@ -47,10 +52,6 @@ class MediaViewerAppBarController extends State<MediaViewerAppBar> {
     } else {
       menuController.open();
     }
-  }
-
-  void toggleAppbarPreview() {
-    showAppbarPreview.value = !showAppbarPreview.value;
   }
 
   /// Forward this image to another room.
@@ -106,6 +107,10 @@ class MediaViewerAppBarController extends State<MediaViewerAppBar> {
     Navigator.of(context).popUntil(
       (Route route) => route.settings.name == '/rooms/room',
     );
+  }
+
+  void onClose() {
+    Navigator.of(context).pop();
   }
 
   void saveFileAction() => widget.event?.saveFile(context);

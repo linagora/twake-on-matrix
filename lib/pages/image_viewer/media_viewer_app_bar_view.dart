@@ -17,7 +17,7 @@ class MediaViewerAppbarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.widget.showAppbarPreviewNotifier,
+      valueListenable: controller.showAppbarPreview ?? ValueNotifier(true),
       builder: (context, showAppbarPreview, child) {
         return AnimatedOpacity(
           opacity: showAppbarPreview ? 1 : 0,
@@ -28,6 +28,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                 ? ImageViewerStyle.paddingTopAppBar
                 : EdgeInsets.zero,
             height: ImageViewerStyle.appBarHeight,
+            width: MediaQuery.sizeOf(context).width,
             color: MediaViewewAppbarStyle.appBarBackgroundColor,
             child: showAppbarPreview
                 ? Row(
@@ -40,9 +41,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                               : Icons.close,
                           color: LinagoraSysColors.material().onPrimary,
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: controller.onClose,
                         color: LinagoraSysColors.material().onPrimary,
                         tooltip: L10n.of(context)!.back,
                       ),
