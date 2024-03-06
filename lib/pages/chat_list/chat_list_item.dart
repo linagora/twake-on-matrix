@@ -25,7 +25,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final Widget? checkBoxWidget;
   final void Function()? onTap;
   final void Function()? onTapAvatar;
-  final void Function()? onSecondaryTap;
+  final void Function(TapDownDetails)? onSecondaryTapDown;
   final void Function()? onLongPress;
 
   const ChatListItem(
@@ -36,7 +36,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.isEnableSelectMode = false,
     this.onTap,
     this.onTapAvatar,
-    this.onSecondaryTap,
+    this.onSecondaryTapDown,
     this.onLongPress,
     Key? key,
   }) : super(key: key);
@@ -102,7 +102,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 : Colors.transparent,
         child: InkWell(
           onTap: () => clickAction(context),
-          onSecondaryTap: onSecondaryTap,
+          onSecondaryTapDown: onSecondaryTapDown,
           onLongPress: onLongPress,
           child: Container(
             height: ChatListItemStyle.chatItemHeight,
