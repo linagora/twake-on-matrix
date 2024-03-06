@@ -14,6 +14,7 @@ class PopupMenuWidgetStyle {
   static TextStyle? defaultItemTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: Theme.of(context).colorScheme.onSurface,
+          overflow: TextOverflow.ellipsis,
         );
   }
 
