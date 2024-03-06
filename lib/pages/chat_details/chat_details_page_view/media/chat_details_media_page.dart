@@ -17,14 +17,14 @@ class ChatDetailsMediaPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
   final Map<EventId, ImageData>? cacheMap;
   final DownloadVideoEventCallback handleDownloadVideoEvent;
-  final VoidCallback? onCloseRightColumn;
+  final VoidCallback? closeRightColumn;
 
   const ChatDetailsMediaPage({
     Key? key,
     required this.controller,
     required this.handleDownloadVideoEvent,
     this.cacheMap,
-    this.onCloseRightColumn,
+    this.closeRightColumn,
   }) : super(key: key);
 
   @override
@@ -47,12 +47,13 @@ class ChatDetailsMediaPage extends StatelessWidget {
                   ? _ImageItem(
                       event: events[index],
                       cacheMap: cacheMap,
-                      onCloseRightColumn: onCloseRightColumn,
+                      closeRightColumn: closeRightColumn,
                     )
                   : _VideoItem(
                       event: events[index],
                       handleDownloadVideoEvent: handleDownloadVideoEvent,
                       thumbnailCacheMap: cacheMap,
+                      closeRightColumn: closeRightColumn,
                     ),
         );
       },
@@ -63,12 +64,12 @@ class ChatDetailsMediaPage extends StatelessWidget {
 class _ImageItem extends StatelessWidget {
   final Event event;
   final Map<EventId, ImageData>? cacheMap;
-  final VoidCallback? onCloseRightColumn;
+  final VoidCallback? closeRightColumn;
 
   const _ImageItem({
     required this.event,
     this.cacheMap,
-    this.onCloseRightColumn,
+    this.closeRightColumn,
   });
 
   @override
@@ -84,7 +85,7 @@ class _ImageItem extends StatelessWidget {
       ),
       cacheKey: event.eventId,
       cacheMap: cacheMap,
-      onCloseRightColumn: onCloseRightColumn,
+      closeRightColumn: closeRightColumn,
     );
   }
 }
@@ -93,11 +94,13 @@ class _VideoItem extends StatelessWidget {
   final Event event;
   final DownloadVideoEventCallback handleDownloadVideoEvent;
   final Map<EventId, ImageData>? thumbnailCacheMap;
+  final VoidCallback? closeRightColumn;
 
   const _VideoItem({
     required this.event,
     required this.handleDownloadVideoEvent,
     this.thumbnailCacheMap,
+    this.closeRightColumn,
   });
 
   static final responsiveUtil = getIt.get<ResponsiveUtils>();
@@ -111,7 +114,7 @@ class _VideoItem extends StatelessWidget {
       thumbnailCacheKey: event.eventId,
       thumbnailCacheMap: thumbnailCacheMap,
       noResizeThumbnail: true,
-      onCloseRightColumn: onCloseRightColumn,
+      onPop: closeRightColumn,
       showPlayButton: !responsiveUtil.isDesktop(context),
     );
   }

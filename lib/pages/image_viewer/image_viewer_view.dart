@@ -80,7 +80,6 @@ class ImageViewerView extends StatelessWidget {
               MediaViewerAppBar(
                 showAppbarPreviewNotifier: controller.showAppbarPreview,
                 event: controller.widget.event,
-                onCloseRightColumn: controller.widget.onCloseRightColumn,
               ),
             ],
           ),
