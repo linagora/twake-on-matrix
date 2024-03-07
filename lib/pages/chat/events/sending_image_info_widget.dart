@@ -80,8 +80,7 @@ class SendingImageInfoWidget extends StatelessWidget {
                     color: LinagoraRefColors.material().primary[100],
                   ),
                   onPressed: () {
-                    mediaCancelToken?.cancel();
-                    event.remove();
+                    _cancelSending();
                   },
                 ),
               ],
@@ -128,5 +127,10 @@ class SendingImageInfoWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _cancelSending() {
+    mediaCancelToken?.cancel();
+    event.remove();
   }
 }
