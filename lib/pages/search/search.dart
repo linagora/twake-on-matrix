@@ -52,6 +52,8 @@ class SearchController extends State<Search>
 
   final scrollController = ScrollController();
 
+  Client get client => Matrix.of(context).client;
+
   bool get isShowMore =>
       textEditingController.value.text.isNotEmpty &&
       searchContactAndRecentChatController != null &&
