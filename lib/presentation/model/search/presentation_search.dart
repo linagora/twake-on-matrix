@@ -43,6 +43,13 @@ class RecentChatPresentationSearch extends PresentationSearch {
 
   final RoomSummary? roomSummary;
 
+  Uri? getAvatarUriByMatrixId({
+    required Client client,
+  }) {
+    if (roomId == null) return null;
+    return client.getRoomById(roomId!)?.avatar;
+  }
+
   const RecentChatPresentationSearch({
     this.roomId,
     this.roomSummary,

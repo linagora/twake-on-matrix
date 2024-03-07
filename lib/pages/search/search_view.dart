@@ -151,6 +151,7 @@ class SearchView extends StatelessWidget {
                     highlightKeyword:
                         searchController.textEditingController.text,
                     presentationSearch: contacts[index],
+                    client: searchController.client,
                     key: Key('chat_recent_${contacts[index].id}'),
                     onTap: () {
                       searchController.onSearchItemTap(contacts[index]);
