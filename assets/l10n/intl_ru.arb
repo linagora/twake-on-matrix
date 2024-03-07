@@ -3013,7 +3013,7 @@
   "@createTwakeId": {},
   "useYourCompanyServer": "Корпоративный сервер",
   "@useYourCompanyServer": {},
-  "descriptionTwakeId": "Создайте Twake ID,\nчтобы получить доступ\nк чату, почте и диску",
+  "descriptionTwakeId": "Open Source мессенджер, который шифрует\nваши данные с помощью протокола Matrix",
   "@descriptionTwakeId": {},
   "countFilesSendPerDialog": "Максимальный размер файла: {count}.",
   "@countFilesSendPerDialog": {},
@@ -3044,5 +3044,41 @@
   "failedToUnpin": "Не удалось открепить",
   "@failedToUnpin": {},
   "welcomeTo": "Добро пожаловать в",
-  "@welcomeTo": {}
+  "@welcomeTo": {},
+  "noResults": "Нет результатов",
+  "@noResults": {},
+  "addAnotherAccount": "Добавить аккаунт",
+  "@addAnotherAccount": {},
+  "accountSettings": "Настройки аккаунта",
+  "@accountSettings": {},
+  "isSingleAccountOnHomeserver": "Мы еще не поддерживаем несколько акаунтов на одном домашнем сервере",
+  "@isSingleAccountOnHomeserver": {},
+  "messageSelected": "{count, plural, =0{Сообщения не} =1{1 сообщение} other{{count} сообщений}} выбрано(-ы)",
+  "@messageSelected": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "draftChatHookPhrase": "Привет, {user}! Предлагаю пообщаться.",
+  "@draftChatHookPhrase": {
+    "placeholders": {
+      "user": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "twakeChatUser": "Пользователь Twake Chat",
+  "@twakeChatUser": {},
+  "sharedMediaAndLinks": "Общие медиа и ссылки",
+  "@sharedMediaAndLinks": {},
+  "errorSendingFiles": "Некоторые файлы невозможно отправить из-за размера, ограничений формата или непредвиденных ошибок. Мы пропустим их.",
+  "@errorSendingFiles": {},
+  "removeFileBeforeSend": "Удалить файлы с ошибками перед отправкой",
+  "@removeFileBeforeSend": {},
+  "unselect": "Отменить выбор",
+  "@unselect": {},
+  "searchContacts": "Поиск контактов",
+  "@searchContacts": {}
 }
