@@ -80,7 +80,7 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())
         .toList();
-    final recentChatPresentationSearchMatched = tomPresentationSearchContacts
+    final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
         .where((contact) {
       if (contact is! ContactPresentationSearch) {
@@ -114,14 +114,34 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
         event.map(
           (success) {
             if (success is SearchRecentChatSuccess) {
-              recentAndContactsNotifier.value =
-                  success.toPresentation().contacts +
-                      recentChatPresentationSearchMatched;
+              recentAndContactsNotifier.value = _combineDuplicateContactAndChat(
+                recentChat: success.toPresentation().contacts,
+                contacts: tomContactPresentationSearchMatched,
+              );
             }
           },
         );
       },
     );
+  }
+
+  List<PresentationSearch> _combineDuplicateContactAndChat({
+    required List<PresentationSearch> contacts,
+    required List<PresentationSearch> recentChat,
+  }) {
+    final contactNames = contacts
+        .map(
+          (contact) => contact.displayName?.toLowerCase(),
+        )
+        .toSet();
+
+    final filteredRecentChat = recentChat
+        .where(
+          (chat) => !contactNames.contains(chat.displayName?.toLowerCase()),
+        )
+        .toList();
+
+    return [...contacts, ...filteredRecentChat];
   }
 
   void onSearchBarChanged(String keyword) {
