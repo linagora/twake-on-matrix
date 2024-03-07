@@ -30,18 +30,15 @@ class RecentItemWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
       color: Colors.transparent,
-      child: Padding(
-        padding: RecentItemStyle.paddingRecentItem,
-        child: Theme(
-          data: ThemeData(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-          ),
-          child: ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: _buildInformationWidget(context),
-            onTap: onTap,
-          ),
+      child: Theme(
+        data: ThemeData(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: ListTile(
+          contentPadding: RecentItemStyle.paddingRecentItem,
+          title: _buildInformationWidget(context),
+          onTap: onTap,
         ),
       ),
     );
@@ -100,6 +97,7 @@ class _GroupChatInformation extends StatelessWidget {
             mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
               client: client,
             ),
+            size: RecentItemStyle.avatarSize,
           ),
         ),
         const SizedBox(width: 8),
@@ -186,6 +184,7 @@ class _DirectChatInformation extends StatelessWidget {
             mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
               client: client,
             ),
+            size: RecentItemStyle.avatarSize,
           ),
         ),
         const SizedBox(width: 8),
@@ -242,13 +241,10 @@ class _ContactInformation extends StatelessWidget {
         FutureBuilder<Profile?>(
           future: contactPresentationSearch.getProfile(client),
           builder: (context, snapshot) {
-            return SizedBox(
-              width: RecentItemStyle.avatarSize,
-              height: RecentItemStyle.avatarSize,
-              child: Avatar(
-                mxContent: snapshot.data?.avatarUrl,
-                name: contactPresentationSearch.displayName,
-              ),
+            return Avatar(
+              mxContent: snapshot.data?.avatarUrl,
+              name: contactPresentationSearch.displayName,
+              size: RecentItemStyle.avatarSize,
             );
           },
         ),
