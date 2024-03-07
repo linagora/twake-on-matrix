@@ -5,7 +5,6 @@ import 'package:fluffychat/presentation/extensions/search/presentation_search_ex
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -14,6 +13,7 @@ import 'package:matrix/matrix.dart';
 class RecentItemWidget extends StatelessWidget {
   final PresentationSearch presentationSearch;
   final String highlightKeyword;
+  final Client client;
   final void Function()? onTap;
 
   const RecentItemWidget({
@@ -21,6 +21,7 @@ class RecentItemWidget extends StatelessWidget {
     required this.highlightKeyword,
     this.onTap,
     Key? key,
+    required this.client,
   }) : super(key: key);
 
   @override
@@ -49,6 +50,7 @@ class RecentItemWidget extends StatelessWidget {
   Widget _buildInformationWidget(BuildContext context) {
     if (presentationSearch is ContactPresentationSearch) {
       return _ContactInformation(
+        client: client,
         contactPresentationSearch:
             presentationSearch as ContactPresentationSearch,
         searchKeyword: highlightKeyword,
@@ -58,11 +60,13 @@ class RecentItemWidget extends StatelessWidget {
           presentationSearch as RecentChatPresentationSearch;
       if (recentChatPresentationSearch.directChatMatrixID == null) {
         return _GroupChatInformation(
+          client: client,
           recentChatPresentationSearch: recentChatPresentationSearch,
           searchKeyword: highlightKeyword,
         );
       } else {
         return _DirectChatInformation(
+          client: client,
           recentChatPresentationSearch: recentChatPresentationSearch,
           searchKeyword: highlightKeyword,
         );
@@ -73,11 +77,13 @@ class RecentItemWidget extends StatelessWidget {
 
 class _GroupChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
+  final Client client;
   final String? searchKeyword;
 
   const _GroupChatInformation({
     required this.recentChatPresentationSearch,
     this.searchKeyword,
+    required this.client,
   });
 
   @override
@@ -91,6 +97,9 @@ class _GroupChatInformation extends StatelessWidget {
           width: RecentItemStyle.avatarSize,
           child: Avatar(
             name: recentChatPresentationSearch.displayName,
+            mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
+              client: client,
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -156,11 +165,13 @@ class _SearchHighlightText extends StatelessWidget {
 
 class _DirectChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
+  final Client client;
   final String? searchKeyword;
 
   const _DirectChatInformation({
     required this.recentChatPresentationSearch,
     this.searchKeyword,
+    required this.client,
   });
 
   @override
@@ -172,6 +183,9 @@ class _DirectChatInformation extends StatelessWidget {
           width: RecentItemStyle.avatarSize,
           child: Avatar(
             name: recentChatPresentationSearch.displayName,
+            mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
+              client: client,
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -212,15 +226,16 @@ class _DirectChatInformation extends StatelessWidget {
 class _ContactInformation extends StatelessWidget {
   final ContactPresentationSearch contactPresentationSearch;
   final String? searchKeyword;
+  final Client client;
 
   const _ContactInformation({
     required this.contactPresentationSearch,
     this.searchKeyword,
+    required this.client,
   });
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
