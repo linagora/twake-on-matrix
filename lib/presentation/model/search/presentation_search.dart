@@ -17,6 +17,12 @@ abstract class PresentationSearch extends Equatable {
     this.displayName,
     this.directChatMatrixID,
   });
+
+  @override
+  List<Object?> get props => [
+        displayName,
+        directChatMatrixID,
+      ];
 }
 
 class ContactPresentationSearch extends PresentationSearch {

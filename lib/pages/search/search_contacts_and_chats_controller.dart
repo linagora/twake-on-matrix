@@ -5,6 +5,7 @@ import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
+import 'package:fluffychat/pages/search/search_mixin.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class SearchContactsAndChatsController with SearchDebouncerMixin {
+class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
   final BuildContext context;
 
   SearchContactsAndChatsController(this.context);
@@ -114,7 +115,7 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
         event.map(
           (success) {
             if (success is SearchRecentChatSuccess) {
-              recentAndContactsNotifier.value = _combineDuplicateContactAndChat(
+              recentAndContactsNotifier.value = combineDuplicateContactAndChat(
                 recentChat: success.toPresentation().contacts,
                 contacts: tomContactPresentationSearchMatched,
               );
@@ -123,25 +124,6 @@ class SearchContactsAndChatsController with SearchDebouncerMixin {
         );
       },
     );
-  }
-
-  List<PresentationSearch> _combineDuplicateContactAndChat({
-    required List<PresentationSearch> contacts,
-    required List<PresentationSearch> recentChat,
-  }) {
-    final contactNames = contacts
-        .map(
-          (contact) => contact.displayName?.toLowerCase(),
-        )
-        .toSet();
-
-    final filteredRecentChat = recentChat
-        .where(
-          (chat) => !contactNames.contains(chat.displayName?.toLowerCase()),
-        )
-        .toList();
-
-    return [...contacts, ...filteredRecentChat];
   }
 
   void onSearchBarChanged(String keyword) {
