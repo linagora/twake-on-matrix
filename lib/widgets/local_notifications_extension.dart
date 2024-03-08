@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
@@ -35,7 +36,8 @@ extension LocalNotificationsExtension on MatrixState {
       Logs().w('Can not display notification for unknown room $roomId');
       return;
     }
-    if (room.notificationCount == 0) return;
+    if (room.notificationCount == 0 ||
+        (room.isMuted && room.highlightCount == 0)) return;
     final event = Event.fromJson(eventUpdate.content, room);
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
     final body = await event.calcLocalizedBody(
