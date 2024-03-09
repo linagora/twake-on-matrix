@@ -43,7 +43,7 @@ enum ChatContextMenuActions {
       case ChatContextMenuActions.copyMessage:
         return Icons.content_copy;
       case ChatContextMenuActions.pinChat:
-        return unpin ? Icons.push_pin_outlined : Icons.push_pin;
+        return !unpin ? Icons.push_pin_outlined : null;
       case ChatContextMenuActions.forward:
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:
@@ -53,10 +53,14 @@ enum ChatContextMenuActions {
     }
   }
 
-  String? getImagePath() {
+  String? getImagePath({
+    bool unpin = false,
+  }) {
     switch (this) {
       case ChatContextMenuActions.jumpToMessage:
         return ImagePaths.icGoTo;
+      case ChatContextMenuActions.pinChat:
+        return unpin ? ImagePaths.icUnpin : null;
       default:
         return null;
     }
