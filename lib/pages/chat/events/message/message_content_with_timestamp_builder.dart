@@ -22,6 +22,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
+  final void Function(Event)? onLongPress;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -39,6 +40,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.nextEvent,
     this.onSelect,
     this.scrollToEventId,
+    this.onLongPress,
     this.selected = false,
     this.selectMode = true,
     required this.timeline,
@@ -88,7 +90,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             child: MultiPlatformSelectionMode(
               event: event,
               isClickable: responsiveUtils.isMobileOrTablet(context),
-              onSelect: onSelect,
+              onLongPress: onLongPress,
               child: Stack(
                 alignment: event.isOwnMessage
                     ? AlignmentDirectional.bottomStart

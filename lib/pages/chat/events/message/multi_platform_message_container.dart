@@ -38,7 +38,7 @@ class MultiPlatformsMessageContainer extends StatelessWidget {
 }
 
 class MultiPlatformSelectionMode extends StatelessWidget {
-  final void Function(Event event)? onSelect;
+  final void Function(Event event)? onLongPress;
 
   final Event event;
 
@@ -48,7 +48,7 @@ class MultiPlatformSelectionMode extends StatelessWidget {
 
   const MultiPlatformSelectionMode({
     super.key,
-    this.onSelect,
+    this.onLongPress,
     this.isClickable = true,
     required this.event,
     required this.child,
@@ -61,7 +61,7 @@ class MultiPlatformSelectionMode extends StatelessWidget {
     }
 
     return GestureDetector(
-      onLongPress: () => onSelect?.call(event),
+      onLongPress: () => onLongPress?.call(event),
       child: child,
     );
   }
