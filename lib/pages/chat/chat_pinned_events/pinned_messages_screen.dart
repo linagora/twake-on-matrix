@@ -1,4 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/bottom_menu/bottom_menu_mobile.dart';
+import 'package:fluffychat/pages/chat/chat_pinned_events/bottom_menu/bottom_menu_web.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
@@ -98,6 +100,11 @@ class PinnedMessagesScreen extends StatelessWidget {
                               selected: controller.isSelected(event),
                               menuChildren: (context) => controller
                                   .pinnedMessagesActionsList(context, event),
+                              onLongPress: (event) =>
+                                  controller.onLongPressMessage(
+                                context,
+                                event,
+                              ),
                             );
                           },
                         );
@@ -109,71 +116,17 @@ class PinnedMessagesScreen extends StatelessWidget {
               ),
             ),
           ),
-          ValueListenableBuilder<List<Event>>(
-            valueListenable: controller.selectedEvents,
-            builder: (context, selectedEvents, child) {
-              if (selectedEvents.isEmpty) return child!;
-
-              return Padding(
-                padding: PinnedMessagesStyle.actionBarParentPadding,
-                child: Material(
-                  elevation: 1,
-                  borderRadius: BorderRadius.circular(
-                    PinnedMessagesStyle.actionBarBorderRadius,
-                  ),
-                  child: Container(
-                    height: PinnedMessagesStyle.unpinButtonHeight,
-                    width: PinnedMessagesStyle.unpinButtonWidth,
-                    padding: PinnedMessagesStyle.actionBarPadding,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(
-                        PinnedMessagesStyle.actionBarBorderRadius,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: controller.closeSelectionMode,
-                          icon: Icon(
-                            Icons.close,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                        ),
-                        Text(
-                          L10n.of(context)!
-                              .messageSelected(selectedEvents.length),
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                        ),
-                        const Spacer(),
-                        TextButton.icon(
-                          onPressed: () => controller.unpinSelectedEvents(),
-                          icon: PinnedMessagesStyle.unpinIcon(),
-                          label: Text(
-                            L10n.of(context)!.unpin,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+          responsiveUtils.isMobile(context)
+              ? BottomMenuMobile(
+                  selectedEvents: controller.selectedEvents,
+                  onUnpinAll: controller.unpinAll,
+                  onUnpinSelectedEvents: controller.unpinSelectedEvents,
+                )
+              : BottomMenuWeb(
+                  selectedEvents: controller.selectedEvents,
+                  onCloseSelectionMode: controller.closeSelectionMode,
+                  onUnpinSelectedEvents: controller.unpinSelectedEvents,
                 ),
-              );
-            },
-            child: const SizedBox.shrink(),
-          ),
         ],
       ),
     );
