@@ -46,7 +46,7 @@ class BottomMenuWeb extends StatelessWidget {
                     icon: Icon(
                       Icons.close,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      size: 20,
+                      size: PinnedMessagesStyle.bottomMenuCloseButtonSize,
                     ),
                   ),
                   Text(
