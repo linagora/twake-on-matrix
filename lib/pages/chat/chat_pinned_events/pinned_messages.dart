@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -189,6 +190,25 @@ class PinnedMessagesController extends State<PinnedMessages>
     }
   }
 
+  void onLongPressMessage(BuildContext context, Event event) {
+    if (PinnedMessagesStyle.responsiveUtils.isMobile(context)) {
+      _showMessageBottomSheet(event);
+    }
+  }
+
+  void _showMessageBottomSheet(Event event) async {
+    await showAdaptiveBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: pinnedMessagesActionsList(context, event),
+        );
+      },
+    );
+  }
+
   void _initPinnedEvents() {
     if (widget.pinnedEvents.isNotEmpty) {
       _updateEventsNotifier(widget.pinnedEvents);
@@ -274,7 +294,10 @@ class PinnedMessagesController extends State<PinnedMessages>
           isSelected: isSelected(event),
         ),
         iconAction: action.getIconData(unpin: event.isPinned),
-        imagePath: action.getImagePath(),
+        imagePath: action.getImagePath(unpin: event.isPinned),
+        colorIcon: action == ChatContextMenuActions.pinChat && event.isPinned
+            ? Theme.of(context).colorScheme.onSurface
+            : null,
         onCallbackAction: () => _handleClickOnContextMenuItem(
           action,
           event,
