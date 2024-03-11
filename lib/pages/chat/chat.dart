@@ -1633,7 +1633,7 @@ class ChatController extends State<Chat>
     final canRequestHistory = timeline!.events
             .where((event) => event.isVisibleInGui)
             .toList()
-            .length <
+            .length <=
         _defaultEventCountDisplay;
 
     if (allMembershipEvents || canRequestHistory) {
