@@ -172,6 +172,7 @@ dependencies:
   photo_manager_image_provider: ^2.1.0
   flutter_slidable: ^3.0.1
   skeletonizer: 1.1.0
+  flutter_portal: 1.1.4
 
 dev_dependencies:
   build_runner: ^2.3.3
@@ -213,6 +214,8 @@ flutter:
     - assets/js/
     - assets/js/package/
     - assets/google_fonts/
+    - configurations/
+    - configurations/icons/
 
 msix_config:
   display_name: Twake Chat
