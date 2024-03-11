@@ -123,12 +123,16 @@ mixin ConnectPageMixin {
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
 
-  String _generateRedirectUrl() {
+  String _generateRedirectUrl(String homeserver) {
     if (kIsWeb) {
-      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+      String? homeserverParam = '';
+      if (homeserver.isNotEmpty) {
+        homeserverParam = '?homeserver=$homeserver';
       }
-      return '${html.window.origin!}/web/auth.html';
+      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
+        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
+      }
+      return '${html.window.origin!}/web/auth.html$homeserverParam';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
