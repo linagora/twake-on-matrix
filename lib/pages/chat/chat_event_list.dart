@@ -188,6 +188,7 @@ class ChatEventList extends StatelessWidget {
                                 event.originServerTs,
                               );
                             },
+                            onLongPress: controller.onLongPressMessage,
                           )
                         : const SizedBox(),
                   );

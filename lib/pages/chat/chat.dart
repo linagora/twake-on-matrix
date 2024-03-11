@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:fluffychat/pages/chat/chat_bottom_sheet_actions.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
@@ -1096,6 +1097,62 @@ class ChatController extends State<Chat>
     }
   }
 
+  void onLongPressMessage(Event event) {
+    if (responsive.isMobile(context)) {
+      _showMessageBottomSheet(event);
+    } else {
+      onSelectMessage(event);
+    }
+  }
+
+  void _showMessageBottomSheet(Event event) async {
+    await showAdaptiveBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: _bottomSheetActionTile(context, event),
+        );
+      },
+    );
+  }
+
+  List<Widget> _bottomSheetActionTile(
+    BuildContext context,
+    Event event,
+  ) {
+    final listAction = [
+      ChatBottomSheetActions.reply,
+      ChatBottomSheetActions.select,
+      if (event.isCopyable) ChatBottomSheetActions.copyMessage,
+      ChatBottomSheetActions.pinChat,
+      ChatBottomSheetActions.forward,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatBottomSheetActions.downloadFile,
+    ];
+    return listAction.map((action) {
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(
+          context,
+          unpin: isUnpinEvent(event),
+          isSelected: isSelected(event),
+        ),
+        iconAction: action.getIconData(
+          unpin: isUnpinEvent(event),
+        ),
+        colorIcon: action == ChatBottomSheetActions.pinChat && event.isPinned
+            ? Theme.of(context).colorScheme.onSurface
+            : null,
+        onCallbackAction: () => _handleClickOnBottomSheetItem(
+          action,
+          event,
+        ),
+      );
+    }).toList();
+  }
+
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
     // this method is called very often. As such, it has to be optimized for speed.
     if (key is! ValueKey) {
@@ -1410,6 +1467,34 @@ class ChatController extends State<Chat>
         forwardEventsAction(event: event);
         break;
       case ChatContextMenuActions.downloadFile:
+        downloadFileAction(context, event);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleClickOnBottomSheetItem(
+    ChatBottomSheetActions action,
+    Event event,
+  ) {
+    switch (action) {
+      case ChatBottomSheetActions.reply:
+        replyAction(replyTo: event);
+        break;
+      case ChatBottomSheetActions.select:
+        onSelectMessage(event);
+        break;
+      case ChatBottomSheetActions.copyMessage:
+        copyEventsAction(event);
+        break;
+      case ChatBottomSheetActions.pinChat:
+        pinEventAction(event);
+        break;
+      case ChatBottomSheetActions.forward:
+        forwardEventsAction(event: event);
+        break;
+      case ChatBottomSheetActions.downloadFile:
         downloadFileAction(context, event);
         break;
       default:
