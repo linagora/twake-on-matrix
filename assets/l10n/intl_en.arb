@@ -3008,5 +3008,6 @@
   "unselect": "Unselect",
   "searchContacts": "Search contacts",
   "tapToAllowAccessToYourMicrophone": "You can enable microphone access in the Settings app to make voice in",
-  "showInChat": "Show in chat"
+  "showInChat": "Show in chat",
+  "cannotCancelImageUpload": "Cannot cancel image update"
 }

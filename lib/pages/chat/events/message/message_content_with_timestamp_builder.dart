@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
@@ -23,6 +22,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
+  final void Function()? onUploadCancel;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -31,7 +31,6 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final bool selectMode;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
-  final CancelToken? mediaCancelToken;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -49,7 +48,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.onMenuAction,
     this.menuChildren,
     this.focusNode,
-    this.mediaCancelToken,
+    this.onUploadCancel,
   });
 
   @override
@@ -143,7 +142,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                       nextEvent: nextEvent,
                                       scrollToEventId: scrollToEventId,
                                       selectMode: selectMode,
-                                      mediaCancelToken: mediaCancelToken,
+                                      onUploadCancel: onUploadCancel,
                                     ),
                                     if (timelineText)
                                       Positioned(

@@ -175,6 +175,9 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
 
+  final ValueNotifier<Map<String, CancelToken>> mediaCancelTokenMapNotifier =
+      ValueNotifier({});
+
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
 
@@ -1280,8 +1283,6 @@ class ChatController extends State<Chat>
     }
   }
 
-  final CancelToken mediaCancelToken = CancelToken();
-
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
@@ -1297,22 +1298,34 @@ class ChatController extends State<Chat>
         context: context,
       ),
       onSendTap: () {
-        sendMedia(
-          imagePickerController,
-          room: room,
-          caption: _captionsController.text,
-          cancelToken: mediaCancelToken,
-        );
+        _onSendTap(imagePickerController);
         _captionsController.clear();
       },
-      onCameraPicked: (_) => sendMedia(
-        imagePickerController,
-        room: room,
-        cancelToken: mediaCancelToken,
-      ),
+      onCameraPicked: (_) => _onSendTap(imagePickerController),
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
       typeAheadKey: _chatMediaPickerTypeAheadKey,
+    );
+  }
+
+  void _onSendTap(ImagePickerGridController imagePickerController) {
+    mediaCancelTokenMapNotifier.value = {};
+    final tempMap = <String, CancelToken>{};
+
+    for (final selection in imagePickerController.selectedAssets) {
+      final fileName = selection.asset.title;
+      if (fileName != null) {
+        tempMap[fileName] = CancelToken();
+      }
+    }
+
+    mediaCancelTokenMapNotifier.value = tempMap;
+
+    sendMedia(
+      imagePickerController,
+      room: room,
+      caption: _captionsController.text,
+      cancelTokens: mediaCancelTokenMapNotifier.value.values.toList(),
     );
   }
 

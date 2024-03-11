@@ -206,6 +206,7 @@ extension SendFileExtension on Room {
                   : thumbnail.filePath,
               thumbnail.fileSize,
             ),
+            cancelToken: cancelToken,
           );
           thumbnailUploadResp =
               Uri.tryParse(thumbnailResponse.contentUri ?? "");
@@ -219,6 +220,12 @@ extension SendFileExtension on Room {
         Logs().e('Error: $e');
         rethrow;
       } catch (e) {
+        if (CancelToken.isCancel(e as DioException)) {
+          Logs().d(
+            'SendImage:: sendFileEvent(): upload cancelled',
+          );
+          return null;
+        }
         await _updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,

@@ -16,7 +16,7 @@ mixin SendFilesMixin {
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
-    CancelToken? cancelToken,
+    List<CancelToken> cancelTokens = const [],
   }) async {
     if (room == null) {
       return;
@@ -26,7 +26,7 @@ mixin SendFilesMixin {
     await sendMediaInteractor.execute(
       room: room,
       caption: caption,
-      cancelToken: cancelToken,
+      cancelTokens: cancelTokens,
       entities: selectedAssets.map<FileAssetEntity>((entity) {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),

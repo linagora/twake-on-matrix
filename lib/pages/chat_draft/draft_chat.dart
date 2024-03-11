@@ -117,14 +117,14 @@ class DraftChatController extends State<DraftChat>
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
-    CancelToken? cancelToken,
+    List<CancelToken> cancelTokens = const [],
   }) {
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
         super.sendMedia(
           imagePickerController,
           room: newRoom,
-          cancelToken: cancelToken,
+          cancelTokens: cancelTokens,
         );
       },
     );

@@ -3067,5 +3067,6 @@
     }
   },
   "contactsWarningBannerTitle": "Pour vous vous connecter avec tous vos contacts, veuillez permettre à Twake d'accéder aux contacts de votre appareil.",
-  "@contactsWarningBannerTitle": {}
+  "@contactsWarningBannerTitle": {},
+  "cannotCancelImageUpload": "Impossible d'annuler cet envoi"
 }

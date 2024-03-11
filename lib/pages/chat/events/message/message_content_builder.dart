@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
@@ -19,10 +18,9 @@ class MessageContentBuilder extends StatelessWidget {
   final BoxConstraints availableBubbleContraints;
   final void Function(String)? scrollToEventId;
   final void Function(Event)? onSelect;
+  final void Function()? onUploadCancel;
   final Event? nextEvent;
   final bool selectMode;
-  final CancelToken? mediaCancelToken;
-
   const MessageContentBuilder({
     super.key,
     required this.event,
@@ -32,7 +30,7 @@ class MessageContentBuilder extends StatelessWidget {
     this.nextEvent,
     this.scrollToEventId,
     this.selectMode = true,
-    this.mediaCancelToken,
+    this.onUploadCancel,
   });
 
   @override
@@ -98,7 +96,7 @@ class MessageContentBuilder extends StatelessWidget {
                       : null,
                   onTapPreview: !selectMode ? () {} : null,
                   ownMessage: event.isOwnMessage,
-                  mediaCancelToken: mediaCancelToken,
+                  onUploadCancel: onUploadCancel,
                 ),
                 if (event.timelineOverlayMessage)
                   Positioned(

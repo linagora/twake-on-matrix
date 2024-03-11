@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
@@ -19,16 +18,16 @@ class SendingImageInfoWidget extends StatelessWidget {
     required this.event,
     required this.displayImageInfo,
     this.onTapPreview,
-    this.mediaCancelToken,
+    this.onUploadCancel,
   });
-
-  final CancelToken? mediaCancelToken;
 
   final MatrixImageFile matrixFile;
 
   final Event event;
 
   final void Function()? onTapPreview;
+
+  final void Function()? onUploadCancel;
 
   final ValueNotifier<double> sendingFileProgressNotifier = ValueNotifier(0);
 
@@ -79,9 +78,7 @@ class SendingImageInfoWidget extends StatelessWidget {
                     Icons.close,
                     color: LinagoraRefColors.material().primary[100],
                   ),
-                  onPressed: () {
-                    _cancelSending();
-                  },
+                  onPressed: onUploadCancel,
                 ),
               ],
             ],
@@ -127,10 +124,5 @@ class SendingImageInfoWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _cancelSending() {
-    mediaCancelToken?.cancel();
-    event.remove();
   }
 }

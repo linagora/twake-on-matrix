@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -145,6 +146,9 @@ class ChatEventList extends StatelessWidget {
                   final nextEvent = index < controller.timeline!.events.length
                       ? controller.timeline!.events[currentEventIndex + 1]
                       : null;
+
+                  _cleanCancelTokenMap(event);
+
                   return AutoScrollTag(
                     key: ValueKey(event.eventId),
                     index: index,
@@ -188,7 +192,10 @@ class ChatEventList extends StatelessWidget {
                                 event.originServerTs,
                               );
                             },
-                            mediaCancelToken: controller.mediaCancelToken,
+                            onUploadCancel: () => _cancelSending(
+                              context: context,
+                              event: event,
+                            ),
                           )
                         : const SizedBox(),
                   );
@@ -202,6 +209,41 @@ class ChatEventList extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _cleanCancelTokenMap(Event event) {
+    if (event.status == EventStatus.sent &&
+        controller.mediaCancelTokenMapNotifier.value[event.body] != null) {
+      controller.mediaCancelTokenMapNotifier.value.remove(event.body);
+    }
+  }
+
+  Future<void> _cancelSending({
+    required BuildContext context,
+    required Event event,
+  }) async {
+    Logs().d(
+      'SendingImageInfoWidget:: _cancelSending: cancelling ${event.body} sending',
+    );
+
+    final cancelToken =
+        controller.mediaCancelTokenMapNotifier.value[event.body];
+
+    cancelToken?.cancel();
+    controller.mediaCancelTokenMapNotifier.value.remove(event.body);
+    try {
+      await event.remove();
+    } catch (e) {
+      Logs().e(
+        'SendingImageInfoWidget:: _cancelSending: unable to cancel sending',
+        e,
+      );
+
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.cannotCancelImageUpload,
+      );
+    }
   }
 
   Widget _chatEmptyBuilder(Timeline timeline) {

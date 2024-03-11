@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
@@ -40,6 +39,7 @@ class Message extends StatefulWidget {
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
+  final void Function()? onUploadCancel;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -50,7 +50,6 @@ class Message extends StatefulWidget {
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
-  final CancelToken? mediaCancelToken;
 
   const Message(
     this.event, {
@@ -73,7 +72,7 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
-    this.mediaCancelToken,
+    this.onUploadCancel,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -191,7 +190,7 @@ class _MessageState extends State<Message> {
               onMenuAction: widget.onMenuAction,
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
-              mediaCancelToken: widget.mediaCancelToken,
+              onUploadCancel: widget.onUploadCancel,
             ),
           ),
         ];
