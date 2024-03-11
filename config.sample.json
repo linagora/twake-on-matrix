@@ -6,5 +6,6 @@
   "render_html": true,
   "hide_redacted_events": false,
   "hide_unknown_events": false,
-  "issue_id": ""
+  "issue_id": "",
+  "app_grid_dashboard_available": true
 }
