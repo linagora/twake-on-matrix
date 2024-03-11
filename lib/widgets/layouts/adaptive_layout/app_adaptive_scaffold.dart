@@ -2,7 +2,6 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -36,10 +35,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
             backgroundColor: Theme.of(context).colorScheme.surface,
             body: Column(
               children: [
-                const SizedBox(
-                  height: AppScaffoldViewStyle.appBarSize,
-                  child: AdaptiveScaffoldAppBar(),
-                ),
+                const AdaptiveScaffoldAppBar(),
                 Expanded(
                   child: AdaptiveLayout(
                     internalAnimations: false,
