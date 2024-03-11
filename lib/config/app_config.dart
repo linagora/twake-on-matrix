@@ -54,6 +54,7 @@ abstract class AppConfig {
   static bool separateChatTypes = false;
   static bool autoplayImages = true;
   static bool experimentalVoip = false;
+  static bool appGridDashboardAvailable = false;
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
@@ -89,6 +90,9 @@ abstract class AppConfig {
   static const int maxFilesSendPerDialog = 6;
 
   static String? issueId;
+
+  static const String appGridConfigurationPath =
+      "configurations/app_dashboard.json";
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
@@ -127,6 +131,9 @@ abstract class AppConfig {
     }
     if (json['issue_id'] is String?) {
       issueId = json['issue_id'];
+    }
+    if (json['app_grid_dashboard_available'] is bool) {
+      appGridDashboardAvailable = json['app_grid_dashboard_available'];
     }
   }
 }
