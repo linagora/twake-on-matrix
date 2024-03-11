@@ -1,5 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/app_grid/app_grid_dashboard_controller.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +9,8 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class AdaptiveScaffoldAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class AdaptiveScaffoldAppBar extends StatelessWidget {
   const AdaptiveScaffoldAppBar({super.key});
-
-  @override
-  Size get preferredSize =>
-      const Size.fromHeight(AdaptiveScaffoldAppBarStyle.toolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +20,21 @@ class AdaptiveScaffoldAppBar extends StatelessWidget
             SlotLayout.from(
           key: AdaptiveScaffoldAppBarStyle.adaptiveAppBarKey,
           builder: (_) {
-            return AppBar(
-              backgroundColor: LinagoraSysColors.material().onPrimary,
-              toolbarHeight: AppConfig.toolbarHeight(context),
-              title: const Padding(
+            return Container(
+              decoration: BoxDecoration(
+                color: LinagoraSysColors.material().onPrimary,
+              ),
+              child: Padding(
                 padding: AdaptiveScaffoldAppBarStyle.appBarPadding,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _LeadingAppBarWidget(),
+                    const _LeadingAppBarWidget(),
+                    if (AppConfig.appGridDashboardAvailable &&
+                        PlatformInfos.isWeb)
+                      const Expanded(
+                        child: AppGridDashboard(),
+                      ),
                   ],
                 ),
               ),
