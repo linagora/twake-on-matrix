@@ -4,6 +4,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,6 +22,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
           key: AdaptiveScaffoldAppBarStyle.adaptiveAppBarKey,
           builder: (_) {
             return Container(
+              height: AppScaffoldViewStyle.appBarSize,
               decoration: BoxDecoration(
                 color: LinagoraSysColors.material().onPrimary,
               ),

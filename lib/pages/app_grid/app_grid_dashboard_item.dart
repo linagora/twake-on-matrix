@@ -54,7 +54,7 @@ class AppGridDashboardItem extends StatelessWidget {
                     textAlign: TextAlign.center,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
               ],
