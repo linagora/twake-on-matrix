@@ -53,4 +53,8 @@ class ImagePaths {
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
+
+  static String getConfigurationImagePath(String imageName) {
+    return AssetsPaths.configurationImages + imageName;
+  }
 }
