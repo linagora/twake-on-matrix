@@ -13,6 +13,8 @@ import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
 mixin ConnectPageMixin {
+  static const windowNameValue = '_self';
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -75,6 +77,7 @@ mixin ConnectPageMixin {
       callbackUrlScheme: urlScheme,
       options: const FlutterWebAuth2Options(
         intentFlags: ephemeralIntentFlags,
+        windowName: windowNameValue,
       ),
     );
     final token = Uri.parse(result).queryParameters['loginToken'];
@@ -100,6 +103,9 @@ mixin ConnectPageMixin {
       final result = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: urlScheme,
+        options: const FlutterWebAuth2Options(
+          windowName: windowNameValue,
+        ),
       );
       Logs().d('tryLogoutSso::result: $result');
     } catch (e) {
