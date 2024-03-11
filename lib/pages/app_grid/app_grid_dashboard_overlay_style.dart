@@ -4,11 +4,11 @@ import 'package:flutter/cupertino.dart';
 class AppGridDashboardOverlayStyle {
   static double widthAppGrid(LinagoraApplications linagoraApplications) {
     if (linagoraApplications.apps.length >= 3) {
-      return 342;
+      return 326;
     } else if (linagoraApplications.apps.length == 2) {
-      return 244;
+      return 228;
     } else if (linagoraApplications.apps.length == 1) {
-      return 146;
+      return 130;
     } else {
       return 0;
     }
@@ -16,7 +16,7 @@ class AppGridDashboardOverlayStyle {
 
   static const double borderRadius = 24;
 
-  static const EdgeInsets padding = EdgeInsets.all(24);
+  static const EdgeInsets padding = EdgeInsets.all(16);
 
   static const EdgeInsets margin = EdgeInsets.only(right: 16);
 }
