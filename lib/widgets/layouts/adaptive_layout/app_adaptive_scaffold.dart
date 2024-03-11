@@ -2,8 +2,10 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
+import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class AppAdaptiveScaffold extends StatelessWidget {
@@ -27,47 +29,66 @@ class AppAdaptiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: displayAppBar == true ? const AdaptiveScaffoldAppBar() : null,
-      body: AdaptiveLayout(
-        internalAnimations: false,
-        body: SlotLayout(
-          config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(
-              end: ResponsiveUtils.maxMobileWidth,
-            ): SlotLayout.from(
-              key: breakpointMobileKey,
-              builder: (_) => secondaryBody != null
-                  ? _secondaryBodyWidget(context, isWebAndDesktop: false)
-                  : _bodyWidget(context, isWebAndDesktop: false),
+    return Portal(
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            body: Column(
+              children: [
+                const SizedBox(
+                  height: AppScaffoldViewStyle.appBarSize,
+                  child: AdaptiveScaffoldAppBar(),
+                ),
+                Expanded(
+                  child: AdaptiveLayout(
+                    internalAnimations: false,
+                    body: SlotLayout(
+                      config: <Breakpoint, SlotLayoutConfig>{
+                        const WidthPlatformBreakpoint(
+                          end: ResponsiveUtils.maxMobileWidth,
+                        ): SlotLayout.from(
+                          key: breakpointMobileKey,
+                          builder: (_) => secondaryBody != null
+                              ? _secondaryBodyWidget(
+                                  context,
+                                  isWebAndDesktop: false,
+                                )
+                              : _bodyWidget(context, isWebAndDesktop: false),
+                        ),
+                        const WidthPlatformBreakpoint(
+                          begin: ResponsiveUtils.minTabletWidth,
+                        ): SlotLayout.from(
+                          key: breakpointWebAndDesktopKey,
+                          builder: (_) => _bodyWidget(context),
+                        ),
+                      },
+                    ),
+                    bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
+                    secondaryBody: SlotLayout(
+                      config: <Breakpoint, SlotLayoutConfig>{
+                        const WidthPlatformBreakpoint(
+                          end: ResponsiveUtils.maxMobileWidth,
+                        ): SlotLayout.from(
+                          key: breakpointMobileKey,
+                          builder: null,
+                        ),
+                        const WidthPlatformBreakpoint(
+                          begin: ResponsiveUtils.minTabletWidth,
+                        ): SlotLayout.from(
+                          key: breakpointWebAndDesktopKey,
+                          builder: secondaryBody != null
+                              ? (_) => _secondaryBodyWidget(context)
+                              : AdaptiveScaffold.emptyBuilder,
+                        ),
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const WidthPlatformBreakpoint(
-              begin: ResponsiveUtils.minTabletWidth,
-            ): SlotLayout.from(
-              key: breakpointWebAndDesktopKey,
-              builder: (_) => _bodyWidget(context),
-            ),
-          },
-        ),
-        bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
-        secondaryBody: SlotLayout(
-          config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(end: ResponsiveUtils.maxMobileWidth):
-                SlotLayout.from(
-              key: breakpointMobileKey,
-              builder: null,
-            ),
-            const WidthPlatformBreakpoint(
-              begin: ResponsiveUtils.minTabletWidth,
-            ): SlotLayout.from(
-              key: breakpointWebAndDesktopKey,
-              builder: secondaryBody != null
-                  ? (_) => _secondaryBodyWidget(context)
-                  : AdaptiveScaffold.emptyBuilder,
-            ),
-          },
-        ),
+          ),
+        ],
       ),
     );
   }
