@@ -61,18 +61,20 @@ mixin ConnectPageMixin {
     return '$authUrl?logout=1&url=$redirectUrlEncode';
   }
 
-  void ssoLoginAction({
+  Future<String> authenticateWithWebAuth({
     required BuildContext context,
     required String id,
   }) async {
-    final redirectUrl = _generateRedirectUrl();
+    final redirectUrl = _generateRedirectUrl(
+      Matrix.of(context).client.homeserver.toString(),
+    );
     final url = _getAuthenticateUrl(
       context: context,
       id: id,
       redirectUrl: redirectUrl,
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    final result = await FlutterWebAuth2.authenticate(
+    return await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,
       options: const FlutterWebAuth2Options(
@@ -80,6 +82,31 @@ mixin ConnectPageMixin {
         windowName: windowNameValue,
       ),
     );
+  }
+
+  Future<void> ssoLoginAction({
+    required BuildContext context,
+    required String id,
+  }) async {
+    if (PlatformInfos.isWeb) {
+      await ssoLoginActionWeb(context: context, id: id);
+    } else {
+      ssoLoginActionMobile(context: context, id: id);
+    }
+  }
+
+  Future<void> ssoLoginActionWeb({
+    required BuildContext context,
+    required String id,
+  }) async {
+    await authenticateWithWebAuth(context: context, id: id);
+  }
+
+  void ssoLoginActionMobile({
+    required BuildContext context,
+    required String id,
+  }) async {
+    final result = await authenticateWithWebAuth(context: context, id: id);
     final token = Uri.parse(result).queryParameters['loginToken'];
     if (token?.isEmpty ?? false) return;
     Matrix.of(context).loginType = LoginType.mLoginToken;
