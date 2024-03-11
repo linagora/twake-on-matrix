@@ -82,16 +82,26 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         OkCancelResult.cancel) {
       return;
     }
-    await tryLogoutSso(context);
+    if (PlatformInfos.isMobile) {
+      await tryLogoutSso(context);
+    }
     final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
     await hiveCollectionToMDatabase.clear();
     final matrix = Matrix.of(context);
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        if (matrix.backgroundPush != null) {
-          await matrix.backgroundPush!.removeCurrentPusher();
+        try {
+          if (matrix.backgroundPush != null) {
+            await matrix.backgroundPush!.removeCurrentPusher();
+          }
+          await matrix.client.logout();
+        } catch (e) {
+          Logs().e('SettingsController()::logoutAction - error: $e');
+        } finally {
+          if (PlatformInfos.isWeb) {
+            await tryLogoutSso(context);
+          }
         }
-        return matrix.client.logout();
       },
     );
   }
