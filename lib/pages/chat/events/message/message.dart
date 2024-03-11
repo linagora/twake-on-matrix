@@ -135,104 +135,103 @@ class _MessageState extends State<Message> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiPlatformsMessageContainer(
-      onTap: widget.hideKeyboardChatScreen,
-      onHover: (hover) {
-        if (widget.onHover != null) {
-          widget.onHover!(hover, widget.event);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!{
+          EventTypes.Message,
+          EventTypes.Sticker,
+          EventTypes.Encrypted,
+          EventTypes.CallInvite,
+        }.contains(widget.event.type)) {
+          if (widget.event.type.startsWith('m.call.')) {
+            return const SizedBox();
+          }
+          if (widget.event.isJoinedByRoomCreator()) {
+            return const SizedBox();
+          }
+          return StateMessage(widget.event);
         }
-      },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (!{
-            EventTypes.Message,
-            EventTypes.Sticker,
-            EventTypes.Encrypted,
-            EventTypes.CallInvite,
-          }.contains(widget.event.type)) {
-            if (widget.event.type.startsWith('m.call.')) {
-              return const SizedBox();
-            }
-            if (widget.event.isJoinedByRoomCreator()) {
-              return const SizedBox();
-            }
-            return StateMessage(widget.event);
-          }
 
-          if (widget.event.type == EventTypes.Message &&
-              widget.event.messageType == EventTypes.KeyVerificationRequest) {
-            return VerificationRequestContent(
-              event: widget.event,
-              timeline: widget.timeline,
-            );
-          }
-
-          final displayTime = widget.event.type == EventTypes.RoomCreate ||
-              widget.nextEvent == null ||
-              !widget.event.originServerTs
-                  .sameEnvironment(widget.nextEvent!.originServerTs);
-          final rowMainAxisAlignment = widget.event.isOwnMessage
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start;
-
-          final rowChildren = <Widget>[
-            _placeHolderWidget(
-              widget.event.isSameSenderWith(widget.previousEvent),
-              widget.event.isOwnMessage,
-              widget.event,
-            ),
-            Expanded(
-              child: MessageContentWithTimestampBuilder(
-                event: widget.event,
-                nextEvent: widget.nextEvent,
-                onSelect: widget.onSelect,
-                scrollToEventId: widget.scrollToEventId,
-                selected: widget.selected,
-                selectMode: widget.selectMode,
-                timeline: widget.timeline,
-                isHoverNotifier: widget.isHoverNotifier,
-                listHorizontalActionMenu: widget.listHorizontalActionMenu,
-                onMenuAction: widget.onMenuAction,
-                menuChildren: widget.menuChildren,
-                focusNode: widget.focusNode,
-              ),
-            ),
-          ];
-          final row = Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: rowMainAxisAlignment,
-            children: rowChildren,
+        if (widget.event.type == EventTypes.Message &&
+            widget.event.messageType == EventTypes.KeyVerificationRequest) {
+          return VerificationRequestContent(
+            event: widget.event,
+            timeline: widget.timeline,
           );
+        }
 
-          return Column(
-            children: [
-              if (displayTime)
-                ValueListenableBuilder(
-                  valueListenable: inviewNotifier,
-                  builder: (context, inView, _) {
-                    return StickyTimestampWidget(
-                      content: !inView
-                          ? widget.event.originServerTs.relativeTime(context)
-                          : '',
-                    );
-                  },
+        final displayTime = widget.event.type == EventTypes.RoomCreate ||
+            widget.nextEvent == null ||
+            !widget.event.originServerTs
+                .sameEnvironment(widget.nextEvent!.originServerTs);
+        final rowMainAxisAlignment = widget.event.isOwnMessage
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start;
+
+        final rowChildren = <Widget>[
+          _placeHolderWidget(
+            widget.event.isSameSenderWith(widget.previousEvent),
+            widget.event.isOwnMessage,
+            widget.event,
+          ),
+          Expanded(
+            child: MessageContentWithTimestampBuilder(
+              event: widget.event,
+              nextEvent: widget.nextEvent,
+              onSelect: widget.onSelect,
+              scrollToEventId: widget.scrollToEventId,
+              selected: widget.selected,
+              selectMode: widget.selectMode,
+              timeline: widget.timeline,
+              isHoverNotifier: widget.isHoverNotifier,
+              listHorizontalActionMenu: widget.listHorizontalActionMenu,
+              onMenuAction: widget.onMenuAction,
+              menuChildren: widget.menuChildren,
+              focusNode: widget.focusNode,
+            ),
+          ),
+        ];
+        final row = Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: rowMainAxisAlignment,
+          children: rowChildren,
+        );
+        return Column(
+          children: [
+            if (displayTime)
+              ValueListenableBuilder(
+                valueListenable: inviewNotifier,
+                builder: (context, inView, _) {
+                  return StickyTimestampWidget(
+                    content: !inView
+                        ? widget.event.originServerTs.relativeTime(context)
+                        : '',
+                  );
+                },
+              ),
+            if (widget.markedUnreadLocation != null &&
+                widget.markedUnreadLocation == widget.event.eventId) ...[
+              Padding(
+                padding: MessageStyle.paddingDividerUnreadMessage,
+                child: Divider(
+                  height: MessageStyle.heightDivider,
+                  color: LinagoraStateLayer(
+                    LinagoraSysColors.material().surfaceTint,
+                  ).opacityLayer3,
                 ),
-              if (widget.markedUnreadLocation != null &&
-                  widget.markedUnreadLocation == widget.event.eventId) ...[
-                Padding(
-                  padding: MessageStyle.paddingDividerUnreadMessage,
-                  child: Divider(
-                    height: MessageStyle.heightDivider,
-                    color: LinagoraStateLayer(
-                      LinagoraSysColors.material().surfaceTint,
-                    ).opacityLayer3,
-                  ),
-                ),
-                StickyTimestampWidget(
-                  content: L10n.of(context)!.unreadMessages,
-                ),
-              ],
-              Container(
+              ),
+              StickyTimestampWidget(
+                content: L10n.of(context)!.unreadMessages,
+              ),
+            ],
+            MultiPlatformsMessageContainer(
+              onTap: widget.hideKeyboardChatScreen,
+              onHover: (hover) {
+                if (widget.onHover != null) {
+                  widget.onHover!(hover, widget.event);
+                }
+              },
+              child: Container(
                 constraints: BoxConstraints(
                   maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
                 ),
@@ -274,10 +273,10 @@ class _MessageState extends State<Message> {
                   ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
