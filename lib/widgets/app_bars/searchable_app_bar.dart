@@ -158,7 +158,7 @@ class SearchableAppBar extends StatelessWidget {
   Widget _textFieldBuilder(BuildContext context) {
     return TextField(
       onTapOutside: (event) {
-        dismissKeyboard();
+        dismissKeyboard(context);
       },
       focusNode: focusNode,
       autofocus: true,
