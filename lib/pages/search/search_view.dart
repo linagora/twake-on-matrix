@@ -186,7 +186,7 @@ class SearchView extends StatelessWidget {
             Expanded(
               child: TextField(
                 onTapOutside: (event) {
-                  dismissKeyboard();
+                  dismissKeyboard(context);
                 },
                 controller: searchController.textEditingController,
                 textInputAction: TextInputAction.search,
