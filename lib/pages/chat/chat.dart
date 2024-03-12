@@ -70,6 +70,8 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
+typedef OnJumpToMessage = void Function(String eventId);
+
 class Chat extends StatefulWidget {
   final String roomId;
   final List<MatrixFile?>? shareFiles;
@@ -401,7 +403,11 @@ class ChatController extends State<Chat>
 
   void _tryLoadTimeline() async {
     _updateOpeningChatViewStateNotifier(ViewEventListLoading());
-    loadTimelineFuture = _getTimeline();
+    loadTimelineFuture = _getTimeline(
+      onJumpToMessage: (event) {
+        scrollToEventId(event);
+      },
+    );
     try {
       await loadTimelineFuture;
       await _tryRequestHistory();
@@ -413,7 +419,8 @@ class ChatController extends State<Chat>
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
       }
-      if (timeline!.events.any((event) => event.eventId == fullyRead)) {
+      if (timeline != null &&
+          timeline!.events.any((event) => event.eventId == fullyRead)) {
         setReadMarker();
         return;
       }
@@ -837,6 +844,7 @@ class ChatController extends State<Chat>
 
   Future<void> _getTimeline({
     String? eventContextId,
+    OnJumpToMessage? onJumpToMessage,
   }) async {
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
@@ -857,7 +865,6 @@ class ChatController extends State<Chat>
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
-
     // when the scroll controller is attached we want to scroll to an event id, if specified
     // and update the scroll controller...which will trigger a request history, if the
     // "load more" button is visible on the screen
@@ -865,7 +872,7 @@ class ChatController extends State<Chat>
       if (mounted) {
         final event = GoRouterState.of(context).uri.queryParameters['event'];
         if (event != null) {
-          scrollToEventId(event, highlight: true);
+          onJumpToMessage?.call(event);
         }
       }
     });
