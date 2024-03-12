@@ -1,16 +1,23 @@
+import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
 
   group(
       '[localizedTimeShort TEST]\n'
       'GIVEN a Text widget\n'
       'USING localizedTimeShort\n', () {
     const textWidgetKey = ValueKey('textWidget');
+
+    setUpAll(() {
+      LocalizationService.currentLocale.value = const Locale('en', 'US');
+    });
 
     testWidgets(
         'GIVEN the date time to display is today\n'
@@ -34,10 +41,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -74,10 +82,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -114,10 +123,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -154,10 +164,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -194,10 +205,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -234,10 +246,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -274,10 +287,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -314,10 +328,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -355,10 +370,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -396,10 +412,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -438,10 +455,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -480,10 +498,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -522,10 +541,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -564,10 +584,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -606,10 +627,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -648,10 +670,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -690,10 +713,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -732,10 +756,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -774,10 +799,11 @@ void main() {
         },
       );
 
-      await tester.binding.setLocale('en', 'US');
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [L10n.delegate],
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
           home: textWidgetBuilder,
         ),
       );
@@ -816,4 +842,700 @@ void main() {
       expect(result, isFalse);
     });
   });
+
+  group(
+    '[relativeTime TEST]\n'
+    'GIVEN a Text widget\n'
+    'USING relativeTime\n',
+    () {
+      const textWidgetKey = ValueKey('textWidget');
+      group('GIVEN locale is French', () {
+        setUpAll(() {
+          LocalizationService.currentLocale.value = const Locale('fr', 'FR');
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is today\n'
+            "THEN should display Aujourd'hui\n", (WidgetTester tester) async {
+          const expectedDisplayText = "Aujourd'hui";
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 28);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('fr', 'FR'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is yesterday\n'
+            'THEN should display Hier\n', (WidgetTester tester) async {
+          const expectedDisplayText = 'Hier';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 27);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('fr', 'FR'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not today or yesterday but in the same year\n'
+            'THEN should display the date in the format MMMM d\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Janvier 15';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('fr', 'FR'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not in the same year\n'
+            'THEN should display the date in the format MMMM d, y\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Janvier 15, 2023';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2023, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('fr', 'FR'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+      });
+
+      group('GIVEN locale is Russia', () {
+        setUpAll(() {
+          LocalizationService.currentLocale.value = const Locale('ru', 'RU');
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is today\n'
+            "THEN should display Сегодня\n", (WidgetTester tester) async {
+          const expectedDisplayText = "Сегодня";
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 28);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('ru', 'RU'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is yesterday\n'
+            'THEN should display Вчера\n', (WidgetTester tester) async {
+          const expectedDisplayText = 'Вчера';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 27);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('ru', 'RU'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not today or yesterday but in the same year\n'
+            'THEN should display the date in the format MMMM d\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Января 15';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('ru', 'RU'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not in the same year\n'
+            'THEN should display the date in the format MMMM d, y\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Января 15, 2023';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2023, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('ru', 'RU'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+      });
+
+      group('GIVEN locale is Vietnam', () {
+        setUpAll(() {
+          LocalizationService.currentLocale.value = const Locale('vi', 'VN');
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is today\n'
+            "THEN should display Hôm nay\n", (WidgetTester tester) async {
+          const expectedDisplayText = "Hôm nay";
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 28);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('vi', 'VN'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is yesterday\n'
+            'THEN should display Hôm qua\n', (WidgetTester tester) async {
+          const expectedDisplayText = 'Hôm qua';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 27);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('vi', 'VN'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not today or yesterday but in the same year\n'
+            'THEN should display the date in the format MMMM d\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Tháng 1 15';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('vi', 'VN'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not in the same year\n'
+            'THEN should display the date in the format MMMM d, y\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'Tháng 1 15, 2023';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2023, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('vi', 'VN'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+      });
+
+      group('GIVEN locale is English', () {
+        setUpAll(() {
+          LocalizationService.currentLocale.value = const Locale('en', 'US');
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is today\n'
+            "THEN should display Today\n", (WidgetTester tester) async {
+          const expectedDisplayText = "Today";
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 28);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('en', 'US'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is yesterday\n'
+            'THEN should display Yesterday\n', (WidgetTester tester) async {
+          const expectedDisplayText = 'Yesterday';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 2, 27);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('en', 'US'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not today or yesterday but in the same year\n'
+            'THEN should display the date in the format MMMM d\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'January 15';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2024, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('en', 'US'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+
+        testWidgets(
+            'GIVEN the date time to display is not in the same year\n'
+            'THEN should display the date in the format MMMM d, y\n',
+            (WidgetTester tester) async {
+          const expectedDisplayText = 'January 15, 2023';
+          final currentTime = DateTime(2024, 2, 28);
+          final timeToTest = DateTime(2023, 1, 15);
+
+          final textWidgetBuilder = Builder(
+            builder: (BuildContext context) {
+              final displayText = timeToTest.relativeTime(
+                context,
+                currentTime: currentTime,
+              );
+
+              return Text(
+                displayText,
+                key: textWidgetKey,
+              );
+            },
+          );
+
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: const Locale('en', 'US'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              home: textWidgetBuilder,
+            ),
+          );
+
+          final textWidgetFinder = find.byKey(textWidgetKey);
+
+          expect(textWidgetFinder, findsOneWidget);
+
+          final Text textWidget = tester.widget(textWidgetFinder) as Text;
+
+          expect(textWidget.data, isNotNull);
+
+          expect(textWidget.data, equals(expectedDisplayText));
+        });
+      });
+    },
+  );
 }
