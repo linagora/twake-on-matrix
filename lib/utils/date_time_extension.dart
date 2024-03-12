@@ -118,21 +118,28 @@ extension DateTimeExtension on DateTime {
 
   static String _z(int i) => i < 10 ? '0${i.toString()}' : i.toString();
 
-  bool isToday() {
-    return DateUtils.isSameDay(this, DateTime.now());
+  bool isToday({DateTime? currentTime}) {
+    currentTime ??= DateTime.now();
+    return DateUtils.isSameDay(this, currentTime);
   }
 
-  bool isYesterday() {
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+  bool isYesterday({DateTime? currentTime}) {
+    currentTime ??= DateTime.now();
+    final yesterday = currentTime.subtract(const Duration(days: 1));
     return DateUtils.isSameDay(this, yesterday);
   }
 
-  String relativeTime(BuildContext context) {
-    if (isToday()) {
+  bool isSameYear({DateTime? currentTime}) {
+    currentTime ??= DateTime.now();
+    return currentTime.year == year;
+  }
+
+  String relativeTime(BuildContext context, {DateTime? currentTime}) {
+    if (isToday(currentTime: currentTime)) {
       return L10n.of(context)!.today;
-    } else if (isYesterday()) {
+    } else if (isYesterday(currentTime: currentTime)) {
       return L10n.of(context)!.yesterday;
-    } else if (year == DateTime.now().year) {
+    } else if (isSameYear(currentTime: currentTime)) {
       return _formatDateWithLocale(context, _fullMonthWithDayPattern);
     } else {
       return _formatDateWithLocale(context, _fullMonthWithDayAndYearPattern);
@@ -161,9 +168,19 @@ extension DateTimeExtension on DateTime {
   String _formatDateWithLocale(BuildContext context, String pattern) {
     final currentLanguageCode =
         LocalizationService.currentLocale.value.languageCode;
-    return DateFormat(
+
+    final formattedDate = DateFormat(
       pattern,
       currentLanguageCode,
     ).format(this);
+
+    switch (pattern) {
+      case _fullMonthWithDayPattern:
+      case _fullMonthWithDayAndYearPattern:
+      case _shortMonthWithDayPattern:
+        return formattedDate[0].toUpperCase() + formattedDate.substring(1);
+      default:
+        return formattedDate;
+    }
   }
 }
