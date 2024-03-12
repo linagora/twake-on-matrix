@@ -1,7 +1,12 @@
+import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:intl/intl.dart';
+
+const _fullMonthWithDayPattern = "MMMM d";
+const _fullMonthWithDayAndYearPattern = "MMMM d, y";
+const _dayMonthYearSlashSeparatedPattern = "dd/MM/yy";
+const _shortMonthWithDayPattern = "MMM d";
 
 /// Provides extra functionality for formatting the time.
 extension DateTimeExtension on DateTime {
@@ -70,9 +75,9 @@ extension DateTimeExtension on DateTime {
           return L10n.of(context)!.sunday;
       }
     } else if (sameYear) {
-      return DateFormat("MMM d").format(this);
+      return _formatDateWithLocale(context, _shortMonthWithDayPattern);
     } else {
-      return DateFormat("dd/MM/yy").format(this);
+      return _formatDateWithLocale(context, _dayMonthYearSlashSeparatedPattern);
     }
     return L10n.of(context)!.dateWithYear(
       year.toString(),
@@ -128,9 +133,9 @@ extension DateTimeExtension on DateTime {
     } else if (isYesterday()) {
       return L10n.of(context)!.yesterday;
     } else if (year == DateTime.now().year) {
-      return DateFormat("MMMM d").format(this);
+      return _formatDateWithLocale(context, _fullMonthWithDayPattern);
     } else {
-      return DateFormat("MMMM d, y").format(this);
+      return _formatDateWithLocale(context, _fullMonthWithDayAndYearPattern);
     }
   }
 
@@ -151,5 +156,14 @@ extension DateTimeExtension on DateTime {
   bool isLessThanTenHoursAgo({DateTime? other}) {
     other ??= DateTime.now();
     return other.difference(this) < const Duration(hours: 10);
+  }
+
+  String _formatDateWithLocale(BuildContext context, String pattern) {
+    final currentLanguageCode =
+        LocalizationService.currentLocale.value.languageCode;
+    return DateFormat(
+      pattern,
+      currentLanguageCode,
+    ).format(this);
   }
 }
