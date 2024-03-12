@@ -56,7 +56,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           valueListenable:
                               controller.openingChatViewStateNotifier,
                           builder: (context, viewState, __) {
-                            if (viewState is ViewEventListLoading) {
+                            if (viewState is ViewEventListLoading ||
+                                controller.timeline == null) {
                               return const ChatLoadingView();
                             }
 
