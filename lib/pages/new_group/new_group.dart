@@ -19,7 +19,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
 
   @override
   String getTitle(BuildContext context) {
-    return L10n.of(context)!.newGroupChat;
+    return L10n.of(context)!.addMembers;
   }
 
   @override
