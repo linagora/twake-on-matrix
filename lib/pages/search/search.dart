@@ -200,6 +200,9 @@ class SearchController extends State<Search>
   void dispose() {
     searchContactAndRecentChatController?.dispose();
     serverSearchController.dispose();
+    preSearchRecentContactsNotifier.dispose();
+    textEditingController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 

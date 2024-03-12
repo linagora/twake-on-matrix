@@ -51,7 +51,7 @@ class ContactsAppBar extends StatelessWidget {
                     Expanded(
                       child: TextField(
                         onTapOutside: (event) {
-                          dismissKeyboard();
+                          dismissKeyboard(context);
                         },
                         focusNode: searchFocusNode,
                         controller: textEditingController,
