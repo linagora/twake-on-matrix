@@ -648,6 +648,11 @@ class ChatController extends State<Chat>
 
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.copiedToClipboard,
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   void reportEventAction() async {
@@ -1142,6 +1147,9 @@ class ChatController extends State<Chat>
         iconAction: action.getIconData(
           unpin: isUnpinEvent(event),
         ),
+        imagePath: action.getImagePath(
+          unpin: isUnpinEvent(event),
+        ),
         colorIcon: action == ChatBottomSheetActions.pinChat && event.isPinned
             ? Theme.of(context).colorScheme.onSurface
             : null,
@@ -1458,7 +1466,7 @@ class ChatController extends State<Chat>
         onSelectMessage(event);
         break;
       case ChatContextMenuActions.copyMessage:
-        event.copy(context, timeline!);
+        copyEventsAction(event);
         break;
       case ChatContextMenuActions.pinChat:
         pinEventAction(event);

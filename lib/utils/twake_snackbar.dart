@@ -21,11 +21,14 @@ class TwakeSnackBarStyle {
 }
 
 class TwakeSnackBar {
-  static void show(BuildContext context, String message) {
+  static void show(BuildContext context, String message, {Duration? duration}) {
+    const Duration defaultDuration = Duration(milliseconds: 4000);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         width: TwakeSnackBarStyle.widthSnackBar(context),
         padding: TwakeSnackBarStyle.snackBarPadding,
+        duration: duration ?? defaultDuration,
         content: Text(
           message,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
