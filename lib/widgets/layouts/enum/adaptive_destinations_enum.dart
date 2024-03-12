@@ -25,7 +25,7 @@ enum AdaptiveDestinationEnum {
           icon: UnreadRoomsBadge(
             filter: (room) => !room.isSpace && !room.isStoryRoom,
           ),
-          label: L10n.of(context)!.chat,
+          label: L10n.of(context)!.chats,
         );
       case AdaptiveDestinationEnum.settings:
         return NavigationDestination(
@@ -39,7 +39,7 @@ enum AdaptiveDestinationEnum {
           icon: UnreadRoomsBadge(
             filter: (room) => !room.isSpace && !room.isStoryRoom,
           ),
-          label: L10n.of(context)!.chat,
+          label: L10n.of(context)!.chats,
         );
     }
   }
