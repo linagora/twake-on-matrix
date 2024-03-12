@@ -116,28 +116,36 @@ class _SliverContactsList extends StatelessWidget {
               if (controller.textEditingController.text.isEmpty) {
                 return const SliverToBoxAdapter(child: EmptyContactBody());
               } else {
-                return SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: ContactsTabViewStyle.padding,
-                      top: ContactsTabViewStyle.padding,
+                final presentationPhoneBookContact = controller
+                    .presentationPhonebookContactNotifier.value
+                    .getSuccessOrNull<PresentationContactsSuccess>();
+                if (presentationPhoneBookContact == null ||
+                    presentationPhoneBookContact.contacts.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: ContactsTabViewStyle.padding,
+                        top: ContactsTabViewStyle.padding,
+                      ),
+                      child: NoContactsFound(
+                        keyword: controller.textEditingController.text,
+                      ),
                     ),
-                    child: NoContactsFound(
-                      keyword: controller.textEditingController.text,
-                    ),
-                  ),
-                );
+                  );
+                }
               }
             }
 
-            return SliverExpandableList(
-              title: L10n.of(context)!.linagoraContactsCount(contacts.length),
-              itemCount: contacts.length,
-              itemBuilder: (context, index) => _Contact(
-                contact: contacts[index],
-                controller: controller,
-              ),
-            );
+            if (contacts.isNotEmpty) {
+              return SliverExpandableList(
+                title: L10n.of(context)!.linagoraContactsCount(contacts.length),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) => _Contact(
+                  contact: contacts[index],
+                  controller: controller,
+                ),
+              );
+            }
           }
 
           return child!;
