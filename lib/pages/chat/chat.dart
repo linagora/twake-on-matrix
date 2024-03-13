@@ -5,6 +5,7 @@ import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -762,14 +763,15 @@ class ChatController extends State<Chat>
   void forwardEventsAction({Event? event}) async {
     if (selectedEvents.isEmpty && event != null) {
       Matrix.of(context).shareContent =
-          event.getDisplayEvent(timeline!).content;
+          event.getDisplayEvent(timeline!).formatContentForwards();
       Logs().d(
         "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
       );
     } else {
-      Matrix.of(context).shareContentList = selectedEvents
-          .map((msg) => msg.getDisplayEvent(timeline!).content)
-          .toList();
+      Matrix.of(context).shareContentList = selectedEvents.map((msg) {
+        final content = msg.getDisplayEvent(timeline!).formatContentForwards();
+        return content;
+      }).toList();
       Logs().d(
         "forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}",
       );

@@ -113,6 +113,7 @@ class _MessageState extends State<Message> {
   }
 
   void _initialInviewState() {
+    if (!mounted) return;
     inViewState = InViewNotifierListCustom.of(context);
     inViewState?.addListener(_inviewStateListener);
     inViewState?.addContext(context: context, id: widget.event.eventId);
