@@ -40,6 +40,14 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                 onDestinationSelected: onDestinationSelected,
                 labelType: NavigationRailLabelType.all,
                 backgroundColor: Theme.of(context).colorScheme.surface,
+                selectedLabelTextStyle:
+                    AdaptiveScaffoldPrimaryNavigationStyle.labelTextStyle(
+                  context,
+                ),
+                unselectedLabelTextStyle:
+                    AdaptiveScaffoldPrimaryNavigationStyle.labelTextStyle(
+                  context,
+                ),
               ),
             ),
             Column(
