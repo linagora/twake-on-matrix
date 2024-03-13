@@ -6,6 +6,7 @@ import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dar
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
+import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -768,6 +769,9 @@ class ChatController extends State<Chat>
   }
 
   void forwardEventsAction({Event? event}) async {
+    if (event != null && !event.status.isAvailableToForwardEvent) {
+      return;
+    }
     if (selectedEvents.isEmpty && event != null) {
       Matrix.of(context).shareContent =
           event.getDisplayEvent(timeline!).formatContentForwards();
@@ -809,6 +813,9 @@ class ChatController extends State<Chat>
   void replyAction({
     Event? replyTo,
   }) {
+    if (replyTo?.status.isAvailableToForwardEvent == false) {
+      return;
+    }
     _updateReplyEvent(
       event: replyTo ?? selectedEvents.first,
     );
@@ -1331,9 +1338,12 @@ class ChatController extends State<Chat>
     openingPopupMenu.toggle();
   }
 
-  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
+  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder(
+    Event event,
+  ) {
     final listAction = [
-      ChatHorizontalActionMenu.reply,
+      if (event.status.isAvailableToForwardEvent)
+        ChatHorizontalActionMenu.reply,
       ChatHorizontalActionMenu.more,
     ];
     return listAction
@@ -1377,7 +1387,8 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.select,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
-      ChatContextMenuActions.forward,
+      if (event.status.isAvailableToForwardEvent)
+        ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
     ];
