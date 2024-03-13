@@ -429,7 +429,18 @@ class ChatController extends State<Chat>
 
   void updateView() {
     if (!mounted) return;
+    final events = timeline?.events ?? [];
+    for (final event in events) {
+      _cleanCancelTokenMap(event);
+    }
     setState(() {});
+  }
+
+  void _cleanCancelTokenMap(Event event) {
+    if (event.status == EventStatus.sent &&
+        mediaCancelTokenMapNotifier.value[event.body] != null) {
+      mediaCancelTokenMapNotifier.value.remove(event.body);
+    }
   }
 
   void onBackPress() {

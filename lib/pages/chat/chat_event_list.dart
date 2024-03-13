@@ -147,8 +147,6 @@ class ChatEventList extends StatelessWidget {
                       ? controller.timeline!.events[currentEventIndex + 1]
                       : null;
 
-                  _cleanCancelTokenMap(event);
-
                   return AutoScrollTag(
                     key: ValueKey(event.eventId),
                     index: index,
@@ -209,13 +207,6 @@ class ChatEventList extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _cleanCancelTokenMap(Event event) {
-    if (event.status == EventStatus.sent &&
-        controller.mediaCancelTokenMapNotifier.value[event.body] != null) {
-      controller.mediaCancelTokenMapNotifier.value.remove(event.body);
-    }
   }
 
   Future<void> _cancelSending({

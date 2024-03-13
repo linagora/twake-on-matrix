@@ -40,7 +40,9 @@ class SendMediaInteractor {
           fakeImageEvent: fakeSendingFileInfo.fakeImageEvent,
           shrinkImageMaxDimension: 1600,
           txid: txId,
-          cancelToken: cancelTokens[fileIndex],
+          cancelToken: cancelTokens.asMap().containsKey(fileIndex)
+              ? cancelTokens[fileIndex]
+              : null,
         );
       }
       if (messageID != null && msgEventContent != null) {
