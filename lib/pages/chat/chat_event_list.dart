@@ -217,11 +217,13 @@ class ChatEventList extends StatelessWidget {
       'SendingImageInfoWidget:: _cancelSending: cancelling ${event.body} sending',
     );
 
+    final cancelTokenMapKey = "${event.eventId}_${event.body}";
+
     final cancelToken =
-        controller.mediaCancelTokenMapNotifier.value[event.body];
+        controller.mediaCancelTokenMapNotifier.value[cancelTokenMapKey];
 
     cancelToken?.cancel();
-    controller.mediaCancelTokenMapNotifier.value.remove(event.body);
+    controller.mediaCancelTokenMapNotifier.value.remove(cancelTokenMapKey);
     try {
       await event.remove();
     } catch (e) {

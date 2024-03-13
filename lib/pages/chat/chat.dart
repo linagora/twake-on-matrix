@@ -437,9 +437,11 @@ class ChatController extends State<Chat>
   }
 
   void _cleanCancelTokenMap(Event event) {
+    final cancelTokenMapKey = "${event.eventId}_${event.body}";
+
     if (event.status == EventStatus.sent &&
-        mediaCancelTokenMapNotifier.value[event.body] != null) {
-      mediaCancelTokenMapNotifier.value.remove(event.body);
+        mediaCancelTokenMapNotifier.value[cancelTokenMapKey] != null) {
+      mediaCancelTokenMapNotifier.value.remove(cancelTokenMapKey);
     }
   }
 
@@ -1320,23 +1322,12 @@ class ChatController extends State<Chat>
   }
 
   void _onSendTap(ImagePickerGridController imagePickerController) {
-    mediaCancelTokenMapNotifier.value = {};
-    final tempMap = <String, CancelToken>{};
-
-    for (final selection in imagePickerController.selectedAssets) {
-      final fileName = selection.asset.title;
-      if (fileName != null) {
-        tempMap[fileName] = CancelToken();
-      }
-    }
-
-    mediaCancelTokenMapNotifier.value = tempMap;
-
     sendMedia(
       imagePickerController,
       room: room,
       caption: _captionsController.text,
-      cancelTokens: mediaCancelTokenMapNotifier.value.values.toList(),
+      cancelMapCallback: (cancelMap) =>
+          mediaCancelTokenMapNotifier.value.addAll(cancelMap),
     );
   }
 

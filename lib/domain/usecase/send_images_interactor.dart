@@ -8,7 +8,7 @@ class SendMediaInteractor {
     required Room room,
     required List<FileAssetEntity> entities,
     String? caption,
-    List<CancelToken> cancelTokens = const [],
+    void Function(Map<String, CancelToken>)? cancelMapCallback,
   }) async {
     try {
       final txIdMapToFileInfo = await room.sendPlaceholdersForImagePickerFiles(
@@ -26,13 +26,18 @@ class SendMediaInteractor {
         );
       }
 
-      for (final txId in txIdMapToFileInfo.keys) {
-        final fileIndex = txIdMapToFileInfo.keys.toList().indexOf(txId);
+      final cancelTokenMap = <String, CancelToken>{};
 
+      for (final txId in txIdMapToFileInfo.keys) {
         final fakeSendingFileInfo = txIdMapToFileInfo[txId];
         if (fakeSendingFileInfo == null) {
           continue;
         }
+
+        final cancelTokenMapKey =
+            "${txId}_${fakeSendingFileInfo.fileInfo.fileName}";
+
+        cancelTokenMap[cancelTokenMapKey] = CancelToken();
 
         room.sendFileEvent(
           fakeSendingFileInfo.fileInfo,
@@ -40,11 +45,12 @@ class SendMediaInteractor {
           fakeImageEvent: fakeSendingFileInfo.fakeImageEvent,
           shrinkImageMaxDimension: 1600,
           txid: txId,
-          cancelToken: cancelTokens.asMap().containsKey(fileIndex)
-              ? cancelTokens[fileIndex]
-              : null,
+          cancelToken: cancelTokenMap[cancelTokenMapKey],
         );
       }
+
+      if (cancelMapCallback != null) cancelMapCallback(cancelTokenMap);
+
       if (messageID != null && msgEventContent != null) {
         await room.sendMessageContent(
           EventTypes.Message,
