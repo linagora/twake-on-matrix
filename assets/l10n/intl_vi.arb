@@ -477,7 +477,7 @@
   "@yourChatBackupHasBeenSetUp": {},
   "chatHasBeenAddedToThisSpace": "Cuộc trò chuyện đã được thêm vào",
   "@chatHasBeenAddedToThisSpace": {},
-  "chats": "Cuộc trò chuyện",
+  "chats": "Tin nhắn",
   "@chats": {
     "type": "text",
     "placeholders": {}
