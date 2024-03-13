@@ -31,51 +31,10 @@ class ChatInputRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: controller.selectMode
-          ? <Widget>[
-              SizedBox(
-                height: ChatInputRowStyle.chatInputRowHeight,
-                child: TextButton(
-                  onPressed: controller.forwardEventsAction,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      const Icon(Icons.keyboard_arrow_left_outlined),
-                      Text(L10n.of(context)!.forward),
-                    ],
-                  ),
-                ),
+          ? [
+              ActionSelectModeWidget(
+                controller: controller,
               ),
-              controller.selectedEvents.length == 1
-                  ? controller.selectedEvents.first
-                          .getDisplayEvent(controller.timeline!)
-                          .status
-                          .isSent
-                      ? SizedBox(
-                          height: ChatInputRowStyle.chatInputRowHeight,
-                          child: TextButton(
-                            onPressed: controller.replyAction,
-                            child: Row(
-                              children: <Widget>[
-                                Text(L10n.of(context)!.reply),
-                                const Icon(Icons.keyboard_arrow_right),
-                              ],
-                            ),
-                          ),
-                        )
-                      : SizedBox(
-                          height: ChatInputRowStyle.chatInputRowHeight,
-                          child: TextButton(
-                            onPressed: controller.sendAgainAction,
-                            child: Row(
-                              children: <Widget>[
-                                Text(L10n.of(context)!.tryToSendAgain),
-                                const SizedBox(width: 4),
-                                SvgPicture.asset(ImagePaths.icSend),
-                              ],
-                            ),
-                          ),
-                        )
-                  : Container(),
             ]
           : <Widget>[
               if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
@@ -168,6 +127,81 @@ class ChatInputRow extends StatelessWidget {
             .copyWith(letterSpacing: -0.15),
       ),
       onChanged: controller.onInputBarChanged,
+    );
+  }
+}
+
+class ActionSelectModeWidget extends StatelessWidget {
+  final ChatController controller;
+
+  const ActionSelectModeWidget({
+    super.key,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (controller.selectedEvents.first
+              .getDisplayEvent(controller.timeline!)
+              .status
+              .isSent)
+            SizedBox(
+              height: ChatInputRowStyle.chatInputRowHeight,
+              child: TextButton(
+                onPressed: controller.forwardEventsAction,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    const Icon(Icons.keyboard_arrow_left_outlined),
+                    Text(L10n.of(context)!.forward),
+                  ],
+                ),
+              ),
+            ),
+          if (controller.selectedEvents.length == 1) ...[
+            if (controller.selectedEvents.first
+                .getDisplayEvent(controller.timeline!)
+                .status
+                .isSent) ...[
+              SizedBox(
+                height: ChatInputRowStyle.chatInputRowHeight,
+                child: TextButton(
+                  onPressed: controller.replyAction,
+                  child: Row(
+                    children: <Widget>[
+                      Text(L10n.of(context)!.reply),
+                      const Icon(Icons.keyboard_arrow_right),
+                    ],
+                  ),
+                ),
+              ),
+            ] else if (controller.selectedEvents.first
+                .getDisplayEvent(controller.timeline!)
+                .status
+                .isError) ...[
+              SizedBox(
+                height: ChatInputRowStyle.chatInputRowHeight,
+                child: TextButton(
+                  onPressed: controller.sendAgainAction,
+                  child: Row(
+                    children: <Widget>[
+                      Text(L10n.of(context)!.tryToSendAgain),
+                      const SizedBox(width: 4),
+                      SvgPicture.asset(ImagePaths.icSend),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox.shrink(),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }

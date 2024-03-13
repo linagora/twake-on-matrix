@@ -176,8 +176,8 @@ class ChatEventList extends StatelessWidget {
                             onHover: (isHover, event) =>
                                 controller.onHover(isHover, index, event),
                             isHoverNotifier: controller.focusHover,
-                            listHorizontalActionMenu:
-                                controller.listHorizontalActionMenuBuilder(),
+                            listHorizontalActionMenu: controller
+                                .listHorizontalActionMenuBuilder(event),
                             onMenuAction: controller.handleHorizontalActionMenu,
                             hideKeyboardChatScreen:
                                 controller.onHideKeyboardAndEmoji,

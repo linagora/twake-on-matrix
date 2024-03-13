@@ -29,16 +29,26 @@ typedef OnMenuAction = Function(
   TapDownDetails,
 );
 
+typedef OnSwipe = void Function(SwipeDirection);
+
+typedef OnHover = void Function(bool, Event);
+
+typedef OnSelect = void Function(Event);
+
+typedef OnTapAvatar = void Function(Event);
+
+typedef OnScrollToEventId = void Function(String);
+
 class Message extends StatefulWidget {
   final Event event;
   final Event? previousEvent;
   final Event? nextEvent;
   final String? markedUnreadLocation;
-  final void Function(Event)? onSelect;
-  final void Function(Event)? onAvatarTap;
-  final void Function(String)? scrollToEventId;
-  final void Function(SwipeDirection)? onSwipe;
-  final void Function(bool, Event)? onHover;
+  final OnSelect? onSelect;
+  final OnTapAvatar? onAvatarTap;
+  final OnScrollToEventId? scrollToEventId;
+  final OnSwipe? onSwipe;
+  final OnHover? onHover;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
