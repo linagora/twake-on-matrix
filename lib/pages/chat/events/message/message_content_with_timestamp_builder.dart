@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
@@ -90,7 +91,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             child: MultiPlatformSelectionMode(
               event: event,
               isClickable: responsiveUtils.isMobileOrTablet(context),
-              onLongPress: onLongPress,
+              onLongPress: event.status.isAvailable ? onLongPress : null,
               child: Stack(
                 alignment: event.isOwnMessage
                     ? AlignmentDirectional.bottomStart
@@ -191,7 +192,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             ),
           ),
         ),
-        if (!event.isOwnMessage) _menuActionsRowBuilder(context),
+        if (!event.isOwnMessage && event.status.isAvailable)
+          _menuActionsRowBuilder(context),
       ],
     );
   }
