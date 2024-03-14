@@ -18,9 +18,9 @@ class MessageContentBuilder extends StatelessWidget {
   final BoxConstraints availableBubbleContraints;
   final void Function(String)? scrollToEventId;
   final void Function(Event)? onSelect;
+  final void Function()? onUploadCancel;
   final Event? nextEvent;
   final bool selectMode;
-
   const MessageContentBuilder({
     super.key,
     required this.event,
@@ -30,6 +30,7 @@ class MessageContentBuilder extends StatelessWidget {
     this.nextEvent,
     this.scrollToEventId,
     this.selectMode = true,
+    this.onUploadCancel,
   });
 
   @override
@@ -95,6 +96,7 @@ class MessageContentBuilder extends StatelessWidget {
                       : null,
                   onTapPreview: !selectMode ? () {} : null,
                   ownMessage: event.isOwnMessage,
+                  onUploadCancel: onUploadCancel,
                 ),
                 if (event.timelineOverlayMessage)
                   Positioned(

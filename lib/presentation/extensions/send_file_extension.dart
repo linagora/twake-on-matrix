@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dio/dio.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -28,6 +29,7 @@ typedef FakeImageEvent = SyncUpdate;
 extension SendFileExtension on Room {
   Future<String?> sendFileEvent(
     FileInfo fileInfo, {
+    CancelToken? cancelToken,
     String msgType = MessageTypes.Image,
     SyncUpdate? fakeImageEvent,
     String? txid,
@@ -188,7 +190,10 @@ extension SendFileExtension on Room {
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
         final mediaApi = getIt.get<MediaAPI>();
-        final response = await mediaApi.uploadFile(fileInfo: tempfileInfo);
+        final response = await mediaApi.uploadFile(
+          fileInfo: tempfileInfo,
+          cancelToken: cancelToken,
+        );
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
@@ -201,6 +206,7 @@ extension SendFileExtension on Room {
                   : thumbnail.filePath,
               thumbnail.fileSize,
             ),
+            cancelToken: cancelToken,
           );
           thumbnailUploadResp =
               Uri.tryParse(thumbnailResponse.contentUri ?? "");
@@ -214,6 +220,12 @@ extension SendFileExtension on Room {
         Logs().e('Error: $e');
         rethrow;
       } catch (e) {
+        if (CancelToken.isCancel(e as DioException)) {
+          Logs().d(
+            'SendImage:: sendFileEvent(): upload cancelled',
+          );
+          return null;
+        }
         await _updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,

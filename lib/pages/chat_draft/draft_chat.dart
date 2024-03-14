@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:dio/dio.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -116,10 +117,15 @@ class DraftChatController extends State<DraftChat>
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
+    void Function(Map<String, CancelToken>)? cancelMapCallback,
   }) {
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        super.sendMedia(imagePickerController, room: newRoom);
+        super.sendMedia(
+          imagePickerController,
+          room: newRoom,
+          cancelMapCallback: cancelMapCallback,
+        );
       },
     );
   }
@@ -307,8 +313,12 @@ class DraftChatController extends State<DraftChat>
         type: action,
         context: context,
       ),
-      onSendTap: () => sendMedia(imagePickerController),
-      onCameraPicked: (_) => sendMedia(imagePickerController),
+      onSendTap: () => sendMedia(
+        imagePickerController,
+      ),
+      onCameraPicked: (_) => sendMedia(
+        imagePickerController,
+      ),
       typeAheadKey: _draftChatMediaPickerTypeAheadKey,
     );
   }

@@ -18,6 +18,7 @@ class SendingImageInfoWidget extends StatelessWidget {
     required this.event,
     required this.displayImageInfo,
     this.onTapPreview,
+    this.onUploadCancel,
   });
 
   final MatrixImageFile matrixFile;
@@ -25,6 +26,8 @@ class SendingImageInfoWidget extends StatelessWidget {
   final Event event;
 
   final void Function()? onTapPreview;
+
+  final void Function()? onUploadCancel;
 
   final ValueNotifier<double> sendingFileProgressNotifier = ValueNotifier(0);
 
@@ -70,9 +73,12 @@ class SendingImageInfoWidget extends StatelessWidget {
                   strokeWidth: 2,
                   color: LinagoraRefColors.material().primary[100],
                 ),
-                Icon(
-                  Icons.close,
-                  color: LinagoraRefColors.material().primary[100],
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: LinagoraRefColors.material().primary[100],
+                  ),
+                  onPressed: onUploadCancel,
                 ),
               ],
             ],

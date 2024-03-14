@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
@@ -176,6 +177,9 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
+  final ValueNotifier<Map<String, CancelToken>> mediaCancelTokenMapNotifier =
+      ValueNotifier({});
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
@@ -433,7 +437,20 @@ class ChatController extends State<Chat>
 
   void updateView() {
     if (!mounted) return;
+    final events = timeline?.events ?? [];
+    for (final event in events) {
+      _cleanCancelTokenMap(event);
+    }
     setState(() {});
+  }
+
+  void _cleanCancelTokenMap(Event event) {
+    final cancelTokenMapKey = "${event.eventId}_${event.body}";
+
+    if (event.status == EventStatus.sent &&
+        mediaCancelTokenMapNotifier.value[cancelTokenMapKey] != null) {
+      mediaCancelTokenMapNotifier.value.remove(cancelTokenMapKey);
+    }
   }
 
   void onBackPress() {
@@ -1303,17 +1320,23 @@ class ChatController extends State<Chat>
         context: context,
       ),
       onSendTap: () {
-        sendMedia(
-          imagePickerController,
-          room: room,
-          caption: _captionsController.text,
-        );
+        _onSendTap(imagePickerController);
         _captionsController.clear();
       },
-      onCameraPicked: (_) => sendMedia(imagePickerController, room: room),
+      onCameraPicked: (_) => _onSendTap(imagePickerController),
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
       typeAheadKey: _chatMediaPickerTypeAheadKey,
+    );
+  }
+
+  void _onSendTap(ImagePickerGridController imagePickerController) {
+    sendMedia(
+      imagePickerController,
+      room: room,
+      caption: _captionsController.text,
+      cancelMapCallback: (cancelMap) =>
+          mediaCancelTokenMapNotifier.value.addAll(cancelMap),
     );
   }
 

@@ -22,6 +22,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
+  final void Function()? onUploadCancel;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -47,6 +48,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.onMenuAction,
     this.menuChildren,
     this.focusNode,
+    this.onUploadCancel,
   });
 
   @override
@@ -140,6 +142,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                       nextEvent: nextEvent,
                                       scrollToEventId: scrollToEventId,
                                       selectMode: selectMode,
+                                      onUploadCancel: onUploadCancel,
                                     ),
                                     if (timelineText)
                                       Positioned(

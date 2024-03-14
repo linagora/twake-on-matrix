@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -145,6 +146,7 @@ class ChatEventList extends StatelessWidget {
                   final nextEvent = index < controller.timeline!.events.length
                       ? controller.timeline!.events[currentEventIndex + 1]
                       : null;
+
                   return AutoScrollTag(
                     key: ValueKey(event.eventId),
                     index: index,
@@ -188,6 +190,10 @@ class ChatEventList extends StatelessWidget {
                                 event.originServerTs,
                               );
                             },
+                            onUploadCancel: () => _cancelSending(
+                              context: context,
+                              event: event,
+                            ),
                           )
                         : const SizedBox(),
                   );
@@ -201,6 +207,36 @@ class ChatEventList extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _cancelSending({
+    required BuildContext context,
+    required Event event,
+  }) async {
+    Logs().d(
+      'SendingImageInfoWidget:: _cancelSending: cancelling ${event.body} sending',
+    );
+
+    final cancelTokenMapKey = "${event.eventId}_${event.body}";
+
+    final cancelToken =
+        controller.mediaCancelTokenMapNotifier.value[cancelTokenMapKey];
+
+    cancelToken?.cancel();
+    controller.mediaCancelTokenMapNotifier.value.remove(cancelTokenMapKey);
+    try {
+      await event.remove();
+    } catch (e) {
+      Logs().e(
+        'SendingImageInfoWidget:: _cancelSending: unable to cancel sending',
+        e,
+      );
+
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.cannotCancelImageUpload,
+      );
+    }
   }
 
   Widget _chatEmptyBuilder(Timeline timeline) {

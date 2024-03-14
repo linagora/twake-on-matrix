@@ -39,6 +39,7 @@ class Message extends StatefulWidget {
   final void Function(String)? scrollToEventId;
   final void Function(SwipeDirection)? onSwipe;
   final void Function(bool, Event)? onHover;
+  final void Function()? onUploadCancel;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -71,6 +72,7 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
+    this.onUploadCancel,
   }) : super(key: key);
 
   /// Indicates wheither the user may use a mouse instead
@@ -189,6 +191,7 @@ class _MessageState extends State<Message> {
               onMenuAction: widget.onMenuAction,
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
+              onUploadCancel: widget.onUploadCancel,
             ),
           ),
         ];
