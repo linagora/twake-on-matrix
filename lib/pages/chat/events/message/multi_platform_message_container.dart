@@ -24,6 +24,9 @@ class MultiPlatformsMessageContainer extends StatelessWidget {
         onHover: (event) {
           onHover(true);
         },
+        onExit: (event) {
+          onHover(false);
+        },
       );
     }
     return InkWell(
