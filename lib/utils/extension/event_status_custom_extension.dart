@@ -1,7 +1,7 @@
 import 'package:matrix/matrix.dart';
 
 extension EventStatusCustomExtension on EventStatus {
-  bool get isAvailableToForwardEvent {
+  bool get isAvailable {
     return !isError && !isSending;
   }
 }

@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -241,6 +242,9 @@ class _MessageState extends State<Message> {
             MultiPlatformsMessageContainer(
               onTap: widget.hideKeyboardChatScreen,
               onHover: (hover) {
+                if (!widget.event.status.isAvailable) {
+                  return;
+                }
                 if (widget.onHover != null) {
                   widget.onHover!(hover, widget.event);
                 }
@@ -260,12 +264,14 @@ class _MessageState extends State<Message> {
                         : CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
-                        onLongPress: () => widget.selectMode
-                            ? widget.onSelect!(widget.event)
-                            : null,
-                        onTap: () => widget.selectMode
-                            ? widget.onSelect!(widget.event)
-                            : widget.hideKeyboardChatScreen?.call(),
+                        onLongPress: () =>
+                            widget.selectMode && widget.event.status.isAvailable
+                                ? widget.onSelect!(widget.event)
+                                : null,
+                        onTap: () =>
+                            widget.selectMode && widget.event.status.isAvailable
+                                ? widget.onSelect!(widget.event)
+                                : widget.hideKeyboardChatScreen?.call(),
                         child: Center(
                           child: Container(
                             padding: EdgeInsets.only(
@@ -279,7 +285,11 @@ class _MessageState extends State<Message> {
                               top: widget.selected ? 0 : 1.0,
                               bottom: widget.selected ? 0 : 1.0,
                             ),
-                            child: _messageSelectedWidget(context, row),
+                            child: _messageSelectedWidget(
+                              context,
+                              row,
+                              widget.event,
+                            ),
                           ),
                         ),
                       ),
@@ -318,7 +328,11 @@ class _MessageState extends State<Message> {
     return const SizedBox(width: MessageStyle.avatarSize);
   }
 
-  Widget _messageSelectedWidget(BuildContext context, Widget child) {
+  Widget _messageSelectedWidget(
+    BuildContext context,
+    Widget child,
+    Event event,
+  ) {
     return Container(
       padding: EdgeInsets.only(
         left: widget.selectMode ? 12.0 : 8.0,
@@ -331,7 +345,7 @@ class _MessageState extends State<Message> {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          if (widget.selectMode)
+          if (widget.selectMode && event.status.isAvailable)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Padding(

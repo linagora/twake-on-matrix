@@ -769,7 +769,7 @@ class ChatController extends State<Chat>
   }
 
   void forwardEventsAction({Event? event}) async {
-    if (event != null && !event.status.isAvailableToForwardEvent) {
+    if (event != null && !event.status.isAvailable) {
       return;
     }
     if (selectedEvents.isEmpty && event != null) {
@@ -813,7 +813,7 @@ class ChatController extends State<Chat>
   void replyAction({
     Event? replyTo,
   }) {
-    if (replyTo?.status.isAvailableToForwardEvent == false) {
+    if (replyTo?.status.isAvailable == false) {
       return;
     }
     _updateReplyEvent(
@@ -1342,8 +1342,7 @@ class ChatController extends State<Chat>
     Event event,
   ) {
     final listAction = [
-      if (event.status.isAvailableToForwardEvent)
-        ChatHorizontalActionMenu.reply,
+      if (event.status.isAvailable) ChatHorizontalActionMenu.reply,
       ChatHorizontalActionMenu.more,
     ];
     return listAction
@@ -1387,8 +1386,7 @@ class ChatController extends State<Chat>
       ChatContextMenuActions.select,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
-      if (event.status.isAvailableToForwardEvent)
-        ChatContextMenuActions.forward,
+      if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
     ];
