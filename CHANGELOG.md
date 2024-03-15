@@ -1,3 +1,30 @@
+## [2.4.20+2330] - 2024-03-15
+### Fixed
+- \#1480 Try to request more history when open room first time
+- \#1400 some permission is applied to all member in group chat
+- \#1503 Update time format for same week
+- \#1469 Cursor for composer when reply message
+- \#1498 Improve preview to make jump to chat exactly
+- \#1442 Consistent Context menu style
+- \#1519 Automatically synchronize pin/unpin
+- \#1439 Change avatar size for group information
+- \#1499 Add Download option to video player
+- \#1406 Go back in Search inside chat
+- \#1551 Remove Duplicated contact base on the format
+- \#1414 Do SSO in the same window of the app, prevent show popup
+- \#984 App Grid
+- \#1504 prevent show notification in web if chat is muted
+- \#1524 Remove hover in timestamp/time block in chat
+- \#1539 Condition to prevent show no result when still have result in search
+- \#1545 Dismiss keyboard in multiple screen have focus
+- \#1421 Update texts term in UI
+- \#1553 Remove content\_related when forwarding
+- \#1527 Can not jump to the bottom after jump from shared media or links
+- \#1369 Bottom action menu for Pin screen in mobile
+- \#1380 Try to sync when web app get focus
+- \#1543 Can not attach file in iOS
+- Translate French, German, Russuan, Vietnamese
+
 ## [2.4.19+2330] - 2024-02-27
 ### Fixed
 - \#1457 Handle predictive back
@@ -2235,6 +2262,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.4.20+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.20
 [2.4.19+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.19
 [2.4.18+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.18
 
