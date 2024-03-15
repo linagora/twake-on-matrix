@@ -40,6 +40,7 @@ mixin SendFilesMixin {
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
       withReadStream: true,
+      allowMultiple: true,
     );
     fileInfos ??= result?.files
         .map(
