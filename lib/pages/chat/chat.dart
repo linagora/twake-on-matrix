@@ -1599,7 +1599,9 @@ class ChatController extends State<Chat>
           Logs().d(
             'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
           );
-          stickyTimestampNotifier.value = dateTime;
+          _updateStickyTimestampNotifier(
+            dateTime: dateTime,
+          );
         }
       }
     });
@@ -1618,7 +1620,7 @@ class ChatController extends State<Chat>
 
   void _handleHideStickyTimestamp() {
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
-    stickyTimestampNotifier.value = null;
+    _updateStickyTimestampNotifier();
   }
 
   void handleScrollEndNotification() {
@@ -1656,12 +1658,20 @@ class ChatController extends State<Chat>
 
     if (allMembershipEvents || canRequestHistory) {
       try {
-        await requestHistory(historyCount: _defaultEventCountDisplay);
+        await requestHistory(historyCount: _defaultEventCountDisplay)
+            .then((response) {
+          Logs().d(
+            'Chat::_tryRequestHistory():: Try request history success',
+          );
+        });
       } catch (e) {
         Logs().e(
           'Chat::_tryRequestHistory():: Error - $e',
         );
+      } finally {
+        _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
       }
+    } else {
       _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
     }
   }
@@ -1744,6 +1754,18 @@ class ChatController extends State<Chat>
       isUnpin: isUnpin,
       eventId: eventId,
     );
+  }
+
+  void _updateStickyTimestampNotifier({
+    DateTime? dateTime,
+  }) {
+    try {
+      stickyTimestampNotifier.value = dateTime;
+    } on FlutterError catch (e) {
+      Logs().e(
+        'Chat::_updateStickyTimestampNotifier():: FlutterError - $e',
+      );
+    }
   }
 
   @override
