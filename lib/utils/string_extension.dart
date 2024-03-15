@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -151,63 +150,6 @@ extension StringCasingExtension on String {
     return this == thatEventId ||
         timeline.events.indexOf(secondEvent) >
             timeline.events.indexOf(firstEvent);
-  }
-
-  MimeType toMimeTypeEnum() {
-    switch (this) {
-      case 'image/jpeg':
-        return MimeType.JPEG;
-      case 'image/png':
-        return MimeType.PNG;
-      case 'image/gif':
-        return MimeType.GIF;
-      case 'image/bmp':
-        return MimeType.BMP;
-      case 'video/mpeg':
-        return MimeType.MPEG;
-      case 'video/x-msvideo':
-        return MimeType.AVI;
-      case 'audio/mpeg':
-        return MimeType.MP3;
-      case 'audio/aac':
-        return MimeType.AAC;
-      case 'application/pdf':
-        return MimeType.PDF;
-      case 'application/epub+zip':
-        return MimeType.EPUB;
-      case 'application/json':
-        return MimeType.JSON;
-      case 'font/otf':
-        return MimeType.OTF;
-      case 'font/ttf':
-        return MimeType.TTF;
-      case 'application/zip':
-        return MimeType.ZIP;
-      case 'application/vnd.oasis.opendocument.presentation':
-        return MimeType.OPENDOCPRESENTATION;
-      case 'application/vnd.oasis.opendocument.text':
-        return MimeType.OPENDOCTEXT;
-      case 'application/vnd.oasis.opendocument.spreadsheet':
-        return MimeType.OPENDOCSHEETS;
-      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        return MimeType.MICROSOFTEXCEL;
-      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        return MimeType.MICROSOFTPRESENTATION;
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return MimeType.MICROSOFTWORD;
-      case 'application/vnd.etsi.asic-e+zip':
-        return MimeType.ASICE;
-      case 'application/vnd.etsi.asic-s+zip':
-        return MimeType.ASICS;
-      case 'application/octet-stream':
-        return MimeType.OTHER;
-      case 'text/plain':
-        return MimeType.TEXT;
-      case 'text/csv':
-        return MimeType.CSV;
-      default:
-        return MimeType.OTHER;
-    }
   }
 
   bool containsWord(String word) {

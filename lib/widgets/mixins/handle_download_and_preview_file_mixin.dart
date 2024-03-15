@@ -181,14 +181,14 @@ mixin HandleDownloadAndPreviewFileMixin {
   }
 
   void previewPdfWeb(BuildContext context, Event event) async {
-    final pdf = await event.getFile(context);
-    if (pdf.result == null || event.sizeString != pdf.result?.sizeString) {
+    final pdf = await event.downloadAndDecryptAttachment();
+    if (event.sizeString != pdf.sizeString) {
       TwakeSnackBar.show(context, L10n.of(context)!.errorGettingPdf);
 
       return;
     }
 
-    final blob = html.Blob([pdf.result!.bytes], 'application/pdf');
+    final blob = html.Blob([pdf.bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);
     html.window.open(url, "_blank");
     html.Url.revokeObjectUrl(url);
