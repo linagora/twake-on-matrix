@@ -1,11 +1,13 @@
-import 'package:fluffychat/pages/user_bottom_sheet/user_bottom_sheet.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
-
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 
 class ParticipantListItem extends StatelessWidget {
   final User user;
@@ -36,17 +38,124 @@ class ParticipantListItem extends StatelessWidget {
       opacity: user.membership == Membership.join ? 1 : 0.5,
       child: ListTile(
         onTap: () async {
-          final result = await showAdaptiveBottomSheet(
-            context: context,
-            builder: (c) => UserBottomSheet(
-              user: user,
-              outerContext: context,
-            ),
-          );
-          if (result is ChatMembersStatus) {
-            if (result == ChatMembersStatus.updated) {
-              onUpdatedMembers?.call();
-            }
+          if (PlatformInfos.isMobile) {
+            await showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              builder: (c) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 4,
+                            width: 32,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: LinagoraSysColors.material().outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                context.go(
+                                  '/rooms/profileinfo/${user.room.id}/${user.id}',
+                                );
+                              },
+                              icon: Icon(
+                                Icons.person_search,
+                                color: LinagoraSysColors.material().onSurface,
+                              ),
+                              label: L10n.of(context)?.viewProfile != null
+                                  ? Row(
+                                      children: [
+                                        Text(
+                                          L10n.of(context)!.viewProfile,
+                                          style: TextStyle(
+                                            color: LinagoraSysColors.material()
+                                                .onSurface,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ),
+                        ],
+                      ),
+                      // TODO: share button
+                      /*TextButton.icon(
+                        onPressed: () {
+                          // Action pour le premier bouton
+                        },
+                        icon: Icon(Icons.share),
+                        label: Text('Partager'),
+                      ),*/
+                    ],
+                  ),
+                );
+              },
+            );
+          } else {
+            await showDialog(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                contentPadding: const EdgeInsets.all(0),
+                backgroundColor: LinagoraRefColors.material().primary[100],
+                surfaceTintColor: Colors.transparent,
+                content: SizedBox(
+                  width: 448,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: IconButton(
+                                onPressed: () => dialogContext.pop(),
+                                icon: const Icon(Icons.close),
+                              ),
+                            ),
+                          ),
+                          ProfileInfoBody(
+                            user: user,
+                            parentContext: context,
+                            onNewChatOpen: () {
+                              dialogContext.pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
           }
         },
         title: Row(
