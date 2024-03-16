@@ -3078,4 +3078,7 @@
   "@unselect": {},
   "searchContacts": "Rechercher des contacts",
   "@searchContacts": {}
+  "phone": "Téléphone",
+  "viewProfile": "Voir le profil",
+  "profileInfo": "Informations du profil"
 }
