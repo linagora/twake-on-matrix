@@ -12,21 +12,21 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfoShared extends StatefulWidget {
+class ChatProfileInfoShared extends StatefulWidget {
   final String roomId;
   final VoidCallback? closeRightColumn;
 
-  const ProfileInfoShared({
+  const ChatProfileInfoShared({
     super.key,
     required this.roomId,
     this.closeRightColumn,
   });
 
   @override
-  State<ProfileInfoShared> createState() => ProfileInfoSharedController();
+  State<ChatProfileInfoShared> createState() => ChatProfileInfoSharedController();
 }
 
-class ProfileInfoSharedController extends State<ProfileInfoShared>
+class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
@@ -67,7 +67,7 @@ class ProfileInfoSharedController extends State<ProfileInfoShared>
                     ? const SizedBox()
                     : ChatDetailsMediaPage(
                         key: const PageStorageKey(
-                          'ProfileInfoSharedMedia',
+                          'ChatProfileInfoSharedMedia',
                         ),
                         controller: mediaListController!,
                         handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
@@ -81,7 +81,7 @@ class ProfileInfoSharedController extends State<ProfileInfoShared>
                     ? const SizedBox()
                     : ChatDetailsLinksPage(
                         key: const PageStorageKey(
-                          'ProfileInfoSharedLinks',
+                          'ChatProfileInfoSharedLinks',
                         ),
                         controller: linksListController!,
                       ),
@@ -164,7 +164,7 @@ class ProfileInfoSharedController extends State<ProfileInfoShared>
 
   @override
   Widget build(BuildContext context) {
-    return ProfileInfoSharedView(
+    return ChatProfileInfoSharedView(
       controller: this,
     );
   }
