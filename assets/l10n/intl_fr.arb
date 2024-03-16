@@ -3077,7 +3077,7 @@
   "unselect": "Désélectionner",
   "@unselect": {},
   "searchContacts": "Rechercher des contacts",
-  "@searchContacts": {}
+  "@searchContacts": {},
   "phone": "Téléphone",
   "viewProfile": "Voir le profil",
   "profileInfo": "Informations du profil"
