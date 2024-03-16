@@ -19,10 +19,10 @@ import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
-class ProfileInfoView extends StatelessWidget {
-  final ProfileInfoController controller;
+class ChatProfileInfoView extends StatelessWidget {
+  final ChatProfileInfoController controller;
 
-  const ProfileInfoView(
+  const ChatProfileInfoView(
     this.controller, {
     super.key,
   });
