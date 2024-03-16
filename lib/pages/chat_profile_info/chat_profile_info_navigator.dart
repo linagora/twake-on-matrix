@@ -5,19 +5,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 
-class ProfileInfoRoutes {
+class ChatProfileInfoRoutes {
   static const String profileInfo = '/profileInfo';
   static const String profileInfoShared = 'profileInfo/shared';
 }
 
-class ProfileInfoNavigator extends StatelessWidget {
+class ChatProfileInfoNavigator extends StatelessWidget {
   final VoidCallback? onBack;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
   final bool isDraftInfo;
 
-  const ProfileInfoNavigator({
+  const ChatProfileInfoNavigator({
     Key? key,
     this.onBack,
     this.roomId,
@@ -29,7 +29,7 @@ class ProfileInfoNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (PlatformInfos.isMobile) {
-      return ProfileInfo(
+      return ChatProfileInfo(
         onBack: onBack,
         isInStack: isInStack,
         roomId: roomId,
@@ -38,12 +38,12 @@ class ProfileInfoNavigator extends StatelessWidget {
       );
     }
     return Navigator(
-      initialRoute: ProfileInfoRoutes.profileInfo,
+      initialRoute: ChatProfileInfoRoutes.profileInfo,
       onGenerateRoute: (route) => CupertinoPageRoute(
         builder: (context) {
           switch (route.name) {
-            case ProfileInfoRoutes.profileInfo:
-              return ProfileInfo(
+            case ChatProfileInfoRoutes.profileInfo:
+              return ChatProfileInfo(
                 onBack: onBack,
                 isInStack: isInStack,
                 roomId: roomId,
@@ -51,8 +51,8 @@ class ProfileInfoNavigator extends StatelessWidget {
                 isDraftInfo: isDraftInfo,
               );
 
-            case ProfileInfoRoutes.profileInfoShared:
-              return ProfileInfoShared(
+            case ChatProfileInfoRoutes.profileInfoShared:
+              return ChatProfileInfoShared(
                 roomId: route.arguments as String,
               );
             default:
