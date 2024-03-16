@@ -13,14 +13,14 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfo extends StatefulWidget {
+class ChatProfileInfo extends StatefulWidget {
   final VoidCallback? onBack;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
   final bool isDraftInfo;
 
-  const ProfileInfo({
+  const ChatProfileInfo({
     super.key,
     required this.onBack,
     required this.isInStack,
@@ -30,10 +30,10 @@ class ProfileInfo extends StatefulWidget {
   });
 
   @override
-  State<ProfileInfo> createState() => ProfileInfoController();
+  State<ChatProfileInfo> createState() => ChatProfileInfoController();
 }
 
-class ProfileInfoController extends State<ProfileInfo> {
+class ChatProfileInfoController extends State<ChatProfileInfo> {
   final _lookupMatchContactInteractor =
       getIt.get<LookupMatchContactInteractor>();
 
@@ -66,7 +66,7 @@ class ProfileInfoController extends State<ProfileInfo> {
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) {
-          return ProfileInfoShared(
+          return ChatProfileInfoShared(
             roomId: widget.roomId!,
             closeRightColumn: widget.onBack,
           );
@@ -90,6 +90,6 @@ class ProfileInfoController extends State<ProfileInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return ProfileInfoView(this);
+    return ChatProfileInfoView(this);
   }
 }
