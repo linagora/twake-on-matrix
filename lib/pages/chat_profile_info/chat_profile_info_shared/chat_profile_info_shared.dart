@@ -23,7 +23,8 @@ class ChatProfileInfoShared extends StatefulWidget {
   });
 
   @override
-  State<ChatProfileInfoShared> createState() => ChatProfileInfoSharedController();
+  State<ChatProfileInfoShared> createState() =>
+      ChatProfileInfoSharedController();
 }
 
 class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>

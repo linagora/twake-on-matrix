@@ -44,9 +44,10 @@ extension PresenceExtension on CachedPresence {
     }
   }
 
-  TextStyle? getPresenceTextStyle(BuildContext context) => currentlyActive ?? false
-      ? _onlineStatusTextStyle(context)
-      : _offlineStatusTextStyle(context);
+  TextStyle? getPresenceTextStyle(BuildContext context) =>
+      currentlyActive ?? false
+          ? _onlineStatusTextStyle(context)
+          : _offlineStatusTextStyle(context);
 
   TextStyle? _offlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
