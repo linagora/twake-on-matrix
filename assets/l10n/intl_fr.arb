@@ -1594,6 +1594,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "sendMessage": "Envoyer un message",
   "sendAsText": "Envoyer un texte",
   "@sendAsText": {
     "type": "text"

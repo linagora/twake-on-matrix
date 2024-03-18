@@ -69,7 +69,7 @@ class ProfileInfoBodyView extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  L10n.of(context)!.newChat,
+                                  L10n.of(context)!.sendMessage,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
