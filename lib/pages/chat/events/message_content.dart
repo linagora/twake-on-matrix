@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -90,13 +91,33 @@ class MessageContent extends StatelessWidget
               ),
             );
           case MessageTypes.Video:
-            return _MessageVideoBuilder(
-              event: event,
-              onFileTapped: (event) => onFileTapped(
-                context: context,
+            if (event.isVideoAvailable) {
+              return _MessageVideoBuilder(
                 event: event,
-              ),
-            );
+                onFileTapped: (event) => onFileTapped(
+                  context: context,
+                  event: event,
+                ),
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  MessageDownloadContent(
+                    event,
+                    onFileTapped: (event) => onFileTapped(
+                      context: context,
+                      event: event,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: endOfBubbleWidget,
+                  ),
+                ],
+              );
+            }
+
           case MessageTypes.File:
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
