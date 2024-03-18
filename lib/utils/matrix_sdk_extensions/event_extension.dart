@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
@@ -152,10 +153,12 @@ extension LocalizedBody on Event {
 
   bool get isOwnMessage => senderId == room.client.userID;
 
-  bool get timelineOverlayMessage => {
+  bool get timelineOverlayMessage =>
+      {
         MessageTypes.Video,
         MessageTypes.Image,
-      }.contains(messageType);
+      }.contains(messageType) &&
+      isVideoAvailable;
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,

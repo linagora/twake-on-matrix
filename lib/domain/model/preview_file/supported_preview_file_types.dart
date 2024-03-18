@@ -201,4 +201,16 @@ class SupportedPreviewFileTypes {
   static const pptFileTypes = ['ppt', 'pptx', 'pps', 'ppsx', 'ppsm', 'pptm'];
 
   static const zipFileTypes = ['zip'];
+
+  static const aviMineType = [
+    'application/x-troff-msvideo',
+    'video/avi',
+    'video/msvideo',
+    'video/x-msvideo',
+  ];
+
+  static const wmvMineType = [
+    'video/x-ms-wmv',
+    'video/x-ms-asf',
+  ];
 }
