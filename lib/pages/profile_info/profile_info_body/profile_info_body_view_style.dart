@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 class ProfileInfoBodyViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const EdgeInsetsGeometry profileInformationsTopPadding = EdgeInsets.only(
+  static const EdgeInsetsGeometry profileInformationsTopPadding =
+      EdgeInsets.only(
     top: 16.0,
     left: 16.0,
     right: 16.0,

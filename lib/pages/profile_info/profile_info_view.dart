@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/profile_info/profile_info.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_view_style.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +13,7 @@ class ProfileInfoView extends StatelessWidget {
     super.key,
   });
 
-  final ProfileInfoState controller;
+  final ProfileInfoPageState controller;
 
   @override
   Widget build(BuildContext context) {
