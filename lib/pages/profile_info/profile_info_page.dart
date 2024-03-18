@@ -3,8 +3,8 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfo extends StatefulWidget {
-  const ProfileInfo({
+class ProfileInfoPage extends StatefulWidget {
+  const ProfileInfoPage({
     super.key,
     required this.roomId,
     required this.userId,
@@ -14,10 +14,10 @@ class ProfileInfo extends StatefulWidget {
   final String userId;
 
   @override
-  State<ProfileInfo> createState() => ProfileInfoState();
+  State<ProfileInfoPage> createState() => ProfileInfoPageState();
 }
 
-class ProfileInfoState extends State<ProfileInfo> {
+class ProfileInfoPageState extends State<ProfileInfoPage> {
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
 
   User? get user => room?.unsafeGetUserFromMemoryOrFallback(widget.userId);
