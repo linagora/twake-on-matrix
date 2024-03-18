@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
@@ -103,7 +104,8 @@ class ChatController extends State<Chat>
         GoToDraftChatMixin,
         PasteImageMixin,
         HandleClipboardActionMixin,
-        TwakeContextMenuMixin {
+        TwakeContextMenuMixin,
+        MessageContentMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1767,6 +1769,59 @@ class ChatController extends State<Chat>
       Logs().e(
         'Chat::_updateStickyTimestampNotifier():: FlutterError - $e',
       );
+    }
+  }
+
+  List<PopupMenuEntry<ChatAppBarActions>> appBarActionsBuilder() {
+    final listAction = [
+      if (PlatformInfos.isAndroid) ...[
+        ChatAppBarActions.saveToGallery,
+        ChatAppBarActions.saveToDownload,
+      ],
+      ChatAppBarActions.info,
+      ChatAppBarActions.report,
+    ];
+    return listAction
+        .map(
+          (action) => PopupMenuItem(
+            value: action,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  action.getIcon(),
+                  color: action.getColorIcon(context),
+                ),
+                Padding(
+                  padding: action.getPaddingTitle(),
+                  child: Text(action.getTitle(context)),
+                ),
+              ],
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  void onSelectedAppBarActions(ChatAppBarActions action) {
+    switch (action) {
+      case ChatAppBarActions.saveToGallery:
+        break;
+      case ChatAppBarActions.saveToDownload:
+        break;
+      case ChatAppBarActions.info:
+        actionWithClearSelections(
+          () => showEventInfo(
+            context,
+            selectedEvents.single,
+          ),
+        );
+        break;
+      case ChatAppBarActions.report:
+        actionWithClearSelections(
+          reportEventAction,
+        );
+        break;
     }
   }
 
