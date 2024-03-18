@@ -1,11 +1,14 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
+import 'package:fluffychat/utils/extension/event_info_extension.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -85,22 +88,8 @@ class ReplyContent extends StatelessWidget {
             const SizedBox(width: ReplyContentStyle.contentSpacing),
             if (displayEvent.hasAttachment)
               Center(
-                child: ClipRRect(
-                  borderRadius: ReplyContentStyle.previewedImageBorderRadius,
-                  child: MxcImage(
-                    key: ValueKey(displayEvent.eventId),
-                    noResize: true,
-                    event: displayEvent,
-                    width: ReplyContentStyle.replyContentSize,
-                    height: ReplyContentStyle.replyContentSize,
-                    isThumbnail: true,
-                    fit: BoxFit.cover,
-                    placeholder: (context) {
-                      return BlurHashPlaceHolder(
-                        event: displayEvent,
-                      );
-                    },
-                  ),
+                child: ReplyPreviewIconBuilder(
+                  event: displayEvent,
                 ),
               ),
             const SizedBox(
@@ -137,6 +126,47 @@ class ReplyContent extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ReplyPreviewIconBuilder extends StatelessWidget {
+  final Event event;
+
+  const ReplyPreviewIconBuilder({
+    Key? key,
+    required this.event,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (event.messageType == MessageTypes.Video &&
+        !event.isVideoAvailable &&
+        event.mimeType != null) {
+      return SvgPicture.asset(
+        event.mimeType!.getIcon(
+          fileType: event.fileType,
+        ),
+        width: ReplyContentStyle.replyContentSize,
+        height: ReplyContentStyle.replyContentSize,
+      );
+    }
+    return ClipRRect(
+      borderRadius: ReplyContentStyle.previewedImageBorderRadius,
+      child: MxcImage(
+        key: ValueKey(event.eventId),
+        noResize: true,
+        event: event,
+        width: ReplyContentStyle.replyContentSize,
+        height: ReplyContentStyle.replyContentSize,
+        isThumbnail: true,
+        fit: BoxFit.cover,
+        placeholder: (context) {
+          return BlurHashPlaceHolder(
+            event: event,
+          );
+        },
       ),
     );
   }
