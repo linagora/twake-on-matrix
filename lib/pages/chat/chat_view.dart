@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
@@ -14,8 +15,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
-
-enum _EventContextAction { info, report }
 
 class ChatView extends StatelessWidget with MessageContentMixin {
   final ChatController controller;
@@ -65,51 +64,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               imageSize: ChatViewStyle.appBarIconSize,
             ),
           if (controller.selectedEvents.length == 1)
-            PopupMenuButton<_EventContextAction>(
-              onSelected: (action) {
-                switch (action) {
-                  case _EventContextAction.info:
-                    controller.actionWithClearSelections(
-                      () => showEventInfo(
-                        context,
-                        controller.selectedEvents.single,
-                      ),
-                    );
-                    break;
-                  case _EventContextAction.report:
-                    controller.actionWithClearSelections(
-                      controller.reportEventAction,
-                    );
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _EventContextAction.info,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.info_outlined),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context)!.messageInfo),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: _EventContextAction.report,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.shield_outlined,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context)!.reportMessage),
-                    ],
-                  ),
-                ),
-              ],
+            PopupMenuButton<ChatAppBarActions>(
+              onSelected: controller.onSelectedAppBarActions,
+              itemBuilder: (context) => controller.appBarActionsBuilder(),
             ),
         ],
       );
