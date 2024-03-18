@@ -111,7 +111,7 @@ class MessageContent extends StatelessWidget
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: endOfBubbleWidget,
                   ),
                 ],
@@ -130,7 +130,7 @@ class MessageContent extends StatelessWidget
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: MessageContentStyle.endOfBubbleWidgetPadding,
                   child: endOfBubbleWidget,
                 ),
               ],
@@ -153,7 +153,7 @@ class MessageContent extends StatelessWidget
                   event.numberEmotes > 0 &&
                   event.numberEmotes <= 10;
               return Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                padding: MessageContentStyle.emojiPadding,
                 child: HtmlMessage(
                   html: html,
                   defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
