@@ -67,4 +67,12 @@ class MessageContentStyle {
       BorderRadius.all(Radius.circular(12.0));
 
   static const backIconColor = Colors.white;
+
+  static const EdgeInsets endOfBubbleWidgetPadding =
+      EdgeInsets.symmetric(vertical: 4);
+
+  static const EdgeInsets emojiPadding = EdgeInsets.only(
+    left: 8.0,
+    right: 8.0,
+  );
 }
