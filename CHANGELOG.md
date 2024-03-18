@@ -1,5 +1,13 @@
-## [2.4.20+2330] - 2024-03-15
+## [2.4.21+2330] - 2024-03-18
+
 ### Fixed
+
+- Prevent infinite loading when open chat
+
+## [2.4.20+2330] - 2024-03-15
+
+### Fixed
+
 - \#1480 Try to request more history when open room first time
 - \#1400 some permission is applied to all member in group chat
 - \#1503 Update time format for same week
