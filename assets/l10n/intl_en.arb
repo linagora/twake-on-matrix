@@ -3014,5 +3014,7 @@
   "showInChat": "Show in chat",
   "phone": "Phone",
   "viewProfile": "View profile",
-  "profileInfo": "Profile info"
+  "profileInfo": "Profile info",
+  "saveToDownloads": "Save to Downloads",
+  "saveToGallery": "Save to Gallery"
 }
