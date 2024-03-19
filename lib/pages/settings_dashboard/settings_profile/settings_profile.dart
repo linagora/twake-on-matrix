@@ -5,6 +5,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
@@ -375,6 +376,19 @@ class SettingsProfileController extends State<SettingsProfile>
         Logs().e(
           'SettingsProfile::_handleUploadAvatarOnData() - failure: $failure',
         );
+        if (failure is UploadContentFailed) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+        } else if (failure is FileTooBigMatrix) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.fileTooBigMatrixException.toString(),
+          );
+        }
       },
       (success) {
         Logs().d(
@@ -437,6 +451,9 @@ class SettingsProfileController extends State<SettingsProfile>
         Logs().e(
           'SettingsProfile::_handleUploadProfileOnData() - failure: $failure',
         );
+        if (failure is UpdateProfileFailure) {
+          _handleUpdateProfileFailure(failure.exception.toString());
+        }
       },
       (success) {
         Logs().d(
@@ -447,7 +464,8 @@ class SettingsProfileController extends State<SettingsProfile>
           final newProfile = Profile(
             userId: client.userID!,
             displayName: success.displayName ?? displayName,
-            avatarUrl: success.avatar,
+            avatarUrl:
+                success.avatar == null ? currentProfile?.avatarUrl : null,
           );
           _sendAccountDataEvent(profile: newProfile);
           if (!success.isDeleteAvatar) {
@@ -547,6 +565,18 @@ class SettingsProfileController extends State<SettingsProfile>
         },
       );
     });
+  }
+
+  void _handleUpdateProfileFailure(String errorMessage) {
+    TwakeDialog.hideLoadingDialog(context);
+    TwakeSnackBar.show(
+      context,
+      errorMessage,
+    );
+    _clearImageInLocal();
+    if (currentProfile != null) {
+      _sendAccountDataEvent(profile: currentProfile!);
+    }
   }
 
   @override
