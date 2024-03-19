@@ -8,10 +8,12 @@ class ProfileInfoPage extends StatefulWidget {
     super.key,
     required this.roomId,
     required this.userId,
+    this.onNewChatOpen,
   });
 
   final String roomId;
   final String userId;
+  final void Function()? onNewChatOpen;
 
   @override
   State<ProfileInfoPage> createState() => ProfileInfoPageState();

@@ -9,6 +9,8 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class CopiableProfileRow extends StatelessWidget {
+  static const snackBarDuration = Duration(milliseconds: 500);
+
   final String caption;
   final String copiableText;
   final Widget leadingIcon;
@@ -31,6 +33,7 @@ class CopiableProfileRow extends StatelessWidget {
         onTap: () {
           TwakeClipboard.instance.copyText(copiableText);
           TwakeSnackBar.show(
+            duration: snackBarDuration,
             context,
             L10n.of(context)!.copiedToClipboard,
           );

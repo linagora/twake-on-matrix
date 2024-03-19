@@ -46,7 +46,7 @@ class ProfileInfoView extends StatelessWidget {
               ),
               Flexible(
                 child: Text(
-                  L10n.of(context)!.profileInfo,
+                  L10n.of(context)?.profileInfo ?? "",
                   style: Theme.of(context).textTheme.titleLarge,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -57,7 +57,7 @@ class ProfileInfoView extends StatelessWidget {
       ),
       body: ProfileInfoBody(
         user: controller.user,
-        parentContext: context,
+        onNewChatOpen: controller.widget.onNewChatOpen,
       ),
     );
   }

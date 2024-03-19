@@ -1,9 +1,11 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -96,11 +98,40 @@ class ParticipantListItem extends StatelessWidget {
   Future _onItemTap(BuildContext context) async {
     final responsive = getIt.get<ResponsiveUtils>();
 
-    if (PlatformInfos.isMobile || responsive.isMobile(context)) {
+    if (responsive.isMobile(context)) {
       await _openProfileMenu(context);
     } else {
       await _openProfileDialog(context);
     }
+  }
+
+  Future _openDialogInvite(BuildContext context) async {
+    if (PlatformInfos.isMobile) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (ctx) => ProfileInfoPage(
+            roomId: member.room.id,
+            userId: member.id,
+          ),
+        ),
+      );
+      return;
+    }
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      useSafeArea: false,
+      useRootNavigator: !PlatformInfos.isMobile,
+      builder: (dialogContext) {
+        return ProfileInfoPage(
+          roomId: member.room.id,
+          userId: member.id,
+          onNewChatOpen: () {
+            dialogContext.pop();
+          },
+        );
+      },
+    );
   }
 
   Future _openProfileMenu(BuildContext context) => showModalBottomSheet(
@@ -111,7 +142,7 @@ class ParticipantListItem extends StatelessWidget {
             topRight: ParticipantListItemStyle.bottomSheetTopRadius,
           ),
         ),
-        builder: (c) {
+        builder: (bottomSheetContext) {
           return Container(
             padding: ParticipantListItemStyle.bottomSheetContentPadding,
             decoration: BoxDecoration(
@@ -146,10 +177,9 @@ class ParticipantListItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextButton.icon(
-                        onPressed: () {
-                          context.go(
-                            '/rooms/profileinfo/${member.room.id}/${member.id}',
-                          );
+                        onPressed: () async {
+                          Navigator.of(bottomSheetContext).pop();
+                          await _openDialogInvite(context);
                         },
                         icon: Icon(
                           Icons.person_search,
@@ -203,7 +233,6 @@ class ParticipantListItem extends StatelessWidget {
                     ),
                     ProfileInfoBody(
                       user: member,
-                      parentContext: context,
                       onNewChatOpen: () {
                         dialogContext.pop();
                       },
