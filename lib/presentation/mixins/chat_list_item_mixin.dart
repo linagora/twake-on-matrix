@@ -19,6 +19,7 @@ mixin ChatListItemMixin {
             hideEdit: true,
             plaintextBody: true,
             removeMarkdown: true,
+            removeBreakLine: true,
           ) ??
           Future.value(L10n.of(context)!.emptyChat),
       builder: (context, snapshot) {
@@ -108,6 +109,7 @@ mixin ChatListItemMixin {
               hideEdit: true,
               plaintextBody: true,
               removeMarkdown: true,
+              removeBreakLine: true,
             ) ??
             L10n.of(context)!.emptyChat;
 
