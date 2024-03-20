@@ -210,6 +210,9 @@ class ChatListController extends State<ChatList>
 
     if (conversation != null && conversation.isSelected) {
       tempConversationSelectionPresentation.remove(conversation);
+      if (tempConversationSelectionPresentation.isEmpty) {
+        toggleSelectMode();
+      }
     } else {
       tempConversationSelectionPresentation.add(
         ConversationSelectionPresentation(
@@ -239,11 +242,7 @@ class ChatListController extends State<ChatList>
   }
 
   void onClickClearSelection() {
-    if (conversationSelectionNotifier.value.isNotEmpty) {
-      _clearSelectionItem();
-    } else {
-      toggleSelectMode();
-    }
+    toggleSelectMode();
   }
 
   void resetActiveSpaceId() {
