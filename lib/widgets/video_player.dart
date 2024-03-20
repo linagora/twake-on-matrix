@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -36,20 +35,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Video(
-            fill: Colors.black,
-            pauseUponEnteringBackgroundMode: true,
-            resumeUponEnteringForegroundMode: true,
-            controller: videoController,
-          ),
-          MediaViewerAppBar(
-            event: widget.event,
-          ),
-        ],
-      ),
+    return Video(
+      fill: Colors.black,
+      pauseUponEnteringBackgroundMode: true,
+      resumeUponEnteringForegroundMode: true,
+      controller: videoController,
     );
   }
 }

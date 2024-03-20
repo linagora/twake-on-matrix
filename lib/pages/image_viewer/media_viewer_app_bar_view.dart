@@ -24,8 +24,10 @@ class MediaViewerAppbarView extends StatelessWidget {
           duration: MediaViewewAppbarStyle.opacityAnimationDuration,
           curve: Curves.easeIn,
           child: Container(
-            padding: showAppbarPreview
-                ? ImageViewerStyle.paddingTopAppBar
+            padding: controller.widget.enablePaddingAppbar == true
+                ? showAppbarPreview
+                    ? ImageViewerStyle.paddingTopAppBar
+                    : EdgeInsets.zero
                 : EdgeInsets.zero,
             height: ImageViewerStyle.appBarHeight,
             width: MediaQuery.sizeOf(context).width,
