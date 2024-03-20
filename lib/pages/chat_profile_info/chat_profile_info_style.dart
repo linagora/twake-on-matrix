@@ -9,6 +9,7 @@ class ChatProfileInfoStyle {
   static const double textSpacing = 4;
 
   static const double avatarFontSize = 36;
+  static const double avatarSize = 96;
 
   static BorderRadius copiableContainerBorderRadius = BorderRadius.circular(16);
 
