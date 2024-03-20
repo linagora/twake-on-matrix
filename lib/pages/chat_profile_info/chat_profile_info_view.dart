@@ -6,6 +6,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -17,7 +18,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 
 class ProfileInfoView extends StatelessWidget {
   final ProfileInfoController controller;
@@ -106,7 +106,6 @@ class ProfileInfoView extends StatelessWidget {
 }
 
 class _Information extends StatelessWidget {
-  static const double avatarRatio = 1;
 
   const _Information({
     Key? key,
@@ -128,54 +127,56 @@ class _Information extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) => Builder(
-            builder: (context) {
-              final text = displayName?.getShortcutNameForAvatar() ?? '@';
-              final placeholder = Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: text.avatarColors,
-                    stops: RoundAvatarStyle.defaultGradientStops,
-                  ),
-                ),
-                width: constraints.maxWidth,
-                height: constraints.maxWidth * avatarRatio,
-                child: Center(
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: ChatProfileInfoStyle.avatarFontSize,
-                      color: AvatarStyle.defaultTextColor(true),
-                      fontFamily: AvatarStyle.fontFamily,
-                      fontWeight: AvatarStyle.fontWeight,
+        Padding(
+          padding: ChatProfileInfoStyle.mainPadding,
+          child: LayoutBuilder(
+            builder: (context, constraints) => Builder(
+              builder: (context) {
+                final text = displayName?.getShortcutNameForAvatar() ?? '@';
+                final placeholder = Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: text.avatarColors,
+                      stops: RoundAvatarStyle.defaultGradientStops,
                     ),
                   ),
-                ),
-              );
-              if (avatarUri == null) {
-                return placeholder;
-              }
-              return MxcImage(
-                uri: avatarUri,
-                width: constraints.maxWidth,
-                height: constraints.maxWidth * avatarRatio,
-                fit: BoxFit.cover,
-                placeholder: (_) => placeholder,
-                cacheKey: avatarUri.toString(),
-                noResize: true,
-              );
-            },
+                  width: ChatProfileInfoStyle.avatarSize,
+                  height: ChatProfileInfoStyle.avatarSize,
+                  child: Center(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: ChatProfileInfoStyle.avatarFontSize,
+                        color: AvatarStyle.defaultTextColor(true),
+                        fontFamily: AvatarStyle.fontFamily,
+                        fontWeight: AvatarStyle.fontWeight,
+                      ),
+                    ),
+                  ),
+                );
+                if (avatarUri == null) {
+                  return placeholder;
+                }
+                return Avatar(
+                  mxContent: avatarUri,
+                  name: displayName,
+                  size: ChatProfileInfoStyle.avatarSize,
+                  fontSize: ChatProfileInfoStyle.avatarFontSize,
+                );
+              },
+            ),
           ),
         ),
         Padding(
           padding: ChatProfileInfoStyle.mainPadding,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 displayName ?? '',
