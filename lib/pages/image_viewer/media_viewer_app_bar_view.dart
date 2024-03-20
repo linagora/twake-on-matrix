@@ -43,7 +43,9 @@ class MediaViewerAppbarView extends StatelessWidget {
                               : Icons.close,
                           color: LinagoraSysColors.material().onPrimary,
                         ),
-                        onPressed: controller.onClose,
+                        onPressed: () => controller.onClose(
+                          context,
+                        ),
                         color: LinagoraSysColors.material().onPrimary,
                         tooltip: L10n.of(context)!.back,
                       ),
@@ -52,8 +54,10 @@ class MediaViewerAppbarView extends StatelessWidget {
                           if (PlatformInfos.isMobile)
                             Builder(
                               builder: (context) => IconButton(
-                                onPressed: () =>
-                                    controller.shareFileAction(context),
+                                onPressed: () => controller.shareFileAction(
+                                  context,
+                                  controller.widget.event,
+                                ),
                                 tooltip: L10n.of(context)!.share,
                                 color: LinagoraSysColors.material().onPrimary,
                                 icon: Icon(
@@ -68,7 +72,10 @@ class MediaViewerAppbarView extends StatelessWidget {
                                 Icons.shortcut,
                                 color: LinagoraSysColors.material().onPrimary,
                               ),
-                              onPressed: controller.forwardAction,
+                              onPressed: () => controller.forwardAction(
+                                context,
+                                controller.widget.event,
+                              ),
                               color: LinagoraSysColors.material().onPrimary,
                               tooltip: L10n.of(context)!.share,
                             ),
@@ -86,19 +93,28 @@ class MediaViewerAppbarView extends StatelessWidget {
                                     ContextMenuItemImageViewer(
                                       icon: Icons.file_download_outlined,
                                       title: L10n.of(context)!.saveFile,
-                                      onTap: controller.saveFileAction,
+                                      onTap: () => controller.saveFileAction(
+                                        context,
+                                        controller.widget.event,
+                                      ),
                                     ),
                                     ContextMenuItemImageViewer(
                                       title: L10n.of(context)!.showInChat,
                                       imagePath: ImagePaths.icShowInChat,
-                                      onTap: controller.showInChat,
+                                      onTap: () => controller.showInChat(
+                                        context,
+                                        controller.widget.event,
+                                      ),
                                       haveDivider: false,
                                     ),
                                   ],
                                   child: InkWell(
                                     borderRadius: MediaViewewAppbarStyle
                                         .showMoreIconSplashRadius,
-                                    onTap: controller.toggleShowMoreActions,
+                                    onTap: () =>
+                                        controller.toggleShowMoreActions(
+                                      controller.menuController,
+                                    ),
                                     child: Padding(
                                       padding: MediaViewewAppbarStyle
                                           .marginAllShowMoreIcon,
