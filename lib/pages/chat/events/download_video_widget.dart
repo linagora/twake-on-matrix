@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
+import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_web.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
@@ -178,10 +179,16 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                 ),
               ],
             ),
-            MediaViewerAppBar(
-              showAppbarPreviewNotifier: showAppbarPreview,
-              event: widget.event,
-            ),
+            if (PlatformInfos.isMobile) ...[
+              MediaViewerAppBar(
+                showAppbarPreviewNotifier: showAppbarPreview,
+                event: widget.event,
+              ),
+            ] else ...[
+              MediaViewerAppBarWeb(
+                event: widget.event,
+              ),
+            ],
           ],
         ),
       ),
