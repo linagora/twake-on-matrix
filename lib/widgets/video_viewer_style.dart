@@ -17,4 +17,6 @@ class VideoViewerStyle {
   static EdgeInsets backButtonMargin(context) => PlatformInfos.isWeb
       ? const EdgeInsets.only(top: 8.0, left: 16.0)
       : EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top);
+
+  static const Duration controlsHoverDuration = Duration(seconds: 5);
 }
