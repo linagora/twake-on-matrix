@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
+import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_web.dart';
 import 'package:fluffychat/widgets/video_player.dart';
 import 'package:fluffychat/widgets/video_viewer_style.dart';
 import 'package:flutter/material.dart';
@@ -26,9 +26,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
         topButtonBarMargin: const EdgeInsets.all(0),
         topButtonBar: [
-          MediaViewerAppBar(
-            event: event,
-          ),
+          MediaViewerAppBarWeb(event: event),
         ],
       ),
       fullscreen: MaterialDesktopVideoControlsThemeData(
