@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/video_player.dart';
 import 'package:fluffychat/widgets/video_viewer_style.dart';
@@ -25,6 +26,15 @@ class VideoViewerMobileTheme extends StatelessWidget {
           MaterialPositionIndicator(),
           Spacer(),
         ],
+        topButtonBar: [
+          Expanded(
+            child: MediaViewerAppBar(
+              event: event,
+              enablePaddingAppbar: false,
+            ),
+          ),
+        ],
+        controlsHoverDuration: VideoViewerStyle.controlsHoverDuration,
         seekBarColor: Theme.of(context).colorScheme.onSurfaceVariant,
         seekBarPositionColor: Theme.of(context).colorScheme.primary,
         bottomButtonBarMargin: VideoViewerStyle.bottomBarMargin(context),

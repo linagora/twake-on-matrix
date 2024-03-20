@@ -16,10 +16,12 @@ class MediaViewerAppBar extends StatefulWidget {
     Key? key,
     this.showAppbarPreviewNotifier,
     this.event,
+    this.enablePaddingAppbar = true,
   }) : super(key: key);
 
   final ValueNotifier<bool>? showAppbarPreviewNotifier;
   final Event? event;
+  final bool? enablePaddingAppbar;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
