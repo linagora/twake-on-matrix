@@ -106,7 +106,6 @@ class ProfileInfoView extends StatelessWidget {
 }
 
 class _Information extends StatelessWidget {
-
   const _Information({
     Key? key,
     this.avatarUri,
