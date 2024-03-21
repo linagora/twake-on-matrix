@@ -16,4 +16,13 @@ class SettingsProfileViewMobileStyle {
 
   static EdgeInsetsDirectional editIconPadding =
       const EdgeInsetsDirectional.all(8);
+
+  static const bottomButtonHeight = 48.0;
+  static const paddingBottomButton = EdgeInsets.only(left: 16.0, right: 16.0);
+  static const bottomButtonRadius = 100.0;
+  static const iconSize = 18.0;
+
+  static const paddingIconAndText = SizedBox(width: 8.0);
+
+  static const paddingBottomBottomButton = SizedBox(height: 32.0);
 }

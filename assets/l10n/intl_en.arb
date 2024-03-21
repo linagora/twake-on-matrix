@@ -2986,5 +2986,7 @@
   "failedToSendFiles": "Failed to send files",
   "addAnotherAccount": "Add another account",
   "accountSettings": "Account settings",
-  "isSingleAccountOnHomeserver": "We do not yet support multiple accounts on a single homeserver"
+  "isSingleAccountOnHomeserver": "We do not yet support multiple accounts on a single homeserver",
+  "switchAccounts": "Switch accounts",
+  "selectAccount": "Select account"
 }

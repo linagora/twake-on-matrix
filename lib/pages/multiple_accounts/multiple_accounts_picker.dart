@@ -3,12 +3,10 @@ import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
 import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
-import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
@@ -82,10 +80,9 @@ class MultipleAccountsPickerController {
       titleAccountSettings: L10n.of(context)!.accountSettings,
       logoApp: Padding(
         padding: TwakeHeaderStyle.logoAppOfMultiplePadding,
-        child: SvgPicture.asset(
-          ImagePaths.icTwakeImageLogo,
-          width: TwakeHeaderStyle.logoAppOfMultipleWidth,
-          height: TwakeHeaderStyle.logoAppOfMultipleHeight,
+        child: Text(
+          L10n.of(context)!.selectAccount,
+          style: TwakeHeaderStyle.selectAccountTextStyle(context),
         ),
       ),
       accountNameStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
