@@ -1401,7 +1401,9 @@ class ChatController extends State<Chat>
         iconAction: action.getIconData(
           unpin: isUnpinEvent(event),
         ),
-        imagePath: action.getImagePath(),
+        imagePath: action.getImagePath(
+          unpin: isUnpinEvent(event),
+        ),
         onCallbackAction: () => _handleClickOnContextMenuItem(
           action,
           event,
