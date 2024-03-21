@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
+import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
@@ -12,9 +13,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class DraftChatInputRow extends StatelessWidget {
-  final DraftChatController controller;
+  final OnSendFileClick onSendFileClick;
+  final ValueNotifier<String> inputText;
+  final OnInputBarSubmitted onInputBarSubmitted;
+  final ValueNotifier<bool> isSendingNotifier;
+  final ValueNotifier<bool> emojiPickerNotifier;
+  final OnEmojiAction onEmojiAction;
+  final OnKeyboardAction onKeyboardAction;
+  final ValueKey typeAheadKey;
+  final OnInputBarChanged onInputBarChanged;
+  final FocusNode? typeAheadFocusNode;
+  final TextEditingController? textEditingController;
+  final FocusSuggestionController focusSuggestionController;
 
-  const DraftChatInputRow(this.controller, {Key? key}) : super(key: key);
+  const DraftChatInputRow({
+    Key? key,
+    required this.onSendFileClick,
+    required this.inputText,
+    required this.onInputBarSubmitted,
+    required this.isSendingNotifier,
+    required this.emojiPickerNotifier,
+    required this.onEmojiAction,
+    required this.onKeyboardAction,
+    required this.typeAheadKey,
+    required this.onInputBarChanged,
+    this.typeAheadFocusNode,
+    this.textEditingController,
+    required this.focusSuggestionController,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +57,7 @@ class DraftChatInputRow extends StatelessWidget {
                 size: ChatInputRowStyle.chatInputRowMoreBtnSize,
                 tooltip: L10n.of(context)!.more,
                 icon: Icons.add_circle_outline,
-                onTap: () => controller.onSendFileClick(context),
+                onTap: () => onSendFileClick(context),
               ),
             ),
           Expanded(
@@ -40,8 +66,9 @@ class DraftChatInputRow extends StatelessWidget {
                 : _buildWebInputRow(context),
           ),
           ChatInputRowSendBtn(
-            inputText: controller.inputText,
-            onTap: controller.onInputBarSubmitted,
+            inputText: inputText,
+            onTap: onInputBarSubmitted,
+            sendingNotifier: isSendingNotifier,
           ),
         ],
       ),
@@ -51,38 +78,38 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: controller.showEmojiPickerNotifier,
-      onEmojiAction: controller.onEmojiAction,
-      onKeyboardAction: controller.onKeyboardAction,
+      emojiPickerNotifier: emojiPickerNotifier,
+      onEmojiAction: onEmojiAction,
+      onKeyboardAction: onKeyboardAction,
     );
   }
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: controller.showEmojiPickerNotifier,
-      onTapMoreBtn: () => controller.onSendFileClick(context),
-      onEmojiAction: controller.onEmojiAction,
-      onKeyboardAction: controller.onKeyboardAction,
+      emojiPickerNotifier: emojiPickerNotifier,
+      onTapMoreBtn: () => onSendFileClick(context),
+      onEmojiAction: onEmojiAction,
+      onKeyboardAction: onKeyboardAction,
     );
   }
 
   Widget _buildInputBar(BuildContext context) {
     return InputBar(
-      typeAheadKey: controller.draftChatComposerTypeAheadKey,
+      typeAheadKey: typeAheadKey,
       minLines: DraftChatViewStyle.minLinesInputBar,
       maxLines: DraftChatViewStyle.maxLinesInputBar,
       autofocus: !PlatformInfos.isMobile,
       keyboardType: TextInputType.multiline,
       textInputAction: null,
-      onSubmitted: (_) => controller.onInputBarSubmitted(),
-      typeAheadFocusNode: controller.inputFocus,
-      controller: controller.sendController,
+      onSubmitted: (_) => onInputBarSubmitted(),
+      typeAheadFocusNode: typeAheadFocusNode,
+      controller: textEditingController,
       decoration: DraftChatViewStyle.bottomBarInputDecoration(
         context,
       ),
-      onChanged: controller.onInputBarChanged,
-      focusSuggestionController: controller.focusSuggestionController,
+      onChanged: onInputBarChanged,
+      focusSuggestionController: focusSuggestionController,
     );
   }
 }

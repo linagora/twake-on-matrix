@@ -8,12 +8,14 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ChatInputRowSendBtn extends StatelessWidget {
   final ValueListenable<String> inputText;
+  final ValueNotifier<bool>? sendingNotifier;
   final void Function() onTap;
 
   const ChatInputRowSendBtn({
     Key? key,
     required this.inputText,
     required this.onTap,
+    this.sendingNotifier,
   }) : super(key: key);
 
   @override
@@ -37,16 +39,34 @@ class ChatInputRowSendBtn extends StatelessWidget {
 
         return const SizedBox();
       },
-      child: Padding(
-        padding: ChatInputRowStyle.sendIconPadding,
-        child: TwakeIconButton(
-          hoverColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          size: ChatInputRowStyle.sendIconBtnSize,
-          onTap: onTap,
-          tooltip: L10n.of(context)!.send,
-          imagePath: ImagePaths.icSend,
-          paddingAll: 0,
+      child: ValueListenableBuilder(
+        valueListenable: sendingNotifier ?? ValueNotifier(false),
+        builder: (context, isSending, child) {
+          if (isSending) {
+            return child!;
+          }
+          return Padding(
+            padding: ChatInputRowStyle.sendIconPadding,
+            child: TwakeIconButton(
+              hoverColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              size: ChatInputRowStyle.sendIconBtnSize,
+              onTap: onTap,
+              tooltip: L10n.of(context)!.send,
+              imagePath: ImagePaths.icSend,
+              paddingAll: 0,
+            ),
+          );
+        },
+        child: const Padding(
+          padding: ChatInputRowStyle.sendIconPadding,
+          child: Center(
+            child: SizedBox(
+              width: ChatInputRowStyle.sendIconBtnSize,
+              height: ChatInputRowStyle.sendIconBtnSize,
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          ),
         ),
       ),
     );

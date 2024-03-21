@@ -36,6 +36,11 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
+typedef OnSendFileClick = void Function(BuildContext context);
+typedef OnInputBarSubmitted = void Function();
+typedef OnEmojiAction = void Function();
+typedef OnKeyboardAction = void Function();
+typedef OnInputBarChanged = void Function(String text);
 
 class DraftChat extends StatefulWidget {
   final PresentationContact contact;

@@ -93,7 +93,21 @@ class DraftChatView extends StatelessWidget {
                   ),
                   Column(
                     children: [
-                      DraftChatInputRow(controller),
+                      DraftChatInputRow(
+                        onEmojiAction: controller.onEmojiAction,
+                        onInputBarChanged: controller.onInputBarChanged,
+                        onInputBarSubmitted: controller.onInputBarSubmitted,
+                        onKeyboardAction: controller.onKeyboardAction,
+                        onSendFileClick: controller.onSendFileClick,
+                        textEditingController: controller.sendController,
+                        typeAheadFocusNode: controller.inputFocus,
+                        typeAheadKey: controller.draftChatComposerTypeAheadKey,
+                        focusSuggestionController:
+                            controller.focusSuggestionController,
+                        inputText: controller.inputText,
+                        isSendingNotifier: controller.isSendingNotifier,
+                        emojiPickerNotifier: controller.showEmojiPickerNotifier,
+                      ),
                       const SizedBox(
                         height: DraftChatViewStyle.bottomBarInputPadding,
                       ),
