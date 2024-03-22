@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -42,13 +43,22 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           //   ),
           if (controller.selectedEvents.length == 1)
             TwakeIconButton(
-              icon: Icons.push_pin_outlined,
-              tooltip: L10n.of(context)!.pinChat,
+              icon: !controller.isUnpinEvent(controller.selectedEvents.first)
+                  ? Icons.push_pin_outlined
+                  : null,
+              imagePath:
+                  controller.isUnpinEvent(controller.selectedEvents.first)
+                      ? ImagePaths.icUnpin
+                      : null,
+              tooltip: !controller.isUnpinEvent(controller.selectedEvents.first)
+                  ? L10n.of(context)!.pinChat
+                  : L10n.of(context)!.unpin,
               onTap: () => controller.actionWithClearSelections(
                 () => controller.pinEventAction(
                   controller.selectedEvents.single,
                 ),
               ),
+              imageSize: ChatViewStyle.appBarIconSize,
             ),
           if (controller.selectedEvents.length == 1)
             PopupMenuButton<_EventContextAction>(
