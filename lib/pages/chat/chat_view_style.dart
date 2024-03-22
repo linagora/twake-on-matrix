@@ -9,6 +9,8 @@ class ChatViewStyle {
 
   static const double pinnedMessageHintHeight = 48;
 
+  static const double appBarIconSize = 24.0;
+
   static EdgeInsetsDirectional paddingLeading(BuildContext context) =>
       EdgeInsetsDirectional.only(
         start: responsive.isMobile(context) ? 0 : 16,
