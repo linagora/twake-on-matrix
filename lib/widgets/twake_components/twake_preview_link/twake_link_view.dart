@@ -1,32 +1,18 @@
-import 'package:fluffychat/widgets/clean_rich_text.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view_style.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix_link_text/link_text.dart';
 
 class TwakeLinkView extends StatelessWidget {
   final String text;
-  final Widget childWidget;
+  final Widget messageContentWidget;
   final Widget previewItemWidget;
-  final TextStyle? textStyle;
-  final TextStyle? linkStyle;
-  final TextAlign? textAlign;
-  final LinkTapHandler? onLinkTap;
-  final int? maxLines;
   final String? firstValidUrl;
-  final TextSpanBuilder? textSpanBuilder;
 
   const TwakeLinkView({
     Key? key,
     required this.text,
-    required this.childWidget,
+    required this.messageContentWidget,
     required this.previewItemWidget,
-    this.textStyle,
-    this.linkStyle,
-    this.textAlign = TextAlign.start,
-    this.onLinkTap,
-    this.maxLines,
     this.firstValidUrl,
-    this.textSpanBuilder,
   }) : super(key: key);
 
   @override
@@ -47,7 +33,7 @@ class TwakeLinkView extends StatelessWidget {
         const SizedBox(height: 2),
         Padding(
           padding: TwakeLinkViewStyle.paddingWidgetNoPreview,
-          child: _buildCleanRichText(context),
+          child: messageContentWidget,
         ),
       ],
     );
@@ -56,20 +42,7 @@ class TwakeLinkView extends StatelessWidget {
   Widget _buildWidgetNoPreview(BuildContext context) {
     return Padding(
       padding: TwakeLinkViewStyle.paddingWidgetNoPreview,
-      child: _buildCleanRichText(context),
-    );
-  }
-
-  Widget _buildCleanRichText(BuildContext context) {
-    return TwakeCleanRichText(
-      text: text,
-      childWidget: childWidget,
-      textStyle: textStyle,
-      linkStyle: linkStyle,
-      textAlign: textAlign ?? TextAlign.start,
-      onLinkTap: onLinkTap,
-      maxLines: maxLines,
-      textSpanBuilder: textSpanBuilder,
+      child: messageContentWidget,
     );
   }
 }
