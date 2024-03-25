@@ -15,30 +15,16 @@ class TwakeLinkPreview extends StatefulWidget {
   final Uri uri;
   final int? preferredPointInTime;
   final String text;
-  final Widget childWidget;
-  final TextStyle? textStyle;
-  final TextStyle? linkStyle;
-  final TextAlign? textAlign;
-  final LinkTapHandler? onLinkTap;
-  final int? maxLines;
-  final double? fontSize;
+  final Widget messageContentWidget;
   final bool ownMessage;
-  final TextSpanBuilder? textSpanBuilder;
 
   const TwakeLinkPreview({
     super.key,
     required this.uri,
     this.preferredPointInTime,
     required this.text,
-    required this.childWidget,
+    required this.messageContentWidget,
     required this.ownMessage,
-    this.textStyle,
-    this.linkStyle,
-    this.textAlign,
-    this.onLinkTap,
-    this.maxLines,
-    this.fontSize,
-    this.textSpanBuilder,
   });
 
   @override
@@ -69,12 +55,8 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
     return TwakeLinkView(
       key: twakeLinkViewKey,
       text: widget.text,
-      textStyle: widget.textStyle,
-      linkStyle: widget.linkStyle,
-      childWidget: widget.childWidget,
       firstValidUrl: firstValidUrl,
-      onLinkTap: (url) => UrlLauncher(context, url: url.toString()).launchUrl(),
-      textSpanBuilder: widget.textSpanBuilder,
+      messageContentWidget: widget.messageContentWidget,
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,
         builder: (context, state, child) {
