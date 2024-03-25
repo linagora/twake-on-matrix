@@ -167,7 +167,7 @@ class _MxcImageState extends State<MxcImage>
 
     if (event != null) {
       if (!PlatformInfos.isWeb) {
-        final fileInfo = await event.getFileInfo(
+        final fileInfo = await event.getMediaFileInfo(
           getThumbnail: widget.isThumbnail,
         );
         if (fileInfo != null && fileInfo.filePath.isNotEmpty) {

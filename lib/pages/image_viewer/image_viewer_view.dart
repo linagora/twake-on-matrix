@@ -110,7 +110,7 @@ class _ImageWidget extends StatelessWidget {
       );
     } else {
       return FutureBuilder(
-        future: event.getFileInfo(
+        future: event.getMediaFileInfo(
           getThumbnail: false,
         ),
         builder: (context, snapshot) {
