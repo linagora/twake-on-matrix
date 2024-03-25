@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TwakeLinkViewStyle {
-  static const EdgeInsetsDirectional paddingWidgetNoPreview =
+  static const EdgeInsetsDirectional paddingMessageBody =
       EdgeInsetsDirectional.only(start: 8.0);
 
   static const EdgeInsetsDirectional paddingCleanRichText =
@@ -10,4 +10,6 @@ class TwakeLinkViewStyle {
     end: 8.0,
     top: 8.0,
   );
+
+  static const double previewToBodySpacing = 2.0;
 }

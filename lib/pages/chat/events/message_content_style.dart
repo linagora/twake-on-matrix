@@ -75,4 +75,9 @@ class MessageContentStyle {
     left: 8.0,
     right: 8.0,
   );
+
+  static TextStyle? linkStyleMessageContent(BuildContext context) =>
+      Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.secondary,
+          );
 }
