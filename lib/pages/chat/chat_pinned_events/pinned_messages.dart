@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/update_pinned_events_state.dart';
 import 'package:fluffychat/domain/enums/pinned_messages_action_enum.dart';
@@ -64,8 +68,17 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
+  StreamSubscription<Either<Failure, Success>>? unpinMessagesStreamSubcription;
+
+  StreamSubscription<Either<Failure, Success>>? unpinAllStreamSubcription;
+
+  StreamSubscription<Either<Failure, Success>>?
+      unpinSelectedEventsStreamSubcription;
+
+  StreamSubscription<EventUpdate>? onEventStreamSubscription;
+
   void unpin(String eventId) {
-    updatePinnedMessagesInteractor
+    unpinMessagesStreamSubcription = updatePinnedMessagesInteractor
         .execute(room: room!, eventIds: [eventId]).listen((event) {
       event.fold((failure) {
         _showErrorSnackbar(failure);
@@ -85,7 +98,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void unpinAll() {
-    updatePinnedMessagesInteractor
+    unpinAllStreamSubcription = updatePinnedMessagesInteractor
         .execute(
       room: room!,
       eventIds: [],
@@ -107,7 +120,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void unpinSelectedEvents() {
-    updatePinnedMessagesInteractor
+    unpinSelectedEventsStreamSubcription = updatePinnedMessagesInteractor
         .execute(
       room: room!,
       eventIds: selectedPinnedEventsIds,
@@ -382,7 +395,7 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void _listenRoomUpdateEvent() {
     if (room == null) return;
-    client.onEvent.stream.listen((eventUpdate) {
+    onEventStreamSubscription = client.onEvent.stream.listen((eventUpdate) {
       Logs().d(
         'PinnedMessages::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
@@ -425,17 +438,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void _updateEventsNotifier(List<Event?> events) {
-    try {
-      eventsNotifier.value = events;
-    } on FlutterError catch (exception) {
-      Logs().e(
-        'PinnedMessages::_updateEventsNotifier():: FlutterError $exception',
-      );
-    } catch (exception) {
-      Logs().e(
-        'PinnedMessages::_updateEventsNotifier():: ErrorCode $exception',
-      );
-    }
+    eventsNotifier.value = events;
   }
 
   @override
@@ -450,8 +453,13 @@ class PinnedMessagesController extends State<PinnedMessages>
   @override
   void dispose() {
     scrollController.dispose();
-    eventsNotifier.dispose();
     isHoverNotifier.dispose();
+    Future.wait([
+      unpinAllStreamSubcription?.cancel() ?? Future.value(),
+      unpinMessagesStreamSubcription?.cancel() ?? Future.value(),
+      unpinSelectedEventsStreamSubcription?.cancel() ?? Future.value(),
+      onEventStreamSubscription?.cancel() ?? Future.value(),
+    ]).whenComplete(() => eventsNotifier.dispose());
     super.dispose();
   }
 
