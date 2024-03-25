@@ -142,7 +142,7 @@ mixin HandleDownloadAndPreviewFileMixin {
         TwakeDialog.hideLoadingDialog(context);
       }, (success) {
         if (success is DownloadFileForPreviewSuccess) {
-          openDownloadedFileForPreview(
+          handleDownloadFileForPreviewSuccess(
             filePath: success.downloadFileForPreviewResponse.filePath,
             mimeType: success.downloadFileForPreviewResponse.mimeType,
           );
@@ -154,12 +154,32 @@ mixin HandleDownloadAndPreviewFileMixin {
     });
   }
 
-  void openDownloadedFileForPreview({
+  void handleDownloadFileForPreviewSuccess({
+    required String filePath,
+    required String? mimeType,
+  }) {
+    if (PlatformInfos.isAndroid) {
+      _openDownloadedFileForPreviewAndroid(
+        filePath: filePath,
+        mimeType: mimeType,
+      );
+      return;
+    }
+
+    if (PlatformInfos.isIOS) {
+      _openDownloadedFileForPreviewIos(
+        filePath: filePath,
+        mimeType: mimeType,
+      );
+      return;
+    }
+  }
+
+  void _openDownloadedFileForPreviewAndroid({
     required String filePath,
     required String? mimeType,
   }) async {
-    if (PlatformInfos.isAndroid &&
-        SupportedPreviewFileTypes.apkMimeTypes.contains(mimeType)) {
+    if (SupportedPreviewFileTypes.apkMimeTypes.contains(mimeType)) {
       await Share.shareXFiles([XFile(filePath)]);
       return;
     }
@@ -170,13 +190,26 @@ mixin HandleDownloadAndPreviewFileMixin {
           .value,
     );
     Logs().d(
-      'ChatController:_openDownloadedFileForPreview(): ${openResults.message}',
+      'ChatController:_openDownloadedFileForPreviewAndroid(): ${openResults.message}',
     );
 
     if (openResults.type != ResultType.done) {
       await Share.shareXFiles([XFile(filePath)]);
       return;
     }
+  }
+
+  void _openDownloadedFileForPreviewIos({
+    required String filePath,
+    required String? mimeType,
+  }) async {
+    Logs().d(
+      'ChatController:_openDownloadedFileForPreviewIos(): $filePath',
+    );
+    await OpenFile.open(
+      filePath,
+      type: mimeType,
+    );
   }
 
   void previewPdfWeb(BuildContext context, Event event) async {
