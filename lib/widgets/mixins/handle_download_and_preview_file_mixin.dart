@@ -2,7 +2,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
-import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
 import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
@@ -40,7 +39,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     required Event event,
     required BuildContext context,
   }) {
-    return _handlePreviewWeb(event: event, context: context);
+    return handlePreviewWeb(event: event, context: context);
   }
 
   void onFileTappedMobile({
@@ -107,7 +106,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
   }
 
-  void _handlePreviewWeb({
+  void handlePreviewWeb({
     required Event event,
     required BuildContext context,
   }) async {
@@ -143,9 +142,9 @@ mixin HandleDownloadAndPreviewFileMixin {
         TwakeDialog.hideLoadingDialog(context);
       }, (success) {
         if (success is DownloadFileForPreviewSuccess) {
-          _openDownloadedFileForPreview(
-            downloadFileForPreviewResponse:
-                success.downloadFileForPreviewResponse,
+          openDownloadedFileForPreview(
+            filePath: success.downloadFileForPreviewResponse.filePath,
+            mimeType: success.downloadFileForPreviewResponse.mimeType,
           );
           TwakeDialog.hideLoadingDialog(context);
         } else if (success is DownloadFileForPreviewLoading) {
@@ -155,17 +154,17 @@ mixin HandleDownloadAndPreviewFileMixin {
     });
   }
 
-  void _openDownloadedFileForPreview({
-    required DownloadFileForPreviewResponse downloadFileForPreviewResponse,
+  void openDownloadedFileForPreview({
+    required String filePath,
+    required String? mimeType,
   }) async {
-    final mimeType = downloadFileForPreviewResponse.mimeType;
     if (PlatformInfos.isAndroid &&
         SupportedPreviewFileTypes.apkMimeTypes.contains(mimeType)) {
-      await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
+      await Share.shareXFiles([XFile(filePath)]);
       return;
     }
     final openResults = await OpenFile.open(
-      downloadFileForPreviewResponse.filePath,
+      filePath,
       type: mimeType,
       uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType])
           .value,
@@ -175,7 +174,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     );
 
     if (openResults.type != ResultType.done) {
-      await Share.shareXFiles([XFile(downloadFileForPreviewResponse.filePath)]);
+      await Share.shareXFiles([XFile(filePath)]);
       return;
     }
   }
