@@ -27,6 +27,8 @@ class ChatEventList extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
+  static const _visiblePercentage = 80;
+
   @override
   Widget build(BuildContext context) {
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 8.0 : 0.0;
@@ -86,7 +88,7 @@ class ChatEventList extends StatelessWidget {
           chatController: controller,
           focusNode: controller.selectionFocusNode,
           child: ValueListenableBuilder(
-            valueListenable: controller.lastScrollDirection,
+            valueListenable: controller.isScrollingForward,
             builder: (context, lastScrollDirection, _) =>
                 InViewNotifierListCustom(
               isInViewPortCondition: controller.isInViewPortCondition,
@@ -161,8 +163,11 @@ class ChatEventList extends StatelessWidget {
                         final visiblePercentage =
                             visibilityInfo.visibleFraction * 100;
 
-                        if (lastScrollDirection == ScrollDirection.forward &&
-                            visiblePercentage == 100) {
+                        final scrollCondition =
+                            lastScrollDirection || previousEvent == null;
+
+                        if (scrollCondition &&
+                            visiblePercentage >= _visiblePercentage) {
                           controller.updateReceipt(
                             event: event,
                             index: index,

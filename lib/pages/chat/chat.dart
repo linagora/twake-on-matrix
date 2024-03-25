@@ -177,8 +177,9 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
 
-  final ValueNotifier<ScrollDirection> lastScrollDirection =
-      ValueNotifier(ScrollDirection.idle);
+  final ValueNotifier<bool> isScrollingForward = ValueNotifier(false);
+
+  double _lastScrollOffset = 0;
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
@@ -263,11 +264,12 @@ class ChatController extends State<Chat>
   String? _findUnreadReceivedMessageId(String fullyRead) {
     final unreadEvents = findUnreadReceivedMessages(fullyRead);
 
+    final lastUnread = unreadEvents.isEmpty ? null : unreadEvents.last.eventId;
     Logs().d(
-      "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
+      "Chat::getFirstUnreadEvent(): Last unread event ${lastUnread}",
     );
-    
-    return unreadEvents.isEmpty ? null : unreadEvents.last.eventId;
+
+    return lastUnread;
   }
 
   List<Event> findUnreadReceivedMessages(String fullyRead) {
@@ -355,13 +357,14 @@ class ChatController extends State<Chat>
     if (!mounted) {
       return;
     }
-
-    if (lastScrollDirection.value !=
-        scrollController.position.userScrollDirection) {
-      lastScrollDirection.value = scrollController.position.userScrollDirection;
-    }
-
     if (!scrollController.hasClients) return;
+
+    if (_lastScrollOffset == 0) _lastScrollOffset = scrollController.offset;
+
+    isScrollingForward.value = scrollController.position.userScrollDirection ==
+            ScrollDirection.forward ||
+        _lastScrollOffset < scrollController.offset;
+
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0) {
       showScrollDownButtonNotifier.value = true;
@@ -419,17 +422,12 @@ class ChatController extends State<Chat>
 
   void _tryLoadTimeline() async {
     _updateOpeningChatViewStateNotifier(ViewEventListLoading());
-    loadTimelineFuture = _getTimeline(
-      onJumpToMessage: (event) {
-        scrollToEventId(event);
-      },
-    );
+    loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
-        setReadMarker();
         return;
       }
       if (room?.hasNewMessages == true) {
@@ -437,7 +435,7 @@ class ChatController extends State<Chat>
       }
       if (timeline != null &&
           timeline!.events.any((event) => event.eventId == fullyRead)) {
-        setReadMarker();
+        setReadMarker(eventId: fullyRead);
         return;
       }
       if (!mounted) return;
@@ -473,12 +471,10 @@ class ChatController extends State<Chat>
 
     Logs().d('Set read marker...', eventId);
     // ignore: unawaited_futures
-    if (eventId != null) {
-      _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
-        _setReadMarkerFuture = null;
-        setState(() {});
-      });
-    }
+    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
+      _setReadMarkerFuture = null;
+      setState(() {});
+    });
 
     if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
       Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
@@ -855,7 +851,6 @@ class ChatController extends State<Chat>
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
-      setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -933,6 +928,7 @@ class ChatController extends State<Chat>
 
   Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
+
     if (eventIndex == -1) {
       timeline = null;
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
@@ -1676,9 +1672,13 @@ class ChatController extends State<Chat>
         _defaultEventCountDisplay;
 
     if (allMembershipEvents || canRequestHistory) {
+      final notificationCount = room?.notificationCount ?? 0;
+      final historyCount = notificationCount > _defaultEventCountDisplay
+          ? notificationCount
+          : _defaultEventCountDisplay;
+
       try {
-        await requestHistory(historyCount: _defaultEventCountDisplay)
-            .then((response) {
+        await requestHistory(historyCount: historyCount).then((response) {
           Logs().d(
             'Chat::_tryRequestHistory():: Try request history success',
           );
