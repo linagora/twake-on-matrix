@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
@@ -23,7 +24,6 @@ import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_player.dart';
 import 'cute_events.dart';
-import 'html_message.dart';
 import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
@@ -132,33 +132,14 @@ class MessageContent extends StatelessWidget
                 !event.redacted &&
                 event.isRichMessage &&
                 containedLink.isEmpty) {
-              var html = event.formattedText;
-
-              if (event.messageType == MessageTypes.Emote) {
-                html = '* $html';
-              }
-              final bigEmotes = event.onlyEmotes &&
-                  event.numberEmotes > 0 &&
-                  event.numberEmotes <= 10;
               return Padding(
                 padding: MessageContentStyle.emojiPadding,
-                child: HtmlMessage(
-                  html: html,
-                  defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                    decoration: TextDecoration.underline,
-                    decorationColor: textColor.withAlpha(150),
-                  ),
-                  room: event.room,
-                  emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
-                  bottomWidgetSpan: Visibility(
-                    visible: false,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: endOfBubbleWidget,
-                  ),
+                child: FormattedTextWidget(
+                  event: event,
+                  linkStyle:
+                      MessageContentStyle.linkStyleMessageContent(context),
+                  fontSize: fontSize,
+                  endOfBubbleWidget: endOfBubbleWidget,
                 ),
               );
             }
@@ -215,31 +196,24 @@ class MessageContent extends StatelessWidget
                 hideReply: true,
               ),
               builder: (context, snapshot) {
-                final text = snapshot.data ??
+                final localizedBody = snapshot.data ??
                     event.calcLocalizedBodyFallback(
                       MatrixLocals(L10n.of(context)!),
                       hideReply: true,
                     );
                 return TwakeLinkPreview(
                   key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                  text: text,
-                  textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                  linkStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                  childWidget: Visibility(
-                    visible: false,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: endOfBubbleWidget,
-                  ),
-                  uri: Uri.parse(text.getFirstValidUrl() ?? ''),
+                  event: event,
+                  localizedBody: localizedBody,
                   ownMessage: ownMessage,
-                  onLinkTap: (url) =>
-                      UrlLauncher(context, url: url.toString()).launchUrl(),
+                  endOfBubbleWidget: endOfBubbleWidget,
+                  fontSize: fontSize,
+                  linkStyle:
+                      MessageContentStyle.linkStyleMessageContent(context),
+                  richTextStyle:
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                 );
               },
             );

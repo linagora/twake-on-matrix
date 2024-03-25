@@ -2,15 +2,13 @@ import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_lin
 import 'package:flutter/material.dart';
 
 class TwakeLinkView extends StatelessWidget {
-  final String text;
-  final Widget messageContentWidget;
+  final Widget body;
   final Widget previewItemWidget;
   final String? firstValidUrl;
 
   const TwakeLinkView({
     Key? key,
-    required this.text,
-    required this.messageContentWidget,
+    required this.body,
     required this.previewItemWidget,
     this.firstValidUrl,
   }) : super(key: key);
@@ -18,31 +16,28 @@ class TwakeLinkView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (firstValidUrl == null) {
-      return _buildWidgetNoPreview(context);
+      return _buildMessageBody();
     }
 
-    return _buildWidgetWithPreview(context, firstValidUrl!);
+    return _buildMessageWithPreview(context);
   }
 
-  Widget _buildWidgetWithPreview(BuildContext context, String url) {
+  Widget _buildMessageWithPreview(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         previewItemWidget,
-        const SizedBox(height: 2),
-        Padding(
-          padding: TwakeLinkViewStyle.paddingWidgetNoPreview,
-          child: messageContentWidget,
-        ),
+        const SizedBox(height: TwakeLinkViewStyle.previewToBodySpacing),
+        _buildMessageBody(),
       ],
     );
   }
 
-  Widget _buildWidgetNoPreview(BuildContext context) {
+  Widget _buildMessageBody() {
     return Padding(
-      padding: TwakeLinkViewStyle.paddingWidgetNoPreview,
-      child: messageContentWidget,
+      padding: TwakeLinkViewStyle.paddingMessageBody,
+      child: body,
     );
   }
 }
