@@ -7,6 +7,8 @@ class StorageDirectoryUtils {
 
   static StorageDirectoryUtils get instance => _instance;
 
+  static String? _tempDirectoryPath;
+
   Future<String> getFileStoreDirectory() async {
     try {
       try {
@@ -17,5 +19,10 @@ class StorageDirectoryUtils {
     } catch (_) {
       return (await getDownloadsDirectory())!.path;
     }
+  }
+
+  Future<String> getDownloadFolderInApp() async {
+    _tempDirectoryPath ??= (await getTemporaryDirectory()).path;
+    return '$_tempDirectoryPath/Downloads';
   }
 }
