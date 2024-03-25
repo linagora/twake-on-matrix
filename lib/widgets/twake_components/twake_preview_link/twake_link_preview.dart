@@ -1,30 +1,36 @@
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/clean_rich_text.dart';
 import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix_link_text/link_text.dart';
+import 'package:matrix/matrix.dart' hide Visibility;
 import 'package:skeletonizer/skeletonizer.dart';
 
 class TwakeLinkPreview extends StatefulWidget {
-  final Uri uri;
-  final int? preferredPointInTime;
-  final String text;
-  final Widget messageContentWidget;
+  final Event event;
+  final String localizedBody;
   final bool ownMessage;
+  final Widget endOfBubbleWidget;
+  final double fontSize;
+  final TextStyle? linkStyle;
+  final TextStyle? richTextStyle;
 
   const TwakeLinkPreview({
     super.key,
-    required this.uri,
-    this.preferredPointInTime,
-    required this.text,
-    required this.messageContentWidget,
+    required this.event,
+    required this.localizedBody,
+    required this.endOfBubbleWidget,
     required this.ownMessage,
+    required this.fontSize,
+    this.linkStyle,
+    this.richTextStyle,
   });
 
   @override
@@ -33,7 +39,9 @@ class TwakeLinkPreview extends StatefulWidget {
 
 class TwakeLinkPreviewController extends State<TwakeLinkPreview>
     with GetPreviewUrlMixin {
-  String? get firstValidUrl => widget.text.getFirstValidUrl();
+  String? get firstValidUrl => widget.localizedBody.getFirstValidUrl();
+
+  Uri get uri => Uri.parse(firstValidUrl ?? '');
 
   static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
 
@@ -45,7 +53,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
   @override
   void initState() {
     if (firstValidUrl != null) {
-      getPreviewUrl(uri: widget.uri);
+      getPreviewUrl(uri: uri);
     }
     super.initState();
   }
@@ -54,9 +62,29 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
   Widget build(BuildContext context) {
     return TwakeLinkView(
       key: twakeLinkViewKey,
-      text: widget.text,
       firstValidUrl: firstValidUrl,
-      messageContentWidget: widget.messageContentWidget,
+      body: widget.event.formattedText.isNotEmpty
+          ? FormattedTextWidget(
+              event: widget.event,
+              linkStyle: widget.linkStyle,
+              fontSize: widget.fontSize,
+              endOfBubbleWidget: widget.endOfBubbleWidget,
+            )
+          : TwakeCleanRichText(
+              text: widget.localizedBody,
+              childWidget: Visibility(
+                visible: false,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: widget.endOfBubbleWidget,
+              ),
+              textStyle: widget.richTextStyle,
+              linkStyle: widget.linkStyle,
+              textAlign: TextAlign.start,
+              onLinkTap: (url) =>
+                  UrlLauncher(context, url: url.toString()).launchUrl(),
+            ),
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,
         builder: (context, state, child) {
