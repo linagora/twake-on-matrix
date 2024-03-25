@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'file_tile_widget_style.dart';
 
 class MessageFileTileStyle extends FileTileWidgetStyle {
+  const MessageFileTileStyle();
+
   @override
   double get iconSize => 36;
 
@@ -24,8 +26,17 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   }
 
   @override
-  Widget get paddingBottomText => const SizedBox(height: 4.0);
+  Widget get paddingBottomText => const SizedBox(height: 8.0);
 
   @override
   Widget get paddingRightIcon => const SizedBox(width: 4.0);
+
+  EdgeInsets get paddingDownloadFileIcon => const EdgeInsets.symmetric(
+        horizontal: 6.0,
+        vertical: 4.0,
+      );
+
+  double get strokeWidthLoading => 2;
+
+  double get cancelButtonSize => 32;
 }

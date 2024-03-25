@@ -85,10 +85,6 @@ class MessageContent extends StatelessWidget
             }
             return MessageDownloadContent(
               event,
-              onFileTapped: (event) => onFileTapped(
-                context: context,
-                event: event,
-              ),
             );
           case MessageTypes.Video:
             if (event.isVideoAvailable) {
@@ -105,10 +101,6 @@ class MessageContent extends StatelessWidget
                 children: [
                   MessageDownloadContent(
                     event,
-                    onFileTapped: (event) => onFileTapped(
-                      context: context,
-                      event: event,
-                    ),
                   ),
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
@@ -124,10 +116,6 @@ class MessageContent extends StatelessWidget
               children: [
                 MessageDownloadContent(
                   event,
-                  onFileTapped: (event) => onFileTapped(
-                    context: context,
-                    event: event,
-                  ),
                 ),
                 Padding(
                   padding: MessageContentStyle.endOfBubbleWidgetPadding,
