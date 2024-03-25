@@ -118,7 +118,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
         if (state is DownloadedPresentationState) {
           return InkWell(
             onTap: () async {
-              openDownloadedFileForPreview(
+              handleDownloadFileForPreviewSuccess(
                 filePath: state.filePath,
                 mimeType: widget.event.mimeType,
               );
