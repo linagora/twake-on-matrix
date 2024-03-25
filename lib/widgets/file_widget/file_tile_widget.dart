@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +71,7 @@ class FileTileWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(height: 4.0),
-                _FileNameText(
+                FileNameText(
                   filename: filename,
                   highlightText: highlightText,
                   style: style,
@@ -77,16 +79,16 @@ class FileTileWidget extends StatelessWidget {
                 Row(
                   children: [
                     if (sizeString != null)
-                      _TextInformationOfFile(
+                      TextInformationOfFile(
                         value: sizeString!,
                         style: style,
                       ),
-                    _TextInformationOfFile(
+                    TextInformationOfFile(
                       value: " · ",
                       style: style,
                     ),
                     Flexible(
-                      child: _TextInformationOfFile(
+                      child: TextInformationOfFile(
                         value: mimeType.getFileType(
                           context,
                           fileType: fileType,
@@ -106,8 +108,9 @@ class FileTileWidget extends StatelessWidget {
   }
 }
 
-class _FileNameText extends StatelessWidget {
-  const _FileNameText({
+class FileNameText extends StatelessWidget {
+  const FileNameText({
+    super.key,
     required this.filename,
     this.highlightText,
     this.style = const FileTileWidgetStyle(),
@@ -133,21 +136,47 @@ class _FileNameText extends StatelessWidget {
   }
 }
 
-class _TextInformationOfFile extends StatelessWidget {
+class TextInformationOfFile extends StatelessWidget {
   final String value;
   final FileTileWidgetStyle style;
-  const _TextInformationOfFile({
+  final ValueNotifier<DownloadPresentationState>? downloadFileStateNotifier;
+
+  const TextInformationOfFile({
+    super.key,
     required this.value,
+    this.downloadFileStateNotifier,
     this.style = const FileTileWidgetStyle(),
   });
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      value,
-      style: style.textInformationStyle(context),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      children: [
+        if (downloadFileStateNotifier != null)
+          ValueListenableBuilder<DownloadPresentationState>(
+            valueListenable: downloadFileStateNotifier!,
+            builder: ((context, downloadFileState, child) {
+              if (downloadFileState is DownloadingPresentationState &&
+                  downloadFileState.total != null &&
+                  downloadFileState.receive != null &&
+                  downloadFileState.total! >= IntExtension.oneKB) {
+                return Text(
+                  '${downloadFileState.receive!.bytesToMB(placeDecimal: 1)} MB / ',
+                  style: style.textInformationStyle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+          ),
+        Text(
+          value,
+          style: style.textInformationStyle(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
