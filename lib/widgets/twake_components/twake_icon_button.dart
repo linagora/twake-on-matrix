@@ -103,13 +103,12 @@ class TwakeIconButton extends StatelessWidget {
                             imagePath!,
                             height: imageSize,
                             width: imageSize,
-                            colorFilter: ColorFilter.mode(
-                              iconColor ??
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                              BlendMode.srcIn,
-                            ),
+                            colorFilter: iconColor != null
+                                ? ColorFilter.mode(
+                                    iconColor!,
+                                    BlendMode.srcIn,
+                                  )
+                                : null,
                           )
                         : null,
               ),

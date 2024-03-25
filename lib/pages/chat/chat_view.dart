@@ -46,6 +46,10 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               icon: !controller.isUnpinEvent(controller.selectedEvents.first)
                   ? Icons.push_pin_outlined
                   : null,
+              iconColor:
+                  controller.isUnpinEvent(controller.selectedEvents.first)
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : null,
               imagePath:
                   controller.isUnpinEvent(controller.selectedEvents.first)
                       ? ImagePaths.icUnpin
