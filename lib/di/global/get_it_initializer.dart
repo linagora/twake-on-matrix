@@ -81,6 +81,8 @@ import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dar
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
+import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -100,6 +102,7 @@ class GetItInitializer {
     bindingGlobal();
     bindingQueue();
     bindingAPI();
+    bindingManager();
     bindingDatasource();
     bindingDatasourceImpl();
     bindingRepositories();
@@ -135,6 +138,15 @@ class GetItInitializer {
     getIt.registerSingleton<MediaAPI>(MediaAPI());
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
+  }
+
+  void bindingManager() {
+    getIt.registerSingleton<DownloadWorkerQueue>(
+      DownloadWorkerQueue(),
+    );
+    getIt.registerSingleton<DownloadManager>(
+      DownloadManager(),
+    );
   }
 
   void bindingDatasource() {
