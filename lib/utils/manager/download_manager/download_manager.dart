@@ -185,12 +185,21 @@ class DownloadManager {
       Task(
         id: event.eventId,
         runnable: () async {
-          final matrixFile = await event.downloadAndDecryptAttachment();
-          streamController.add(
-            Right(
-              DownloadMatrixFileSuccessState(matrixFile: matrixFile),
-            ),
-          );
+          try {
+            final matrixFile = await event.downloadAndDecryptAttachment();
+            streamController.add(
+              Right(
+                DownloadMatrixFileSuccessState(matrixFile: matrixFile),
+              ),
+            );
+          } catch (e) {
+            Logs().e('DownloadManager::download(): $e');
+            streamController.add(
+              Left(
+                DownloadFileFailureState(exception: e),
+              ),
+            );
+          }
         },
         onTaskCompleted: () => clear(event.eventId),
       ),
