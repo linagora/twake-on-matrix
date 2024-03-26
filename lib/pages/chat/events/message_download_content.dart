@@ -15,6 +15,7 @@ import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -78,6 +79,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
         downloadFileStateNotifier.value = const NotDownloadPresentationState();
+        streamSubscription?.cancel();
       },
       (success) {
         if (success is DownloadingFileState) {
@@ -92,17 +94,37 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
             filePath: success.filePath,
           );
         } else if (success is DownloadMatrixFileSuccessState) {
-          downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
-            matrixFile: success.matrixFile,
-          );
+          _handleDownloadMatrixFileSuccessState(success);
         }
       },
     );
   }
 
+  void _handleDownloadMatrixFileSuccessState(
+    DownloadMatrixFileSuccessState success,
+  ) {
+    streamSubscription?.cancel();
+    if (mounted) {
+      downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
+        matrixFile: success.matrixFile,
+      );
+      handlePreviewWeb(event: widget.event, context: context);
+      return;
+    }
+
+    if (TwakeApp.routerKey.currentContext != null) {
+      handlePreviewWeb(
+        event: widget.event,
+        context: TwakeApp.routerKey.currentContext!,
+      );
+    }
+  }
+
   @override
   void dispose() {
-    streamSubscription?.cancel();
+    if (!PlatformInfos.isWeb) {
+      streamSubscription?.cancel();
+    }
     downloadFileStateNotifier.dispose();
     super.dispose();
   }
@@ -150,10 +172,29 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
         } else if (state is FileWebDownloadedPresentationState) {
           return InkWell(
             onTap: () {
-              handlePreviewWeb(
+              onFileTapped(
                 event: widget.event,
                 context: context,
               );
+            },
+            child: FileTileWidget(
+              mimeType: widget.event.mimeType,
+              fileType: filetype,
+              filename: filename,
+              highlightText: widget.highlightText,
+              sizeString: sizeString,
+              style: const MessageFileTileStyle(),
+            ),
+          );
+        } else if (PlatformInfos.isWeb) {
+          return InkWell(
+            onTap: () {
+              downloadFileStateNotifier.value =
+                  const DownloadingPresentationState();
+              downloadManager.download(
+                event: widget.event,
+              );
+              setupListeningForStreamSubcription();
             },
             child: FileTileWidget(
               mimeType: widget.event.mimeType,
