@@ -45,22 +45,22 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  Future<String> downloadFileInWeb(BuildContext context) async {
+  Future<String?> downloadFileInWeb(BuildContext context) async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
-
-    final directory = await FileSaver.instance.saveFile(
-      name,
-      bytes!,
-      extensionFromMime(mimeType),
-      mimeType: mimeType.toMimeTypeEnum(),
-    );
-
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.downloadFileInWeb(directory),
-    );
-
-    return '$directory/$name';
+    try {
+      final directory = await FileSaver.instance.saveFile(
+        name: name,
+        bytes: bytes,
+        ext: extensionFromMime(mimeType),
+        mimeType: mimeType.toMimeTypeEnum(),
+      );
+      return '$directory/$name';
+    } catch (e) {
+      Logs().e(
+        "MatrixFileExtension()::downloadFileInWeb()::Error: $e",
+      );
+    }
+    return null;
   }
 
   Future<String> downloadImageInMobile(BuildContext context) async {
