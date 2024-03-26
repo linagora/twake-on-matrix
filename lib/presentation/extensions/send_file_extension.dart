@@ -470,12 +470,18 @@ extension SendFileExtension on Room {
     var width = fileInfo.width;
     var height = fileInfo.height;
     if (width == null || height == null) {
-      final imageDimension = await runBenchmarked(
-        '_calculateImageDimension',
-        () => _calculateImageBytesDimension(fileInfo.imagePlaceholderBytes),
-      );
-      width = imageDimension.width.toInt();
-      height = imageDimension.height.toInt();
+      try {
+        final imageDimension = await _calculateImageBytesDimension(
+          tempThumbnailFile.readAsBytesSync(),
+        );
+        width = imageDimension.width.toInt();
+        height = imageDimension.height.toInt();
+      } catch (e) {
+        Logs().e(
+          '_getThumbnailVideo():: Error while calculating image dimension',
+          e,
+        );
+      }
     }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     final newThumbnail = ImageFileInfo(

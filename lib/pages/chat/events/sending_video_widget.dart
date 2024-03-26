@@ -1,7 +1,6 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -129,7 +128,7 @@ class VideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return matrixFile.bytes != null && event.isThumbnailGenerated()
+    return matrixFile.bytes != null && matrixFile.bytes!.isNotEmpty
         ? Image.memory(
             matrixFile.bytes!,
             width: imageWidth,
