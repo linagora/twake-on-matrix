@@ -35,11 +35,11 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
   }
 
-  void onFileTappedWeb({
+  Future<void> onFileTappedWeb({
     required Event event,
     required BuildContext context,
-  }) {
-    return handlePreviewWeb(event: event, context: context);
+  }) async {
+    return await handlePreviewWeb(event: event, context: context);
   }
 
   void onFileTappedMobile({
@@ -106,7 +106,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
   }
 
-  void handlePreviewWeb({
+  Future<void> handlePreviewWeb({
     required Event event,
     required BuildContext context,
   }) async {
@@ -116,7 +116,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
 
     if (event.mimeType.isPdfFile()) {
-      return previewPdfWeb(context, event);
+      return await previewPdfWeb(context, event);
     }
 
     await event.saveFile(context);
@@ -212,7 +212,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     );
   }
 
-  void previewPdfWeb(BuildContext context, Event event) async {
+  Future<void> previewPdfWeb(BuildContext context, Event event) async {
     final pdf = await event.getFile(context);
     if (pdf.result == null || event.sizeString != pdf.result?.sizeString) {
       TwakeSnackBar.show(context, L10n.of(context)!.errorGettingPdf);

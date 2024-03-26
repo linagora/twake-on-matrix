@@ -486,10 +486,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "49af28382aefc53562459104f64d16b9dfd1e8ef68c862d5af436cc8356ce5a8"
+      sha256: "50fec96118958b97c727d0d8f67255d3683f16cc1f90d9bc917b5d4fe3abeca9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.1"
+    version: "5.4.2"
   dio_cache_interceptor:
     dependency: "direct main"
     description:
@@ -606,10 +606,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: "9efc615b43127952aa394e98b23d9e932715e8c008dc10710177008882b3d141"
+      sha256: bdebc720e17b3e01aba59da69b6d47020a7e5ba7d5c75bd9194f9618d5f16ef4
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.2.12"
   file_selector:
     dependency: "direct overridden"
     description:

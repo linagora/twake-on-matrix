@@ -30,8 +30,6 @@ class ImageViewerController extends State<ImageViewer> {
   TapDownDetails? tapDownDetails;
   final double zoomScale = 3;
 
-  static const String roomPathName = '/rooms/room';
-
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
 
   @override

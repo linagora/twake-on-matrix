@@ -156,57 +156,57 @@ extension StringCasingExtension on String {
   MimeType toMimeTypeEnum() {
     switch (this) {
       case 'image/jpeg':
-        return MimeType.JPEG;
+        return MimeType.jpeg;
       case 'image/png':
-        return MimeType.PNG;
+        return MimeType.png;
       case 'image/gif':
-        return MimeType.GIF;
+        return MimeType.gif;
       case 'image/bmp':
-        return MimeType.BMP;
+        return MimeType.bmp;
       case 'video/mpeg':
-        return MimeType.MPEG;
+        return MimeType.mpeg;
       case 'video/x-msvideo':
-        return MimeType.AVI;
+        return MimeType.avi;
       case 'audio/mpeg':
-        return MimeType.MP3;
+        return MimeType.mp3;
       case 'audio/aac':
-        return MimeType.AAC;
+        return MimeType.aac;
       case 'application/pdf':
-        return MimeType.PDF;
+        return MimeType.pdf;
       case 'application/epub+zip':
-        return MimeType.EPUB;
+        return MimeType.epub;
       case 'application/json':
-        return MimeType.JSON;
+        return MimeType.json;
       case 'font/otf':
-        return MimeType.OTF;
+        return MimeType.otf;
       case 'font/ttf':
-        return MimeType.TTF;
+        return MimeType.ttf;
       case 'application/zip':
-        return MimeType.ZIP;
+        return MimeType.zip;
       case 'application/vnd.oasis.opendocument.presentation':
-        return MimeType.OPENDOCPRESENTATION;
+        return MimeType.openDocPresentation;
       case 'application/vnd.oasis.opendocument.text':
-        return MimeType.OPENDOCTEXT;
+        return MimeType.openDocText;
       case 'application/vnd.oasis.opendocument.spreadsheet':
-        return MimeType.OPENDOCSHEETS;
+        return MimeType.openDocSheets;
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        return MimeType.MICROSOFTEXCEL;
+        return MimeType.microsoftExcel;
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        return MimeType.MICROSOFTPRESENTATION;
+        return MimeType.microsoftPresentation;
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return MimeType.MICROSOFTWORD;
+        return MimeType.microsoftWord;
       case 'application/vnd.etsi.asic-e+zip':
-        return MimeType.ASICE;
+        return MimeType.asice;
       case 'application/vnd.etsi.asic-s+zip':
-        return MimeType.ASICS;
+        return MimeType.asics;
       case 'application/octet-stream':
-        return MimeType.OTHER;
+        return MimeType.other;
       case 'text/plain':
-        return MimeType.TEXT;
+        return MimeType.text;
       case 'text/csv':
-        return MimeType.CSV;
+        return MimeType.csv;
       default:
-        return MimeType.OTHER;
+        return MimeType.other;
     }
   }
 
