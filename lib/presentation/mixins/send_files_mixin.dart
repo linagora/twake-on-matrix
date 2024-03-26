@@ -42,13 +42,11 @@ mixin SendFilesMixin {
       withReadStream: true,
       allowMultiple: true,
     );
+    final temporaryDirectory = await getTemporaryDirectory();
     fileInfos ??= result?.files
         .map(
-          (xFile) => FileInfo(
-            xFile.name,
-            xFile.path ?? '${getTemporaryDirectory()}/${xFile.name}',
-            xFile.size,
-            readStream: xFile.readStream,
+          (xFile) => xFile.toFileInfo(
+            temporaryDirectoryPath: temporaryDirectory.path,
           ),
         )
         .toList();
@@ -65,7 +63,14 @@ mixin SendFilesMixin {
       withReadStream: true,
     );
     if (result == null || result.files.isEmpty) return [];
-    return result.files.map((file) => file.toMatrixFile()).toList();
+    final temporaryDirectory = await getTemporaryDirectory();
+    return result.files
+        .map(
+          (file) => file.toMatrixFile(
+            temporaryDirectoryPath: temporaryDirectory.path,
+          ),
+        )
+        .toList();
   }
 
   void onPickerTypeClick({
