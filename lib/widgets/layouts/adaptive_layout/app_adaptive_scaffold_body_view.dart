@@ -2,7 +2,6 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
@@ -19,8 +18,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart'
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
-  final OnOpenSearchPage onOpenSearchPage;
-  final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
   final PageController pageController;
@@ -43,8 +40,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.activeRoomIdNotifier,
     required this.pageController,
     required this.activeNavigationBarNotifier,
-    required this.onOpenSearchPage,
-    required this.onCloseSearchPage,
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
@@ -123,8 +118,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                     activeNavigationBarNotifier:
                                         activeNavigationBarNotifier,
                                     pageController: pageController,
-                                    onOpenSearchPage: onOpenSearchPage,
-                                    onCloseSearchPage: onCloseSearchPage,
                                     onDestinationSelected:
                                         onDestinationSelected,
                                     onClientSelected: onClientSelected,
@@ -153,8 +146,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       activeRoomIdNotifier: activeRoomIdNotifier,
                       activeNavigationBarNotifier: activeNavigationBarNotifier,
                       pageController: pageController,
-                      onOpenSearchPage: onOpenSearchPage,
-                      onCloseSearchPage: onCloseSearchPage,
                       onDestinationSelected: onDestinationSelected,
                       onClientSelected: onClientSelected,
                       destinations: destinations,
@@ -183,8 +174,6 @@ class _ColumnPageView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final PageController pageController;
-  final OnOpenSearchPage onOpenSearchPage;
-  final OnCloseSearchPage onCloseSearchPage;
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
   final ValueKey bottomNavigationKey;
@@ -196,8 +185,6 @@ class _ColumnPageView extends StatelessWidget {
     required this.activeNavigationBarNotifier,
     required this.activeRoomIdNotifier,
     required this.pageController,
-    required this.onOpenSearchPage,
-    required this.onCloseSearchPage,
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
@@ -223,7 +210,6 @@ class _ColumnPageView extends StatelessWidget {
             navigatorBarType: AdaptiveDestinationEnum.rooms,
             navigatorBarWidget: _bottomNavigationBarBuilder(context),
           ),
-          onOpenSearchPage: onOpenSearchPage,
           activeRoomIdNotifier: activeRoomIdNotifier,
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
@@ -233,9 +219,6 @@ class _ColumnPageView extends StatelessWidget {
           navigatorBarWidget: Settings(
             bottomNavigationBar: _bottomNavigationBarBuilder(context),
           ),
-        ),
-        Search(
-          onCloseSearchPage: onCloseSearchPage,
         ),
       ],
     );
