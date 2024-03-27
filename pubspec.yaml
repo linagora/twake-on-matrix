@@ -173,6 +173,7 @@ dependencies:
   flutter_slidable: ^3.0.1
   skeletonizer: 1.1.0
   flutter_portal: 1.1.4
+  visibility_detector: ^0.3.3
 
 dev_dependencies:
   build_runner: ^2.3.3

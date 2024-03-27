@@ -9,6 +9,7 @@ import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
@@ -139,8 +140,6 @@ class ChatController extends State<Chat>
 
   Timer? _timestampTimer;
 
-  String _markerReadLocation = '';
-
   String? unreadReceivedMessageLocation;
 
   List<MatrixFile?>? get shareFiles => widget.shareFiles;
@@ -177,6 +176,10 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
+  final ValueNotifier<bool> isScrollingForward = ValueNotifier(false);
+
+  double _lastScrollOffset = 0;
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
@@ -258,27 +261,36 @@ class ChatController extends State<Chat>
         (e) => e.eventId == event.eventId,
       );
 
-  String? _findUnreadReceivedMessageLocation() {
+  String? _findUnreadReceivedMessageId(String fullyRead) {
+    final unreadEvents = findUnreadReceivedMessages(fullyRead);
+
+    final lastUnread = unreadEvents.isEmpty ? null : unreadEvents.last.eventId;
+    Logs().d(
+      "Chat::getFirstUnreadEvent(): Last unread event ${lastUnread}",
+    );
+
+    return lastUnread;
+  }
+
+  List<Event> findUnreadReceivedMessages(String fullyRead) {
     final events = timeline!.events;
-    if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
+    if (fullyRead != '' && fullyRead.isNotEmpty) {
       final lastIndexReadEvent = events.indexWhere(
-        (event) => event.eventId == _markerReadLocation,
+        (event) => event.eventId == fullyRead,
       );
       if (lastIndexReadEvent > 0) {
         final afterFullyRead = events.getRange(0, lastIndexReadEvent);
         final unreadEvents = afterFullyRead
             .where((event) => event.senderId != client.userID)
             .toList();
-        if (unreadEvents.isEmpty) return null;
-        Logs().d(
-          "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
-        );
-        return unreadEvents.last.eventId;
+        if (unreadEvents.isEmpty) return <Event>[];
+
+        return unreadEvents;
       }
     } else {
-      return null;
+      return <Event>[];
     }
-    return null;
+    return <Event>[];
   }
 
   void recreateChat() async {
@@ -346,6 +358,13 @@ class ChatController extends State<Chat>
       return;
     }
     if (!scrollController.hasClients) return;
+
+    if (_lastScrollOffset == 0) _lastScrollOffset = scrollController.offset;
+
+    isScrollingForward.value = scrollController.position.userScrollDirection ==
+            ScrollDirection.forward ||
+        _lastScrollOffset < scrollController.offset;
+
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0) {
       showScrollDownButtonNotifier.value = true;
@@ -397,24 +416,18 @@ class ChatController extends State<Chat>
   }
 
   void _initUnreadLocation(String fullyRead) {
-    _markerReadLocation = fullyRead;
-    unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
+    unreadReceivedMessageLocation = _findUnreadReceivedMessageId(fullyRead);
     scrollToEventId(fullyRead);
   }
 
   void _tryLoadTimeline() async {
     _updateOpeningChatViewStateNotifier(ViewEventListLoading());
-    loadTimelineFuture = _getTimeline(
-      onJumpToMessage: (event) {
-        scrollToEventId(event);
-      },
-    );
+    loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
-        setReadMarker();
         return;
       }
       if (room?.hasNewMessages == true) {
@@ -422,7 +435,7 @@ class ChatController extends State<Chat>
       }
       if (timeline != null &&
           timeline!.events.any((event) => event.eventId == fullyRead)) {
-        setReadMarker();
+        setReadMarker(eventId: fullyRead);
         return;
       }
       if (!mounted) return;
@@ -460,7 +473,9 @@ class ChatController extends State<Chat>
     // ignore: unawaited_futures
     _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
       _setReadMarkerFuture = null;
+      setState(() {});
     });
+
     if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
       Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
     }
@@ -836,7 +851,6 @@ class ChatController extends State<Chat>
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
-      setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -914,6 +928,7 @@ class ChatController extends State<Chat>
 
   Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
+
     if (eventIndex == -1) {
       timeline = null;
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
@@ -1659,9 +1674,13 @@ class ChatController extends State<Chat>
         _defaultEventCountDisplay;
 
     if (allMembershipEvents || canRequestHistory) {
+      final notificationCount = room?.notificationCount ?? 0;
+      final historyCount = notificationCount > _defaultEventCountDisplay
+          ? notificationCount
+          : _defaultEventCountDisplay;
+
       try {
-        await requestHistory(historyCount: _defaultEventCountDisplay)
-            .then((response) {
+        await requestHistory(historyCount: historyCount).then((response) {
           Logs().d(
             'Chat::_tryRequestHistory():: Try request history success',
           );
@@ -1767,6 +1786,23 @@ class ChatController extends State<Chat>
       Logs().e(
         'Chat::_updateStickyTimestampNotifier():: FlutterError - $e',
       );
+    }
+  }
+
+  void updateReceipt({
+    required int index,
+    required Event event,
+  }) {
+    final fullyRead = room?.fullyRead;
+    if (fullyRead == null) return;
+    final unreadMessagesIds = findUnreadReceivedMessages(fullyRead)
+        .map(
+          (e) => e.eventId,
+        )
+        .toList();
+
+    if (roomId != null && unreadMessagesIds.contains(event.eventId)) {
+      setReadMarker(eventId: event.eventId);
     }
   }
 
