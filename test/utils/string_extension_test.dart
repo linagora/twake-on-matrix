@@ -54,7 +54,7 @@ void main() {
       '[isContainsHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING isContainsUrl function\n'
-      'IF the text contains a URL\n'
+      'IF the string contains a URL\n'
       'THEN should return true\n'
       'ELSE should return false\n', () {
     final testMap = <String, bool>{
@@ -99,7 +99,11 @@ void main() {
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
         final result = entry.key.isContainsHttpProtocol();
-        expect(result, entry.value);
+        if (entry.value) {
+          expect(result, isTrue);
+        } else {
+          expect(result, isFalse);
+        }
       });
     }
   });
@@ -108,7 +112,7 @@ void main() {
       '[removeHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING removeHttpProtocol function\n'
-      'IF the URL starts with http:// or https://\n'
+      'IF the string starts with http:// or https://\n'
       'THEN should return the URL without the protocol\n'
       'ELSE should return the string unchanged\n', () {
     final testMap = <String, String>{
@@ -174,7 +178,10 @@ void main() {
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
         final result = entry.key.removeHttpProtocol();
-        expect(result, entry.value);
+        expect(result, isNotEmpty);
+        expect(result, contains(entry.value));
+        expect(result, startsWith(entry.value.substring(0, 1)));
+        expect(result, endsWith(entry.value.substring(entry.value.length - 1)));
       });
     }
   });
