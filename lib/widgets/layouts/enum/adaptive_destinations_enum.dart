@@ -7,8 +7,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 enum AdaptiveDestinationEnum {
   contacts,
   rooms,
-  settings,
-  search;
+  settings;
 
   NavigationDestination getNavigationDestination(BuildContext context) {
     switch (this) {
@@ -19,7 +18,6 @@ enum AdaptiveDestinationEnum {
           ),
           label: L10n.of(context)!.contacts,
         );
-      case AdaptiveDestinationEnum.search:
       case AdaptiveDestinationEnum.rooms:
         return NavigationDestination(
           icon: UnreadRoomsBadge(
