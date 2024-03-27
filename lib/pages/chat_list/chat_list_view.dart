@@ -17,7 +17,7 @@ import 'package:matrix/matrix.dart';
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
   final Widget? bottomNavigationBar;
-  final VoidCallback? onOpenSearchPage;
+  final VoidCallback? onOpenSearchPageInMultipleColumns;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
   final responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -26,7 +26,7 @@ class ChatListView extends StatelessWidget {
     Key? key,
     required this.controller,
     this.bottomNavigationBar,
-    this.onOpenSearchPage,
+    this.onOpenSearchPageInMultipleColumns,
     required this.onTapBottomNavigation,
   }) : super(key: key);
 
@@ -44,7 +44,7 @@ class ChatListView extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
         child: ChatListHeader(
-          onOpenSearchPage: onOpenSearchPage,
+          onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
           controller: controller,
         ),
       ),
