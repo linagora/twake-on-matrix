@@ -342,15 +342,18 @@ extension StringCasingExtension on String {
     return replaceAll(RegExp(r'\D'), '');
   }
 
-  bool isContainsHttpProtocol() {
-    final urlRegExp = RegExp(
-      r'(http://|https://)(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{2,}.?([a-z]+)?',
-    );
-    return urlRegExp.hasMatch(this);
+  bool isContainsUrlSeparator() {
+    final separatorRegExp = RegExp(r'://');
+    return separatorRegExp.hasMatch(this);
   }
 
-  String removeHttpProtocol() {
-    final httpProtocolRegExp = RegExp(r'(http://|https://)');
-    return replaceAll(httpProtocolRegExp, '');
+  String removeUrlSeparatorAndPreceding() {
+    final separatorRegExp = RegExp(r'\b[^ ]*://');
+    final standAloneSeparatorRegExp = RegExp(r' *:// *');
+
+    var replacedText = replaceAll(separatorRegExp, '');
+    replacedText = replacedText.replaceAll(standAloneSeparatorRegExp, ' ');
+
+    return replacedText;
   }
 }

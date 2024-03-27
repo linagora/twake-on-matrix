@@ -112,8 +112,8 @@ class ServerSearchController with SearchDebouncerMixin {
   void updateSearchCategories(String searchTerm) {
     resetNextBatch();
 
-    if (searchTerm.isContainsHttpProtocol()) {
-      searchTerm = searchTerm.removeHttpProtocol();
+    if (searchTerm.isContainsUrlSeparator()) {
+      searchTerm = searchTerm.removeUrlSeparatorAndPreceding();
     }
 
     _searchCategories = ServerSideSearchCategories(
