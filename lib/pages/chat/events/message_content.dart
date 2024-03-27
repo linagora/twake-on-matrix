@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
@@ -99,9 +100,15 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  MessageDownloadContent(
-                    event,
-                  ),
+                  if (PlatformInfos.isWeb) ...[
+                    MessageDownloadContent(
+                      event,
+                    ),
+                  ] else ...[
+                    MessageDownloadContentWeb(
+                      event,
+                    ),
+                  ],
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: endOfBubbleWidget,
