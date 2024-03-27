@@ -54,16 +54,28 @@ void main() {
       '[isContainsHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING isContainsUrl function\n'
-      'IF the text contains a URL\n'
+      'IF the string contains a URL\n'
       'THEN should return true\n'
       'ELSE should return false\n', () {
     final testMap = <String, bool>{
+      'https': false,
+      'https:': false,
+      'https:/': false,
+      'https/': false,
+      'https//': false,
+      'https://': true,
       'https://www.example.com': true,
       'https://www.example.com/': true,
       'https://www.example.com/watch?v=ohg5sjyrha0': true,
       'https://example.com/test/test-a-link/check/1608?test=1': true,
       'https://www.example.com/watch?v=ohg5sjyrha0&feature=related': true,
       'https://example.com/test/test-a-link/check/1608': true,
+      'http': false,
+      'http:': false,
+      'http:/': false,
+      'http/': false,
+      'http//': false,
+      'http://': true,
       'http://www.example.com': true,
       'http://www.example.com/': true,
       'http://www.example.com/watch?v=ohg5sjyrha0': true,
@@ -94,12 +106,49 @@ void main() {
       'hello world.com/test/test-a-link/check/1608/?test==1': false,
       'hello world.com/test/test-a-link/check/1608/?test=1&': false,
       'this is a test string': false,
+      'ftp': false,
+      'ftp:': false,
+      'ftp:/': false,
+      'ftp//': false,
+      'ftp://': true,
+      'ftp://www.example.com': true,
+      'ftp://www.example.com/': true,
+      'ftp://www.example.com/watch?v=ohg5sjyrha0': true,
+      'ftp://example.com/test/test-a-link/check/1608?test=1': true,
+      'ftp://www.example.com/watch?v=ohg5sjyrha0&feature=related': true,
+      'ftp://example.com/test/test-a-link/check/1608': true,
+      'sftp': false,
+      'sftp:': false,
+      'sftp:/': false,
+      'sftp//': false,
+      'sftp://': true,
+      'sftp://www.example.com': true,
+      'sftp://www.example.com/': true,
+      'sftp://www.example.com/watch?v=ohg5sjyrha0': true,
+      'sftp://example.com/test/test-a-link/check/1608?test=1': true,
+      'sftp://www.example.com/watch?v=ohg5sjyrha0&feature=related': true,
+      'sftp://example.com/test/test-a-link/check/1608': true,
+      'ssh': false,
+      'ssh:': false,
+      'ssh:/': false,
+      'ssh//': false,
+      'ssh://': true,
+      'ssh://www.example.com': true,
+      'ssh://www.example.com/': true,
+      'ssh://www.example.com/watch?v=ohg5sjyrha0': true,
+      'ssh://example.com/test/test-a-link/check/1608?test=1': true,
+      'ssh://www.example.com/watch?v=ohg5sjyrha0&feature=related': true,
+      'ssh://example.com/test/test-a-link/check/1608': true,
     };
 
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
-        final result = entry.key.isContainsHttpProtocol();
-        expect(result, entry.value);
+        final result = entry.key.isContainsUrlSeparator();
+        if (entry.value) {
+          expect(result, isTrue);
+        } else {
+          expect(result, isFalse);
+        }
       });
     }
   });
@@ -108,10 +157,15 @@ void main() {
       '[removeHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING removeHttpProtocol function\n'
-      'IF the URL starts with http:// or https://\n'
+      'IF the string starts with http:// or https://\n'
       'THEN should return the URL without the protocol\n'
       'ELSE should return the string unchanged\n', () {
     final testMap = <String, String>{
+      'https': 'https',
+      'https:': 'https:',
+      'https:/': 'https:/',
+      'https//': 'https//',
+      'https://': '',
       'https://www.example.com': 'www.example.com',
       'https://www.example.com/': 'www.example.com/',
       'https://www.example.com/watch?v=ohg5sjyrha0':
@@ -122,6 +176,11 @@ void main() {
           'www.example.com/watch?v=ohg5sjyrha0&feature=related',
       'https://example.com/test/test-a-link/check/1608':
           'example.com/test/test-a-link/check/1608',
+      'http': 'http',
+      'http:': 'http:',
+      'http:/': 'http:/',
+      'http//': 'http//',
+      'http://': '',
       'http://www.example.com': 'www.example.com',
       'http://www.example.com/': 'www.example.com/',
       'http://www.example.com/watch?v=ohg5sjyrha0':
@@ -168,13 +227,67 @@ void main() {
           'hello world.com/test/test-a-link/check/1608/?test==1',
       'hello world.com/test/test-a-link/check/1608/?test=1&':
           'hello world.com/test/test-a-link/check/1608/?test=1&',
+      'hello 123://world.com/test/test-a-link/check/1608/?test=1&':
+          'hello world.com/test/test-a-link/check/1608/?test=1&',
+      'hello this is the://world.com/test/test-a-link/check/1608/?test=1& for the text contains :// inside it':
+          'hello this is world.com/test/test-a-link/check/1608/?test=1& for the text contains inside it',
       'this is a test string': 'this is a test string',
+      'ftp': 'ftp',
+      'ftp:': 'ftp:',
+      'ftp:/': 'ftp:/',
+      'ftp//': 'ftp//',
+      'ftp://': '',
+      'ftp://www.example.com': 'www.example.com',
+      'ftp://www.example.com/': 'www.example.com/',
+      'ftp://www.example.com/watch?v=ohg5sjyrha0':
+          'www.example.com/watch?v=ohg5sjyrha0',
+      'ftp://example.com/test/test-a-link/check/1608?test=1':
+          'example.com/test/test-a-link/check/1608?test=1',
+      'ftp://www.example.com/watch?v=ohg5sjyrha0&feature=related':
+          'www.example.com/watch?v=ohg5sjyrha0&feature=related',
+      'ftp://example.com/test/test-a-link/check/1608':
+          'example.com/test/test-a-link/check/1608',
+      'sftp': 'sftp',
+      'sftp:': 'sftp:',
+      'sftp:/': 'sftp:/',
+      'sftp//': 'sftp//',
+      'sftp://': '',
+      'sftp://www.example.com': 'www.example.com',
+      'sftp://www.example.com/': 'www.example.com/',
+      'sftp://www.example.com/watch?v=ohg5sjyrha0':
+          'www.example.com/watch?v=ohg5sjyrha0',
+      'sftp://example.com/test/test-a-link/check/1608?test=1':
+          'example.com/test/test-a-link/check/1608?test=1',
+      'sftp://www.example.com/watch?v=ohg5sjyrha0&feature=related':
+          'www.example.com/watch?v=ohg5sjyrha0&feature=related',
+      'sftp://example.com/test/test-a-link/check/1608':
+          'example.com/test/test-a-link/check/1608',
+      'ssh': 'ssh',
+      'ssh:': 'ssh:',
+      'ssh:/': 'ssh:/',
+      'ssh//': 'ssh//',
+      'ssh://': '',
+      'ssh://www.example.com': 'www.example.com',
+      'ssh://www.example.com/': 'www.example.com/',
+      'ssh://www.example.com/watch?v=ohg5sjyrha0':
+          'www.example.com/watch?v=ohg5sjyrha0',
+      'ssh://example.com/test/test-a-link/check/1608?test=1':
+          'example.com/test/test-a-link/check/1608?test=1',
+      'ssh://www.example.com/watch?v=ohg5sjyrha0&feature=related':
+          'www.example.com/watch?v=ohg5sjyrha0&feature=related',
+      'ssh://example.com/test/test-a-link/check/1608':
+          'example.com/test/test-a-link/check/1608',
     };
 
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
-        final result = entry.key.removeHttpProtocol();
-        expect(result, entry.value);
+        final result = entry.key.removeUrlSeparatorAndPreceding();
+        if (entry.value.isNotEmpty) {
+          expect(result, isNotEmpty);
+          expect(result, equals(entry.value));
+        } else {
+          expect(result, isEmpty);
+        }
       });
     }
   });
