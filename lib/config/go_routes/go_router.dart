@@ -15,6 +15,7 @@ import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
+import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/share/share.dart';
@@ -230,7 +231,8 @@ abstract class AppRoutes {
               ],
               redirect: loggedOutRedirect,
             ),
-            if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn())
+            if (FirstColumnInnerRoutes.instance
+                .goRouteAvailableInFirstColumn()) ...[
               GoRoute(
                 path: 'newprivatechat',
                 pageBuilder: (context, state) {
@@ -270,6 +272,16 @@ abstract class AppRoutes {
                   ),
                 ],
               ),
+              GoRoute(
+                path: 'search',
+                pageBuilder: (_, __) {
+                  return const CupertinoPage(
+                    child: Search(),
+                  );
+                },
+                redirect: loggedOutRedirect,
+              ),
+            ],
             GoRoute(
               path: 'newgroup',
               pageBuilder: (context, state) => defaultPageBuilder(
