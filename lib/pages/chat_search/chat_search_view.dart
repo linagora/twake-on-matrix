@@ -4,6 +4,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content.dart';
+import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_style.dart';
@@ -15,6 +16,7 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
@@ -284,7 +286,11 @@ class _MessageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (event.messageType) {
       case MessageTypes.File:
-        return MessageDownloadContent(event, highlightText: searchWord);
+        if (PlatformInfos.isWeb) {
+          return MessageDownloadContentWeb(event, highlightText: searchWord);
+        } else {
+          return MessageDownloadContent(event, highlightText: searchWord);
+        }
       default:
         return HighlightText(
           text: event
