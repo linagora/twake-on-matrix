@@ -4,7 +4,7 @@ import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class FirstColumnInnerRoutes {
   static final _firstColumnInnerRoutes = FirstColumnInnerRoutes._();
@@ -52,7 +52,7 @@ class FirstColumnInnerRoutes {
   }
 
   static PageRoute<dynamic> _defaultPageRoute(Widget widget) {
-    return MaterialPageRoute(
+    return CupertinoPageRoute(
       builder: (context) {
         return widget;
       },

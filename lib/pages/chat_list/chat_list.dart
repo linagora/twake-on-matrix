@@ -48,8 +48,6 @@ class ChatList extends StatefulWidget {
 
   final Widget? bottomNavigationBar;
 
-  final VoidCallback? onOpenSearchPage;
-
   final VoidCallback? onOpenSettings;
 
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
@@ -58,7 +56,6 @@ class ChatList extends StatefulWidget {
     Key? key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
-    this.onOpenSearchPage,
     this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
   }) : super(key: key);
@@ -819,6 +816,12 @@ class ChatListController extends State<ChatList>
     super.initState();
   }
 
+  void onOpenSearchPageInMultipleColumns() {
+    if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
+      context.pushInner('innernavigator/search');
+    }
+  }
+
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
@@ -831,7 +834,7 @@ class ChatListController extends State<ChatList>
     return ChatListView(
       controller: this,
       bottomNavigationBar: widget.bottomNavigationBar,
-      onOpenSearchPage: widget.onOpenSearchPage,
+      onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
       onTapBottomNavigation: _onTapBottomNavigation,
     );
   }

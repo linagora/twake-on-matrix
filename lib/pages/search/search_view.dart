@@ -1,8 +1,8 @@
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
-import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/pages/search/search_text_field.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
@@ -184,32 +184,8 @@ class SearchView extends StatelessWidget {
             ),
             const SizedBox(width: 4.0),
             Expanded(
-              child: TextField(
-                onTapOutside: (event) {
-                  dismissKeyboard(context);
-                },
-                controller: searchController.textEditingController,
-                textInputAction: TextInputAction.search,
-                enabled: true,
-                autofocus: true,
-                decoration: InputDecoration(
-                  filled: true,
-                  contentPadding: SearchViewStyle.contentPaddingAppBar,
-                  fillColor: Theme.of(context).colorScheme.surface,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: SearchViewStyle.borderRadiusTextField,
-                  ),
-                  hintText: L10n.of(context)!.search,
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  suffixIcon: TwakeIconButton(
-                    tooltip: L10n.of(context)!.close,
-                    icon: Icons.close,
-                    onTap: () {
-                      searchController.textEditingController.clear();
-                    },
-                  ),
-                ),
+              child: SearchTextField(
+                textEditingController: searchController.textEditingController,
               ),
             ),
           ],
