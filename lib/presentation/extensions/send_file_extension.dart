@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -286,12 +287,42 @@ extension SendFileExtension on Room {
       inReplyTo: inReplyTo,
       editEventId: editEventId,
     );
+    if (eventId != null) {
+      await _copyFileInMemToAppDownloadsFolder(
+        eventId: eventId,
+        sendingEventId: txid,
+        fileName: fileInfo.fileName,
+      );
+    }
     await Future.wait([
       tempEncryptedFile.delete(),
       tempThumbnailFile.delete(),
       tempEncryptedThumbnailFile.delete(),
     ]);
     return eventId;
+  }
+
+  Future<void> _copyFileInMemToAppDownloadsFolder({
+    required String sendingEventId,
+    required String eventId,
+    required String fileName,
+  }) async {
+    try {
+      final downloadInAppFolder =
+          await StorageDirectoryUtils.instance.getDownloadFolderInApp();
+      final filePathInAppDownloads = '$downloadInAppFolder/$eventId/$fileName';
+      final fileInMem = sendingFilePlaceholders[sendingEventId]?.filePath;
+      final file = File(filePathInAppDownloads);
+      if (await file.exists() || fileInMem == null) {
+        return;
+      }
+      await file.create(recursive: true);
+      await File(fileInMem).copy(filePathInAppDownloads);
+      Logs().d('File copied in app downloads folder', filePathInAppDownloads);
+    } catch (e) {
+      Logs().e('Error while copying file in app downloads folder', e);
+      rethrow;
+    }
   }
 
   Future<SyncUpdate> sendFakeImagePickerFileEvent(
