@@ -28,7 +28,7 @@ class SearchView extends StatelessWidget {
         child: _buildAppBarSearch(context),
       ),
       body: PopScope(
-        canPop: false,
+        canPop: PlatformInfos.isIOS ? true : false,
         onPopInvoked: (didPop) async {
           if (PlatformInfos.isAndroid) {
             searchController.goToRoomsShellBranch();
