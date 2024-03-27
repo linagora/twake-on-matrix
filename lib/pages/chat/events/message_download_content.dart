@@ -49,6 +49,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
   }
 
   void checkDownloadFileState() async {
+    checkFileExistInMemory();
     final filePath = await widget.event.getFileNameInAppDownload();
     final file = File(filePath);
     if (await file.exists() &&
@@ -62,6 +63,16 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
       downloadFileStateNotifier.value = const DownloadingPresentationState();
+    }
+  }
+
+  void checkFileExistInMemory() {
+    final filePathInMem = widget.event.getFilePathFromMem();
+    if (filePathInMem.isNotEmpty) {
+      downloadFileStateNotifier.value = DownloadedPresentationState(
+        filePath: filePathInMem,
+      );
+      return;
     }
   }
 
