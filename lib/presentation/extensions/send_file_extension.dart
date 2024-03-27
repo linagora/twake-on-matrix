@@ -126,7 +126,7 @@ extension SendFileExtension on Room {
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
       );
-      thumbnail ??= await _getThumbnailVideo(tempThumbnailFile, fileInfo);
+      thumbnail ??= await _getThumbnailVideo(tempThumbnailFile, fileInfo, txid);
       if (fileInfo.width == null || fileInfo.height == null) {
         fileInfo = VideoFileInfo(
           fileInfo.fileName,
@@ -136,10 +136,18 @@ extension SendFileExtension on Room {
           width: thumbnail.width,
           height: thumbnail.height,
         );
-        storePlaceholderFileInMem(
-          fileInfo: fileInfo,
-          txid: txid,
-        );
+        if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
+          storePlaceholderFileInMem(
+            fileInfo: fileInfo,
+            txid: txid,
+          );
+        } else {
+          storePlaceholderFileInMem(
+            fileInfo: thumbnail,
+            txid: txid,
+          );
+        }
+
         fakeImageEvent = await sendFakeImagePickerFileEvent(
           fileInfo,
           txid: txid,
@@ -453,6 +461,7 @@ extension SendFileExtension on Room {
   Future<ImageFileInfo> _getThumbnailVideo(
     File tempThumbnailFile,
     VideoFileInfo fileInfo,
+    String txid,
   ) async {
     final int fileSize;
     if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
@@ -472,7 +481,7 @@ extension SendFileExtension on Room {
     if (width == null || height == null) {
       try {
         final imageDimension = await _calculateImageBytesDimension(
-          tempThumbnailFile.readAsBytesSync(),
+          await tempThumbnailFile.readAsBytes(),
         );
         width = imageDimension.width.toInt();
         height = imageDimension.height.toInt();
