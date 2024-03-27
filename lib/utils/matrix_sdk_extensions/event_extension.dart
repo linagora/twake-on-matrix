@@ -34,8 +34,12 @@ extension LocalizedBody on Event {
     return await matrixFile.result?.downloadFile(context);
   }
 
+  String get filenameEllipsized {
+    return filename.ellipsizeFileName;
+  }
+
   String get filename {
-    return (content.tryGet<String>('filename') ?? body).ellipsizeFileName;
+    return (content.tryGet<String>('filename') ?? body);
   }
 
   String? get blurHash {
@@ -111,6 +115,11 @@ extension LocalizedBody on Event {
   MatrixFile? getMatrixFile() {
     final txId = unsigned?['transaction_id'] ?? eventId;
     return room.sendingFilePlaceholders[txId];
+  }
+
+  String getFilePathFromMem() {
+    final matrixFile = getMatrixFile();
+    return matrixFile?.filePath ?? '';
   }
 
   Size? getOriginalResolution() {
