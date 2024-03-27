@@ -110,7 +110,8 @@ abstract class AppConfig {
       }
     }
 
-    if (json['register_site'] != null && json['registration_url'] is String) {
+    if (json['registration_url'] != null &&
+        json['registration_url'] is String) {
       if (json['registration_url'] != '') {
         registrationUrl = json['registration_url'];
       }
