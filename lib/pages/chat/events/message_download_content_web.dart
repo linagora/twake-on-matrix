@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dartz/dartz.dart' hide State, OpenFile;
 import 'package:fluffychat/app_state/failure.dart';
@@ -8,31 +7,31 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class MessageDownloadContent extends StatefulWidget {
-  final Event event;
-
-  final String? highlightText;
-
-  const MessageDownloadContent(
+class MessageDownloadContentWeb extends StatefulWidget {
+  const MessageDownloadContentWeb(
     this.event, {
     Key? key,
     this.highlightText,
   }) : super(key: key);
 
+  final Event event;
+
+  final String? highlightText;
+
   @override
-  State<MessageDownloadContent> createState() => _MessageDownloadContentState();
+  State<StatefulWidget> createState() => _MessageDownloadContentWebState();
 }
 
-class _MessageDownloadContentState extends State<MessageDownloadContent>
+class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
     with HandleDownloadAndPreviewFileMixin {
   final downloadManager = getIt.get<DownloadManager>();
 
@@ -45,20 +44,6 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
   @override
   void initState() {
     super.initState();
-    checkDownloadFileState();
-  }
-
-  void checkDownloadFileState() async {
-    final filePath = await widget.event.getFileNameInAppDownload();
-    final file = File(filePath);
-    if (await file.exists() &&
-        await file.length() == widget.event.getFileSize()) {
-      downloadFileStateNotifier.value = DownloadedPresentationState(
-        filePath: filePath,
-      );
-      return;
-    }
-
     _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
       downloadFileStateNotifier.value = const DownloadingPresentationState();
@@ -76,7 +61,6 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
         downloadFileStateNotifier.value = const NotDownloadPresentationState();
-        streamSubscription?.cancel();
       },
       (success) {
         if (success is DownloadingFileState) {
@@ -86,18 +70,35 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               total: success.total,
             );
           }
-        } else if (success is DownloadNativeFileSuccessState) {
-          downloadFileStateNotifier.value = DownloadedPresentationState(
-            filePath: success.filePath,
-          );
+        } else if (success is DownloadMatrixFileSuccessState) {
+          _handleDownloadMatrixFileSuccessState(success);
         }
       },
     );
   }
 
+  void _handleDownloadMatrixFileSuccessState(
+    DownloadMatrixFileSuccessState success,
+  ) {
+    streamSubscription?.cancel();
+    if (mounted) {
+      downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
+        matrixFile: success.matrixFile,
+      );
+      handlePreviewWeb(event: widget.event, context: context);
+      return;
+    }
+
+    if (TwakeApp.routerKey.currentContext != null) {
+      handlePreviewWeb(
+        event: widget.event,
+        context: TwakeApp.routerKey.currentContext!,
+      );
+    }
+  }
+
   @override
   void dispose() {
-    streamSubscription?.cancel();
     downloadFileStateNotifier.dispose();
     super.dispose();
   }
@@ -110,24 +111,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     return ValueListenableBuilder(
       valueListenable: downloadFileStateNotifier,
       builder: (context, DownloadPresentationState state, child) {
-        if (state is DownloadedPresentationState) {
-          return InkWell(
-            onTap: () async {
-              handleDownloadFileForPreviewSuccess(
-                filePath: state.filePath,
-                mimeType: widget.event.mimeType,
-              );
-            },
-            child: FileTileWidget(
-              mimeType: widget.event.mimeType,
-              fileType: filetype,
-              filename: filename,
-              highlightText: widget.highlightText,
-              sizeString: sizeString,
-              style: const MessageFileTileStyle(),
-            ),
-          );
-        } else if (state is DownloadingPresentationState) {
+        if (state is DownloadingPresentationState) {
           return DownloadFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
@@ -142,6 +126,23 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               downloadManager.cancelDownload(widget.event.eventId);
             },
           );
+        } else if (state is FileWebDownloadedPresentationState) {
+          return InkWell(
+            onTap: () {
+              handlePreviewWeb(
+                event: widget.event,
+                context: context,
+              );
+            },
+            child: FileTileWidget(
+              mimeType: widget.event.mimeType,
+              fileType: filetype,
+              filename: filename,
+              highlightText: widget.highlightText,
+              sizeString: sizeString,
+              style: const MessageFileTileStyle(),
+            ),
+          );
         }
 
         return InkWell(
@@ -153,13 +154,12 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
             );
             _trySetupDownloadingStreamSubcription();
           },
-          child: DownloadFileTileWidget(
+          child: FileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
             filename: filename,
             highlightText: widget.highlightText,
             sizeString: sizeString,
-            downloadFileStateNotifier: downloadFileStateNotifier,
             style: const MessageFileTileStyle(),
           ),
         );
