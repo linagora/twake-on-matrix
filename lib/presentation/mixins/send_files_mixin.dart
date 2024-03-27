@@ -45,8 +45,10 @@ mixin SendFilesMixin {
     final temporaryDirectory = await getTemporaryDirectory();
     fileInfos ??= result?.files
         .map(
-          (xFile) => xFile.toFileInfo(
-            temporaryDirectoryPath: temporaryDirectory.path,
+          (xFile) => FileInfo.fromMatrixFile(
+            xFile.toMatrixFile(
+              temporaryDirectoryPath: temporaryDirectory.path,
+            ),
           ),
         )
         .toList();
