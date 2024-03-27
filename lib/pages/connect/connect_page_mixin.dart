@@ -22,6 +22,8 @@ mixin ConnectPageMixin {
 
   static const windowNameValue = '_self';
 
+  static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -64,7 +66,7 @@ mixin ConnectPageMixin {
     required String redirectUrl,
   }) {
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
-    return '${AppConfig.registrationUrl}?post_registered_redirect_url=$redirectUrlEncode';
+    return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode';
   }
 
   String? _getLogoutUrl(
