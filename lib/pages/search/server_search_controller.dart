@@ -10,6 +10,7 @@ import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
 import 'package:matrix/matrix.dart';
@@ -110,6 +111,11 @@ class ServerSearchController with SearchDebouncerMixin {
 
   void updateSearchCategories(String searchTerm) {
     resetNextBatch();
+
+    if (searchTerm.isContainsHttpProtocol()) {
+      searchTerm = searchTerm.removeHttpProtocol();
+    }
+
     _searchCategories = ServerSideSearchCategories(
       searchTerm: searchTerm,
       searchFilter: SearchFilter(
