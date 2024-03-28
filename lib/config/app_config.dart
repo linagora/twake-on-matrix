@@ -103,6 +103,31 @@ abstract class AppConfig {
   static const String appGridConfigurationPath =
       "configurations/app_dashboard.json";
 
+  static void loadEnvironment() {
+    twakeWorkplaceHomeserver = const String.fromEnvironment(
+      'TWAKE_WORKPLACE_HOMESERVER',
+      defaultValue: 'https://example.com/',
+    );
+
+    registrationUrl = const String.fromEnvironment(
+      'REGISTRATION_URL',
+      defaultValue: 'https://example.com/',
+    );
+
+    platform = const String.fromEnvironment(
+      'PLATFORM',
+      defaultValue: 'platform',
+    );
+
+    homeserver = const String.fromEnvironment(
+      'HOME_SERVER',
+      defaultValue: 'https://example.com/',
+    );
+  }
+
+  static bool get isSaasPlatForm =>
+      platform != null && platform!.isNotEmpty && platform == 'saas';
+
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['homeserver'] != null && json['homeserver'] is String) {
       if (json['homeserver'] != '') {
