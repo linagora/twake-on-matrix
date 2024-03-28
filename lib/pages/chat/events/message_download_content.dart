@@ -51,18 +51,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
 
   void checkDownloadFileState() async {
     checkFileExistInMemory();
-    final filePath = await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
-      eventId: widget.event.eventId,
-      fileName: widget.event.filename,
-    );
-    final file = File(filePath);
-    if (await file.exists() &&
-        await file.length() == widget.event.getFileSize()) {
-      downloadFileStateNotifier.value = DownloadedPresentationState(
-        filePath: filePath,
-      );
-      return;
-    }
+    await checkFileInDownloadsInApp();
 
     _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
@@ -75,6 +64,22 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     if (filePathInMem?.isNotEmpty == true) {
       downloadFileStateNotifier.value = DownloadedPresentationState(
         filePath: filePathInMem!,
+      );
+      return;
+    }
+  }
+
+  Future<void> checkFileInDownloadsInApp() async {
+    final filePath =
+        await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+      eventId: widget.event.eventId,
+      fileName: widget.event.filename,
+    );
+    final file = File(filePath);
+    if (await file.exists() &&
+        await file.length() == widget.event.getFileSize()) {
+      downloadFileStateNotifier.value = DownloadedPresentationState(
+        filePath: filePath,
       );
       return;
     }
