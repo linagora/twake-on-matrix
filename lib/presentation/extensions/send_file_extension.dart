@@ -308,9 +308,11 @@ extension SendFileExtension on Room {
     required String fileName,
   }) async {
     try {
-      final downloadInAppFolder =
-          await StorageDirectoryUtils.instance.getDownloadFolderInApp();
-      final filePathInAppDownloads = '$downloadInAppFolder/$eventId/$fileName';
+      final filePathInAppDownloads =
+          await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: fileName,
+      );
       final fileInMem = sendingFilePlaceholders[sendingEventId]?.filePath;
       final file = File(filePathInAppDownloads);
       if (await file.exists() || fileInMem == null) {
