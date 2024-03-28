@@ -290,9 +290,9 @@ class MatrixState extends State<Matrix>
       initMatrix();
       initReceiveSharingIntent();
       if (PlatformInfos.isWeb) {
-        initConfig().then((_) => initSettings());
+        initConfigWeb().then((_) => initSettings());
       } else {
-        initSettings();
+        initConfigMobile().then((_) => initSettings());
       }
       initLoadingDialog();
     });
@@ -307,14 +307,23 @@ class MatrixState extends State<Matrix>
     });
   }
 
-  Future<void> initConfig() async {
+  Future<void> initConfigWeb() async {
     try {
       final configJsonString =
           utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
       final configJson = json.decode(configJsonString);
       AppConfig.loadFromJson(configJson);
+      Logs().d('[ConfigLoader] $configJson');
     } on FormatException catch (_) {
       Logs().v('[ConfigLoader] config.json not found');
+    } catch (e) {
+      Logs().v('[ConfigLoader] config.json not found', e);
+    }
+  }
+
+  Future<void> initConfigMobile() async {
+    try {
+      AppConfig.loadEnvironment();
     } catch (e) {
       Logs().v('[ConfigLoader] config.json not found', e);
     }

@@ -50,10 +50,10 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   static const String postRegisteredRedirectUrlPathParams =
       'post_registered_redirect_url';
 
-  String loginUrl =
+  String get loginUrl =>
       "${AppConfig.registrationUrl}?$postLoginRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
 
-  String signupUrl =
+  String get signupUrl =>
       "${AppConfig.registrationUrl}?$postRegisteredRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
 
   MatrixState get matrix => Matrix.of(context);
