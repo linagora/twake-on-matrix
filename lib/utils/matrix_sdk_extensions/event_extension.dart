@@ -117,9 +117,9 @@ extension LocalizedBody on Event {
     return room.sendingFilePlaceholders[txId];
   }
 
-  String getFilePathFromMem() {
+  String? getFilePathFromMem() {
     final matrixFile = getMatrixFile();
-    return matrixFile?.filePath ?? '';
+    return matrixFile?.filePath;
   }
 
   Size? getOriginalResolution() {
