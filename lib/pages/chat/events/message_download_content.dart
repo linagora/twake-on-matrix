@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/manager/download_manager/download_file_state.da
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
@@ -49,7 +50,31 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
   }
 
   void checkDownloadFileState() async {
-    final filePath = await widget.event.getFileNameInAppDownload();
+    checkFileExistInMemory();
+    await checkFileInDownloadsInApp();
+
+    _trySetupDownloadingStreamSubcription();
+    if (streamSubscription != null) {
+      downloadFileStateNotifier.value = const DownloadingPresentationState();
+    }
+  }
+
+  void checkFileExistInMemory() {
+    final filePathInMem = widget.event.getFilePathFromMem();
+    if (filePathInMem.isNotEmpty) {
+      downloadFileStateNotifier.value = DownloadedPresentationState(
+        filePath: filePathInMem,
+      );
+      return;
+    }
+  }
+
+  Future<void> checkFileInDownloadsInApp() async {
+    final filePath =
+        await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+      eventId: widget.event.eventId,
+      fileName: widget.event.filename,
+    );
     final file = File(filePath);
     if (await file.exists() &&
         await file.length() == widget.event.getFileSize()) {
@@ -57,11 +82,6 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
         filePath: filePath,
       );
       return;
-    }
-
-    _trySetupDownloadingStreamSubcription();
-    if (streamSubscription != null) {
-      downloadFileStateNotifier.value = const DownloadingPresentationState();
     }
   }
 
