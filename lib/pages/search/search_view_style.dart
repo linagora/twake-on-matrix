@@ -31,4 +31,6 @@ class SearchViewStyle {
       Theme.of(context).textTheme.labelLarge?.copyWith(
             color: LinagoraRefColors.material().neutral[40],
           );
+
+  static const double searchIconSize = 24.0;
 }

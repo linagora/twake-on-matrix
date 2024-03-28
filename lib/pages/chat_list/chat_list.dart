@@ -819,8 +819,6 @@ class ChatListController extends State<ChatList>
   void openSearchPage() {
     if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.pushInner('innernavigator/search');
-    } else {
-      context.push('/rooms/search');
     }
   }
 
