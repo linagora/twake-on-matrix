@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -18,13 +19,15 @@ class TwakeWelcomeView extends StatelessWidget {
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
       overlayColor: MaterialStateProperty.all(Colors.transparent),
-      signInTitle: L10n.of(context)!.signIn,
-      createTwakeIdTitle: L10n.of(context)!.createTwakeId,
+      signInTitle: AppConfig.isSaasPlatForm ? L10n.of(context)!.signIn : null,
+      createTwakeIdTitle:
+          AppConfig.isSaasPlatForm ? L10n.of(context)!.createTwakeId : null,
       useCompanyServerTitle: L10n.of(context)!.useYourCompanyServer,
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
-      onSignInOnTap: controller.onClickSignIn,
-      onCreateTwakeIdOnTap: controller.onClickCreateTwakeId,
+      onSignInOnTap: AppConfig.isSaasPlatForm ? controller.onClickSignIn : null,
+      onCreateTwakeIdOnTap:
+          AppConfig.isSaasPlatForm ? controller.onClickCreateTwakeId : null,
       logo: SvgPicture.asset(
         ImagePaths.logoTwakeWelcome,
         width: TwakeWelcomeViewStyle.logoWidth,
