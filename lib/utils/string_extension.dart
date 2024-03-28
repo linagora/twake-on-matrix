@@ -341,4 +341,16 @@ extension StringCasingExtension on String {
   String normalizePhoneNumber() {
     return replaceAll(RegExp(r'\D'), '');
   }
+
+  bool isContainsHttpProtocol() {
+    final urlRegExp = RegExp(
+      r'(http://|https://)(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{2,}.?([a-z]+)?',
+    );
+    return urlRegExp.hasMatch(this);
+  }
+
+  String removeHttpProtocol() {
+    final httpProtocolRegExp = RegExp(r'(http://|https://)');
+    return replaceAll(httpProtocolRegExp, '');
+  }
 }
