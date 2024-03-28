@@ -11,7 +11,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-typedef OnOpenSearchPage = void Function();
 typedef OnCloseSearchPage = void Function();
 typedef OnClientSelectedSetting = void Function(
   Object object,
@@ -95,15 +94,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
     _jumpToPageByIndex();
   }
 
-  void _onOpenSearchPage() {
-    pageController.jumpToPage(AdaptiveDestinationEnum.search.index);
-  }
-
-  void _onCloseSearchPage() {
-    activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
-    _jumpToPageByIndex();
-  }
-
   void _jumpToPageByIndex() {
     pageController.jumpToPage(activeNavigationBarNotifier.value.index);
   }
@@ -163,8 +153,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
         activeRoomIdNotifier: activeRoomIdNotifier,
         activeNavigationBarNotifier: activeNavigationBarNotifier,
         pageController: pageController,
-        onOpenSearchPage: _onOpenSearchPage,
-        onCloseSearchPage: _onCloseSearchPage,
         onDestinationSelected: onDestinationSelected,
         onClientSelected: clientSelected,
         onPopInvoked: _onPopInvoked,

@@ -230,7 +230,8 @@ abstract class AppRoutes {
               ],
               redirect: loggedOutRedirect,
             ),
-            if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn())
+            if (FirstColumnInnerRoutes.instance
+                .goRouteAvailableInFirstColumn()) ...[
               GoRoute(
                 path: 'newprivatechat',
                 pageBuilder: (context, state) {
@@ -270,6 +271,7 @@ abstract class AppRoutes {
                   ),
                 ],
               ),
+            ],
             GoRoute(
               path: 'newgroup',
               pageBuilder: (context, state) => defaultPageBuilder(
