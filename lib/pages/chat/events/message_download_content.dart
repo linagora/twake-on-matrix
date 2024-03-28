@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/manager/download_manager/download_file_state.da
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
@@ -50,7 +51,10 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
 
   void checkDownloadFileState() async {
     checkFileExistInMemory();
-    final filePath = await widget.event.getFileNameInAppDownload();
+    final filePath = await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+      eventId: widget.event.eventId,
+      fileName: widget.event.filename,
+    );
     final file = File(filePath);
     if (await file.exists() &&
         await file.length() == widget.event.getFileSize()) {
@@ -68,9 +72,9 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
 
   void checkFileExistInMemory() {
     final filePathInMem = widget.event.getFilePathFromMem();
-    if (filePathInMem.isNotEmpty) {
+    if (filePathInMem?.isNotEmpty == true) {
       downloadFileStateNotifier.value = DownloadedPresentationState(
-        filePath: filePathInMem,
+        filePath: filePathInMem!,
       );
       return;
     }

@@ -25,4 +25,13 @@ class StorageDirectoryUtils {
     _tempDirectoryPath ??= (await getTemporaryDirectory()).path;
     return '$_tempDirectoryPath/Downloads';
   }
+
+  Future<String> getFilePathInAppDownloads({
+    required String eventId,
+    required String fileName,
+  }) async {
+    final downloadInAppFolder =
+        await StorageDirectoryUtils.instance.getDownloadFolderInApp();
+    return '$downloadInAppFolder/$eventId/$fileName';
+  }
 }
