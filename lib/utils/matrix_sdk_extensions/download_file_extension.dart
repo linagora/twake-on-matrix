@@ -276,7 +276,10 @@ extension DownloadFileExtension on Event {
 
     return downloadOrRetrieveAttachment(
       mxcUrl,
-      await getFileNameInAppDownload(),
+      await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: filename,
+      ),
       downloadStreamController: downloadStreamController,
       getThumbnail: getThumbnail,
       cancelToken: cancelToken,
@@ -348,9 +351,5 @@ extension DownloadFileExtension on Event {
     }
 
     return fileInfo;
-  }
-
-  Future<String> getFileNameInAppDownload() async {
-    return '${await StorageDirectoryUtils.instance.getDownloadFolderInApp()}/$eventId/$filename';
   }
 }

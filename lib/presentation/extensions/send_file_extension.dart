@@ -308,16 +308,18 @@ extension SendFileExtension on Room {
     required String fileName,
   }) async {
     try {
-      final downloadInAppFolder =
-          await StorageDirectoryUtils.instance.getDownloadFolderInApp();
-      final filePathInAppDownloads = '$downloadInAppFolder/$eventId/$fileName';
-      final fileInMem = sendingFilePlaceholders[sendingEventId]?.filePath;
+      final filePathInAppDownloads =
+          await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: fileName,
+      );
+      final sendingFilePath = sendingFilePlaceholders[sendingEventId]?.filePath;
       final file = File(filePathInAppDownloads);
-      if (await file.exists() || fileInMem == null) {
+      if (await file.exists() || sendingFilePath == null) {
         return;
       }
       await file.create(recursive: true);
-      await File(fileInMem).copy(filePathInAppDownloads);
+      await File(sendingFilePath).copy(filePathInAppDownloads);
       Logs().d('File copied in app downloads folder', filePathInAppDownloads);
     } catch (e) {
       Logs().e('Error while copying file in app downloads folder', e);
