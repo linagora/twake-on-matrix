@@ -72,7 +72,7 @@ class _RightColumnNavigator extends StatelessWidget {
           isInStack: isInStack,
         );
       case RightColumnType.profileInfo:
-        return ProfileInfoNavigator(
+        return ChatProfileInfoNavigator(
           onBack: controller.hideRightColumn,
           roomId: roomId,
           isInStack: isInStack,

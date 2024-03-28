@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
-class ProfileInfoSharedView extends StatelessWidget {
-  final ProfileInfoSharedController controller;
+class ChatProfileInfoSharedView extends StatelessWidget {
+  final ChatProfileInfoSharedController controller;
 
-  const ProfileInfoSharedView({
+  const ChatProfileInfoSharedView({
     super.key,
     required this.controller,
   });

@@ -1764,6 +1764,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "sendMessage": "Send message",
   "sendOriginal": "Send original",
   "@sendOriginal": {
     "type": "text",
@@ -3010,5 +3011,8 @@
   "unselect": "Unselect",
   "searchContacts": "Search contacts",
   "tapToAllowAccessToYourMicrophone": "You can enable microphone access in the Settings app to make voice in",
-  "showInChat": "Show in chat"
+  "showInChat": "Show in chat",
+  "phone": "Phone",
+  "viewProfile": "View profile",
+  "profileInfo": "Profile info"
 }

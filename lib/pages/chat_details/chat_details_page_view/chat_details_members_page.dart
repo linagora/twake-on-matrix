@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_details/participant_list_item.dart';
+import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
