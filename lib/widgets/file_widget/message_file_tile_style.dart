@@ -6,7 +6,7 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   const MessageFileTileStyle();
 
   @override
-  double get iconSize => 36;
+  double get iconSize => 40;
 
   @override
   EdgeInsets get paddingIcon => const EdgeInsets.only(right: 4);
@@ -38,5 +38,13 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
 
   double get strokeWidthLoading => 2;
 
-  double get cancelButtonSize => 32;
+  double get cancelButtonSize => 24;
+
+  double get iconSizeDownload => 24;
+
+  double get circularProgressLoadingSize => 32;
+
+  double get downloadIconSize => 28;
+
+  EdgeInsets get marginDownloadIcon => const EdgeInsets.all(4);
 }
