@@ -958,7 +958,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "27e36218e126e9e1c382e45fde4a683b10e83f91"
+      resolved-ref: "9a1027b074c530f6deec4a5593a7a62f8fd70f45"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
