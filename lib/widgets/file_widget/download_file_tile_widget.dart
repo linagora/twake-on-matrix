@@ -1,11 +1,12 @@
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:flutter/material.dart';
 
-class DownloadFileTileWidget extends StatefulWidget {
+class DownloadFileTileWidget extends StatelessWidget {
   const DownloadFileTileWidget({
     super.key,
     this.style = const MessageFileTileStyle(),
@@ -28,50 +29,20 @@ class DownloadFileTileWidget extends StatefulWidget {
   final VoidCallback? onCancelDownload;
 
   @override
-  State<DownloadFileTileWidget> createState() => _DownloadFileTileWidgetState();
-}
-
-class _DownloadFileTileWidgetState extends State<DownloadFileTileWidget>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  AnimationController? _controller;
-  Animation<double>? _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animation = CurvedAnimation(
-      parent: _controller!,
-      curve: Curves.linear,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Container(
-      padding: widget.style.paddingFileTileAll,
+      padding: style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: widget.style.backgroundColor,
+        color: style.backgroundColor,
         shape: RoundedRectangleBorder(
-          borderRadius: widget.style.borderRadius,
+          borderRadius: style.borderRadius,
         ),
       ),
       child: Row(
-        crossAxisAlignment: widget.style.crossAxisAlignment,
+        crossAxisAlignment: style.crossAxisAlignment,
         children: [
           ValueListenableBuilder(
-            valueListenable: widget.downloadFileStateNotifier,
+            valueListenable: downloadFileStateNotifier,
             builder: (context, downloadFileState, child) {
               double? downloadProgress;
               if (downloadFileState is DownloadingPresentationState) {
@@ -85,38 +56,50 @@ class _DownloadFileTileWidgetState extends State<DownloadFileTileWidget>
               } else if (downloadFileState is NotDownloadPresentationState) {
                 downloadProgress = 0;
               }
-              if (downloadProgress == 0) {
-                return Padding(
-                  padding: widget.style.paddingDownloadFileIcon,
-                  child: Icon(
-                    Icons.file_download_rounded,
-                    size: widget.style.iconSize,
-                  ),
-                );
-              }
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  RotationTransition(
-                    turns: _animation!,
-                    child: CircularProgressIndicator(
-                      strokeWidth: widget.style.strokeWidthLoading,
-                      value: downloadProgress,
+                  Container(
+                    margin: style.marginDownloadIcon,
+                    width: style.iconSize,
+                    height: style.iconSize,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  IconButton(
-                    onPressed:
-                        PlatformInfos.isWeb ? null : widget.onCancelDownload,
-                    icon: Icon(
-                      Icons.close,
-                      size: widget.style.cancelButtonSize,
+                  if (downloadProgress != 0)
+                    SizedBox(
+                      width: style.circularProgressLoadingSize,
+                      height: style.circularProgressLoadingSize,
+                      child: CircularLoadingDownloadWidget(
+                        style: style,
+                        downloadProgress: downloadProgress,
+                      ),
+                    ),
+                  InkWell(
+                    onTap: PlatformInfos.isWeb ? null : onCancelDownload,
+                    child: Container(
+                      width: style.downloadIconSize,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        downloadProgress == 0
+                            ? Icons.arrow_downward
+                            : Icons.close,
+                        key: ValueKey(downloadProgress),
+                        color: Theme.of(context).colorScheme.surface,
+                        size: style.downloadIconSize,
+                      ),
                     ),
                   ),
                 ],
               );
             },
           ),
-          widget.style.paddingRightIcon,
+          style.paddingRightIcon,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,35 +107,34 @@ class _DownloadFileTileWidgetState extends State<DownloadFileTileWidget>
               children: [
                 const SizedBox(height: 4.0),
                 FileNameText(
-                  filename: widget.filename,
-                  highlightText: widget.highlightText,
-                  style: widget.style,
+                  filename: filename,
+                  highlightText: highlightText,
+                  style: style,
                 ),
                 Row(
                   children: [
-                    if (widget.sizeString != null)
+                    if (sizeString != null)
                       TextInformationOfFile(
-                        value: widget.sizeString!,
-                        style: widget.style,
-                        downloadFileStateNotifier:
-                            widget.downloadFileStateNotifier,
+                        value: sizeString!,
+                        style: style,
+                        downloadFileStateNotifier: downloadFileStateNotifier,
                       ),
                     TextInformationOfFile(
                       value: " · ",
-                      style: widget.style,
+                      style: style,
                     ),
                     Flexible(
                       child: TextInformationOfFile(
-                        value: widget.mimeType.getFileType(
+                        value: mimeType.getFileType(
                           context,
-                          fileType: widget.fileType,
+                          fileType: fileType,
                         ),
-                        style: widget.style,
+                        style: style,
                       ),
                     ),
                   ],
                 ),
-                widget.style.paddingBottomText,
+                style.paddingBottomText,
               ],
             ),
           ),
@@ -160,7 +142,4 @@ class _DownloadFileTileWidgetState extends State<DownloadFileTileWidget>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
