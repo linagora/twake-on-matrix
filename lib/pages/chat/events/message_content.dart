@@ -100,7 +100,7 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (PlatformInfos.isWeb) ...[
+                  if (!PlatformInfos.isWeb) ...[
                     MessageDownloadContent(
                       event,
                     ),
@@ -121,9 +121,15 @@ class MessageContent extends StatelessWidget
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                MessageDownloadContent(
-                  event,
-                ),
+                if (!PlatformInfos.isWeb) ...[
+                  MessageDownloadContent(
+                    event,
+                  ),
+                ] else ...[
+                  MessageDownloadContentWeb(
+                    event,
+                  ),
+                ],
                 Padding(
                   padding: MessageContentStyle.endOfBubbleWidgetPadding,
                   child: endOfBubbleWidget,
