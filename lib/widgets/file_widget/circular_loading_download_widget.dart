@@ -23,11 +23,13 @@ class _CircularLoadingDownloadWidgetState
   AnimationController? _controller;
   Animation<double>? _animation;
 
+  static const animationDurationSeconds = 2;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: animationDurationSeconds),
       vsync: this,
     )..repeat(reverse: true);
 
