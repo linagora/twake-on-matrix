@@ -103,30 +103,53 @@ abstract class AppConfig {
   static const String appGridConfigurationPath =
       "configurations/app_dashboard.json";
 
+  static const String _platformEnv = String.fromEnvironment(
+    'PLATFORM',
+    defaultValue: 'platform',
+  );
+
+  static const String _twakeWorkplaceHomeserverEnv = String.fromEnvironment(
+    'TWAKE_WORKPLACE_HOMESERVER',
+    defaultValue: 'https://example.com/',
+  );
+
+  static const String _registrationUrlEnv = String.fromEnvironment(
+    'REGISTRATION_URL',
+    defaultValue: 'https://example.com/',
+  );
+
+  static const String _homeserverEnv = String.fromEnvironment(
+    'HOME_SERVER',
+    defaultValue: 'https://example.com/',
+  );
+
   static void loadEnvironment() {
-    twakeWorkplaceHomeserver = const String.fromEnvironment(
-      'TWAKE_WORKPLACE_HOMESERVER',
-      defaultValue: 'https://example.com/',
+    twakeWorkplaceHomeserver = _twakeWorkplaceHomeserverEnv;
+
+    Logs().i(
+      '[Public Platform] AppConfig():: TWAKE_WORKPLACE_HOMESERVER $_twakeWorkplaceHomeserverEnv',
     );
 
-    registrationUrl = const String.fromEnvironment(
-      'REGISTRATION_URL',
-      defaultValue: 'https://example.com/',
+    registrationUrl = _registrationUrlEnv;
+
+    Logs().i(
+      '[Public Platform] AppConfig():: REGISTRATION_URL $_registrationUrlEnv',
     );
 
-    platform = const String.fromEnvironment(
-      'PLATFORM',
-      defaultValue: 'platform',
+    platform = _platformEnv;
+
+    Logs().i(
+      '[Public Platform] AppConfig():: Platform $_platformEnv',
     );
 
-    homeserver = const String.fromEnvironment(
-      'HOME_SERVER',
-      defaultValue: 'https://example.com/',
+    homeserver = _homeserverEnv;
+
+    Logs().i(
+      '[Public Platform] AppConfig():: HOME_SERVER $_homeserverEnv',
     );
   }
 
-  static bool get isSaasPlatForm =>
-      platform != null && platform!.isNotEmpty && platform == 'saas';
+  static bool get isSaasPlatForm => _platformEnv == 'saas';
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['homeserver'] != null && json['homeserver'] is String) {
