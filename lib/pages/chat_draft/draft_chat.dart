@@ -32,7 +32,6 @@ import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
@@ -329,13 +328,9 @@ class DraftChatController extends State<DraftChat>
     );
     if (result == null || result.files.isEmpty) return;
 
-    final temporaryDirectory = await getTemporaryDirectory();
-
     final matrixFilesList = result.files
         .map(
-          (file) => file
-              .toMatrixFile(temporaryDirectoryPath: temporaryDirectory.path)
-              .detectFileType,
+          (file) => file.toMatrixFileOnWeb().detectFileType,
         )
         .toList();
 

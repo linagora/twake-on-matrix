@@ -46,7 +46,7 @@ mixin SendFilesMixin {
     fileInfos ??= result?.files
         .map(
           (xFile) => FileInfo.fromMatrixFile(
-            xFile.toMatrixFile(
+            xFile.toMatrixFileOnMobile(
               temporaryDirectoryPath: temporaryDirectory.path,
             ),
           ),
@@ -65,14 +65,7 @@ mixin SendFilesMixin {
       withReadStream: true,
     );
     if (result == null || result.files.isEmpty) return [];
-    final temporaryDirectory = await getTemporaryDirectory();
-    return result.files
-        .map(
-          (file) => file.toMatrixFile(
-            temporaryDirectoryPath: temporaryDirectory.path,
-          ),
-        )
-        .toList();
+    return result.files.map((file) => file.toMatrixFileOnWeb()).toList();
   }
 
   void onPickerTypeClick({
