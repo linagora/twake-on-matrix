@@ -122,15 +122,15 @@ class FileNameText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      maxLines: 2,
-      text: TextSpan(
+    return Text.rich(
+      TextSpan(
         children: filename.buildHighlightTextSpans(
           highlightText ?? '',
           style: style.textStyle(context),
           highlightStyle: style.highlightTextStyle(context),
         ),
       ),
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
