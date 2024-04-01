@@ -279,10 +279,13 @@ class ChatListController extends State<ChatList>
         final markUnread = anySelectedRoomNotMarkedUnread;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = activeClient.getRoomById(conversation.roomId)!;
-          if (room.markedUnread == markUnread) continue;
-          await activeClient
-              .getRoomById(conversation.roomId)!
-              .markUnread(markUnread);
+          if (room.markedUnread == markUnread) {
+            await room.setReadMarker(
+              room.lastEvent!.eventId,
+              mRead: room.lastEvent!.eventId,
+            );
+          }
+          await room.markUnread(markUnread);
         }
       },
     );
