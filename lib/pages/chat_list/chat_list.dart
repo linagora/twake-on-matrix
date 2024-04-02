@@ -276,16 +276,19 @@ class ChatListController extends State<ChatList>
   Future<void> toggleUnreadSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        final markUnread = anySelectedRoomNotMarkedUnread;
+        final markUnreadAction = anySelectedRoomNotMarkedUnread;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = activeClient.getRoomById(conversation.roomId)!;
-          if (room.markedUnread == markUnread) {
-            await room.setReadMarker(
-              room.lastEvent!.eventId,
-              mRead: room.lastEvent!.eventId,
-            );
+          if (room.markedUnread == markUnreadAction) {
+            if (room.isUnread) {
+              await room.setReadMarker(
+                room.lastEvent!.eventId,
+                mRead: room.lastEvent!.eventId,
+              );
+            }
           }
-          await room.markUnread(markUnread);
+
+          await room.markUnread(markUnreadAction);
         }
       },
     );
