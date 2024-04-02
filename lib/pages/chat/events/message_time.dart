@@ -29,61 +29,69 @@ class MessageTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: timelineOverlayMessage
-          ? const EdgeInsets.symmetric(
-              vertical: 4,
-              horizontal: 8,
-            )
-          : null,
-      decoration: timelineOverlayMessage
-          ? BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: LinagoraStateLayer(Colors.black).opacityLayer3,
-            )
-          : null,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+    return Text.rich(
+      TextSpan(
         children: [
-          if (event.isPinned) ...[
-            TwakeIconButton(
-              tooltip: L10n.of(context)!.pin,
-              icon: Icons.push_pin_outlined,
-              size: MessageStyle.pushpinIconSize,
-              paddingAll: MessageStyle.paddingAllPushpin,
-              margin: EdgeInsets.zero,
-              iconColor: timelineOverlayMessage
-                  ? Colors.white
-                  : LinagoraRefColors.material().neutral[50],
-            ),
-            const SizedBox(width: 4.0),
-          ],
-          Text(
-            DateFormat("HH:mm").format(event.originServerTs),
-            style: Theme.of(context).textTheme.bodySmall?.merge(
-                  TextStyle(
-                    color: timelineOverlayMessage
-                        ? Colors.white
-                        : LinagoraRefColors.material().tertiary[30],
-                    letterSpacing: 0.4,
+          WidgetSpan(
+            child: Container(
+              padding: timelineOverlayMessage
+                  ? const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    )
+                  : null,
+              decoration: timelineOverlayMessage
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: LinagoraStateLayer(Colors.black).opacityLayer3,
+                    )
+                  : null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (event.isPinned) ...[
+                    TwakeIconButton(
+                      tooltip: L10n.of(context)!.pin,
+                      icon: Icons.push_pin_outlined,
+                      size: MessageStyle.pushpinIconSize,
+                      paddingAll: MessageStyle.paddingAllPushpin,
+                      margin: EdgeInsets.zero,
+                      iconColor: timelineOverlayMessage
+                          ? Colors.white
+                          : LinagoraRefColors.material().neutral[50],
+                    ),
+                    const SizedBox(width: 4.0),
+                  ],
+                  Text(
+                    DateFormat("HH:mm").format(event.originServerTs),
+                    style: Theme.of(context).textTheme.bodySmall?.merge(
+                          TextStyle(
+                            color: timelineOverlayMessage
+                                ? Colors.white
+                                : LinagoraRefColors.material().tertiary[30],
+                            letterSpacing: 0.4,
+                          ),
+                        ),
                   ),
-                ),
-          ),
-          if (ownMessage) ...[
-            SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
-            SeenByRow(
-              timelineOverlayMessage: timelineOverlayMessage,
-              participants: timeline.room.getParticipants(),
-              getSeenByUsers: room.getSeenByUsers(
-                timeline,
-                eventId: event.eventId,
+                  if (ownMessage) ...[
+                    SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
+                    SeenByRow(
+                      timelineOverlayMessage: timelineOverlayMessage,
+                      participants: timeline.room.getParticipants(),
+                      getSeenByUsers: room.getSeenByUsers(
+                        timeline,
+                        eventId: event.eventId,
+                      ),
+                      eventStatus: event.status,
+                      event: event,
+                    ),
+                  ],
+                ],
               ),
-              eventStatus: event.status,
-              event: event,
             ),
-          ],
+          ),
         ],
       ),
     );
