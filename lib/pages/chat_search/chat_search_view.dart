@@ -217,7 +217,7 @@ class _SearchItem extends StatelessWidget {
                     height: ChatSearchStyle.itemHeight,
                     decoration: BoxDecoration(
                       border: Border(
-                        top: BorderSide(
+                        bottom: BorderSide(
                           color: LinagoraRefColors.material().tertiary[60] ??
                               Colors.black,
                           width: 1,
