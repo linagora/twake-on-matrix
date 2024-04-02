@@ -253,7 +253,11 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         ],
       ),
       cameraWidget: UseCameraWidget(
-        onPressed: () => _onPressedCamera(context, imagePickerController),
+        onPressed: () => _onPressedCamera(
+          context,
+          imagePickerController,
+          onCameraPicked,
+        ),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
     );
@@ -262,6 +266,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
   void _onPressedCamera(
     BuildContext context,
     ImagePickerGridController imagePickerController,
+    OnCameraPicked? onCameraPicked,
   ) async {
     final currentPermissionMicro = await getCurrentMicroPermission();
     final currentPermissionCamera = await getCurrentCameraPermission();
@@ -270,9 +275,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       _pickFromCameraAction(
         context: context,
         imagePickerGridController: imagePickerController,
-        onCameraPicked: (assetEntity) {
-          Navigator.of(context).pop();
-        },
+        onCameraPicked: onCameraPicked,
       );
     } else {
       goToSettings(
@@ -290,6 +293,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
   }) async {
     final assetEntity =
         await pickMediaFromCameraAction(context: context, onlyImage: onlyImage);
+    Logs().d(
+      "MediaPickerMixin::_pickFromCameraAction(): assetEntity - $assetEntity",
+    );
     if (assetEntity != null) {
       imagePickerGridController.pickAssetFromCamera(assetEntity);
 
