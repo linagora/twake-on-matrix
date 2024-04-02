@@ -3016,5 +3016,19 @@
   "viewProfile": "View profile",
   "profileInfo": "Profile info",
   "saveToDownloads": "Save to Downloads",
-  "saveToGallery": "Save to Gallery"
+  "saveToGallery": "Save to Gallery",
+  "fileSavedToDownloads": "File saved to Downloads",
+  "saveFileToDownloadsError": "Failed to save file to Downloads",
+  "explainPermissionToDownloadFiles": "To continue, please allow {appName} to access storage permission. This permission is essential for saving file to Downloads folder.",
+  "@explainPermissionToDownloadFiles": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "downloading": "Downloading"
 }

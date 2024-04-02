@@ -127,6 +127,11 @@ class PermissionHandlerService {
     }
   }
 
+  Future<bool> isUserHaveToRequestStoragePermissionAndroid() async {
+    return await _getCurrentAndroidVersion() <= 29 &&
+        !(await Permission.storage.isGranted);
+  }
+
   void goToSettingsForPermissionActions() {
     openAppSettings();
   }

@@ -115,6 +115,18 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     );
   }
 
+  void onDownloadFileTap() async {
+    await checkFileInDownloadsInApp();
+    if (downloadFileStateNotifier.value is DownloadedPresentationState) {
+      return;
+    }
+    downloadFileStateNotifier.value = const DownloadingPresentationState();
+    downloadManager.download(
+      event: widget.event,
+    );
+    _trySetupDownloadingStreamSubcription();
+  }
+
   @override
   void dispose() {
     streamSubscription?.cancel();
@@ -165,14 +177,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
         }
 
         return InkWell(
-          onTap: () {
-            downloadFileStateNotifier.value =
-                const DownloadingPresentationState();
-            downloadManager.download(
-              event: widget.event,
-            );
-            _trySetupDownloadingStreamSubcription();
-          },
+          onTap: onDownloadFileTap,
           child: DownloadFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,

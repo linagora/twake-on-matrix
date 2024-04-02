@@ -84,7 +84,9 @@ class _PermissionDialogState extends State<PermissionDialog>
                         if (widget.onAcceptButton != null) {
                           widget.onAcceptButton!.call();
                         } else {
-                          await widget.permission.request();
+                          await widget.permission.request().then(
+                                (value) => Navigator.of(context).pop(),
+                              );
                         }
                       },
                     ),
