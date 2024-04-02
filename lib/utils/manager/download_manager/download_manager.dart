@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/exception/downloading_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_info.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
@@ -32,8 +33,10 @@ class DownloadManager {
       try {
         cancelToken.cancel();
         _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
-              const Right(
-                DownloadFileInitial(),
+              Left(
+                DownloadFileFailureState(
+                  exception: CancelDownloadingException(),
+                ),
               ),
             );
       } catch (e) {

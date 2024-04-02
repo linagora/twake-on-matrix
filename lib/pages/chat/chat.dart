@@ -1,17 +1,23 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
+import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -105,7 +111,8 @@ class ChatController extends State<Chat>
         PasteImageMixin,
         HandleClipboardActionMixin,
         TwakeContextMenuMixin,
-        MessageContentMixin {
+        MessageContentMixin,
+        SaveFileToTwakeAndroidDownloadsFolderMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1775,8 +1782,9 @@ class ChatController extends State<Chat>
   List<PopupMenuEntry<ChatAppBarActions>> appBarActionsBuilder() {
     final listAction = [
       if (PlatformInfos.isAndroid) ...[
-        ChatAppBarActions.saveToGallery,
-        ChatAppBarActions.saveToDownload,
+        if (selectedEvents
+            .every((event) => event.hasAttachment && !event.isVideoOrImage))
+          ChatAppBarActions.saveToDownload,
       ],
       ChatAppBarActions.info,
       ChatAppBarActions.report,
@@ -1805,9 +1813,10 @@ class ChatController extends State<Chat>
 
   void onSelectedAppBarActions(ChatAppBarActions action) {
     switch (action) {
-      case ChatAppBarActions.saveToGallery:
-        break;
       case ChatAppBarActions.saveToDownload:
+        actionWithClearSelections(
+          () => saveSelectedEventToDownloadAndroid(),
+        );
         break;
       case ChatAppBarActions.info:
         actionWithClearSelections(
@@ -1822,7 +1831,65 @@ class ChatController extends State<Chat>
           reportEventAction,
         );
         break;
+      default:
+        break;
     }
+  }
+
+  void saveSelectedEventToDownloadAndroid() async {
+    if (selectedEvents.length != 1) {
+      return;
+    }
+    final downloadEvent = selectedEvents.first;
+    if (await PermissionHandlerService()
+        .isUserHaveToRequestStoragePermissionAndroid()) {
+      final permission = await Permission.storage.request();
+
+      if (permission.isPermanentlyDenied) {
+        showDialog(
+          useRootNavigator: false,
+          context: context,
+          builder: (_) {
+            return PermissionDialog(
+              icon: const Icon(Icons.storage_rounded),
+              permission: Permission.storage,
+              explainTextRequestPermission: Text(
+                L10n.of(context)!.explainPermissionToDownloadFiles(
+                  AppConfig.applicationName,
+                ),
+              ),
+              onAcceptButton: () =>
+                  PermissionHandlerService().goToSettingsForPermissionActions(),
+            );
+          },
+        );
+      }
+
+      if (!permission.isGranted) {
+        Logs().i(
+          'Chat::saveSelectedEventToDownloadAndroid():: Permission Denied',
+        );
+        return;
+      }
+    }
+    final downloadManager = getIt.get<DownloadManager>();
+    final downloadingStreamSubscription =
+        downloadManager.getDownloadStateStream(
+      downloadEvent.eventId,
+    );
+    if (downloadingStreamSubscription == null) {
+      await handleSaveToDownloadsForFileNotInDownloading(
+        downloadEvent,
+        context: context,
+      );
+      return;
+    }
+
+    handleSaveToDownloadForDownloadingFile(
+      downloadingStreamSubscription: downloadingStreamSubscription,
+      event: downloadEvent,
+      context: context,
+    );
   }
 
   @override
