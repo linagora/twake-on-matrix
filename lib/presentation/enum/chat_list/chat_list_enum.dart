@@ -21,6 +21,7 @@ enum PopupMenuAction {
 
 enum ActiveFilter {
   allChats,
+  acceptedChats,
   groups,
   messages,
   spaces;
@@ -37,6 +38,9 @@ enum ActiveFilter {
             !room.isSpace && room.isDirectChat && !room.isStoryRoom;
       case ActiveFilter.spaces:
         return (r) => r.isSpace;
+      case ActiveFilter.acceptedChats:
+        return (room) =>
+            !room.isSpace && !room.isStoryRoom && !room.isInvitation;
     }
   }
 }
