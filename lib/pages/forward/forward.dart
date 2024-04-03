@@ -75,7 +75,7 @@ class ForwardController extends State<Forward> with SearchRecentChat {
     selectedRoomIdNotifier.value = id;
   }
 
-  final ActiveFilter _activeFilterAllChats = ActiveFilter.allChats;
+  final ActiveFilter _activeFilterAllChats = ActiveFilter.acceptedChats;
 
   List<Room> get filteredRoomsForAll =>
       Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
