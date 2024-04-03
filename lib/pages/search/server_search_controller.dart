@@ -73,6 +73,14 @@ class ServerSearchController with SearchDebouncerMixin {
     searchResult.fold(
       (failure) => resetNextBatch(),
       (success) {
+        if (!searchTermIsNotEmpty) {
+          return;
+        }
+
+        if (success is ServerSearchInitial) {
+          searchResultsNotifier.value = PresentationServerSideInitial();
+        }
+
         if (success is ServerSearchChatSuccess) {
           updateNextBatch(success.nextBatch);
           if (success.results?.isEmpty == true) {
