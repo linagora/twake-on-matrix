@@ -48,6 +48,9 @@ class SettingsItemBuilder extends StatelessWidget {
               ),
               Expanded(
                 child: Row(
+                  crossAxisAlignment: subtitle.isEmpty
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
