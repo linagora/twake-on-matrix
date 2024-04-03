@@ -5,8 +5,10 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -83,9 +85,86 @@ class ChatEventList extends StatelessWidget {
         child: SelectionTextContainer(
           chatController: controller,
           focusNode: controller.selectionFocusNode,
-          child: InViewNotifierListCustom(
-            isInViewPortCondition: controller.isInViewPortCondition,
-            listViewCustom: ListView.custom(
+          child: InViewNotifierScrollable(
+              isInViewPortCondition: controller.isInViewPortCondition,
+              child: Scrollable(
+                controller: controller.scrollController,
+                axisDirection: AxisDirection.up,
+                viewportBuilder:
+                    (BuildContext context, ViewportOffset position) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      top: 16,
+                      bottom: 8.0,
+                      left: horizontalPadding,
+                      right: horizontalPadding,
+                    ),
+                    child: Viewport(
+                      offset: position,
+                      axisDirection: AxisDirection.up,
+                      center: controller.forwardListKey,
+                      slivers: [
+                        PagedSliverList(
+                          pagingController:
+                              controller.pagingReplyForwardController,
+                          builderDelegate: PagedChildBuilderDelegate<Event>(
+                            itemBuilder: (context, characterUp, index) =>
+                                Container(
+                              padding: const EdgeInsets.all(8),
+                              color: Colors.pink,
+                              child: _itemBuider(
+                                context,
+                                index,
+                                events,
+                              ),
+                            ),
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox.shrink(),
+                          ),
+                        ),
+                        PagedSliverList(
+                          key: controller.forwardListKey,
+                          pagingController:
+                              controller.pagingReplyBackwardController,
+                          builderDelegate: PagedChildBuilderDelegate<Event>(
+                            itemBuilder: (context, characterDown, index) =>
+                                Container(
+                              padding: const EdgeInsets.all(8),
+                              color: Colors.green,
+                              child: _itemBuider(
+                                context,
+                                index,
+                                events,
+                              ),
+                            ),
+                            noItemsFoundIndicatorBuilder: (context) =>
+                                const SizedBox.shrink(),
+                            firstPageErrorIndicatorBuilder: (context) =>
+                                const SizedBox.shrink(),
+                            newPageErrorIndicatorBuilder: (context) =>
+                                const SizedBox.shrink(),
+                            noMoreItemsIndicatorBuilder: (context) =>
+                                const SizedBox.shrink(),
+                            firstPageProgressIndicatorBuilder: (context) =>
+                                const Center(
+                              child: CircularProgressIndicator.adaptive(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            newPageProgressIndicatorBuilder: (context) =>
+                                const Center(
+                              child: CircularProgressIndicator.adaptive(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              )
+              /*ListView.custom(
               padding: EdgeInsets.only(
                 top: 16,
                 bottom: 8.0,
@@ -97,110 +176,106 @@ class ChatEventList extends StatelessWidget {
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               childrenDelegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
-                  // Footer to display typing indicator and read receipts:
-                  if (index == 0) {
-                    if (controller.timeline!.isRequestingFuture) {
-                      return const Center(
-                        child:
-                            CircularProgressIndicator.adaptive(strokeWidth: 2),
-                      );
-                    }
-                    if (controller.timeline!.canRequestFuture) {
-                      Center(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                          ),
-                          onPressed: controller.requestFuture,
-                          child: Text(L10n.of(context)!.loadMore),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }
-                  // Request history button or progress indicator:
-                  if (index == events.length + 1) {
-                    if (controller.timeline!.isRequestingHistory) {
-                      return const Center(
-                        child:
-                            CircularProgressIndicator.adaptive(strokeWidth: 2),
-                      );
-                    }
-                    if (controller.timeline!.canRequestHistory) {
-                      return Center(
-                        child: IconButton(
-                          onPressed: controller.requestHistory,
-                          icon: const Icon(Icons.refresh_outlined),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }
-                  final currentEventIndex = index - 1;
-                  final event = controller.timeline!.events[currentEventIndex];
-                  final previousEvent = currentEventIndex > 0
-                      ? controller.timeline!.events[currentEventIndex - 1]
-                      : null;
-                  final nextEvent = index < controller.timeline!.events.length
-                      ? controller.timeline!.events[currentEventIndex + 1]
-                      : null;
-                  return AutoScrollTag(
-                    key: ValueKey(event.eventId),
-                    index: index,
-                    controller: controller.scrollController,
-                    highlightColor: LinagoraRefColors.material().primary[99],
-                    child: event.isVisibleInGui
-                        ? Message(
-                            key: ValueKey(event.eventId),
-                            event,
-                            onSwipe: (direction) =>
-                                controller.replyAction(replyTo: event),
-                            onAvatarTap: (Event event) =>
-                                controller.onContactTap(
-                              contactPresentationSearch: event
-                                  .senderFromMemoryOrFallback
-                                  .toContactPresentationSearch(),
-                              context: context,
-                              path: 'rooms',
-                            ),
-                            onSelect: controller.onSelectMessage,
-                            selectMode: controller.selectMode,
-                            scrollToEventId: (String eventId) =>
-                                controller.scrollToEventId(eventId),
-                            selected: controller.selectedEvents
-                                .any((e) => e.eventId == event.eventId),
-                            timeline: controller.timeline!,
-                            previousEvent: previousEvent,
-                            nextEvent: nextEvent,
-                            onHover: (isHover, event) =>
-                                controller.onHover(isHover, index, event),
-                            isHoverNotifier: controller.focusHover,
-                            listHorizontalActionMenu: controller
-                                .listHorizontalActionMenuBuilder(event),
-                            onMenuAction: controller.handleHorizontalActionMenu,
-                            hideKeyboardChatScreen:
-                                controller.onHideKeyboardAndEmoji,
-                            markedUnreadLocation:
-                                controller.unreadReceivedMessageLocation,
-                            timestampCallback: (event) {
-                              controller.handleDisplayStickyTimestamp(
-                                event.originServerTs,
-                              );
-                            },
-                            onLongPress: controller.onSelectMessage,
-                          )
-                        : const SizedBox(),
-                  );
+                  
                 },
                 childCount: events.length + 2,
                 findChildIndexCallback: (key) =>
                     controller.findChildIndexCallback(key, thisEventsKeyMap),
               ),
-            ),
-          ),
+            ),*/
+              ),
         ),
       ),
+    );
+  }
+
+  Widget _itemBuider(BuildContext context, int index, List<Event> events) {
+    // Footer to display typing indicator and read receipts:
+    if (index == 0) {
+      if (controller.timeline!.isRequestingFuture) {
+        return const Center(
+          child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+        );
+      }
+      if (controller.timeline!.canRequestFuture) {
+        Center(
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            onPressed: controller.requestFuture,
+            child: Text(L10n.of(context)!.loadMore),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+    // Request history button or progress indicator:
+    if (index == events.length + 1) {
+      if (controller.timeline!.isRequestingHistory) {
+        return const Center(
+          child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+        );
+      }
+      if (controller.timeline!.canRequestHistory) {
+        return Center(
+          child: IconButton(
+            onPressed: controller.requestHistory,
+            icon: const Icon(Icons.refresh_outlined),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+    final currentEventIndex = index - 1;
+    final event = controller.timeline!.events[currentEventIndex];
+    final previousEvent = currentEventIndex > 0
+        ? controller.timeline!.events[currentEventIndex - 1]
+        : null;
+    final nextEvent = index < controller.timeline!.events.length
+        ? controller.timeline!.events[currentEventIndex + 1]
+        : null;
+    return AutoScrollTag(
+      key: ValueKey(event.eventId),
+      index: index,
+      controller: controller.scrollController,
+      highlightColor: LinagoraRefColors.material().primary[99],
+      child: event.isVisibleInGui
+          ? Message(
+              key: ValueKey(event.eventId),
+              event,
+              onSwipe: (direction) => controller.replyAction(replyTo: event),
+              onAvatarTap: (Event event) => controller.onContactTap(
+                contactPresentationSearch: event.senderFromMemoryOrFallback
+                    .toContactPresentationSearch(),
+                context: context,
+                path: 'rooms',
+              ),
+              onSelect: controller.onSelectMessage,
+              selectMode: controller.selectMode,
+              scrollToEventId: (String eventId) =>
+                  controller.scrollToEventId(eventId),
+              selected: controller.selectedEvents
+                  .any((e) => e.eventId == event.eventId),
+              timeline: controller.timeline!,
+              previousEvent: previousEvent,
+              nextEvent: nextEvent,
+              onHover: (isHover, event) =>
+                  controller.onHover(isHover, index, event),
+              isHoverNotifier: controller.focusHover,
+              listHorizontalActionMenu:
+                  controller.listHorizontalActionMenuBuilder(event),
+              onMenuAction: controller.handleHorizontalActionMenu,
+              hideKeyboardChatScreen: controller.onHideKeyboardAndEmoji,
+              markedUnreadLocation: controller.unreadReceivedMessageLocation,
+              timestampCallback: (event) {
+                controller.handleDisplayStickyTimestamp(
+                  event.originServerTs,
+                );
+              },
+              onLongPress: controller.onSelectMessage,
+            )
+          : const SizedBox(),
     );
   }
 

@@ -9,8 +9,10 @@ import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -128,6 +130,19 @@ class ChatController extends State<Chat>
   final ValueKey _chatMediaPickerTypeAheadKey =
       const ValueKey('chatMediaPickerTypeAheadKey');
 
+  final debouncerLight = DebouncerLight(milliseconds: 500);
+
+  final Key forwardListKey = UniqueKey();
+
+  final PagingController<int, Event> pagingReplyBackwardController =
+      PagingController(
+    firstPageKey: 0,
+  );
+  final PagingController<int, Event> pagingReplyForwardController =
+      PagingController(
+    firstPageKey: 0,
+  );
+
   @override
   Room? room;
 
@@ -180,6 +195,8 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
+
+  final eventListNotifier = ValueNotifier(<Event>[]);
 
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
@@ -341,20 +358,33 @@ class ChatController extends State<Chat>
     }
   }
 
+  final isScrollingForward = ValueNotifier(false);
+  double _lastScrollOffset = 0;
+
   void _updateScrollController() async {
     if (!mounted) {
       return;
     }
     if (!scrollController.hasClients) return;
+
+    if (_lastScrollOffset == 0) _lastScrollOffset = scrollController.offset;
+
+    isScrollingForward.value = scrollController.position.userScrollDirection ==
+            ScrollDirection.forward ||
+        _lastScrollOffset < scrollController.offset;
+
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0) {
       showScrollDownButtonNotifier.value = true;
     } else if (scrollController.position.pixels <= 0) {
       showScrollDownButtonNotifier.value = false;
     }
+
     if (scrollController.position.pixels == 0 ||
         scrollController.position.pixels == _isPortionAvailableToScroll) {
-      requestFuture();
+      debouncerLight.run(() {
+        requestFuture();
+      });
     } else if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent ||
         scrollController.position.pixels + _isPortionAvailableToScroll ==
@@ -434,7 +464,65 @@ class ChatController extends State<Chat>
 
   void updateView() {
     if (!mounted) return;
+    _fetchPage();
     setState(() {});
+  }
+
+  void _fetchPage() {
+    final newEvents = timeline?.events ?? [];
+
+    if (eventListNotifier.value.isEmpty == true) {
+      eventListNotifier.value.addAll(newEvents);
+      // pagingReplyBackwardController.appendPage(eventListNotifier.value, eventListNotifier.value.length);
+    }
+
+    final messages = eventListNotifier.value.where(
+      (element) => {
+        EventTypes.Message,
+        EventTypes.Sticker,
+        EventTypes.Encrypted,
+        EventTypes.CallInvite,
+      }.contains(element.type),
+    );
+    final previousFirstIndex = messages.firstOrNull != null
+        ? newEvents
+            .map((e) {
+              return e.eventId;
+            })
+            .toList()
+            .indexOf(messages.first.eventId)
+        : -2;
+    final previousLastIndex = messages.lastOrNull != null
+        ? newEvents
+            .map((e) => e.eventId)
+            .toList()
+            .indexOf(messages.last.eventId)
+        : -2;
+
+    print(
+        "tez: previousFirstIndex = $previousFirstIndex, previousLastIndex = $previousLastIndex, newEvents.length = ${newEvents.length}");
+    if (previousFirstIndex > 0) {
+      print(
+          "tez: newEvents => debut: ${newEvents.firstOrNull?.body} (${newEvents.firstOrNull?.originServerTs}), fin: ${newEvents[previousFirstIndex - 1].body} (${newEvents[previousFirstIndex - 1].originServerTs})");
+    }
+
+    if (previousLastIndex == newEvents.length - 1) {
+      pagingReplyBackwardController.appendPage(newEvents, newEvents.length);
+    } else if (previousLastIndex > 0 && previousLastIndex < newEvents.length - 1) {
+      print("tez: append page backward");
+      final apres = newEvents.sublist(previousLastIndex + 1, newEvents.length);
+      print(
+          "tez: apres = ${apres.length} début: ${apres.firstOrNull?.body},  fin: ${apres.lastOrNull?.body}");
+
+      eventListNotifier.value.addAll(apres);
+      pagingReplyBackwardController.appendPage(apres, apres.length);
+    } else if (previousFirstIndex > 0) {
+      print("tez: append page forward");
+      final avant = newEvents.sublist(0, previousFirstIndex - 1).reversed.toList();
+
+      eventListNotifier.value.insertAll(0, avant);
+      pagingReplyForwardController.appendPage(avant, avant.length);
+    }
   }
 
   void onBackPress() {
@@ -829,7 +917,7 @@ class ChatController extends State<Chat>
 
   Future<void>? loadTimelineFuture;
 
-  void requestFuture() async {
+  Future requestFuture() async {
     final timeline = this.timeline;
     if (timeline == null) return;
     if (!timeline.canRequestFuture) return;
@@ -861,7 +949,7 @@ class ChatController extends State<Chat>
     }
     try {
       timeline = await room?.getTimeline(
-        onUpdate: updateView,
+        onUpdate: () => updateView(),
         eventContextId: eventContextId,
       );
     } catch (e, s) {
@@ -916,12 +1004,16 @@ class ChatController extends State<Chat>
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
       timeline = null;
+      eventListNotifier.value = [];
+      pagingReplyForwardController.refresh();
+      pagingReplyBackwardController.refresh();
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
         (e, s) {
           Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
         },
       );
       await loadTimelineFuture;
+      // pagingReplyBackwardController.appendPage(timeline?.events ?? [], null);
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         scrollToEventId(eventId, highlight: highlight);
       });
@@ -1780,6 +1872,14 @@ class ChatController extends State<Chat>
     _loadDraft();
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
+    pagingReplyBackwardController.addPageRequestListener((pageKey) {
+      print("tez: pagingReplyBackwardController.addPageRequestListener");
+      _fetchPage();
+    });
+    pagingReplyForwardController.addPageRequestListener((pageKey) {
+      print("tez: pagingReplyForwardController.addPageRequestListener");
+      requestFuture().then((_) => _fetchPage());
+    });
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (room == null) {
@@ -1841,3 +1941,15 @@ class ChatController extends State<Chat>
 }
 
 enum EmojiPickerType { reaction, keyboard }
+
+class DebouncerLight {
+  final int milliseconds;
+  Timer? _timer;
+  DebouncerLight({required this.milliseconds});
+  void run(VoidCallback action) {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
