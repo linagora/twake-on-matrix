@@ -7,11 +7,11 @@ import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SearchView extends StatelessWidget {
@@ -27,97 +27,89 @@ class SearchView extends StatelessWidget {
         preferredSize: Size.fromHeight(SearchViewStyle.toolbarHeightSearch),
         child: _buildAppBarSearch(context),
       ),
-      body: PopScope(
-        canPop: PlatformInfos.isIOS ? true : false,
-        onPopInvoked: (didPop) async {
-          if (PlatformInfos.isAndroid) {
-            searchController.goToRoomsShellBranch();
-          }
-        },
-        child: CustomScrollView(
-          physics: const ClampingScrollPhysics(),
-          controller: searchController.scrollController,
-          slivers: [
-            ValueListenableBuilder(
-              valueListenable: searchController.preSearchRecentContactsNotifier,
-              builder: (context, value, emptyChild) =>
-                  value.fold((failure) => emptyChild!, (success) {
-                switch (success.runtimeType) {
-                  case PreSearchRecentContactsSuccess:
-                    final data = success as PreSearchRecentContactsSuccess;
-                    return ValueListenableBuilder(
-                      valueListenable: searchController.textEditingController,
-                      builder: (context, textEditingValue, child) {
-                        if (textEditingValue.text.isNotEmpty) {
-                          return emptyChild!;
-                        }
-                        return SliverAppBar(
-                          flexibleSpace: FlexibleSpaceBar(
-                            title: PreSearchRecentContactsContainer(
-                              searchController: searchController,
-                              contactsList: data.users,
-                            ),
-                            titlePadding:
-                                const EdgeInsetsDirectional.only(start: 0.0),
+      body: CustomScrollView(
+        physics: const ClampingScrollPhysics(),
+        controller: searchController.scrollController,
+        slivers: [
+          ValueListenableBuilder(
+            valueListenable: searchController.preSearchRecentContactsNotifier,
+            builder: (context, value, emptyChild) =>
+                value.fold((failure) => emptyChild!, (success) {
+              switch (success.runtimeType) {
+                case PreSearchRecentContactsSuccess:
+                  final data = success as PreSearchRecentContactsSuccess;
+                  return ValueListenableBuilder(
+                    valueListenable: searchController.textEditingController,
+                    builder: (context, textEditingValue, child) {
+                      if (textEditingValue.text.isNotEmpty) {
+                        return emptyChild!;
+                      }
+                      return SliverAppBar(
+                        flexibleSpace: FlexibleSpaceBar(
+                          title: PreSearchRecentContactsContainer(
+                            searchController: searchController,
+                            contactsList: data.users,
                           ),
-                          toolbarHeight: 112,
-                          backgroundColor: Colors.transparent,
-                          automaticallyImplyLeading: false,
-                        );
-                      },
-                    );
-                  default:
-                    return emptyChild!;
-                }
-              }),
-              child: const SliverToBoxAdapter(),
-            ),
-            _RecentChatAndContactsHeader(searchController: searchController),
-            _recentChatsWidget(),
-            ValueListenableBuilder(
-              valueListenable:
-                  searchController.serverSearchController.searchResultsNotifier,
-              builder: ((context, searchResults, child) {
-                if (searchResults is PresentationServerSideEmptySearch) {
-                  if (searchController.searchContactAndRecentChatController!
-                      .recentAndContactsNotifier.value.isNotEmpty) {
-                    return child!;
-                  }
-                  return _SearchHeader(
-                    header: L10n.of(context)!.messages,
-                    searchController: searchController,
-                    needShowMore: false,
+                          titlePadding:
+                              const EdgeInsetsDirectional.only(start: 0.0),
+                        ),
+                        toolbarHeight: 112,
+                        backgroundColor: Colors.transparent,
+                        automaticallyImplyLeading: false,
+                      );
+                    },
                   );
+                default:
+                  return emptyChild!;
+              }
+            }),
+            child: const SliverToBoxAdapter(),
+          ),
+          _RecentChatAndContactsHeader(searchController: searchController),
+          _recentChatsWidget(),
+          ValueListenableBuilder(
+            valueListenable:
+                searchController.serverSearchController.searchResultsNotifier,
+            builder: ((context, searchResults, child) {
+              if (searchResults is PresentationServerSideEmptySearch) {
+                if (searchController.searchContactAndRecentChatController!
+                    .recentAndContactsNotifier.value.isNotEmpty) {
+                  return child!;
                 }
-
-                if (searchResults is PresentationServerSideSearch) {
-                  if (searchResults.searchResults.isEmpty) {
-                    return child!;
-                  }
-                  return _SearchHeader(
-                    header: L10n.of(context)!.messages,
-                    searchController: searchController,
-                    needShowMore: false,
-                  );
-                }
-                return child!;
-              }),
-              child: _EmptySliverBox(),
-            ),
-            ServerSearchMessagesList(searchController: searchController),
-            ValueListenableBuilder(
-              valueListenable:
-                  searchController.serverSearchController.isLoadingMoreNotifier,
-              builder: (context, isLoadingMore, _) {
-                return SliverToBoxAdapter(
-                  child: isLoadingMore
-                      ? const CenterLoadingIndicator()
-                      : const SizedBox(),
+                return _SearchHeader(
+                  header: L10n.of(context)!.messages,
+                  searchController: searchController,
+                  needShowMore: false,
                 );
-              },
-            ),
-          ],
-        ),
+              }
+
+              if (searchResults is PresentationServerSideSearch) {
+                if (searchResults.searchResults.isEmpty) {
+                  return child!;
+                }
+                return _SearchHeader(
+                  header: L10n.of(context)!.messages,
+                  searchController: searchController,
+                  needShowMore: false,
+                );
+              }
+              return child!;
+            }),
+            child: _EmptySliverBox(),
+          ),
+          ServerSearchMessagesList(searchController: searchController),
+          ValueListenableBuilder(
+            valueListenable:
+                searchController.serverSearchController.isLoadingMoreNotifier,
+            builder: (context, isLoadingMore, _) {
+              return SliverToBoxAdapter(
+                child: isLoadingMore
+                    ? const CenterLoadingIndicator()
+                    : const SizedBox(),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -179,7 +171,7 @@ class SearchView extends StatelessWidget {
             TwakeIconButton(
               tooltip: L10n.of(context)!.back,
               icon: Icons.arrow_back,
-              onTap: () => searchController.goToRoomsShellBranch(),
+              onTap: () => context.pop(),
               paddingAll: SearchViewStyle.paddingBackButton,
             ),
             const SizedBox(width: 4.0),
