@@ -1,5 +1,6 @@
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
+import 'package:fluffychat/data/network/status_error_code.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:matrix/matrix.dart';
 
@@ -47,7 +48,7 @@ class DioCacheOption {
     return CacheOptions(
       store: getIt.get<MemCacheStore>(),
       policy: CachePolicy.forceCache,
-      hitCacheOnErrorExcept: [404],
+      hitCacheOnErrorExcept: HttpResponseStatusCode.errorCodes,
       keyBuilder: (request) {
         Logs().d(
           'DioCacheOption::getMemCacheOptions() Request URI - ${request.uri}',
