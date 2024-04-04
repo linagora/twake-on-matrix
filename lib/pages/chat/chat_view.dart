@@ -170,7 +170,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             sendController: controller.sendController,
                             connectivityResultStream: controller
                                 .networkConnectionService
-                                .getStreamInstance(),
+                                .connectivity
+                                .onConnectivityChanged,
                             actions: _appBarActions(context),
                             onPushDetails: controller.onPushDetails,
                             roomName: controller.roomName,
