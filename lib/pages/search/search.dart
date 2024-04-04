@@ -10,7 +10,6 @@ import 'package:fluffychat/pages/search/server_search_controller.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -150,12 +149,6 @@ class SearchController extends State<Search> {
     );
     if (roomIdResult.error != null) return;
     context.go('/rooms/${roomIdResult.result!}');
-  }
-
-  void goToRoomsShellBranch() {
-    textEditingController.clear();
-    widget.onCloseSearchPage?.call();
-    context.popInnerAll();
   }
 
   @override
