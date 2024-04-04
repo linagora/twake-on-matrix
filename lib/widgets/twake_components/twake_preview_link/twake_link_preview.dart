@@ -38,7 +38,7 @@ class TwakeLinkPreview extends StatefulWidget {
 }
 
 class TwakeLinkPreviewController extends State<TwakeLinkPreview>
-    with GetPreviewUrlMixin {
+    with GetPreviewUrlMixin, AutomaticKeepAliveClientMixin {
   String? get firstValidUrl => widget.localizedBody.getFirstValidUrl();
 
   Uri get uri => Uri.parse(firstValidUrl ?? '');
@@ -60,6 +60,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
@@ -181,4 +182,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
