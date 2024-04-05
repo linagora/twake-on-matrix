@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/recent_chat_list.dart';
 import 'package:fluffychat/pages/forward/recent_chat_title.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -35,38 +34,30 @@ class ForwardView extends StatelessWidget {
           textEditingController: controller.searchTextEditingController,
         ),
       ),
-      body: PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-          if (PlatformInfos.isAndroid) {
-            controller.popScreen();
-          }
-        },
-        child: SingleChildScrollView(
-          padding:
-              const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
-          child: Column(
-            children: [
-              const RecentChatsTitle(),
-              ValueListenableBuilder<List<Room>>(
-                valueListenable: controller.recentlyChatsNotifier,
-                builder: (context, rooms, child) {
-                  if (rooms.isNotEmpty) {
-                    return RecentChatList(
-                      rooms: rooms,
-                      selectedChatNotifier: controller.selectedRoomIdNotifier,
-                      onSelectedChat: (roomId) =>
-                          controller.onToggleSelectChat(roomId),
-                      recentChatScrollController:
-                          controller.recentChatScrollController,
-                    );
-                  }
-
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
-          ),
+      body: SingleChildScrollView(
+        padding:
+            const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
+        child: Column(
+          children: [
+            const RecentChatsTitle(),
+            ValueListenableBuilder<List<Room>>(
+              valueListenable: controller.recentlyChatsNotifier,
+              builder: (context, rooms, child) {
+                if (rooms.isNotEmpty) {
+                  return RecentChatList(
+                    rooms: rooms,
+                    selectedChatNotifier: controller.selectedRoomIdNotifier,
+                    onSelectedChat: (roomId) =>
+                        controller.onToggleSelectChat(roomId),
+                    recentChatScrollController:
+                        controller.recentChatScrollController,
+                  );
+                }
+      
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
         ),
       ),
       floatingActionButton: ForwardButton(
