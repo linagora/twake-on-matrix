@@ -73,7 +73,7 @@ class MediaAPI {
     );
   }
 
-  Future<Uint8List> downloadAttachmentWeb({
+  Future<Uint8List> downloadFileWeb({
     required Uri uri,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,

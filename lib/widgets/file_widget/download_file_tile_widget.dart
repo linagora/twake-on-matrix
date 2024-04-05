@@ -1,6 +1,5 @@
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
@@ -78,7 +77,7 @@ class DownloadFileTileWidget extends StatelessWidget {
                       ),
                     ),
                   InkWell(
-                    onTap: PlatformInfos.isWeb ? null : onCancelDownload,
+                    onTap: onCancelDownload,
                     child: Container(
                       width: style.downloadIconSize,
                       decoration: BoxDecoration(
