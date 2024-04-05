@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/mixins/media_viewer_app_bar_mixin.dart';
+import 'package:fluffychat/presentation/mixins/media_viewer_app_bar_mixin/media_viewer_app_bar_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/resource/image_paths.dart';
