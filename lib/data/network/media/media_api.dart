@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/model/download_file_response.dart';
+import 'package:fluffychat/data/model/media/download_file_response.dart';
 import 'package:fluffychat/data/model/media/upload_file_json.dart';
 import 'package:fluffychat/data/model/media/url_preview_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
@@ -70,6 +71,31 @@ class MediaAPI {
       isRedirect: response.isRedirect,
       redirects: response.redirects,
     );
+  }
+
+  Future<Uint8List> downloadAttachmentWeb({
+    required Uri uri,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final uint8List = await _client
+        .get(
+      uri.path,
+      onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+      options: Options(
+        responseType: ResponseType.bytes,
+      ),
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException && error.type == DioExceptionType.cancel) {
+        throw CancelRequestException();
+      } else {
+        throw Exception(error);
+      }
+    });
+
+    return uint8List;
   }
 
   Future<UrlPreviewResponse> getUrlPreview({
