@@ -1,4 +1,6 @@
 PODS:
+  - appkit_ui_element_colors (1.0.0):
+    - FlutterMacOS
   - audio_session (0.0.1):
     - FlutterMacOS
   - connectivity_plus (0.0.1):
@@ -37,6 +39,8 @@ PODS:
     - "GoogleUtilities/NSData+zlib (~> 7.7)"
   - flutter_app_badger (1.3.0):
     - FlutterMacOS
+  - flutter_image_compress_macos (1.0.0):
+    - FlutterMacOS
   - flutter_local_notifications (0.0.1):
     - FlutterMacOS
   - flutter_secure_storage_macos (6.1.1):
@@ -45,11 +49,8 @@ PODS:
     - FlutterMacOS
   - flutter_webrtc (0.9.36):
     - FlutterMacOS
-    - WebRTC-SDK (= 114.5735.02)
+    - WebRTC-SDK (= 114.5735.08)
   - FlutterMacOS (1.0.0)
-  - FMDB (2.7.10):
-    - FMDB/standard (= 2.7.10)
-  - FMDB/standard (2.7.10)
   - GoogleDataTransport (9.4.1):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30911.0, >= 2.30908.0)
@@ -100,24 +101,28 @@ PODS:
     - FlutterMacOS
   - shared_preferences_macos (0.0.1):
     - FlutterMacOS
-  - sqflite (0.0.2):
+  - sqflite (0.0.3):
+    - Flutter
     - FlutterMacOS
-    - FMDB (>= 2.7.5)
   - super_native_extensions (0.0.1):
     - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
   - video_compress (0.3.0):
     - FlutterMacOS
+  - video_player_avfoundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - wakelock_macos (0.0.1):
     - FlutterMacOS
   - wakelock_plus (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (114.5735.02)
+  - WebRTC-SDK (114.5735.08)
   - window_to_front (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
+  - appkit_ui_element_colors (from `Flutter/ephemeral/.symlinks/plugins/appkit_ui_element_colors/macos`)
   - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - connectivity_plus (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
@@ -129,6 +134,7 @@ DEPENDENCIES:
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - flutter_app_badger (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos`)
+  - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
   - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
   - flutter_web_auth_2 (from `Flutter/ephemeral/.symlinks/plugins/flutter_web_auth_2/macos`)
@@ -148,10 +154,11 @@ DEPENDENCIES:
   - screen_brightness_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_brightness_macos/macos`)
   - share_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/share_plus_macos/macos`)
   - shared_preferences_macos (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos`)
-  - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/macos`)
+  - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/darwin`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - video_compress (from `Flutter/ephemeral/.symlinks/plugins/video_compress/macos`)
+  - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
   - wakelock_macos (from `Flutter/ephemeral/.symlinks/plugins/wakelock_macos/macos`)
   - wakelock_plus (from `Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos`)
   - window_to_front (from `Flutter/ephemeral/.symlinks/plugins/window_to_front/macos`)
@@ -162,7 +169,6 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseCoreInternal
-    - FMDB
     - GoogleDataTransport
     - GoogleUtilities
     - nanopb
@@ -171,6 +177,8 @@ SPEC REPOS:
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
+  appkit_ui_element_colors:
+    :path: Flutter/ephemeral/.symlinks/plugins/appkit_ui_element_colors/macos
   audio_session:
     :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
   connectivity_plus:
@@ -193,6 +201,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
   flutter_app_badger:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos
+  flutter_image_compress_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos
   flutter_local_notifications:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
   flutter_secure_storage_macos:
@@ -232,13 +242,15 @@ EXTERNAL SOURCES:
   shared_preferences_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos
   sqflite:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqflite/macos
+    :path: Flutter/ephemeral/.symlinks/plugins/sqflite/darwin
   super_native_extensions:
     :path: Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   video_compress:
     :path: Flutter/ephemeral/.symlinks/plugins/video_compress/macos
+  video_player_avfoundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin
   wakelock_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/wakelock_macos/macos
   wakelock_plus:
@@ -247,6 +259,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_to_front/macos
 
 SPEC CHECKSUMS:
+  appkit_ui_element_colors: 39bb2d80be3f19b152ccf4c70d5bbe6cba43d74a
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
@@ -262,12 +275,12 @@ SPEC CHECKSUMS:
   FirebaseCoreDiagnostics: 99a495094b10a57eeb3ae8efa1665700ad0bdaa6
   FirebaseCoreInternal: bca76517fe1ed381e989f5e7d8abb0da8d85bed3
   flutter_app_badger: 55a64b179f8438e89d574320c77b306e327a1730
+  flutter_image_compress_macos: c26c3c13ea0f28ae6dea4e139b3292e7729f99f1
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   flutter_secure_storage_macos: 75c8cadfdba05ca007c0fa4ea0c16e5cf85e521b
   flutter_web_auth_2: 2e1dc2d2139973e4723c5286ce247dd590390d70
-  flutter_webrtc: b7de006ffa89334a52103ea577b6596c437e6b9e
+  flutter_webrtc: cf7dc44d26cbb5c5f1ae5f583dab545871f287f9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  FMDB: eae540775bf7d0c87a5af926ae37af69effe5a19
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: d053d902a8edaa9904e1bd00c37535385b8ed152
   irondash_engine_context: da62996ee25616d2f01bbeb85dc115d813359478
@@ -279,7 +292,7 @@ SPEC CHECKSUMS:
   media_kit_video: c75b07f14d59706c775778e4dd47dd027de8d1e5
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
@@ -287,13 +300,14 @@ SPEC CHECKSUMS:
   screen_brightness_macos: 2d6d3af2165592d9a55ffcd95b7550970e41ebda
   share_plus_macos: 853ee48e7dce06b633998ca0735d482dd671ade4
   shared_preferences_macos: 8b221d457159a85f478c0b9d2f19aeae9feff475
-  sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
+  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   super_native_extensions: 85efee3a7495b46b04befcfc86ed12069264ebf3
   url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
   video_compress: aebf9865ccccab1f4038be7aa72af525ef2c10d7
+  video_player_avfoundation: 02011213dab73ae3687df27ce441fbbcc82b5579
   wakelock_macos: bc3f2a9bd8d2e6c89fee1e1822e7ddac3bd004a9
   wakelock_plus: 4783562c9a43d209c458cb9b30692134af456269
-  WebRTC-SDK: dd913fd31cfbf1d43b9a22d83f4c6354c960c623
+  WebRTC-SDK: c24d2a6c9f571f2ed42297cb8ffba9557093142b
   window_to_front: 4cdc24ddd8461ad1a55fa06286d6a79d8b29e8d8
 
 PODFILE CHECKSUM: 9b8d08a513b178c33212d1b54cc9e3cba756d95b
