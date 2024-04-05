@@ -35,8 +35,7 @@ class ForwardView extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding:
-            const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
+        padding: const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
         child: Column(
           children: [
             const RecentChatsTitle(),
@@ -53,7 +52,7 @@ class ForwardView extends StatelessWidget {
                         controller.recentChatScrollController,
                   );
                 }
-      
+
                 return const SizedBox.shrink();
               },
             ),
