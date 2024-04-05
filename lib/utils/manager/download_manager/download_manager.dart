@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/manager/download_manager/download_file_info.dar
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_web_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
@@ -141,7 +142,6 @@ class DownloadManager {
       _addTaskToWorkerQueueWeb(
         event: event,
         streamController: streamController,
-        getThumbnail: getThumbnail,
         cancelToken: cancelToken,
       );
       return;
@@ -188,7 +188,6 @@ class DownloadManager {
   void _addTaskToWorkerQueueWeb({
     required Event event,
     required StreamController<Either<Failure, Success>> streamController,
-    getThumbnail = false,
     required CancelToken cancelToken,
   }) {
     workingQueue.addTask(
@@ -196,8 +195,7 @@ class DownloadManager {
         id: event.eventId,
         runnable: () async {
           try {
-            await event.downloadAttachmentWeb(
-              getThumbnail: getThumbnail,
+            await event.downloadFileWeb(
               downloadStreamController: streamController,
               cancelToken: cancelToken,
             );
