@@ -11,7 +11,6 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SearchView extends StatelessWidget {
@@ -171,7 +170,7 @@ class SearchView extends StatelessWidget {
             TwakeIconButton(
               tooltip: L10n.of(context)!.back,
               icon: Icons.arrow_back,
-              onTap: () => context.pop(),
+              onTap: () => Navigator.of(context).pop(),
               paddingAll: SearchViewStyle.paddingBackButton,
             ),
             const SizedBox(width: 4.0),
