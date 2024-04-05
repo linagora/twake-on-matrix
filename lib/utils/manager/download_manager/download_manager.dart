@@ -137,17 +137,22 @@ class DownloadManager {
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
   }) {
-    if (!PlatformInfos.isWeb) {
-      _addTaskToWorkerQueueNative(
-        event,
-        getThumbnail,
-        streamController,
-        cancelToken,
+    if (PlatformInfos.isWeb) {
+      _addTaskToWorkerQueueWeb(
+        event: event,
+        streamController: streamController,
+        getThumbnail: getThumbnail,
+        cancelToken: cancelToken,
       );
       return;
     }
 
-    _addTaskToWorkerQueueWeb(event, streamController);
+    _addTaskToWorkerQueueNative(
+      event,
+      getThumbnail,
+      streamController,
+      cancelToken,
+    );
   }
 
   void _addTaskToWorkerQueueNative(
@@ -180,20 +185,21 @@ class DownloadManager {
     );
   }
 
-  void _addTaskToWorkerQueueWeb(
-    Event event,
-    StreamController<Either<Failure, Success>> streamController,
-  ) {
+  void _addTaskToWorkerQueueWeb({
+    required Event event,
+    required StreamController<Either<Failure, Success>> streamController,
+    getThumbnail = false,
+    required CancelToken cancelToken,
+  }) {
     workingQueue.addTask(
       Task(
         id: event.eventId,
         runnable: () async {
           try {
-            final matrixFile = await event.downloadAndDecryptAttachment();
-            streamController.add(
-              Right(
-                DownloadMatrixFileSuccessState(matrixFile: matrixFile),
-              ),
+            await event.downloadAttachmentWeb(
+              getThumbnail: getThumbnail,
+              downloadStreamController: streamController,
+              cancelToken: cancelToken,
             );
           } catch (e) {
             Logs().e('DownloadManager::download(): $e');

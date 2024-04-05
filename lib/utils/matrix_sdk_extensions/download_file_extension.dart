@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -284,6 +285,193 @@ extension DownloadFileExtension on Event {
       getThumbnail: getThumbnail,
       cancelToken: cancelToken,
     );
+  }
+
+  Future<MatrixFile?> downloadAttachmentWeb({
+    getThumbnail = false,
+    required StreamController<Either<Failure, Success>>
+        downloadStreamController,
+    CancelToken? cancelToken,
+  }) async {
+    if (!canContainAttachment()) {
+      throw (
+        "downloadAttachmentWeb: This event has the type '$type' and so it can't contain an attachment.",
+      );
+    }
+
+    if (isSending()) {
+      final localFile = room.sendingFilePlaceholders[eventId];
+      if (localFile != null) return localFile;
+    }
+
+    final mxcUrl = getAttachmentOrThumbnailMxcUrl(getThumbnail: getThumbnail);
+    if (mxcUrl == null) {
+      throw "downloadAttachmentWeb: This event hasn't any attachment or thumbnail.";
+    }
+
+    final isFileEncrypted =
+        getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
+    if (isEncryptionDisabled(isFileEncrypted)) {
+      throw (
+        'downloadAttachmentWeb: Encryption is not enabled in your Client.',
+      );
+    }
+
+    final storeable = isFileStoreable(getThumbnail: getThumbnail);
+
+    Uint8List? uint8list;
+
+    if (storeable) {
+      uint8list = await room.client.database?.getFile(mxcUrl);
+    }
+
+    if (uint8list != null) {
+      return MatrixFile(
+        bytes: await _decryptAttachmentWeb(uint8list: uint8list),
+        name: body,
+      );
+    }
+
+    return await _handleDownloadAttachmentWeb(
+      mxcUrl: mxcUrl,
+      downloadStreamController: downloadStreamController,
+      getThumbnail: getThumbnail,
+      cancelToken: cancelToken,
+      storeable: storeable,
+    );
+  }
+
+  Future<MatrixFile?> _handleDownloadAttachmentWeb({
+    required Uri mxcUrl,
+    required StreamController<Either<Failure, Success>>
+        downloadStreamController,
+    bool getThumbnail = false,
+    CancelToken? cancelToken,
+    bool storeable = true,
+  }) async {
+    try {
+      final database = room.client.database;
+      final mediaAPI = getIt<MediaAPI>();
+      final downloadLink = mxcUrl.getDownloadLink(room.client);
+      final uint8List = await mediaAPI.downloadAttachmentWeb(
+        uri: downloadLink,
+        onReceiveProgress: (receive, total) {
+          downloadStreamController.add(
+            Right(
+              DownloadingFileState(
+                receive: receive,
+                total: total,
+              ),
+            ),
+          );
+        },
+        cancelToken: cancelToken,
+      );
+      if (database != null &&
+          storeable &&
+          uint8List.lengthInBytes < database.maxFileSize) {
+        await database.storeFile(
+          mxcUrl,
+          uint8List,
+          DateTime.now().millisecondsSinceEpoch,
+        );
+      }
+
+      await _handleDownloadAttachmentWebSuccess(
+        uint8List,
+        downloadStreamController,
+      );
+      return MatrixFile(name: body);
+    } catch (e) {
+      if (e is CancelRequestException) {
+        Logs().i("_handleDownloadAttachmentWeb: user cancel the download");
+      }
+      Logs().e("_handleDownloadAttachmentWeb: $e");
+    }
+    return null;
+  }
+
+  Future<void> _handleDownloadAttachmentWebSuccess(
+    Uint8List uint8list,
+    StreamController<Either<Failure, Success>> streamController,
+  ) async {
+    if (isAttachmentEncrypted) {
+      await _handleDecryptedAttachmentWeb(
+        streamController: streamController,
+        uint8list: uint8list,
+      );
+    } else {
+      streamController.add(
+        Right(
+          DownloadMatrixFileSuccessState(
+            matrixFile: MatrixFile(bytes: uint8list, name: body),
+          ),
+        ),
+      );
+    }
+    return;
+  }
+
+  Future<void> _handleDecryptedAttachmentWeb({
+    required StreamController<Either<Failure, Success>> streamController,
+    required Uint8List uint8list,
+    bool getThumbnail = false,
+  }) async {
+    streamController.add(
+      const Right(
+        DecryptingFileState(),
+      ),
+    );
+    try {
+      final decryptedFile = await _decryptAttachmentWeb(
+        uint8list: uint8list,
+        getThumbnail: getThumbnail,
+      );
+      if (decryptedFile == null) {
+        throw Exception(
+          '_handleDownloadAttachmentWeb:: decryptedFile is null',
+        );
+      }
+      streamController.add(
+        Right(
+          DownloadMatrixFileSuccessState(
+            matrixFile: MatrixFile(bytes: decryptedFile, name: body),
+          ),
+        ),
+      );
+    } catch (e) {
+      Logs().e(
+        '_handleDownloadAttachmentWeb:: $e',
+      );
+      streamController.add(
+        Left(
+          DownloadFileFailureState(exception: e),
+        ),
+      );
+    }
+  }
+
+  Future<Uint8List?> _decryptAttachmentWeb({
+    required Uint8List uint8list,
+    bool getThumbnail = false,
+  }) async {
+    final fileMap = getThumbnail ? infoMap['thumbnail_file'] : content['file'];
+    if (!fileMap['key']['key_ops'].contains('decrypt')) {
+      throw ("Missing 'decrypt' in 'key_ops'.");
+    }
+    final encryptedFile = EncryptedFile(
+      data: uint8list,
+      iv: fileMap['iv'],
+      k: fileMap['key']['k'],
+      sha256: fileMap['hashes']['sha256'],
+    );
+    final decryptAttachment =
+        await room.client.nativeImplementations.decryptFile(encryptedFile);
+    if (decryptAttachment == null) {
+      throw ('Unable to decrypt file');
+    }
+
+    return decryptAttachment;
   }
 
   Future<FileInfo?> getMediaFileInfo({
