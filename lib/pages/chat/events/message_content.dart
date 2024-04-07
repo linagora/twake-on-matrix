@@ -111,7 +111,11 @@ class MessageContent extends StatelessWidget
                   ],
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                    child: endOfBubbleWidget,
+                    child: Text.rich(
+                      WidgetSpan(
+                        child: endOfBubbleWidget,
+                      ),
+                    ),
                   ),
                 ],
               );
@@ -132,7 +136,11 @@ class MessageContent extends StatelessWidget
                 ],
                 Padding(
                   padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                  child: endOfBubbleWidget,
+                  child: Text.rich(
+                    WidgetSpan(
+                      child: endOfBubbleWidget,
+                    ),
+                  ),
                 ),
               ],
             );
