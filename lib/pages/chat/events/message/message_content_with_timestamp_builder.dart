@@ -150,13 +150,18 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                           child: Padding(
                                             padding:
                                                 MessageStyle.paddingMessageTime,
-                                            child: MessageTime(
-                                              timelineOverlayMessage:
-                                                  event.timelineOverlayMessage,
-                                              room: event.room,
-                                              event: event,
-                                              ownMessage: event.isOwnMessage,
-                                              timeline: timeline,
+                                            child: Text.rich(
+                                              WidgetSpan(
+                                                child: MessageTime(
+                                                  timelineOverlayMessage: event
+                                                      .timelineOverlayMessage,
+                                                  room: event.room,
+                                                  event: event,
+                                                  ownMessage:
+                                                      event.isOwnMessage,
+                                                  timeline: timeline,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
