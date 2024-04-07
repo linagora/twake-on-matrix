@@ -1,12 +1,15 @@
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
-import 'package:matrix/matrix.dart';
+import 'package:intl/intl.dart' hide TextDirection;
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:matrix/matrix.dart' hide Visibility;
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -101,12 +104,17 @@ class MessageContentBuilder extends StatelessWidget {
                     right: 8,
                     bottom: 4.0,
                     child: SelectionContainer.disabled(
-                      child: MessageTime(
-                        timelineOverlayMessage: event.timelineOverlayMessage,
-                        event: event,
-                        ownMessage: event.isOwnMessage,
-                        timeline: timeline,
-                        room: event.room,
+                      child: Text.rich(
+                        WidgetSpan(
+                          child: MessageTime(
+                            timelineOverlayMessage:
+                                event.timelineOverlayMessage,
+                            event: event,
+                            ownMessage: event.isOwnMessage,
+                            timeline: timeline,
+                            room: event.room,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -158,28 +166,37 @@ class MessageContentBuilder extends StatelessWidget {
       MessageTypes.Video,
     }.contains(event.messageType);
 
-    if (ownMessage || hideDisplayName || isNotSupportCalcSize) {
+    if (isNotSupportCalcSize || event.text.isEmpty) {
       return null;
     }
 
-    final sizeWidthDisplayName = _getSizeDisplayName(
+    final sizeWidthDisplayName = _paintDisplayName(
       context,
       maxWidth,
     ).width;
 
-    final sizeWidthMessageText = _getSizeMessageText(
+    final totalMessageWidth = _getWidthMessageAndTime(
       context,
       maxWidth,
-    ).width;
+    );
 
-    return max<double>(sizeWidthDisplayName, sizeWidthMessageText);
+    if (ownMessage || hideDisplayName) {
+      return totalMessageWidth;
+    }
+
+    const rightSpaceDisplayName = 16.0;
+
+    final totalDisplayNameWidth = sizeWidthDisplayName + rightSpaceDisplayName;
+
+    return max<double>(totalDisplayNameWidth, totalMessageWidth);
   }
 
-  TextPainter _getSizeDisplayName(
+  TextPainter _paintDisplayName(
     BuildContext context,
     double maxWidth,
   ) {
     return TextPainter(
+      textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
         text: event.senderFromMemoryOrFallback
             .calcDisplayname()
@@ -197,23 +214,122 @@ class MessageContentBuilder extends StatelessWidget {
     )..layout(minWidth: 0, maxWidth: maxWidth);
   }
 
-  TextPainter _getSizeMessageText(
+  TextPainter _paintMessageText(
     BuildContext context,
     double maxWidth,
   ) {
     return TextPainter(
+      textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
         text: event.calcLocalizedBodyFallback(
           MatrixLocals(L10n.of(context)!),
           hideReply: true,
+          plaintextBody: true,
         ),
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(
                 context,
-              ).colorScheme.primary,
+              ).colorScheme.onSurface,
             ),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: maxWidth);
+  }
+
+  double _getWidthMessageTime(
+    BuildContext context,
+    double maxWidth,
+  ) {
+    final painTimeText = TextPainter(
+      textScaler: MediaQuery.of(context).textScaler,
+      text: TextSpan(
+        text: DateFormat("HH:mm").format(event.originServerTs),
+        style: Theme.of(context).textTheme.bodySmall?.merge(
+              TextStyle(
+                color: event.timelineOverlayMessage
+                    ? Colors.white
+                    : LinagoraRefColors.material().tertiary[30],
+                letterSpacing: 0.4,
+              ),
+            ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: maxWidth);
+
+    const pushpinIconSize = MessageStyle.pushpinIconSize;
+    const paddingAllPushpin = MessageStyle.paddingAllPushpin;
+    const paddingToTimeSpacing = 4.0;
+    final seenByRowIconSize = MessageTimeStyle.seenByRowIconSize;
+    final paddingTimeAndIcon = MessageTimeStyle.paddingTimeAndIcon;
+
+    double totalWidth = painTimeText.width;
+
+    if (event.isPinned) {
+      totalWidth += paddingTimeAndIcon +
+          pushpinIconSize +
+          paddingAllPushpin +
+          paddingToTimeSpacing;
+    }
+
+    if (event.isOwnMessage) {
+      totalWidth += paddingTimeAndIcon + seenByRowIconSize;
+    }
+
+    final scaledWidth = MediaQuery.textScalerOf(context).scale(totalWidth);
+
+    return scaledWidth;
+  }
+
+  double _getWidthMessageAndTime(
+    BuildContext context,
+    double maxWidth,
+  ) {
+    const spaceMessageAndTime = 4.0;
+    const paddingTimeStamp = 12.0;
+    const paddingMessage = 16.0;
+
+    final paintedMessageText = _paintMessageText(
+      context,
+      maxWidth,
+    );
+
+    final sizeMessageTime = _getWidthMessageTime(
+      context,
+      maxWidth,
+    );
+
+    final messageTimeAndPaddingWidth =
+        sizeMessageTime + spaceMessageAndTime + paddingTimeStamp;
+
+    final messageTextWidth = paintedMessageText.width;
+
+    final lastLineWidth = paintedMessageText
+        .getBoxesForSelection(
+          TextSelection(
+            baseOffset: 0,
+            extentOffset: event
+                .calcLocalizedBodyFallback(
+                  MatrixLocals(L10n.of(context)!),
+                  hideReply: true,
+                  plaintextBody: true,
+                )
+                .length,
+          ),
+        )
+        .last
+        .right;
+
+    final lastLineToRightBoundarySpace = messageTextWidth - lastLineWidth;
+
+    double totalMessageWidth;
+
+    if (lastLineToRightBoundarySpace > messageTimeAndPaddingWidth) {
+      totalMessageWidth = messageTextWidth + paddingMessage;
+    } else {
+      totalMessageWidth =
+          lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+    }
+
+    return totalMessageWidth;
   }
 }
