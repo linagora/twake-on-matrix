@@ -3,8 +3,10 @@ import 'package:fluffychat/pages/search/recent_item_widget_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/extensions/search/presentation_search_extensions.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
+import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -253,16 +255,33 @@ class _ContactInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SearchHighlightText(
-                text: contactPresentationSearch.displayName ?? "",
-                style: Theme.of(context).textTheme.titleMedium?.merge(
-                      TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        letterSpacing: 0.15,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SearchHighlightText(
+                      text: contactPresentationSearch.displayName ?? "",
+                      style: Theme.of(context).textTheme.titleMedium?.merge(
+                            TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              letterSpacing: 0.15,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                      searchWord: searchKeyword,
                     ),
-                searchWord: searchKeyword,
+                  ),
+                  if (contactPresentationSearch.matrixId != null &&
+                      contactPresentationSearch.matrixId!
+                          .isCurrentMatrixId(context)) ...[
+                    const SizedBox(width: 8.0),
+                    TwakeChip(
+                      text: L10n.of(context)!.owner,
+                      textColor: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
