@@ -11,8 +11,10 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -47,6 +49,9 @@ class ForwardController extends State<Forward> with SearchRecentChat {
 
   final ValueNotifier<String> selectedRoomIdNotifier = ValueNotifier('');
 
+  final KeyboardVisibilityController keyboardVisibilityController =
+      KeyboardVisibilityController();
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +63,13 @@ class ForwardController extends State<Forward> with SearchRecentChat {
       );
       recentlyChatsNotifier.value = filteredRoomsForAll;
     });
+    if (PlatformInfos.isMobile) {
+      keyboardVisibilityController.onChange.listen((visible) {
+        if (!visible) {
+          isSearchBarShowNotifier.value = false;
+        }
+      });
+    }
   }
 
   @override
