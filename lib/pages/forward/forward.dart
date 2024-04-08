@@ -9,12 +9,11 @@ import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -22,19 +21,23 @@ import 'package:fluffychat/widgets/matrix.dart';
 
 class Forward extends StatefulWidget {
   final String? sendFromRoomId;
+  final bool? isFullScreen;
 
-  const Forward({Key? key, this.sendFromRoomId}) : super(key: key);
+  const Forward({
+    Key? key,
+    this.sendFromRoomId,
+    this.isFullScreen = true,
+  }) : super(key: key);
 
   @override
   ForwardController createState() => ForwardController();
 }
 
-class ForwardController extends State<Forward> with SearchRecentChat {
+class ForwardController extends State<Forward>
+    with SearchRecentChat, ContactsViewControllerMixin {
   final _forwardMessageInteractor = getIt.get<ForwardMessageInteractor>();
 
   final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
-
-  final isSearchBarShowNotifier = ValueNotifier(false);
 
   StreamSubscription? forwardMessageInteractorStreamSubscription;
 
@@ -44,13 +47,18 @@ class ForwardController extends State<Forward> with SearchRecentChat {
 
   String? get roomId => widget.sendFromRoomId;
 
+  bool get isFullScreen => widget.isFullScreen == true;
+
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
 
   final ValueNotifier<String> selectedRoomIdNotifier = ValueNotifier('');
 
-  final KeyboardVisibilityController keyboardVisibilityController =
-      KeyboardVisibilityController();
+  @override
+  void closeSearchBar() {
+    searchTextEditingController.clear();
+    super.closeSearchBar();
+  }
 
   @override
   void initState() {
@@ -63,19 +71,12 @@ class ForwardController extends State<Forward> with SearchRecentChat {
       );
       recentlyChatsNotifier.value = filteredRoomsForAll;
     });
-    if (PlatformInfos.isMobile) {
-      keyboardVisibilityController.onChange.listen((visible) {
-        if (!visible) {
-          isSearchBarShowNotifier.value = false;
-        }
-      });
-    }
   }
 
   @override
   void dispose() {
     forwardMessageNotifier.dispose();
-    isSearchBarShowNotifier.dispose();
+    disposeContactsMixin();
     recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
     disposeSearchRecentChat();
