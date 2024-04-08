@@ -203,13 +203,16 @@ class _ForwardAppBar extends StatelessWidget {
                     ),
                   );
                 } else {
-                  return Text(
-                    L10n.of(context)!.forwardTo,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          letterSpacing:
-                              ChatAppBarTitleStyle.letterSpacingRoomName,
-                        ),
+                  return GestureDetector(
+                    onTap: () => isSearchBarShowNotifier.value = true,
+                    child: Text(
+                      L10n.of(context)!.forwardTo,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            letterSpacing:
+                                ChatAppBarTitleStyle.letterSpacingRoomName,
+                          ),
+                    ),
                   );
                 }
               },
