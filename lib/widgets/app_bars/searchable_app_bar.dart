@@ -88,12 +88,18 @@ class SearchableAppBar extends StatelessWidget {
                           child: _textFieldBuilder(context),
                         );
                       }
-                      return Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                      return GestureDetector(
+                        onTap: isFullScreen ? openSearchBar : null,
+                        child: Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
                       );
                     },
                   ),
@@ -101,8 +107,8 @@ class SearchableAppBar extends StatelessWidget {
                 if (isFullScreen) ...[
                   ValueListenableBuilder(
                     valueListenable: searchModeNotifier,
-                    builder: (context, searchModeNotifier, child) {
-                      if (searchModeNotifier) {
+                    builder: (context, isSearchModeEnabled, child) {
+                      if (isSearchModeEnabled) {
                         return TwakeIconButton(
                           onTap: closeSearchBar,
                           tooltip: L10n.of(context)!.close,
