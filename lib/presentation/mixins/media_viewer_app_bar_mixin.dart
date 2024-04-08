@@ -1,14 +1,14 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
+import 'package:fluffychat/pages/forward/forward_web_view.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
-import 'package:fluffychat/presentation/mixins/media_viewer_app_bar_mixin/media_viewer_app_bar_mixin_style.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 
@@ -52,21 +52,38 @@ mixin MediaViewerAppBarMixin {
         builder: (c) => const Forward(),
       );
 
+  final forwardSelectionMobileAndTabletKey =
+      const Key('ForwardSelectionMobileAndTabletKey');
+
+  final forwardSelectionWebAndDesktopKey =
+      const Key('ForwardSelectionWebAndDesktopKey');
+
   Future<PopResultFromForward?> _showForwardWebDialog(
     BuildContext context,
   ) async =>
       await showDialog(
         context: context,
+        barrierDismissible: false,
+        useSafeArea: false,
         useRootNavigator: false,
-        builder: (c) => AlertDialog(
-          backgroundColor: LinagoraRefColors.material().primary[100],
-          surfaceTintColor: LinagoraRefColors.material().primary[100],
-          content: const SizedBox(
-            width: MediaViewerAppBarMixinStyle.fixedForwardActionDialogWidth,
-            height: MediaViewerAppBarMixinStyle.fixedForwardActionDialogHeight,
-            child: Forward(),
-          ),
-        ),
+        builder: (context) {
+          return SlotLayout(
+            config: <Breakpoint, SlotLayoutConfig>{
+              const WidthPlatformBreakpoint(
+                begin: ResponsiveUtils.minTabletWidth,
+              ): SlotLayout.from(
+                key: forwardSelectionWebAndDesktopKey,
+                builder: (_) => const ForwardWebView(),
+              ),
+              const WidthPlatformBreakpoint(
+                end: ResponsiveUtils.minTabletWidth,
+              ): SlotLayout.from(
+                key: forwardSelectionMobileAndTabletKey,
+                builder: (_) => const Forward(),
+              ),
+            },
+          );
+        },
       );
 
   void showInChat(
