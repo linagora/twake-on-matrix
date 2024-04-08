@@ -91,10 +91,18 @@ class SearchController extends State<Search> {
 
   void onSearchItemTap(PresentationSearch presentationSearch) async {
     if (presentationSearch is ContactPresentationSearch) {
+      if (presentationSearch.matrixId?.isCurrentMatrixId(context) == true) {
+        goToSettingsProfile();
+        return;
+      }
       onContactTap(presentationSearch);
     } else if (presentationSearch is RecentChatPresentationSearch) {
       onRecentChatTap(presentationSearch);
     }
+  }
+
+  void goToSettingsProfile() async {
+    context.go('/rooms/profile');
   }
 
   void onContactTap(ContactPresentationSearch contactPresentationSearch) {
