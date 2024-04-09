@@ -160,7 +160,6 @@ class MessageContent extends StatelessWidget
                   linkStyle:
                       MessageContentStyle.linkStyleMessageContent(context),
                   fontSize: fontSize,
-                  endOfBubbleWidget: endOfBubbleWidget,
                 ),
               );
             }
