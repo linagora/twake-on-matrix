@@ -3,7 +3,7 @@ import 'package:matrix_link_text/link_text.dart';
 
 class TwakeCleanRichText extends StatelessWidget {
   final String text;
-  final Widget childWidget;
+  final Widget? childWidget;
   final TextStyle? textStyle;
   final TextStyle? linkStyle;
   final TextAlign? textAlign;
@@ -14,7 +14,7 @@ class TwakeCleanRichText extends StatelessWidget {
   const TwakeCleanRichText({
     Key? key,
     required this.text,
-    required this.childWidget,
+    this.childWidget,
     this.textStyle,
     this.linkStyle,
     this.textAlign = TextAlign.start,
@@ -36,8 +36,10 @@ class TwakeCleanRichText extends StatelessWidget {
             themeData: Theme.of(context),
             textSpanBuilder: textSpanBuilder,
           ),
-          const WidgetSpan(child: SizedBox(width: 4)),
-          WidgetSpan(child: childWidget),
+          if (childWidget != null) ...[
+            const WidgetSpan(child: SizedBox(width: 4)),
+            WidgetSpan(child: childWidget!),
+          ],
         ],
       ),
       textAlign: textAlign,

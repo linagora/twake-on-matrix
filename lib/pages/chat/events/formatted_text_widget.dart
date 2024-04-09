@@ -5,14 +5,12 @@ import 'package:matrix/matrix.dart' hide Visibility;
 class FormattedTextWidget extends StatelessWidget {
   final Event event;
   final double fontSize;
-  final Widget endOfBubbleWidget;
   final TextStyle? linkStyle;
 
   const FormattedTextWidget({
     super.key,
     required this.event,
     required this.fontSize,
-    required this.endOfBubbleWidget,
     this.linkStyle,
   });
 
@@ -32,13 +30,6 @@ class FormattedTextWidget extends StatelessWidget {
       linkStyle: linkStyle,
       room: event.room,
       emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
-      bottomWidgetSpan: Visibility(
-        visible: false,
-        maintainSize: true,
-        maintainAnimation: true,
-        maintainState: true,
-        child: endOfBubbleWidget,
-      ),
     );
   }
 }

@@ -73,7 +73,6 @@ class MessageContentStyle {
 
   static const EdgeInsets emojiPadding = EdgeInsets.only(
     left: 8.0,
-    right: 8.0,
   );
 
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
