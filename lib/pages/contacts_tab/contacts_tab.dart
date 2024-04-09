@@ -5,6 +5,7 @@ import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.da
 import 'package:fluffychat/presentation/model/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
@@ -43,6 +44,10 @@ class ContactsTabController extends State<ContactsTab>
     required String path,
     required PresentationContact contact,
   }) {
+    if (contact.matrixId?.isCurrentMatrixId(context) == true) {
+      goToSettingsProfile();
+      return;
+    }
     final roomId =
         Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {
@@ -54,6 +59,10 @@ class ContactsTabController extends State<ContactsTab>
     } else {
       context.go('/$path/$roomId');
     }
+  }
+
+  void goToSettingsProfile() {
+    context.go('/rooms/profile');
   }
 
   void goToDraftChat({
