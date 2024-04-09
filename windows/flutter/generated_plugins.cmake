@@ -11,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_saver
   file_selector_windows
   flutter_webrtc
+  gal
   irondash_engine_context
   media_kit_libs_windows_video
   media_kit_video
