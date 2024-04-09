@@ -30,16 +30,22 @@ class ForwardView extends StatelessWidget {
         preferredSize: controller.isFullScreen
             ? ForwardViewStyle.preferredSize(context)
             : ForwardViewStyle.maxPreferredSize(context),
-        child: SearchableAppBar(
-          toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
-          focusNode: controller.searchFocusNode,
-          title: L10n.of(context)!.forwardTo,
-          searchModeNotifier: controller.isSearchModeNotifier,
-          hintText: L10n.of(context)!.searchContacts,
-          textEditingController: controller.searchTextEditingController,
-          openSearchBar: controller.openSearchBar,
-          closeSearchBar: controller.closeSearchBar,
-          isFullScreen: controller.isFullScreen,
+        child: ValueListenableBuilder<Either<Failure, Success>?>(
+            valueListenable: controller.forwardMessageNotifier,
+          builder: (context, forwardMessageState, child) {
+            return SearchableAppBar(
+              toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
+              focusNode: controller.searchFocusNode,
+              title: L10n.of(context)!.forwardTo,
+              searchModeNotifier: controller.isSearchModeNotifier,
+              hintText: L10n.of(context)!.searchContacts,
+              textEditingController: controller.searchTextEditingController,
+              openSearchBar: controller.openSearchBar,
+              closeSearchBar: controller.closeSearchBar,
+              isFullScreen: controller.isFullScreen,
+              displayBackButton: forwardMessageState == null,
+            );
+          },
         ),
       ),
       body: Column(
@@ -109,53 +115,53 @@ class _WebActionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TwakeTextButton(
-            onTap: () => context.pop(),
-            message: L10n.of(context)!.cancel,
-            borderHover: ForwardViewStyle.webActionsButtonBorder,
-            margin: ForwardViewStyle.webActionsButtonMargin,
-            buttonDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                ForwardViewStyle.webActionsButtonBorder,
-              ),
-            ),
-            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraSysColors.material().primary,
-                ),
-          ),
-          const SizedBox(width: 8.0),
-          ValueListenableBuilder<String>(
-            valueListenable: selectedChatNotifier,
-            builder: ((context, selectedChat, child) {
-              return ValueListenableBuilder<Either<Failure, Success>?>(
-                valueListenable: forwardMessageNotifier,
-                builder: (context, forwardMessageState, child) {
-                  if (forwardMessageState == null) {
-                    return child!;
+      child: ValueListenableBuilder<String>(
+        valueListenable: selectedChatNotifier,
+        builder: ((context, selectedChat, child) {
+          return ValueListenableBuilder<Either<Failure, Success>?>(
+            valueListenable: forwardMessageNotifier,
+            builder: (context, forwardMessageState, child) {
+              if (forwardMessageState == null) {
+                return child!;
+              } else {
+                return forwardMessageState.fold((failure) => child!, (success) {
+                  if (success is ForwardMessageLoading) {
+                    return const SizedBox(
+                      height: ForwardViewStyle.bottomBarHeight,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: TwakeFloatingActionButton(
+                          customIcon:
+                              SizedBox(child: CircularProgressIndicator()),
+                        ),
+                      ),
+                    );
                   } else {
-                    return forwardMessageState.fold((failure) => child!,
-                        (success) {
-                      if (success is ForwardMessageLoading) {
-                        return const SizedBox(
-                          height: ForwardViewStyle.bottomBarHeight,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: TwakeFloatingActionButton(
-                              customIcon:
-                                  SizedBox(child: CircularProgressIndicator()),
-                            ),
-                          ),
-                        );
-                      } else {
-                        return const SizedBox();
-                      }
-                    });
+                    return const SizedBox();
                   }
-                },
-                child: TwakeTextButton(
+                });
+              }
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TwakeTextButton(
+                  onTap: () => context.pop(),
+                  message: L10n.of(context)!.cancel,
+                  borderHover: ForwardViewStyle.webActionsButtonBorder,
+                  margin: ForwardViewStyle.webActionsButtonMargin,
+                  buttonDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      ForwardViewStyle.webActionsButtonBorder,
+                    ),
+                  ),
+                  styleMessage:
+                      Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: LinagoraSysColors.material().primary,
+                          ),
+                ),
+                const SizedBox(width: 8.0),
+                TwakeTextButton(
                   onTap: forwardAction,
                   message: L10n.of(context)!.add,
                   margin: ForwardViewStyle.webActionsButtonMargin,
@@ -179,10 +185,10 @@ class _WebActionsButton extends StatelessWidget {
                                     .withOpacity(0.6),
                           ),
                 ),
-              );
-            }),
-          ),
-        ],
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
