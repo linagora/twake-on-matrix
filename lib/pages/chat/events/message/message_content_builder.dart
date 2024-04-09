@@ -43,19 +43,22 @@ class MessageContentBuilder extends StatelessWidget {
       MessageTypes.File,
       MessageTypes.Audio,
     }.contains(event.messageType);
+    final sizeMessageBubble = _getSizeMessageBubbleWidth(
+      context,
+      maxWidth: availableBubbleContraints.maxWidth,
+      ownMessage: event.isOwnMessage,
+      hideDisplayName: event.hideDisplayName(
+        nextEvent,
+      ),
+    );
+    final stepWidth = sizeMessageBubble?.keys.first;
+    final isNeedAddNewLine = sizeMessageBubble?.values.first ?? false;
     return Padding(
       padding: EdgeInsets.only(
         bottom: noPadding || event.timelineOverlayMessage ? 0 : 8,
       ),
       child: IntrinsicWidth(
-        stepWidth: _getSizeMessageBubbleWidth(
-          context,
-          maxWidth: availableBubbleContraints.maxWidth,
-          ownMessage: event.isOwnMessage,
-          hideDisplayName: event.hideDisplayName(
-            nextEvent,
-          ),
-        ),
+        stepWidth: stepWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,6 +123,26 @@ class MessageContentBuilder extends StatelessWidget {
                   ),
               ],
             ),
+            if (isNeedAddNewLine)
+              Visibility(
+                visible: false,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: SelectionContainer.disabled(
+                  child: Text.rich(
+                    WidgetSpan(
+                      child: MessageTime(
+                        timelineOverlayMessage: event.timelineOverlayMessage,
+                        event: event,
+                        ownMessage: event.isOwnMessage,
+                        timeline: timeline,
+                        room: event.room,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             if (event.hasAggregatedEvents(
               timeline,
               RelationshipTypes.edit,
@@ -154,7 +177,7 @@ class MessageContentBuilder extends StatelessWidget {
     );
   }
 
-  double? _getSizeMessageBubbleWidth(
+  Map<double, bool>? _getSizeMessageBubbleWidth(
     BuildContext context, {
     required double maxWidth,
     bool ownMessage = false,
@@ -181,14 +204,24 @@ class MessageContentBuilder extends StatelessWidget {
     );
 
     if (ownMessage || hideDisplayName) {
-      return totalMessageWidth;
+      final Map<double, bool> result = {
+        totalMessageWidth.keys.first: totalMessageWidth.values.first,
+      };
+      return result;
     }
 
     const rightSpaceDisplayName = 16.0;
 
     final totalDisplayNameWidth = sizeWidthDisplayName + rightSpaceDisplayName;
 
-    return max<double>(totalDisplayNameWidth, totalMessageWidth);
+    final totalWidth =
+        max<double>(totalDisplayNameWidth, totalMessageWidth.keys.first);
+
+    final Map<double, bool> result = {
+      totalWidth: totalMessageWidth.values.first,
+    };
+
+    return result;
   }
 
   TextPainter _paintDisplayName(
@@ -275,17 +308,14 @@ class MessageContentBuilder extends StatelessWidget {
       totalWidth += paddingTimeAndIcon + seenByRowIconSize;
     }
 
-    final scaledWidth = MediaQuery.textScalerOf(context).scale(totalWidth);
-
-    return scaledWidth;
+    return totalWidth;
   }
 
-  double _getWidthMessageAndTime(
+  Map<double, bool> _getWidthMessageAndTime(
     BuildContext context,
     double maxWidth,
   ) {
     const spaceMessageAndTime = 4.0;
-    const paddingTimeStamp = 12.0;
     const paddingMessage = 16.0;
 
     final paintedMessageText = _paintMessageText(
@@ -298,10 +328,13 @@ class MessageContentBuilder extends StatelessWidget {
       maxWidth,
     );
 
-    final messageTimeAndPaddingWidth =
-        sizeMessageTime + spaceMessageAndTime + paddingTimeStamp;
+    final messageTimeAndPaddingWidth = sizeMessageTime + spaceMessageAndTime;
 
     final messageTextWidth = paintedMessageText.width;
+
+    double totalMessageWidth = messageTextWidth + paddingMessage;
+
+    bool isNeedAddNewLine = false;
 
     final lastLineWidth = paintedMessageText
         .getBoxesForSelection(
@@ -319,17 +352,49 @@ class MessageContentBuilder extends StatelessWidget {
         .last
         .right;
 
-    final lastLineToRightBoundarySpace = messageTextWidth - lastLineWidth;
-
-    double totalMessageWidth;
-
-    if (lastLineToRightBoundarySpace > messageTimeAndPaddingWidth) {
-      totalMessageWidth = messageTextWidth + paddingMessage;
+    if (lastLineWidth >= maxWidth) {
+      isNeedAddNewLine = true;
+      totalMessageWidth = maxWidth;
     } else {
-      totalMessageWidth =
-          lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+      if (lastLineWidth < messageTextWidth) {
+        final lastLineToRightBoundarySpace = messageTextWidth - lastLineWidth;
+        if (lastLineToRightBoundarySpace >= messageTimeAndPaddingWidth) {
+          final messageAndTimeWidth = messageTextWidth + paddingMessage;
+          if (messageAndTimeWidth >= maxWidth) {
+            if (lastLineWidth + messageTimeAndPaddingWidth >= maxWidth) {
+              isNeedAddNewLine = true;
+              totalMessageWidth = maxWidth;
+            } else {
+              totalMessageWidth = lastLineWidth + messageTimeAndPaddingWidth;
+            }
+          } else {
+            totalMessageWidth = messageAndTimeWidth;
+          }
+        } else {
+          final lastLineWidthTimeWidth =
+              lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+          if (lastLineWidthTimeWidth >= maxWidth) {
+            isNeedAddNewLine = true;
+            totalMessageWidth = maxWidth;
+          } else {
+            totalMessageWidth = lastLineWidthTimeWidth;
+          }
+        }
+      } else {
+        final lastLineWithTimeWidth =
+            lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+        if (lastLineWithTimeWidth >= maxWidth) {
+          isNeedAddNewLine = true;
+          totalMessageWidth = maxWidth;
+        } else {
+          totalMessageWidth = lastLineWithTimeWidth;
+        }
+      }
     }
 
-    return totalMessageWidth;
+    final Map<double, bool> result = {
+      totalMessageWidth: isNeedAddNewLine,
+    };
+    return result;
   }
 }
