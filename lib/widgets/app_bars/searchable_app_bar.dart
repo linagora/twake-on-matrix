@@ -9,6 +9,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SearchableAppBar extends StatelessWidget {
   final ValueNotifier<bool> searchModeNotifier;
+  final bool displayBackButton;
   final FocusNode focusNode;
   final String title;
   final String? hintText;
@@ -29,6 +30,7 @@ class SearchableAppBar extends StatelessWidget {
     required this.closeSearchBar,
     this.toolbarHeight,
     this.isFullScreen = true,
+    this.displayBackButton = true,
   });
 
   @override
@@ -113,11 +115,9 @@ class SearchableAppBar extends StatelessWidget {
                           onTap: closeSearchBar,
                           tooltip: L10n.of(context)!.close,
                           icon: Icons.close,
-                          paddingAll: 10.0,
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 10.0,
-                            horizontal: 6.0,
-                          ),
+                          paddingAll:
+                              SearchableAppBarStyle.closeButtonPaddingAll,
+                          margin: SearchableAppBarStyle.closeButtonMargin,
                         );
                       }
                       return TwakeIconButton(
@@ -130,16 +130,24 @@ class SearchableAppBar extends StatelessWidget {
                     },
                   ),
                 ] else ...[
-                  TwakeIconButton(
-                    onTap: () => context.pop(),
-                    tooltip: L10n.of(context)!.close,
-                    icon: Icons.close,
-                    paddingAll: 10.0,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 10.0,
-                      horizontal: 6.0,
+                  if (displayBackButton)
+                    TwakeIconButton(
+                      onTap: () => context.pop(),
+                      tooltip: L10n.of(context)!.close,
+                      icon: Icons.close,
+                      paddingAll: SearchableAppBarStyle.closeButtonPaddingAll,
+                      margin: SearchableAppBarStyle.closeButtonMargin,
+                    )
+                  else
+                    Container(
+                      width: SearchableAppBarStyle.closeButtonPlaceholderWidth,
+                      height: SearchableAppBarStyle.closeButtonPlaceholderWidth,
+                      padding: const EdgeInsets.all(
+                        SearchableAppBarStyle.closeButtonPaddingAll,
+                      ),
+                      margin: SearchableAppBarStyle.closeButtonMargin,
+                      child: const SizedBox.shrink(),
                     ),
-                  ),
                 ],
               ],
             ),

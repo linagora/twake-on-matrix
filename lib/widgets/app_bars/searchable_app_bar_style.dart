@@ -35,4 +35,13 @@ class SearchableAppBarStyle {
   static const int textFieldMaxLines = 1;
 
   static const double appBarBorderRadius = 16.0;
+
+  static const double closeButtonPaddingAll = 10.0;
+
+  static const EdgeInsets closeButtonMargin = EdgeInsets.symmetric(
+    vertical: 10.0,
+    horizontal: 6.0,
+  );
+
+  static const double closeButtonPlaceholderWidth = 44.0;
 }
