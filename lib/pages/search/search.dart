@@ -101,7 +101,7 @@ class SearchController extends State<Search> {
     }
   }
 
-  void goToSettingsProfile() async {
+  void goToSettingsProfile() {
     context.go('/rooms/profile');
   }
 
