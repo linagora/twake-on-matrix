@@ -69,17 +69,9 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               event: widget.event,
               linkStyle: widget.linkStyle,
               fontSize: widget.fontSize,
-              endOfBubbleWidget: widget.endOfBubbleWidget,
             )
           : TwakeCleanRichText(
               text: widget.localizedBody,
-              childWidget: Visibility(
-                visible: false,
-                maintainSize: true,
-                maintainAnimation: true,
-                maintainState: true,
-                child: widget.endOfBubbleWidget,
-              ),
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
               textAlign: TextAlign.start,
