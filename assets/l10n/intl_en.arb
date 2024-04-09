@@ -3031,5 +3031,18 @@
     }
   },
   "downloading": "Downloading",
-  "configurationNotFound": "The configuration data not found"
+  "configurationNotFound": "The configuration data not found",
+  "fileSavedToGallery": "File saved to Gallery",
+  "saveFileToGalleryError": "Failed to save file to Gallery",
+  "explainPermissionToGallery": "To continue, please allow {appName} to access photo permission. This permission is essential for saving file to gallery.",
+  "@explainPermissionToGallery": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  }
 }

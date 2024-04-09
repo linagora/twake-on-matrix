@@ -75,6 +75,13 @@ class StorageDirectoryUtils {
     return availableFilePath;
   }
 
+  Future<String> getMediaFilePath({
+    required Uri mxcUrl,
+  }) async {
+    final temporaryDirectory = await getTemporaryDirectory();
+    return '${temporaryDirectory.path}/${Uri.encodeComponent(mxcUrl.toString())}';
+  }
+
   String getDecryptedFilePath({
     required String savePath,
   }) {
