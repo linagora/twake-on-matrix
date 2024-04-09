@@ -72,8 +72,7 @@ class MxcImage extends StatefulWidget {
   State<MxcImage> createState() => _MxcImageState();
 }
 
-class _MxcImageState extends State<MxcImage>
-    with SingleTickerProviderStateMixin {
+class _MxcImageState extends State<MxcImage> {
   static const String placeholderKey = 'placeholder';
   static final Map<EventId, ImageData> _imageDataCache = {};
   ImageData? _imageDataNoCache;

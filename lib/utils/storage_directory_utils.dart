@@ -74,4 +74,10 @@ class StorageDirectoryUtils {
     }
     return availableFilePath;
   }
+
+  String getDecryptedFilePath({
+    required String savePath,
+  }) {
+    return '${savePath}decrypted';
+  }
 }
