@@ -1790,6 +1790,8 @@ class ChatController extends State<Chat>
             .every((event) => event.hasAttachment && !event.isVideoOrImage))
           ChatAppBarActions.saveToDownload,
       ],
+      if (selectedEvents.every((event) => event.isVideoOrImage))
+        ChatAppBarActions.saveToGallery,
       ChatAppBarActions.info,
       ChatAppBarActions.report,
     ];
@@ -1822,6 +1824,11 @@ class ChatController extends State<Chat>
           () => saveSelectedEventToDownloadAndroid(),
         );
         break;
+      case ChatAppBarActions.saveToGallery:
+        actionWithClearSelections(
+          () => saveSelectedEventToGallery(),
+        );
+        break;
       case ChatAppBarActions.info:
         actionWithClearSelections(
           () => showEventInfo(
@@ -1840,11 +1847,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void saveSelectedEventToDownloadAndroid() async {
-    if (selectedEvents.length != 1) {
-      return;
-    }
-    final downloadEvent = selectedEvents.first;
+  Future<void> handleAndroidStoragePermission() async {
     if (await PermissionHandlerService()
         .isUserHaveToRequestStoragePermissionAndroid()) {
       final permission = await Permission.storage.request();
@@ -1914,6 +1917,35 @@ class ChatController extends State<Chat>
       }
     }
   }
+
+  Future<void> handlePhotoPermissionIOS() async {
+    final permissionHandlerService = PermissionHandlerService();
+    final permissionStatus =
+        await permissionHandlerService.requestPhotoAddOnlyPermissionIOS();
+    if (permissionStatus.isPermanentlyDenied) {
+      showDialog(
+        useRootNavigator: false,
+        context: context,
+        builder: (_) {
+          return PermissionDialog(
+            icon: const Icon(Icons.photo),
+            permission: Permission.photos,
+            explainTextRequestPermission: Text(
+              L10n.of(context)!.explainPermissionToGallery(
+                AppConfig.applicationName,
+              ),
+            ),
+            onAcceptButton: () =>
+                permissionHandlerService.goToSettingsForPermissionActions(),
+          );
+        },
+      );
+    }
+    if (!permissionStatus.isGranted) {
+      throw StoragePermissionException('Permission denied');
+    }
+  }
+
   Future<void> saveSelectedEventToGallery() async {
     if (selectedEvents.length != 1) {
       return;
