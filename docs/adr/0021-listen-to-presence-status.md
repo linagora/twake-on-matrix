@@ -29,39 +29,36 @@ This was because the UI was listening to `onPresenceChanged`'s stream which is u
 
 To avoid this problem we created a new stream which purpose is to get the status of presence the closest of current time: `onlatestPresenceChanged` . That's the one who should be listened by the UI.
 
-Here `lowestLastActivePresence` is updated for each items in sync.presence list if it is `null` or if the current item's timestamp is before the one in `lowestLastActivePresence`. Then when the loop is over and we are sure to have the right value, we can update `onLatestPresenceChange` with the right value and this way update the UI.
+Here `lastActivePresence` is updated for each items in `sync.presence` list if it is `null` or if the current item's timestamp is after the one in `lastActivePresence`. Then when the loop is over and we are sure to have the right value, we can update `onLatestPresenceChange` with the right value and this way update the UI.
 
 ```dart
   /// Callback will be called on presence updates.
   final CachedStreamController<CachedPresence> onPresenceChanged =
-      CachedStreamController();
+    CachedStreamController();
 
   /// Callback will be called on presence update and return latest value.
   final CachedStreamController<CachedPresence> onlatestPresenceChanged =
-      CachedStreamController();
+    CachedStreamController();
 
-    CachedPresence? lowestLastActivePresence;
+  CachedPresence? lastActivePresence;
 
+  for (final newPresence in sync.presence ?? []) {
+    final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
+    presences[newPresence.senderId] = cachedPresence;
+    // ignore: deprecated_member_use_from_same_package
+    onPresence.add(newPresence);
+    onPresenceChanged.add(cachedPresence);
 
-    for (final newPresence in sync.presence ?? []) {
-      final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
-      presences[newPresence.senderId] = cachedPresence;
-      // ignore: deprecated_member_use_from_same_package
-      onPresence.add(newPresence);
-      onPresenceChanged.add(cachedPresence);
-
-
-      if (lowestLastActivePresence == null ||
-          (cachedPresence.lastActiveTimestamp != null &&
-              lowestLastActivePresence.lastActiveTimestamp != null &&
-              cachedPresence.lastActiveTimestamp!
-                  .isBefore(lowestLastActivePresence.lastActiveTimestamp!))) {
-        lowestLastActivePresence = cachedPresence;
-      }
+    if (lastActivePresence == null ||
+        (cachedPresence.lastActiveTimestamp != null &&
+            lastActivePresence.lastActiveTimestamp != null &&
+            cachedPresence.lastActiveTimestamp!
+                .isAfter(lastActivePresence.lastActiveTimestamp!))) {
+      lastActivePresence = cachedPresence;
     }
+  }
 
-
-    if (lowestLastActivePresence != null) {
-      onlatestPresenceChanged.add(lowestLastActivePresence);
-    }
+  if (lastActivePresence != null) {
+    onlatestPresenceChanged.add(lastActivePresence);
+  }
 ```
