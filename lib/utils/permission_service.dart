@@ -132,6 +132,10 @@ class PermissionHandlerService {
         !(await Permission.storage.isGranted);
   }
 
+  Future<PermissionStatus> requestPhotoAddOnlyPermissionIOS() async {
+    return await Permission.photosAddOnly.request();
+  }
+
   void goToSettingsForPermissionActions() {
     openAppSettings();
   }
