@@ -12,7 +12,7 @@ extension RoomStatusExtension on Room {
       client.presences[directChatMatrixID];
 
   Stream<CachedPresence> get directChatPresenceStream =>
-      client.onPresenceChanged.stream;
+      client.onlatestPresenceChanged.stream;
 
   String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
     if (isDirectChat) {
