@@ -139,14 +139,18 @@ extension DownloadFileExtension on Event {
       final decryptedFile = await event.decryptFile(
         fileInfo,
         event.getAttachmentOrThumbnailMxcUrl()!,
-        '${savePath}decrypted',
+        StorageDirectoryUtils.instance.getDecryptedFilePath(savePath: savePath),
       );
       if (decryptedFile == null) {
         throw Exception(
           'DownloadManager::download(): decryptedFile is null',
         );
       }
-      final saveFile = File('${savePath}decrypted').copySync(savePath);
+      final saveFile = File(
+        StorageDirectoryUtils.instance.getDecryptedFilePath(
+          savePath: savePath,
+        ),
+      ).copySync(savePath);
       streamController.add(
         Right(
           DownloadNativeFileSuccessState(
@@ -311,12 +315,13 @@ extension DownloadFileExtension on Event {
       throw ('getFileInfo: Encryption is not enabled in your Client.');
     }
 
-    final tempDirectory =
-        await StorageDirectoryUtils.instance.getFileStoreDirectory();
     String? decryptedPath;
     if (isFileEncrypted) {
-      decryptedPath =
-          '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}-decrypted';
+      decryptedPath = StorageDirectoryUtils.instance.getDecryptedFilePath(
+        savePath: await StorageDirectoryUtils.instance.getMediaFilePath(
+          mxcUrl: mxcUrl,
+        ),
+      );
       final decryptedFile = File(decryptedPath);
 
       if (await File(decryptedPath).exists()) {
@@ -335,7 +340,7 @@ extension DownloadFileExtension on Event {
 
     final fileInfo = await downloadOrRetrieveAttachmentForMedia(
       mxcUrl,
-      '$tempDirectory/${Uri.encodeComponent(mxcUrl.toString())}',
+      await StorageDirectoryUtils.instance.getMediaFilePath(mxcUrl: mxcUrl),
       progressCallback: progressCallback,
       getThumbnail: getThumbnail,
       cancelToken: cancelToken,
