@@ -31,7 +31,7 @@ class ForwardView extends StatelessWidget {
             ? ForwardViewStyle.preferredSize(context)
             : ForwardViewStyle.maxPreferredSize(context),
         child: ValueListenableBuilder<Either<Failure, Success>?>(
-            valueListenable: controller.forwardMessageNotifier,
+          valueListenable: controller.forwardMessageNotifier,
           builder: (context, forwardMessageState, child) {
             return SearchableAppBar(
               toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
