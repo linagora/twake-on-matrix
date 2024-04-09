@@ -6,11 +6,14 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -112,7 +115,8 @@ class ChatController extends State<Chat>
         HandleClipboardActionMixin,
         TwakeContextMenuMixin,
         MessageContentMixin,
-        SaveFileToTwakeAndroidDownloadsFolderMixin {
+        SaveFileToTwakeAndroidDownloadsFolderMixin,
+        SaveMediaToGalleryAndroidMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1869,27 +1873,86 @@ class ChatController extends State<Chat>
         Logs().i(
           'Chat::saveSelectedEventToDownloadAndroid():: Permission Denied',
         );
-        return;
+        throw StoragePermissionException("Don't have permission to save file");
       }
     }
-    final downloadManager = getIt.get<DownloadManager>();
-    final downloadingStreamSubscription =
-        downloadManager.getDownloadStateStream(
-      downloadEvent.eventId,
-    );
-    if (downloadingStreamSubscription == null) {
-      await handleSaveToDownloadsForFileNotInDownloading(
-        downloadEvent,
-        context: context,
-      );
+  }
+
+  void saveSelectedEventToDownloadAndroid() async {
+    if (selectedEvents.length != 1) {
       return;
     }
+    final downloadEvent = selectedEvents.first;
+    try {
+      await handleAndroidStoragePermission();
 
-    handleSaveToDownloadForDownloadingFile(
-      downloadingStreamSubscription: downloadingStreamSubscription,
-      event: downloadEvent,
-      context: context,
-    );
+      final downloadManager = getIt.get<DownloadManager>();
+      final downloadingStreamSubscription =
+          downloadManager.getDownloadStateStream(
+        downloadEvent.eventId,
+      );
+      if (downloadingStreamSubscription == null) {
+        await handleSaveToDownloadsForFileNotInDownloading(
+          downloadEvent,
+          context: context,
+        );
+        return;
+      }
+
+      handleSaveToDownloadForDownloadingFile(
+        downloadingStreamSubscription: downloadingStreamSubscription,
+        event: downloadEvent,
+        context: context,
+      );
+    } catch (e) {
+      Logs().e('Chat::saveSelectedEventToDownloadAndroid(): $e');
+      if (e is! StoragePermissionException) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.saveFileToDownloadsError,
+        );
+      }
+    }
+  }
+  Future<void> saveSelectedEventToGallery() async {
+    if (selectedEvents.length != 1) {
+      return;
+    }
+    final downloadEvent = selectedEvents.first;
+
+    try {
+      if (PlatformInfos.isAndroid) {
+        await handleAndroidStoragePermission();
+      } else {
+        await handlePhotoPermissionIOS();
+      }
+      final mxcFile = await getMediaFile(downloadEvent);
+      if (await mxcFile.exists() &&
+          await mxcFile.length() == downloadEvent.getFileSize()) {
+        final fileInDownloadsInApp = await getFileInDownloadsInAppFolder(
+          mxcFile: mxcFile,
+          downloadEvent: downloadEvent,
+        );
+        if (downloadEvent.messageType == MessageTypes.Image) {
+          await saveImageToGallery(file: fileInDownloadsInApp);
+        } else if (downloadEvent.messageType == MessageTypes.Video) {
+          await saveVideoToGallery(file: fileInDownloadsInApp);
+        }
+
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.fileSavedToGallery,
+        );
+      }
+    } catch (e) {
+      Logs().e('Chat::saveSelectedEventToGallery(): $e');
+      if (e is! StoragePermissionException) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.saveFileToDownloadsError,
+        );
+      }
+    }
   }
 
   @override
