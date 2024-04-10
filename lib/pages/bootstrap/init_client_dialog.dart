@@ -1,56 +1,107 @@
 import 'dart:async';
+import 'package:fluffychat/presentation/model/client_login_state_event.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
-enum StreamDialogState {
-  loginSSOSuccess,
-  backupSuccess,
-  recoveringSuccess,
-}
-
-class StreamDialogBuilder extends StatefulWidget {
+class InitClientDialog extends StatefulWidget {
   final Future Function() future;
-  final Function(StreamDialogState) listen;
 
-  const StreamDialogBuilder({
+  const InitClientDialog({
     super.key,
     required this.future,
-    required this.listen,
   });
 
   @override
-  State<StreamDialogBuilder> createState() => _StreamDialogBuilderState();
+  State<InitClientDialog> createState() => _InitClientDialogState();
 }
 
-class _StreamDialogBuilderState extends State<StreamDialogBuilder>
+class _InitClientDialogState extends State<InitClientDialog>
     with TickerProviderStateMixin {
-  final StreamController<StreamDialogState> streamController =
-      StreamController<StreamDialogState>.broadcast();
-
   late AnimationController loginSSOProgressController;
-  late AnimationController backupProgressController;
-  late AnimationController recoveringProgressController;
 
-  static const String loginSSOProgress = 'loginSSOProgress';
-  static const String backupProgress = 'backupProgress';
-  static const String recoveringProgress = 'recoveringProgress';
+  Client? _clientFirstLoggedIn;
 
-  bool _isCompletedFunc = false;
+  Client? _clientAddAnotherAccount;
 
   @override
   void initState() {
     _initial();
-    streamController.stream.listen((event) {
-      widget.listen(event);
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _startLoginSSOProgress();
-      await widget.future().then((value) {
-        _isCompletedFunc = true;
-      });
-    });
+    Matrix.of(context).onClientLoginStateChanged.stream.listen(
+          _listenClientLoginStateChanged,
+        );
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        _startLoginSSOProgress();
+        await widget
+            .future()
+            .then(
+              (_) => _handleFunctionOnDone(),
+            )
+            .onError(
+              (error, _) => _handleFunctionOnError(error),
+            );
+      },
+    );
 
     super.initState();
+  }
+
+  void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
+    Logs().i(
+      'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
+    );
+    if (event.multipleAccountLoginType ==
+        MultipleAccountLoginType.firstLoggedIn) {
+      _clientFirstLoggedIn = event.client;
+      return;
+    }
+
+    if (event.multipleAccountLoginType ==
+        MultipleAccountLoginType.otherAccountLoggedIn) {
+      _clientAddAnotherAccount = event.client;
+      return;
+    }
+  }
+
+  void _handleFunctionOnDone() async {
+    Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
+    Navigator.of(context, rootNavigator: false).pop();
+    if (_clientFirstLoggedIn != null) {
+      _handleFirstLoggedIn(_clientFirstLoggedIn!);
+      return;
+    }
+
+    if (_clientAddAnotherAccount != null) {
+      _handleAddAnotherAccount(_clientAddAnotherAccount!);
+      return;
+    }
+  }
+
+  void _handleFunctionOnError(Object? error) {
+    Logs().i('StreamDialogBuilder::_handleFunctionOnError - $error');
+    Navigator.pop(context);
+  }
+
+  void _handleFirstLoggedIn(Client client) {
+    TwakeApp.router.go(
+      '/rooms',
+      extra: LoggedInBodyArgs(
+        newActiveClient: client,
+      ),
+    );
+  }
+
+  void _handleAddAnotherAccount(Client client) {
+    TwakeApp.router.go(
+      '/rooms',
+      extra: LoggedInOtherAccountBodyArgs(
+        newActiveClient: client,
+      ),
+    );
   }
 
   void _initial() {
@@ -58,99 +109,25 @@ class _StreamDialogBuilderState extends State<StreamDialogBuilder>
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    backupProgressController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-    recoveringProgressController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
   }
 
   void _startLoginSSOProgress() {
     loginSSOProgressController.addListener(() {
       setState(() {});
-      if (loginSSOProgressController.isCompleted) {
-        streamController.add(StreamDialogState.loginSSOSuccess);
-        _startBackupProgress();
-      }
     });
-    loginSSOProgressController.forward(from: 0);
-  }
-
-  void _startBackupProgress() {
-    backupProgressController.addListener(() {
-      setState(() {});
-      if (backupProgressController.isCompleted) {
-        streamController.add(StreamDialogState.backupSuccess);
-        _startRecoveringProgress();
-      }
-    });
-    backupProgressController.forward(from: 0);
-  }
-
-  void _startRecoveringProgress() {
-    recoveringProgressController.addListener(() {
-      setState(() {});
-      if (_isCompletedFunc) {
-        streamController.add(StreamDialogState.recoveringSuccess);
-        recoveringProgressController.stop();
-        Navigator.of(context).pop();
-      }
-    });
-
-    recoveringProgressController.repeat();
+    loginSSOProgressController.repeat();
   }
 
   @override
   void dispose() {
     loginSSOProgressController.dispose();
-    backupProgressController.dispose();
-    recoveringProgressController.dispose();
-    streamController.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.transparent,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Setting up your Twake',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Setting up requires extra time so, please, be patient.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: loginSSOProgressController.value,
-              semanticsLabel: loginSSOProgress,
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: backupProgressController.value,
-              semanticsLabel: backupProgress,
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: recoveringProgressController.value,
-              semanticsLabel: recoveringProgress,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:fluffychat/pages/bootstrap/linear_progress_indicator_widget.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -13,100 +16,146 @@ import 'package:matrix/matrix.dart';
 import 'bootstrap_dialog.dart';
 
 class TomBootstrapDialog extends StatefulWidget {
-  final bool wipe;
-  final bool wipeRecovery;
   final Client client;
-  final RecoveryWords? recoveryWords;
 
   const TomBootstrapDialog({
     super.key,
-    this.recoveryWords,
-    this.wipe = false,
-    this.wipeRecovery = false,
     required this.client,
   });
 
   Future<bool?> show() => TwakeDialog.showDialogFullScreen(
         builder: () => this,
+        barrierColor: LinagoraSysColors.material().onPrimary,
       );
 
   @override
   TomBootstrapDialogState createState() => TomBootstrapDialogState();
 }
 
-class TomBootstrapDialogState extends State<TomBootstrapDialog> {
+class TomBootstrapDialogState extends State<TomBootstrapDialog>
+    with TickerProviderStateMixin {
   final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
+
+  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
+
   final _deleteRecoveryWordsInteractor =
       getIt.get<DeleteRecoveryWordsInteractor>();
   Bootstrap? bootstrap;
 
-  String? titleText;
-  Widget? body;
-  final buttons = <AdaptiveFlatButton>[];
-
   UploadRecoveryKeyState _uploadRecoveryKeyState =
-      UploadRecoveryKeyState.initial;
+      UploadRecoveryKeyState.dataLoading;
 
-  bool? _wipe;
+  bool _wipe = false;
+  RecoveryWords? _recoveryWords;
 
   @override
   void initState() {
     super.initState();
-    _createBootstrap(widget.wipe);
+    _createBootstrap();
   }
 
-  void _createBootstrap(bool wipe) async {
-    _wipe = wipe;
-    titleText = null;
-    _uploadRecoveryKeyState = _initializeRecoveryKeyState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      bootstrap =
-          widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+  void _createBootstrap() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadingData();
     });
   }
 
-  UploadRecoveryKeyState _initializeRecoveryKeyState() {
-    if (widget.wipeRecovery) {
-      return UploadRecoveryKeyState.wipeRecovery;
-    }
-
-    if (widget.recoveryWords != null) {
-      return UploadRecoveryKeyState.useExisting;
-    }
-
-    return UploadRecoveryKeyState.initial;
+  Future<void> setupAdditionalDioCacheOption(String userId) async {
+    Logs().d('TomBootstrapDialog::setupAdditionalDioCacheOption: $userId');
+    DioCacheInterceptorForClient(userId).setup(getIt);
   }
+
+  Future<RecoveryWords?> _getRecoveryWords() async {
+    return await _getRecoveryWordsInteractor.execute().then(
+          (either) => either.fold(
+            (failure) => null,
+            (success) => success.words,
+          ),
+        );
+  }
+
+  Future<void> _loadingData() async {
+    _uploadRecoveryKeyState = UploadRecoveryKeyState.dataLoading;
+    await widget.client.roomsLoading;
+    await widget.client.accountDataLoading;
+    if (widget.client.userID != null) {
+      await setupAdditionalDioCacheOption(widget.client.userID!);
+    }
+    setState(() {
+      _uploadRecoveryKeyState = UploadRecoveryKeyState.checkingRecoveryWork;
+    });
+    await _getRecoveryKeyState();
+    bootstrap =
+        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+  }
+
+  Future<void> _getRecoveryKeyState() async {
+    await widget.client.onSync.stream.first;
+    await widget.client.initCompleter?.future;
+
+    // Display first login bootstrap if enabled
+    if (widget.client.encryption?.keyManager.enabled == true) {
+      Logs().d(
+        'TomBootstrapDialog::_initializeRecoveryKeyState: Showing bootstrap dialog when encryption is enabled',
+      );
+      if (await widget.client.encryption?.keyManager.isCached() == false ||
+          await widget.client.encryption?.crossSigning.isCached() == false ||
+          widget.client.isUnknownSession && mounted) {
+        final recoveryWords = await _getRecoveryWords();
+        if (recoveryWords != null) {
+          _recoveryWords = recoveryWords;
+          _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
+        } else {
+          Logs().d(
+            'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
+          );
+          Navigator.pop(context);
+          await BootstrapDialog(client: widget.client).show();
+        }
+      }
+    } else {
+      Logs().d(
+        'TomBootstrapDialog::_initializeRecoveryKeyState(): encryption is not enabled',
+      );
+      final recoveryWords = await _getRecoveryWords();
+      _wipe = recoveryWords != null;
+      if (recoveryWords != null) {
+        _uploadRecoveryKeyState = UploadRecoveryKeyState.wipeRecovery;
+      } else {
+        _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
+      }
+    }
+
+    setState(() {});
+  }
+
+  bool get isDataLoadingState =>
+      _uploadRecoveryKeyState == UploadRecoveryKeyState.dataLoading;
+
+  bool get isCheckingRecoveryWorkState =>
+      _uploadRecoveryKeyState == UploadRecoveryKeyState.checkingRecoveryWork;
 
   @override
   Widget build(BuildContext context) {
     Logs().d(
       'TomBootstrapDialogState::build(): BootstrapState = ${bootstrap?.state}',
     );
-    _wipe ??= widget.wipe;
-    body = _loadingContent(context);
+
+    Logs().d(
+      'TomBootstrapDialogState::build(): RecoveryKeyState = $_uploadRecoveryKeyState',
+    );
 
     switch (_uploadRecoveryKeyState) {
+      case UploadRecoveryKeyState.dataLoading:
+        break;
+      case UploadRecoveryKeyState.checkingRecoveryWork:
+        break;
       case UploadRecoveryKeyState.wipeRecovery:
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _wipeRecoveryWord();
         });
         break;
       case UploadRecoveryKeyState.wipeRecoveryFailed:
-        titleText = L10n.of(context)!.chatBackup;
-        body = Text(
-          L10n.of(context)!.cannotEnableKeyBackup,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        );
-        buttons.clear();
-        buttons.add(
-          AdaptiveFlatButton(
-            label: L10n.of(context)!.close,
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: false).pop<bool>(false),
-          ),
-        );
         break;
       case UploadRecoveryKeyState.created:
         if (_createNewRecoveryKeySuccess()) {
@@ -118,7 +167,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
             Logs().d(
               'TomBootstrapDialogState::build(): check if key is already in TOM = ${_existedRecoveryWordsInTom(
                 key,
-              )} - ${widget.recoveryWords?.words}',
+              )} - ${_recoveryWords?.words}',
             );
             if (_existedRecoveryWordsInTom(key)) {
               _uploadRecoveryKeyState = UploadRecoveryKeyState.uploaded;
@@ -135,69 +184,71 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
         _handleBootstrapState();
         break;
       case UploadRecoveryKeyState.unlockError:
-        titleText = L10n.of(context)!.chatBackup;
-        body = Text(
-          L10n.of(context)!.cannotUnlockBackupKey,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        );
-        buttons.clear();
-        buttons
-          ..add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.close,
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop<bool>(false),
-            ),
-          )
-          ..add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.next,
-              onPressed: () async {
-                await BootstrapDialog(client: widget.client).show().then(
-                      (value) => Navigator.of(context, rootNavigator: false)
-                          .pop<bool>(false),
-                    );
-              },
-            ),
-          );
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          Navigator.pop(context);
+          await BootstrapDialog(client: widget.client).show();
+        });
         break;
       case UploadRecoveryKeyState.uploadError:
         Logs().e('TomBootstrapDialogState::build(): upload recovery key error');
-        titleText = L10n.of(context)!.chatBackup;
-        body = Text(
-          L10n.of(context)!.cannotUploadKey,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        );
-        buttons.clear();
-        buttons.add(
-          AdaptiveFlatButton(
-            label: L10n.of(context)!.close,
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: false).pop<bool>(false),
-          ),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context, rootNavigator: false).pop<bool>(false);
+        });
         break;
       default:
         _handleBootstrapState();
         break;
     }
 
-    return AlertDialog(
-      title: titleText != null ? Text(titleText!) : null,
-      content: body,
-      actions: buttons,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: TomBootstrapDialogStyle.paddingDialog,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              L10n.of(context)!.settingUpYourTwake,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              L10n.of(context)!.settingUpYourTwakeDescription,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            TomBootstrapProgressItem(
+              titleProgress: L10n.of(context)!.performingAutomaticalLogin,
+              isCompleted: !isDataLoadingState,
+              isProgress: isDataLoadingState,
+            ),
+            TomBootstrapProgressItem(
+              titleProgress: L10n.of(context)!.backingUpYourMessage,
+              isCompleted: !isCheckingRecoveryWorkState && !isDataLoadingState,
+              isProgress: isCheckingRecoveryWorkState,
+            ),
+            TomBootstrapProgressItem(
+              titleProgress: L10n.of(context)!.recoveringYourEncryptedChats,
+              isProgress: !isCheckingRecoveryWorkState && !isDataLoadingState,
+              isCompleted:
+                  bootstrap != null && bootstrap!.state == BootstrapState.done,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   bool _existedRecoveryWordsInTom(String? key) {
-    if (key == null && widget.recoveryWords != null) {
+    if (key == null && _recoveryWords != null) {
       return true;
     }
-    return widget.recoveryWords != null && widget.recoveryWords!.words == key;
+    return _recoveryWords != null && _recoveryWords!.words == key;
   }
 
   bool _createNewRecoveryKeySuccess() {
@@ -205,14 +256,18 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
         _uploadRecoveryKeyState == UploadRecoveryKeyState.created;
   }
 
+  bool get _setUpSuccess =>
+      _uploadRecoveryKeyState != UploadRecoveryKeyState.dataLoading &&
+      _uploadRecoveryKeyState != UploadRecoveryKeyState.checkingRecoveryWork;
+
   void _handleBootstrapState() {
-    if (bootstrap != null) {
+    if (bootstrap != null && _setUpSuccess) {
       switch (bootstrap!.state) {
         case BootstrapState.loading:
           break;
         case BootstrapState.askWipeSsss:
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => bootstrap?.wipeSsss(_wipe!),
+            (_) => bootstrap?.wipeSsss(_wipe),
           );
           break;
         case BootstrapState.askBadSsss:
@@ -223,7 +278,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
         case BootstrapState.askUseExistingSsss:
           _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => bootstrap?.useExistingSsss(!_wipe!),
+            (_) => bootstrap?.useExistingSsss(!_wipe),
           );
           break;
         case BootstrapState.askUnlockSsss:
@@ -246,7 +301,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
           break;
         case BootstrapState.askWipeCrossSigning:
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => bootstrap?.wipeCrossSigning(_wipe!),
+            (_) => bootstrap?.wipeCrossSigning(_wipe),
           );
           break;
         case BootstrapState.askSetupCrossSigning:
@@ -262,7 +317,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
           break;
         case BootstrapState.askWipeOnlineKeyBackup:
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => bootstrap?.wipeOnlineKeyBackup(_wipe!),
+            (_) => bootstrap?.wipeOnlineKeyBackup(_wipe),
           );
           break;
         case BootstrapState.askSetupOnlineKeyBackup:
@@ -271,34 +326,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
           );
           break;
         case BootstrapState.error:
-          titleText = L10n.of(context)!.oopsSomethingWentWrong;
-          body = const Icon(Icons.error_outline, color: Colors.red, size: 40);
-          buttons.clear();
-          buttons.add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.close,
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop<bool>(false),
-            ),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context, rootNavigator: false).pop<bool>(false);
+          });
           break;
         case BootstrapState.done:
-          titleText = L10n.of(context)!.everythingReady;
-          body = Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset('assets/backup.png', fit: BoxFit.contain),
-              Text(L10n.of(context)!.yourChatBackupHasBeenSetUp),
-            ],
-          );
-          buttons.clear();
-          buttons.add(
-            AdaptiveFlatButton(
-              label: L10n.of(context)!.close,
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop<bool>(false),
-            ),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context, rootNavigator: false).pop<bool>(true);
+          });
           break;
       }
     }
@@ -351,7 +386,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
   }
 
   Future<void> _unlockBackUp() async {
-    final recoveryWords = widget.recoveryWords;
+    final recoveryWords = _recoveryWords;
     if (recoveryWords == null) {
       Logs().e('TomBootstrapDialogState::_unlockBackUp(): recoveryWords null');
       setState(() {
@@ -383,27 +418,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog> {
       setState(() {});
     }
   }
-
-  Widget _loadingContent(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(right: 16.0),
-          child: CircularProgressIndicator.adaptive(),
-        ),
-        Expanded(
-          child: Text(
-            L10n.of(context)!.loadingPleaseWait,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 enum UploadRecoveryKeyState {
+  dataLoading,
+  checkingRecoveryWork,
   initial,
   wipeRecovery,
   wipeRecoveryFailed,

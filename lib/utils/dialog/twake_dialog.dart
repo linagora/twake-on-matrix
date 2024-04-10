@@ -57,9 +57,8 @@ class TwakeDialog {
     );
   }
 
-  static void showStreamDialogFullScreen({
+  static Future<void> showStreamDialogFullScreen({
     required Future Function() future,
-    required Function(StreamDialogState) listen,
   }) async {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -67,14 +66,13 @@ class TwakeDialog {
         'TwakeLoadingDialog()::showStreamDialogFullScreen - Twake context is null',
       );
     }
-    await showDialog(
+    return await showDialog(
       context: twakeContext!,
-      builder: (context) => StreamDialogBuilder(
+      builder: (context) => InitClientDialog(
         future: future,
-        listen: listen,
       ),
       barrierDismissible: true,
-      barrierColor: Colors.white,
+      barrierColor: Colors.transparent,
       useRootNavigator: false,
     );
   }
@@ -82,6 +80,7 @@ class TwakeDialog {
   static Future<bool?> showDialogFullScreen({
     required Widget Function() builder,
     bool barrierDismissible = true,
+    Color? barrierColor,
   }) {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -93,6 +92,7 @@ class TwakeDialog {
     return showDialog(
       context: twakeContext,
       builder: (context) => builder(),
+      barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
       useRootNavigator: false,
     );

@@ -372,8 +372,6 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     isDestructiveAction: true,
                                   )) {
                                 await TomBootstrapDialog(
-                                  wipe: true,
-                                  wipeRecovery: true,
                                   client: widget.client,
                                 ).show().then(
                                       (value) => Navigator.of(
@@ -426,12 +424,17 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           );
           break;
         case BootstrapState.done:
-          titleText = L10n.of(context)!.everythingReady;
+          titleText = null;
           body = Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset('assets/backup.png', fit: BoxFit.contain),
-              Text(L10n.of(context)!.yourChatBackupHasBeenSetUp),
+              Flexible(
+                child: Text(
+                  L10n.of(context)!.yourChatBackupHasBeenSetUp,
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ],
           );
           buttons.add(
@@ -448,16 +451,19 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     return AlertDialog(
       content: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: body,
-          ),
           Expanded(
-            child: Text(
-              titleText!,
-              overflow: TextOverflow.ellipsis,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: body,
             ),
           ),
+          if (titleText != null)
+            Expanded(
+              child: Text(
+                titleText!,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
         ],
       ),
       actions: buttons.isNotEmpty ? buttons : null,

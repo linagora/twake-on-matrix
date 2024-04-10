@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
+import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -191,9 +192,14 @@ class HomeserverPickerController extends State<HomeserverPicker>
             identityProviders(rawLoginTypes: rawLoginTypes);
 
         if (supportsSso(context) && identitiesProvider?.length == 1) {
-          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
+          final result = await ssoLoginAction(
+            context: context,
+            id: identitiesProvider!.single.id!,
+          );
+          if (result == SsoLoginState.error) {
+            state = HomeserverState.ssoLoginServer;
+          }
         }
-        state = HomeserverState.ssoLoginServer;
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       } else {

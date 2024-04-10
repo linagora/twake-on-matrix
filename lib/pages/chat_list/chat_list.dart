@@ -6,11 +6,10 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
@@ -27,6 +26,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -74,8 +74,6 @@ class ChatListController extends State<ChatList>
         PopupMenuWidgetMixin,
         GoToGroupChatMixin,
         TwakeContextMenuMixin {
-  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
-
   final responsive = getIt.get<ResponsiveUtils>();
 
   final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
@@ -413,47 +411,33 @@ class ChatListController extends State<ChatList>
     DioCacheInterceptorForClient(userId).setup(getIt);
   }
 
+  Future<void> _trySync() async {
+    if (widget.adaptiveScaffoldBodyArgs is LoggedInBodyArgs ||
+        widget.adaptiveScaffoldBodyArgs is LoggedInOtherAccountBodyArgs) {
+      _waitForFirstSyncAfterLogin();
+    } else {
+      _waitForFirstSync();
+    }
+  }
+
+  Future<void> _waitForFirstSyncAfterLogin() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await TomBootstrapDialog(
+        client: activeClient,
+      ).show();
+    });
+
+    if (!mounted) return;
+    setState(() {
+      waitForFirstSync = true;
+    });
+  }
+
   Future<void> _waitForFirstSync() async {
     await activeClient.roomsLoading;
     await activeClient.accountDataLoading;
     if (activeClient.userID != null) {
       await setupAdditionalDioCacheOption(activeClient.userID!);
-    }
-    if (activeClient.prevBatch == null) {
-      await activeClient.onSync.stream.first;
-      await activeClient.initCompleter?.future;
-
-      // Display first login bootstrap if enabled
-      if (activeClient.encryption?.keyManager.enabled == true) {
-        Logs().d(
-          'ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled',
-        );
-        if (await activeClient.encryption?.keyManager.isCached() == false ||
-            await activeClient.encryption?.crossSigning.isCached() == false ||
-            activeClient.isUnknownSession && mounted) {
-          final recoveryWords = await _getRecoveryWords();
-          if (recoveryWords != null) {
-            await TomBootstrapDialog(
-              client: activeClient,
-              recoveryWords: recoveryWords,
-            ).show();
-          } else {
-            Logs().d(
-              'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap',
-            );
-            await BootstrapDialog(client: activeClient).show();
-          }
-        }
-      } else {
-        Logs().d(
-          'ChatListController::_waitForFirstSync(): encryption is not enabled',
-        );
-        final recoveryWords = await _getRecoveryWords();
-        await TomBootstrapDialog(
-          client: activeClient,
-          wipeRecovery: recoveryWords != null,
-        ).show();
-      }
     }
     if (!mounted) return;
     setState(() {
@@ -722,15 +706,6 @@ class ChatListController extends State<ChatList>
     isTorBrowser = isTor;
   }
 
-  Future<RecoveryWords?> _getRecoveryWords() async {
-    return await _getRecoveryWordsInteractor.execute().then(
-          (either) => either.fold(
-            (failure) => null,
-            (success) => success.words,
-          ),
-        );
-  }
-
   Future<void> dehydrate() =>
       SettingsSecurityController.dehydrateDevice(context);
 
@@ -766,7 +741,7 @@ class ChatListController extends State<ChatList>
       Logs().d(
         "ChatList::_handleAnotherAccountAdded(): Handle recovery data for another account",
       );
-      _waitForFirstSync();
+      _trySync();
     }
   }
 
@@ -795,7 +770,7 @@ class ChatListController extends State<ChatList>
     }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
-    _waitForFirstSync();
+    _trySync();
     _hackyWebRTCFixForWeb();
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
