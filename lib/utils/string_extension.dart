@@ -356,4 +356,21 @@ extension StringCasingExtension on String {
 
     return replacedText;
   }
+
+  bool isContainsATag() {
+    final aTagRegex = RegExp(r'<a[^>]*>([^<]+)</a>');
+    return aTagRegex.hasMatch(this);
+  }
+
+  List<String> extractAllHrefs() {
+    final regex = RegExp(r'<a[^>]*href="([^"]*)"[^>]*>[^<]*</a>');
+    final matches = regex.allMatches(this);
+    return matches.map((match) => match.group(1)!).toList();
+  }
+
+  String? extractInnerText() {
+    final regex = RegExp(r'<a[^>]*>([^<]*)</a>');
+    final match = regex.firstMatch(this);
+    return match?.group(1);
+  }
 }
