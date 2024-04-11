@@ -3,7 +3,6 @@ import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/clean_rich_text.dart';
 import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
@@ -11,6 +10,7 @@ import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_lin
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
+import 'package:matrix_link_text/link_text.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class TwakeLinkPreview extends StatefulWidget {
@@ -70,7 +70,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               linkStyle: widget.linkStyle,
               fontSize: widget.fontSize,
             )
-          : TwakeCleanRichText(
+          : LinkText(
               text: widget.localizedBody,
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
