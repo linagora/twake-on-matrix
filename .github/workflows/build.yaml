@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -40,13 +40,13 @@ jobs:
           bundler-cache: true
           working-directory: ${{ matrix.os }}
 
-      - uses: webfactory/ssh-agent@v0.8.0
+      - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Setup Java
         if: matrix.os == 'android'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin" # See 'Supported distributions' for available options
           java-version: "11"
@@ -78,7 +78,7 @@ jobs:
         working-directory: ${{ matrix.os }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: twake-on-matrix-dev-mobile
           path: |
@@ -100,7 +100,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -110,7 +110,7 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
 
-      - uses: webfactory/ssh-agent@v0.8.0
+      - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
@@ -140,7 +140,7 @@ jobs:
         shell: bash
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: twake-on-matrix-dev-${{ matrix.os }}
           path: dist/
