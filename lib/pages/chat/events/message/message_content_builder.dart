@@ -58,7 +58,8 @@ class MessageContentBuilder extends StatelessWidget {
         bottom: noPadding || event.timelineOverlayMessage ? 0 : 8,
       ),
       child: IntrinsicWidth(
-        stepWidth: stepWidth,
+        stepWidth:
+            _isContainsTagName() || _isContainsCodeTag() ? null : stepWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +124,9 @@ class MessageContentBuilder extends StatelessWidget {
                   ),
               ],
             ),
-            if (isNeedAddNewLine)
+            if (isNeedAddNewLine ||
+                _isContainsTagName() ||
+                _isContainsCodeTag())
               Visibility(
                 visible: false,
                 maintainSize: true,
@@ -177,7 +180,7 @@ class MessageContentBuilder extends StatelessWidget {
     );
   }
 
-  Map<double, bool>? _getSizeMessageBubbleWidth(
+  Map<double?, bool>? _getSizeMessageBubbleWidth(
     BuildContext context, {
     required double maxWidth,
     bool ownMessage = false,
@@ -251,6 +254,8 @@ class MessageContentBuilder extends StatelessWidget {
     BuildContext context,
     double maxWidth,
   ) {
+    const double leftMessagePadding = 8.0;
+    final double messageMaxWidth = maxWidth - leftMessagePadding;
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
@@ -266,7 +271,7 @@ class MessageContentBuilder extends StatelessWidget {
             ),
       ),
       textDirection: TextDirection.ltr,
-    )..layout(minWidth: 0, maxWidth: maxWidth);
+    )..layout(minWidth: 0, maxWidth: messageMaxWidth);
   }
 
   double _getWidthMessageTime(
@@ -336,59 +341,57 @@ class MessageContentBuilder extends StatelessWidget {
 
     bool isNeedAddNewLine = false;
 
-    final lastLineWidth = paintedMessageText
-        .getBoxesForSelection(
-          TextSelection(
-            baseOffset: 0,
-            extentOffset: event
-                .calcLocalizedBodyFallback(
-                  MatrixLocals(L10n.of(context)!),
-                  hideReply: true,
-                  plaintextBody: true,
-                )
-                .length,
-          ),
-        )
-        .last
-        .right;
+    final TextRange lastLineRange = paintedMessageText.getLineBoundary(
+      paintedMessageText.getPositionForOffset(
+        Offset(
+          paintedMessageText.size.width,
+          paintedMessageText.size.height,
+        ),
+      ),
+    );
+    final List<TextBox> lastLineBoxes = paintedMessageText.getBoxesForSelection(
+      TextSelection(
+        baseOffset: lastLineRange.start,
+        extentOffset: lastLineRange.end,
+      ),
+    );
 
-    if (lastLineWidth >= maxWidth) {
-      isNeedAddNewLine = true;
-      totalMessageWidth = maxWidth;
-    } else {
-      if (lastLineWidth < messageTextWidth) {
-        final lastLineToRightBoundarySpace = messageTextWidth - lastLineWidth;
-        if (lastLineToRightBoundarySpace >= messageTimeAndPaddingWidth) {
-          final messageAndTimeWidth = messageTextWidth + paddingMessage;
-          if (messageAndTimeWidth >= maxWidth) {
-            if (lastLineWidth + messageTimeAndPaddingWidth >= maxWidth) {
-              isNeedAddNewLine = true;
-              totalMessageWidth = maxWidth;
-            } else {
-              totalMessageWidth = lastLineWidth + messageTimeAndPaddingWidth;
-            }
-          } else {
-            totalMessageWidth = messageAndTimeWidth;
-          }
+    final lastLineWidth = lastLineBoxes.last.right;
+
+    if (lastLineWidth < messageTextWidth) {
+      final lastLineToRightBoundarySpace = messageTextWidth - lastLineWidth;
+      if (lastLineToRightBoundarySpace >= messageTimeAndPaddingWidth) {
+        final messageWithTimeWidth = messageTextWidth + paddingMessage;
+        if (messageWithTimeWidth < maxWidth) {
+          totalMessageWidth = messageWithTimeWidth;
         } else {
-          final lastLineWidthTimeWidth =
+          final lastLineWithTimeWidth =
               lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
-          if (lastLineWidthTimeWidth >= maxWidth) {
+          if (lastLineWithTimeWidth < maxWidth) {
+            totalMessageWidth = lastLineWithTimeWidth;
+          } else {
             isNeedAddNewLine = true;
             totalMessageWidth = maxWidth;
-          } else {
-            totalMessageWidth = lastLineWidthTimeWidth;
           }
         }
       } else {
         final lastLineWithTimeWidth =
             lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
-        if (lastLineWithTimeWidth >= maxWidth) {
+        if (lastLineWithTimeWidth < maxWidth) {
+          totalMessageWidth = lastLineWithTimeWidth;
+        } else {
           isNeedAddNewLine = true;
           totalMessageWidth = maxWidth;
-        } else {
-          totalMessageWidth = lastLineWithTimeWidth;
         }
+      }
+    } else {
+      final lastLineWithTimeWidth =
+          lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+      if (lastLineWithTimeWidth < maxWidth) {
+        totalMessageWidth = lastLineWithTimeWidth;
+      } else {
+        isNeedAddNewLine = true;
+        totalMessageWidth = maxWidth;
       }
     }
 
@@ -396,5 +399,60 @@ class MessageContentBuilder extends StatelessWidget {
       totalMessageWidth: isNeedAddNewLine,
     };
     return result;
+  }
+
+  bool _isContainsTagName() {
+    const matrixToScheme = "https://matrix.to/#/";
+    const matrixScheme = "matrix:";
+    final formattedText = event.formattedText;
+
+    if (formattedText.isNotEmpty && formattedText.isContainsATag()) {
+      final List<String> listHrefs = formattedText.extractAllHrefs();
+      for (final href in listHrefs) {
+        final hrefLower = href.toLowerCase();
+        if (hrefLower.startsWith(matrixToScheme) ||
+            hrefLower.startsWith(matrixScheme)) {
+          var isPill = true;
+          var identifier = href;
+          if (hrefLower.startsWith(matrixToScheme)) {
+            final urlPart =
+                href.substring(matrixToScheme.length).split('?').first;
+            try {
+              identifier = Uri.decodeComponent(urlPart);
+            } catch (_) {
+              identifier = urlPart;
+            }
+            isPill =
+                RegExp(r'^[@#!+][^:]+:[^\/]+$').firstMatch(identifier) != null;
+          } else {
+            final match = RegExp(r'^matrix:(r|roomid|u)\/([^\/]+)$')
+                .firstMatch(hrefLower.split('?').first.split('#').first);
+            isPill = match != null && match.group(2) != null;
+            if (isPill) {
+              final sigil = {
+                'r': '#',
+                'roomid': '!',
+                'u': '@',
+              }[match.group(1)];
+              if (sigil == null) {
+                isPill = false;
+              } else {
+                identifier = sigil + match.group(2)!;
+              }
+            }
+          }
+          if (isPill) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _isContainsCodeTag() {
+    final formattedText = event.formattedText;
+    final codeTagRegex = RegExp(r'<code[^>]*>.*<\/code>');
+    return codeTagRegex.hasMatch(formattedText);
   }
 }
