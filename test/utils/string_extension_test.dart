@@ -291,4 +291,90 @@ void main() {
       });
     }
   });
+
+  group('[isContainsATag] TEST\n', () {
+    test('[isContainsATag] detects <a> tag', () {
+      expect(
+        'Hello <a href="https://example.com">world</a>!'.isContainsATag(),
+        isTrue,
+      );
+      expect('Hello world!'.isContainsATag(), isFalse);
+    });
+
+    test('[isContainsATag] detects <a> tag with attributes', () {
+      expect(
+        '<a href="https://example.com" target="_blank">Link</a>'
+            .isContainsATag(),
+        isTrue,
+      );
+    });
+
+    test('[isContainsATag] does not detect other tags', () {
+      expect('<p>Hello world!</p>'.isContainsATag(), isFalse);
+    });
+  });
+
+  group('[extractAllHrefs] TEST\n', () {
+    test('extractAllHrefs extracts all hrefs from <a> tags', () {
+      expect(
+        '<a href="https://example.com">Link</a> <a href="https://another.com">Another Link</a>'
+            .extractAllHrefs(),
+        equals(['https://example.com', 'https://another.com']),
+      );
+    });
+
+    test('extractAllHrefs returns empty list when no <a> tags', () {
+      expect('Hello world!'.extractAllHrefs(), isEmpty);
+    });
+
+    test('extractAllHrefs ignores <a> tags without href', () {
+      expect(
+        '<a>Link</a> <a href="https://example.com">Another Link</a>'
+            .extractAllHrefs(),
+        equals(['https://example.com']),
+      );
+    });
+
+    test(
+        'extractAllHrefs extracts hrefs from <a> tags with multiple attributes',
+        () {
+      expect(
+        '<a class="link" href="https://example.com" target="_blank">Link</a> <a href="https://another.com">Another Link</a>'
+            .extractAllHrefs(),
+        equals(['https://example.com', 'https://another.com']),
+      );
+    });
+
+    test('extractAllHrefs extracts href when only one <a> tag', () {
+      expect(
+        '<a href="https://example.com">Link</a>'.extractAllHrefs(),
+        equals(['https://example.com']),
+      );
+    });
+  });
+
+  group('[extractInnerText] TEST\n', () {
+    test(
+        'GIVEN an a tag\n'
+        'CONTAINS innerText\n'
+        'THEN return innerText\n', () {
+      expect(
+        '<a href="https://example.com">Link</a>'.extractInnerText(),
+        equals('Link'),
+      );
+    });
+
+    test(
+        'GIVEN string without a tag\n'
+        'THEN return null\n', () {
+      expect('Hello world!'.extractInnerText(), isNull);
+    });
+
+    test(
+        'GIVEN an a tag\n'
+        'NOT CONTAINS innerText\n'
+        'THEN return an empty string\n', () {
+      expect('<a href="https://example.com"></a>'.extractInnerText(), isEmpty);
+    });
+  });
 }
