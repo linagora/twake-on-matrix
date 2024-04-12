@@ -299,8 +299,22 @@ mixin MessageContentBuilderMixin {
 
   bool isContainsSpecialHTMLTag(Event event) {
     final formattedText = event.formattedText;
+    final specialTags = [
+      'b',
+      'strong',
+      'tt',
+      'h[1-6]',
+      'code',
+      'pre',
+      'blockquote',
+      'i',
+      'em',
+    ];
+    final specialTagsPattern = specialTags.join('|');
     final specialTagRegex = RegExp(
-      r'<(b|strong|tt|h[1-6]|code)[^>]*>.*<\/(b|strong|tt|h[1-6]|code)>',
+      '<($specialTagsPattern)[^>]*>.*</($specialTagsPattern)>|<hr[^>]*>',
+      multiLine: true,
+      dotAll: true,
     );
     return specialTagRegex.hasMatch(formattedText);
   }
