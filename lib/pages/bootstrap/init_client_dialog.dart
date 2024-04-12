@@ -27,12 +27,15 @@ class _InitClientDialogState extends State<InitClientDialog>
 
   Client? _clientAddAnotherAccount;
 
+  StreamSubscription? _clientLoginStateChangedSubscription;
+
   @override
   void initState() {
     _initial();
-    Matrix.of(context).onClientLoginStateChanged.stream.listen(
-          _listenClientLoginStateChanged,
-        );
+    _clientLoginStateChangedSubscription =
+        Matrix.of(context).onClientLoginStateChanged.stream.listen(
+              _listenClientLoginStateChanged,
+            );
     WidgetsBinding.instance.addPostFrameCallback(
       (_) async {
         _startLoginSSOProgress();
@@ -82,7 +85,7 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleFunctionOnError(Object? error) {
-    Logs().i('StreamDialogBuilder::_handleFunctionOnError - $error');
+    Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
     Navigator.pop(context);
   }
 
@@ -121,6 +124,7 @@ class _InitClientDialogState extends State<InitClientDialog>
   @override
   void dispose() {
     loginSSOProgressController.dispose();
+    _clientLoginStateChangedSubscription?.cancel();
     super.dispose();
   }
 

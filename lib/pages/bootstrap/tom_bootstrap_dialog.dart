@@ -3,12 +3,11 @@ import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/bootstrap/linear_progress_indicator_widget.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:lottie/lottie.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -25,7 +24,7 @@ class TomBootstrapDialog extends StatefulWidget {
 
   Future<bool?> show() => TwakeDialog.showDialogFullScreen(
         builder: () => this,
-        barrierColor: LinagoraSysColors.material().onPrimary,
+        barrierColor: TomBootstrapDialogStyle.barrierColor,
       );
 
   @override
@@ -135,6 +134,16 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   bool get isCheckingRecoveryWorkState =>
       _uploadRecoveryKeyState == UploadRecoveryKeyState.checkingRecoveryWork;
 
+  String get _description {
+    if (isDataLoadingState) {
+      return L10n.of(context)!.backingUpYourMessage;
+    } else if (isCheckingRecoveryWorkState) {
+      return L10n.of(context)!.configureDataEncryption;
+    } else {
+      return L10n.of(context)!.recoveringYourEncryptedChats;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Logs().d(
@@ -202,43 +211,41 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: TomBootstrapDialogStyle.paddingDialog,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              L10n.of(context)!.settingUpYourTwake,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
+      body: Center(
+        child: Container(
+          height: TomBootstrapDialogStyle.sizedDialogWeb,
+          width: TomBootstrapDialogStyle.sizedDialogWeb,
+          decoration: TomBootstrapDialogStyle.decorationDialog,
+          child: Padding(
+            padding: TomBootstrapDialogStyle.paddingDialog,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  L10n.of(context)!.settingUpYourTwake,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                Padding(
+                  padding: TomBootstrapDialogStyle.lottiePadding,
+                  child: LottieBuilder.asset(
+                    'assets/twake_loading.json',
+                    width: TomBootstrapDialogStyle.lottieSize,
+                    height: TomBootstrapDialogStyle.lottieSize,
                   ),
-              textAlign: TextAlign.center,
+                ),
+                Text(
+                  _description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              L10n.of(context)!.settingUpYourTwakeDescription,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            TomBootstrapProgressItem(
-              titleProgress: L10n.of(context)!.performingAutomaticalLogin,
-              isCompleted: !isDataLoadingState,
-              isProgress: isDataLoadingState,
-            ),
-            TomBootstrapProgressItem(
-              titleProgress: L10n.of(context)!.backingUpYourMessage,
-              isCompleted: !isCheckingRecoveryWorkState && !isDataLoadingState,
-              isProgress: isCheckingRecoveryWorkState,
-            ),
-            TomBootstrapProgressItem(
-              titleProgress: L10n.of(context)!.recoveringYourEncryptedChats,
-              isProgress: !isCheckingRecoveryWorkState && !isDataLoadingState,
-              isCompleted:
-                  bootstrap != null && bootstrap!.state == BootstrapState.done,
-            ),
-          ],
+          ),
         ),
       ),
     );

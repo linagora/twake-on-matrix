@@ -3031,11 +3031,11 @@
     }
   },
   "downloading": "Downloading",
-  "settingUpYourTwake": "Setting up your Twake",
-  "settingUpYourTwakeDescription": "Setting up requires extra time so, please, be patient.",
+  "settingUpYourTwake": "Setting up your Twake\nIt could take a while",
   "performingAutomaticalLogin": "Performing automatical login  via SSO",
   "backingUpYourMessage": "Preparing server environment for backing up your messages",
   "recoveringYourEncryptedChats": "Recovering your encrypted chats",
+  "configureDataEncryption": "Configure data encryption",
   "configurationNotFound": "The configuration data not found",
   "fileSavedToGallery": "File saved to Gallery",
   "saveFileToGalleryError": "Failed to save file to Gallery",
