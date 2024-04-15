@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -9,18 +8,12 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
-import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -1786,11 +1779,12 @@ class ChatController extends State<Chat>
   List<PopupMenuEntry<ChatAppBarActions>> appBarActionsBuilder() {
     final listAction = [
       if (PlatformInfos.isAndroid) ...[
-        if (selectedEvents
-            .every((event) => event.hasAttachment && !event.isVideoOrImage))
+        if (selectedEvents.length == 1 &&
+            selectedEvents.first.hasAttachment &&
+            !selectedEvents.first.isVideoOrImage)
           ChatAppBarActions.saveToDownload,
       ],
-      if (selectedEvents.every((event) => event.isVideoOrImage))
+      if (selectedEvents.length == 1 && selectedEvents.first.isVideoOrImage)
         ChatAppBarActions.saveToGallery,
       ChatAppBarActions.info,
       ChatAppBarActions.report,
@@ -1821,12 +1815,15 @@ class ChatController extends State<Chat>
     switch (action) {
       case ChatAppBarActions.saveToDownload:
         actionWithClearSelections(
-          () => saveSelectedEventToDownloadAndroid(),
+          () => saveSelectedEventToDownloadAndroid(
+            context,
+            selectedEvents.first,
+          ),
         );
         break;
       case ChatAppBarActions.saveToGallery:
         actionWithClearSelections(
-          () => saveSelectedEventToGallery(),
+          () => saveSelectedEventToGallery(context, selectedEvents.first),
         );
         break;
       case ChatAppBarActions.info:
@@ -1844,146 +1841,6 @@ class ChatController extends State<Chat>
         break;
       default:
         break;
-    }
-  }
-
-  Future<void> handleAndroidStoragePermission() async {
-    if (await PermissionHandlerService()
-        .isUserHaveToRequestStoragePermissionAndroid()) {
-      final permission = await Permission.storage.request();
-
-      if (permission.isPermanentlyDenied) {
-        showDialog(
-          useRootNavigator: false,
-          context: context,
-          builder: (_) {
-            return PermissionDialog(
-              icon: const Icon(Icons.storage_rounded),
-              permission: Permission.storage,
-              explainTextRequestPermission: Text(
-                L10n.of(context)!.explainPermissionToDownloadFiles(
-                  AppConfig.applicationName,
-                ),
-              ),
-              onAcceptButton: () =>
-                  PermissionHandlerService().goToSettingsForPermissionActions(),
-            );
-          },
-        );
-      }
-
-      if (!permission.isGranted) {
-        Logs().i(
-          'Chat::saveSelectedEventToDownloadAndroid():: Permission Denied',
-        );
-        throw StoragePermissionException("Don't have permission to save file");
-      }
-    }
-  }
-
-  void saveSelectedEventToDownloadAndroid() async {
-    if (selectedEvents.length != 1) {
-      return;
-    }
-    final downloadEvent = selectedEvents.first;
-    try {
-      await handleAndroidStoragePermission();
-
-      final downloadManager = getIt.get<DownloadManager>();
-      final downloadingStreamSubscription =
-          downloadManager.getDownloadStateStream(
-        downloadEvent.eventId,
-      );
-      if (downloadingStreamSubscription == null) {
-        await handleSaveToDownloadsForFileNotInDownloading(
-          downloadEvent,
-          context: context,
-        );
-        return;
-      }
-
-      handleSaveToDownloadForDownloadingFile(
-        downloadingStreamSubscription: downloadingStreamSubscription,
-        event: downloadEvent,
-        context: context,
-      );
-    } catch (e) {
-      Logs().e('Chat::saveSelectedEventToDownloadAndroid(): $e');
-      if (e is! StoragePermissionException) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.saveFileToDownloadsError,
-        );
-      }
-    }
-  }
-
-  Future<void> handlePhotoPermissionIOS() async {
-    final permissionHandlerService = PermissionHandlerService();
-    final permissionStatus =
-        await permissionHandlerService.requestPhotoAddOnlyPermissionIOS();
-    if (permissionStatus.isPermanentlyDenied) {
-      showDialog(
-        useRootNavigator: false,
-        context: context,
-        builder: (_) {
-          return PermissionDialog(
-            icon: const Icon(Icons.photo),
-            permission: Permission.photos,
-            explainTextRequestPermission: Text(
-              L10n.of(context)!.explainPermissionToGallery(
-                AppConfig.applicationName,
-              ),
-            ),
-            onAcceptButton: () =>
-                permissionHandlerService.goToSettingsForPermissionActions(),
-          );
-        },
-      );
-    }
-    if (!permissionStatus.isGranted) {
-      throw StoragePermissionException('Permission denied');
-    }
-  }
-
-  Future<void> saveSelectedEventToGallery() async {
-    if (selectedEvents.length != 1) {
-      return;
-    }
-    final downloadEvent = selectedEvents.first;
-
-    try {
-      if (PlatformInfos.isAndroid) {
-        await handleAndroidStoragePermission();
-      } else {
-        await handlePhotoPermissionIOS();
-      }
-      final mxcFile = await getMediaFile(downloadEvent);
-      if (await mxcFile.exists() &&
-          await mxcFile.length() == downloadEvent.getFileSize()) {
-        final fileInDownloadsInApp = await getFileInDownloadsInAppFolder(
-          mxcFile: mxcFile,
-          downloadEvent: downloadEvent,
-        );
-        if (downloadEvent.messageType == MessageTypes.Image) {
-          await saveImageToGallery(file: fileInDownloadsInApp);
-        } else if (downloadEvent.messageType == MessageTypes.Video) {
-          await saveVideoToGallery(file: fileInDownloadsInApp);
-        }
-
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.fileSavedToGallery,
-        );
-      }
-    } catch (e) {
-      Logs().e('Chat::saveSelectedEventToGallery(): $e');
-      if (e is! StoragePermissionException) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.saveFileToDownloadsError,
-        );
-      }
     }
   }
 

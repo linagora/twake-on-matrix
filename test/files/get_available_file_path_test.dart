@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<File> createMockFile(String filePath) async {
