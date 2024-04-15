@@ -14,8 +14,12 @@ abstract class WorkerQueue {
 
   Queue<Task> get queue => _queue;
 
-  Future addTask(Task task) {
-    _queue.add(task);
+  Future addTask(Task task, {bool isFirstPriority = false}) {
+    if (isFirstPriority) {
+      _queue.addFirst(task);
+    } else {
+      _queue.add(task);
+    }
     Logs().i(
       'WorkerQueue<$workerName>::addTask(): QUEUE_LENGTH: ${_queue.length}',
     );
