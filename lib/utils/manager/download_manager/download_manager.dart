@@ -97,6 +97,7 @@ class DownloadManager {
   Future<void> download({
     required Event event,
     bool getThumbnail = false,
+    bool isFirstPriority = false,
   }) async {
     _initDownloadFileInfo(event);
     final streamController = _eventIdMapDownloadFileInfo[event.eventId]
@@ -129,6 +130,7 @@ class DownloadManager {
       getThumbnail: getThumbnail,
       streamController: streamController,
       cancelToken: cancelToken,
+      isFirstPriority: isFirstPriority,
     );
   }
 
@@ -137,12 +139,14 @@ class DownloadManager {
     bool getThumbnail = false,
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
+    bool isFirstPriority = false,
   }) {
     if (PlatformInfos.isWeb) {
       _addTaskToWorkerQueueWeb(
         event: event,
         streamController: streamController,
         cancelToken: cancelToken,
+        isFirstPriority: isFirstPriority,
       );
       return;
     }
@@ -152,6 +156,7 @@ class DownloadManager {
       getThumbnail,
       streamController,
       cancelToken,
+      isFirstPriority: isFirstPriority,
     );
   }
 
@@ -159,8 +164,9 @@ class DownloadManager {
     Event event,
     bool getThumbnail,
     StreamController<Either<Failure, Success>> streamController,
-    CancelToken cancelToken,
-  ) {
+    CancelToken cancelToken, {
+    bool isFirstPriority = false,
+  }) {
     workingQueue.addTask(
       Task(
         id: event.eventId,
@@ -182,6 +188,7 @@ class DownloadManager {
         },
         onTaskCompleted: () => clear(event.eventId),
       ),
+      isFirstPriority: isFirstPriority,
     );
   }
 
@@ -189,6 +196,7 @@ class DownloadManager {
     required Event event,
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
+    bool isFirstPriority = false,
   }) {
     workingQueue.addTask(
       Task(
@@ -210,6 +218,7 @@ class DownloadManager {
         },
         onTaskCompleted: () => clear(event.eventId),
       ),
+      isFirstPriority: isFirstPriority,
     );
   }
 }
