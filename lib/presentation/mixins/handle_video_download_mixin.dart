@@ -32,7 +32,7 @@ mixin HandleVideoDownloadMixin {
       }
       return url;
     } else {
-      final videoFile = await event.getMediaFileInfo(
+      final videoFile = await event.getFileInfo(
         progressCallback: progressCallback,
         cancelToken: cancelToken,
       );

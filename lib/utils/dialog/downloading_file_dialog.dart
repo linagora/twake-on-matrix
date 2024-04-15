@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/dialog/downloading_file_dialog_style.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
@@ -11,7 +10,6 @@ class DownloadingFileDialog extends StatelessWidget {
     required this.parentContext,
     required this.eventId,
     required this.downloadProgressNotifier,
-    this.cancelDownloadToken,
   });
 
   final BuildContext parentContext;
@@ -19,8 +17,6 @@ class DownloadingFileDialog extends StatelessWidget {
   final String eventId;
 
   final ValueNotifier<double?> downloadProgressNotifier;
-
-  final CancelToken? cancelDownloadToken;
 
   @override
   Widget build(BuildContext context) {
@@ -116,12 +112,8 @@ class DownloadingFileDialog extends StatelessWidget {
   }
 
   void onCloseTap(BuildContext context) {
-    if (cancelDownloadToken != null) {
-      cancelDownloadToken!.cancel();
-    } else {
-      final downloadManager = getIt.get<DownloadManager>();
-      downloadManager.cancelDownload(eventId);
-    }
+    final downloadManager = getIt.get<DownloadManager>();
+    downloadManager.cancelDownload(eventId);
     Navigator.of(context, rootNavigator: true).pop();
   }
 }

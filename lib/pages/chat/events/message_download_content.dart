@@ -71,7 +71,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
 
   Future<void> checkFileInDownloadsInApp() async {
     final filePath =
-        await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: widget.event.eventId,
       fileName: widget.event.filename,
     );
