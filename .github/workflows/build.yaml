@@ -80,7 +80,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: twake-on-matrix-dev-mobile
+          name: twake-on-matrix-dev-${{ matrix.os }}
           path: |
             twake-on-matrix-debug.apk
             Runner.ipa
