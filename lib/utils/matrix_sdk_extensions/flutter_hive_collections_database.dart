@@ -131,36 +131,47 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   bool get supportsFileStoring => !kIsWeb;
 
   @override
-  Future<Uint8List?> getFile(Uri mxcUri) async {
+  Future<Uint8List?> getFile(String eventId, String fileName) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory =
-        await StorageDirectoryUtils.instance.getFileStoreDirectory();
-    final file =
-        File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
+    final file = File(
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: fileName,
+      ),
+    );
     if (await file.exists() == false) return null;
     final bytes = await file.readAsBytes();
     return bytes;
   }
 
   @override
-  Future storeFile(Uri mxcUri, Uint8List bytes, int time) async {
+  Future storeEventFile(
+    String eventId,
+    String fileName,
+    Uint8List bytes,
+    int time,
+  ) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory =
-        await StorageDirectoryUtils.instance.getFileStoreDirectory();
-    final file =
-        File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
+    final file = File(
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: fileName,
+      ),
+    );
     if (await file.exists()) return;
     await file.writeAsBytes(bytes);
     return;
   }
 
   @override
-  Future<File?> getFileEntity(Uri mxcUri) async {
+  Future<File?> getFileEntity(String eventId, String fileName) async {
     if (!supportsFileStoring) return null;
-    final tempDirectory =
-        await StorageDirectoryUtils.instance.getFileStoreDirectory();
-    final file =
-        File('$tempDirectory/${Uri.encodeComponent(mxcUri.toString())}');
+    final file = File(
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: fileName,
+      ),
+    );
     if (await file.exists() == false) return null;
     return file;
   }
