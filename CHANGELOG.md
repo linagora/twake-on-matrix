@@ -1,3 +1,42 @@
+## [2.5.0+2330] - 2024-04-15
+
+### Fixed
+- #1435 Remove Big dot in message notification
+- #1453 Error handling update profile failed
+- #1565 Icon for avi, wmv
+- unpin icon in context menu
+- #1124 Profile Info view for Direct Chat (avatar)
+- #1564 improve video player
+- #1453 video player for web
+- unpin icon for app bar
+- Pin bottom sheet in mobile
+- #1567 Prevent show hover, actions in sending or error message
+- #1543 Fix cannot attach file
+- #1380 updat AppLifeCycle for Twake Web
+- #1544 Prevent create direct multiple times
+- remove colorFilter of TwakeIconButton
+- #1581 preview unknown file
+- Highlight tag with link in message bubble
+- Handle multiple download for web
+- #1456 change profile info UI in member list of Group info
+- #1589 Search with link content
+- #1578 swipe to back in search screen (mobile)
+- #1656 fix user can not mark as read/unread some chat
+- Fix can not get fix on web
+- #1662 Fix can not send video/picture by camera
+- #1497 Filter chat in forward list
+- #1523 Chat setting align in view
+- #1678 Prevent blink blink in preview link
+- Save to files (mobile)
+- #1675 Online status is not stable
+- #1621 Improve forward screen (mobile/web)
+
+### Added
+- Integrate registration (mobile/web)
+- Multiple accounts support
+- Improve Download with queue
+- Cancel downloading
+
 ## [2.4.21+2330] - 2024-03-18
 
 ### Fixed
