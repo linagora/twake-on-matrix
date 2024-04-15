@@ -295,7 +295,7 @@ class _MessageImageBuilder extends StatelessWidget {
       onTapSelectMode: onTapSelectMode,
       onTapPreview: onTapPreview,
       animated: true,
-      thumbnailOnly: false,
+      thumbnailOnly: true,
     );
   }
 

@@ -10,7 +10,7 @@ import 'package:fluffychat/utils/manager/download_manager/download_file_state.da
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';

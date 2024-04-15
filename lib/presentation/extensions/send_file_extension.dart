@@ -10,7 +10,7 @@ import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -308,11 +308,21 @@ extension SendFileExtension on Room {
     required String fileName,
   }) async {
     try {
-      final filePathInAppDownloads =
-          await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
-        eventId: eventId,
-        fileName: fileName,
-      );
+      String? filePathInAppDownloads;
+      if (isRoomEncrypted()) {
+        filePathInAppDownloads =
+            await StorageDirectoryManager.instance.getDecryptedFilePath(
+          eventId: eventId,
+          fileName: fileName,
+        );
+      } else {
+        filePathInAppDownloads =
+            await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+          eventId: eventId,
+          fileName: fileName,
+        );
+      }
+
       final sendingFilePath = sendingFilePlaceholders[sendingEventId]?.filePath;
       final file = File(filePathInAppDownloads);
       if (await file.exists() || sendingFilePath == null) {
@@ -323,7 +333,6 @@ extension SendFileExtension on Room {
       Logs().d('File copied in app downloads folder', filePathInAppDownloads);
     } catch (e) {
       Logs().e('Error while copying file in app downloads folder', e);
-      rethrow;
     }
   }
 

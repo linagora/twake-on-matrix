@@ -9,8 +9,7 @@ import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileExtension on Event {
@@ -37,16 +36,22 @@ extension DownloadFileExtension on Event {
   Future<FileInfo?> downloadOrRetrieveAttachment(
     Uri mxcUrl,
     String savePath, {
-    required StreamController<Either<Failure, Success>>
+    required StreamController<Either<Failure, Success>>?
         downloadStreamController,
+    ProgressCallback? progressCallback,
     bool getThumbnail = false,
     CancelToken? cancelToken,
+    required String filename,
   }) async {
-    final database = room.client.database;
-    final attachment = await database?.getFileEntity(mxcUrl);
+    final attachment = File(
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: filename,
+      ),
+    );
     final downloadLink = mxcUrl.getDownloadLink(room.client);
 
-    if (attachment != null) {
+    if (await attachment.exists()) {
       if (await attachment.length() ==
           getFileSize(getThumbnail: getThumbnail)) {
         return FileInfo(
@@ -64,7 +69,8 @@ extension DownloadFileExtension on Event {
         uriPath: downloadLink,
         savePath: savePath,
         onReceiveProgress: (receive, total) {
-          downloadStreamController.add(
+          progressCallback?.call(receive, total);
+          downloadStreamController?.add(
             Right(
               DownloadingFileState(
                 receive: receive,
@@ -82,10 +88,12 @@ extension DownloadFileExtension on Event {
           content.tryGet<int>('size') ?? await File(savePath).length(),
         );
         await _handleDownloadFileDone(
-          this,
-          fileInfo,
-          downloadStreamController,
-          savePath,
+          mxcUrl: mxcUrl,
+          fileInfo: fileInfo,
+          savePath: savePath,
+          filename: filename,
+          streamController: downloadStreamController,
+          getThumbnail: getThumbnail,
         );
         return fileInfo;
       }
@@ -99,21 +107,25 @@ extension DownloadFileExtension on Event {
     return null;
   }
 
-  Future<void> _handleDownloadFileDone(
-    Event event,
-    FileInfo fileInfo,
-    StreamController<Either<Failure, Success>> streamController,
-    String savePath,
-  ) async {
-    if (event.isAttachmentEncrypted) {
+  Future<void> _handleDownloadFileDone({
+    required Uri mxcUrl,
+    required String savePath,
+    required String filename,
+    required FileInfo fileInfo,
+    getThumbnail = false,
+    StreamController<Either<Failure, Success>>? streamController,
+  }) async {
+    if (isAttachmentEncrypted) {
       await _handleEncryptedFileEvent(
-        streamController,
-        event,
-        fileInfo,
-        savePath,
+        mxcUrl: mxcUrl,
+        streamController: streamController,
+        fileInfo: fileInfo,
+        savePath: savePath,
+        filename: filename,
+        getThumbnail: getThumbnail,
       );
     } else {
-      streamController.add(
+      streamController?.add(
         Right(
           DownloadNativeFileSuccessState(
             filePath: fileInfo.filePath,
@@ -124,22 +136,28 @@ extension DownloadFileExtension on Event {
     return;
   }
 
-  Future<void> _handleEncryptedFileEvent(
-    StreamController<Either<Failure, Success>> streamController,
-    Event event,
-    FileInfo fileInfo,
-    String savePath,
-  ) async {
-    streamController.add(
+  Future<void> _handleEncryptedFileEvent({
+    required Uri mxcUrl,
+    required FileInfo fileInfo,
+    required String savePath,
+    required String filename,
+    bool getThumbnail = false,
+    StreamController<Either<Failure, Success>>? streamController,
+  }) async {
+    streamController?.add(
       const Right(
         DecryptingFileState(),
       ),
     );
     try {
-      final decryptedFile = await event.decryptFile(
+      final decryptedFile = await decryptFile(
         fileInfo,
-        event.getAttachmentOrThumbnailMxcUrl()!,
-        StorageDirectoryUtils.instance.getDecryptedFilePath(savePath: savePath),
+        mxcUrl,
+        await StorageDirectoryManager.instance.getDecryptedFilePath(
+          eventId: eventId,
+          fileName: filename,
+        ),
+        getThumbnail: getThumbnail,
       );
       if (decryptedFile == null) {
         throw Exception(
@@ -147,11 +165,12 @@ extension DownloadFileExtension on Event {
         );
       }
       final saveFile = File(
-        StorageDirectoryUtils.instance.getDecryptedFilePath(
-          savePath: savePath,
+        await StorageDirectoryManager.instance.getDecryptedFilePath(
+          eventId: eventId,
+          fileName: filename,
         ),
       ).copySync(savePath);
-      streamController.add(
+      streamController?.add(
         Right(
           DownloadNativeFileSuccessState(
             filePath: saveFile.path,
@@ -162,60 +181,12 @@ extension DownloadFileExtension on Event {
       Logs().e(
         'DownloadManager::_handleEncryptedFileEvent(): $e',
       );
-      streamController.add(
+      streamController?.add(
         Left(
           DownloadFileFailureState(exception: e),
         ),
       );
     }
-  }
-
-  Future<FileInfo?> downloadOrRetrieveAttachmentForMedia(
-    Uri mxcUrl,
-    String savePath, {
-    ProgressCallback? progressCallback,
-    CancelToken? cancelToken,
-    bool getThumbnail = false,
-  }) async {
-    final database = room.client.database;
-    final attachment = await database?.getFileEntity(mxcUrl);
-
-    final mediaApi = getIt.get<MediaAPI>();
-    final downloadLink = mxcUrl.getDownloadLink(room.client);
-
-    if (attachment != null) {
-      if (await attachment.length() ==
-          getFileSize(getThumbnail: getThumbnail)) {
-        return FileInfo(
-          filename,
-          attachment.path,
-          getFileSize(getThumbnail: getThumbnail),
-        );
-      } else {
-        await attachment.delete();
-      }
-    }
-    try {
-      final downloadResponse = await mediaApi.downloadFileInfo(
-        uriPath: downloadLink,
-        savePath: savePath,
-        cancelToken: cancelToken,
-        onReceiveProgress: progressCallback,
-      );
-      if (downloadResponse.statusCode == 200) {
-        return FileInfo(
-          filename,
-          savePath,
-          content.tryGet<int>('size') ?? await File(savePath).length(),
-        );
-      }
-      throw ('getFileInfo: Download file $filename failed');
-    } catch (e) {
-      if (e is CancelRequestException) {
-        Logs().i("downloadOrRetrieveAttachment: user cancel the download");
-      }
-    }
-    return null;
   }
 
   // Decrypt the file if it's encrypted.
@@ -254,44 +225,7 @@ extension DownloadFileExtension on Event {
 
   Future<FileInfo?> getFileInfo({
     getThumbnail = false,
-    required StreamController<Either<Failure, Success>>
-        downloadStreamController,
-    CancelToken? cancelToken,
-  }) async {
-    if (!canContainAttachment()) {
-      throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
-    }
-
-    if (isSending()) {
-      final localFile = room.sendingFilePlaceholders[eventId];
-      if (localFile != null) return FileInfo.fromMatrixFile(localFile);
-    }
-
-    final mxcUrl = getAttachmentOrThumbnailMxcUrl(getThumbnail: getThumbnail);
-    if (mxcUrl == null) {
-      throw "getFileInfo: This event hasn't any attachment or thumbnail.";
-    }
-
-    final isFileEncrypted =
-        getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
-    if (isEncryptionDisabled(isFileEncrypted)) {
-      throw ('getFileInfo: Encryption is not enabled in your Client.');
-    }
-
-    return downloadOrRetrieveAttachment(
-      mxcUrl,
-      await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
-        eventId: eventId,
-        fileName: filename,
-      ),
-      downloadStreamController: downloadStreamController,
-      getThumbnail: getThumbnail,
-      cancelToken: cancelToken,
-    );
-  }
-
-  Future<FileInfo?> getMediaFileInfo({
-    getThumbnail = false,
+    StreamController<Either<Failure, Success>>? downloadStreamController,
     ProgressCallback? progressCallback,
     CancelToken? cancelToken,
   }) async {
@@ -303,6 +237,7 @@ extension DownloadFileExtension on Event {
       final localFile = room.sendingFilePlaceholders[eventId];
       if (localFile != null) return FileInfo.fromMatrixFile(localFile);
     }
+    getThumbnail = getThumbnail && hasThumbnail;
 
     final mxcUrl = getAttachmentOrThumbnailMxcUrl(getThumbnail: getThumbnail);
     if (mxcUrl == null) {
@@ -315,12 +250,13 @@ extension DownloadFileExtension on Event {
       throw ('getFileInfo: Encryption is not enabled in your Client.');
     }
 
+    final filename = getThumbnail ? thumbnailFilename : this.filename;
     String? decryptedPath;
     if (isFileEncrypted) {
-      decryptedPath = StorageDirectoryUtils.instance.getDecryptedFilePath(
-        savePath: await StorageDirectoryUtils.instance.getMediaFilePath(
-          mxcUrl: mxcUrl,
-        ),
+      decryptedPath =
+          await StorageDirectoryManager.instance.getDecryptedFilePath(
+        eventId: eventId,
+        fileName: filename,
       );
       final decryptedFile = File(decryptedPath);
 
@@ -328,7 +264,7 @@ extension DownloadFileExtension on Event {
         final decryptedFileLength = await decryptedFile.length();
         if (decryptedFileLength == getFileSize(getThumbnail: getThumbnail)) {
           return FileInfo(
-            body,
+            filename,
             decryptedPath,
             getFileSize(getThumbnail: getThumbnail),
           );
@@ -338,23 +274,15 @@ extension DownloadFileExtension on Event {
       }
     }
 
-    final fileInfo = await downloadOrRetrieveAttachmentForMedia(
+    return downloadOrRetrieveAttachment(
       mxcUrl,
-      await StorageDirectoryUtils.instance.getMediaFilePath(mxcUrl: mxcUrl),
-      progressCallback: progressCallback,
+      await StorageDirectoryManager.instance
+          .getFilePathInAppDownloads(eventId: eventId, fileName: filename),
+      downloadStreamController: downloadStreamController,
       getThumbnail: getThumbnail,
+      progressCallback: progressCallback,
       cancelToken: cancelToken,
+      filename: filename,
     );
-
-    if (isFileEncrypted && fileInfo != null && decryptedPath != null) {
-      return await decryptFile(
-        fileInfo,
-        mxcUrl,
-        decryptedPath,
-        getThumbnail: getThumbnail,
-      );
-    }
-
-    return fileInfo;
   }
 }
