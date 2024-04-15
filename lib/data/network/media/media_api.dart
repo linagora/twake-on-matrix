@@ -55,6 +55,7 @@ class MediaAPI {
       if (error is DioException && error.type == DioExceptionType.cancel) {
         throw CancelRequestException();
       } else {
+        Logs().i('downloadFileInfo error: $error');
         throw Exception(error);
       }
     });

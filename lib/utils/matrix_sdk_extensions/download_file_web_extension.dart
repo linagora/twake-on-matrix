@@ -51,7 +51,7 @@ extension DownloadFileWebExtension on Event {
     Uint8List? uint8list;
 
     if (storeable) {
-      uint8list = await room.client.database?.getFile(mxcUrl);
+      uint8list = await room.client.database?.getFile(eventId, filename);
     }
 
     if (uint8list != null) {
@@ -97,8 +97,9 @@ extension DownloadFileWebExtension on Event {
       if (database != null &&
           storeable &&
           uint8List.lengthInBytes < database.maxFileSize) {
-        await database.storeFile(
-          mxcUrl,
+        await database.storeEventFile(
+          eventId,
+          filename,
           uint8List,
           DateTime.now().millisecondsSinceEpoch,
         );

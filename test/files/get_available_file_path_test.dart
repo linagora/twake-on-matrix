@@ -20,7 +20,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('file1.pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
     await file.delete();
@@ -33,7 +33,7 @@ void main() async {
     final file = await createMockFile('file1.pdf');
     final file1 = await createMockFile('file1 (1).pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -55,7 +55,7 @@ void main() async {
     final file5 = await createMockFile('file1 (5).pdf');
     final file6 = await createMockFile('file1 (6).pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -76,7 +76,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('file1 (6).pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -91,7 +91,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('my.document.v1.pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -106,7 +106,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('text');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -121,7 +121,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('.DS_Store');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -136,7 +136,7 @@ void main() async {
       """, () async {
     final file = await createMockFile('filename.tar.gz');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 
@@ -155,7 +155,7 @@ void main() async {
     final file1 = await createMockFile('file (1).pdf');
     final file3 = await createMockFile('file (3).pdf');
     final fileAvailable =
-        await StorageDirectoryUtils.instance.getAvailableFilePath(
+        await StorageDirectoryManager.instance.getAvailableFilePath(
       file.path,
     );
 

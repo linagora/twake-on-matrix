@@ -38,10 +38,6 @@ extension LocalizedBody on Event {
     return filename.ellipsizeFileName;
   }
 
-  String get filename {
-    return (content.tryGet<String>('filename') ?? body);
-  }
-
   String? get blurHash {
     return infoMap['xyz.amorgan.blurhash'] is String
         ? infoMap['xyz.amorgan.blurhash']

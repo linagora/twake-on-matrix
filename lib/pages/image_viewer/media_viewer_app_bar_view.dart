@@ -92,7 +92,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                                   menuChildren: [
                                     ContextMenuItemImageViewer(
                                       icon: Icons.file_download_outlined,
-                                      title: L10n.of(context)!.saveFile,
+                                      title: L10n.of(context)!.saveToGallery,
                                       onTap: () => controller.saveFileAction(
                                         context,
                                         controller.widget.event,
