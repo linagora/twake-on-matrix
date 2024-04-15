@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/forward_web_view.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 
-mixin MediaViewerAppBarMixin {
+mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   final MenuController menuController = MenuController();
 
   final responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -149,8 +150,15 @@ mixin MediaViewerAppBarMixin {
   void saveFileAction(
     BuildContext context,
     Event? event,
-  ) =>
+  ) {
+    if (PlatformInfos.isWeb) {
       event?.saveFile(context);
+    } else {
+      if (event != null) {
+        saveSelectedEventToGallery(context, event);
+      }
+    }
+  }
 
   void shareFileAction(
     BuildContext context,
