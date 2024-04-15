@@ -133,10 +133,11 @@ class _MxcImageState extends State<MxcImage> {
             )
           : uri.getDownloadLink(client);
 
-      final storeKey = widget.isThumbnail ? httpUri : uri;
-
-      if (_isCached == null) {
-        final cachedData = await client.database?.getFile(storeKey);
+      if (_isCached == null && widget.event != null) {
+        final cachedData = await client.database?.getFile(
+          event!.eventId,
+          widget.isThumbnail ? event.thumbnailFilename : event.filename,
+        );
         if (cachedData != null) {
           if (!mounted) return;
           setState(() {
@@ -161,12 +162,19 @@ class _MxcImageState extends State<MxcImage> {
       setState(() {
         _imageData = remoteData;
       });
-      await client.database?.storeFile(storeKey, remoteData, 0);
+      if (widget.event != null) {
+        await client.database?.storeEventFile(
+          widget.event!.eventId,
+          event!.filename,
+          remoteData,
+          0,
+        );
+      }
     }
 
     if (event != null) {
       if (!PlatformInfos.isWeb) {
-        final fileInfo = await event.getMediaFileInfo(
+        final fileInfo = await event.getFileInfo(
           getThumbnail: widget.isThumbnail,
         );
         if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
