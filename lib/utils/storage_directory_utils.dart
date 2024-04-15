@@ -6,14 +6,12 @@ import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:external_path/external_path.dart';
 
-class StorageDirectoryUtils {
-  StorageDirectoryUtils._();
+class StorageDirectoryManager {
+  StorageDirectoryManager._();
 
-  static final StorageDirectoryUtils _instance = StorageDirectoryUtils._();
+  static final StorageDirectoryManager _instance = StorageDirectoryManager._();
 
-  static StorageDirectoryUtils get instance => _instance;
-
-  static String? _tempDirectoryPath;
+  static StorageDirectoryManager get instance => _instance;
 
   Future<String> getFileStoreDirectory() async {
     try {
@@ -27,18 +25,13 @@ class StorageDirectoryUtils {
     }
   }
 
-  Future<String> getDownloadFolderInApp() async {
-    _tempDirectoryPath ??= (await getTemporaryDirectory()).path;
-    return '$_tempDirectoryPath/Downloads';
-  }
-
   Future<String> getFilePathInAppDownloads({
     required String eventId,
     required String fileName,
   }) async {
-    final downloadInAppFolder =
-        await StorageDirectoryUtils.instance.getDownloadFolderInApp();
-    return '$downloadInAppFolder/$eventId/$fileName';
+    final fileStoreDirectory =
+        await StorageDirectoryManager.instance.getFileStoreDirectory();
+    return '$fileStoreDirectory/$eventId/$fileName';
   }
 
   Future<String?> getTwakeDownloadsFolderInDevice() async {
@@ -75,16 +68,12 @@ class StorageDirectoryUtils {
     return availableFilePath;
   }
 
-  Future<String> getMediaFilePath({
-    required Uri mxcUrl,
+  Future<String> getDecryptedFilePath({
+    required String eventId,
+    required String fileName,
   }) async {
-    final temporaryDirectory = await getTemporaryDirectory();
-    return '${temporaryDirectory.path}/${Uri.encodeComponent(mxcUrl.toString())}';
-  }
-
-  String getDecryptedFilePath({
-    required String savePath,
-  }) {
-    return '${savePath}decrypted';
+    final fileStoreDirectory =
+        await StorageDirectoryManager.instance.getFileStoreDirectory();
+    return '$fileStoreDirectory/$eventId/decrypted-$fileName';
   }
 }

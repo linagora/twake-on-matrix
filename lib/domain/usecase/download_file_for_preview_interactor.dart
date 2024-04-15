@@ -8,7 +8,6 @@ import 'package:fluffychat/domain/app_state/preview_file/download_file_for_previ
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 
