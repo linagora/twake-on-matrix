@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fluffychat/pages/chat/custom_scroll_physics.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -86,6 +87,7 @@ class ChatEventList extends StatelessWidget {
           child: InViewNotifierListCustom(
             isInViewPortCondition: controller.isInViewPortCondition,
             listViewCustom: ListView.custom(
+              physics: PositionRetainedScrollPhysics(),
               padding: EdgeInsets.only(
                 top: 16,
                 bottom: 8.0,
