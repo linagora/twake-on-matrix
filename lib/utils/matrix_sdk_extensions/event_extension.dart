@@ -75,6 +75,8 @@ extension LocalizedBody on Event {
 
   bool get isContainsLink => firstValidUrl != null;
 
+  bool get isAFile => messageType == MessageTypes.File;
+
   void shareFile(BuildContext context) async {
     final matrixFile = await getFile(context);
 

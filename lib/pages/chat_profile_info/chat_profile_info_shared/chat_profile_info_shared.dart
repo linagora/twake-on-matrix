@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared_view.dart';
@@ -36,9 +37,13 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
 
   static const _linksFetchLimit = 20;
 
+  static const _filesFetchLimit = 20;
+
   SameTypeEventsBuilderController? mediaListController;
 
   SameTypeEventsBuilderController? linksListController;
+
+  SameTypeEventsBuilderController? filesListController;
 
   TabController? tabController;
 
@@ -49,6 +54,7 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
   final List<ChatDetailsPage> profileSharedPageView = [
     ChatDetailsPage.media,
     ChatDetailsPage.links,
+    ChatDetailsPage.files,
   ];
 
   Future<Timeline> getTimeline() async {
@@ -87,6 +93,18 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
                         controller: linksListController!,
                       ),
               );
+            case ChatDetailsPage.files:
+              return ChatDetailsPageModel(
+                page: page,
+                child: filesListController == null
+                    ? const SizedBox()
+                    : ChatDetailsFilesPage(
+                        key: const PageStorageKey(
+                          'ChatProfileInfoSharedFiles',
+                        ),
+                        controller: filesListController!,
+                      ),
+              );
             default:
               return ChatDetailsPageModel(
                 page: page,
@@ -119,6 +137,9 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
         case ChatDetailsPage.links:
           linksListController?.loadMore();
           break;
+        case ChatDetailsPage.files:
+          filesListController?.loadMore();
+          break;
         default:
           break;
       }
@@ -128,6 +149,7 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
   void _refreshDataInTabviewInit() {
     linksListController?.refresh();
     mediaListController?.refresh();
+    filesListController?.refresh();
   }
 
   @override
@@ -146,6 +168,11 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
       searchFunc: (event) => event.isContainsLink,
       limit: _linksFetchLimit,
     );
+    filesListController = SameTypeEventsBuilderController(
+      getTimeline: getTimeline,
+      searchFunc: (event) => event.isAFile,
+      limit: _filesFetchLimit,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       nestedScrollViewState.currentState?.innerController.addListener(
         _listenerInnerController,
@@ -160,6 +187,7 @@ class ChatProfileInfoSharedController extends State<ChatProfileInfoShared>
     tabController?.dispose();
     mediaListController?.dispose();
     linksListController?.dispose();
+    filesListController?.dispose();
     super.dispose();
   }
 
