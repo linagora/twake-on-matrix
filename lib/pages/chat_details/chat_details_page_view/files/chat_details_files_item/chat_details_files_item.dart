@@ -10,25 +10,13 @@ class ChatDetailsFileItem extends StatefulWidget {
   final Event event;
 
   @override
-  State<ChatDetailsFileItem> createState() => ChatDetailsFileItemState();
+  State<ChatDetailsFileItem> createState() => ChatDetailsFileItemController();
 }
 
-class ChatDetailsFileItemState extends State<ChatDetailsFileItem>
+class ChatDetailsFileItemController extends State<ChatDetailsFileItem>
     with HandleDownloadAndPreviewFileMixin, DownloadFileOnMobileMixin {
+  @override
   Event get event => widget.event;
-
-  @override
-  void initState() {
-    super.initState();
-    checkDownloadFileState(event: event);
-  }
-
-  @override
-  void dispose() {
-    streamSubscription?.cancel();
-    downloadFileStateNotifier.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
