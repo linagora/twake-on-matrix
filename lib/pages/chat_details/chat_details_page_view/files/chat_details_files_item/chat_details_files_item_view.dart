@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_file_row.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_tile_style.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_row.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
@@ -45,18 +45,13 @@ class ChatDetailsFilesView extends StatelessWidget {
         return InkWell(
           hoverColor: LinagoraSysColors.material().surfaceVariant,
           onTap: () {
-            if (state is FileWebDownloadedPresentationState) {
-              controller.handlePreviewWeb(
-                event: controller.event,
-                context: context,
+            if (state is DownloadedPresentationState) {
+              controller.handleDownloadFileForPreviewSuccess(
+                filePath: state.filePath,
+                mimeType: controller.event.mimeType,
               );
             } else {
-              controller.downloadFileStateNotifier.value =
-                  const DownloadingPresentationState();
-              controller.downloadManager.download(
-                event: controller.event,
-              );
-              controller.trySetupDownloadingStreamSubcription();
+              controller.onDownloadFileTap(event: controller.event);
             }
           },
           child: Padding(
