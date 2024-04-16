@@ -7,6 +7,7 @@ import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/identity_endpoint.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:fluffychat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/base_di.dart';
@@ -87,6 +88,9 @@ class NetworkDI extends BaseDI {
       ),
       instanceName: memCacheDioInterceptorName,
     );
+    get.registerSingleton(
+      DownloadFileInterceptor(),
+    );
   }
 
   void _bindDio(GetIt get) {
@@ -149,6 +153,7 @@ class NetworkDI extends BaseDI {
       ),
     );
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
+    dio.interceptors.add(get.get<DownloadFileInterceptor>());
     if (kDebugMode) {
       dio.interceptors
           .add(LogInterceptor(requestBody: true, responseBody: true));
