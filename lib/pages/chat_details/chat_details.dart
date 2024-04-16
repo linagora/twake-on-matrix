@@ -3,6 +3,7 @@ import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
@@ -59,6 +60,8 @@ class ChatDetailsController extends State<ChatDetails>
 
   static const _linksFetchLimit = 20;
 
+  static const _filesFetchLimit = 20;
+
   final invitationSelectionMobileAndTabletKey =
       const Key('InvitationSelectionMobileAndTabletKey');
 
@@ -75,6 +78,7 @@ class ChatDetailsController extends State<ChatDetails>
     ChatDetailsPage.members,
     ChatDetailsPage.media,
     ChatDetailsPage.links,
+    ChatDetailsPage.files,
   ];
 
   final responsive = getIt.get<ResponsiveUtils>();
@@ -87,6 +91,7 @@ class ChatDetailsController extends State<ChatDetails>
 
   SameTypeEventsBuilderController? mediaListController;
   SameTypeEventsBuilderController? linksListController;
+  SameTypeEventsBuilderController? filesListController;
 
   Room? room;
 
@@ -125,6 +130,11 @@ class ChatDetailsController extends State<ChatDetails>
       searchFunc: (event) => event.isContainsLink,
       limit: _linksFetchLimit,
     );
+    filesListController = SameTypeEventsBuilderController(
+      getTimeline: getTimeline,
+      searchFunc: (event) => event.isAFile,
+      limit: _filesFetchLimit,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       nestedScrollViewState.currentState?.innerController.addListener(
         _listenerInnerController,
@@ -143,6 +153,7 @@ class ChatDetailsController extends State<ChatDetails>
     muteNotifier.dispose();
     mediaListController?.dispose();
     linksListController?.dispose();
+    filesListController?.dispose();
     nestedScrollViewState.currentState?.innerController.dispose();
     super.dispose();
   }
@@ -159,6 +170,9 @@ class ChatDetailsController extends State<ChatDetails>
         case ChatDetailsPage.links:
           linksListController?.loadMore();
           break;
+        case ChatDetailsPage.files:
+          filesListController?.loadMore();
+          break;
         default:
           break;
       }
@@ -168,6 +182,7 @@ class ChatDetailsController extends State<ChatDetails>
   void _refreshDataInTabviewInit() {
     linksListController?.refresh();
     mediaListController?.refresh();
+    filesListController?.refresh();
   }
 
   void requestMoreMembersAction() async {
@@ -265,6 +280,16 @@ class ChatDetailsController extends State<ChatDetails>
                     : ChatDetailsLinksPage(
                         key: const PageStorageKey<String>('Links'),
                         controller: linksListController!,
+                      ),
+              );
+            case ChatDetailsPage.files:
+              return ChatDetailsPageModel(
+                page: page,
+                child: filesListController == null
+                    ? const SizedBox()
+                    : ChatDetailsFilesPage(
+                        key: const PageStorageKey<String>('Files'),
+                        controller: filesListController!,
                       ),
               );
             default:
