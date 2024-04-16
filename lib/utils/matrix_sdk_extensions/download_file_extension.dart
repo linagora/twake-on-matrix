@@ -5,7 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_request_exception.dart';
+import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -82,7 +82,10 @@ extension DownloadFileExtension on Event {
         },
         cancelToken: cancelToken,
       );
-      if (downloadResponse.statusCode == 200 && await File(savePath).exists()) {
+      if (downloadResponse.statusCode == 200 &&
+          await File(savePath).exists() &&
+          await File(savePath).length() ==
+              getFileSize(getThumbnail: getThumbnail)) {
         final fileInfo = FileInfo(
           filename,
           savePath,
@@ -102,7 +105,7 @@ extension DownloadFileExtension on Event {
     } catch (e) {
       if (e is CancelRequestException) {
         Logs().i("downloadOrRetrieveAttachment: user cancel the download");
-      } else if (e is DioDuplicateRequestException) {
+      } else if (e is DioDuplicateDownloadException) {
         Logs().i("downloadOrRetrieveAttachment: duplicate request");
       } else {
         Logs().e("downloadOrRetrieveAttachment: $e");

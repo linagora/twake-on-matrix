@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_request_exception.dart';
+import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:matrix/matrix.dart';
 
 class DownloadFileInterceptor extends InterceptorsWrapper {
@@ -9,18 +9,27 @@ class DownloadFileInterceptor extends InterceptorsWrapper {
 
   static const downloadPath = '_matrix/media/v3/download/';
 
+  Set<String> get currentDownloads => _currentDownloads;
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     Logs().d('DownloadFileInterceptor::onRequest: ${options.path}');
-    if (options.path.contains(downloadPath) &&
-        _currentDownloads.contains(options.path)) {
+    if (!options.path.contains(downloadPath)) {
+      super.onRequest(options, handler);
+      return;
+    }
+    if (isAlreadyDownloading(options.path)) {
       handler.reject(
-        DioDuplicateRequestException(),
+        DioDuplicateDownloadException(requestOptions: options),
       );
       return;
     }
     _currentDownloads.add(options.path);
     super.onRequest(options, handler);
+  }
+
+  bool isAlreadyDownloading(String path) {
+    return path.contains(downloadPath) && _currentDownloads.contains(path);
   }
 
   @override
