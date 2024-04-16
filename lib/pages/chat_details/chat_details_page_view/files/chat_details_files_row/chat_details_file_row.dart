@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_file_row_style.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_row_style.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
@@ -62,7 +62,7 @@ class ChatDetailsFileTileRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
-              const SizedBox(height: ChatDetailsFileRow.textTopMargin),
+              const SizedBox(height: ChatDetailsFileRowStyle.textTopMargin),
               FileNameText(
                 filename: filename,
                 highlightText: highlightText,
@@ -73,17 +73,20 @@ class ChatDetailsFileTileRow extends StatelessWidget {
                   if (sizeString != null) ...[
                     Text(
                       sizeString!,
-                      style: ChatDetailsFileRow.textInformationStyle(context),
+                      style:
+                          ChatDetailsFileRowStyle.textInformationStyle(context),
                     ),
                     Text(
                       " - ",
-                      style: ChatDetailsFileRow.textInformationStyle(context),
+                      style:
+                          ChatDetailsFileRowStyle.textInformationStyle(context),
                     ),
                   ],
                   Flexible(
                     child: Text(
                       sentDate.localizedTime(context),
-                      style: ChatDetailsFileRow.textInformationStyle(context),
+                      style:
+                          ChatDetailsFileRowStyle.textInformationStyle(context),
                     ),
                   ),
                 ],
