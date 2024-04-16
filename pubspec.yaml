@@ -33,7 +33,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: time-overlap
+      ref: master
 
   contacts_service:
     git:
