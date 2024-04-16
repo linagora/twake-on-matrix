@@ -1,8 +1,9 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
 import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/utils/exception/check_homeserver_exception.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,12 +22,14 @@ class AutoHomeserverPicker extends StatefulWidget {
 }
 
 class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
-    with ConnectPageMixin {
+    with ConnectPageMixin, InitConfigMixin {
   static const Duration autoHomeserverPickerTimeout = Duration(seconds: 30);
 
   static const _saasPlatform = 'saas';
 
-  final showButtonRetryNotifier = ValueNotifier<bool>(false);
+  final autoHomeserverPickerUIState = ValueNotifier<AutoHomeServerPickerState>(
+    AutoHomeServerPickerInitialState(),
+  );
 
   MatrixState get matrix => Matrix.of(context);
 
@@ -91,7 +94,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         context.push('/connect');
       }
     } catch (e) {
-      showButtonRetryNotifier.toggle();
+      autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();
       Logs().d(
         "AutoHomeserverPickerController: _autoCheckHomeserver: Error: $e",
       );
@@ -99,7 +102,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   void retryCheckHomeserver() {
-    showButtonRetryNotifier.toggle();
+    autoHomeserverPickerUIState.value = AutoHomeServerPickerLoadingState();
     if (_isSaasPlatform) {
       _autoConnectSaas();
     } else {
@@ -145,8 +148,18 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
     }
   }
 
-  void _setupAutoHomeserverPicker() {
+  Future<void> _setupAutoHomeserverPicker() async {
+    autoHomeserverPickerUIState.value = AutoHomeServerPickerLoadingState();
     if (widget.loggedOut == null) {
+      final isConfigured = await AppConfig.initConfigCompleter.future;
+      if (!isConfigured) {
+        if (!AppConfig.hasReachedMaxRetries) {
+          return _setupAutoHomeserverPicker();
+        } else {
+          autoHomeserverPickerUIState.value =
+              AutoHomeServerPickerFailureState();
+        }
+      }
       Logs().d(
         "AutoHomeserverPickerController: _initializeAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
       );
@@ -157,7 +170,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       }
     } else {
       if (widget.loggedOut == true) {
-        showButtonRetryNotifier.toggle();
+        autoHomeserverPickerUIState.value = AutoHomeServerPickerInitialState();
       }
     }
   }
@@ -166,6 +179,12 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   void initState() {
     _setupAutoHomeserverPicker();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    autoHomeserverPickerUIState.dispose();
   }
 
   @override

@@ -3030,5 +3030,6 @@
       }
     }
   },
-  "downloading": "Downloading"
+  "downloading": "Downloading",
+  "configurationNotFound": "The configuration data not found"
 }
