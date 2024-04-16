@@ -2802,7 +2802,7 @@
   "@matrixId": {},
   "roomCreationFailed": "Не удалось создать комнату",
   "@roomCreationFailed": {},
-  "settingsAppLanguageSubtitle": "Английский (язык телефона).",
+  "settingsAppLanguageSubtitle": "Выберите, на каком языке вы хотите использовать Twake.",
   "@settingsAppLanguageSubtitle": {},
   "settingsNotificationAndSoundsSubtitle": "Настройте уведомления от Twake – предварительный просмотр сообщений, звук, время и т. д.",
   "@settingsNotificationAndSoundsSubtitle": {},
