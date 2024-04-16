@@ -97,7 +97,7 @@ void main() {
   group(
     '[MessageContentBuilderMixin] TEST\n',
     () {
-      // In unit testing, TextScaler(1.5) simulates medium web font size.
+      // In unit testing, TextScaler(1.5) simulates medium font size.
       const textScaler = TextScaler.linear(1.5);
 
       Future<void> runTest(
@@ -429,7 +429,7 @@ void main() {
       group(
         '[getSizeMessageBubbleWidth] TEST\n'
         'GIVEN platform is Mobile\n'
-        'THEN maxWidth for message is 360.0\n',
+        'THEN maxWidth for message is 412.0\n',
         () {
           const messageMaxWidthMobile = 412.0;
           group('GIVEN message type is not supported for calculate\n', () {
