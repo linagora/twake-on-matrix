@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -8,6 +9,12 @@ import 'package:matrix/matrix.dart';
 
 abstract class AppConfig {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+
+  static Completer<bool> initConfigCompleter = Completer<bool>();
+
+  static int retryCompleterCount = 0;
+
+  static bool get hasReachedMaxRetries => retryCompleterCount == 3;
 
   static String _applicationName = 'Twake Chat';
 
