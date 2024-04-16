@@ -965,8 +965,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: time-overlap
-      resolved-ref: "74da044c1e1b62b0c2b0eee6a3320ca1de1d5439"
+      ref: master
+      resolved-ref: c4e9f7ab8e093e7e23be3a5f15d901781305ffa7
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
