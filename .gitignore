@@ -62,3 +62,4 @@ ios/Podfile.lock
 /macos/out
 .vs
 olm
+test/interceptor/*.mocks.dart

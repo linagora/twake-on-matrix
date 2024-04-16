@@ -6,7 +6,7 @@ import 'package:fluffychat/data/model/media/download_file_response.dart';
 import 'package:fluffychat/data/model/media/upload_file_json.dart';
 import 'package:fluffychat/data/model/media/url_preview_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_request_exception.dart';
+import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -55,9 +55,11 @@ class MediaAPI {
         .onError((error, stackTrace) {
       if (error is DioException && error.type == DioExceptionType.cancel) {
         throw CancelRequestException();
-      } else if (error is DioDuplicateRequestException) {
+      } else if (error is DioDuplicateDownloadException) {
         Logs().i('downloadFileInfo error: $error');
-        throw DioDuplicateRequestException();
+        throw DioDuplicateDownloadException(
+          requestOptions: error.requestOptions,
+        );
       } else {
         Logs().i('downloadFileInfo error: $error');
         throw Exception(error);
