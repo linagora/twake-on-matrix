@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -33,7 +33,10 @@ class ImageViewerView extends StatelessWidget {
         filterQuality: FilterQuality.none,
       );
     } else if (controller.widget.event != null) {
-      imageWidget = _ImageWidget(event: controller.widget.event!);
+      imageWidget = _ImageWidget(
+        event: controller.widget.event!,
+        controller: controller,
+      );
     } else if (imageData != null) {
       imageWidget = Image.memory(
         imageData!,
@@ -90,9 +93,11 @@ class ImageViewerView extends StatelessWidget {
 }
 
 class _ImageWidget extends StatelessWidget {
+  final ImageViewerController controller;
+
   final Event event;
 
-  const _ImageWidget({required this.event});
+  const _ImageWidget({required this.event, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -109,17 +114,18 @@ class _ImageWidget extends StatelessWidget {
         },
       );
     } else {
-      return FutureBuilder(
-        future: event.getFileInfo(
-          getThumbnail: false,
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.data == null || snapshot.data!.fileName.isEmpty) {
-            return const CircularProgressIndicator();
-          }
-          return Image.file(File(snapshot.data!.filePath));
-        },
-      );
+      if (controller.filePath != null) {
+        return Image.file(
+          File(controller.filePath!),
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.none,
+        );
+      } else {
+        return const CupertinoActivityIndicator(
+          animating: true,
+          color: Colors.white,
+        );
+      }
     }
   }
 }
