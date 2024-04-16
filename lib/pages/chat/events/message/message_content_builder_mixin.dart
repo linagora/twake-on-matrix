@@ -193,11 +193,13 @@ mixin MessageContentBuilderMixin {
     final lastLineWidth = lastLineBoxes.last.right;
 
     double totalMessageWidth = messageTextWidth + paddingMessage;
+    bool isNeedAddNewLine;
 
     if (lastLineWidth < messageTextWidth &&
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
+      isNeedAddNewLine = false;
     } else {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
@@ -205,9 +207,10 @@ mixin MessageContentBuilderMixin {
         paddingMessage,
         maxWidth,
       );
+
+      isNeedAddNewLine = _checkNeedAddNewLine(totalMessageWidth, maxWidth);
     }
 
-    final isNeedAddNewLine = _checkNeedAddNewLine(totalMessageWidth, maxWidth);
     final metrics = MessageMetrics(
       totalMessageWidth: totalMessageWidth,
       isNeedAddNewLine: isNeedAddNewLine,
