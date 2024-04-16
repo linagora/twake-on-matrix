@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
+import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -36,7 +36,6 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
@@ -75,7 +74,7 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin {
+    with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
 
   int _activeClient = -1;
@@ -305,28 +304,6 @@ class MatrixState extends State<Matrix>
       LoadingDialog.defaultOnError =
           (e) => (e as Object?)!.toLocalizedString(context);
     });
-  }
-
-  Future<void> initConfigWeb() async {
-    try {
-      final configJsonString =
-          utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
-      final configJson = json.decode(configJsonString);
-      AppConfig.loadFromJson(configJson);
-      Logs().d('[ConfigLoader] $configJson');
-    } on FormatException catch (_) {
-      Logs().v('[ConfigLoader] config.json not found');
-    } catch (e) {
-      Logs().v('[ConfigLoader] config.json not found', e);
-    }
-  }
-
-  Future<void> initConfigMobile() async {
-    try {
-      AppConfig.loadEnvironment();
-    } catch (e) {
-      Logs().v('[ConfigLoader] config.json not found', e);
-    }
   }
 
   void _registerSubs(String name) async {
