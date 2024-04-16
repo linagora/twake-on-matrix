@@ -6,8 +6,8 @@ import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:flutter/material.dart';
 
-class DownloadFileTileWidget extends StatelessWidget {
-  const DownloadFileTileWidget({
+class DownloadingFileTileWidget extends StatelessWidget {
+  const DownloadingFileTileWidget({
     super.key,
     this.style = const MessageFileTileStyle(),
     required this.mimeType,
@@ -17,7 +17,6 @@ class DownloadFileTileWidget extends StatelessWidget {
     this.sizeString,
     required this.downloadFileStateNotifier,
     this.onCancelDownload,
-    this.hasError = false,
   });
 
   final TwakeMimeType mimeType;
@@ -28,7 +27,6 @@ class DownloadFileTileWidget extends StatelessWidget {
   final String? fileType;
   final ValueNotifier<DownloadPresentationState> downloadFileStateNotifier;
   final VoidCallback? onCancelDownload;
-  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +64,11 @@ class DownloadFileTileWidget extends StatelessWidget {
                     width: style.iconSize,
                     height: style.iconSize,
                     decoration: BoxDecoration(
-                      color: style.iconBackgroundColor(
-                        hasError: hasError,
-                        context: context,
-                      ),
+                      color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  if (downloadProgress != 0 && !hasError)
+                  if (downloadProgress != 0)
                     SizedBox(
                       width: style.circularProgressLoadingSize,
                       height: style.circularProgressLoadingSize,
@@ -87,18 +82,13 @@ class DownloadFileTileWidget extends StatelessWidget {
                     child: Container(
                       width: style.downloadIconSize,
                       decoration: BoxDecoration(
-                        color: style.iconBackgroundColor(
-                          hasError: hasError,
-                          context: context,
-                        ),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        hasError
-                            ? Icons.error_outline
-                            : downloadProgress == 0
-                                ? Icons.arrow_downward
-                                : Icons.close,
+                        downloadProgress == 0
+                            ? Icons.arrow_downward
+                            : Icons.close,
                         key: ValueKey(downloadProgress),
                         color: Theme.of(context).colorScheme.surface,
                         size: style.downloadIconSize,
