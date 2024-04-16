@@ -14,7 +14,7 @@ class ChatDetailsFilesView extends StatelessWidget {
     required this.controller,
   });
 
-  final ChatDetailsFileItemState controller;
+  final ChatDetailsFileItemController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class ChatDetailsFilesView extends StatelessWidget {
                 mimeType: controller.event.mimeType,
               );
             } else {
-              controller.onDownloadFileTap(event: controller.event);
+              controller.onDownloadFileTap();
             }
           },
           child: Padding(

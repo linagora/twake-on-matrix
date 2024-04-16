@@ -7,14 +7,14 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-mixin DownloadFileOnMobileMixin {
+mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   final downloadManager = getIt.get<DownloadManager>();
 
   final downloadFileStateNotifier = ValueNotifier<DownloadPresentationState>(
@@ -23,37 +23,45 @@ mixin DownloadFileOnMobileMixin {
 
   StreamSubscription<Either<Failure, Success>>? streamSubscription;
 
-  void checkDownloadFileState({
-    required Event event,
-  }) async {
-    checkFileExistInMemory(event: event);
-    await checkFileInDownloadsInApp(
-      event: event,
-    );
+  Event get event;
 
-    _trySetupDownloadingStreamSubcription(event.eventId);
+  @override
+  void initState() {
+    super.initState();
+    checkDownloadFileState();
+  }
+
+  @override
+  void dispose() {
+    streamSubscription?.cancel();
+    downloadFileStateNotifier.dispose();
+    super.dispose();
+  }
+
+  void checkDownloadFileState() async {
+    checkFileExistInMemory();
+    await checkFileInDownloadsInApp();
+
+    _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
       downloadFileStateNotifier.value = const DownloadingPresentationState();
     }
   }
 
-  void checkFileExistInMemory({
-    required Event event,
-  }) {
+  bool checkFileExistInMemory() {
     final filePathInMem = event.getFilePathFromMem();
     if (filePathInMem?.isNotEmpty == true) {
       downloadFileStateNotifier.value = DownloadedPresentationState(
         filePath: filePathInMem!,
       );
-      return;
+      return true;
     }
+    return false;
   }
 
-  Future<void> checkFileInDownloadsInApp({
-    required Event event,
-  }) async {
+  Future<void> checkFileInDownloadsInApp() async {
     final filePath =
-        await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: event.eventId,
       fileName: event.filename,
     );
@@ -66,16 +74,17 @@ mixin DownloadFileOnMobileMixin {
     }
   }
 
-  void _trySetupDownloadingStreamSubcription(String eventId) {
+  void _trySetupDownloadingStreamSubcription() {
     streamSubscription = downloadManager
-        .getDownloadStateStream(eventId)
+        .getDownloadStateStream(event.eventId)
         ?.listen(setupDownloadingProcess);
   }
 
-  void setupDownloadingProcess(Either<Failure, Success> event) {
-    event.fold(
+  void setupDownloadingProcess(Either<Failure, Success> resultEvent) {
+    resultEvent.fold(
       (failure) {
-        Logs().e('setupDownloadingProcess::onDownloadingProcess(): $failure');
+        Logs()
+            .e('$T::setupDownloadingProcess::onDownloadingProcess(): $failure');
         downloadFileStateNotifier.value = const NotDownloadPresentationState();
         streamSubscription?.cancel();
       },
@@ -96,12 +105,8 @@ mixin DownloadFileOnMobileMixin {
     );
   }
 
-  void onDownloadFileTap({
-    required Event event,
-  }) async {
-    await checkFileInDownloadsInApp(
-      event: event,
-    );
+  void onDownloadFileTap() async {
+    await checkFileInDownloadsInApp();
     if (downloadFileStateNotifier.value is DownloadedPresentationState) {
       return;
     }
@@ -109,6 +114,6 @@ mixin DownloadFileOnMobileMixin {
     downloadManager.download(
       event: event,
     );
-    _trySetupDownloadingStreamSubcription(event.eventId);
+    _trySetupDownloadingStreamSubcription();
   }
 }
