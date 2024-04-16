@@ -1,5 +1,9 @@
+import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/download/download_file_state.dart';
+import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
@@ -32,13 +36,47 @@ class ImageViewerController extends State<ImageViewer> {
 
   final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
 
+  String? filePath;
+
+  final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
+
+  StreamSubscription? streamSubcription;
+
   @override
   void initState() {
     super.initState();
+    if (!PlatformInfos.isWeb && widget.event != null) {
+      handleDownloadFile(widget.event!);
+    }
+  }
+
+  Future<void> handleDownloadFile(Event event) async {
+    try {
+      streamSubcription =
+          downloadMediaFileInteractor.execute(event: event).listen((state) {
+        state.fold(
+          (failure) {
+            if (failure is DownloadMediaFileFailure) {
+              Logs().e('Error downloading file', failure.exception);
+            }
+          },
+          (success) {
+            if (success is DownloadMediaFileSuccess) {
+              setState(() {
+                filePath = success.filePath;
+              });
+            }
+          },
+        );
+      });
+    } catch (e) {
+      Logs().e('Error downloading file', e);
+    }
   }
 
   @override
   void dispose() {
+    streamSubcription?.cancel();
     transformationController.dispose();
     showAppbarPreview.dispose();
     super.dispose();
