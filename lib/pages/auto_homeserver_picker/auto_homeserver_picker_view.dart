@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AutoHomeserverPickerView extends StatelessWidget {
   final AutoHomeserverPickerController controller;
+
   const AutoHomeserverPickerView({super.key, required this.controller});
 
   @override
@@ -47,10 +49,12 @@ class AutoHomeserverPickerView extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 ValueListenableBuilder(
-                  valueListenable: controller.showButtonRetryNotifier,
-                  builder: (context, isShowRetry, child) {
-                    if (isShowRetry) return child!;
-                    return const CircularProgressIndicator.adaptive();
+                  valueListenable: controller.autoHomeserverPickerUIState,
+                  builder: (context, state, child) {
+                    if (state is AutoHomeServerPickerLoadingState) {
+                      return const CircularProgressIndicator.adaptive();
+                    }
+                    return child!;
                   },
                   child: const SizedBox(),
                 ),
@@ -59,48 +63,107 @@ class AutoHomeserverPickerView extends StatelessWidget {
             Positioned(
               bottom: 0,
               child: ValueListenableBuilder(
-                valueListenable: controller.showButtonRetryNotifier,
-                builder: (context, isShowRetry, child) {
-                  if (isShowRetry) return child!;
-                  return const SizedBox();
-                },
-                child: Padding(
-                  padding: AutoHomeserverPickerViewStyle.buttonPadding,
-                  child: InkWell(
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    onTap: controller.retryCheckHomeserver,
-                    child: Container(
-                      height: AutoHomeserverPickerViewStyle.buttonHeight,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
+                valueListenable: controller.autoHomeserverPickerUIState,
+                builder: (context, state, child) {
+                  if (state is AutoHomeServerPickerFailureState) {
+                    return Padding(
+                      padding: AutoHomeserverPickerViewStyle.buttonPadding,
+                      child: Column(
+                        children: [
+                          InkWell(
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            onTap: controller.retryCheckHomeserver,
+                            child: Container(
+                              height:
+                                  AutoHomeserverPickerViewStyle.buttonHeight,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              decoration: ShapeDecoration(
+                                color: LinagoraSysColors.material().primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AutoHomeserverPickerViewStyle.buttonRadius,
+                                  ),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  L10n.of(context)!.startMessaging,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onPrimary,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            L10n.of(context)!.configurationNotFound,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: LinagoraSysColors.material().error,
+                                ),
+                          ),
+                        ],
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
-                        color: LinagoraSysColors.material().primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AutoHomeserverPickerViewStyle.buttonRadius,
+                    );
+                  }
+
+                  if (state is AutoHomeServerPickerInitialState) {
+                    return Padding(
+                      padding: AutoHomeserverPickerViewStyle.buttonPadding,
+                      child: InkWell(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        onTap: controller.retryCheckHomeserver,
+                        child: Container(
+                          height: AutoHomeserverPickerViewStyle.buttonHeight,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          decoration: ShapeDecoration(
+                            color: LinagoraSysColors.material().primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AutoHomeserverPickerViewStyle.buttonRadius,
+                              ),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              L10n.of(context)!.startMessaging,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onPrimary,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
-                      child: Center(
-                        child: Text(
-                          L10n.of(context)!.startMessaging,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.copyWith(
-                                color: LinagoraSysColors.material().onPrimary,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                    );
+                  }
+                  return child!;
+                },
+                child: const SizedBox(),
               ),
             ),
           ],
