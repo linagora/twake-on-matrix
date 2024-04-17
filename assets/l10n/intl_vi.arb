@@ -2801,7 +2801,7 @@
   "@matrixId": {},
   "roomCreationFailed": "Tạo hội thoại lỗi",
   "@roomCreationFailed": {},
-  "settingsAppLanguageSubtitle": "Chọn ngôn ngữ bạn muốn sử dụng Twake.",
+  "settingsAppLanguageSubtitle": "Chọn ngôn ngữ bạn muốn sử dụng Twake Chat.",
   "@settingsAppLanguageSubtitle": {},
   "settingsNotificationAndSoundsSubtitle": "Tùy chỉnh cách bạn nhận thông báo từ Twake như xem trước tin nhắn, âm thanh, thời gian,...",
   "@settingsNotificationAndSoundsSubtitle": {},
