@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_row.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
@@ -40,31 +39,31 @@ class ChatDetailsFilesView extends StatelessWidget {
                   .cancelDownload(controller.event.eventId);
             },
           );
-        }
-
-        return InkWell(
-          hoverColor: LinagoraSysColors.material().surfaceVariant,
-          onTap: () {
-            if (state is DownloadedPresentationState) {
+        } else if (state is DownloadedPresentationState) {
+          return ChatDetailsDownloadedFileTileWidget(
+            onTap: () {
               controller.handleDownloadFileForPreviewSuccess(
                 filePath: state.filePath,
                 mimeType: controller.event.mimeType,
               );
-            } else {
-              controller.onDownloadFileTap();
-            }
-          },
-          child: Padding(
-            padding: ChatDetailsFileTileStyle().paddingFileTileAll,
-            child: ChatDetailsFileTileRow(
-              mimeType: controller.event.mimeType,
-              fileType: filetype,
-              filename: filename,
-              sizeString: sizeString,
-              style: ChatDetailsFileTileStyle(),
-              sentDate: controller.event.originServerTs,
-            ),
-          ),
+            },
+            trailingIcon: Icons.folder_outlined,
+            iconColor: LinagoraSysColors.material().primary,
+            filename: filename,
+            mimeType: controller.event.mimeType,
+            fileType: filetype,
+          );
+        }
+
+        return ChatDetailsDownloadFileTileWidget(
+          onTap: () => controller.onDownloadFileTap(),
+          mimeType: controller.event.mimeType,
+          fileType: filetype,
+          filename: filename,
+          sizeString: sizeString,
+          sentDate: controller.event.originServerTs,
+          trailingIcon: Icons.download_outlined,
+          iconColor: LinagoraSysColors.material().tertiary,
         );
       },
     );
