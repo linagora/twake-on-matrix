@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item_web/chat_details_files_item_web.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_row.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
@@ -42,8 +41,7 @@ class ChatDetailsFilesViewWeb extends StatelessWidget {
           );
         }
 
-        return InkWell(
-          hoverColor: LinagoraSysColors.material().surfaceVariant,
+        return ChatDetailsDownloadFileTileWidget(
           onTap: () {
             if (state is FileWebDownloadedPresentationState) {
               controller.handlePreviewWeb(
@@ -59,17 +57,13 @@ class ChatDetailsFilesViewWeb extends StatelessWidget {
               controller.trySetupDownloadingStreamSubcription();
             }
           },
-          child: Padding(
-            padding: ChatDetailsFileTileStyle().paddingFileTileAll,
-            child: ChatDetailsFileTileRow(
-              mimeType: controller.event.mimeType,
-              fileType: filetype,
-              filename: filename,
-              sizeString: sizeString,
-              style: ChatDetailsFileTileStyle(),
-              sentDate: controller.event.originServerTs,
-            ),
-          ),
+          mimeType: controller.event.mimeType,
+          fileType: filetype,
+          filename: filename,
+          sizeString: sizeString,
+          sentDate: controller.event.originServerTs,
+          trailingIcon: Icons.download_outlined,
+          iconColor: LinagoraSysColors.material().tertiary,
         );
       },
     );

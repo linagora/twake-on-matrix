@@ -14,7 +14,9 @@ class ChatDetailsFileItem extends StatefulWidget {
 }
 
 class ChatDetailsFileItemController extends State<ChatDetailsFileItem>
-    with HandleDownloadAndPreviewFileMixin, DownloadFileOnMobileMixin {
+    with
+        HandleDownloadAndPreviewFileMixin,
+        DownloadFileOnMobileMixin<ChatDetailsFileItem> {
   @override
   Event get event => widget.event;
 
