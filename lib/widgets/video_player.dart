@@ -35,11 +35,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Video(
-      fill: Colors.black,
-      pauseUponEnteringBackgroundMode: true,
-      resumeUponEnteringForegroundMode: true,
-      controller: videoController,
+    return Scaffold(
+      body: Video(
+        fill: Colors.black,
+        pauseUponEnteringBackgroundMode: true,
+        resumeUponEnteringForegroundMode: true,
+        controller: videoController,
+      ),
     );
   }
 }
