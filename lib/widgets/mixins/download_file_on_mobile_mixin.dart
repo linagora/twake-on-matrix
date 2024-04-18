@@ -74,11 +74,11 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  void _trySetupDownloadingStreamSubcription() {
-    streamSubscription = downloadManager
-        .getDownloadStateStream(event.eventId)
-        ?.listen(setupDownloadingProcess);
-  }
+  StreamSubscription<Either<Failure, Success>>?
+      _trySetupDownloadingStreamSubcription() =>
+          streamSubscription = downloadManager
+              .getDownloadStateStream(event.eventId)
+              ?.listen(setupDownloadingProcess);
 
   void setupDownloadingProcess(Either<Failure, Success> resultEvent) {
     resultEvent.fold(
@@ -105,7 +105,7 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  void onDownloadFileTap() async {
+  void _downloadFile() async {
     await checkFileInDownloadsInApp();
     if (downloadFileStateNotifier.value is DownloadedPresentationState) {
       return;
@@ -115,5 +115,13 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
       event: event,
     );
     _trySetupDownloadingStreamSubcription();
+  }
+
+  void onDownloadFileTap() async {
+    final streamSubscribtion = _trySetupDownloadingStreamSubcription();
+    if (streamSubscribtion != null) {
+      return;
+    }
+    _downloadFile();
   }
 }

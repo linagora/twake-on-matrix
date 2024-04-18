@@ -1,6 +1,7 @@
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
+import 'package:fluffychat/widgets/file_widget/downloading_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/mixins/download_file_on_mobile_mixin.dart';
@@ -76,7 +77,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
 
         return InkWell(
           onTap: () => onDownloadFileTap(),
-          child: DownloadFileTileWidget(
+          child: DownloadingFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
             filename: filename,
