@@ -27,17 +27,17 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
-    trySetupDownloadingStreamSubcription();
+    _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
       downloadFileStateNotifier.value = const DownloadingPresentationState();
     }
   }
 
-  void trySetupDownloadingStreamSubcription() {
-    streamSubscription = downloadManager
-        .getDownloadStateStream(event.eventId)
-        ?.listen(setupDownloadingProcess);
-  }
+  StreamSubscription<Either<Failure, Success>>?
+      _trySetupDownloadingStreamSubcription() =>
+          streamSubscription = downloadManager
+              .getDownloadStateStream(event.eventId)
+              ?.listen(setupDownloadingProcess);
 
   void setupDownloadingProcess(Either<Failure, Success> resultEvent) {
     resultEvent.fold(
@@ -75,6 +75,22 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
     if (TwakeApp.routerKey.currentContext != null) {
       handlePreview;
     }
+  }
+
+  void _downloadFile() async {
+    downloadFileStateNotifier.value = const DownloadingPresentationState();
+    downloadManager.download(
+      event: event,
+    );
+    _trySetupDownloadingStreamSubcription();
+  }
+
+  void onDownloadFileTap() {
+    final streamSubscribtion = _trySetupDownloadingStreamSubcription();
+    if (streamSubscribtion != null) {
+      return;
+    }
+    _downloadFile();
   }
 
   @override

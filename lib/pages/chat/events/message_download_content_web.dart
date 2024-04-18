@@ -84,14 +84,7 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
         }
 
         return InkWell(
-          onTap: () {
-            downloadFileStateNotifier.value =
-                const DownloadingPresentationState();
-            downloadManager.download(
-              event: widget.event,
-            );
-            trySetupDownloadingStreamSubcription();
-          },
+          onTap: () => onDownloadFileTap(),
           child: FileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
