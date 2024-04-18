@@ -1,9 +1,9 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_row.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_download_tile.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloaded_tile.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloading_tile.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -25,14 +25,13 @@ class ChatDetailsFilesView extends StatelessWidget {
       valueListenable: controller.downloadFileStateNotifier,
       builder: (context, DownloadPresentationState state, child) {
         if (state is DownloadingPresentationState) {
-          return DownloadFileTileWidget(
+          return ChatDetailsDownloadingFileTile(
             mimeType: controller.event.mimeType,
             fileType: filetype,
             filename: filename,
             sizeString: sizeString,
-            style: const MessageFileTileStyle(),
             downloadFileStateNotifier: controller.downloadFileStateNotifier,
-            onCancelDownload: () {
+            onTap: () {
               controller.downloadFileStateNotifier.value =
                   const NotDownloadPresentationState();
               controller.downloadManager
@@ -40,7 +39,7 @@ class ChatDetailsFilesView extends StatelessWidget {
             },
           );
         } else if (state is DownloadedPresentationState) {
-          return ChatDetailsDownloadedFileTileWidget(
+          return ChatDetailsDownloadedFileTile(
             onTap: () {
               controller.handleDownloadFileForPreviewSuccess(
                 filePath: state.filePath,
@@ -55,7 +54,7 @@ class ChatDetailsFilesView extends StatelessWidget {
           );
         }
 
-        return ChatDetailsDownloadFileTileWidget(
+        return ChatDetailsDownloadFileTile(
           onTap: () => controller.onDownloadFileTap(),
           mimeType: controller.event.mimeType,
           fileType: filetype,

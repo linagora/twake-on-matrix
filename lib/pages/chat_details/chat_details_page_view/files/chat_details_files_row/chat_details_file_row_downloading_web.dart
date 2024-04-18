@@ -1,13 +1,14 @@
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_row_wrapper.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_row_downloading_wrapper.dart';
+import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
-class ChatDetailsFileTileRowWeb extends StatelessWidget {
-  const ChatDetailsFileTileRowWeb({
+class ChatDetailsFileTileRowDownloadingWeb extends StatelessWidget {
+  const ChatDetailsFileTileRowDownloadingWeb({
     super.key,
     required this.mimeType,
     required this.filename,
@@ -15,7 +16,7 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
     required this.fileType,
     required this.sizeString,
     required this.onTap,
-    required this.isDownloaded,
+    required this.downloadFileStateNotifier,
   });
 
   final GestureTapCallback onTap;
@@ -24,16 +25,17 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
   final String? sizeString;
   final String? fileType;
   final DateTime sentDate;
-  final bool isDownloaded;
+  final ValueNotifier<DownloadPresentationState> downloadFileStateNotifier;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       hoverColor: LinagoraSysColors.material().surfaceVariant,
       onTap: onTap,
-      child: ChatDetailsFileRowWrapper(
+      child: ChatDetailsFileRowDownloadingWrapper(
         mimeType: mimeType,
         fileType: fileType,
+        downloadFileStateNotifier: downloadFileStateNotifier,
         child: Container(
           padding: ChatDetailsFileTileStyle.bodyPaddingWeb,
           decoration: BoxDecoration(
@@ -45,6 +47,7 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
             ),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -69,25 +72,27 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  if (sizeString != null)
-                    Text(
-                      sizeString!,
-                      style: ChatDetailsFileTileStyle.downloadSizeFileTextStyle(
-                        context,
-                      ),
-                    ),
-                  if (!isDownloaded) ...[
-                    const Spacer(),
-                    Icon(
-                      Icons.download_outlined,
-                      color: const FileTileWidgetStyle().fileInfoColor,
-                    ),
-                  ] else
-                    const SizedBox(height: 24),
-                ],
+              SizedBox(
+                height:
+                    ChatDetailsFileTileStyle.downloadingTileInformationPadding,
               ),
+              if (sizeString != null) ...[
+                TextInformationOfFile(
+                  value: sizeString!,
+                  style: ChatDetailsFileTileStyle.downloadSizeFileTextStyle(
+                    context,
+                  ),
+                  downloadFileStateNotifier: downloadFileStateNotifier,
+                ),
+                SizedBox(
+                  height: ChatDetailsFileTileStyle
+                      .downloadingTileInformationPadding,
+                ),
+              ] else
+                SizedBox(
+                  height: ChatDetailsFileTileStyle
+                      .downloadingTileBottomPlaceholderWeb,
+                ),
             ],
           ),
         ),
