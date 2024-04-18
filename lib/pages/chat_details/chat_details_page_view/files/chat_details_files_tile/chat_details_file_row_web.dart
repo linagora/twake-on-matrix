@@ -69,25 +69,26 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  if (sizeString != null)
-                    Text(
-                      sizeString!,
-                      style: ChatDetailsFileTileStyle.downloadSizeFileTextStyle(
-                        context,
+              if (!isDownloaded)
+                Row(
+                  children: [
+                    if (sizeString != null)
+                      Text(
+                        sizeString!,
+                        style:
+                            ChatDetailsFileTileStyle.downloadSizeFileTextStyle(
+                          context,
+                        ),
                       ),
-                    ),
-                  if (!isDownloaded) ...[
                     const Spacer(),
                     Icon(
                       Icons.download_outlined,
                       color: const FileTileWidgetStyle().fileInfoColor,
                     ),
-                  ] else
-                    const SizedBox(height: 24),
-                ],
-              ),
+                  ],
+                )
+              else
+                const SizedBox(height: 24),
             ],
           ),
         ),
