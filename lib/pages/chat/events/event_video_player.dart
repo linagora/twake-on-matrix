@@ -39,9 +39,11 @@ class EventVideoPlayer extends StatelessWidget {
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
 
-  final bool showPlayButton;
-
   final VoidCallback? onPop;
+
+  final VoidCallback? onVideoTapped;
+
+  final Widget centerWidget;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -55,8 +57,9 @@ class EventVideoPlayer extends StatelessWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
-    this.showPlayButton = true,
     this.onPop,
+    this.onVideoTapped,
+    this.centerWidget = const CenterVideoButton(icon: Icons.play_arrow),
   }) : super(key: key);
 
   @override
@@ -74,7 +77,13 @@ class EventVideoPlayer extends StatelessWidget {
         color: Colors.black,
         child: InkWell(
           mouseCursor: SystemMouseCursors.click,
-          onTap: () => _onTapVideo(context),
+          onTap: () {
+            if (onVideoTapped != null) {
+              onVideoTapped!.call();
+            } else {
+              _onTapVideo(context);
+            }
+          },
           child: SizedBox(
             width: MessageContentStyle.imageBubbleWidth(imageWidth),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
@@ -97,10 +106,7 @@ class EventVideoPlayer extends StatelessWidget {
                       isPreview: false,
                     ),
                   ),
-                if (showPlayButton)
-                  const CenterVideoButton(
-                    icon: Icons.play_arrow,
-                  ),
+                centerWidget,
                 if (showDuration)
                   Positioned(
                     bottom: ChatDetailsMediaStyle.durationPaddingAll(context),
@@ -148,9 +154,12 @@ class EventVideoPlayer extends StatelessWidget {
 class CenterVideoButton extends StatelessWidget {
   final IconData icon;
 
+  final double? iconSize;
+
   const CenterVideoButton({
     super.key,
     required this.icon,
+    this.iconSize,
   });
 
   @override
@@ -166,7 +175,7 @@ class CenterVideoButton extends StatelessWidget {
       child: Icon(
         icon,
         color: LinagoraRefColors.material().primary[100],
-        size: MessageContentStyle.iconInsideVideoButtonSize,
+        size: iconSize ?? MessageContentStyle.iconInsideVideoButtonSize,
       ),
     );
   }
