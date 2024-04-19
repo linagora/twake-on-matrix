@@ -107,6 +107,9 @@ class _VideoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final centerVideoWidget = !responsiveUtil.isDesktop(context)
+        ? const CenterVideoButton(icon: Icons.play_arrow)
+        : const SizedBox.shrink();
     return EventVideoPlayer(
       event,
       rounded: false,
@@ -115,7 +118,7 @@ class _VideoItem extends StatelessWidget {
       thumbnailCacheMap: thumbnailCacheMap,
       noResizeThumbnail: true,
       onPop: closeRightColumn,
-      showPlayButton: !responsiveUtil.isDesktop(context),
+      centerWidget: centerVideoWidget,
     );
   }
 }
