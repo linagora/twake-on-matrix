@@ -193,6 +193,26 @@ extension DownloadFileExtension on Event {
           DownloadFileFailureState(exception: e),
         ),
       );
+    } finally {
+      await _clearEncryptedFile(
+        eventId: eventId,
+        filename: filename,
+      );
+    }
+  }
+
+  Future<void> _clearEncryptedFile({
+    required String eventId,
+    required String filename,
+  }) async {
+    try {
+      final encryptedFilePath = await StorageDirectoryManager.instance
+          .getFilePathInAppDownloads(eventId: eventId, fileName: filename);
+      await File(encryptedFilePath).delete();
+    } catch (e) {
+      Logs().e(
+        '_clearEncryptedFile(): $e',
+      );
     }
   }
 
