@@ -95,7 +95,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     event.fold(
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
-        downloadFileStateNotifier.value = const NotDownloadPresentationState();
+        downloadFileStateNotifier.value = DownloadErrorPresentationState(error: failure.toString());
         streamSubscription?.cancel();
       },
       (success) {
@@ -159,7 +159,8 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               style: const MessageFileTileStyle(),
             ),
           );
-        } else if (state is DownloadingPresentationState) {
+        } else if (state is DownloadingPresentationState ||
+            state is DownloadErrorPresentationState) {
           return DownloadFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
@@ -173,6 +174,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
                   const NotDownloadPresentationState();
               downloadManager.cancelDownload(widget.event.eventId);
             },
+            hasError: state is DownloadErrorPresentationState,
           );
         }
 

@@ -16,6 +16,7 @@ class DownloadFileTileWidget extends StatelessWidget {
     this.sizeString,
     required this.downloadFileStateNotifier,
     this.onCancelDownload,
+    this.hasError = false,
   });
 
   final TwakeMimeType mimeType;
@@ -26,6 +27,7 @@ class DownloadFileTileWidget extends StatelessWidget {
   final String? fileType;
   final ValueNotifier<DownloadPresentationState> downloadFileStateNotifier;
   final VoidCallback? onCancelDownload;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +65,13 @@ class DownloadFileTileWidget extends StatelessWidget {
                     width: style.iconSize,
                     height: style.iconSize,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: hasError
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  if (downloadProgress != 0)
+                  if (downloadProgress != 0 && !hasError)
                     SizedBox(
                       width: style.circularProgressLoadingSize,
                       height: style.circularProgressLoadingSize,
@@ -81,13 +85,17 @@ class DownloadFileTileWidget extends StatelessWidget {
                     child: Container(
                       width: style.downloadIconSize,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: hasError
+                            ? Theme.of(context).colorScheme.error
+                            : Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        downloadProgress == 0
-                            ? Icons.arrow_downward
-                            : Icons.close,
+                        hasError
+                            ? Icons.error_outline
+                            : downloadProgress == 0
+                                ? Icons.arrow_downward
+                                : Icons.close,
                         key: ValueKey(downloadProgress),
                         color: Theme.of(context).colorScheme.surface,
                         size: style.downloadIconSize,

@@ -60,7 +60,8 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
     event.fold(
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
-        downloadFileStateNotifier.value = const NotDownloadPresentationState();
+        downloadFileStateNotifier.value =
+            DownloadErrorPresentationState(error: failure.toString());
       },
       (success) {
         if (success is DownloadingFileState) {
@@ -111,7 +112,8 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
     return ValueListenableBuilder(
       valueListenable: downloadFileStateNotifier,
       builder: (context, DownloadPresentationState state, child) {
-        if (state is DownloadingPresentationState) {
+        if (state is DownloadingPresentationState ||
+            state is DownloadErrorPresentationState) {
           return DownloadFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
@@ -125,6 +127,7 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
                   const NotDownloadPresentationState();
               downloadManager.cancelDownload(widget.event.eventId);
             },
+            hasError: state is DownloadErrorPresentationState,
           );
         } else if (state is FileWebDownloadedPresentationState) {
           return InkWell(

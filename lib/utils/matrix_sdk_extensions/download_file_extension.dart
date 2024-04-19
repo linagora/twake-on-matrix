@@ -109,6 +109,11 @@ extension DownloadFileExtension on Event {
         Logs().i("downloadOrRetrieveAttachment: duplicate request");
       } else {
         Logs().e("downloadOrRetrieveAttachment: $e");
+        downloadStreamController?.add(
+          Left(
+            DownloadFileFailureState(exception: e),
+          ),
+        );
       }
     }
     return null;
