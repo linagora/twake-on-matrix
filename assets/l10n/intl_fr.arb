@@ -2789,7 +2789,7 @@
   "@matrixId": {},
   "roomCreationFailed": "La création d'un salon a échoué",
   "@roomCreationFailed": {},
-  "settingsAppLanguageSubtitle": "Choisissez dans quelle langue vous souhaitez utiliser Twake.",
+  "settingsAppLanguageSubtitle": "Choisissez dans quelle langue vous souhaitez utiliser Twake Chat.",
   "@settingsAppLanguageSubtitle": {},
   "settingsNotificationAndSoundsSubtitle": "Personnalisez la façon dont vous recevez les notifications de Twake Chat, telles que l'aperçu des messages, les sons, l'heure,...",
   "@settingsNotificationAndSoundsSubtitle": {},
