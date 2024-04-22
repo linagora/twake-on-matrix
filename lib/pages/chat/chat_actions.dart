@@ -78,7 +78,8 @@ enum ChatAppBarActions {
   info,
   report,
   saveToDownload,
-  saveToGallery;
+  saveToGallery,
+  leaveGroup;
 
   String getTitle(BuildContext context) {
     switch (this) {
@@ -90,6 +91,8 @@ enum ChatAppBarActions {
         return L10n.of(context)!.saveToDownloads;
       case ChatAppBarActions.saveToGallery:
         return L10n.of(context)!.saveToGallery;
+      case ChatAppBarActions.leaveGroup:
+        return L10n.of(context)!.commandHint_leave;
     }
   }
 
@@ -103,6 +106,8 @@ enum ChatAppBarActions {
         return Icons.download_outlined;
       case ChatAppBarActions.saveToGallery:
         return Icons.save_outlined;
+      case ChatAppBarActions.leaveGroup:
+        return Icons.logout_outlined;
     }
   }
 
@@ -114,6 +119,8 @@ enum ChatAppBarActions {
         return Theme.of(context).colorScheme.onSurface;
       case ChatAppBarActions.report:
         return LinagoraSysColors.material().errorDark;
+      case ChatAppBarActions.leaveGroup:
+        return Theme.of(context).colorScheme.error;
     }
   }
 
