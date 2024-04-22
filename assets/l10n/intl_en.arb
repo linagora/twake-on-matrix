@@ -3044,5 +3044,7 @@
         }
       }
     }
-  }
+  },
+  "dangerZone": "Danger zone",
+  "leaveGroupSubtitle": "This group will still remain after you left"
 }
