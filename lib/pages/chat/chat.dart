@@ -8,6 +8,7 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/utils/exception/leave_room_exception.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -311,17 +312,27 @@ class ChatController extends State<Chat>
   }
 
   Future<void> leaveChat() async {
-    final room = this.room;
-    if (room == null) {
-      throw Exception(
-        'Leave room button clicked while room is null. This should not be possible from the UI!',
+    try {
+      final room = this.room;
+      if (room == null) {
+        throw RoomNullException();
+      }
+
+      final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
+        future: room.leave,
+      );
+
+      if (success.error != null) return;
+      context.go('/rooms');
+    } on RoomNullException catch (e) {
+      Logs().e(
+        'Chat::leaveChat() - RoomNullException - $e',
+      );
+    } catch (e) {
+      Logs().e(
+        'Chat::leaveChat() - error - $e',
       );
     }
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: room.leave,
-    );
-    if (success.error != null) return;
-    context.go('/rooms');
   }
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
