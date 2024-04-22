@@ -1777,18 +1777,21 @@ class ChatController extends State<Chat>
   }
 
   List<PopupMenuEntry<ChatAppBarActions>> appBarActionsBuilder() {
-    final listAction = [
-      if (PlatformInfos.isAndroid) ...[
-        if (selectedEvents.length == 1 &&
-            selectedEvents.first.hasAttachment &&
-            !selectedEvents.first.isVideoOrImage)
-          ChatAppBarActions.saveToDownload,
-      ],
-      if (selectedEvents.length == 1 && selectedEvents.first.isVideoOrImage)
-        ChatAppBarActions.saveToGallery,
-      ChatAppBarActions.info,
-      ChatAppBarActions.report,
-    ];
+    final listAction = selectMode
+        ? [
+            if (PlatformInfos.isAndroid) ...[
+              if (selectedEvents.length == 1 &&
+                  selectedEvents.first.hasAttachment &&
+                  !selectedEvents.first.isVideoOrImage)
+                ChatAppBarActions.saveToDownload,
+            ],
+            if (selectedEvents.length == 1 &&
+                selectedEvents.first.isVideoOrImage)
+              ChatAppBarActions.saveToGallery,
+            ChatAppBarActions.info,
+            ChatAppBarActions.report,
+          ]
+        : [ChatAppBarActions.leaveGroup];
     return listAction
         .map(
           (action) => PopupMenuItem(
@@ -1838,6 +1841,9 @@ class ChatController extends State<Chat>
         actionWithClearSelections(
           reportEventAction,
         );
+        break;
+      case ChatAppBarActions.leaveGroup:
+        leaveChat();
         break;
       default:
         break;
