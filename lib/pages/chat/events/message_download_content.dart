@@ -95,7 +95,8 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     event.fold(
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
-        downloadFileStateNotifier.value = DownloadErrorPresentationState(error: failure.toString());
+        downloadFileStateNotifier.value =
+            DownloadErrorPresentationState(error: failure);
         streamSubscription?.cancel();
       },
       (success) {

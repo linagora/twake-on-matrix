@@ -61,7 +61,7 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
         downloadFileStateNotifier.value =
-            DownloadErrorPresentationState(error: failure.toString());
+            DownloadErrorPresentationState(error: failure);
       },
       (success) {
         if (success is DownloadingFileState) {

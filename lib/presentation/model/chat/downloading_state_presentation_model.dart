@@ -46,7 +46,7 @@ class DownloadingPresentationState extends DownloadPresentationState {
 }
 
 class DownloadErrorPresentationState extends DownloadPresentationState {
-  final String error;
+  final dynamic error;
 
   const DownloadErrorPresentationState({required this.error});
 

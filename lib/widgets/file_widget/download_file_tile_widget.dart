@@ -65,9 +65,10 @@ class DownloadFileTileWidget extends StatelessWidget {
                     width: style.iconSize,
                     height: style.iconSize,
                     decoration: BoxDecoration(
-                      color: hasError
-                          ? Theme.of(context).colorScheme.error
-                          : Theme.of(context).colorScheme.primary,
+                      color: style.iconBackgroundColor(
+                        hasError: hasError,
+                        context: context,
+                      ),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -85,9 +86,10 @@ class DownloadFileTileWidget extends StatelessWidget {
                     child: Container(
                       width: style.downloadIconSize,
                       decoration: BoxDecoration(
-                        color: hasError
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.primary,
+                        color: style.iconBackgroundColor(
+                          hasError: hasError,
+                          context: context,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
