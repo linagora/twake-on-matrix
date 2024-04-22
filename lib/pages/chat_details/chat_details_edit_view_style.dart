@@ -55,6 +55,12 @@ class ChatDetailEditViewStyle {
             color: Colors.black,
           );
 
+  static TextStyle? textChatDetailsEditCategoryStyle(BuildContext context) =>
+      Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.tertiary,
+            fontSize: 14.0,
+          );
+
   static const double clearIconSize = 20.0;
 
   static const EdgeInsetsDirectional contentPadding =

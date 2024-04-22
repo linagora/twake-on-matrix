@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_option.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_avatar_ui_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -82,14 +83,14 @@ class ChatDetailsEditView extends StatelessWidget {
           ],
         ),
       ),
-      body: Padding(
-        padding: ChatDetailEditViewStyle.editAvatarPadding,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              Center(
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            Padding(
+              padding: ChatDetailEditViewStyle.editAvatarPadding,
+              child: Center(
                 child: Stack(
                   children: [
                     Padding(
@@ -167,10 +168,13 @@ class ChatDetailsEditView extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: ChatDetailEditViewStyle.avatarAndTextFieldsGap,
-              ),
-              Column(
+            ),
+            const SizedBox(
+              height: ChatDetailEditViewStyle.avatarAndTextFieldsGap,
+            ),
+            Padding(
+              padding: ChatDetailEditViewStyle.editAvatarPadding,
+              child: Column(
                 children: [
                   _GroupNameField(controller: controller),
                   const SizedBox(
@@ -179,8 +183,27 @@ class ChatDetailsEditView extends StatelessWidget {
                   _DescriptionField(controller: controller),
                 ],
               ),
-            ],
-          ),
+            ),
+            Container(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                L10n.of(context)!.dangerZone,
+                style: ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
+                  context,
+                ),
+              ),
+            ),
+            ChatDetailsEditOption(
+              title: L10n.of(context)!.commandHint_leave,
+              subtitle: L10n.of(context)!.leaveGroupSubtitle,
+              leading: Icons.logout_outlined,
+              titleColor: Theme.of(context).colorScheme.error,
+              leadingIconColor: Theme.of(context).colorScheme.error,
+              onTap: controller.leaveChat,
+            ),
+          ],
         ),
       ),
     );
