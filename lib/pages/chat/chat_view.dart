@@ -141,12 +141,22 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     if (!controller.selectMode)
                       Padding(
                         padding: ChatViewStyle.paddingTrailing(context),
-                        child: IconButton(
-                          hoverColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onPressed: controller.toggleSearch,
-                          icon: const Icon(Icons.search),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              hoverColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onPressed: controller.toggleSearch,
+                              icon: const Icon(Icons.search),
+                            ),
+                            if (!controller.room!.isDirectChat)
+                              PopupMenuButton<ChatAppBarActions>(
+                                itemBuilder: (context) =>
+                                    controller.appBarActionsBuilder(),
+                                onSelected: controller.onSelectedAppBarActions,
+                              ),
+                          ],
                         ),
                       ),
                   ],
