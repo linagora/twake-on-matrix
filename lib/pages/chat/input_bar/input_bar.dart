@@ -365,6 +365,23 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     }
   }
 
+  void _handleSuggestionsCallbackWeb(List<Map<String, String?>> suggestions) {
+    if (suggestions.isNotEmpty) {
+      suggestionsController?.open();
+    } else {
+      suggestionsController?.close();
+      if (PlatformInfos.isWeb || showEmojiPickerNotifier?.value == false) {
+        typeAheadFocusNode?.requestFocus();
+      }
+    }
+  }
+
+  void _handleSuggestionsCallbackMobile() {
+    if (showEmojiPickerNotifier?.value == false) {
+      typeAheadFocusNode?.requestFocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InputBarShortcuts(
@@ -400,6 +417,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             decoration: decoration,
             focusNode: focusNode,
             onChanged: (text) {
+              suggestionsController?.open();
               if (onChanged != null) {
                 onChanged!(text);
               }
@@ -426,14 +444,12 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           suggestionsCallback: (text) {
             if (room!.isDirectChat) return [];
             final suggestions = getSuggestions(text);
-            if (suggestions.isNotEmpty) {
-              suggestionsController?.open();
-            } else {
-              suggestionsController?.close();
-              if (PlatformInfos.isWeb ||
-                  showEmojiPickerNotifier?.value == false) {
-                typeAheadFocusNode?.requestFocus();
-              }
+            if (PlatformInfos.isMobile) {
+              _handleSuggestionsCallbackMobile();
+            }
+
+            if (PlatformInfos.isWeb) {
+              _handleSuggestionsCallbackWeb(suggestions);
             }
             focusSuggestionController.suggestions = suggestions;
             return suggestions;
@@ -447,8 +463,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
               const SizedBox.shrink(),
           loadingBuilder: (BuildContext context) => const SizedBox.shrink(),
           // fix loading briefly flickering a dark box
-          emptyBuilder: (BuildContext context) => const SizedBox
-              .shrink(), // fix loading briefly showing no suggestions
+          emptyBuilder: (BuildContext context) => const SizedBox.shrink(),
+          // fix loading briefly showing no suggestions
           listBuilder: (context, widgets) => FocusSuggestionList(
             items: widgets,
             scrollController: suggestionScrollController,
