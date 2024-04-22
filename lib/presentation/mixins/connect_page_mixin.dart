@@ -4,11 +4,12 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/exception/check_homeserver_exception.dart';
+import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:matrix/matrix.dart';
@@ -169,8 +170,6 @@ mixin ConnectPageMixin {
   Future<void> registerPublicPlatformAction({
     required BuildContext context,
     required String id,
-    OnSAASRegistrationTimeoutCallback? saasRegistrationTimeoutCallback,
-    OnSAASRegistrationErrorCallback? saasRegistrationErrorCallback,
   }) async {
     final redirectUrl = _generateRedirectUrl(
       Matrix.of(context).client.homeserver.toString(),
@@ -190,9 +189,15 @@ mixin ConnectPageMixin {
       ),
     );
     Logs().d("ConnectPageMixin:_redirectRegistrationUrl: URI - $uri");
+    final token = Uri.parse(uri).queryParameters['loginToken'];
+    if (token == null) {
+      throw HomeserverTokenNotFoundException(
+        error: L10n.of(context)!.tokenNotFound,
+      );
+    }
     handleTokenFromRegistrationSite(
       matrix: Matrix.of(context),
-      uri: uri,
+      token: token,
     );
   }
 
@@ -239,9 +244,8 @@ mixin ConnectPageMixin {
 
   void handleTokenFromRegistrationSite({
     required MatrixState matrix,
-    required String uri,
+    required String? token,
   }) async {
-    final token = Uri.parse(uri).queryParameters['loginToken'];
     Logs().d(
       "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
     );

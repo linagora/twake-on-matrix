@@ -108,7 +108,8 @@ class AutoHomeserverPickerView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            L10n.of(context)!.configurationNotFound,
+                            state.error ??
+                                L10n.of(context)!.configurationNotFound,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium

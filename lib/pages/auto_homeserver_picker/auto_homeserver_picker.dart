@@ -3,7 +3,7 @@ import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_s
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
-import 'package:fluffychat/utils/exception/check_homeserver_exception.dart';
+import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -131,20 +131,18 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
     );
     final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
     if (identitiesProvider?.length == 1) {
-      registerPublicPlatformAction(
-        context: context,
-        id: identitiesProvider!.single.id!,
-        saasRegistrationErrorCallback: (object) {
-          Logs().e(
-            "AutoHomeserverPickerController: _saasAutoRegistration: Error - $object",
-          );
-        },
-        saasRegistrationTimeoutCallback: () {
-          Logs().e(
-            "AutoHomeserverPickerController: _saasAutoRegistration: Timeout",
-          );
-        },
-      );
+      try {
+        await registerPublicPlatformAction(
+          context: context,
+          id: identitiesProvider!.single.id!,
+        );
+      } on HomeserverTokenNotFoundException catch (e) {
+        autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
+          error: e.toString(),
+        );
+      } catch (e) {
+        autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();
+      }
     }
   }
 
