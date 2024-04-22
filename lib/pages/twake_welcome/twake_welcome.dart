@@ -75,8 +75,9 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         intentFlags: ephemeralIntentFlags,
       ),
     );
+    final token = Uri.parse(uri).queryParameters['loginToken'];
     Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
-    handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+    handleTokenFromRegistrationSite(matrix: matrix, token: token);
   }
 
   void onClickCreateTwakeId() {
