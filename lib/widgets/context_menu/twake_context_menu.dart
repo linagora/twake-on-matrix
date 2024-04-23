@@ -1,4 +1,6 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_position.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
@@ -65,31 +67,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   @override
   Widget build(BuildContext context) {
     final children = widget.builder(context);
-
-    double height = 2 *
-        (widget.verticalPadding ??
-            TwakeContextMenuStyle.defaultVerticalPadding);
-
-    for (final element in _heights.values) {
-      height += element;
-    }
-
-    final heightsNotAvailable = children.length - _heights.length;
-    height += heightsNotAvailable * _kMinTileHeight;
-
-    if (height > MediaQuery.sizeOf(context).height) {
-      height = MediaQuery.sizeOf(context).height;
-    }
-
-    final double positionLeft = widget.position.dx;
-    double positionTop = widget.position.dy;
-    double positionBottom =
-        MediaQuery.sizeOf(context).height - widget.position.dy - height;
-
-    if (positionBottom < 0) {
-      positionTop += positionBottom;
-      positionBottom = 0;
-    }
+    final contextMenuPosition = _calculatePosition(children);
 
     return GestureDetector(
       onTap: () => closeContextMenu(),
@@ -102,15 +80,16 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
           child: Stack(
             children: [
               Positioned(
-                left: positionLeft,
-                top: positionTop,
-                bottom: positionBottom,
+                left: contextMenuPosition.left,
+                top: contextMenuPosition.top,
+                bottom: contextMenuPosition.bottom,
+                right: contextMenuPosition.right,
                 child: AnimatedBuilder(
                   animation: _animationController,
                   builder: (context, child) {
                     return Transform.scale(
                       scale: _animation.value,
-                      alignment: Alignment.topLeft,
+                      alignment: contextMenuPosition.alignment,
                       child: Opacity(
                         opacity: _animation.value,
                         child: child,
@@ -147,13 +126,19 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: children
                                     .map(
-                                      (e) => _GrowingWidget(
-                                        child: e,
-                                        onHeightChange: (height) {
-                                          setState(() {
-                                            _heights[ValueKey(e)] = height;
-                                          });
-                                        },
+                                      (e) => Listener(
+                                        onPointerDown: (_) =>
+                                            PlatformInfos.isMobile
+                                                ? closeContextMenu()
+                                                : null,
+                                        child: _GrowingWidget(
+                                          child: e,
+                                          onHeightChange: (height) {
+                                            setState(() {
+                                              _heights[ValueKey(e)] = height;
+                                            });
+                                          },
+                                        ),
                                       ),
                                     )
                                     .toList(),
@@ -177,6 +162,54 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     _animationController
         .reverse()
         .whenComplete(() => Navigator.of(context).pop());
+  }
+
+  ContextMenuPosition _calculatePosition(List<Widget> children) {
+    double height = 2 *
+        (widget.verticalPadding ??
+            TwakeContextMenuStyle.defaultVerticalPadding);
+    for (final element in _heights.values) {
+      height += element;
+    }
+
+    final heightsNotAvailable = children.length - _heights.length;
+    height += heightsNotAvailable * _kMinTileHeight;
+
+    if (height > MediaQuery.sizeOf(context).height) {
+      height = MediaQuery.sizeOf(context).height;
+    }
+
+    double positionTop = widget.position.dy -
+        MediaQueryData.fromView(View.of(context)).viewPadding.top;
+    double positionBottom =
+        MediaQuery.sizeOf(context).height - widget.position.dy - height;
+
+    if (positionBottom < 0) {
+      positionTop += positionBottom;
+      positionBottom = 0;
+    }
+
+    final double positionLeftTap = widget.position.dx;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double availableRightSpace = screenWidth - positionLeftTap;
+    double? positionLeft;
+    double? positionRight;
+    Alignment alignment = Alignment.topLeft;
+
+    if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth) {
+      positionRight = screenWidth - positionLeftTap;
+      alignment = Alignment.topRight;
+    } else {
+      positionLeft = positionLeftTap;
+    }
+
+    return ContextMenuPosition(
+      alignment: alignment,
+      left: positionLeft,
+      top: positionTop,
+      right: positionRight,
+      bottom: positionBottom,
+    );
   }
 }
 
