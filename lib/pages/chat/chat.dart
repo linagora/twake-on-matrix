@@ -12,6 +12,7 @@ import 'package:fluffychat/utils/exception/leave_room_exception.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
@@ -318,11 +319,11 @@ class ChatController extends State<Chat>
         throw RoomNullException();
       }
 
-      final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: room.leave,
       );
 
-      if (success.error != null) return;
+      if (result.error != null) return;
       context.go('/rooms');
     } on RoomNullException catch (e) {
       Logs().e(
@@ -1787,7 +1788,19 @@ class ChatController extends State<Chat>
     }
   }
 
-  List<PopupMenuEntry<ChatAppBarActions>> appBarActionsBuilder() {
+  void handleAppbarMenuAction(
+    BuildContext context,
+    TapDownDetails tapDownDetails,
+  ) {
+    final offset = tapDownDetails.globalPosition;
+    showTwakeContextMenu(
+      offset: offset,
+      context: context,
+      builder: (_) => _appbarMenuActionTile(context),
+    );
+  }
+
+  List<Widget> _appbarMenuActionTile(BuildContext context) {
     final listAction = selectMode
         ? [
             if (PlatformInfos.isAndroid) ...[
@@ -1803,26 +1816,20 @@ class ChatController extends State<Chat>
             ChatAppBarActions.report,
           ]
         : [ChatAppBarActions.leaveGroup];
-    return listAction
-        .map(
-          (action) => PopupMenuItem(
-            value: action,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  action.getIcon(),
-                  color: action.getColorIcon(context),
-                ),
-                Padding(
-                  padding: action.getPaddingTitle(),
-                  child: Text(action.getTitle(context)),
-                ),
-              ],
-            ),
-          ),
-        )
-        .toList();
+    return listAction.map((action) {
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(context),
+        iconAction: action.getIcon(),
+        colorIcon: action.getColorIcon(context),
+        styleName: action == ChatAppBarActions.leaveGroup
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.copyWith(
+                color: action.getColorIcon(context),
+              )
+            : null,
+        onCallbackAction: () => onSelectedAppBarActions(action),
+      );
+    }).toList();
   }
 
   void onSelectedAppBarActions(ChatAppBarActions action) {

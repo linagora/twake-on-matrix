@@ -503,11 +503,11 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         throw RoomNullException();
       }
 
-      final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: currentRoom.leave,
       );
 
-      if (success.error != null) return;
+      if (result.error != null) return;
       context.go('/rooms');
     } on RoomNullException catch (e) {
       Logs().e(
