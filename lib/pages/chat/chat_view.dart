@@ -1,6 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
@@ -64,9 +63,14 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               imageSize: ChatViewStyle.appBarIconSize,
             ),
           if (controller.selectedEvents.length == 1)
-            PopupMenuButton<ChatAppBarActions>(
-              onSelected: controller.onSelectedAppBarActions,
-              itemBuilder: (context) => controller.appBarActionsBuilder(),
+            TwakeIconButton(
+              icon: Icons.more_vert,
+              tooltip: L10n.of(context)!.more,
+              onTapDown: (tapDownDetails) => controller.handleAppbarMenuAction(
+                context,
+                tapDownDetails,
+              ),
+              preferBelow: false,
             ),
         ],
       );
@@ -151,10 +155,17 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                               icon: const Icon(Icons.search),
                             ),
                             if (!controller.room!.isDirectChat)
-                              PopupMenuButton<ChatAppBarActions>(
-                                itemBuilder: (context) =>
-                                    controller.appBarActionsBuilder(),
-                                onSelected: controller.onSelectedAppBarActions,
+                              Builder(
+                                builder: (context) => TwakeIconButton(
+                                  icon: Icons.more_vert,
+                                  tooltip: L10n.of(context)!.more,
+                                  onTapDown: (tapDownDetails) =>
+                                      controller.handleAppbarMenuAction(
+                                    context,
+                                    tapDownDetails,
+                                  ),
+                                  preferBelow: false,
+                                ),
                               ),
                           ],
                         ),
