@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State, OpenFile;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:fluffychat/utils/exception/downloading_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -59,9 +61,16 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
   void setupDownloadingProcess(Either<Failure, Success> event) {
     event.fold(
       (failure) {
-        Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
-        downloadFileStateNotifier.value =
-            DownloadErrorPresentationState(error: failure);
+        Logs().e(
+            'MessageDownloadContentWeb::onDownloadingProcess(): $failure');
+        if (failure is DownloadFileFailureState &&
+            failure.exception is CancelDownloadingException) {
+          downloadFileStateNotifier.value =
+              const NotDownloadPresentationState();
+        } else {
+          downloadFileStateNotifier.value =
+              DownloadErrorPresentationState(error: failure);
+        }
       },
       (success) {
         if (success is DownloadingFileState) {
