@@ -4,11 +4,11 @@ import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
+import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
-import 'package:fluffychat/utils/exception/leave_room_exception.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -111,7 +111,8 @@ class ChatController extends State<Chat>
         TwakeContextMenuMixin,
         MessageContentMixin,
         SaveFileToTwakeAndroidDownloadsFolderMixin,
-        SaveMediaToGalleryAndroidMixin {
+        SaveMediaToGalleryAndroidMixin,
+        LeaveChatMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -310,30 +311,6 @@ class ChatController extends State<Chat>
     final roomId = success.result;
     if (roomId == null) return;
     context.go('/rooms/$roomId');
-  }
-
-  Future<void> leaveChat() async {
-    try {
-      final room = this.room;
-      if (room == null) {
-        throw RoomNullException();
-      }
-
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: room.leave,
-      );
-
-      if (result.error != null) return;
-      context.go('/rooms');
-    } on RoomNullException catch (e) {
-      Logs().e(
-        'Chat::leaveChat() - RoomNullException - $e',
-      );
-    } catch (e) {
-      Logs().e(
-        'Chat::leaveChat() - error - $e',
-      );
-    }
   }
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
@@ -1535,7 +1512,7 @@ class ChatController extends State<Chat>
       case DialogRejectInviteResult.cancel:
         return;
       case DialogRejectInviteResult.reject:
-        await leaveChat();
+        await leaveChat(context, room);
         return;
     }
   }
@@ -1796,26 +1773,42 @@ class ChatController extends State<Chat>
     showTwakeContextMenu(
       offset: offset,
       context: context,
-      builder: (_) => _appbarMenuActionTile(context),
+      builder: (_) =>
+          _appbarMenuActionTile(context, _getListActionAppBarMenu()),
     );
   }
 
-  List<Widget> _appbarMenuActionTile(BuildContext context) {
-    final listAction = selectMode
-        ? [
-            if (PlatformInfos.isAndroid) ...[
-              if (selectedEvents.length == 1 &&
-                  selectedEvents.first.hasAttachment &&
-                  !selectedEvents.first.isVideoOrImage)
-                ChatAppBarActions.saveToDownload,
-            ],
-            if (selectedEvents.length == 1 &&
-                selectedEvents.first.isVideoOrImage)
-              ChatAppBarActions.saveToGallery,
-            ChatAppBarActions.info,
-            ChatAppBarActions.report,
-          ]
-        : [ChatAppBarActions.leaveGroup];
+  List<ChatAppBarActions> _getListActionAppBarMenu() {
+    return selectMode
+        ? _getListActionAppbarMenuSelectMode()
+        : _getListActionAppbarMenuNormal();
+  }
+
+  List<ChatAppBarActions> _getListActionAppbarMenuSelectMode() {
+    return [
+      if (PlatformInfos.isAndroid) ...[
+        if (selectedEvents.length == 1 &&
+            selectedEvents.first.hasAttachment &&
+            !selectedEvents.first.isVideoOrImage)
+          ChatAppBarActions.saveToDownload,
+      ],
+      if (selectedEvents.length == 1 && selectedEvents.first.isVideoOrImage)
+        ChatAppBarActions.saveToGallery,
+      ChatAppBarActions.info,
+      ChatAppBarActions.report,
+    ];
+  }
+
+  List<ChatAppBarActions> _getListActionAppbarMenuNormal() {
+    return [
+      ChatAppBarActions.leaveGroup,
+    ];
+  }
+
+  List<Widget> _appbarMenuActionTile(
+    BuildContext context,
+    List<ChatAppBarActions> listAction,
+  ) {
     return listAction.map((action) {
       return popupItemByTwakeAppRouter(
         context,
@@ -1861,7 +1854,7 @@ class ChatController extends State<Chat>
         );
         break;
       case ChatAppBarActions.leaveGroup:
-        leaveChat();
+        leaveChat(context, room);
         break;
       default:
         break;
