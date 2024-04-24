@@ -201,7 +201,7 @@ class ChatDetailsEditView extends StatelessWidget {
               leading: Icons.logout_outlined,
               titleColor: Theme.of(context).colorScheme.error,
               leadingIconColor: Theme.of(context).colorScheme.error,
-              onTap: controller.leaveChat,
+              onTap: () => controller.leaveChat(context, controller.room),
             ),
           ],
         ),

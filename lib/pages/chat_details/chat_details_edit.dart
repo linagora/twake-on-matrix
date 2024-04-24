@@ -14,9 +14,9 @@ import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/exception/leave_room_exception.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -24,7 +24,6 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
@@ -44,7 +43,11 @@ class ChatDetailsEdit extends StatefulWidget {
 }
 
 class ChatDetailsEditController extends State<ChatDetailsEdit>
-    with PopupMenuWidgetMixin, CommonMediaPickerMixin, SingleImagePickerMixin {
+    with
+        PopupMenuWidgetMixin,
+        CommonMediaPickerMixin,
+        SingleImagePickerMixin,
+        LeaveChatMixin {
   final updateGroupChatInteractor = getIt.get<UpdateGroupChatInteractor>();
 
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
@@ -494,30 +497,6 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       isEditedGroupInfoNotifier.value =
           descriptionTextEditingController.text != room?.topic;
     });
-  }
-
-  Future<void> leaveChat() async {
-    try {
-      final currentRoom = room;
-      if (currentRoom == null) {
-        throw RoomNullException();
-      }
-
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: currentRoom.leave,
-      );
-
-      if (result.error != null) return;
-      context.go('/rooms');
-    } on RoomNullException catch (e) {
-      Logs().e(
-        'ChatDetailsEdit::leaveChat() - RoomNullException - $e',
-      );
-    } catch (e) {
-      Logs().e(
-        'ChatDetailsEdit::leaveChat() - error: $e',
-      );
-    }
   }
 
   @override
