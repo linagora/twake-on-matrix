@@ -1,8 +1,8 @@
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/material.dart';
@@ -61,7 +61,7 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> {
       );
     } catch (e) {
       Logs().e('tryLoggingUsingToken::error: $e');
-      context.go('/home');
+      TwakeApp.router.go('/home', extra: true);
     }
   }
 
