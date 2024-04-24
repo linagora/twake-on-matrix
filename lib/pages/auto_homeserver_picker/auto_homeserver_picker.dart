@@ -1,7 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
-import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/utils/exception/check_homeserver_exception.dart';
 import 'package:fluffychat/widgets/matrix.dart';

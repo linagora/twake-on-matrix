@@ -5,7 +5,7 @@ import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
