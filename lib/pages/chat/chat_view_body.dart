@@ -108,7 +108,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                         icon: const Icon(
                                           Icons.archive_outlined,
                                         ),
-                                        onPressed: controller.leaveChat,
+                                        onPressed: () => controller.leaveChat(
+                                          context,
+                                          controller.room,
+                                        ),
                                         label: Text(
                                           L10n.of(context)!.leave,
                                         ),
