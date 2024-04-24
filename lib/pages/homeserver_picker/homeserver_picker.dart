@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/pages/connect/connect_page_mixin.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -195,6 +195,8 @@ class HomeserverPickerController extends State<HomeserverPicker>
       } else {
         state = HomeserverState.otherLoginMethod;
         context.push('/connect');
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() {});
       }
     } catch (e) {
       state = HomeserverState.wrongServerName;
@@ -227,6 +229,8 @@ class HomeserverPickerController extends State<HomeserverPicker>
   @override
   void dispose() {
     homeserverFocusNode.removeListener(_updateFocus);
+    homeserverFocusNode.dispose();
+    homeserverController.dispose();
     super.dispose();
   }
 
