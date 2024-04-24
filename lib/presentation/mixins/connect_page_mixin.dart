@@ -9,7 +9,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:matrix/matrix.dart';
@@ -189,16 +188,6 @@ mixin ConnectPageMixin {
       ),
     );
     Logs().d("ConnectPageMixin:_redirectRegistrationUrl: URI - $uri");
-    final token = Uri.parse(uri).queryParameters['loginToken'];
-    if (token == null) {
-      throw HomeserverTokenNotFoundException(
-        error: L10n.of(context)!.tokenNotFound,
-      );
-    }
-    handleTokenFromRegistrationSite(
-      matrix: Matrix.of(context),
-      token: token,
-    );
   }
 
   String _generatePostLogoutRedirectUrl() {
@@ -244,8 +233,9 @@ mixin ConnectPageMixin {
 
   void handleTokenFromRegistrationSite({
     required MatrixState matrix,
-    required String? token,
+    required String uri,
   }) async {
+    final token = Uri.parse(uri).queryParameters['loginToken'];
     Logs().d(
       "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
     );
