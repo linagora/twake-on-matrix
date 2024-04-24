@@ -1615,18 +1615,19 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "14fe4d3144e1d45561b8e65713b5e1fc35651af4"
+      resolved-ref: "272cb73ab18cff7ae534ef4eafa61c6a3494cb00"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
   matrix_api_lite:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: matrix_api_lite
-      sha256: "0e92d3402b4cbb8ab9283fd2fbe44147facf6f73de88f5adf0b3123bc5114bc1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.3"
+      path: "."
+      ref: main
+      resolved-ref: "00b6570f95556636499c845f475d2d9e9049e44d"
+      url: "https://github.com/linagora/dart_matrix_api_lite.git"
+    source: git
+    version: "1.7.4"
   matrix_homeserver_recommendations:
     dependency: "direct main"
     description:
