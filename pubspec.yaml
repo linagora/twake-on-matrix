@@ -269,6 +269,11 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/matrix_link_text.git
       ref: twake-supported
+  # TODO: Remove this part when update matrix_homeserver_recommendations to same version as matrix_dart_sdk
+  matrix_api_lite:
+    git:
+      url: https://github.com/linagora/dart_matrix_api_lite.git
+      ref: main
 
 cider:
   link_template:
