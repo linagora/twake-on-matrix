@@ -47,4 +47,12 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   double get downloadIconSize => 28;
 
   EdgeInsets get marginDownloadIcon => const EdgeInsets.all(4);
+
+  Color iconBackgroundColor({
+    required bool hasError,
+    required BuildContext context,
+  }) =>
+      hasError
+          ? Theme.of(context).colorScheme.error
+          : Theme.of(context).colorScheme.primary;
 }

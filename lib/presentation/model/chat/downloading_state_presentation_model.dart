@@ -44,3 +44,12 @@ class DownloadingPresentationState extends DownloadPresentationState {
   @override
   List<Object?> get props => [receive, total];
 }
+
+class DownloadErrorPresentationState extends DownloadPresentationState {
+  final dynamic error;
+
+  const DownloadErrorPresentationState({required this.error});
+
+  @override
+  List<Object?> get props => [error];
+}
