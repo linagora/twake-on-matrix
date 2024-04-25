@@ -37,7 +37,8 @@ mixin ConnectPageMixin {
   bool supportsSso(BuildContext context) =>
       (PlatformInfos.isMobile ||
           PlatformInfos.isWeb ||
-          PlatformInfos.isMacOS) &&
+          PlatformInfos.isMacOS ||
+          PlatformInfos.isLinux) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
@@ -58,6 +59,11 @@ mixin ConnectPageMixin {
       AppConfig.homeserver.isNotEmpty;
 
   String _getRedirectUrlScheme(String redirectUrl) {
+    // Remove when package limitation will be fixed
+    // https://pub.dev/packages/flutter_web_auth_2#windows-and-linux
+    if (PlatformInfos.isLinux || PlatformInfos.isWindows) {
+      return "http://localhost:60665";
+    }
     return Uri.parse(redirectUrl).scheme;
   }
 
@@ -106,6 +112,7 @@ mixin ConnectPageMixin {
       redirectUrl: redirectUrl,
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
+    print("tez: urlScheme = $urlScheme");
     return await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,

@@ -89,7 +89,7 @@ dependencies:
   flutter_olm: ^1.2.0
   flutter_openssl_crypto: ^0.1.0
   flutter_ringtone_player: ^3.1.1
-  flutter_secure_storage: ^7.0.1
+  flutter_secure_storage: ^9.0.0
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
   flutter_web_auth_2: ^3.1.1
@@ -245,6 +245,12 @@ dependency_overrides:
     git:
       url: https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git
       ref: main
+  # https://github.com/mogol/flutter_secure_storage/issues/616
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_linux
   geolocator_android:
     hosted:
       name: geolocator_android
@@ -269,6 +275,7 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/matrix_link_text.git
       ref: twake-supported
+  web: ^0.5.0
 
 cider:
   link_template:

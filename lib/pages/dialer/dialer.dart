@@ -186,7 +186,10 @@ class MyCallingPage extends State<Calling> {
 
   void _playCallSound() async {
     const path = 'assets/sounds/call.ogg';
-    if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS) {
+    if (kIsWeb ||
+        PlatformInfos.isMobile ||
+        PlatformInfos.isMacOS ||
+        PlatformInfos.isLinux) {
       final player = AudioPlayer();
       await player.setAsset(path);
       player.play();

@@ -76,6 +76,7 @@ class MessageContent extends StatelessWidget
             if (PlatformInfos.isMobile ||
                     PlatformInfos.isMacOS ||
                     PlatformInfos.isWeb
+                // TODO: test this
                 // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
                 // is fixed
                 //   || PlatformInfos.isLinux
