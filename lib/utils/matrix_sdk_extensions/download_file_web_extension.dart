@@ -115,6 +115,11 @@ extension DownloadFileWebExtension on Event {
         Logs().i("_handleDownloadFileWeb: user cancel the download");
       }
       Logs().e("_handleDownloadFileWeb: $e");
+      downloadStreamController.add(
+        Left(
+          DownloadFileFailureState(exception: e),
+        ),
+      );
     }
     return null;
   }

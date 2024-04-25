@@ -6,6 +6,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:fluffychat/utils/exception/downloading_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
@@ -95,7 +96,14 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
     event.fold(
       (failure) {
         Logs().e('MessageDownloadContent::onDownloadingProcess(): $failure');
-        downloadFileStateNotifier.value = const NotDownloadPresentationState();
+        if (failure is DownloadFileFailureState &&
+            failure.exception is CancelDownloadingException) {
+          downloadFileStateNotifier.value =
+              const NotDownloadPresentationState();
+        } else {
+          downloadFileStateNotifier.value =
+              DownloadErrorPresentationState(error: failure);
+        }
         streamSubscription?.cancel();
       },
       (success) {
@@ -159,7 +167,8 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               style: const MessageFileTileStyle(),
             ),
           );
-        } else if (state is DownloadingPresentationState) {
+        } else if (state is DownloadingPresentationState ||
+            state is DownloadErrorPresentationState) {
           return DownloadFileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
@@ -173,6 +182,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
                   const NotDownloadPresentationState();
               downloadManager.cancelDownload(widget.event.eventId);
             },
+            hasError: state is DownloadErrorPresentationState,
           );
         }
 
