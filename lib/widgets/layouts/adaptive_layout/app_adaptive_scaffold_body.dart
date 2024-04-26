@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_action_enum.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -34,7 +35,8 @@ class AppAdaptiveScaffoldBody extends StatefulWidget {
       AppAdaptiveScaffoldBodyController();
 }
 
-class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
+class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
+    with ConnectPageMixin {
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier =
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
@@ -129,6 +131,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody> {
   @override
   void initState() {
     activeRoomIdNotifier.value = widget.activeRoomId;
+    resetLocationPathWithLoginToken();
     super.initState();
   }
 

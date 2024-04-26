@@ -263,4 +263,12 @@ mixin ConnectPageMixin {
           ),
     );
   }
+
+  void resetLocationPathWithLoginToken({
+    String? route,
+  }) {
+    final loginTokenExisted = getQueryParameter('loginToken') != null;
+    if (!loginTokenExisted) return;
+    html.window.history.replaceState({}, '', '/#/${route ?? 'rooms'}');
+  }
 }
