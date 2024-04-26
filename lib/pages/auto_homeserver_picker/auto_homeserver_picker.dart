@@ -10,7 +10,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AutoHomeserverPicker extends StatefulWidget {
   final bool? loggedOut;
@@ -162,30 +162,34 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         }
       }
       Logs().d(
-        "AutoHomeserverPickerController: _initializeAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
+        "AutoHomeserverPickerController::_setupAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
       );
       final loginToken = getQueryParameter('loginToken');
       if (loginToken != null || loginToken?.isNotEmpty == true) {
-        try {
-          Matrix.of(context).loginType = LoginType.mLoginToken;
-          Matrix.of(context).loginHomeserverSummary =
-              await Matrix.of(context).getLoginClient().checkHomeserver(
-                    Uri.parse(
-                      AppConfig.homeserver,
-                    ),
-                  );
-          await TwakeDialog.showFutureLoadingDialogFullScreen(
-            future: () => Matrix.of(context).getLoginClient().login(
-                  LoginType.mLoginToken,
-                  token: loginToken,
-                  initialDeviceDisplayName: PlatformInfos.clientName,
-                ),
+        Matrix.of(context).loginType = LoginType.mLoginToken;
+        Matrix.of(context).loginHomeserverSummary =
+            await Matrix.of(context).getLoginClient().checkHomeserver(
+                  Uri.parse(
+                    AppConfig.homeserver,
+                  ),
+                );
+        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => Matrix.of(context).getLoginClient().login(
+                LoginType.mLoginToken,
+                token: loginToken,
+                initialDeviceDisplayName: PlatformInfos.clientName,
+              ),
+        );
+        if (result.error != null) {
+          autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
+            error: L10n.of(context)!.invalidLoginToken,
           );
-        } catch (e) {
-          autoHomeserverPickerUIState.value =
-              AutoHomeServerPickerFailureState();
+          resetLocationPathWithLoginToken(
+            route: 'home',
+          );
+        } else {
+          resetLocationPathWithLoginToken();
         }
-        _resetLocationPath();
         return;
       }
       if (_isSaasPlatform) {
@@ -198,10 +202,6 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         autoHomeserverPickerUIState.value = AutoHomeServerPickerInitialState();
       }
     }
-  }
-
-  void _resetLocationPath() {
-    html.window.history.replaceState({}, '', '/#/rooms');
   }
 
   @override
