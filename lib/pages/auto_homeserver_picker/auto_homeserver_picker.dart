@@ -166,20 +166,25 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       );
       final loginToken = getQueryParameter('loginToken');
       if (loginToken != null || loginToken?.isNotEmpty == true) {
-        Matrix.of(context).loginType = LoginType.mLoginToken;
-        Matrix.of(context).loginHomeserverSummary =
-            await Matrix.of(context).getLoginClient().checkHomeserver(
-                  Uri.parse(
-                    AppConfig.homeserver,
-                  ),
-                );
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => Matrix.of(context).getLoginClient().login(
-                LoginType.mLoginToken,
-                token: loginToken,
-                initialDeviceDisplayName: PlatformInfos.clientName,
-              ),
-        );
+        try {
+          Matrix.of(context).loginType = LoginType.mLoginToken;
+          Matrix.of(context).loginHomeserverSummary =
+              await Matrix.of(context).getLoginClient().checkHomeserver(
+                    Uri.parse(
+                      AppConfig.homeserver,
+                    ),
+                  );
+          await TwakeDialog.showFutureLoadingDialogFullScreen(
+            future: () => Matrix.of(context).getLoginClient().login(
+                  LoginType.mLoginToken,
+                  token: loginToken,
+                  initialDeviceDisplayName: PlatformInfos.clientName,
+                ),
+          );
+        } catch (e) {
+          autoHomeserverPickerUIState.value =
+              AutoHomeServerPickerFailureState();
+        }
         _resetLocationPath();
         return;
       }
