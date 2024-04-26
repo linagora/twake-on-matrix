@@ -275,7 +275,6 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/matrix_link_text.git
       ref: twake-supported
-  web: ^0.5.0
 
 cider:
   link_template:

@@ -24,6 +24,8 @@ mixin ConnectPageMixin {
 
   static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
 
+  static const linowsRedirectUrl = 'http://localhost:60665';
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -59,10 +61,8 @@ mixin ConnectPageMixin {
       AppConfig.homeserver.isNotEmpty;
 
   String _getRedirectUrlScheme(String redirectUrl) {
-    // Remove when package limitation will be fixed
-    // https://pub.dev/packages/flutter_web_auth_2#windows-and-linux
-    if (PlatformInfos.isLinux || PlatformInfos.isWindows) {
-      return "http://localhost:60665";
+    if (PlatformInfos.isLinows) {
+      return linowsRedirectUrl;
     }
     return Uri.parse(redirectUrl).scheme;
   }
@@ -112,8 +112,8 @@ mixin ConnectPageMixin {
       redirectUrl: redirectUrl,
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    print("tez: urlScheme = $urlScheme");
-    return await FlutterWebAuth2.authenticate(
+
+    return FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,
       options: const FlutterWebAuth2Options(
@@ -222,6 +222,7 @@ mixin ConnectPageMixin {
   }
 
   String _generateRedirectUrl(String homeserver) {
+    if (PlatformInfos.isLinows) return linowsRedirectUrl;
     if (kIsWeb) {
       String? homeserverParam = '';
       if (homeserver.isNotEmpty) {
