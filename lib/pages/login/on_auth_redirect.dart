@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -33,16 +34,34 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> {
     return queryParams[key];
   }
 
+  static bool get homeserverIsConfigured =>
+      AppConfig.homeserver != 'https://example.com/' ||
+      AppConfig.homeserver.isNotEmpty;
+
   Future<void> tryLoggingUsingToken() async {
     try {
-      final loginToken = getQueryParameter('loginToken');
-      final homeserver = getQueryParameter('homeserver');
-      if (loginToken == null ||
-          loginToken.isEmpty ||
-          homeserver == null ||
-          homeserver.isEmpty) {
+      final isConfigured = await AppConfig.initConfigCompleter.future;
+      if (!isConfigured) {
+        if (!AppConfig.hasReachedMaxRetries) {
+          tryLoggingUsingToken();
+        } else {
+          Logs().e(
+            'OnAuthRedirect::tryGetHomeserver(): Config not found',
+          );
+          TwakeApp.router.go('/home', extra: true);
+        }
+      }
+      final homeserver = AppConfig.homeserver;
+      if (!homeserverIsConfigured) {
         throw Exception(
-          'tryLoggingUsingToken(): Missing loginToken or homeserver',
+          'tryLoggingUsingToken(): Missing homeserver',
+        );
+      }
+
+      final loginToken = getQueryParameter('loginToken');
+      if (loginToken == null || loginToken.isEmpty) {
+        throw Exception(
+          'tryLoggingUsingToken(): Missing loginToken',
         );
       }
       Logs().i('tryLoggingUsingToken::loginToken: $loginToken');
