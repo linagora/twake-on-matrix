@@ -1,12 +1,12 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 class OnAuthRedirect extends StatefulWidget {
   const OnAuthRedirect({super.key});
@@ -15,35 +15,23 @@ class OnAuthRedirect extends StatefulWidget {
   State<OnAuthRedirect> createState() => _OnAuthRedirectState();
 }
 
-class _OnAuthRedirectState extends State<OnAuthRedirect> {
+class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      tryLoggingUsingToken();
+      tryLoggingUsingToken(context: context);
     });
   }
 
-  String? getQueryParameter(String key) {
-    final questionMarkIndex = html.window.location.href.indexOf('?');
-    if (questionMarkIndex == -1) {
-      return null;
-    }
-    final queryParams =
-        Uri.parse(html.window.location.href, questionMarkIndex).queryParameters;
-    return queryParams[key];
-  }
-
-  static bool get homeserverIsConfigured =>
-      AppConfig.homeserver != 'https://example.com/' ||
-      AppConfig.homeserver.isNotEmpty;
-
-  Future<void> tryLoggingUsingToken() async {
+  Future<void> tryLoggingUsingToken({
+    required BuildContext context,
+  }) async {
     try {
       final isConfigured = await AppConfig.initConfigCompleter.future;
       if (!isConfigured) {
         if (!AppConfig.hasReachedMaxRetries) {
-          tryLoggingUsingToken();
+          tryLoggingUsingToken(context: context);
         } else {
           throw Exception(
             'tryLoggingUsingToken(): Config not found',
