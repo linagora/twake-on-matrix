@@ -43,6 +43,20 @@ mixin ConnectPageMixin {
   bool supportsLogin(BuildContext context) =>
       supportsFlow(context: context, flowType: 'm.login.password');
 
+  String? getQueryParameter(String key) {
+    final questionMarkIndex = html.window.location.href.indexOf('?');
+    if (questionMarkIndex == -1) {
+      return null;
+    }
+    final queryParams =
+        Uri.parse(html.window.location.href, questionMarkIndex).queryParameters;
+    return queryParams[key];
+  }
+
+  bool get homeserverIsConfigured =>
+      AppConfig.homeserver != 'https://example.com/' ||
+      AppConfig.homeserver.isNotEmpty;
+
   String _getRedirectUrlScheme(String redirectUrl) {
     return Uri.parse(redirectUrl).scheme;
   }

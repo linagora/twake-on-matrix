@@ -3,11 +3,14 @@ import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_s
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/exception/homeserver_exception.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:universal_html/html.dart' as html;
 
 class AutoHomeserverPicker extends StatefulWidget {
   final bool? loggedOut;
@@ -161,6 +164,25 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       Logs().d(
         "AutoHomeserverPickerController: _initializeAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
       );
+      final loginToken = getQueryParameter('loginToken');
+      if (loginToken != null || loginToken?.isNotEmpty == true) {
+        Matrix.of(context).loginType = LoginType.mLoginToken;
+        Matrix.of(context).loginHomeserverSummary =
+            await Matrix.of(context).getLoginClient().checkHomeserver(
+                  Uri.parse(
+                    AppConfig.homeserver,
+                  ),
+                );
+        await TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => Matrix.of(context).getLoginClient().login(
+                LoginType.mLoginToken,
+                token: loginToken,
+                initialDeviceDisplayName: PlatformInfos.clientName,
+              ),
+        );
+        _resetLocationPath();
+        return;
+      }
       if (_isSaasPlatform) {
         _autoConnectSaas();
       } else {
@@ -171,6 +193,10 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         autoHomeserverPickerUIState.value = AutoHomeServerPickerInitialState();
       }
     }
+  }
+
+  void _resetLocationPath() {
+    html.window.history.replaceState({}, '', '/#/rooms');
   }
 
   @override
