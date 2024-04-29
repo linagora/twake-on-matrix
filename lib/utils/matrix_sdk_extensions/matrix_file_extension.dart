@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/stream_list_int_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -111,41 +112,16 @@ extension MatrixFileExtension on MatrixFile {
     if (bytes != null || readStream == null) {
       return this;
     }
-
     return MatrixFile(
-      bytes: await _streamToUint8List(readStream!),
+      bytes: await streamToUint8List(readStream!),
       name: name,
       mimeType: mimeType,
       filePath: filePath,
     ).detectFileType;
   }
 
-  Future<Uint8List> _streamToUint8List(Stream<List<int>> stream) async {
-    var byteData = ByteData(0);
-    var length = 0;
-
-    await for (final chunk in stream) {
-      final chunkLength = chunk.length;
-      final newLength = length + chunkLength;
-
-      if (newLength > byteData.lengthInBytes) {
-        final newByteData = ByteData(newLength);
-
-        for (var i = 0; i < length; i++) {
-          newByteData.setUint8(i, byteData.getUint8(i));
-        }
-
-        byteData = newByteData;
-      }
-
-      for (var i = 0; i < chunkLength; i++) {
-        byteData.setUint8(length + i, chunk[i]);
-      }
-
-      length = newLength;
-    }
-
-    return Uint8List.view(byteData.buffer, 0, length);
+  Future<Uint8List> streamToUint8List(Stream<List<int>> stream) async {
+    return await stream.toUint8List();
   }
 
   bool get isFileHaveThumbnail =>
