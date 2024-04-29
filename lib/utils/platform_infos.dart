@@ -32,7 +32,9 @@ abstract class PlatformInfos {
 
   static bool get isDesktop => isLinux || isWindows || isMacOS;
 
-  static bool get isLinows => isLinux || isWindows;
+  static bool get isLinuxOrWindows => isLinux || isWindows;
+
+  static bool get isWebOrDesktop => isWeb || isDesktop;
 
   static bool get usesTouchscreen => !isMobile;
 

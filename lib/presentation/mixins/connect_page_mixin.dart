@@ -61,7 +61,7 @@ mixin ConnectPageMixin {
       AppConfig.homeserver.isNotEmpty;
 
   String _getRedirectUrlScheme(String redirectUrl) {
-    if (PlatformInfos.isLinows) {
+    if (PlatformInfos.isLinuxOrWindows) {
       return linowsRedirectUrl;
     }
     return Uri.parse(redirectUrl).scheme;
@@ -222,7 +222,7 @@ mixin ConnectPageMixin {
   }
 
   String _generateRedirectUrl(String homeserver) {
-    if (PlatformInfos.isLinows) return linowsRedirectUrl;
+    if (PlatformInfos.isLinuxOrWindows) return linowsRedirectUrl;
     if (kIsWeb) {
       String? homeserverParam = '';
       if (homeserver.isNotEmpty) {

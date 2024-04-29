@@ -120,8 +120,7 @@ class EmotesSettingsView extends StatelessWidget {
                         final image = controller.pack!.images[imageCode]!;
                         final textEditingController = TextEditingController();
                         textEditingController.text = imageCode;
-                        final useShortCuts =
-                            (PlatformInfos.isWeb || PlatformInfos.isDesktop);
+                        final useShortCuts = PlatformInfos.isWebOrDesktop;
                         return ListTile(
                           leading: Container(
                             width: 180.0,

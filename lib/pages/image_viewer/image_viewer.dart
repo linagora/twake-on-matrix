@@ -45,7 +45,7 @@ class ImageViewerController extends State<ImageViewer> {
   @override
   void initState() {
     super.initState();
-    if (!PlatformInfos.isWeb && widget.event != null) {
+    if (!PlatformInfos.isWebOrDesktop && widget.event != null) {
       handleDownloadFile(widget.event!);
     }
   }

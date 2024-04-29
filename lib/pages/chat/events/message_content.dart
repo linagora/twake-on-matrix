@@ -76,7 +76,6 @@ class MessageContent extends StatelessWidget
             if (PlatformInfos.isMobile ||
                     PlatformInfos.isMacOS ||
                     PlatformInfos.isWeb
-                // TODO: test this
                 // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
                 // is fixed
                 //   || PlatformInfos.isLinux
@@ -102,7 +101,7 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!PlatformInfos.isWeb) ...[
+                  if (!PlatformInfos.isWebOrDesktop) ...[
                     MessageDownloadContent(
                       event,
                     ),
@@ -127,7 +126,7 @@ class MessageContent extends StatelessWidget
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (!PlatformInfos.isWeb) ...[
+                if (!PlatformInfos.isWebOrDesktop) ...[
                   MessageDownloadContent(
                     event,
                   ),
@@ -318,7 +317,7 @@ class _MessageImageBuilder extends StatelessWidget {
     return matrixFile != null &&
         matrixFile.filePath != null &&
         matrixFile is MatrixImageFile &&
-        !PlatformInfos.isWeb;
+        !PlatformInfos.isWebOrDesktop;
   }
 }
 

@@ -69,7 +69,7 @@ class ImageViewerView extends StatelessWidget {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            if (PlatformInfos.isWeb) {
+            if (PlatformInfos.isWebOrDesktop) {
               Navigator.of(context).pop();
             } else {
               controller.showAppbarPreview.toggle();
@@ -101,7 +101,7 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isWebOrDesktop) {
       return FutureBuilder(
         future: event.downloadAndDecryptAttachment(
           getThumbnail: true,
