@@ -199,21 +199,21 @@ extension DownloadFileExtension on Event {
         ),
       );
     } finally {
-      await _clearEncryptedFile(
+      await _clearDecryptedFile(
         eventId: eventId,
         filename: filename,
       );
     }
   }
 
-  Future<void> _clearEncryptedFile({
+  Future<void> _clearDecryptedFile({
     required String eventId,
     required String filename,
   }) async {
     try {
-      final encryptedFilePath = await StorageDirectoryManager.instance
-          .getFilePathInAppDownloads(eventId: eventId, fileName: filename);
-      await File(encryptedFilePath).delete();
+      final decryptedFilePath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: filename);
+      await File(decryptedFilePath).delete();
     } catch (e) {
       Logs().e(
         '_clearEncryptedFile(): $e',
