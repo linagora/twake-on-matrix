@@ -1,14 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
-import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
@@ -39,13 +32,9 @@ class EventVideoPlayer extends StatelessWidget {
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
 
-  final VoidCallback? onPop;
-
   final VoidCallback? onVideoTapped;
 
   final Widget centerWidget;
-
-  static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   const EventVideoPlayer(
     this.event, {
@@ -57,7 +46,6 @@ class EventVideoPlayer extends StatelessWidget {
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
     this.noResizeThumbnail = false,
-    this.onPop,
     this.onVideoTapped,
     this.centerWidget = const CenterVideoButton(icon: Icons.play_arrow),
   }) : super(key: key);
@@ -80,8 +68,6 @@ class EventVideoPlayer extends StatelessWidget {
           onTap: () {
             if (onVideoTapped != null) {
               onVideoTapped!.call();
-            } else {
-              _onTapVideo(context);
             }
           },
           child: SizedBox(
@@ -128,26 +114,6 @@ class EventVideoPlayer extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _onTapVideo(BuildContext context) async {
-    final result = await Navigator.of(
-      context,
-      rootNavigator: PlatformInfos.isWeb,
-    ).push(
-      HeroPageRoute(
-        builder: (context) {
-          return InteractiveViewerGallery(
-            itemBuilder: DownloadVideoWidget(
-              event: event,
-            ),
-          );
-        },
-      ),
-    );
-    if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
-      onPop?.call();
-    }
   }
 }
 

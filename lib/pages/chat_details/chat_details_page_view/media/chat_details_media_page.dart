@@ -12,6 +12,11 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
+import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
+import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/hero_page_route.dart';
 
 class ChatDetailsMediaPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
@@ -117,8 +122,28 @@ class _VideoItem extends StatelessWidget {
       thumbnailCacheKey: event.eventId,
       thumbnailCacheMap: thumbnailCacheMap,
       noResizeThumbnail: true,
-      onPop: closeRightColumn,
       centerWidget: centerVideoWidget,
+      onVideoTapped: () => _onTapVideo(context),
     );
+  }
+
+  Future<void> _onTapVideo(BuildContext context) async {
+    final result = await Navigator.of(
+      context,
+      rootNavigator: PlatformInfos.isWeb,
+    ).push(
+      HeroPageRoute(
+        builder: (context) {
+          return InteractiveViewerGallery(
+            itemBuilder: DownloadVideoWidget(
+              event: event,
+            ),
+          );
+        },
+      ),
+    );
+    if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
+      closeRightColumn?.call();
+    }
   }
 }

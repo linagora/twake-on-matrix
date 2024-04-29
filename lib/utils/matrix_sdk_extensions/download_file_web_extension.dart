@@ -11,6 +11,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/exception/download_file_web_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:fluffychat/utils/stream_list_int_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileWebExtension on Event {
@@ -80,7 +81,7 @@ extension DownloadFileWebExtension on Event {
       final database = room.client.database;
       final mediaAPI = getIt<MediaAPI>();
       final downloadLink = mxcUrl.getDownloadLink(room.client);
-      final uint8List = await mediaAPI.downloadFileWeb(
+      final stream = await mediaAPI.downloadFileWeb(
         uri: downloadLink,
         onReceiveProgress: (receive, total) {
           downloadStreamController.add(
@@ -94,9 +95,10 @@ extension DownloadFileWebExtension on Event {
         },
         cancelToken: cancelToken,
       );
+      final uint8List = await stream.toUint8List();
       if (database != null &&
           storeable &&
-          uint8List.lengthInBytes < database.maxFileSize) {
+          uint8List.length < database.maxFileSize) {
         await database.storeEventFile(
           eventId,
           filename,
@@ -109,7 +111,7 @@ extension DownloadFileWebExtension on Event {
         uint8List,
         downloadStreamController,
       );
-      return MatrixFile(name: body);
+      return MatrixFile(bytes: uint8List, name: body);
     } catch (e) {
       if (e is CancelRequestException) {
         Logs().i("_handleDownloadFileWeb: user cancel the download");
@@ -125,19 +127,19 @@ extension DownloadFileWebExtension on Event {
   }
 
   Future<void> _handleDownloadFileWebSuccess(
-    Uint8List uint8list,
+    Uint8List uint8List,
     StreamController<Either<Failure, Success>> streamController,
   ) async {
     if (isAttachmentEncrypted) {
       await _handleDecryptedFileWeb(
         streamController: streamController,
-        uint8list: uint8list,
+        uint8list: uint8List,
       );
     } else {
       streamController.add(
         Right(
           DownloadMatrixFileSuccessState(
-            matrixFile: MatrixFile(bytes: uint8list, name: body),
+            matrixFile: MatrixFile(bytes: uint8List, name: body),
           ),
         ),
       );

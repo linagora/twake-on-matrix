@@ -1,10 +1,11 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
-import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
+import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
+import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
@@ -357,8 +358,15 @@ class _MessageVideoBuilder extends StatelessWidget {
         displayImageInfo: displayImageInfo,
       );
     }
-    return EventVideoPlayer(
-      event,
+    if (PlatformInfos.isWeb) {
+      return MessageVideoDownloadContentWeb(
+        event: event,
+        width: displayImageInfo.size.width,
+        height: displayImageInfo.size.height,
+      );
+    }
+    return MessageVideoDownloadContent(
+      event: event,
       width: displayImageInfo.size.width,
       height: displayImageInfo.size.height,
     );
