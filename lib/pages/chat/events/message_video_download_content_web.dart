@@ -1,10 +1,10 @@
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/mixins/handle_download_file_from_queue_in_web_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
+import 'package:fluffychat/widgets/mixins/download_file_on_web_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -29,21 +29,11 @@ class MessageVideoDownloadContentWeb extends StatefulWidget {
 
 class _MessageVideoDownloadContentWebState
     extends State<MessageVideoDownloadContentWeb>
-    with HandleDownloadFileFromQueueInWebMixin, PlayVideoActionMixin {
+    with
+        DownloadFileOnWebMixin<MessageVideoDownloadContentWeb>,
+        PlayVideoActionMixin {
   @override
-  void initState() {
-    super.initState();
-    trySetupDownloadingStreamSubcription(widget.event.eventId);
-    if (streamSubscription != null) {
-      downloadFileStateNotifier.value = const DownloadingPresentationState();
-    }
-  }
-
-  @override
-  void dispose() {
-    downloadFileStateNotifier.dispose();
-    super.dispose();
-  }
+  Event get event => widget.event;
 
   @override
   void handleDownloadMatrixFileSuccessDone({
@@ -56,7 +46,6 @@ class _MessageVideoDownloadContentWebState
       downloadFileStateNotifier.dispose();
     }
 
-    super.handleDownloadMatrixFileSuccessDone(success: success);
     streamSubscription?.cancel();
   }
 
@@ -104,7 +93,7 @@ class _MessageVideoDownloadContentWebState
             width: widget.width,
             height: widget.height,
             onVideoTapped: () async {
-              onDownloadFileTapped(widget.event);
+              onDownloadFileTap();
             },
             centerWidget: const CenterVideoButton(
               icon: Icons.arrow_downward,

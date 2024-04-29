@@ -25,6 +25,12 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
 
   Event get event;
 
+  void onDownloadedFileDone(String filePath) {
+    Logs().i(
+      'HandleDownloadFileFromQueueInMobileMixin::onDownloadedFile(): $filePath',
+    );
+  }
+
   @override
   void initState() {
     super.initState();
