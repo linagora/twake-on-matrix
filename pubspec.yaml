@@ -150,7 +150,6 @@ dependencies:
   tuple: ^2.0.2
   lottie: ^2.3.2
   wechat_camera_picker: 4.2.1
-  open_file: ^3.3.2
   mime: ^1.0.4
   async: ^2.11.0
   cached_network_image: ^3.2.3
@@ -175,6 +174,9 @@ dependencies:
   flutter_portal: 1.1.4
   external_path: 1.0.3
   gal: 2.3.0
+  open_app_file:
+    git:
+      url: git@github.com:aws1313/open_app_file.git
 
 dev_dependencies:
   build_runner: ^2.3.3

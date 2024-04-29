@@ -13,7 +13,8 @@ class StorageDirectoryManager {
 
   static StorageDirectoryManager get instance => _instance;
 
-  Future<String> getFileStoreDirectory() async {
+  Future<String> getFileStoreDirectory({bool isTemporary = true}) async {
+    if (!isTemporary) return (await getDownloadsDirectory())!.path;
     try {
       try {
         return (await getTemporaryDirectory()).path;
@@ -28,10 +29,14 @@ class StorageDirectoryManager {
   Future<String> getFilePathInAppDownloads({
     required String eventId,
     required String fileName,
+    bool isTemporary = true,
   }) async {
-    final fileStoreDirectory =
-        await StorageDirectoryManager.instance.getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/$fileName';
+    final fileStoreDirectory = await StorageDirectoryManager.instance
+        .getFileStoreDirectory(isTemporary: isTemporary);
+    if (isTemporary) {
+      return '$fileStoreDirectory/$eventId/$fileName';
+    }
+    return '$fileStoreDirectory/${AppConfig.applicationName}/$fileName';
   }
 
   Future<String?> getTwakeDownloadsFolderInDevice() async {
@@ -71,9 +76,13 @@ class StorageDirectoryManager {
   Future<String> getDecryptedFilePath({
     required String eventId,
     required String fileName,
+    bool isTemporary = true,
   }) async {
-    final fileStoreDirectory =
-        await StorageDirectoryManager.instance.getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/decrypted-$fileName';
+    final fileStoreDirectory = await StorageDirectoryManager.instance
+        .getFileStoreDirectory(isTemporary: isTemporary);
+    if (isTemporary) {
+      return '$fileStoreDirectory/$eventId/decrypted-$fileName';
+    }
+    return '$fileStoreDirectory/${AppConfig.applicationName}/decrypted-$fileName';
   }
 }

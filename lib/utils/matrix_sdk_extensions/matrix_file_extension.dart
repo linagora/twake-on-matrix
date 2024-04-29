@@ -16,7 +16,7 @@ import 'package:file_saver/file_saver.dart';
 
 extension MatrixFileExtension on MatrixFile {
   Future<String?> downloadFile(BuildContext context) async {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isWebOrDesktop) {
       return await downloadFileInWeb(context);
     }
 
@@ -51,10 +51,20 @@ extension MatrixFileExtension on MatrixFile {
         name: name,
         bytes: bytes,
       );
+
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.fileSavedToDownloads,
+      );
       return '$directory/$name';
     } catch (e) {
       Logs().e(
         "MatrixFileExtension()::downloadFileInWeb()::Error: $e",
+      );
+
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.downloadImageError,
       );
     }
     return null;

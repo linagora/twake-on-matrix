@@ -87,7 +87,8 @@ class ChatAdaptiveScaffoldBuilderController
                   builder: (_) => Stack(
                     children: [
                       body!,
-                      if (rightColumnType != null && PlatformInfos.isWebOrDesktop)
+                      if (rightColumnType != null &&
+                          PlatformInfos.isWebOrDesktop)
                         widget.rightBuilder(
                           this,
                           isInStack: true,

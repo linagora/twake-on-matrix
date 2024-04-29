@@ -101,7 +101,7 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!PlatformInfos.isWebOrDesktop) ...[
+                  if (PlatformInfos.isMobile) ...[
                     MessageDownloadContent(
                       event,
                     ),
@@ -126,7 +126,7 @@ class MessageContent extends StatelessWidget
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (!PlatformInfos.isWebOrDesktop) ...[
+                if (PlatformInfos.isMobile || PlatformInfos.isDesktop) ...[
                   MessageDownloadContent(
                     event,
                   ),
