@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fluffychat/data/model/media/download_file_response.dart';
@@ -80,18 +79,18 @@ class MediaAPI {
     );
   }
 
-  Future<Uint8List> downloadFileWeb({
+  Future<Stream<List<int>>> downloadFileWeb({
     required Uri uri,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final uint8List = await _client
+    final response = await _client
         .get(
       uri.path,
       onReceiveProgress: onReceiveProgress,
       cancelToken: cancelToken,
       options: Options(
-        responseType: ResponseType.bytes,
+        responseType: ResponseType.stream,
       ),
     )
         .onError((error, stackTrace) {
@@ -102,7 +101,7 @@ class MediaAPI {
       }
     });
 
-    return uint8List;
+    return response.stream;
   }
 
   Future<UrlPreviewResponse> getUrlPreview({
