@@ -22,7 +22,9 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
 
   Event get event;
 
-  Future<void> get handlePreview;
+  void handleDownloadMatrixFileSuccessDone({
+    required DownloadMatrixFileSuccessState success,
+  });
 
   @override
   void initState() {
@@ -68,12 +70,13 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
       downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
         matrixFile: success.matrixFile,
       );
-      handlePreview;
+      downloadFileStateNotifier.dispose();
+      handleDownloadMatrixFileSuccessDone(success: success);
       return;
     }
 
     if (TwakeApp.routerKey.currentContext != null) {
-      handlePreview;
+      handleDownloadMatrixFileSuccessDone(success: success);
     }
   }
 

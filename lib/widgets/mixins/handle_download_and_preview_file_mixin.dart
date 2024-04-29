@@ -107,6 +107,7 @@ mixin HandleDownloadAndPreviewFileMixin {
   }
 
   Future<void> handlePreviewWeb({
+    MatrixFile? matrixFile,
     required Event event,
     required BuildContext context,
   }) async {
@@ -116,10 +117,10 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
 
     if (event.mimeType.isPdfFile()) {
-      return await previewPdfWeb(context, event);
+      return await previewPdfWeb(context, event, matrixFile: matrixFile);
     }
 
-    await event.saveFile(context);
+    await event.saveFile(context, matrixFile: matrixFile);
   }
 
   void _handleDownloadFileForPreviewMobile({
@@ -212,15 +213,20 @@ mixin HandleDownloadAndPreviewFileMixin {
     );
   }
 
-  Future<void> previewPdfWeb(BuildContext context, Event event) async {
-    final pdf = await event.getFile(context);
-    if (pdf.result == null || event.sizeString != pdf.result?.sizeString) {
+  Future<void> previewPdfWeb(
+    BuildContext context,
+    Event event, {
+    MatrixFile? matrixFile,
+  }) async {
+    matrixFile ??= (await event.getFile(context)).result;
+
+    if (matrixFile == null || event.sizeString != matrixFile.sizeString) {
       TwakeSnackBar.show(context, L10n.of(context)!.errorGettingPdf);
 
       return;
     }
 
-    final blob = html.Blob([pdf.result!.bytes], 'application/pdf');
+    final blob = html.Blob([matrixFile.bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);
     html.window.open(url, "_blank");
     html.Url.revokeObjectUrl(url);

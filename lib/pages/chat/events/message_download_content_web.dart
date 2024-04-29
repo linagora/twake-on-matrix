@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
@@ -35,10 +34,31 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
   Event get event => widget.event;
 
   @override
-  Future<void> get handlePreview => handlePreviewWeb(
+  void handleDownloadMatrixFileSuccessDone({
+    required DownloadMatrixFileSuccessState success,
+  }) {
+    streamSubscription?.cancel();
+    if (mounted) {
+      downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
+        matrixFile: success.matrixFile,
+      );
+      downloadFileStateNotifier.dispose();
+      handlePreviewWeb(
+        event: widget.event,
+        matrixFile: success.matrixFile,
+        context: context,
+      );
+      return;
+    }
+
+    if (TwakeApp.routerKey.currentContext != null) {
+      handlePreviewWeb(
+        matrixFile: success.matrixFile,
         event: widget.event,
         context: TwakeApp.routerKey.currentContext!,
       );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +89,7 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
           return InkWell(
             onTap: () {
               handlePreviewWeb(
+                matrixFile: state.matrixFile,
                 event: widget.event,
                 context: context,
               );

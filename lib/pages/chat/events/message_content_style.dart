@@ -59,6 +59,10 @@ class MessageContentStyle {
 
   static const double iconInsideVideoButtonSize = 48;
 
+  static const double cancelButtonSize = 28;
+
+  static const double downloadButtonSize = 32;
+
   static const double strokeVideoWidth = 2;
 
   static const Color backgroundColorCenterButton = Colors.black38;

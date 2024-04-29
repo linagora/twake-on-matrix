@@ -8,9 +8,9 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
+import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/storage_directory_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -53,7 +53,7 @@ mixin HandleDownloadFileFromQueueInMobileMixin {
 
   Future<void> checkFileInDownloadsInApp(Event event) async {
     final filePath =
-        await StorageDirectoryUtils.instance.getFilePathInAppDownloads(
+        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: event.eventId,
       fileName: event.filename,
     );

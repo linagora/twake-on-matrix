@@ -28,10 +28,13 @@ extension LocalizedBody on Event {
         future: downloadAndDecryptAttachment,
       );
 
-  Future<String?> saveFile(BuildContext context) async {
-    final matrixFile = await getFile(context);
+  Future<String?> saveFile(
+    BuildContext context, {
+    MatrixFile? matrixFile,
+  }) async {
+    matrixFile ??= (await getFile(context)).result;
 
-    return await matrixFile.result?.downloadFile(context);
+    return await matrixFile?.downloadFile(context);
   }
 
   String get filenameEllipsized {
