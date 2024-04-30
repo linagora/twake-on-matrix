@@ -217,8 +217,10 @@ class _MxcImageState extends State<MxcImage> {
   void _onTap(BuildContext context) async {
     if (widget.onTapPreview != null) {
       widget.onTapPreview!();
-      final result =
-          await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      final result = await Navigator.of(
+        context,
+        rootNavigator: PlatformInfos.isWebOrDesktop,
+      ).push(
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
