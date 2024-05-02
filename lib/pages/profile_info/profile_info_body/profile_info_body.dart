@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -7,12 +8,18 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
+import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -20,12 +27,15 @@ class ProfileInfoBody extends StatefulWidget {
   const ProfileInfoBody({
     required this.user,
     this.onNewChatOpen,
+    this.onUpdatedMembers,
     Key? key,
   }) : super(key: key);
 
   final User? user;
 
-  final void Function()? onNewChatOpen;
+  final VoidCallback? onNewChatOpen;
+
+  final VoidCallback? onUpdatedMembers;
 
   @override
   State<ProfileInfoBody> createState() => ProfileInfoBodyController();
@@ -119,6 +129,93 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
               ),
       );
     }
+  }
+
+  void leaveFromChat() async {
+    if (user == null) return;
+    if (await showOkCancelAlertDialog(
+          useRootNavigator: false,
+          context: context,
+          title: L10n.of(context)!.removeUser,
+          okLabel: L10n.of(context)!.remove,
+          cancelLabel: L10n.of(context)!.cancel,
+          message: L10n.of(context)!.removeReason(
+            user?.displayName ?? '',
+          ),
+        ) ==
+        OkCancelResult.ok) {
+      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+        future: () => user!.kick(),
+      );
+      if (result.error != null) {
+        TwakeSnackBar.show(
+          context,
+          result.error!.message,
+        );
+        return;
+      }
+      Navigator.of(context).pop();
+      widget.onUpdatedMembers?.call();
+    }
+  }
+
+  List<ProfileInfoActions> profileInfoActions() {
+    return [
+      ProfileInfoActions.sendMessage,
+      ProfileInfoActions.removeFromGroup,
+    ];
+  }
+
+  void handleActions(ProfileInfoActions action) {
+    switch (action) {
+      case ProfileInfoActions.sendMessage:
+        openNewChat();
+        break;
+      case ProfileInfoActions.removeFromGroup:
+        leaveFromChat();
+        break;
+      default:
+        break;
+    }
+  }
+
+  Widget buildProfileInfoActions(BuildContext context) {
+    return Column(
+      children: profileInfoActions().map((action) {
+        return Column(
+          children: [
+            Divider(
+              thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
+              color: LinagoraSysColors.material().surface,
+            ),
+            Padding(
+              padding: ProfileInfoBodyViewStyle.actionItemPadding,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: () => handleActions(action),
+                      icon: action.icon(),
+                      label: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              action.label(context),
+                              style: action.textStyle(context),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
   }
 
   @override
