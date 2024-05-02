@@ -14,10 +14,13 @@ class ProfileInfoBodyViewStyle {
 
   static const double bigDividerThickness = 4;
 
-  static const EdgeInsetsGeometry newChatButtonPadding = EdgeInsets.only(
-    bottom: 16.0,
+  static const EdgeInsetsGeometry actionItemPadding = EdgeInsets.only(
     left: 16.0,
     right: 16.0,
+  );
+
+  static const EdgeInsetsGeometry actionsPadding = EdgeInsets.only(
+    bottom: 16.0,
   );
 
   static const EdgeInsetsGeometry copiableRowPadding = EdgeInsets.symmetric(

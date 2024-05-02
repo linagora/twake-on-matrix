@@ -4,9 +4,6 @@ import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_con
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-
 class ProfileInfoBodyView extends StatelessWidget {
   const ProfileInfoBodyView({
     required this.controller,
@@ -36,34 +33,9 @@ class ProfileInfoBodyView extends StatelessWidget {
           ),
         ),
         if (!controller.isOwnProfile) ...[
-          Divider(
-            thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
-            color: LinagoraSysColors.material().surface,
-          ),
           Padding(
-            padding: ProfileInfoBodyViewStyle.newChatButtonPadding,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: () => controller.openNewChat(),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: L10n.of(context)?.newChat != null
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  L10n.of(context)!.sendMessage,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              ],
-            ),
+            padding: ProfileInfoBodyViewStyle.actionsPadding,
+            child: controller.buildProfileInfoActions(context),
           ),
         ] else
           const SizedBox(height: 16),
