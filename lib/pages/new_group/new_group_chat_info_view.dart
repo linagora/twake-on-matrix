@@ -220,14 +220,11 @@ class NewGroupChatInfoView extends StatelessWidget {
               ),
               labelText: L10n.of(context)!.widgetName,
               labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 16,
-                    letterSpacing: 0.4,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
               hintText: L10n.of(context)!.enterGroupName,
               hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    letterSpacing: -0.15,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: LinagoraRefColors.material().neutral[60],
                   ),
               contentPadding: NewGroupChatInfoStyle.contentPadding,
             ),
