@@ -3049,5 +3049,6 @@
   "dangerZone": "Danger zone",
   "leaveGroupSubtitle": "This group will still remain after you left",
   "leaveChatFailed": "Failed to leave the chat",
-  "invalidLoginToken": "Invalid login token"
+  "invalidLoginToken": "Invalid login token",
+  "copiedPublicKeyToClipboard": "Copied public key to clipboard."
 }

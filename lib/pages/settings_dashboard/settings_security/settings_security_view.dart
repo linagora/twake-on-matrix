@@ -10,6 +10,7 @@ import 'settings_security.dart';
 
 class SettingsSecurityView extends StatelessWidget {
   final SettingsSecurityController controller;
+
   const SettingsSecurityView(this.controller, {Key? key}) : super(key: key);
 
   @override
@@ -69,27 +70,32 @@ class SettingsSecurityView extends StatelessWidget {
                     style: const TextStyle(fontFamily: 'monospace'),
                   ),
                   leading: const Icon(Icons.vpn_key_outlined),
+                  trailing: InkWell(
+                    onTap: controller.copyPublicKey,
+                    child: const Icon(Icons.content_copy),
+                  ),
                 ),
               },
               const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.tap_and_play),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(
-                  L10n.of(context)!.dehydrate,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                onTap: controller.dehydrateAction,
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete_outlined),
-                trailing: const Icon(Icons.chevron_right_outlined),
-                title: Text(
-                  L10n.of(context)!.deleteAccount,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                onTap: controller.deleteAccountAction,
-              ),
+              //TODO #1734: Remove dehydrate and delete account
+              // ListTile(
+              //   leading: const Icon(Icons.tap_and_play),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(
+              //     L10n.of(context)!.dehydrate,
+              //     style: const TextStyle(color: Colors.red),
+              //   ),
+              //   onTap: controller.dehydrateAction,
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.delete_outlined),
+              //   trailing: const Icon(Icons.chevron_right_outlined),
+              //   title: Text(
+              //     L10n.of(context)!.deleteAccount,
+              //     style: const TextStyle(color: Colors.red),
+              //   ),
+              //   onTap: controller.deleteAccountAction,
+              // ),
             ],
           ),
         ),
