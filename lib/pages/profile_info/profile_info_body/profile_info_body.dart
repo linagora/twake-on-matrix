@@ -162,7 +162,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
   List<ProfileInfoActions> profileInfoActions() {
     return [
       ProfileInfoActions.sendMessage,
-      ProfileInfoActions.removeFromGroup,
+      if (user!.canKick) ProfileInfoActions.removeFromGroup,
     ];
   }
 
