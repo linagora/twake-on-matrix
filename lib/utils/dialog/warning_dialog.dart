@@ -27,8 +27,10 @@ class WarningDialog {
     String? title,
     String? message,
     String? acceptText,
+    Color? acceptTextColor,
     OnAcceptButton? onAccept,
     String? cancelText,
+    Color? cancelTextColor,
     OnAcceptButton? onCancel,
   }) {
     showDialog(
@@ -40,6 +42,7 @@ class WarningDialog {
         actions: [
           DialogAction(
             text: cancelText ?? L10n.of(context)!.cancel,
+            textColor: cancelTextColor,
             onPressed: () {
               Navigator.pop(context);
               onCancel?.call();
@@ -47,6 +50,7 @@ class WarningDialog {
           ),
           DialogAction(
             text: acceptText ?? L10n.of(context)!.ok,
+            textColor: acceptTextColor,
             onPressed: () {
               Navigator.pop(context);
               onAccept?.call();

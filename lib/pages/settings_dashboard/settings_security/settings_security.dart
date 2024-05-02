@@ -137,7 +137,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     file.result?.downloadFile(context);
   }
 
-  void copyPublicKey() {
+  Future<void> copyPublicKey() async {
     Clipboard.setData(
       ClipboardData(text: Matrix.of(context).client.fingerprintKey.beautified),
     );
