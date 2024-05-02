@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -99,64 +100,6 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     }
   }
 
-  void deleteAccountAction() async {
-    if (await showOkCancelAlertDialog(
-          useRootNavigator: false,
-          context: context,
-          title: L10n.of(context)!.warning,
-          message: L10n.of(context)!.deactivateAccountWarning,
-          okLabel: L10n.of(context)!.ok,
-          cancelLabel: L10n.of(context)!.cancel,
-        ) ==
-        OkCancelResult.cancel) {
-      return;
-    }
-    final supposedMxid = Matrix.of(context).client.userID!;
-    final mxids = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.confirmMatrixId,
-      textFields: [
-        DialogTextField(
-          validator: (text) => text == supposedMxid
-              ? null
-              : L10n.of(context)!.supposedMxid(supposedMxid),
-        ),
-      ],
-      okLabel: L10n.of(context)!.delete,
-      cancelLabel: L10n.of(context)!.cancel,
-    );
-    if (mxids == null || mxids.length != 1 || mxids.single != supposedMxid) {
-      return;
-    }
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.pleaseEnterYourPassword,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        const DialogTextField(
-          obscureText: true,
-          hintText: '******',
-          minLines: 1,
-          maxLines: 1,
-        ),
-      ],
-    );
-    if (input == null) return;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.deactivateAccount(
-            auth: AuthenticationPassword(
-              password: input.single,
-              identifier: AuthenticationUserIdentifier(
-                user: Matrix.of(context).client.userID!,
-              ),
-            ),
-          ),
-    );
-  }
-
   void showBootstrapDialog(BuildContext context) async {
     await BootstrapDialog(
       client: Matrix.of(context).client,
@@ -192,6 +135,16 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     );
 
     file.result?.downloadFile(context);
+  }
+
+  void copyPublicKey() {
+    Clipboard.setData(
+      ClipboardData(text: Matrix.of(context).client.fingerprintKey.beautified),
+    );
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.copiedPublicKeyToClipboard,
+    );
   }
 
   @override
