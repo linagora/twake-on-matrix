@@ -59,16 +59,19 @@ class WarningDialogWidget extends StatelessWidget {
 
 class DialogAction {
   final String text;
+  final Color? textColor;
   final VoidCallback? onPressed;
 
   DialogAction({
     required this.text,
     this.onPressed,
+    this.textColor,
   });
 }
 
 class _WarningTextButton extends StatelessWidget {
   final DialogAction action;
+
   const _WarningTextButton({
     required this.action,
   });
@@ -85,7 +88,8 @@ class _WarningTextButton extends StatelessWidget {
           child: Text(
             action.text,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+                  color:
+                      action.textColor ?? Theme.of(context).colorScheme.primary,
                 ),
           ),
         ),

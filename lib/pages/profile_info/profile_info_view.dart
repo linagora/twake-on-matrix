@@ -11,9 +11,12 @@ class ProfileInfoView extends StatelessWidget {
   const ProfileInfoView(
     this.controller, {
     super.key,
+    this.onUpdatedMembers,
   });
 
   final ProfileInfoPageState controller;
+
+  final VoidCallback? onUpdatedMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +61,7 @@ class ProfileInfoView extends StatelessWidget {
       body: ProfileInfoBody(
         user: controller.user,
         onNewChatOpen: controller.widget.onNewChatOpen,
+        onUpdatedMembers: onUpdatedMembers,
       ),
     );
   }

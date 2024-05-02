@@ -9,11 +9,13 @@ class ProfileInfoPage extends StatefulWidget {
     required this.roomId,
     required this.userId,
     this.onNewChatOpen,
+    this.onUpdatedMembers,
   });
 
   final String roomId;
   final String userId;
   final void Function()? onNewChatOpen;
+  final VoidCallback? onUpdatedMembers;
 
   @override
   State<ProfileInfoPage> createState() => ProfileInfoPageState();
@@ -25,5 +27,8 @@ class ProfileInfoPageState extends State<ProfileInfoPage> {
   User? get user => room?.unsafeGetUserFromMemoryOrFallback(widget.userId);
 
   @override
-  Widget build(BuildContext context) => ProfileInfoView(this);
+  Widget build(BuildContext context) => ProfileInfoView(
+        this,
+        onUpdatedMembers: widget.onUpdatedMembers,
+      );
 }
