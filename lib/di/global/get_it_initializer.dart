@@ -6,6 +6,7 @@ import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:fluffychat/data/datasource/phonebook_datasouce.dart';
+import 'package:fluffychat/data/datasource/pubic_room_datasource.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
@@ -17,6 +18,7 @@ import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/pubilc_room_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_config_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.dart';
@@ -28,6 +30,7 @@ import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
+import 'package:fluffychat/data/network/search/public_room_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
 import 'package:fluffychat/data/network/server_config_api.dart';
 import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
@@ -36,6 +39,7 @@ import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.d
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/multiple_account/multiple_account_repository_impl.dart';
+import 'package:fluffychat/data/repository/public_room_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_config_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_search_repository_impl.dart';
@@ -49,6 +53,7 @@ import 'package:fluffychat/domain/repository/localizations/localizations_reposit
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
+import 'package:fluffychat/domain/repository/public_room_reposity.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
@@ -75,6 +80,7 @@ import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/search/public_room_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
@@ -155,6 +161,7 @@ class GetItInitializer {
     getIt.registerSingleton<MediaAPI>(MediaAPI());
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
+    getIt.registerSingleton<PublicRoomAPI>(PublicRoomAPI());
   }
 
   void bindingManager() {
@@ -187,6 +194,9 @@ class GetItInitializer {
     getIt.registerFactory<MultipleAccountDatasource>(
       () => MultipleAccountDatasourceImpl(),
     );
+    getIt.registerFactory<PublicRoomDatasource>(
+      () => PublicRoomDatasourceImpl(),
+    );
   }
 
   void bindingDatasourceImpl() {
@@ -215,6 +225,10 @@ class GetItInitializer {
 
     getIt.registerFactory<ServerSearchDatasourceImpl>(
       () => ServerSearchDatasourceImpl(),
+    );
+
+    getIt.registerFactory<PublicRoomDatasourceImpl>(
+      () => PublicRoomDatasourceImpl(),
     );
   }
 
@@ -248,6 +262,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerConfigRepository>(
       () => ServerConfigRepositoryImpl(),
+    );
+    getIt.registerFactory<PublicRoomRepository>(
+      () => PublicRoomRepositoryImpl(),
     );
   }
 
@@ -349,6 +366,10 @@ class GetItInitializer {
 
     getIt.registerSingleton<DownloadMediaFileInteractor>(
       DownloadMediaFileInteractor(),
+    );
+
+    getIt.registerFactory<PublicRoomInteractor>(
+      () => PublicRoomInteractor(),
     );
   }
 

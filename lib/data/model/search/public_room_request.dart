@@ -9,33 +9,18 @@ class PublicRoomRequest with EquatableMixin {
   @JsonKey(name: 'filter')
   final PublicRoomQueryFilter? filter;
 
-  @JsonKey(name: 'include_all_networks')
-  final bool? includeAllNetworks;
-
   @JsonKey(name: 'limit')
   final int? limit;
 
-  @JsonKey(name: 'since')
-  final String? since;
-
-  @JsonKey(name: 'third_party_instance_id')
-  final String? thirdPartyInstanceId;
-
   PublicRoomRequest({
     this.filter,
-    this.includeAllNetworks = false,
     this.limit,
-    this.since,
-    this.thirdPartyInstanceId,
   });
 
   @override
   List<Object?> get props => [
         filter,
-        includeAllNetworks,
         limit,
-        since,
-        thirdPartyInstanceId,
       ];
 
   factory PublicRoomRequest.fromJson(Map<String, dynamic> json) =>
