@@ -3050,5 +3050,14 @@
   "leaveGroupSubtitle": "This group will still remain after you left",
   "leaveChatFailed": "Failed to leave the chat",
   "invalidLoginToken": "Invalid login token",
-  "copiedPublicKeyToClipboard": "Copied public key to clipboard."
+  "copiedPublicKeyToClipboard": "Copied public key to clipboard.",
+  "removeFromGroup": "Remove from group",
+  "removeUser": "Remove User",
+  "removeReason": "Remove {user} from the group",
+  "@removeReason": {
+    "type": "text",
+    "placeholders": {
+      "user": {}
+    }
+  }
 }
