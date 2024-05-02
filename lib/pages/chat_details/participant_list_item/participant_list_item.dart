@@ -236,6 +236,7 @@ class ParticipantListItem extends StatelessWidget {
                       onNewChatOpen: () {
                         dialogContext.pop();
                       },
+                      onUpdatedMembers: onUpdatedMembers,
                     ),
                   ],
                 ),
