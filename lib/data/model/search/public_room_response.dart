@@ -7,7 +7,7 @@ part 'public_room_response.g.dart';
 @JsonSerializable()
 class PublicRoomResponse with EquatableMixin {
   @JsonKey(name: 'chunk')
-  final PublicRoomsChunk chunk;
+  final List<PublicRoomsChunk> chunk;
 
   @JsonKey(name: 'next_batch')
   final String? nextBatch;
