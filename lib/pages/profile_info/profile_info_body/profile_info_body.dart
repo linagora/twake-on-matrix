@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -13,6 +12,7 @@ import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum
 import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -131,32 +131,32 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
     }
   }
 
-  void leaveFromChat() async {
+  Future<void> removeFromGroupChat() async {
     if (user == null) return;
-    if (await showOkCancelAlertDialog(
-          useRootNavigator: false,
-          context: context,
-          title: L10n.of(context)!.removeUser,
-          okLabel: L10n.of(context)!.remove,
-          cancelLabel: L10n.of(context)!.cancel,
-          message: L10n.of(context)!.removeReason(
-            user?.displayName ?? '',
-          ),
-        ) ==
-        OkCancelResult.ok) {
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => user!.kick(),
-      );
-      if (result.error != null) {
-        TwakeSnackBar.show(
-          context,
-          result.error!.message,
+    WarningDialog.showCancelable(
+      context,
+      message: L10n.of(context)!.removeReason(
+        user?.displayName ?? '',
+      ),
+      title: L10n.of(context)!.removeUser,
+      acceptText: L10n.of(context)!.remove,
+      cancelText: L10n.of(context)!.cancel,
+      acceptTextColor: LinagoraSysColors.material().error,
+      onAccept: () async {
+        WarningDialog.hideWarningDialog(context);
+        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => user!.kick(),
         );
-        return;
-      }
-      Navigator.of(context).pop();
-      widget.onUpdatedMembers?.call();
-    }
+        if (result.error != null) {
+          TwakeSnackBar.show(
+            context,
+            result.error!.message,
+          );
+          return;
+        }
+        widget.onUpdatedMembers?.call();
+      },
+    );
   }
 
   List<ProfileInfoActions> profileInfoActions() {
@@ -172,7 +172,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
         openNewChat();
         break;
       case ProfileInfoActions.removeFromGroup:
-        leaveFromChat();
+        removeFromGroupChat();
         break;
       default:
         break;

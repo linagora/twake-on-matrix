@@ -112,6 +112,7 @@ class ParticipantListItem extends StatelessWidget {
           builder: (ctx) => ProfileInfoPage(
             roomId: member.room.id,
             userId: member.id,
+            onUpdatedMembers: onUpdatedMembers,
           ),
         ),
       );
@@ -126,6 +127,7 @@ class ParticipantListItem extends StatelessWidget {
         return ProfileInfoPage(
           roomId: member.room.id,
           userId: member.id,
+          onUpdatedMembers: onUpdatedMembers,
           onNewChatOpen: () {
             dialogContext.pop();
           },
