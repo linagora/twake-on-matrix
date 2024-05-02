@@ -20,6 +20,10 @@ class HomeserverEndpoint {
   static final ServicePath configPath = ServicePath(
     '/config',
   );
+
+  static final ServicePath publicRoomsPath = ServicePath(
+    '/publicRooms',
+  );
 }
 
 extension ServicePathHomeserver on ServicePath {
