@@ -390,7 +390,7 @@ class MatrixState extends State<Matrix>
     LoginState state,
     Client currentClient,
   ) async {
-    _cancelSubs(currentClient.clientName);
+    await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     ClientManager.removeClientNameFromStore(currentClient.clientName);
     TwakeSnackBar.show(
@@ -466,14 +466,14 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _cancelSubs(String name) {
-    onRoomKeyRequestSub[name]?.cancel();
+  Future<void> _cancelSubs(String name) async {
+    await onRoomKeyRequestSub[name]?.cancel();
     onRoomKeyRequestSub.remove(name);
-    onKeyVerificationRequestSub[name]?.cancel();
+    await onKeyVerificationRequestSub[name]?.cancel();
     onKeyVerificationRequestSub.remove(name);
-    onLoginStateChanged[name]?.cancel();
+    await onLoginStateChanged[name]?.cancel();
     onLoginStateChanged.remove(name);
-    onNotification[name]?.cancel();
+    await onNotification[name]?.cancel();
     onNotification.remove(name);
   }
 
