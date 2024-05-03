@@ -1,3 +1,24 @@
+## [2.5.2+2330] - 2024-05-03
+
+### Fixed
+
+- #1573 Save media to gallery
+- #1461 Update app language setting subtitles
+- #1666 Fix Filename does not resize and time overlapping
+- #1693 Delete the encrypted file after downloading it
+- #1719 Fix can't tag name on mobile
+- #1702 DownloadErrorPresentationState added handle errors
+- #1727 Update login with `matrix.org` homeserver
+- #1728 Fix can't logout on registration site
+- #1658 Fix small bugs
+- #1711 Handle deep link from registration platform
+- #1734 Fix bugs pre-prod
+
+### Added
+
+- #1584 Sent files in room
+- #1695 Leave group
+
 ## [2.5.0+2330] - 2024-04-15
 
 ### Fixed
@@ -2309,6 +2330,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.5.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.5.2
 [2.4.20+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.20
 [2.4.19+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.19
 [2.4.18+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.18
