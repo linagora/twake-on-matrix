@@ -112,6 +112,8 @@ class _MessageState extends State<Message> {
   @override
   void dispose() {
     inViewState?.removeContext(context: context);
+    inViewState?.removeListener(_inviewStateListener);
+    inViewState?.dispose();
     inviewNotifier.dispose();
     super.dispose();
   }
