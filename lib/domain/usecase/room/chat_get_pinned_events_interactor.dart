@@ -18,6 +18,7 @@ class ChatGetPinnedEventsInteractor {
     if (isInitial) {
       yield Right(ChatGetPinnedEventsLoading());
     }
+    Timeline? timeline;
     try {
       final room = client.getRoomById(roomId);
       if (room == null) {
@@ -28,7 +29,7 @@ class ChatGetPinnedEventsInteractor {
         return;
       }
       if (isInitial) {
-        await room.getTimeline();
+        timeline = await room.getTimeline();
       }
       final pinnedEvents = room.pinnedEventIds;
       Logs().d(
@@ -65,6 +66,8 @@ class ChatGetPinnedEventsInteractor {
         "ChatGetPinnedEventsInteractor()::execute()::Exception: $exception",
       );
       yield Left(ChatGetPinnedEventsFailure(exception: exception));
+    } finally {
+      timeline?.cancelSubscriptions();
     }
   }
 }
