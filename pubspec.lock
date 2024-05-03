@@ -619,7 +619,7 @@ packages:
     source: hosted
     version: "0.2.12"
   file_selector:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: file_selector
       sha256: "1d2fde93dddf634a9c3c0faa748169d7ac0d83757135555707e52f02c017ad4f"

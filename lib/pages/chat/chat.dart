@@ -1284,6 +1284,9 @@ class ChatController extends State<Chat>
   void onSendFileClick(BuildContext context) async {
     if (PlatformInfos.isMobile) {
       _showMediaPicker(context);
+    } else if (PlatformInfos.isDesktop) {
+      final matrixFiles = await pickFilesFromDesktop();
+      sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
     } else {
       final matrixFiles = await pickFilesFromSystem();
       sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
