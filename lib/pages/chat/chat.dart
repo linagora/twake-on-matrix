@@ -137,6 +137,8 @@ class ChatController extends State<Chat>
   final ValueKey _chatMediaPickerTypeAheadKey =
       const ValueKey('chatMediaPickerTypeAheadKey');
 
+  StreamSubscription? onUpdateEventStreamSubcription;
+
   @override
   Room? room;
 
@@ -748,7 +750,9 @@ class ChatController extends State<Chat>
     final clients = matrix!.currentBundle;
     for (final event in selectedEvents) {
       if (event.canRedact == false &&
-          !(clients!.any((cl) => event.senderId == cl!.userID))) return false;
+          !(clients!.any((cl) => event.senderId == cl!.userID))) {
+        return false;
+      }
     }
     return true;
   }
@@ -854,6 +858,9 @@ class ChatController extends State<Chat>
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
     }
+    if (timeline != null) {
+      timeline!.cancelSubscriptions();
+    }
     try {
       timeline = await room?.getTimeline(
         onUpdate: updateView,
@@ -886,7 +893,6 @@ class ChatController extends State<Chat>
     if (timeline == null) return;
     if (!timeline!.allowNewEvent) {
       setState(() {
-        timeline = null;
         loadTimelineFuture = _getTimeline().onError(
           (e, s) {
             Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
@@ -910,7 +916,6 @@ class ChatController extends State<Chat>
   Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
-      timeline = null;
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
         (e, s) {
           Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
@@ -1721,7 +1726,8 @@ class ChatController extends State<Chat>
 
   void _listenRoomUpdateEvent() {
     if (room == null) return;
-    client.onEvent.stream.listen((eventUpdate) {
+    onUpdateEventStreamSubcription =
+        client.onEvent.stream.listen((eventUpdate) {
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
@@ -1861,11 +1867,14 @@ class ChatController extends State<Chat>
     }
   }
 
+  StreamSubscription? keyboardVisibilitySubscription;
+
   @override
   void initState() {
     _initializePinnedEvents();
     registerPasteShortcutListeners();
-    keyboardVisibilityController.onChange.listen(_keyboardListener);
+    keyboardVisibilitySubscription =
+        keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
     _loadDraft();
@@ -1904,6 +1913,7 @@ class ChatController extends State<Chat>
     _jumpToEventIdSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
+    scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     selectionFocusNode.dispose();
     keyboardFocus.dispose();
@@ -1915,6 +1925,12 @@ class ChatController extends State<Chat>
     suggestionsController.dispose();
     stickyTimestampNotifier.dispose();
     openingChatViewStateNotifier.dispose();
+    draggingNotifier.dispose();
+    showEmojiPickerNotifier.dispose();
+    pinnedMessageScrollController.dispose();
+    onUpdateEventStreamSubcription?.cancel();
+    keyboardVisibilitySubscription?.cancel();
+
     replyEventNotifier.dispose();
     super.dispose();
   }
