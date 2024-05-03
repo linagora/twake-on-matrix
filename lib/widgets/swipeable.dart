@@ -204,21 +204,22 @@ class SwipeableState extends State<Swipeable>
         AnimationController(duration: widget.movementDuration, vsync: this)
           ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
-    _moveController.addListener(() {
-      if (!isInSwipe) {
-        isSwipeAnimationRunning = true;
-      }
-
-      if (isSwipeAnimationRunning &&
-          _moveController.value >= widget.maxOffset) {
-        if (widget.onOverScrollTheMaxOffset != null) {
-          widget.onOverScrollTheMaxOffset!();
-        }
-        isSwipeAnimationRunning = false;
-      }
-    });
+    _moveController.addListener(listenMoveController);
 
     super.initState();
+  }
+
+  void listenMoveController() {
+    if (!isInSwipe) {
+      isSwipeAnimationRunning = true;
+    }
+
+    if (isSwipeAnimationRunning && _moveController.value >= widget.maxOffset) {
+      if (widget.onOverScrollTheMaxOffset != null) {
+        widget.onOverScrollTheMaxOffset!();
+      }
+      isSwipeAnimationRunning = false;
+    }
   }
 
   late AnimationController _moveController;
@@ -238,6 +239,8 @@ class SwipeableState extends State<Swipeable>
 
   @override
   void dispose() {
+    _moveController.removeStatusListener(_handleDismissStatusChanged);
+    _moveController.removeListener(listenMoveController);
     _moveController.dispose();
     super.dispose();
   }
