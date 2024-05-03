@@ -93,7 +93,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                       );
                     }
                     if (success is GetAvatarInBytesUIStateSuccess &&
-                        PlatformInfos.isWeb) {
+                        PlatformInfos.isWebOrDesktop) {
                       if (success.filePickerResult == null ||
                           success.filePickerResult?.files.single.bytes ==
                               null) {
@@ -160,7 +160,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                   ) {
                     return GestureDetector(
                       onTap: () {
-                        if (PlatformInfos.isWeb) {
+                        if (PlatformInfos.isWebOrDesktop) {
                           menuController.isOpen
                               ? menuController.close()
                               : menuController.open();
