@@ -19,7 +19,7 @@ class VideoPlayer extends StatefulWidget {
 }
 
 class _VideoPlayerState extends State<VideoPlayer> {
-  final VideoController videoController = VideoController(Player());
+  final videoController = VideoController(Player());
 
   @override
   void initState() {
@@ -31,6 +31,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void dispose() {
     super.dispose();
     videoController.player.dispose();
+    videoController.notifier.dispose();
+    videoController.id.dispose();
+    videoController.rect.dispose();
   }
 
   @override
