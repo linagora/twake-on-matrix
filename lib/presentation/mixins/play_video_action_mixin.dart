@@ -29,7 +29,8 @@ mixin PlayVideoActionMixin {
       },
     );
     if (isReplacement) {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWebOrDesktop).pushReplacement(
+      Navigator.of(context, rootNavigator: PlatformInfos.isWebOrDesktop)
+          .pushReplacement(
         pageRoute,
       );
     } else {
