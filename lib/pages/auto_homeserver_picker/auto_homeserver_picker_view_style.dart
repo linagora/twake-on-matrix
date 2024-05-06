@@ -12,4 +12,13 @@ class AutoHomeserverPickerViewStyle {
   static const EdgeInsets buttonPadding = EdgeInsets.only(
     bottom: 44,
   );
+
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [
+      Color(0xFF8135FE),
+      Color(0xFFE8A6FF),
+    ],
+    begin: Alignment.bottomLeft,
+    end: Alignment.topRight,
+  );
 }
