@@ -224,4 +224,8 @@ extension LocalizedBody on Event {
       hideReply: true,
     );
   }
+
+  bool isEventEncrypted({bool isThumbnail = true}) {
+    return isThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
+  }
 }
