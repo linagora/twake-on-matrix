@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/pages/chat/events/image_builder_web.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
@@ -49,7 +51,89 @@ class ImageBubble extends StatelessWidget {
 
   static const animationSwitcherDuration = Duration(seconds: 1);
 
-  Widget _buildPlaceholder(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
+    final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: rounded
+            ? MessageContentStyle.borderRadiusBubble
+            : BorderRadius.zero,
+      ),
+      constraints: maxSize
+          ? BoxConstraints(
+              maxWidth: bubbleWidth,
+              maxHeight: bubbleHeight,
+            )
+          : null,
+      child: ClipRRect(
+        borderRadius: rounded
+            ? MessageContentStyle.borderRadiusBubble
+            : BorderRadius.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: bubbleWidth,
+              height: bubbleHeight,
+              child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+            ),
+            PlatformInfos.isWeb
+                ? ImageBuilderWeb(
+                    event: event,
+                    isThumbnail: thumbnailOnly,
+                    width: width,
+                    height: height,
+                    onTapPreview: onTapPreview,
+                    onTapSelectMode: onTapSelectMode,
+                    fit: fit,
+                  )
+                : MxcImage(
+                    event: event,
+                    width: width,
+                    height: height,
+                    fit: fit,
+                    animated: animated,
+                    isThumbnail: thumbnailOnly,
+                    placeholder: (context) => ImagePlaceholder(
+                      event: event,
+                      width: width,
+                      height: height,
+                      fit: fit,
+                    ),
+                    onTapPreview: onTapPreview,
+                    onTapSelectMode: onTapSelectMode,
+                    imageData: imageData,
+                    isPreview: isPreview,
+                    animationDuration: animationDuration,
+                    cacheKey: thumbnailCacheKey,
+                    cacheMap: thumbnailCacheMap,
+                    noResize: noResizeThumbnail,
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ImagePlaceholder extends StatelessWidget {
+  const ImagePlaceholder({
+    super.key,
+    required this.event,
+    required this.width,
+    required this.height,
+    required this.fit,
+  });
+
+  final Event event;
+  final double width;
+  final double height;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
     if (event.messageType == MessageTypes.Sticker) {
       return const Center(
         child: CircularProgressIndicator.adaptive(),
@@ -77,61 +161,6 @@ class ImageBubble extends StatelessWidget {
           decodingWidth: width,
           decodingHeight: height,
           imageFit: fit,
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
-    final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
-    return AnimatedSwitcher(
-      duration: animationSwitcherDuration,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: rounded
-              ? MessageContentStyle.borderRadiusBubble
-              : BorderRadius.zero,
-        ),
-        constraints: maxSize
-            ? BoxConstraints(
-                maxWidth: bubbleWidth,
-                maxHeight: bubbleHeight,
-              )
-            : null,
-        child: ClipRRect(
-          borderRadius: rounded
-              ? MessageContentStyle.borderRadiusBubble
-              : BorderRadius.zero,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: bubbleWidth,
-                height: bubbleHeight,
-                child:
-                    const BlurHash(hash: MessageContentStyle.defaultBlurHash),
-              ),
-              MxcImage(
-                event: event,
-                width: width,
-                height: height,
-                fit: fit,
-                animated: animated,
-                isThumbnail: thumbnailOnly,
-                placeholder: _buildPlaceholder,
-                onTapPreview: onTapPreview,
-                onTapSelectMode: onTapSelectMode,
-                imageData: imageData,
-                isPreview: isPreview,
-                animationDuration: animationDuration,
-                cacheKey: thumbnailCacheKey,
-                cacheMap: thumbnailCacheMap,
-                noResize: noResizeThumbnail,
-              ),
-            ],
-          ),
         ),
       ),
     );
