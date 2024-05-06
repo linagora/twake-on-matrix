@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/pages/chat/events/image_builder_web.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/config/app_config.dart';
@@ -22,7 +20,6 @@ class ImageBubble extends StatelessWidget {
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final bool isPreview;
-  final Uint8List? imageData;
   final Duration animationDuration;
 
   final String? thumbnailCacheKey;
@@ -31,7 +28,6 @@ class ImageBubble extends StatelessWidget {
 
   const ImageBubble(
     this.event, {
-    this.imageData,
     this.maxSize = true,
     this.fit = BoxFit.cover,
     this.thumbnailOnly = true,
@@ -79,7 +75,8 @@ class ImageBubble extends StatelessWidget {
               height: bubbleHeight,
               child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
             ),
-            PlatformInfos.isWeb
+            PlatformInfos.isWeb &&
+                    event.isEventEncrypted(isThumbnail: thumbnailOnly)
                 ? ImageBuilderWeb(
                     event: event,
                     isThumbnail: thumbnailOnly,
@@ -104,7 +101,6 @@ class ImageBubble extends StatelessWidget {
                     ),
                     onTapPreview: onTapPreview,
                     onTapSelectMode: onTapSelectMode,
-                    imageData: imageData,
                     isPreview: isPreview,
                     animationDuration: animationDuration,
                     cacheKey: thumbnailCacheKey,
