@@ -29,17 +29,29 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
     );
   }
 
+  Future<void> paste() async {
+    final clipboard = SystemClipboard.instance;
+    if (clipboard != null) {
+      final reader = await clipboard.read();
+      _paste(reader);
+    }
+  }
+
   void _onPasteEvent(ClipboardReadEvent event) async {
     if (chatFocusNode.hasFocus != true) {
       return;
     }
     final clipboardReader = await event.getClipboardReader();
+    _paste(clipboardReader);
+  }
+
+  void _paste(ClipboardReader reader) async {
     if (await TwakeClipboard.instance
-            .isReadableImageFormat(clipboardReader: clipboardReader) &&
+            .isReadableImageFormat(clipboardReader: reader) &&
         room != null) {
-      await pasteImage(context, room!, clipboardReader: clipboardReader);
+      await pasteImage(context, room!, clipboardReader: reader);
     } else {
-      sendController.pasteText(clipboardReader: clipboardReader);
+      sendController.pasteText(clipboardReader: reader);
     }
   }
 }

@@ -6,10 +6,12 @@ import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/shortcuts.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -103,105 +105,120 @@ class ChatView extends StatelessWidget with MessageContentMixin {
 
     return Focus(
       focusNode: controller.chatFocusNode,
-      child: GestureDetector(
-        onTapDown: (_) => controller.setReadMarker(),
-        behavior: HitTestBehavior.opaque,
-        child: StreamBuilder(
-          stream: controller.room!.onUpdate.stream
-              .rateLimit(const Duration(seconds: 1)),
-          builder: (context, snapshot) => FutureBuilder(
-            future: controller.loadTimelineFuture,
-            builder: (BuildContext context, snapshot) {
-              return Scaffold(
-                backgroundColor: LinagoraSysColors.material().onPrimary,
-                appBar: AppBar(
-                  backgroundColor: LinagoraSysColors.material().onPrimary,
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: AppConfig.toolbarHeight(context),
-                  title: Padding(
-                    padding: ChatViewStyle.paddingLeading(context),
-                    child: Row(
-                      children: [
-                        _buildLeading(context),
-                        Expanded(
-                          child: ChatAppBarTitle(
-                            selectedEvents: controller.selectedEvents,
-                            room: controller.room,
-                            isArchived: controller.isArchived,
-                            sendController: controller.sendController,
-                            connectivityResultStream: controller
-                                .networkConnectionService
-                                .connectivity
-                                .onConnectivityChanged,
-                            actions: _appBarActions(context),
-                            onPushDetails: controller.onPushDetails,
-                            roomName: controller.roomName,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    if (!controller.selectMode)
-                      Padding(
-                        padding: ChatViewStyle.paddingTrailing(context),
+      child: Shortcuts(
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(
+            LogicalKeyboardKey.control,
+            LogicalKeyboardKey.keyV,
+          ): const PasteIntent(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            PasteIntent: CallbackAction<PasteIntent>(
+              onInvoke: (intent) => controller.paste(),
+            ),
+          },
+          child: GestureDetector(
+            onTapDown: (_) => controller.setReadMarker(),
+            behavior: HitTestBehavior.opaque,
+            child: StreamBuilder(
+              stream: controller.room!.onUpdate.stream
+                  .rateLimit(const Duration(seconds: 1)),
+              builder: (context, snapshot) => FutureBuilder(
+                future: controller.loadTimelineFuture,
+                builder: (BuildContext context, snapshot) {
+                  return Scaffold(
+                    backgroundColor: LinagoraSysColors.material().onPrimary,
+                    appBar: AppBar(
+                      backgroundColor: LinagoraSysColors.material().onPrimary,
+                      automaticallyImplyLeading: false,
+                      toolbarHeight: AppConfig.toolbarHeight(context),
+                      title: Padding(
+                        padding: ChatViewStyle.paddingLeading(context),
                         child: Row(
                           children: [
-                            IconButton(
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onPressed: controller.toggleSearch,
-                              icon: const Icon(Icons.search),
-                            ),
-                            if (!controller.room!.isDirectChat)
-                              Builder(
-                                builder: (context) => TwakeIconButton(
-                                  icon: Icons.more_vert,
-                                  tooltip: L10n.of(context)!.more,
-                                  onTapDown: (tapDownDetails) =>
-                                      controller.handleAppbarMenuAction(
-                                    context,
-                                    tapDownDetails,
-                                  ),
-                                  preferBelow: false,
-                                ),
+                            _buildLeading(context),
+                            Expanded(
+                              child: ChatAppBarTitle(
+                                selectedEvents: controller.selectedEvents,
+                                room: controller.room,
+                                isArchived: controller.isArchived,
+                                sendController: controller.sendController,
+                                connectivityResultStream: controller
+                                    .networkConnectionService
+                                    .connectivity
+                                    .onConnectivityChanged,
+                                actions: _appBarActions(context),
+                                onPushDetails: controller.onPushDetails,
+                                roomName: controller.roomName,
                               ),
+                            ),
                           ],
                         ),
                       ),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: const Size(double.infinity, 1),
-                    child: Container(
-                      color: LinagoraStateLayer(
-                        LinagoraSysColors.material().surfaceTint,
-                      ).opacityLayer1,
-                      height: 1,
-                    ),
-                  ),
-                ),
-                floatingActionButton: ValueListenableBuilder(
-                  valueListenable: controller.showScrollDownButtonNotifier,
-                  builder: (context, showScrollDownButton, _) {
-                    if (showScrollDownButton &&
-                        controller.selectedEvents.isEmpty &&
-                        controller.replyEventNotifier.value == null) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 56.0),
-                        child: FloatingActionButton(
-                          onPressed: controller.scrollDown,
-                          mini: true,
-                          child: const Icon(Icons.arrow_downward_outlined),
+                      actions: [
+                        if (!controller.selectMode)
+                          Padding(
+                            padding: ChatViewStyle.paddingTrailing(context),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  hoverColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onPressed: controller.toggleSearch,
+                                  icon: const Icon(Icons.search),
+                                ),
+                                if (!controller.room!.isDirectChat)
+                                  Builder(
+                                    builder: (context) => TwakeIconButton(
+                                      icon: Icons.more_vert,
+                                      tooltip: L10n.of(context)!.more,
+                                      onTapDown: (tapDownDetails) =>
+                                          controller.handleAppbarMenuAction(
+                                        context,
+                                        tapDownDetails,
+                                      ),
+                                      preferBelow: false,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                      ],
+                      bottom: PreferredSize(
+                        preferredSize: const Size(double.infinity, 1),
+                        child: Container(
+                          color: LinagoraStateLayer(
+                            LinagoraSysColors.material().surfaceTint,
+                          ).opacityLayer1,
+                          height: 1,
                         ),
-                      );
-                    }
-                    return const SizedBox();
-                  },
-                ),
-                body: _buildBody(),
-              );
-            },
+                      ),
+                    ),
+                    floatingActionButton: ValueListenableBuilder(
+                      valueListenable: controller.showScrollDownButtonNotifier,
+                      builder: (context, showScrollDownButton, _) {
+                        if (showScrollDownButton &&
+                            controller.selectedEvents.isEmpty &&
+                            controller.replyEventNotifier.value == null) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 56.0),
+                            child: FloatingActionButton(
+                              onPressed: controller.scrollDown,
+                              mini: true,
+                              child: const Icon(Icons.arrow_downward_outlined),
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                    body: _buildBody(),
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),

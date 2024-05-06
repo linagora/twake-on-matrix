@@ -7,3 +7,7 @@ class OnEmojiActionIntent extends Intent {
 class SelectAllIntent extends Intent {
   const SelectAllIntent();
 }
+
+class PasteIntent extends Intent {
+  const PasteIntent();
+}
