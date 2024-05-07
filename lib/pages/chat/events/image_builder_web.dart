@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
 
-class ImageBuilderWeb extends StatelessWidget {
+class UnencryptedImageBuilderWeb extends StatelessWidget {
   final Event event;
 
   final bool isThumbnail;
@@ -27,10 +27,10 @@ class ImageBuilderWeb extends StatelessWidget {
 
   final void Function()? onTapSelectMode;
 
-  const ImageBuilderWeb({
+  const UnencryptedImageBuilderWeb({
     super.key,
     required this.event,
-    this.isThumbnail = false,
+    this.isThumbnail = true,
     this.width = 256,
     this.height = 300,
     this.fit = BoxFit.cover,
@@ -131,6 +131,13 @@ class UnencryptedImageWidget extends StatelessWidget {
       fit: fit,
       width: width,
       height: height,
+      cacheWidth: (width * MediaQuery.of(context).devicePixelRatio).toInt(),
+      filterQuality: FilterQuality.none,
+      errorBuilder: (context, error, stackTrace) {
+        return BlurHash(
+          hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
+        );
+      },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
           return child;
