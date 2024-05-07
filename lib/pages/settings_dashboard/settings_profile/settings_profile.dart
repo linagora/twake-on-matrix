@@ -25,6 +25,7 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/xfile_groups.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -191,16 +192,12 @@ class SettingsProfileController extends State<SettingsProfile>
   void _getImageOnDesktop(
     BuildContext context,
   ) async {
-    const XTypeGroup typeGroup = XTypeGroup(
-      label: 'images',
-      extensions: <String>['jpg', 'png'],
-    );
     final String initialDirectory =
         (await getApplicationDocumentsDirectory()).path;
 
     final XFile? result = await openFile(
       initialDirectory: initialDirectory,
-      acceptedTypeGroups: [typeGroup],
+      acceptedTypeGroups: [XFileGroups.images],
     );
 
     Logs().d(

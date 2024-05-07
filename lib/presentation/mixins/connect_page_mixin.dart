@@ -113,7 +113,7 @@ mixin ConnectPageMixin {
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
 
-    return FlutterWebAuth2.authenticate(
+    return await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,
       options: const FlutterWebAuth2Options(
