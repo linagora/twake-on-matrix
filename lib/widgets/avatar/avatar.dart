@@ -32,7 +32,6 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallbackLetters = name?.getShortcutNameForAvatar() ?? '@';
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(size / 2),
@@ -44,19 +43,25 @@ class Avatar extends StatelessWidget {
           fit: BoxFit.cover,
           width: size,
           height: size,
+          cacheWidth: (size * MediaQuery.of(context).devicePixelRatio).toInt(),
           cacheKey: mxContent.toString(),
-          placeholder: (context) => RoundAvatar(
-            size: size,
-            text: fallbackLetters,
-            boxShadows: boxShadows,
-            textStyle: TextStyle(
-              fontSize: fontSize,
-              color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
-              fontFamily: AvatarStyle.fontFamily,
-              fontWeight: AvatarStyle.fontWeight,
-            ),
-          ),
+          placeholder: (context) => _fallbackAvatar(),
         ),
+      ),
+    );
+  }
+
+  Widget _fallbackAvatar() {
+    final fallbackLetters = name?.getShortcutNameForAvatar() ?? '@';
+    return RoundAvatar(
+      size: size,
+      text: fallbackLetters,
+      boxShadows: boxShadows,
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
+        fontFamily: AvatarStyle.fontFamily,
+        fontWeight: AvatarStyle.fontWeight,
       ),
     );
   }
