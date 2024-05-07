@@ -67,26 +67,28 @@ class ImageBubble extends StatelessWidget {
         borderRadius: rounded
             ? MessageContentStyle.borderRadiusBubble
             : BorderRadius.zero,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: bubbleWidth,
-              height: bubbleHeight,
-              child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
-            ),
-            PlatformInfos.isWeb &&
-                    event.isEventEncrypted(isThumbnail: thumbnailOnly)
-                ? ImageBuilderWeb(
-                    event: event,
-                    isThumbnail: thumbnailOnly,
-                    width: width,
-                    height: height,
-                    onTapPreview: onTapPreview,
-                    onTapSelectMode: onTapSelectMode,
-                    fit: fit,
-                  )
-                : MxcImage(
+        child: (PlatformInfos.isWeb &&
+                !event.isEventEncrypted(isThumbnail: thumbnailOnly))
+            ? UnencryptedImageBuilderWeb(
+                event: event,
+                isThumbnail: thumbnailOnly,
+                width: width,
+                height: height,
+                onTapPreview: onTapPreview,
+                onTapSelectMode: onTapSelectMode,
+                fit: fit,
+              )
+            : Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: bubbleWidth,
+                    height: bubbleHeight,
+                    child: const BlurHash(
+                      hash: MessageContentStyle.defaultBlurHash,
+                    ),
+                  ),
+                  MxcImage(
                     event: event,
                     width: width,
                     height: height,
@@ -107,8 +109,8 @@ class ImageBubble extends StatelessWidget {
                     cacheMap: thumbnailCacheMap,
                     noResize: noResizeThumbnail,
                   ),
-          ],
-        ),
+                ],
+              ),
       ),
     );
   }

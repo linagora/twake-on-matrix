@@ -43,6 +43,8 @@ class MxcImage extends StatefulWidget {
 
   final VoidCallback? closeRightColumn;
 
+  final int? cacheWidth;
+
   const MxcImage({
     this.uri,
     this.event,
@@ -65,6 +67,7 @@ class MxcImage extends StatefulWidget {
     this.cacheMap,
     this.noResize = false,
     this.closeRightColumn,
+    this.cacheWidth,
     Key? key,
   }) : super(key: key);
 
@@ -303,6 +306,7 @@ class _MxcImageState extends State<MxcImage> {
               height: widget.height,
               fit: widget.fit,
               needResize: needResize,
+              cacheWidth: widget.cacheWidth,
               imageErrorWidgetBuilder: (context, __, ___) {
                 _isCached = false;
                 _imageData = null;
@@ -322,6 +326,7 @@ class _ImageWidget extends StatelessWidget {
   final bool needResize;
   final BoxFit? fit;
   final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
+  final int? cacheWidth;
 
   const _ImageWidget({
     this.filePath,
@@ -331,6 +336,7 @@ class _ImageWidget extends StatelessWidget {
     required this.needResize,
     this.fit,
     required this.imageErrorWidgetBuilder,
+    this.cacheWidth,
   });
 
   @override
@@ -341,9 +347,11 @@ class _ImageWidget extends StatelessWidget {
             File(filePath!),
             width: width,
             height: height,
-            cacheWidth: (width != null && needResize)
-                ? (width! * devicePixelRatio).toInt()
-                : null,
+            cacheWidth: cacheWidth != null
+                ? cacheWidth!
+                : (width != null && needResize)
+                    ? (width! * devicePixelRatio).toInt()
+                    : null,
             cacheHeight: (height != null && needResize)
                 ? (height! * devicePixelRatio).toInt()
                 : null,
@@ -356,9 +364,11 @@ class _ImageWidget extends StatelessWidget {
                 data!,
                 width: width,
                 height: height,
-                cacheWidth: (width != null && needResize)
-                    ? (width! * devicePixelRatio).toInt()
-                    : null,
+                cacheWidth: cacheWidth != null
+                    ? cacheWidth!
+                    : (width != null && needResize)
+                        ? (width! * devicePixelRatio).toInt()
+                        : null,
                 cacheHeight: (height != null && needResize)
                     ? (height! * devicePixelRatio).toInt()
                     : null,
