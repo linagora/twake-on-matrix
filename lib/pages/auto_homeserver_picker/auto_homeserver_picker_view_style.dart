@@ -21,4 +21,8 @@ class AutoHomeserverPickerViewStyle {
     begin: Alignment.bottomLeft,
     end: Alignment.topRight,
   );
+
+  static const Decoration containerDecoration = BoxDecoration(
+    color: Colors.white,
+  );
 }

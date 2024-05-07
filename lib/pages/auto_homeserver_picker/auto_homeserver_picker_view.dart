@@ -17,9 +17,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: AutoHomeserverPickerViewStyle.containerDecoration,
         child: Stack(
           alignment: Alignment.center,
           children: [
