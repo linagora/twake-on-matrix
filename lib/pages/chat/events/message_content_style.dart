@@ -10,6 +10,7 @@ class MessageContentStyle {
 
   static const int maxLengthTextInline = 180;
   static const double appBarFontSize = 16.0;
+  static Duration animationSwitcherDuration = const Duration(milliseconds: 300);
 
   static double imageWidth(BuildContext context) {
     if (responsiveUtils.isDesktop(context)) {
@@ -83,4 +84,6 @@ class MessageContentStyle {
       Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.secondary,
           );
+
+  static const blurhashSize = 32;
 }

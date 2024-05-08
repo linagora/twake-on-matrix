@@ -84,7 +84,7 @@ class HtmlMessage extends StatelessWidget {
         double? height, {
         bool? animated = false,
       }) {
-        final ratio = MediaQuery.of(context).devicePixelRatio;
+        final ratio = MediaQuery.devicePixelRatioOf(context);
         return Uri.parse(mxc)
             .getThumbnail(
               matrix.client,

@@ -16,12 +16,16 @@ class ImageViewer extends StatefulWidget {
   final Event? event;
   final Uint8List? imageData;
   final String? filePath;
+  final double? width;
+  final double? height;
 
   const ImageViewer({
     Key? key,
     this.event,
     this.imageData,
     this.filePath,
+    this.width,
+    this.height,
   }) : super(key: key);
 
   @override
@@ -135,5 +139,7 @@ class ImageViewerController extends State<ImageViewer> {
         this,
         imageData: widget.imageData,
         filePath: widget.filePath,
+        width: widget.width,
+        height: widget.height,
       );
 }
