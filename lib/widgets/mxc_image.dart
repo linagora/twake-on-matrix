@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -45,6 +46,8 @@ class MxcImage extends StatefulWidget {
 
   final int? cacheWidth;
 
+  final int? cacheHeight;
+
   const MxcImage({
     this.uri,
     this.event,
@@ -68,6 +71,7 @@ class MxcImage extends StatefulWidget {
     this.noResize = false,
     this.closeRightColumn,
     this.cacheWidth,
+    this.cacheHeight,
     Key? key,
   }) : super(key: key);
 
@@ -120,11 +124,10 @@ class _MxcImageState extends State<MxcImage> {
     final event = widget.event;
 
     if (uri != null) {
-      final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
       final width = widget.width;
-      final realWidth = width == null ? null : width * devicePixelRatio;
+      final realWidth = width == null ? null : context.getCacheSize(width);
       final height = widget.height;
-      final realHeight = height == null ? null : height * devicePixelRatio;
+      final realHeight = height == null ? null : context.getCacheSize(height);
 
       final httpUri = widget.isThumbnail
           ? uri.getThumbnail(
@@ -307,6 +310,7 @@ class _MxcImageState extends State<MxcImage> {
               fit: widget.fit,
               needResize: needResize,
               cacheWidth: widget.cacheWidth,
+              cacheHeight: widget.cacheHeight,
               imageErrorWidgetBuilder: (context, __, ___) {
                 _isCached = false;
                 _imageData = null;
@@ -327,6 +331,7 @@ class _ImageWidget extends StatelessWidget {
   final BoxFit? fit;
   final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
   final int? cacheWidth;
+  final int? cacheHeight;
 
   const _ImageWidget({
     this.filePath,
@@ -337,11 +342,11 @@ class _ImageWidget extends StatelessWidget {
     this.fit,
     required this.imageErrorWidgetBuilder,
     this.cacheWidth,
+    this.cacheHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     return filePath != null && filePath!.isNotEmpty
         ? Image.file(
             File(filePath!),
@@ -350,11 +355,13 @@ class _ImageWidget extends StatelessWidget {
             cacheWidth: cacheWidth != null
                 ? cacheWidth!
                 : (width != null && needResize)
-                    ? (width! * devicePixelRatio).toInt()
+                    ? context.getCacheSize(width!)
                     : null,
-            cacheHeight: (height != null && needResize)
-                ? (height! * devicePixelRatio).toInt()
-                : null,
+            cacheHeight: cacheHeight != null
+                ? cacheHeight!
+                : (height != null && needResize)
+                    ? context.getCacheSize(height!)
+                    : null,
             fit: fit,
             filterQuality: FilterQuality.medium,
             errorBuilder: imageErrorWidgetBuilder,
@@ -367,11 +374,13 @@ class _ImageWidget extends StatelessWidget {
                 cacheWidth: cacheWidth != null
                     ? cacheWidth!
                     : (width != null && needResize)
-                        ? (width! * devicePixelRatio).toInt()
+                        ? context.getCacheSize(width!)
                         : null,
-                cacheHeight: (height != null && needResize)
-                    ? (height! * devicePixelRatio).toInt()
-                    : null,
+                cacheHeight: cacheHeight != null
+                    ? cacheHeight!
+                    : (height != null && needResize)
+                        ? context.getCacheSize(height!)
+                        : null,
                 fit: fit,
                 filterQuality: FilterQuality.medium,
                 errorBuilder: imageErrorWidgetBuilder,

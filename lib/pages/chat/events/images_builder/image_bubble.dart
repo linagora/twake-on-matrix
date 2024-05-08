@@ -1,6 +1,8 @@
-import 'package:fluffychat/pages/chat/events/image_builder_web.dart';
+import 'dart:typed_data';
+
+import 'package:fluffychat/pages/chat/events/images_builder/image_builder_web.dart';
+import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ class ImageBubble extends StatelessWidget {
   final void Function()? onTapSelectMode;
   final bool isPreview;
   final Duration animationDuration;
+  final Uint8List? imageData;
 
   final String? thumbnailCacheKey;
   final Map<EventId, ImageData>? thumbnailCacheMap;
@@ -42,6 +45,7 @@ class ImageBubble extends StatelessWidget {
     this.thumbnailCacheMap,
     this.noResizeThumbnail = false,
     this.isPreview = true,
+    this.imageData,
     Key? key,
   }) : super(key: key);
 
@@ -108,58 +112,10 @@ class ImageBubble extends StatelessWidget {
                     cacheKey: thumbnailCacheKey,
                     cacheMap: thumbnailCacheMap,
                     noResize: noResizeThumbnail,
+                    imageData: imageData,
                   ),
                 ],
               ),
-      ),
-    );
-  }
-}
-
-class ImagePlaceholder extends StatelessWidget {
-  const ImagePlaceholder({
-    super.key,
-    required this.event,
-    required this.width,
-    required this.height,
-    required this.fit,
-  });
-
-  final Event event;
-  final double width;
-  final double height;
-  final BoxFit fit;
-
-  @override
-  Widget build(BuildContext context) {
-    if (event.messageType == MessageTypes.Sticker) {
-      return const Center(
-        child: CircularProgressIndicator.adaptive(),
-      );
-    }
-    final String blurHashString =
-        event.blurHash ?? AppConfig.defaultImageBlurHash;
-    final ratio = event.infoMap['w'] is int && event.infoMap['h'] is int
-        ? event.infoMap['w'] / event.infoMap['h']
-        : 1.0;
-    var width = 32;
-    var height = 32;
-    if (ratio > 1.0) {
-      height = (width / ratio).round();
-    } else {
-      width = (height * ratio).round();
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.zero,
-      child: SizedBox(
-        width: this.width,
-        height: this.height,
-        child: BlurHash(
-          hash: blurHashString,
-          decodingWidth: width,
-          decodingHeight: height,
-          imageFit: fit,
-        ),
       ),
     );
   }

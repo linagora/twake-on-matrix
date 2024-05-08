@@ -61,6 +61,9 @@ class MediaPageViewWidget extends StatelessWidget {
                         thumbnails[firstFile]?.bytes ??
                         Uint8List(0),
                     fit: BoxFit.cover,
+                    cacheWidth: (SendFileDialogStyle.imageSize *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round(),
                   );
                 },
               ),

@@ -71,19 +71,19 @@ extension ContextExtensionss on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
 
   /// similar to [MediaQuery.of(context).padding]
-  EdgeInsets get mediaQueryPadding => MediaQuery.of(this).padding;
+  EdgeInsets get mediaQueryPadding => MediaQuery.paddingOf(this);
 
   /// similar to [MediaQuery.of(context).padding]
   MediaQueryData get mediaQuery => MediaQuery.of(this);
 
   /// similar to [MediaQuery.of(context).viewPadding]
-  EdgeInsets get mediaQueryViewPadding => MediaQuery.of(this).viewPadding;
+  EdgeInsets get mediaQueryViewPadding => MediaQuery.viewPaddingOf(this);
 
   /// similar to [MediaQuery.of(context).viewInsets]
-  EdgeInsets get mediaQueryViewInsets => MediaQuery.of(this).viewInsets;
+  EdgeInsets get mediaQueryViewInsets => MediaQuery.viewInsetsOf(this);
 
   /// similar to [MediaQuery.of(context).orientation]
-  Orientation get orientation => MediaQuery.of(this).orientation;
+  Orientation get orientation => MediaQuery.orientationOf(this);
 
   /// check if device is on landscape mode
   bool get isLandscape => orientation == Orientation.landscape;
@@ -92,7 +92,7 @@ extension ContextExtensionss on BuildContext {
   bool get isPortrait => orientation == Orientation.portrait;
 
   /// similar to [MediaQuery.of(this).devicePixelRatio]
-  double get devicePixelRatio => MediaQuery.of(this).devicePixelRatio;
+  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(this);
 
   /// get the shortestSide from screen
   double get mediaQueryShortestSide => mediaQuerySize.shortestSide;
@@ -191,5 +191,9 @@ extension ContextExtensionss on BuildContext {
 
   void goToRoomWithEvent(String roomId, String eventId) {
     go('/rooms/$roomId?event=$eventId');
+  }
+
+  int getCacheSize(double size) {
+    return (MediaQuery.devicePixelRatioOf(this) * size).round();
   }
 }
