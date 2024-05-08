@@ -1399,6 +1399,7 @@ class ChatController extends State<Chat>
         imagePath: action.getImagePath(
           unpin: isUnpinEvent(event),
         ),
+        isClearCurrentPage: false,
         onCallbackAction: () => _handleClickOnContextMenuItem(
           action,
           event,
@@ -1820,6 +1821,7 @@ class ChatController extends State<Chat>
                 color: action.getColorIcon(context),
               )
             : null,
+        isClearCurrentPage: false,
         onCallbackAction: () => onSelectedAppBarActions(action),
       );
     }).toList();
