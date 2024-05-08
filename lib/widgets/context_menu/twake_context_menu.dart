@@ -82,7 +82,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
               Positioned(
                 left: contextMenuPosition.left,
                 top: contextMenuPosition.top,
-                bottom: contextMenuPosition.bottom,
+                bottom:
+                    !PlatformInfos.isMobile ? contextMenuPosition.bottom : null,
                 right: contextMenuPosition.right,
                 child: AnimatedBuilder(
                   animation: _animationController,
