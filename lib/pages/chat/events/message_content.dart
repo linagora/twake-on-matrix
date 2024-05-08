@@ -1,13 +1,13 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
+import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
-import 'package:fluffychat/pages/chat/events/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
@@ -26,7 +26,6 @@ import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_player.dart';
 import 'cute_events.dart';
-import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
@@ -62,7 +61,7 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            return _MessageImageBuilder(
+            return MessageImageBuilder(
               event: event,
               onTapPreview: onTapPreview,
               onTapSelectMode: onTapSelectMode,
@@ -244,80 +243,6 @@ class MessageContent extends StatelessWidget
       default:
         return UnknownContent(event: event);
     }
-  }
-}
-
-class _MessageImageBuilder extends StatelessWidget {
-  final Event event;
-
-  final void Function()? onTapPreview;
-
-  final void Function()? onTapSelectMode;
-
-  const _MessageImageBuilder({
-    required this.event,
-    this.onTapPreview,
-    this.onTapSelectMode,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final matrixFile = event.getMatrixFile();
-
-    DisplayImageInfo? displayImageInfo =
-        event.getOriginalResolution()?.getDisplayImageInfo(context);
-
-    if (isSendingImageInMobile(matrixFile)) {
-      final file = matrixFile as MatrixImageFile;
-      displayImageInfo = Size(
-        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-      ).getDisplayImageInfo(context);
-      return SendingImageInfoWidget(
-        key: ValueKey(event.eventId),
-        matrixFile: file,
-        event: event,
-        onTapPreview: onTapPreview,
-        displayImageInfo: displayImageInfo,
-      );
-    }
-    displayImageInfo ??= DisplayImageInfo(
-      size: Size(
-        MessageContentStyle.imageWidth(context),
-        MessageContentStyle.imageHeight(context),
-      ),
-      hasBlur: true,
-    );
-    if (isSendingImageInWeb(matrixFile)) {
-      final file = matrixFile as MatrixImageFile;
-      displayImageInfo = Size(
-        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-      ).getDisplayImageInfo(context);
-    }
-    return ImageBubble(
-      event,
-      width: displayImageInfo.size.width,
-      height: displayImageInfo.size.height,
-      fit: BoxFit.cover,
-      onTapSelectMode: onTapSelectMode,
-      onTapPreview: onTapPreview,
-      animated: true,
-      thumbnailOnly: true,
-    );
-  }
-
-  bool isSendingImageInWeb(MatrixFile? matrixFile) {
-    return matrixFile != null &&
-        matrixFile.bytes != null &&
-        matrixFile is MatrixImageFile;
-  }
-
-  bool isSendingImageInMobile(MatrixFile? matrixFile) {
-    return matrixFile != null &&
-        matrixFile.filePath != null &&
-        matrixFile is MatrixImageFile &&
-        !PlatformInfos.isWeb;
   }
 }
 

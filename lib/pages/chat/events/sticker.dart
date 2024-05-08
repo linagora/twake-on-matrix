@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../../config/app_config.dart';
-import 'image_bubble.dart';
+import 'images_builder/image_bubble.dart';
 
 class Sticker extends StatefulWidget {
   final Event event;
