@@ -9,7 +9,7 @@ import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/chat/events/image_bubble.dart';
+import 'package:fluffychat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
 typedef DownloadVideoEventCallback = Future<String> Function(Event event);

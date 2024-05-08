@@ -15,12 +15,16 @@ class ImageViewerView extends StatelessWidget {
   final ImageViewerController controller;
   final Uint8List? imageData;
   final String? filePath;
+  final double? width;
+  final double? height;
 
   const ImageViewerView(
     this.controller, {
     Key? key,
     this.imageData,
     this.filePath,
+    this.width,
+    this.height,
   }) : super(key: key);
 
   @override
@@ -36,6 +40,8 @@ class ImageViewerView extends StatelessWidget {
       imageWidget = _ImageWidget(
         event: controller.widget.event!,
         controller: controller,
+        width: width,
+        height: height,
       );
     } else if (imageData != null) {
       imageWidget = Image.memory(
@@ -97,7 +103,16 @@ class _ImageWidget extends StatelessWidget {
 
   final Event event;
 
-  const _ImageWidget({required this.event, required this.controller});
+  final double? width;
+
+  final double? height;
+
+  const _ImageWidget({
+    required this.event,
+    required this.controller,
+    this.width,
+    this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +125,12 @@ class _ImageWidget extends StatelessWidget {
           if (snapshot.data == null || snapshot.data!.bytes?.isEmpty != false) {
             return const CircularProgressIndicator();
           }
-          return Image.memory(snapshot.data!.bytes!);
+          return Image.memory(
+            snapshot.data!.bytes!,
+            cacheWidth: width != null
+                ? (width! * MediaQuery.devicePixelRatioOf(context)).toInt()
+                : null,
+          );
         },
       );
     } else {

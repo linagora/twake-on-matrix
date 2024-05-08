@@ -3,8 +3,10 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -32,7 +34,7 @@ class SendingImageInfoWidget extends StatelessWidget {
 
   void _onTap(BuildContext context) async {
     if (onTapPreview != null) {
-      Navigator.of(context).push(
+      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
@@ -53,7 +55,6 @@ class SendingImageInfoWidget extends StatelessWidget {
         event.status == EventStatus.synced) {
       sendingFileProgressNotifier.value = 1;
     }
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     return Hero(
       tag: event.eventId,
@@ -87,7 +88,8 @@ class SendingImageInfoWidget extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (displayImageInfo.hasBlur)
+                  if (matrixFile.bytes?.isNotEmpty != true ||
+                      matrixFile.filePath == null)
                     SizedBox(
                       width: MessageContentStyle.imageBubbleWidth(
                         displayImageInfo.size.width,
@@ -99,18 +101,30 @@ class SendingImageInfoWidget extends StatelessWidget {
                         hash: event.blurHash ?? AppConfig.defaultImageBlurHash,
                       ),
                     ),
-                  Image.file(
-                    File(matrixFile.filePath!),
-                    width: displayImageInfo.size.width,
-                    height: displayImageInfo.size.height,
-                    cacheHeight:
-                        (displayImageInfo.size.height * devicePixelRatio)
-                            .toInt(),
-                    cacheWidth: (displayImageInfo.size.width * devicePixelRatio)
-                        .toInt(),
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.low,
-                  ),
+                  if (!PlatformInfos.isWeb && matrixFile.filePath != null)
+                    Image.file(
+                      File(matrixFile.filePath!),
+                      width: displayImageInfo.size.width,
+                      height: displayImageInfo.size.height,
+                      cacheHeight:
+                          context.getCacheSize(displayImageInfo.size.height),
+                      cacheWidth:
+                          context.getCacheSize(displayImageInfo.size.width),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.low,
+                    ),
+                  if (matrixFile.bytes?.isNotEmpty == true)
+                    Image.memory(
+                      matrixFile.bytes!,
+                      width: displayImageInfo.size.width,
+                      height: displayImageInfo.size.height,
+                      cacheHeight:
+                          context.getCacheSize(displayImageInfo.size.height),
+                      cacheWidth:
+                          context.getCacheSize(displayImageInfo.size.width),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.none,
+                    ),
                 ],
               ),
             ),
