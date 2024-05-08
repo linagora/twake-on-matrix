@@ -29,7 +29,7 @@
     <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    <link rel="icon" type="image/png" href="favicon.png" />
 
     <title>Twake Chat</title>
     <link rel="manifest" href="manifest.json" />
@@ -62,10 +62,20 @@
         alt=""
       />
     </picture>
-    <div class="center splash">
-      <img class="logo" src="splash/img/logo.svg" alt="Twake Chat logo">
-      <img class="appName" src="splash/img/app-name-dark.svg" alt="Twake Chat">
-    </div>
+    <picture id="splash">
+      <img
+              class="center"
+              aria-hidden="true"
+              srcset="
+          splash/img/dark-1x.png 1x,
+          splash/img/dark-2x.png 2x,
+          splash/img/dark-3x.png 3x,
+          splash/img/dark-4x.png 4x
+        "
+              src="splash/img/dark-1x.png"
+              alt=""
+      />
+    </picture>
     <script>
       window.addEventListener("load", function (ev) {
         // Download main.dart.js
