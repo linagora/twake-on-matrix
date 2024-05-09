@@ -17,9 +17,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          gradient: LinagoraSysColors.material().linearGradientStartingPage,
-        ),
+        decoration: AutoHomeserverPickerViewStyle.containerDecoration,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -84,7 +82,8 @@ class AutoHomeserverPickerView extends StatelessWidget {
                               ),
                               clipBehavior: Clip.antiAlias,
                               decoration: ShapeDecoration(
-                                color: LinagoraSysColors.material().primary,
+                                gradient: AutoHomeserverPickerViewStyle
+                                    .buttonGradient,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
                                     AutoHomeserverPickerViewStyle.buttonRadius,
@@ -138,7 +137,8 @@ class AutoHomeserverPickerView extends StatelessWidget {
                           ),
                           clipBehavior: Clip.antiAlias,
                           decoration: ShapeDecoration(
-                            color: LinagoraSysColors.material().primary,
+                            gradient:
+                                AutoHomeserverPickerViewStyle.buttonGradient,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                 AutoHomeserverPickerViewStyle.buttonRadius,
