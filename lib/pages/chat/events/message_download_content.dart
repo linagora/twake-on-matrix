@@ -41,6 +41,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
       builder: (context, DownloadPresentationState state, child) {
         if (state is DownloadedPresentationState) {
           return InkWell(
+            mouseCursor: SystemMouseCursors.click,
             onTap: () async {
               handleDownloadFileForPreviewSuccess(
                 filePath: state.filePath,
