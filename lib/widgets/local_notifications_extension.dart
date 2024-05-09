@@ -49,12 +49,24 @@ extension LocalNotificationsExtension on MatrixState {
       hideEdit: true,
       removeMarkdown: true,
     );
+    final icon = event.senderFromMemoryOrFallback.avatarUrl?.getThumbnail(
+          client,
+          width: 64,
+          height: 64,
+          method: ThumbnailMethod.crop,
+        ) ??
+        room.avatar?.getThumbnail(
+          client,
+          width: 64,
+          height: 64,
+          method: ThumbnailMethod.crop,
+        );
     if (kIsWeb) {
       _audioPlayer.play();
       js.context.callMethod("handleNotifications", [
         title,
         body,
-        'assets/logo.svg',
+        icon,
         eventUpdate.roomID,
       ]);
     } else if (Platform.isLinux) {
