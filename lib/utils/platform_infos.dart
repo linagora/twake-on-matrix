@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -89,11 +90,11 @@ abstract class PlatformInfos {
           child: const Text('Logs'),
         ),
       ],
-      applicationIcon: Image.asset(
-        'assets/logo.png',
+      applicationIcon: SvgPicture.asset(
+        'assets/logo.svg',
         width: 64,
         height: 64,
-        filterQuality: FilterQuality.medium,
+        fit: BoxFit.fill,
       ),
       applicationName: AppConfig.applicationName,
     );
