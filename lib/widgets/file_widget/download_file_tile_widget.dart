@@ -82,27 +82,32 @@ class DownloadFileTileWidget extends StatelessWidget {
                         downloadProgress: downloadProgress,
                       ),
                     ),
+                  Container(
+                    width: style.downloadIconSize,
+                    decoration: BoxDecoration(
+                      color: style.iconBackgroundColor(
+                        hasError: hasError,
+                        context: context,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      hasError
+                          ? Icons.error_outline
+                          : downloadProgress == 0
+                              ? Icons.arrow_downward
+                              : Icons.close,
+                      key: ValueKey(downloadProgress),
+                      color: Theme.of(context).colorScheme.surface,
+                      size: style.downloadIconSize,
+                    ),
+                  ),
                   InkWell(
                     onTap: onCancelDownload,
-                    child: Container(
-                      width: style.downloadIconSize,
-                      decoration: BoxDecoration(
-                        color: style.iconBackgroundColor(
-                          hasError: hasError,
-                          context: context,
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        hasError
-                            ? Icons.error_outline
-                            : downloadProgress == 0
-                                ? Icons.arrow_downward
-                                : Icons.close,
-                        key: ValueKey(downloadProgress),
-                        color: Theme.of(context).colorScheme.surface,
-                        size: style.downloadIconSize,
-                      ),
+                    mouseCursor: SystemMouseCursors.click,
+                    child: SizedBox(
+                      width: style.downloadIconSize * 1.5,
+                      height: style.downloadIconSize * 1.5,
                     ),
                   ),
                 ],
