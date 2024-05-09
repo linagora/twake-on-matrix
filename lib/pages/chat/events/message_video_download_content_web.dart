@@ -71,18 +71,22 @@ class _MessageVideoDownloadContentWebState
             centerWidget: Stack(
               alignment: Alignment.center,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: MessageContentStyle.videoCenterButtonSize,
                   height: MessageContentStyle.videoCenterButtonSize,
+                ),
+                const CenterVideoButton(
+                  icon: Icons.close,
+                  iconSize: MessageContentStyle.cancelButtonSize,
+                ),
+                SizedBox(
+                  width: MessageContentStyle.iconInsideVideoButtonSize,
+                  height: MessageContentStyle.iconInsideVideoButtonSize,
                   child: CircularProgressIndicator(
                     value: progress,
                     color: LinagoraRefColors.material().primary[100],
                     strokeWidth: MessageContentStyle.strokeVideoWidth,
                   ),
-                ),
-                const CenterVideoButton(
-                  icon: Icons.close,
-                  iconSize: MessageContentStyle.cancelButtonSize,
                 ),
               ],
             ),
