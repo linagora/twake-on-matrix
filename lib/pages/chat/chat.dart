@@ -16,6 +16,7 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -1932,7 +1933,7 @@ class ChatController extends State<Chat>
     pinnedMessageScrollController.dispose();
     onUpdateEventStreamSubcription?.cancel();
     keyboardVisibilitySubscription?.cancel();
-
+    InViewNotifierListCustom.of(context)?.dispose();
     replyEventNotifier.dispose();
     super.dispose();
   }
