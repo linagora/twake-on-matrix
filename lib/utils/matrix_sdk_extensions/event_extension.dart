@@ -185,7 +185,7 @@ extension LocalizedBody on Event {
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
   Future<void> copy(BuildContext context, Timeline timeline) async {
-    if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
+    if (messageType == MessageTypes.Image && PlatformInfos.isWebOrDesktop) {
       final matrixFile = getMatrixFile() ??
           await downloadAndDecryptAttachment(
             getThumbnail: true,

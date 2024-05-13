@@ -5,10 +5,12 @@ import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/shortcuts.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
@@ -98,35 +100,57 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  InputBar _buildInputBar(BuildContext context) {
-    return InputBar(
-      typeAheadKey: controller.chatComposerTypeAheadKey,
-      rawKeyboardFocusNode: controller.rawKeyboardListenerFocusNode,
-      room: controller.room!,
-      minLines: 1,
-      maxLines: 8,
-      autofocus: !PlatformInfos.isMobile,
-      keyboardType: TextInputType.multiline,
-      textInputAction: null,
-      onSubmitted: (_) => controller.onInputBarSubmitted(),
-      suggestionsController: controller.suggestionsController,
-      typeAheadFocusNode: controller.inputFocus,
-      controller: controller.sendController,
-      focusSuggestionController: controller.focusSuggestionController,
-      suggestionScrollController: controller.suggestionScrollController,
-      showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
-      decoration: InputDecoration(
-        hintText: L10n.of(context)!.chatMessage,
-        hintMaxLines: 1,
-        hintStyle: Theme.of(context)
-            .textTheme
-            .bodyLarge
-            ?.merge(
-              Theme.of(context).inputDecorationTheme.hintStyle,
-            )
-            .copyWith(letterSpacing: -0.15),
+  Widget _buildInputBar(BuildContext context) {
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(
+          LogicalKeyboardKey.controlLeft,
+          LogicalKeyboardKey.keyA,
+        ): const SelectAllIntent(),
+        LogicalKeySet(
+          LogicalKeyboardKey.altLeft,
+          LogicalKeyboardKey.keyE,
+        ): const OnEmojiActionIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          SelectAllIntent: CallbackAction<SelectAllIntent>(
+            onInvoke: (_) => controller.selectAll(),
+          ),
+          OnEmojiActionIntent: CallbackAction<OnEmojiActionIntent>(
+            onInvoke: (_) => controller.onEmojiAction(),
+          ),
+        },
+        child: InputBar(
+          typeAheadKey: controller.chatComposerTypeAheadKey,
+          rawKeyboardFocusNode: controller.rawKeyboardListenerFocusNode,
+          room: controller.room!,
+          minLines: 1,
+          maxLines: 8,
+          autofocus: !PlatformInfos.isMobile,
+          keyboardType: TextInputType.multiline,
+          textInputAction: null,
+          onSubmitted: (_) => controller.onInputBarSubmitted(),
+          suggestionsController: controller.suggestionsController,
+          typeAheadFocusNode: controller.inputFocus,
+          controller: controller.sendController,
+          focusSuggestionController: controller.focusSuggestionController,
+          suggestionScrollController: controller.suggestionScrollController,
+          showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
+          decoration: InputDecoration(
+            hintText: L10n.of(context)!.chatMessage,
+            hintMaxLines: 1,
+            hintStyle: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.merge(
+                  Theme.of(context).inputDecorationTheme.hintStyle,
+                )
+                .copyWith(letterSpacing: -0.15),
+          ),
+          onChanged: controller.onInputBarChanged,
+        ),
       ),
-      onChanged: controller.onInputBarChanged,
     );
   }
 }

@@ -2792,6 +2792,7 @@
   "downloadImageSuccess": "Image saved to Pictures",
   "@downloadImageSuccess": {},
   "downloadImageError": "Error saving image",
+  "downloadFileError": "Error downloading file",
   "@downloadImageError": {},
   "downloadFileInWeb": "File saved to {directory}",
   "@downloadFileInWeb": {

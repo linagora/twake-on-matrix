@@ -78,7 +78,7 @@ abstract class AppRoutes {
       path: '/home',
       pageBuilder: (context, state) => defaultPageBuilder(
         context,
-        PlatformInfos.isMobile
+        PlatformInfos.isMobile || PlatformInfos.isLinux
             ? const TwakeWelcome()
             : AutoHomeserverPicker(
                 loggedOut: state.extra is bool ? state.extra as bool? : null,

@@ -29,11 +29,12 @@ mixin PlayVideoActionMixin {
       },
     );
     if (isReplacement) {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).pushReplacement(
+      Navigator.of(context, rootNavigator: PlatformInfos.isWebOrDesktop)
+          .pushReplacement(
         pageRoute,
       );
     } else {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      Navigator.of(context, rootNavigator: PlatformInfos.isWebOrDesktop).push(
         pageRoute,
       );
     }

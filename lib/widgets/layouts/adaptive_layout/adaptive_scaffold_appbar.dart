@@ -33,7 +33,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
                   children: [
                     const _LeadingAppBarWidget(),
                     if (AppConfig.appGridDashboardAvailable &&
-                        PlatformInfos.isWeb)
+                        PlatformInfos.isWebOrDesktop)
                       const Expanded(
                         child: AppGridDashboard(),
                       ),

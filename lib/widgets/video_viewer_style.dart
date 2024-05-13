@@ -14,7 +14,7 @@ class VideoViewerStyle {
         bottom: 8.0 + MediaQuery.of(context).viewPadding.bottom,
       );
 
-  static EdgeInsets backButtonMargin(context) => PlatformInfos.isWeb
+  static EdgeInsets backButtonMargin(context) => PlatformInfos.isWebOrDesktop
       ? const EdgeInsets.only(top: 8.0, left: 16.0)
       : EdgeInsets.only(top: MediaQuery.of(context).viewPadding.top);
 

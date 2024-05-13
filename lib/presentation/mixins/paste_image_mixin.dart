@@ -20,7 +20,7 @@ mixin PasteImageMixin {
       return;
     }
     List<MatrixFile?>? matrixFiles;
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isWebOrDesktop) {
       matrixFiles = await TwakeClipboard.instance
           .pasteImagesUsingBytes(reader: clipboardReader);
     }
@@ -43,7 +43,7 @@ mixin PasteImageMixin {
         .toList();
     await showDialog(
       context: context,
-      useRootNavigator: PlatformInfos.isWeb,
+      useRootNavigator: PlatformInfos.isWebOrDesktop,
       builder: (context) {
         return SendFileDialog(
           room: room,

@@ -101,7 +101,7 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!PlatformInfos.isWeb) ...[
+                  if (PlatformInfos.isMobile) ...[
                     MessageDownloadContent(
                       event,
                     ),
@@ -126,7 +126,7 @@ class MessageContent extends StatelessWidget
             return Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (!PlatformInfos.isWeb) ...[
+                if (PlatformInfos.isMobile || PlatformInfos.isDesktop) ...[
                   MessageDownloadContent(
                     event,
                   ),
@@ -317,7 +317,7 @@ class _MessageImageBuilder extends StatelessWidget {
     return matrixFile != null &&
         matrixFile.filePath != null &&
         matrixFile is MatrixImageFile &&
-        !PlatformInfos.isWeb;
+        !PlatformInfos.isWebOrDesktop;
   }
 }
 
