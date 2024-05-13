@@ -45,7 +45,7 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                   padding: SelectedParticipantsListStyle.paddingAll,
                   child: Wrap(
                     spacing: 8.0,
-                    runSpacing: PlatformInfos.isWeb ? 4.0 : 0.0,
+                    runSpacing: PlatformInfos.isWebOrDesktop ? 4.0 : 0.0,
                     children: contactsNotifier.contactsList.map((contact) {
                       return InputChip(
                         shape: RoundedRectangleBorder(

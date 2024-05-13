@@ -107,7 +107,8 @@ abstract class ClientManager {
         AuthenticationTypes.password,
         if (PlatformInfos.isMobile ||
             PlatformInfos.isWeb ||
-            PlatformInfos.isMacOS)
+            PlatformInfos.isMacOS ||
+            PlatformInfos.isLinux)
           AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,

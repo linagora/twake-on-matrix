@@ -7,6 +7,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
+import 'package:fluffychat/domain/model/extensions/xfile_extension.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
@@ -24,6 +25,7 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/xfile_groups.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -33,6 +35,8 @@ import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:file_selector/file_selector.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class SettingsProfile extends StatefulWidget {
@@ -180,7 +184,39 @@ class SettingsProfileController extends State<SettingsProfile>
         ),
       );
       Logs().d(
-        'SettingsProfile::_getImageOnWeb(): AvatarWebNotifier - $result',
+        'SettingsProfile::_getImageOnWeb(): AvatarNotifier - $result',
+      );
+    }
+  }
+
+  void _getImageOnDesktop(
+    BuildContext context,
+  ) async {
+    final String initialDirectory =
+        (await getApplicationDocumentsDirectory()).path;
+
+    final XFile? result = await openFile(
+      initialDirectory: initialDirectory,
+      acceptedTypeGroups: [XFileGroups.images],
+    );
+
+    Logs().d(
+      'SettingsProfile::_getImageOnDesktop(): FilePickerResult - ${result?.path}',
+    );
+
+    if (result == null) {
+      return;
+    } else {
+      if (!isEditedProfileNotifier.value) {
+        isEditedProfileNotifier.toggle();
+      }
+      settingsProfileUIState.value = Right<Failure, Success>(
+        GetAvatarInBytesUIStateSuccess(
+          filePickerResult: FilePickerResult([await result.toPlatformFile()]),
+        ),
+      );
+      Logs().d(
+        'SettingsProfile::_getImageOnDesktop(): AvatarNotifier - $result',
       );
     }
   }
@@ -188,6 +224,10 @@ class SettingsProfileController extends State<SettingsProfile>
   void _showImagesPickerAction() async {
     if (PlatformInfos.isWeb) {
       _getImageOnWeb(context);
+      return;
+    }
+    if (PlatformInfos.isDesktop) {
+      _getImageOnDesktop(context);
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission();

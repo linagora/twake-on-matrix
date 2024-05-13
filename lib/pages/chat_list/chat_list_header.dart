@@ -28,7 +28,7 @@ class ChatListHeader extends StatelessWidget {
         Container(
           height: ChatListHeaderStyle.searchBarContainerHeight,
           padding: ChatListHeaderStyle.searchInputPadding,
-          child: PlatformInfos.isWeb
+          child: PlatformInfos.isWebOrDesktop
               ? _normalModeWidgetWeb(context)
               : _normalModeWidgetsMobile(context),
         ),

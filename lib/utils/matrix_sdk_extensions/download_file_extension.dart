@@ -43,11 +43,13 @@ extension DownloadFileExtension on Event {
     bool getThumbnail = false,
     CancelToken? cancelToken,
     required String filename,
+    bool isTemporary = true,
   }) async {
     final attachment = File(
       await StorageDirectoryManager.instance.getFilePathInAppDownloads(
         eventId: eventId,
         fileName: filename,
+        isTemporary: isTemporary,
       ),
     );
     final downloadLink = mxcUrl.getDownloadLink(room.client);
@@ -155,6 +157,7 @@ extension DownloadFileExtension on Event {
     required String filename,
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
+    bool isTemporary = true,
   }) async {
     streamController?.add(
       const Right(
@@ -168,6 +171,7 @@ extension DownloadFileExtension on Event {
         await StorageDirectoryManager.instance.getDecryptedFilePath(
           eventId: eventId,
           fileName: filename,
+          isTemporary: isTemporary,
         ),
         getThumbnail: getThumbnail,
       );
@@ -180,6 +184,7 @@ extension DownloadFileExtension on Event {
         await StorageDirectoryManager.instance.getDecryptedFilePath(
           eventId: eventId,
           fileName: filename,
+          isTemporary: isTemporary,
         ),
       ).copySync(savePath);
       streamController?.add(
@@ -260,6 +265,7 @@ extension DownloadFileExtension on Event {
     StreamController<Either<Failure, Success>>? downloadStreamController,
     ProgressCallback? progressCallback,
     CancelToken? cancelToken,
+    bool isTemporary = true,
   }) async {
     if (!canContainAttachment()) {
       throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
@@ -289,6 +295,7 @@ extension DownloadFileExtension on Event {
           await StorageDirectoryManager.instance.getDecryptedFilePath(
         eventId: eventId,
         fileName: filename,
+        isTemporary: isTemporary,
       );
       final decryptedFile = File(decryptedPath);
 
@@ -308,13 +315,17 @@ extension DownloadFileExtension on Event {
 
     return downloadOrRetrieveAttachment(
       mxcUrl,
-      await StorageDirectoryManager.instance
-          .getFilePathInAppDownloads(eventId: eventId, fileName: filename),
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: filename,
+        isTemporary: isTemporary,
+      ),
       downloadStreamController: downloadStreamController,
       getThumbnail: getThumbnail,
       progressCallback: progressCallback,
       cancelToken: cancelToken,
       filename: filename,
+      isTemporary: isTemporary,
     );
   }
 }

@@ -89,7 +89,7 @@ dependencies:
   flutter_olm: ^1.2.0
   flutter_openssl_crypto: ^0.1.0
   flutter_ringtone_player: ^3.1.1
-  flutter_secure_storage: ^7.0.1
+  flutter_secure_storage: ^9.0.0
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
   flutter_web_auth_2: ^3.1.1
@@ -150,7 +150,6 @@ dependencies:
   tuple: ^2.0.2
   lottie: ^2.3.2
   wechat_camera_picker: 4.2.1
-  open_file: ^3.3.2
   mime: ^1.0.4
   async: ^2.11.0
   cached_network_image: ^3.2.3
@@ -175,6 +174,10 @@ dependencies:
   flutter_portal: 1.1.4
   external_path: 1.0.3
   gal: 2.3.0
+  open_app_file:
+    git:
+      url: git@github.com:aws1313/open_app_file.git
+  file_selector: ^0.9.2+2
 
 dev_dependencies:
   build_runner: ^2.3.3
@@ -245,6 +248,12 @@ dependency_overrides:
     git:
       url: https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git
       ref: main
+  # https://github.com/mogol/flutter_secure_storage/issues/616
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_linux
   geolocator_android:
     hosted:
       name: geolocator_android

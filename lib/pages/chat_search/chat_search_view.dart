@@ -286,7 +286,7 @@ class _MessageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (event.messageType) {
       case MessageTypes.File:
-        if (PlatformInfos.isWeb) {
+        if (PlatformInfos.isWebOrDesktop) {
           return MessageDownloadContentWeb(event, highlightText: searchWord);
         } else {
           return MessageDownloadContent(event, highlightText: searchWord);

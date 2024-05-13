@@ -2696,6 +2696,7 @@
   "@acceptInvite": {},
   "downloadImageError": "Erreur d'enregistrement de l'image",
   "@downloadImageError": {},
+  "downloadFileError": "Erreur de téléchargement du fichier",
   "externalContactMessage": "Certains des utilisateurs que vous souhaitez ajouter ne figurent pas dans vos contacts. Voulez-vous les inviter ?",
   "@externalContactMessage": {},
   "appLanguage": "Langue de l'application",

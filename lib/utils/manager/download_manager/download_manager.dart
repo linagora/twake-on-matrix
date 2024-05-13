@@ -98,6 +98,7 @@ class DownloadManager {
     required Event event,
     bool getThumbnail = false,
     bool isFirstPriority = false,
+    bool isTemporary = true,
   }) async {
     _initDownloadFileInfo(event);
     final streamController = _eventIdMapDownloadFileInfo[event.eventId]
@@ -131,6 +132,7 @@ class DownloadManager {
       streamController: streamController,
       cancelToken: cancelToken,
       isFirstPriority: isFirstPriority,
+      isTemporary: isTemporary,
     );
   }
 
@@ -140,6 +142,7 @@ class DownloadManager {
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
     bool isFirstPriority = false,
+    bool isTemporary = true,
   }) {
     if (PlatformInfos.isWeb) {
       _addTaskToWorkerQueueWeb(
@@ -157,6 +160,7 @@ class DownloadManager {
       streamController,
       cancelToken,
       isFirstPriority: isFirstPriority,
+      isTemporary: isTemporary,
     );
   }
 
@@ -166,6 +170,7 @@ class DownloadManager {
     StreamController<Either<Failure, Success>> streamController,
     CancelToken cancelToken, {
     bool isFirstPriority = false,
+    bool isTemporary = true,
   }) {
     workingQueue.addTask(
       Task(
@@ -176,6 +181,7 @@ class DownloadManager {
               getThumbnail: getThumbnail,
               downloadStreamController: streamController,
               cancelToken: cancelToken,
+              isTemporary: isTemporary,
             );
           } catch (e) {
             Logs().e('DownloadManager::download(): $e');

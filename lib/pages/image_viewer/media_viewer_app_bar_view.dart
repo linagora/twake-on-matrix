@@ -92,7 +92,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                                   menuChildren: [
                                     ContextMenuItemImageViewer(
                                       icon: Icons.file_download_outlined,
-                                      title: PlatformInfos.isWeb
+                                      title: PlatformInfos.isWebOrDesktop
                                           ? L10n.of(context)!.saveFile
                                           : L10n.of(context)!.saveToGallery,
                                       onTap: () {

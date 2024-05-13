@@ -24,6 +24,8 @@ mixin ConnectPageMixin {
 
   static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
 
+  static const linowsRedirectUrl = 'http://localhost:60665';
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -37,7 +39,8 @@ mixin ConnectPageMixin {
   bool supportsSso(BuildContext context) =>
       (PlatformInfos.isMobile ||
           PlatformInfos.isWeb ||
-          PlatformInfos.isMacOS) &&
+          PlatformInfos.isMacOS ||
+          PlatformInfos.isLinux) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
@@ -58,6 +61,9 @@ mixin ConnectPageMixin {
       AppConfig.homeserver.isNotEmpty;
 
   String _getRedirectUrlScheme(String redirectUrl) {
+    if (PlatformInfos.isLinuxOrWindows) {
+      return linowsRedirectUrl;
+    }
     return Uri.parse(redirectUrl).scheme;
   }
 
@@ -106,6 +112,7 @@ mixin ConnectPageMixin {
       redirectUrl: redirectUrl,
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
+
     return await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,
@@ -215,6 +222,7 @@ mixin ConnectPageMixin {
   }
 
   String _generateRedirectUrl(String homeserver) {
+    if (PlatformInfos.isLinuxOrWindows) return linowsRedirectUrl;
     if (kIsWeb) {
       String? homeserverParam = '';
       if (homeserver.isNotEmpty) {

@@ -241,7 +241,7 @@ class SelectionTextContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!PlatformInfos.isWeb) {
+    if (PlatformInfos.isMobile) {
       return child;
     }
 

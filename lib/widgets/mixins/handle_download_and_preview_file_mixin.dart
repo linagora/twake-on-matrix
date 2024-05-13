@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
@@ -16,7 +18,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_app_file/open_app_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
@@ -174,6 +176,13 @@ mixin HandleDownloadAndPreviewFileMixin {
       );
       return;
     }
+
+    if (PlatformInfos.isDesktop) {
+      _openDownloadedFileOnDesktop(
+        filePath: filePath,
+        mimeType: mimeType,
+      );
+    }
   }
 
   void _openDownloadedFileForPreviewAndroid({
@@ -184,9 +193,9 @@ mixin HandleDownloadAndPreviewFileMixin {
       await Share.shareXFiles([XFile(filePath)]);
       return;
     }
-    final openResults = await OpenFile.open(
+    final openResults = await OpenAppFile.open(
       filePath,
-      type: mimeType,
+      mimeType: mimeType,
       uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType])
           .value,
     );
@@ -207,10 +216,39 @@ mixin HandleDownloadAndPreviewFileMixin {
     Logs().d(
       'ChatController:_openDownloadedFileForPreviewIos(): $filePath',
     );
-    await OpenFile.open(
+    await OpenAppFile.open(
       filePath,
-      type: mimeType,
+      mimeType: mimeType,
     );
+  }
+
+  void _openDownloadedFileOnDesktop({
+    required String filePath,
+    required String? mimeType,
+  }) async {
+    Logs().d(
+      'ChatController:_openDownloadedFileOnDesktop(): $filePath',
+    );
+    final downloadDirectory = await getDownloadsDirectory();
+    try {
+      await OpenAppFile.open(
+        filePath,
+        mimeType: mimeType,
+      );
+    } catch (e) {
+      Logs().e(
+        'ChatController:_openDownloadedFileOnDesktop(): $e',
+      );
+      if (downloadDirectory == null) {
+        return;
+      }
+      if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+        Process.run('open', [downloadDirectory.path]);
+      }
+      if (PlatformInfos.isWindows) {
+        Process.run('explorer', [downloadDirectory.path]);
+      }
+    }
   }
 
   Future<void> previewPdfWeb(

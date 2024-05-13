@@ -22,6 +22,13 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
     ClipboardEvents.instance?.unregisterPasteEventListener(_onPasteEvent);
   }
 
+  void selectAll() {
+    sendController.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: sendController.text.length,
+    );
+  }
+
   void _onPasteEvent(ClipboardReadEvent event) async {
     if (chatFocusNode.hasFocus != true) {
       return;
