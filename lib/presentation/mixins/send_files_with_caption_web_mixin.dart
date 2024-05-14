@@ -8,7 +8,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:matrix/matrix.dart';
 
 mixin SendFilesWithCaptionWebMixin {
-  void sendFileOnWebAction(
+  void openSendFileDialogAction(
     BuildContext context, {
     Room? room,
     required List<MatrixFile> matrixFilesList,

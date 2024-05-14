@@ -375,7 +375,7 @@ class ChatController extends State<Chat>
 
   void handleDragDone(DropDoneDetails details) async {
     final matrixFiles = await onDragDone(details);
-    sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
+    openSendFileDialogAction(context, room: room, matrixFilesList: matrixFiles);
   }
 
   void _handleReceivedShareFiles() {
@@ -1286,10 +1286,10 @@ class ChatController extends State<Chat>
       _showMediaPicker(context);
     } else if (PlatformInfos.isDesktop) {
       final matrixFiles = await pickFilesFromDesktop();
-      sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
+      openSendFileDialogAction(context, room: room, matrixFilesList: matrixFiles);
     } else {
       final matrixFiles = await pickFilesFromSystem();
-      sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
+      openSendFileDialogAction(context, room: room, matrixFilesList: matrixFiles);
     }
   }
 
