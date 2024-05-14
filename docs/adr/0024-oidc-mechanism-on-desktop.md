@@ -30,4 +30,8 @@ To achieve that the app (via `FlutterWebAuth2`) sets a light webserver on the us
 
 The app listens to this server, looking for a result. If log in succeed, the OIDC server `POST` the access token to this server which send it to the app. 
 As soon as the log in process is done (wether it's successful or not), the webserver is closed.
-More details: https://github.com/ThexXTURBOXx/flutter_web_auth_2/blob/b48b6f5c866b8c1018cc138b2b11acb3b6188e0b/flutter_web_auth_2/lib/src/server.dart 
+
+More details: 
+- https://github.com/ThexXTURBOXx/flutter_web_auth_2/blob/b48b6f5c866b8c1018cc138b2b11acb3b6188e0b/flutter_web_auth_2/lib/src/server.dart 
+- https://blog.logto.io/redirect-uri-in-authorization-code-flow/ 
+- https://openid.net/developers/how-connect-works/ 
