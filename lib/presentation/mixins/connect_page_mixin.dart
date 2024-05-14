@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
@@ -23,9 +24,6 @@ mixin ConnectPageMixin {
   static const windowNameValue = '_self';
 
   static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
-
-  static const linowsRedirectUrl = 'http://localhost:60665';
-
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
@@ -62,7 +60,7 @@ mixin ConnectPageMixin {
 
   String _getRedirectUrlScheme(String redirectUrl) {
     if (PlatformInfos.isLinuxOrWindows) {
-      return linowsRedirectUrl;
+      return redirectUrl;
     }
     return Uri.parse(redirectUrl).scheme;
   }
@@ -103,7 +101,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    final redirectUrl = _generateRedirectUrl(
+    final redirectUrl = await _generateRedirectUrl(
       Matrix.of(context).client.homeserver.toString(),
     );
     final url = _getAuthenticateUrl(
@@ -168,7 +166,7 @@ mixin ConnectPageMixin {
 
   Future<void> tryLogoutSso(BuildContext context) async {
     if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
-    final redirectUrl = _generatePostLogoutRedirectUrl();
+    final redirectUrl = await _generatePostLogoutRedirectUrl();
     final url = _getLogoutUrl(context, redirectUrl: redirectUrl);
     if (url == null) return Future.value();
 
@@ -191,7 +189,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    final redirectUrl = _generateRedirectUrl(
+    final redirectUrl = await _generateRedirectUrl(
       Matrix.of(context).client.homeserver.toString(),
     );
     final url = generatePublicPlatformAuthenticationUrl(
@@ -211,18 +209,22 @@ mixin ConnectPageMixin {
     Logs().d("ConnectPageMixin:_redirectRegistrationUrl: URI - $uri");
   }
 
-  String _generatePostLogoutRedirectUrl() {
+  Future<String> _generatePostLogoutRedirectUrl() async {
     if (kIsWeb) {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
         return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html';
       }
       return '${html.window.origin!}/web/auth.html';
+    } else if (PlatformInfos.isLinuxOrWindows) {
+      return await _generateDesktopRedirectUrl();
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
 
-  String _generateRedirectUrl(String homeserver) {
-    if (PlatformInfos.isLinuxOrWindows) return linowsRedirectUrl;
+  Future<String> _generateRedirectUrl(String homeserver) async {
+    if (PlatformInfos.isLinuxOrWindows) {
+      return await _generateDesktopRedirectUrl();
+    }
     if (kIsWeb) {
       String? homeserverParam = '';
       if (homeserver.isNotEmpty) {
@@ -234,6 +236,18 @@ mixin ConnectPageMixin {
       return '${html.window.origin!}/web/auth.html$homeserverParam';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
+  }
+
+  Future<int> _findFreePort() async {
+    final tmpServer = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final port = tmpServer.port;
+    await tmpServer.close();
+    return port;
+  }
+
+  Future<String> _generateDesktopRedirectUrl() async {
+    final freePort = await _findFreePort();
+    return 'http://localhost:$freePort/callback';
   }
 
   List<IdentityProvider>? identityProviders({
