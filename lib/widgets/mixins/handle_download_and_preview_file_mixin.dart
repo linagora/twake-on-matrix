@@ -242,12 +242,16 @@ mixin HandleDownloadAndPreviewFileMixin {
       if (downloadDirectory == null) {
         return;
       }
-      if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
-        Process.run('open', [downloadDirectory.path]);
-      }
-      if (PlatformInfos.isWindows) {
-        Process.run('explorer', [downloadDirectory.path]);
-      }
+      _openFileUsingTerminal(downloadDirectory.path);
+    }
+  }
+
+  void _openFileUsingTerminal(String path) {
+    if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+      Process.run('open', [path]);
+    }
+    if (PlatformInfos.isWindows) {
+      Process.run('explorer', [path]);
     }
   }
 
