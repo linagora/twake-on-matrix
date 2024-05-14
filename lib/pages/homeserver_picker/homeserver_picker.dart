@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
@@ -145,9 +146,12 @@ class HomeserverPickerController extends State<HomeserverPicker>
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
-
+      final allHomeserverLoggedIn = (await ClientManager.getClients())
+          .map((client) => client.homeserver.toString())
+          .toList();
+      Logs().i('All homeservers: $allHomeserverLoggedIn');
       final homeserverExists =
-          homeserver == matrix.client.homeserver && matrix.client.isLogged();
+          allHomeserverLoggedIn.contains(homeserver.toString());
 
       if (homeserverExists &&
           !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
