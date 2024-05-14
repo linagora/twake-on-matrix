@@ -71,21 +71,26 @@ mixin SendFilesMixin {
   }
 
   Future<List<MatrixFile>> pickFilesFromDesktop() async {
-    final String initialDirectory =
-        (await getApplicationDocumentsDirectory()).path;
-    final List<XFile> xFiles =
-        await openFiles(initialDirectory: initialDirectory);
+    try {
+      final String initialDirectory =
+          (await getApplicationDocumentsDirectory()).path;
+      final List<XFile> xFiles =
+          await openFiles(initialDirectory: initialDirectory);
 
-    if (xFiles.isEmpty) return [];
+      if (xFiles.isEmpty) return [];
 
-    final matrixFiles = <MatrixFile>[];
+      final matrixFiles = <MatrixFile>[];
 
-    for (final xFile in xFiles) {
-      final matrixFile = await xFile.toMatrixFile();
-      matrixFiles.add(matrixFile);
+      for (final xFile in xFiles) {
+        final matrixFile = await xFile.toMatrixFile();
+        matrixFiles.add(matrixFile);
+      }
+
+      return matrixFiles;
+    } on Exception catch (error) {
+      Logs().e('SendFilesMixin::pickFilesFromDesktop(): error: $error');
+      return [];
     }
-
-    return matrixFiles;
   }
 
   void onPickerTypeClick({

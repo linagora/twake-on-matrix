@@ -104,7 +104,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         } catch (e) {
           Logs().e('SettingsController()::logoutAction - error: $e');
         } finally {
-          if (PlatformInfos.isWeb) {
+          if (PlatformInfos.isWebOrDesktop) {
             await tryLogoutSso(context);
           }
         }
