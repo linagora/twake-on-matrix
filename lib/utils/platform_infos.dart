@@ -92,8 +92,8 @@ abstract class PlatformInfos {
       ],
       applicationIcon: SvgPicture.asset(
         'assets/logo.svg',
-        width: 64,
-        height: 64,
+        width: 56,
+        height: 56,
         fit: BoxFit.fill,
       ),
       applicationName: AppConfig.applicationName,
