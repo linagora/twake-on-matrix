@@ -10,7 +10,6 @@ extension XFileExtension on XFile {
       name: name,
       filePath: path,
       sizeInBytes: await length(),
-      readStream: readAsBytes().asStream(),
     );
   }
 
@@ -20,7 +19,6 @@ extension XFileExtension on XFile {
       'path': path,
       'bytes': await readAsBytes(),
       'size': await length(),
-      'readStream': readAsBytes().asStream(),
     });
   }
 }
