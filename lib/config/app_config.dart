@@ -85,7 +85,7 @@ abstract class AppConfig {
           : "app.twake.ios.chat.sandbox"
       : "app.twake.android.chat";
   static const String pushNotificationsGatewayUrl =
-      'https://sygnal.tom-dev.xyz/_matrix/push/v1/notify';
+      'https://sygnal.lin-saas.dev/_matrix/push/v1/notify';
   static const String pushNotificationsPusherFormat = 'event_id_only';
   static const String emojiFontName = 'Noto Emoji';
   static const String emojiFontUrl =
