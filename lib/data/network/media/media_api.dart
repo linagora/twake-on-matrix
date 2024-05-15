@@ -69,31 +69,6 @@ class MediaAPI {
     return UploadFileResponse.fromJson(response);
   }
 
-  Future<UploadFileResponse> uploadFileWeb({
-    required MatrixFile file,
-    CancelToken? cancelToken,
-    ProgressCallback? onReceiveProgress,
-  }) async {
-    final dioHeaders = _client.getHeaders();
-    dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes!.length;
-    dioHeaders[HttpHeaders.contentTypeHeader] = file.mimeType;
-    final response = await _client
-        .postToGetBody(
-          HomeserverEndpoint.uploadMediaServicePath
-              .generateHomeserverMediaEndpoint(),
-          data: file,
-          queryParameters: {
-            'fileName': file.name,
-          },
-          onReceiveProgress: onReceiveProgress,
-          cancelToken: cancelToken,
-          options: Options(headers: dioHeaders),
-        )
-        .onError((error, stackTrace) => throw Exception(error));
-
-    return UploadFileResponse.fromJson(response);
-  }
-
   Future<DownloadFileResponse> downloadFileInfo({
     required Uri uriPath,
     required String savePath,
