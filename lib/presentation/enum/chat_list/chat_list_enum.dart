@@ -96,7 +96,7 @@ enum ChatListSelectionActions {
   ) {
     switch (this) {
       case ChatListSelectionActions.read:
-        if (room.markedUnread) {
+        if (room.isUnreadOrInvited) {
           return L10n.of(context)!.markThisChatAsRead;
         } else {
           return L10n.of(context)!.markThisChatAsUnRead;
