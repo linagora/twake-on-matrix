@@ -167,7 +167,6 @@ class DraftChatController extends State<DraftChat>
       });
 
   Future<void> sendText({
-    OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onCreateRoomFailed,
   }) async {
     scrollDown();
@@ -179,7 +178,6 @@ class DraftChatController extends State<DraftChat>
     isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) {
-        onRoomCreatedSuccess?.call(room);
         room.sendTextEvent(
           sendController.text,
         );
@@ -203,17 +201,19 @@ class DraftChatController extends State<DraftChat>
         onRoomCreatedFailed?.call();
         Logs().d("_createRoom: $failure");
         isSendingNotifier.value = false;
-      }, (success) {
+      }, (success) async {
         if (success is CreateDirectChatSuccess) {
           final room = Matrix.of(context).client.getRoomById(success.roomId);
           if (room != null) {
             onRoomCreatedSuccess?.call(room);
+            final user = await _getProfile();
             context.go(
               '/rooms/${room.id}/',
               extra: ChatRouterInputArgument(
                 type: ChatRouterInputArgumentType.draft,
-                data: presentationContact?.displayName ??
-                    presentationContact?.matrixId,
+                data: user.displayName ??
+                    presentationContact?.displayName ??
+                    room.name,
               ),
             );
           }
@@ -360,15 +360,27 @@ class DraftChatController extends State<DraftChat>
     widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
   }
 
-  void handleDraftAction(BuildContext context) {
+  Future<void> handleDraftAction(BuildContext context) async {
+    Profile? profile;
+    try {
+      profile = await _getProfile();
+    } catch (e) {
+      Logs().e('Error getting profile: $e');
+    }
     inputFocus.requestFocus();
-
     sendController.value = TextEditingValue(
       text: L10n.of(context)!.draftChatHookPhrase(
-        presentationContact!.displayName ?? L10n.of(context)!.twakeChatUser,
+        profile?.displayName ?? presentationContact?.displayName ?? '',
       ),
     );
     onInputBarChanged(sendController.text);
+  }
+
+  Future<Profile> _getProfile() async {
+    return await Matrix.of(context).client.getProfileFromUserId(
+          presentationContact!.matrixId!,
+          getFromRooms: false,
+        );
   }
 
   void hideKeyboardChatScreen() {
