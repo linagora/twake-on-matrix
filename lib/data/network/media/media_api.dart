@@ -18,7 +18,11 @@ class MediaAPI {
 
   MediaAPI();
 
-  Future<UploadFileResponse> uploadFile({required FileInfo fileInfo}) async {
+  Future<UploadFileResponse> uploadFileMobile({
+    required FileInfo fileInfo,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+  }) async {
     final dioHeaders = _client.getHeaders();
     dioHeaders[HttpHeaders.contentLengthHeader] =
         await File(fileInfo.filePath).length();
@@ -31,6 +35,8 @@ class MediaAPI {
           queryParameters: {
             'fileName': fileInfo.fileName,
           },
+          cancelToken: cancelToken,
+          onReceiveProgress: onReceiveProgress,
           options: Options(headers: dioHeaders),
         )
         .onError((error, stackTrace) => throw Exception(error));
@@ -44,7 +50,7 @@ class MediaAPI {
     ProgressCallback? onReceiveProgress,
   }) async {
     final dioHeaders = _client.getHeaders();
-    dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes!.length;
+    dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes?.length;
     dioHeaders[HttpHeaders.contentTypeHeader] = file.mimeType;
     final response = await _client
         .postToGetBody(
