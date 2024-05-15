@@ -2,30 +2,46 @@ import 'dart:typed_data';
 
 extension StreamListIntExtension on Stream<List<int>> {
   Future<Uint8List> toUint8List() async {
-    var byteData = ByteData(0);
+    // Chunk size for processing the file
+    const chunkSize = 1024 * 1024; // 1MB (adjust as needed)
+
+    // Initialize variables
+    var byteData = ByteData(chunkSize);
     var length = 0;
 
+    // Iterate over the stream asynchronously
     await for (final chunk in this) {
       final chunkLength = chunk.length;
-      final newLength = length + chunkLength;
+      var offset = 0;
 
-      if (newLength > byteData.lengthInBytes) {
-        final newByteData = ByteData(newLength);
+      while (offset < chunkLength) {
+        // Calculate remaining bytes in the chunk
+        final remainingBytes = chunkLength - offset;
 
-        for (var i = 0; i < length; i++) {
-          newByteData.setUint8(i, byteData.getUint8(i));
+        // Calculate bytes to copy (either remaining bytes or chunk size, whichever is smaller)
+        final bytesToCopy =
+            remainingBytes < chunkSize ? remainingBytes : chunkSize;
+
+        // Resize the byteData if necessary
+        if (length + bytesToCopy > byteData.lengthInBytes) {
+          final newByteData = ByteData(length + bytesToCopy);
+          newByteData.buffer
+              .asUint8List()
+              .setAll(0, byteData.buffer.asUint8List());
+          byteData = newByteData;
         }
 
-        byteData = newByteData;
-      }
+        // Copy the chunk to byteData
+        for (var i = 0; i < bytesToCopy; i++) {
+          byteData.setUint8(length++, chunk[offset + i]);
+        }
 
-      for (var i = 0; i < chunkLength; i++) {
-        byteData.setUint8(length + i, chunk[i]);
+        // Move the offset
+        offset += bytesToCopy;
       }
-
-      length = newLength;
     }
 
+    // Return Uint8List containing the concatenated data
     return Uint8List.view(byteData.buffer, 0, length);
   }
 }
