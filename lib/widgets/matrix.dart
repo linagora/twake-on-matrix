@@ -96,13 +96,16 @@ class MatrixState extends State<Matrix>
 
   BackgroundPush? backgroundPush;
 
+  bool get isValidActiveClient =>
+      _activeClient >= 0 && _activeClient < widget.clients.length;
+
   String? get authUrl => _authUrl;
 
   Client get client {
     if (widget.clients.isEmpty) {
       widget.clients.add(getLoginClient());
     }
-    if (_activeClient < 0 || _activeClient >= widget.clients.length) {
+    if (!isValidActiveClient) {
       return currentBundle!.first!;
     }
     return widget.clients[_activeClient];
@@ -122,7 +125,9 @@ class MatrixState extends State<Matrix>
   RequestTokenResponse? currentThreepidCreds;
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
-    final index = widget.clients.indexWhere((client) => client == newClient);
+    final index = widget.clients.indexWhere(
+      (client) => newClient != null && client.userID == newClient.userID,
+    );
     if (index != -1) {
       _activeClient = index;
       // TODO: Multi-client VoiP support
@@ -558,7 +563,10 @@ class MatrixState extends State<Matrix>
     if (client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
-      if (toMConfigurations == null) return;
+      if (toMConfigurations == null) {
+        _setupAuthUrl();
+        return;
+      }
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -690,12 +698,14 @@ class MatrixState extends State<Matrix>
       );
       if (toMConfigurations == null) {
         _setUpToMServer(null);
+        _setupAuthUrl();
       } else {
         _setUpToMServer(toMConfigurations.tomServerInformation);
         _setupAuthUrl(url: toMConfigurations.authUrl);
       }
     } catch (e) {
       _setUpToMServer(null);
+      _setupAuthUrl();
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
     Logs().d(

@@ -15,12 +15,16 @@ import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
+import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
+import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
@@ -64,14 +68,17 @@ class SettingsProfileController extends State<SettingsProfile>
   AssetEntity? assetEntity;
   FilePickerResult? filePickerResult;
 
-  ValueNotifier<bool> haveMultipleAccountsNotifier = ValueNotifier(false);
-
   final TwakeEventDispatcher twakeEventDispatcher =
       getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
+
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState =
       ValueNotifier<Either<Failure, Success>>(Right(GetAvatarInitialUIState()));
+
+  final settingsMultiAccountsUIState = ValueNotifier<Either<Failure, Success>>(
+    Right(GetClientsInitialUIState()),
+  );
 
   Client get client => Matrix.of(context).client;
 
@@ -543,14 +550,71 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
-  Future<int> get accountsCount async
-      // FIXME: Change to false after merging TW-1262
-      =>
-      (await ClientManager.getClients(initialize: true)).length;
+  Future<void> _getMultipleAccounts(
+    Client currentActiveClient,
+  ) async {
+    try {
+      settingsMultiAccountsUIState.value = Right(GetClientsLoadingUIState());
+      final profileBundles = await _getClientProfiles();
+      final multipleAccounts = profileBundles
+          .where((clientProfile) => clientProfile != null)
+          .map(
+            (clientProfile) => clientProfile!.toTwakeChatPresentationAccount(
+              currentActiveClient,
+            ),
+          )
+          .toList();
+      settingsMultiAccountsUIState.value = Right(
+        GetClientsSuccessUIState(
+          multipleAccounts: multipleAccounts,
+        ),
+      );
+    } catch (e) {
+      Logs().e(
+        'SettingsProfileController::_getMultipleAccounts() - Error: $e',
+      );
+      settingsMultiAccountsUIState.value = Left<Failure, Success>(
+        GetClientsFailureUIState(
+          exception: e,
+        ),
+      );
+    }
+  }
 
-  void onBottomButtonTap() {
-    MultipleAccountsPickerController(context: context)
-        .showMultipleAccountsPicker(
+  Future<List<ClientProfilePresentation?>> _getClientProfiles() async {
+    try {
+      final profiles = await Future.wait(
+        (await ClientManager.getClients()).map((client) async {
+          final profileBundle = await client.fetchOwnProfile();
+          Logs().d(
+            'SettingsProfileController::getProfileBundles() - ClientName - ${client.clientName}',
+          );
+          Logs().d(
+            'SettingsProfileController::getProfileBundles() - UserId - ${client.userID}',
+          );
+          return ClientProfilePresentation(
+            profile: profileBundle,
+            client: client,
+          );
+        }),
+      );
+
+      return profiles.toList();
+    } catch (e) {
+      Logs().e(
+        'SettingsProfileController::getProfileBundles() - Error: $e',
+      );
+      rethrow;
+    }
+  }
+
+  void onBottomButtonTap({
+    required List<TwakeChatPresentationAccount> multipleAccounts,
+  }) {
+    MultipleAccountsPickerController(
+      context: context,
+      multipleAccounts: multipleAccounts,
+    ).showMultipleAccountsPicker(
       client,
       onGoToAccountSettings: () {
         context.go('/rooms/profile');
@@ -604,7 +668,7 @@ class SettingsProfileController extends State<SettingsProfile>
     _handleViewState();
     _getCurrentProfile(client);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      haveMultipleAccountsNotifier.value = await accountsCount > 1;
+      _getMultipleAccounts(client);
     });
     super.initState();
   }
@@ -616,6 +680,7 @@ class SettingsProfileController extends State<SettingsProfile>
     displayNameFocusNode.dispose();
     settingsProfileUIState.dispose();
     isEditedProfileNotifier.dispose();
+    settingsMultiAccountsUIState.dispose();
     super.dispose();
   }
 

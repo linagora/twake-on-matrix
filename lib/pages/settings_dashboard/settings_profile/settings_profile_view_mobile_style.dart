@@ -19,10 +19,11 @@ class SettingsProfileViewMobileStyle {
 
   static const bottomButtonHeight = 48.0;
   static const paddingBottomButton = EdgeInsets.only(left: 16.0, right: 16.0);
+  static const marginBottomButton = EdgeInsets.only(bottom: 32.0);
   static const bottomButtonRadius = 100.0;
   static const iconSize = 18.0;
+  static const indicatorStrokeWidth = 2.0;
+  static const indicatorScale = 0.7;
 
   static const paddingIconAndText = SizedBox(width: 8.0);
-
-  static const paddingBottomBottomButton = SizedBox(height: 32.0);
 }
