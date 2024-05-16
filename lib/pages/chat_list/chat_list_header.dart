@@ -22,8 +22,12 @@ class ChatListHeader extends StatelessWidget {
     return Column(
       children: [
         TwakeHeader(
-          controller: controller,
           onClearSelection: controller.onClickClearSelection,
+          client: controller.activeClient,
+          selectModeNotifier: controller.selectModeNotifier,
+          conversationSelectionNotifier:
+              controller.conversationSelectionNotifier,
+          onClickAvatar: controller.onClickAvatar,
         ),
         Container(
           height: ChatListHeaderStyle.searchBarContainerHeight,

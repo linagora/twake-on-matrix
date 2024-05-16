@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -114,16 +115,13 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   }
 
   void _handleLogout(AppAdaptiveScaffoldBody oldWidget) {
-    Logs().d(
-      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():oldWidget - ${oldWidget.args}',
-    );
-    Logs().d(
-      'AppAdaptiveScaffoldBodyController::_onLogoutMultipleAccountSuccess():newWidget - ${widget.args}',
-    );
-    if (oldWidget.args != widget.args && widget.args is LogoutBodyArgs) {
-      activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
-      pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
-    }
+    activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
+    pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+  }
+
+  void _handleSwitchAccount(AppAdaptiveScaffoldBody oldWidget) {
+    activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
+    pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
   }
 
   MatrixState get matrix => Matrix.of(context);
@@ -138,7 +136,20 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   @override
   void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
     activeRoomIdNotifier.value = widget.activeRoomId;
-    _handleLogout(oldWidget);
+    Logs().d(
+      'AppAdaptiveScaffoldBodyController::didUpdateWidget():oldWidget - ${oldWidget.args}',
+    );
+    Logs().d(
+      'AppAdaptiveScaffoldBodyController::didUpdateWidget():newWidget - ${widget.args}',
+    );
+    if (oldWidget.args != widget.args && widget.args is LogoutBodyArgs) {
+      _handleLogout(oldWidget);
+    }
+
+    if (oldWidget.args != widget.args &&
+        widget.args is SwitchActiveAccountBodyArgs) {
+      _handleSwitchAccount(oldWidget);
+    }
     super.didUpdateWidget(oldWidget);
   }
 

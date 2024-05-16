@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -10,17 +10,65 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class TwakeHeader extends StatelessWidget
-    with ShowDialogMixin
-    implements PreferredSizeWidget {
-  final ChatListController controller;
+class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onClearSelection;
+  final ValueNotifier<SelectMode> selectModeNotifier;
+  final ValueNotifier<List<ConversationSelectionPresentation>>
+      conversationSelectionNotifier;
+  final VoidCallback onClickAvatar;
+  final Client client;
 
   const TwakeHeader({
     super.key,
-    required this.controller,
     required this.onClearSelection,
+    required this.client,
+    required this.selectModeNotifier,
+    required this.conversationSelectionNotifier,
+    required this.onClickAvatar,
   });
+
+  @override
+  State<TwakeHeader> createState() => _TwakeHeaderState();
+
+  @override
+  Size get preferredSize =>
+      const Size.fromHeight(TwakeHeaderStyle.toolbarHeight);
+}
+
+class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
+  final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
+    Profile(userId: ''),
+  );
+
+  void getCurrentProfile(Client client) async {
+    currentProfileNotifier.value = Profile(userId: '');
+    final profile = await client.getProfileFromUserId(
+      widget.client.userID!,
+      getFromRooms: false,
+    );
+    Logs().d(
+      'ChatList::_getCurrentProfile() - currentProfile1: $profile',
+    );
+    currentProfileNotifier.value = profile;
+  }
+
+  @override
+  void didUpdateWidget(covariant TwakeHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (Matrix.of(context).isValidActiveClient &&
+        widget.client != oldWidget.client) {
+      getCurrentProfile(widget.client);
+    }
+    if (currentProfileNotifier.value.userId.isEmpty) {
+      getCurrentProfile(widget.client);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    currentProfileNotifier.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +78,7 @@ class TwakeHeader extends StatelessWidget
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,
       title: ValueListenableBuilder(
-        valueListenable: controller.selectModeNotifier,
+        valueListenable: widget.selectModeNotifier,
         builder: (context, selectMode, _) {
           return Align(
             alignment: TwakeHeaderStyle.alignment,
@@ -55,7 +103,7 @@ class TwakeHeader extends StatelessWidget
                         children: [
                           InkWell(
                             onTap: selectMode == SelectMode.select
-                                ? onClearSelection
+                                ? widget.onClearSelection
                                 : null,
                             borderRadius: BorderRadius.circular(
                               TwakeHeaderStyle.closeIconSize,
@@ -72,7 +120,7 @@ class TwakeHeader extends StatelessWidget
                           ),
                           ValueListenableBuilder(
                             valueListenable:
-                                controller.conversationSelectionNotifier,
+                                widget.conversationSelectionNotifier,
                             builder: (context, conversationSelection, _) {
                               return Padding(
                                 padding:
@@ -109,18 +157,14 @@ class TwakeHeader extends StatelessWidget
                               hoverColor: Colors.transparent,
                               splashColor: Colors.transparent,
                               highlightColor: Colors.transparent,
-                              onTap: controller.onClickAvatar,
+                              onTap: widget.onClickAvatar,
                               child: ValueListenableBuilder(
-                                valueListenable:
-                                    controller.currentProfileNotifier,
+                                valueListenable: currentProfileNotifier,
                                 builder: (context, profile, _) {
                                   return Avatar(
                                     mxContent: profile.avatarUrl,
                                     name: profile.displayName ??
-                                        Matrix.of(context)
-                                            .client
-                                            .userID!
-                                            .localpart,
+                                        profile.userId.localpart,
                                     size: TwakeHeaderStyle.avatarSize,
                                     fontSize:
                                         TwakeHeaderStyle.avatarFontSizeInAppBar,
@@ -140,8 +184,4 @@ class TwakeHeader extends StatelessWidget
       centerTitle: true,
     );
   }
-
-  @override
-  Size get preferredSize =>
-      const Size.fromHeight(TwakeHeaderStyle.toolbarHeight);
 }

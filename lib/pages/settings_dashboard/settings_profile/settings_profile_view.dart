@@ -88,9 +88,12 @@ class SettingsProfileView extends StatelessWidget {
                   client: controller.client,
                   settingsProfileUIState: controller.settingsProfileUIState,
                   onTapAvatar: controller.onTapAvatarInMobile,
-                  onBottomButtonTap: controller.onBottomButtonTap,
-                  haveMultipleAccountsNotifier:
-                      controller.haveMultipleAccountsNotifier,
+                  onTapMultipleAccountsButton: (multipleAccounts) =>
+                      controller.onBottomButtonTap(
+                    multipleAccounts: multipleAccounts,
+                  ),
+                  settingsMultiAccountsUIState:
+                      controller.settingsMultiAccountsUIState,
                   menuChildren: controller.listContextMenuBuilder(context),
                   menuController: controller.menuController,
                   settingsProfileOptions: ListView.separated(
