@@ -84,10 +84,6 @@ class ChatListController extends State<ChatList>
   final ValueNotifier<SelectMode> selectModeNotifier =
       ValueNotifier(SelectMode.normal);
 
-  final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
-    Profile(userId: ''),
-  );
-
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier = ValueNotifier([]);
 
@@ -748,17 +744,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
-    );
-    Logs().d(
-      'ChatList::_getCurrentProfile() - currentProfile: $profile',
-    );
-    currentProfileNotifier.value = profile;
-  }
-
   void onClickAvatar() {
     context.push('/rooms/profile');
   }
@@ -783,7 +768,6 @@ class ChatListController extends State<ChatList>
     );
     if (newActiveClient != null && newActiveClient.userID != null) {
       setState(() {
-        _getCurrentProfile(newActiveClient);
         _clientStream.add(newActiveClient);
         _handleRecovery();
       });
@@ -800,14 +784,12 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
-    _getCurrentProfile(activeClient);
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
         await matrixState.retrievePersistedActiveClient();
-        _getCurrentProfile(activeClient);
       }
     });
     _checkTorBrowser();
