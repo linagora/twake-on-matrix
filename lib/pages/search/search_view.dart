@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
+import 'package:fluffychat/pages/search/public_room/search_public_room_view.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -7,6 +8,8 @@ import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room.dart';
+import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_empty.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -66,6 +69,29 @@ class SearchView extends StatelessWidget {
           ),
           _RecentChatAndContactsHeader(searchController: searchController),
           _recentChatsWidget(),
+          ValueListenableBuilder(
+            valueListenable: searchController
+                .searchPublicRoomController.searchResultsNotifier,
+            builder: ((context, searchResults, child) {
+              if (searchResults is PresentationSearchPublicRoomEmpty) {
+                return child!;
+              }
+
+              if (searchResults is PresentationSearchPublicRoom) {
+                if (searchResults.searchResults.isEmpty) {
+                  return child!;
+                }
+                return _SearchHeader(
+                  header: L10n.of(context)!.publicRooms,
+                  searchController: searchController,
+                  needShowMore: false,
+                );
+              }
+              return child!;
+            }),
+            child: _EmptySliverBox(),
+          ),
+          SearchPublicRoomList(searchController: searchController),
           ValueListenableBuilder(
             valueListenable:
                 searchController.serverSearchController.searchResultsNotifier,
