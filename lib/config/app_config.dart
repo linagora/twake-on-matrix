@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/config/config_saas/config_saas.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -28,11 +29,16 @@ abstract class AppConfig {
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
 
-  static String registrationUrl = 'https://example.com/';
+  static String sampleValue = 'sampleValue';
 
-  static String twakeWorkplaceHomeserver = 'https://example.com/';
+  ///`REGISTRATION_URL`: Registration URL for public platform, sample is `https://example.com`
+  static String registrationUrl = sampleValue;
 
-  static String homeserver = 'https://example.com/';
+  ///`TWAKE_WORKPLACE_HOMESERVER`: Twake workplace homeserver, sample is `https://example.com`
+  static String twakeWorkplaceHomeserver = sampleValue;
+
+  ///`HOME_SERVER`: Homeserver, sample is `https://example.com`
+  static String homeserver = sampleValue;
 
   static String? platform;
 
@@ -112,22 +118,22 @@ abstract class AppConfig {
 
   static const String _platformEnv = String.fromEnvironment(
     'PLATFORM',
-    defaultValue: 'platform',
+    defaultValue: ConfigurationSaas.platform,
   );
 
   static const String _twakeWorkplaceHomeserverEnv = String.fromEnvironment(
     'TWAKE_WORKPLACE_HOMESERVER',
-    defaultValue: 'https://example.com/',
+    defaultValue: ConfigurationSaas.twakeWorkplaceHomeserver,
   );
 
   static const String _registrationUrlEnv = String.fromEnvironment(
     'REGISTRATION_URL',
-    defaultValue: 'https://example.com/',
+    defaultValue: ConfigurationSaas.registrationUrl,
   );
 
   static const String _homeserverEnv = String.fromEnvironment(
     'HOME_SERVER',
-    defaultValue: 'https://example.com/',
+    defaultValue: ConfigurationSaas.homeserver,
   );
 
   static void loadEnvironment() {

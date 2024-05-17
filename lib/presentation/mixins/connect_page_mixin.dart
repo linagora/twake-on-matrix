@@ -54,7 +54,7 @@ mixin ConnectPageMixin {
   }
 
   bool get homeserverIsConfigured =>
-      AppConfig.homeserver != 'https://example.com/' ||
+      AppConfig.homeserver != AppConfig.sampleValue ||
       AppConfig.homeserver.isNotEmpty;
 
   String _getRedirectUrlScheme(String redirectUrl) {
