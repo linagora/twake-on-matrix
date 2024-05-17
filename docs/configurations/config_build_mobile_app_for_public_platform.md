@@ -2,27 +2,49 @@
 
 ### Context
 
-- Twake Chat app can use the values of environment declarations to change its functionality or behavior. 
-  Dart compilers can eliminate the code made unreachable due to 
-  control flow using the environment declaration values.
-- Only support for mobile app.
+- Twake Chat need to config env for Twake Chat service on mobile app for public platform, two ways
+  to config env:
 
-### How to config
+#### 1. Enable for `SaaS` platform
 
-1.Flutter
+1.1. Use `--dart-define` option to config env for mobile app.
+
+- Specify `platform` is `saas`.
 - To specify environment declarations to the Flutter tool, use the `--dart-define` option instead:
 
 ```
 flutter run --dart-define=REGISTRATION_URL=https://example.com/ 
 --dart-define=TWAKE_WORKPLACE_HOMESERVER=https://example.com/ 
---dart-define=PLATFORM=platfomrm 
+--dart-define=PLATFORM=saas 
 --dart-define=HOME_SERVER=https://example.com/ 
 
 ```
 
-- `REGISTRATION_URL`: Registration URL for public platform
-- `TWAKE_WORKPLACE_HOMESERVER`: Twake workplace homeserver
-- `PLATFORM`: Platform, `saas` for the case of public platform
-- `HOME_SERVER`: Homeserver
+1.2. Use `config_saas.dart` to config env for mobile app.
 
-If you want to disable it, please change the value or remove when use `--dart-define` option
+```
+class ConfigurationSaas {
+  static const String registrationUrl = 'https://example.com/';
+
+  static const String twakeWorkplaceHomeserver = 'https://example.com/';
+
+  static const String homeserver = 'https://example.com/';
+
+  static const String platform = 'saas';
+}
+```
+
+#### 2. Disable for `SaaS` platform
+
+- Build without `--dart-define`.
+
+- Change the value `platform` in `config_saas.dart` to any value except `saas`.
+
+```
+class ConfigurationSaas {
+
+  // ...
+  
+  static const String platform = 'platform';
+}
+```
