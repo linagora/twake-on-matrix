@@ -373,4 +373,18 @@ extension StringCasingExtension on String {
     final match = regex.firstMatch(this);
     return match?.group(1);
   }
+
+  bool isRoomAlias() {
+    final regExp = RegExp(r'^[#][^:]+:.+$');
+    final result = regExp.hasMatch(trim());
+    return result;
+  }
+
+  String? getServerNameFromRoomAlias() {
+    final parts = split(':');
+    if (parts.length > 1) {
+      return parts[1];
+    }
+    return null;
+  }
 }

@@ -377,4 +377,39 @@ void main() {
       expect('<a href="https://example.com"></a>'.extractInnerText(), isEmpty);
     });
   });
+
+  group('[isRoomAlias TEST]', () {
+    final testMap = <String, bool>{
+      '#room:server.com': true,
+      '!room:server.com:': false,
+      'room:server.com': false,
+      '': false,
+    };
+
+    for (final entry in testMap.entries) {
+      test('Testing: ${entry.key} => Expected: ${entry.value}', () {
+        final result = entry.key.isRoomAlias();
+        if (entry.value) {
+          expect(result, isTrue);
+        } else {
+          expect(result, isFalse);
+        }
+      });
+    }
+  });
+
+  group('[getServerNameFromRoomAlias] TEST', () {
+    final testMap = <String, String?>{
+      '#room:server.com': 'server.com',
+      '#room:domain.com:': 'domain.com',
+      '': null,
+    };
+
+    for (final entry in testMap.entries) {
+      test('Testing: ${entry.key} => Expected: ${entry.value}', () {
+        final result = entry.key.getServerNameFromRoomAlias();
+        expect(result, equals(entry.value));
+      });
+    }
+  });
 }
