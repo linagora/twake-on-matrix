@@ -7,8 +7,6 @@ import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';

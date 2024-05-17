@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
@@ -7,6 +8,7 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
@@ -224,7 +226,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
                 Text(
                   L10n.of(context)!.settingUpYourTwake,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: LinagoraSysColors.material().onBackground,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -239,7 +241,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
                 Text(
                   _description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: LinagoraSysColors.material().onBackground,
                       ),
                   textAlign: TextAlign.center,
                 ),

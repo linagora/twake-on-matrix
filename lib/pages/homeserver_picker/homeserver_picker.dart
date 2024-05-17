@@ -253,7 +253,10 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   Widget build(BuildContext context) {
-    return HomeserverPickerView(this);
+    return PopScope(
+      canPop: state != HomeserverState.loading,
+      child: HomeserverPickerView(this),
+    );
   }
 
   Future<void> restoreBackup() async {
