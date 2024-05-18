@@ -1,3 +1,12 @@
+## [2.5.3+2330] - 2024-05-03
+
+### Fixed
+- #1650: Memory leak problems: Web and Mobile app
+- #1696: Change app icon 
+- Change log format
+- Update new push gateway service 
+- #1768 Integrate SaaS for mobile app
+
 ## [2.5.2+2330] - 2024-05-03
 
 ### Fixed
