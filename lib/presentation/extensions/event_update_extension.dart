@@ -20,6 +20,10 @@ extension EventUpdateExtension on EventUpdate {
     return content['type'] == EventTypes.RoomPinnedEvents;
   }
 
+  bool get isMemberChangedEvent {
+    return content['type'] == EventTypes.RoomMember;
+  }
+
   bool _isPinnedListChanged(
     Map<String, dynamic> content,
     Map<String, dynamic> prevContent,
