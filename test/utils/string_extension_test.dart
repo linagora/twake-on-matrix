@@ -412,4 +412,24 @@ void main() {
       });
     }
   });
+
+  group('[isRoomId TEST]', () {
+    final testMap = <String, bool>{
+      '#room:server.com': false,
+      '!room:server.com:': true,
+      'room:server.com': false,
+      '': false,
+    };
+
+    for (final entry in testMap.entries) {
+      test('Testing: ${entry.key} => Expected: ${entry.value}', () {
+        final result = entry.key.isRoomId();
+        if (entry.value) {
+          expect(result, isTrue);
+        } else {
+          expect(result, isFalse);
+        }
+      });
+    }
+  });
 }

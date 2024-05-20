@@ -387,4 +387,10 @@ extension StringCasingExtension on String {
     }
     return null;
   }
+
+  bool isRoomId() {
+    final regExp = RegExp(r'^[!][^:]+:.+$');
+    final result = regExp.hasMatch(trim());
+    return result;
+  }
 }
