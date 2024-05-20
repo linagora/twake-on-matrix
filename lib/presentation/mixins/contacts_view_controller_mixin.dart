@@ -249,16 +249,21 @@ mixin class ContactsViewControllerMixin {
       keyword: keyword ?? '',
       matrixLocalizations: matrixLocalizations,
       rooms: client.rooms,
-      limit: keyword == null ? _defaultLimitRecentContacts : null,
     )
         .listen(
       (event) {
         event.map((success) {
           if (success is SearchRecentChatSuccess) {
-            presentationRecentContactNotifier.value = success
+            final recent = success
                 .toPresentation()
                 .contacts
                 .where((contact) => contact.directChatMatrixID != null)
+                .toList();
+
+            presentationRecentContactNotifier.value = recent
+                .take(
+                  keyword == null ? _defaultLimitRecentContacts : recent.length,
+                )
                 .toList();
           }
         });
@@ -313,11 +318,6 @@ mixin class ContactsViewControllerMixin {
     textEditingController.dispose();
     presentationContactNotifier.dispose();
     presentationPhonebookContactNotifier.dispose();
-    contactsManager
-        .getContactsNotifier()
-        .removeListener(() => _refreshAllContacts);
-    contactsManager
-        .getPhonebookContactsNotifier()
-        .removeListener(() => _refreshAllContacts);
+    presentationRecentContactNotifier.dispose();
   }
 }
