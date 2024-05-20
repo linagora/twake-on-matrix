@@ -1,11 +1,11 @@
+import 'package:fluffychat/pages/search/public_room/empty_search_public_room_widget.dart';
 import 'package:fluffychat/pages/search/public_room/search_public_room_view_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_empty.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:google_fonts/google_fonts.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SearchPublicRoomList extends StatelessWidget {
   final SearchController searchController;
@@ -23,6 +23,15 @@ class SearchPublicRoomList extends StatelessWidget {
             searchController.searchPublicRoomController.searchResultsNotifier,
         builder: (context, searchPublicRoomNotifier, child) {
           if (searchPublicRoomNotifier is PresentationSearchPublicRoomEmpty) {
+            final genericSearchTerm =
+                searchController.searchPublicRoomController.genericSearchTerm;
+            if (genericSearchTerm != null || genericSearchTerm!.isNotEmpty) {
+              return EmptySearchPublicRoomWidget(
+                genericSearchTerm: genericSearchTerm,
+                onTapJoin: () => searchController.searchPublicRoomController
+                    .joinRoom(context, genericSearchTerm),
+              );
+            }
             return child!;
           }
 
@@ -34,12 +43,14 @@ class SearchPublicRoomList extends StatelessWidget {
               padding: SearchPublicRoomViewStyle.paddingListItem,
               itemBuilder: ((context, index) {
                 final room = searchPublicRoomNotifier.searchResults[index];
+                final action = searchController.searchPublicRoomController
+                    .getAction(context, room);
                 return Padding(
                   padding: SearchPublicRoomViewStyle.paddingListItem,
                   child: Padding(
                     padding: SearchPublicRoomViewStyle.paddingInsideListItem,
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
                           padding: SearchPublicRoomViewStyle.paddingAvatar,
@@ -48,18 +59,36 @@ class SearchPublicRoomList extends StatelessWidget {
                             name: room.name,
                           ),
                         ),
-                        Flexible(
-                          child: Text(
-                            room.name ?? room.roomId,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: LinagoraTextStyle.material()
-                                .bodyMedium3
-                                .copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                  fontFamily: GoogleFonts.inter().fontFamily,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                room.name ?? room.roomId,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                                style:
+                                    SearchPublicRoomViewStyle.roomNameTextStyle,
+                              ),
+                              const SizedBox(
+                                height:
+                                    SearchPublicRoomViewStyle.nameToButtonSpace,
+                              ),
+                              if (action != null)
+                                TwakeTextButton(
+                                  message: action.getLabel(context),
+                                  styleMessage: action.getLabelStyle(context),
+                                  paddingAll: 0.0,
+                                  onTap: () => searchController
+                                      .searchPublicRoomController
+                                      .handlePublicRoomActions(
+                                    context,
+                                    room,
+                                    action,
+                                  ),
                                 ),
+                            ],
                           ),
                         ),
                       ],

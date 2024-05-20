@@ -3059,5 +3059,7 @@
     "placeholders": {
       "user": {}
     }
-  }
+  },
+  "view": "View",
+  "join": "Join"
 }
