@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/domain/model/search/contact_search_model.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class PresentationSearch extends Equatable {
@@ -100,6 +101,16 @@ extension UserExtension on User {
   ContactPresentationSearch toContactPresentationSearch() {
     return ContactPresentationSearch(
       matrixId: id,
+      displayName: displayName,
+    );
+  }
+}
+
+extension PresentationSearchExtension on PresentationSearch {
+  PresentationContact toPresentationContact() {
+    return PresentationContact(
+      matrixId: directChatMatrixID,
+      email: email,
       displayName: displayName,
     );
   }

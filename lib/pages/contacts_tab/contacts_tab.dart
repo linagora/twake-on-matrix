@@ -4,8 +4,11 @@ import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +31,15 @@ class ContactsTabController extends State<ContactsTab>
 
   @override
   void initState() {
-    initialFetchContacts();
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        initialFetchContacts(
+          client: Matrix.of(context).client,
+          matrixLocalizations: MatrixLocals(L10n.of(context)!),
+        );
+      }
+    });
+
     _listenFocusTextEditing();
     super.initState();
   }
