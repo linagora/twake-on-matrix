@@ -1733,7 +1733,8 @@ class ChatController extends State<Chat>
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
-      if (eventUpdate.isPinnedEventsHasChanged) {
+      if (eventUpdate.isPinnedEventsHasChanged &&
+          room?.id == eventUpdate.roomID) {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           eventUpdate.updatePinnedMessage(
             onPinnedMessageUpdated: _handlePinnedMessageCallBack,
