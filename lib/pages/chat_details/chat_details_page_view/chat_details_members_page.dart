@@ -50,7 +50,10 @@ class ChatDetailsMembersPage extends StatelessWidget {
                       onUpdatedMembers: onUpdatedMembers,
                     );
                   }
-
+                  final haveMoreMembers = actualMembersCount > members.length;
+                  if (!haveMoreMembers) {
+                    return const SizedBox.shrink();
+                  }
                   return ListTile(
                     title: Text(
                       L10n.of(context)!.loadCountMoreParticipants(
