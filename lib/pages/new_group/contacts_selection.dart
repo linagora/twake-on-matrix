@@ -4,7 +4,11 @@ import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dar
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:matrix/matrix.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>
     extends State<T>
@@ -27,9 +31,14 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   bool get isFullScreen => true;
 
+  Client get client => Matrix.of(context).client;
+
   @override
   void initState() {
-    initialFetchContacts();
+    initialFetchContacts(
+      client: client,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+    );
     super.initState();
   }
 

@@ -5,9 +5,11 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.dart';
+import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
@@ -15,6 +17,8 @@ import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -24,16 +28,24 @@ import 'package:permission_handler/permission_handler.dart';
 mixin class ContactsViewControllerMixin {
   static const _debouncerIntervalInMilliseconds = 300;
 
+  static const _defaultLimitRecentContacts = 6;
+
   final TextEditingController textEditingController = TextEditingController();
 
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
+
+  final SearchRecentChatInteractor _searchRecentChatInteractor =
+      getIt.get<SearchRecentChatInteractor>();
 
   ValueNotifier<WarningContactsBannerState> warningBannerNotifier =
       ValueNotifier(WarningContactsBannerState.hide);
 
   // FIXME: Consider can use FocusNode instead ?
   final ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
+
+  final presentationRecentContactNotifier =
+      ValueNotifier<List<PresentationSearch>>([]);
 
   final presentationContactNotifier = ValueNotifier<Either<Failure, Success>>(
     const Right(ContactsInitial()),
@@ -55,19 +67,31 @@ mixin class ContactsViewControllerMixin {
 
   PermissionStatus contactsPermissionStatus = PermissionStatus.granted;
 
-  void initialFetchContacts() async {
+  void initialFetchContacts({
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) async {
     if (PlatformInfos.isMobile &&
         !contactsManager.isDoNotShowWarningContactsBannerAgain) {
       await _handleRequestContactsPermission();
     }
-    _refreshContacts();
-    _listenContactsDataChange();
+    _refreshAllContacts(
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
+    _listenContactsDataChange(
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
     textEditingController.addListener(() {
       _debouncer.value = textEditingController.text;
     });
 
     _debouncer.values.listen((keyword) {
-      _refreshContacts();
+      _refreshAllContacts(
+        client: client,
+        matrixLocalizations: matrixLocalizations,
+      );
     });
     contactsManager.initialSynchronizeContacts(
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
@@ -75,14 +99,28 @@ mixin class ContactsViewControllerMixin {
     );
   }
 
-  void _listenContactsDataChange() {
-    contactsManager.getContactsNotifier().addListener(_refreshContacts);
-    contactsManager
-        .getPhonebookContactsNotifier()
-        .addListener(_refreshContacts);
+  void _listenContactsDataChange({
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) {
+    contactsManager.getContactsNotifier().addListener(
+          () => _refreshAllContacts(
+            client: client,
+            matrixLocalizations: matrixLocalizations,
+          ),
+        );
+    contactsManager.getPhonebookContactsNotifier().addListener(
+          () => _refreshAllContacts(
+            client: client,
+            matrixLocalizations: matrixLocalizations,
+          ),
+        );
   }
 
-  void _refreshContacts() {
+  void _refreshAllContacts({
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) {
     final keyword = _debouncer.value;
     if (keyword.isValidMatrixId && keyword.startsWith("@")) {
       presentationContactNotifier.value = Right(
@@ -98,6 +136,16 @@ mixin class ContactsViewControllerMixin {
           const Right(GetPhonebookContactsInitial());
       return;
     }
+    _refreshContacts(keyword);
+    _refreshPhoneBookContacts(keyword);
+    _refreshRecentContacts(
+      client: client,
+      keyword: keyword.isEmpty ? null : keyword,
+      matrixLocalizations: matrixLocalizations,
+    );
+  }
+
+  Future<void> _refreshContacts(String keyword) async {
     presentationContactNotifier.value =
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
@@ -142,12 +190,17 @@ mixin class ContactsViewControllerMixin {
         return Right(success);
       },
     );
+  }
+
+  Future<void> _refreshPhoneBookContacts(String keyword) async {
     presentationPhonebookContactNotifier.value =
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
         if (failure is GetPhonebookContactsFailure) {
-          return const Left(
-            GetPresentationContactsEmpty(),
+          return Left(
+            GetPresentationContactsFailure(
+              keyword: keyword,
+            ),
           );
         }
 
@@ -182,6 +235,33 @@ mixin class ContactsViewControllerMixin {
           }
         }
         return Right(success);
+      },
+    );
+  }
+
+  Future<void> _refreshRecentContacts({
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+    String? keyword,
+  }) async {
+    _searchRecentChatInteractor
+        .execute(
+      keyword: keyword ?? '',
+      matrixLocalizations: matrixLocalizations,
+      rooms: client.rooms,
+      limit: keyword == null ? _defaultLimitRecentContacts : null,
+    )
+        .listen(
+      (event) {
+        event.map((success) {
+          if (success is SearchRecentChatSuccess) {
+            presentationRecentContactNotifier.value = success
+                .toPresentation()
+                .contacts
+                .where((contact) => contact.directChatMatrixID != null)
+                .toList();
+          }
+        });
       },
     );
   }
@@ -233,9 +313,11 @@ mixin class ContactsViewControllerMixin {
     textEditingController.dispose();
     presentationContactNotifier.dispose();
     presentationPhonebookContactNotifier.dispose();
-    contactsManager.getContactsNotifier().removeListener(_refreshContacts);
+    contactsManager
+        .getContactsNotifier()
+        .removeListener(() => _refreshAllContacts);
     contactsManager
         .getPhonebookContactsNotifier()
-        .removeListener(_refreshContacts);
+        .removeListener(() => _refreshAllContacts);
   }
 }

@@ -11,6 +11,7 @@ import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class ContactsTabBodyView extends StatelessWidget {
       slivers: [
         _SliverWarningBanner(controller: controller),
         _SliverPhonebookLoading(controller: controller),
+        _SliverRecentContacts(controller: controller),
         _SliverContactsList(controller: controller),
         _SliverPhonebookList(controller: controller),
         const _SliverPadding(),
@@ -100,12 +102,15 @@ class _SliverContactsList extends StatelessWidget {
             final presentationPhoneBookContact = controller
                 .presentationPhonebookContactNotifier.value
                 .getSuccessOrNull<PresentationContactsSuccess>();
+            final presentationRecentContact =
+                controller.presentationRecentContactNotifier.value;
             if (failure is GetPresentationContactsFailure) {
               if (failure.keyword.isEmpty) {
                 return child!;
               } else {
-                if (presentationPhoneBookContact == null ||
-                    presentationPhoneBookContact.contacts.isEmpty) {
+                if ((presentationPhoneBookContact == null ||
+                        presentationPhoneBookContact.contacts.isEmpty) &&
+                    presentationRecentContact.isEmpty) {
                   return SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.only(
@@ -121,8 +126,9 @@ class _SliverContactsList extends StatelessWidget {
               }
             }
             if (failure is GetPresentationContactsEmpty) {
-              if (presentationPhoneBookContact == null ||
-                  presentationPhoneBookContact.contacts.isEmpty) {
+              if ((presentationPhoneBookContact == null ||
+                      presentationPhoneBookContact.contacts.isEmpty) &&
+                  presentationRecentContact.isEmpty) {
                 if (controller.textEditingController.text.isEmpty) {
                   return const SliverToBoxAdapter(child: EmptyContactBody());
                 } else {
@@ -202,6 +208,51 @@ class _SliverPhonebookLoading extends StatelessWidget {
           child: _PhonebookLoading(progress: loading.progress),
         );
       },
+    );
+  }
+}
+
+class _SliverRecentContacts extends StatelessWidget {
+  final ContactsTabController controller;
+
+  const _SliverRecentContacts({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.presentationContactNotifier,
+      builder: (context, state, child) {
+        return state.fold(
+          (failure) => child!,
+          (success) {
+            if (success is ContactsLoading) {
+              return const SliverToBoxAdapter(
+                child: SizedBox(),
+              );
+            }
+            return child!;
+          },
+        );
+      },
+      child: ValueListenableBuilder(
+        valueListenable: controller.presentationRecentContactNotifier,
+        builder: (context, recentContacts, child) {
+          if (recentContacts.isEmpty) {
+            return child!;
+          }
+          return SliverExpandableList(
+            title: L10n.of(context)!.recentChat,
+            itemCount: recentContacts.length,
+            itemBuilder: (context, index) => _Contact(
+              contact: recentContacts[index].toPresentationContact(),
+              controller: controller,
+            ),
+          );
+        },
+        child: const SliverToBoxAdapter(
+          child: SizedBox(),
+        ),
+      ),
     );
   }
 }
