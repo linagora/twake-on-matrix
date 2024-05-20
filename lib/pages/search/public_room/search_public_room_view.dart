@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/search/public_room/search_public_room_view_styl
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_empty.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -28,8 +29,13 @@ class SearchPublicRoomList extends StatelessWidget {
             if (genericSearchTerm != null || genericSearchTerm!.isNotEmpty) {
               return EmptySearchPublicRoomWidget(
                 genericSearchTerm: genericSearchTerm,
-                onTapJoin: () => searchController.searchPublicRoomController
-                    .joinRoom(context, genericSearchTerm),
+                onTapJoin: () =>
+                    searchController.searchPublicRoomController.joinRoom(
+                  context,
+                  genericSearchTerm,
+                  searchController.searchPublicRoomController
+                      .getServerName(genericSearchTerm),
+                ),
               );
             }
             return child!;

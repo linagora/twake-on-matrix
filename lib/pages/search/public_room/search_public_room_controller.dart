@@ -31,8 +31,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
 
   PublicRoomQueryFilter? _filter;
 
-  String? _server;
-
   bool get searchTermIsNotEmpty =>
       _filter?.genericSearchTerm?.isNotEmpty == true;
 
@@ -41,7 +39,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
   void init() {
     initializeDebouncer((keyword) {
       _updateFilter(keyword);
-      _updateServer(keyword);
 
       if (keyword.isEmpty) return;
 
@@ -60,10 +57,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     );
   }
 
-  void _updateServer(String keyword) {
-    _server = keyword.getServerNameFromRoomAlias();
-  }
-
   void _resetSearchResults() {
     searchResultsNotifier.value = PresentationSearchPublicRoom(
       searchResults: [],
@@ -75,7 +68,7 @@ class SearchPublicRoomController with SearchDebouncerMixin {
         .execute(
           filter: _filter,
           limit: _limitPublicRoomSearchFilter,
-          server: _server,
+          server: getServerName(_filter?.genericSearchTerm),
         )
         .listen(
           (searchResult) => _handleListenSearchPublicRoom(searchResult),
@@ -108,10 +101,24 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     context.go('/rooms/$roomId');
   }
 
-  void joinRoom(BuildContext context, String roomIdOrAlias) async {
+  String? getServerName(String? roomIdOrAlias) {
+    if (roomIdOrAlias != null) {
+      return roomIdOrAlias.getServerNameFromRoomIdOrAlias();
+    }
+    return null;
+  }
+
+  void joinRoom(
+    BuildContext context,
+    String roomIdOrAlias,
+    String? server,
+  ) async {
     final client = Matrix.of(context).client;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => client.joinRoom(roomIdOrAlias),
+      future: () => client.joinRoom(
+        roomIdOrAlias,
+        serverName: server != null ? [server] : null,
+      ),
     );
     if (result.error == null) {
       if (client.getRoomById(result.result!) == null) {
@@ -134,7 +141,11 @@ class SearchPublicRoomController with SearchDebouncerMixin {
   ) {
     switch (action) {
       case PublicRoomActions.join:
-        joinRoom(context, room.canonicalAlias ?? room.roomId);
+        joinRoom(
+          context,
+          room.roomId,
+          getServerName(room.roomId),
+        );
         break;
       case PublicRoomActions.view:
         _viewRoom(context, room.roomId);
@@ -169,7 +180,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     searchResultsNotifier.dispose();
     _resetSearchResults();
     disposeDebouncer();
-    _server = null;
     _filter = null;
   }
 }

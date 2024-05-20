@@ -380,7 +380,7 @@ extension StringCasingExtension on String {
     return result;
   }
 
-  String? getServerNameFromRoomAlias() {
+  String? getServerNameFromRoomIdOrAlias() {
     final parts = split(':');
     if (parts.length > 1) {
       return parts[1];
