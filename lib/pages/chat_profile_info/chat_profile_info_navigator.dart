@@ -3,7 +3,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 
 class ChatProfileInfoRoutes {
   static const String profileInfo = '/profileInfo';

@@ -16,16 +16,16 @@ class GetTomContactsInteractor {
   }) async* {
     try {
       yield const Right(ContactsLoading());
-      yield* contactRepository
-          .fetchContacts(
+      final response = await contactRepository.fetchContacts(
         query: ContactQuery(keyword: ''),
         limit: limit,
-      )
-          .map((contacts) {
-        return Right(
-          GetContactsSuccess(contacts: contacts),
-        );
-      });
+      );
+
+      if (response.isEmpty) {
+        yield const Left(GetContactsIsEmpty());
+      } else {
+        yield Right(GetContactsSuccess(contacts: response));
+      }
     } catch (e) {
       yield Left(GetContactsFailure(keyword: '', exception: e));
     }

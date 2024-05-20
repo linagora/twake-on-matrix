@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class NoContactsFound extends StatelessWidget {
-  final String keyword;
+  final String? keyword;
 
-  const NoContactsFound({super.key, required this.keyword});
+  const NoContactsFound({super.key, this.keyword});
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +14,11 @@ class NoContactsFound extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            L10n.of(context)!.noResultForKeyword(keyword),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          if (keyword != null)
+            Text(
+              L10n.of(context)!.noResultForKeyword(keyword!),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           const SizedBox(
             height: 8.0,
           ),

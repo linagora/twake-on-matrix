@@ -8,7 +8,7 @@ import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.d
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';

@@ -44,7 +44,11 @@ class PhonebookContactInteractor {
           thirdPartyIdToHashMap.values.whereNotNull().slices(lookupChunkSize);
 
       if (chunks.isEmpty) {
-        yield Right(GetPhonebookContactsSuccess(contacts: contacts));
+        if (contacts.isEmpty) {
+          yield const Left(GetPhonebookContactsIsEmpty());
+        } else {
+          yield Right(GetPhonebookContactsSuccess(contacts: contacts));
+        }
         return;
       }
 
@@ -85,7 +89,11 @@ class PhonebookContactInteractor {
         return contact;
       }).toList();
 
-      yield Right(GetPhonebookContactsSuccess(contacts: lookupContacts));
+      if (lookupContacts.isEmpty) {
+        yield const Left(GetPhonebookContactsIsEmpty());
+      } else {
+        yield Right(GetPhonebookContactsSuccess(contacts: lookupContacts));
+      }
     } catch (e) {
       Logs().e('PhonebookContactInteractor::error', e);
       yield Left(GetPhonebookContactsFailure(exception: e));
