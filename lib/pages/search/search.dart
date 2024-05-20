@@ -7,7 +7,7 @@ import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_inte
 import 'package:fluffychat/pages/search/search_contacts_and_chats_controller.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/pages/search/server_search_controller.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';

@@ -10,9 +10,11 @@ import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
-import 'package:fluffychat/presentation/model/get_presentation_contacts_success.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
+import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
+import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -97,31 +99,91 @@ mixin class ContactsViewControllerMixin {
       return;
     }
     presentationContactNotifier.value =
-        contactsManager.getContactsNotifier().value.map((success) {
-      if (success is GetContactsSuccess) {
-        return GetPresentationContactsSuccess(
-          contacts: success.contacts
+        contactsManager.getContactsNotifier().value.fold(
+      (failure) {
+        if (failure is GetContactsFailure) {
+          return Left(
+            GetPresentationContactsFailure(
+              keyword: keyword,
+            ),
+          );
+        }
+
+        if (failure is GetContactsIsEmpty) {
+          return Left(
+            GetPresentationContactsEmpty(
+              keyword: keyword,
+            ),
+          );
+        }
+        return Left(failure);
+      },
+      (success) {
+        if (success is GetContactsSuccess) {
+          final filteredContacts = success.contacts
               .searchContacts(keyword)
               .expand((contact) => contact.toPresentationContacts())
-              .toList(),
-          keyword: keyword,
-        );
-      }
-      return success;
-    });
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+        return Right(success);
+      },
+    );
     presentationPhonebookContactNotifier.value =
-        contactsManager.getPhonebookContactsNotifier().value.map((success) {
-      if (success is GetPhonebookContactsSuccess) {
-        return GetPresentationContactsSuccess(
-          contacts: success.contacts
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+      (failure) {
+        if (failure is GetPhonebookContactsFailure) {
+          return const Left(
+            GetPresentationContactsEmpty(),
+          );
+        }
+
+        if (failure is GetPhonebookContactsIsEmpty) {
+          return Left(
+            GetPresentationContactsEmpty(
+              keyword: keyword,
+            ),
+          );
+        }
+        return Left(failure);
+      },
+      (success) {
+        if (success is GetPhonebookContactsSuccess) {
+          final filteredContacts = success.contacts
               .searchContacts(keyword)
               .expand((contact) => contact.toPresentationContacts())
-              .toList(),
-          keyword: keyword,
-        );
-      }
-      return success;
-    });
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+        return Right(success);
+      },
+    );
   }
 
   void openSearchBar() {

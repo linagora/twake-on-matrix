@@ -28,6 +28,13 @@ class GetContactsSuccess extends Success {
   List<Object?> get props => [contacts];
 }
 
+class GetContactsIsEmpty extends Failure {
+  const GetContactsIsEmpty();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class GetContactsFailure extends Failure {
   final String keyword;
   final dynamic exception;

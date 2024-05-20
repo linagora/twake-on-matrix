@@ -3,7 +3,7 @@ import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.da
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/cupertino.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>

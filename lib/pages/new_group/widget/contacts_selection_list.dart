@@ -4,8 +4,8 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
