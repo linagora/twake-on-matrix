@@ -3,7 +3,7 @@ import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 
 abstract class ContactRepository {
-  Stream<List<Contact>> fetchContacts({
+  Future<List<Contact>> fetchContacts({
     required ContactQuery query,
     int? limit,
     int? offset,

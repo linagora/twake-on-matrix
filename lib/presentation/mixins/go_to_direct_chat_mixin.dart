@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';

@@ -1,8 +1,8 @@
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

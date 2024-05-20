@@ -4,7 +4,7 @@ import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';

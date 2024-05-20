@@ -17,7 +17,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';

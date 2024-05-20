@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/widgets.dart';
 
 class SelectedContactsMapChangeNotifier extends ChangeNotifier {
