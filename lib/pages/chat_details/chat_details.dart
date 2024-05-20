@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
@@ -7,6 +8,7 @@ import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
+import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
@@ -113,6 +115,8 @@ class ChatDetailsController extends State<ChatDetails>
 
   int get actualMembersCount => room!.summary.actualMembersCount;
 
+  StreamSubscription? _onRoomEventChangedSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -143,8 +147,16 @@ class ChatDetailsController extends State<ChatDetails>
     });
     room = Matrix.of(context).client.getRoomById(roomId!);
     muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
-    membersNotifier.value ??=
-        Matrix.of(context).client.getRoomById(roomId!)!.getParticipants();
+    _listenForRoomMembersChanged();
+  }
+
+  void _listenForRoomMembersChanged() {
+    _onRoomEventChangedSubscription =
+        Matrix.of(context).client.onEvent.stream.listen((event) {
+      if (event.isMemberChangedEvent && room?.id == event.roomID) {
+        membersNotifier.value = room?.getParticipants();
+      }
+    });
   }
 
   @override
@@ -155,6 +167,7 @@ class ChatDetailsController extends State<ChatDetails>
     linksListController?.dispose();
     filesListController?.dispose();
     nestedScrollViewState.currentState?.innerController.dispose();
+    _onRoomEventChangedSubscription?.cancel();
     super.dispose();
   }
 
