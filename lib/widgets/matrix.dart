@@ -764,14 +764,14 @@ class MatrixState extends State<Matrix>
   Future<void> _setupAuthUrl({
     String? url,
   }) async {
-    final newAuthUrl = loginHomeserverSummary?.discoveryInformation
-        ?.additionalProperties["m.authentication"]?["issuer"];
     if (url != null) {
       Logs().e(
         'Matrix::_setupAuthUrl: newAuthUrl - $url',
       );
       _authUrl = url;
     } else {
+      final newAuthUrl = loginHomeserverSummary?.discoveryInformation
+          ?.additionalProperties["m.authentication"]?["issuer"];
       Logs().e(
         'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
       );
