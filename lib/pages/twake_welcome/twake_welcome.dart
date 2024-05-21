@@ -2,8 +2,11 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
+import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -38,7 +41,7 @@ class TwakeWelcome extends StatefulWidget {
 class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   void goToHomeserverPicker() {
     if (widget.arg?.isAddAnotherAccount == true) {
-      context.push('/rooms/addhomeserver');
+      context.push('/rooms/addaccount/homeserverpicker');
     } else {
       context.push('/home/homeserverpicker');
     }
@@ -58,12 +61,14 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
 
   MatrixState get matrix => Matrix.of(context);
 
-  void onClickSignIn() {
+  void onClickSignIn() async {
     Logs().d("TwakeIdController::onClickSignIn: Login Url - $loginUrl");
     _redirectRegistrationUrl(loginUrl);
   }
 
   void _redirectRegistrationUrl(String url) async {
+    final homeserverExisted = await _homeserverExisted();
+    if (homeserverExisted) return;
     matrix.loginHomeserverSummary =
         await matrix.getLoginClient().checkHomeserver(
               Uri.parse(AppConfig.twakeWorkplaceHomeserver),
@@ -86,8 +91,37 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
     _redirectRegistrationUrl(signupUrl);
   }
 
+  Future<bool> _homeserverExisted() async {
+    if (widget.arg?.isAddAnotherAccount == false) return false;
+    try {
+      final allHomeserverLoggedIn = (await ClientManager.getClients())
+          .where((client) => client.homeserver != null)
+          .map((client) => client.homeserver.toString())
+          .toList();
+      Logs().i('All homeservers: $allHomeserverLoggedIn');
+      final homeserverExists = allHomeserverLoggedIn.any(
+        (homeserver) => "$homeserver/".contains(AppConfig.homeserver),
+      );
+
+      if (homeserverExists &&
+          !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.isSingleAccountOnHomeserver,
+        );
+        return true;
+      }
+    } catch (e) {
+      Logs().e('TwakeIdController::_homeserverExisted: $e');
+      return false;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return TwakeWelcomeView(controller: this);
+    return TwakeWelcomeView(
+      controller: this,
+    );
   }
 }
