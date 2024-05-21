@@ -84,6 +84,8 @@ class SearchPublicRoomController with SearchDebouncerMixin {
       if (success is PublicRoomSuccess) {
         if (success.publicRoomsChunk == null) {
           searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
+        } else if (success.publicRoomsChunk!.isEmpty) {
+          searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
         } else {
           searchResultsNotifier.value = PresentationSearchPublicRoom(
             searchResults: success.publicRoomsChunk!,
@@ -129,7 +131,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
       if (!client.getRoomById(result.result!)!.isSpace) {
         context.go('/rooms/${result.result!}');
       }
-      Navigator.of(context, rootNavigator: false).pop();
       return;
     }
   }
