@@ -94,12 +94,6 @@ class MatrixState extends State<Matrix>
     return tomServerUrlInterceptor.baseUrl != null;
   }
 
-  bool get canDeleteToMDatabase {
-    final lastClientTwakeSupport =
-        widget.clients.where((client) => client.homeserver != null).length == 1;
-    return lastClientTwakeSupport && twakeSupported;
-  }
-
   BackgroundPush? backgroundPush;
 
   String? get authUrl => _authUrl;
@@ -385,7 +379,7 @@ class MatrixState extends State<Matrix>
       } else {
         Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
         if (PlatformInfos.isMobile) {
-          _deletePersistActiveAccount(state);
+          await _deletePersistActiveAccount();
           TwakeApp.router.go('/home/twakeWelcome');
         } else {
           TwakeApp.router.go('/home', extra: true);
@@ -421,7 +415,7 @@ class MatrixState extends State<Matrix>
 
   Future<void> _handleFirstLoggedIn(Client newActiveClient) async {
     await setUpToMServicesInLogin(newActiveClient);
-    _storePersistActiveAccount(newActiveClient);
+    await _storePersistActiveAccount(newActiveClient);
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInBodyArgs(
@@ -460,10 +454,13 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _deletePersistActiveAccount(LoginState state) async {
+  Future<void> _deletePersistActiveAccount() async {
     try {
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
-      await multipleAccountRepository.deletePersistActiveAccount();
+      await Future.wait([
+        multipleAccountRepository.deletePersistActiveAccount(),
+        _deleteAllTomConfigurations(),
+      ]);
       Logs().d(
         'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
       );
@@ -720,12 +717,12 @@ class MatrixState extends State<Matrix>
       final persistActiveAccount =
           await multipleAccountRepository.getPersistActiveAccount();
       if (persistActiveAccount == null) {
-        _storePersistActiveAccount(client);
+        await _storePersistActiveAccount(client);
         return;
       } else {
         final newActiveClient = getClientByUserId(persistActiveAccount);
         if (newActiveClient != null) {
-          setActiveClient(newActiveClient);
+          await setActiveClient(newActiveClient);
         }
       }
     } catch (e) {
@@ -780,6 +777,14 @@ class MatrixState extends State<Matrix>
       );
       _authUrl = newAuthUrl is String ? newAuthUrl : url;
     }
+  }
+
+  Future<void> _deleteAllTomConfigurations() async {
+    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+    await hiveCollectionToMDatabase.clear();
+    Logs().d(
+      'MatrixState::_deleteAllTomConfigurations: Delete ToM database success',
+    );
   }
 
   @override

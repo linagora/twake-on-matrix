@@ -46,4 +46,10 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
           .toJson(),
     );
   }
+
+  @override
+  Future<void> deleteTomConfigurations(String userId) {
+    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+    return hiveCollectionToMDatabase.tomConfigurationsBox.delete(userId);
+  }
 }
