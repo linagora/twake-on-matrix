@@ -86,11 +86,21 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         OkCancelResult.cancel) {
       return;
     }
-    final matrix = Matrix.of(context);
     if (PlatformInfos.isMobile) {
-      await tryLogoutSso(context);
+      await _logoutActionsOnMobile();
+    } else {
+      await _logoutActionsOnWeb();
     }
-    if (matrix.twakeSupported == true) {
+  }
+
+  Future<void> _logoutActionsOnMobile() async {
+    try {
+      await tryLogoutSso(context);
+    } catch (e) {
+      Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
+      return;
+    }
+    if (matrix.canDeleteToMDatabase == true) {
       final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
       await hiveCollectionToMDatabase.clear();
     }
@@ -102,10 +112,34 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           }
           await matrix.client.logout();
         } catch (e) {
-          Logs().e('SettingsController()::logoutAction - error: $e');
+          Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
+        }
+      },
+    );
+  }
+
+  Future<void> _logoutActionsOnWeb() async {
+    if (matrix.canDeleteToMDatabase == true) {
+      final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+      await hiveCollectionToMDatabase.clear();
+    }
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        try {
+          if (matrix.backgroundPush != null) {
+            await matrix.backgroundPush!.removeCurrentPusher();
+          }
+          await matrix.client.logout();
+        } catch (e) {
+          Logs().e('SettingsController()::_logoutActionsOnWeb - error: $e');
         } finally {
           if (PlatformInfos.isWeb) {
-            await tryLogoutSso(context);
+            try {
+              await tryLogoutSso(context);
+            } catch (e) {
+              Logs().e('SettingsController()::_logoutActionsOnWeb - error: $e');
+              return;
+            }
           }
         }
       },
