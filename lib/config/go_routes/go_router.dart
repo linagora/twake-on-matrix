@@ -375,7 +375,11 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
-                const HomeserverPicker(),
+                TwakeWelcome(
+                  arg: state.extra is TwakeWelcomeArg?
+                      ? state.extra as TwakeWelcomeArg?
+                      : null,
+                ),
               ),
               routes: [
                 GoRoute(
@@ -387,20 +391,11 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'twakeWelcome',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const TwakeWelcome(),
-                  ),
-                  redirect: loggedInRedirect,
-                ),
-                GoRoute(
                   path: 'homeserverpicker',
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     const HomeserverPicker(),
                   ),
-                  redirect: loggedInRedirect,
                 ),
               ],
             ),
