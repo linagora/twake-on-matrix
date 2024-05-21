@@ -108,7 +108,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           if (matrix.backgroundPush != null) {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
-          Future.wait([
+          await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
           ]);
@@ -126,7 +126,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           if (matrix.backgroundPush != null) {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
-          Future.wait([
+          await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
           ]);
