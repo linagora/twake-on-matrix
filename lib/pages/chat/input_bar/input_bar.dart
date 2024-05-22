@@ -1,3 +1,6 @@
+// ignore_for_file: deprecated_member_use
+// TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
+
 import 'package:emojis/emoji.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
@@ -57,8 +60,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     this.rawKeyboardFocusNode,
     this.suggestionsController,
     this.showEmojiPickerNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const debounceDuration = Duration(milliseconds: 50);
 

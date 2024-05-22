@@ -8,11 +8,11 @@ class WarningDialogWidget extends StatelessWidget {
   final List<DialogAction>? actions;
 
   const WarningDialogWidget({
-    Key? key,
+    super.key,
     this.title,
     this.message,
     this.actions,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -26,7 +26,8 @@ class UrlLauncher with GoToDraftChatMixin {
 
   UrlLauncher(this.context, {this.url, this.room});
 
-  final ChromeSafariBrowser browser = ChromeSafariBrowser();
+  final ChromeSafariBrowser? browser =
+      PlatformInfos.isMobile ? ChromeSafariBrowser() : null;
 
   void launchUrl() {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
@@ -222,13 +223,11 @@ class UrlLauncher with GoToDraftChatMixin {
   void openUrlInAppBrowser() async {
     if (url != null) {
       if (PlatformInfos.isMobile) {
-        await browser.open(
-          url: Uri.parse(url!),
-          options: ChromeSafariBrowserClassOptions(
-            android: AndroidChromeCustomTabsOptions(
-              shareState: CustomTabsShareState.SHARE_STATE_ON,
-            ),
-            ios: IOSSafariOptions(barCollapsingEnabled: true),
+        await browser?.open(
+          url: WebUri(url!),
+          settings: ChromeSafariBrowserSettings(
+            shareState: CustomTabsShareState.SHARE_STATE_ON,
+            barCollapsingEnabled: true,
           ),
         );
       } else {
