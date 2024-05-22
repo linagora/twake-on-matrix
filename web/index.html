@@ -41,7 +41,7 @@
     <script src="splash/splash.js"></script>
     <script>
       // The value below is injected by flutter build, do not touch.
-      var serviceWorkerVersion = null;
+      var serviceWorkerVersion = '{{flutter_service_worker_version}}';
     </script>
     <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
@@ -79,7 +79,10 @@
     <script>
       window.addEventListener("load", function (ev) {
         // Download main.dart.js
-        _flutter.loader.loadEntrypoint({
+        {{flutter_js}}
+        {{flutter_build_config}}
+        
+        _flutter.loader.load({
           serviceWorker: {
             serviceWorkerVersion: serviceWorkerVersion,
           },
@@ -99,7 +102,7 @@
     <script src="https://unpkg.com/pica/dist/pica.min.js"></script>
     <script
       type="application/javascript"
-      src="/assets/packages/flutter_inappwebview/assets/web/web_support.js"
+      src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
       defer
     ></script>
   </body>

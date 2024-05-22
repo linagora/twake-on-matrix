@@ -18,6 +18,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   record_windows
   screen_brightness_windows
+  share_plus
   super_native_extensions
   url_launcher_windows
   window_to_front

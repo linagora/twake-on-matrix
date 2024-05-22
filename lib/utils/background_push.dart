@@ -311,7 +311,7 @@ class BackgroundPush {
           await _flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
                   AndroidFlutterLocalNotificationsPlugin>()
-              ?.requestPermission();
+              ?.requestNotificationsPermission();
         }
         _pushToken = await (Platform.isIOS
             ? apnChannel.invokeMethod("getToken")

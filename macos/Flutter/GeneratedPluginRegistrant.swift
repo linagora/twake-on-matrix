@@ -18,6 +18,7 @@ import file_selector_macos
 import firebase_core
 import flutter_app_badger
 import flutter_image_compress_macos
+import flutter_inappwebview_macos
 import flutter_local_notifications
 import flutter_secure_storage_macos
 import flutter_web_auth_2
@@ -34,8 +35,8 @@ import path_provider_foundation
 import photo_manager
 import record_macos
 import screen_brightness_macos
-import share_plus_macos
-import shared_preferences_macos
+import share_plus
+import shared_preferences_foundation
 import sqflite
 import super_native_extensions
 import url_launcher_macos
@@ -59,6 +60,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
   FlutterAppBadgerPlugin.register(with: registry.registrar(forPlugin: "FlutterAppBadgerPlugin"))
   FlutterImageCompressMacosPlugin.register(with: registry.registrar(forPlugin: "FlutterImageCompressMacosPlugin"))
+  InAppWebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "InAppWebViewFlutterPlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
   FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
   FlutterWebAuth2Plugin.register(with: registry.registrar(forPlugin: "FlutterWebAuth2Plugin"))
