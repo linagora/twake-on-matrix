@@ -5,7 +5,7 @@ import 'package:fluffychat/pages/connect/connect_page_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class ConnectPage extends StatefulWidget {
-  const ConnectPage({Key? key}) : super(key: key);
+  const ConnectPage({super.key});
 
   @override
   State<ConnectPage> createState() => ConnectPageController();

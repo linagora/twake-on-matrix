@@ -27,7 +27,7 @@ class DraftChatInputRow extends StatelessWidget {
   final FocusSuggestionController focusSuggestionController;
 
   const DraftChatInputRow({
-    Key? key,
+    super.key,
     required this.onSendFileClick,
     required this.inputText,
     required this.onInputBarSubmitted,
@@ -40,7 +40,7 @@ class DraftChatInputRow extends StatelessWidget {
     this.typeAheadFocusNode,
     this.textEditingController,
     required this.focusSuggestionController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -14,12 +14,12 @@ class PermissionDialog extends StatefulWidget {
   final OnAcceptButton onAcceptButton;
 
   const PermissionDialog({
-    Key? key,
+    super.key,
     required this.permission,
     required this.explainTextRequestPermission,
     this.icon,
     this.onAcceptButton,
-  }) : super(key: key);
+  });
 
   @override
   State<PermissionDialog> createState() => _PermissionDialogState();

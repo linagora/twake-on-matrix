@@ -18,12 +18,12 @@ class SeenByRow extends StatelessWidget {
 
   const SeenByRow({
     this.eventStatus,
-    Key? key,
+    super.key,
     required this.getSeenByUsers,
     required this.participants,
     required this.timelineOverlayMessage,
     required this.event,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

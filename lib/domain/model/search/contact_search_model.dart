@@ -8,10 +8,8 @@ class ContactSearchModel extends SearchModel {
   const ContactSearchModel(
     this.matrixId,
     this.email, {
-    String? displayName,
-  }) : super(
-          displayName: displayName,
-        );
+    super.displayName,
+  });
 
   @override
   String get id => matrixId ?? email ?? '';

@@ -13,11 +13,11 @@ class ChatAdaptiveScaffold extends StatefulWidget {
   final String? roomName;
 
   const ChatAdaptiveScaffold({
-    Key? key,
+    super.key,
     required this.roomId,
     this.shareFiles,
     this.roomName,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatAdaptiveScaffold> createState() => ChatAdaptiveScaffoldController();

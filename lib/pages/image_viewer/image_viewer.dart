@@ -20,13 +20,13 @@ class ImageViewer extends StatefulWidget {
   final double? height;
 
   const ImageViewer({
-    Key? key,
+    super.key,
     this.event,
     this.imageData,
     this.filePath,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   ImageViewerController createState() => ImageViewerController();

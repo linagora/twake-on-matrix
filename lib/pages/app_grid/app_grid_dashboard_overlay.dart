@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 class AppGridDashboardOverlay extends StatelessWidget {
   final LinagoraApplications _linagoraApplications;
 
-  const AppGridDashboardOverlay(this._linagoraApplications, {Key? key})
-      : super(key: key);
+  const AppGridDashboardOverlay(this._linagoraApplications, {super.key});
 
   @override
   Widget build(BuildContext context) {

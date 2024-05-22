@@ -78,13 +78,13 @@ class Message extends StatefulWidget {
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
     this.menuChildren,
-    Key? key,
+    super.key,
     this.onMenuAction,
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
     this.onLongPress,
-  }) : super(key: key);
+  });
 
   /// Indicates wheither the user may use a mouse instead
   /// of touchscreen.

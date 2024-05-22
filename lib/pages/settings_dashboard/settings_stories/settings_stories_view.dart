@@ -9,7 +9,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsStoriesView extends StatelessWidget {
   final SettingsStoriesController controller;
-  const SettingsStoriesView(this.controller, {Key? key}) : super(key: key);
+  const SettingsStoriesView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

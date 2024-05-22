@@ -8,11 +8,11 @@ class SliverExpandableList extends StatefulWidget {
   final Widget Function(BuildContext, int) itemBuilder;
 
   const SliverExpandableList({
-    Key? key,
+    super.key,
     required this.title,
     required this.itemCount,
     required this.itemBuilder,
-  }) : super(key: key);
+  });
 
   @override
   State<SliverExpandableList> createState() => _SliverExpandableListState();

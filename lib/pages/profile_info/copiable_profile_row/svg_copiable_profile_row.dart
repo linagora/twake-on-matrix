@@ -10,9 +10,8 @@ class SvgCopiableProfileRow extends CopiableProfileRow {
     required String leadingIconPath,
     required super.caption,
     required super.copiableText,
-    Key? key,
+    super.key,
   }) : super(
-          key: key,
           leadingIcon: SvgPicture.asset(
             leadingIconPath,
             width: ChatProfileInfoStyle.iconSize,

@@ -43,7 +43,7 @@ class SettingsView extends StatelessWidget {
       ),
       bottomNavigationBar: bottomNavigationBar,
       body: ListTileTheme(
-        iconColor: Theme.of(context).colorScheme.onBackground,
+        iconColor: Theme.of(context).colorScheme.onSurface,
         child: ListView(
           key: const Key('SettingsListViewContent'),
           children: <Widget>[

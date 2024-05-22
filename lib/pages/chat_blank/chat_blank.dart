@@ -13,7 +13,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ChatBlank extends StatelessWidget {
   final bool loading;
 
-  const ChatBlank({this.loading = false, Key? key}) : super(key: key);
+  const ChatBlank({this.loading = false, super.key});
 
   @override
   Widget build(BuildContext context) {

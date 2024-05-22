@@ -18,7 +18,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class PinnedEventsView extends StatelessWidget {
   final ChatController controller;
 
-  const PinnedEventsView(this.controller, {Key? key}) : super(key: key);
+  const PinnedEventsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class PinnedEventsView extends StatelessWidget {
           (failure) => child!,
           (success) {
             switch (success.runtimeType) {
-              case ChatGetPinnedEventsSuccess:
+              case const (ChatGetPinnedEventsSuccess):
                 final data = success as ChatGetPinnedEventsSuccess;
                 return Material(
                   color: LinagoraSysColors.material().onPrimary,

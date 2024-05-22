@@ -19,12 +19,12 @@ class TomBootstrapDialog extends StatefulWidget {
   final RecoveryWords? recoveryWords;
 
   const TomBootstrapDialog({
-    Key? key,
+    super.key,
     this.recoveryWords,
     this.wipe = false,
     this.wipeRecovery = false,
     required this.client,
-  }) : super(key: key);
+  });
 
   Future<bool?> show() => TwakeDialog.showDialogFullScreen(
         builder: () => this,

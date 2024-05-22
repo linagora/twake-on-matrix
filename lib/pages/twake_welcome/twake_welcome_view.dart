@@ -31,7 +31,7 @@ class TwakeWelcomeView extends StatelessWidget {
       focusColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
       signInTitle: AppConfig.isSaasPlatForm ? L10n.of(context)!.signIn : null,
       createTwakeIdTitle:
           AppConfig.isSaasPlatForm ? L10n.of(context)!.createTwakeId : null,

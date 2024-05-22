@@ -122,14 +122,14 @@ class SendFileDialogView extends StatelessWidget {
                       SendMediaWithCaptionStatus.cancel,
                     ),
                     style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             SendFileDialogStyle.buttonBorderRadius,
                           ),
                         ),
                       ),
-                      padding: const MaterialStatePropertyAll(
+                      padding: const WidgetStatePropertyAll(
                         SendFileDialogStyle.buttonPadding,
                       ),
                     ),
@@ -147,17 +147,17 @@ class SendFileDialogView extends StatelessWidget {
                     onPressed: controller.send,
                     autofocus: true,
                     style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             SendFileDialogStyle.buttonBorderRadius,
                           ),
                         ),
                       ),
-                      backgroundColor: MaterialStatePropertyAll(
+                      backgroundColor: WidgetStatePropertyAll(
                         Theme.of(context).colorScheme.primary,
                       ),
-                      padding: const MaterialStatePropertyAll(
+                      padding: const WidgetStatePropertyAll(
                         SendFileDialogStyle.buttonPadding,
                       ),
                     ),

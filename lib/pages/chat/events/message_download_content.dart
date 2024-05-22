@@ -16,9 +16,9 @@ class MessageDownloadContent extends StatefulWidget {
 
   const MessageDownloadContent(
     this.event, {
-    Key? key,
+    super.key,
     this.highlightText,
-  }) : super(key: key);
+  });
 
   @override
   State<MessageDownloadContent> createState() => _MessageDownloadContentState();

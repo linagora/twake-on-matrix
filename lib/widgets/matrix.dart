@@ -62,8 +62,8 @@ class Matrix extends StatefulWidget {
     this.child,
     required this.clients,
     this.queryParameters,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   MatrixState createState() => MatrixState();
@@ -885,16 +885,11 @@ class MatrixState extends State<Matrix>
 
 class FixedThreepidCreds extends ThreepidCreds {
   FixedThreepidCreds({
-    required String sid,
-    required String clientSecret,
-    String? idServer,
-    String? idAccessToken,
-  }) : super(
-          sid: sid,
-          clientSecret: clientSecret,
-          idServer: idServer,
-          idAccessToken: idAccessToken,
-        );
+    required super.sid,
+    required super.clientSecret,
+    super.idServer,
+    super.idAccessToken,
+  });
 
   @override
   Map<String, dynamic> toJson() {

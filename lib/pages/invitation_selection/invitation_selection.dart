@@ -17,10 +17,10 @@ class InvitationSelection extends StatefulWidget {
   final bool? isFullScreen;
 
   const InvitationSelection({
-    Key? key,
+    super.key,
     required this.roomId,
     this.isFullScreen = true,
-  }) : super(key: key);
+  });
 
   @override
   InvitationSelectionController createState() =>

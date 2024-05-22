@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 
 class ErrorPage extends StatelessWidget {
-  const ErrorPage({Key? key}) : super(key: key);
+  const ErrorPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -22,10 +22,10 @@ class TwakeApp extends StatefulWidget {
   static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
 
   const TwakeApp({
-    Key? key,
+    super.key,
     this.testWidget,
     required this.clients,
-  }) : super(key: key);
+  });
 
   /// getInitialLink may rereturn the value multiple times if this view is
   /// opened multiple times for example if the user logs out after they logged

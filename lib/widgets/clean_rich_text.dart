@@ -12,7 +12,7 @@ class TwakeCleanRichText extends StatelessWidget {
   final TextSpanBuilder? textSpanBuilder;
 
   const TwakeCleanRichText({
-    Key? key,
+    super.key,
     required this.text,
     required this.childWidget,
     this.textStyle,
@@ -21,7 +21,7 @@ class TwakeCleanRichText extends StatelessWidget {
     this.onLinkTap,
     this.maxLines,
     this.textSpanBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

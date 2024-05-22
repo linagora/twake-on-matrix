@@ -20,7 +20,7 @@ import '../../config/themes.dart';
 
 class StoryView extends StatelessWidget {
   final StoryPageController controller;
-  const StoryView(this.controller, {Key? key}) : super(key: key);
+  const StoryView(this.controller, {super.key});
 
   static const List<Shadow> textShadows = [
     Shadow(
@@ -377,7 +377,7 @@ class StoryView extends StatelessWidget {
                                   onPressed: controller.replyAction,
                                   icon: const Icon(Icons.send_outlined),
                                 ),
-                          fillColor: Theme.of(context).colorScheme.background,
+                          fillColor: Theme.of(context).colorScheme.surface,
                         ),
                       ),
                     ),

@@ -13,7 +13,7 @@ import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
 import '../../widgets/matrix.dart';
 
 class DevicesSettings extends StatefulWidget {
-  const DevicesSettings({Key? key}) : super(key: key);
+  const DevicesSettings({super.key});
 
   @override
   DevicesSettingsController createState() => DevicesSettingsController();

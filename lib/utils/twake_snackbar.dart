@@ -38,7 +38,7 @@ class TwakeSnackBar {
         content: Text(
           message,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.surface,
               ),
         ),
       ),
