@@ -57,6 +57,7 @@ jobs:
           flutter clean
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
+          flutter pub get
           flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
           echo "$TWAKE_PREVIEW_CONFIG" | yq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
 
