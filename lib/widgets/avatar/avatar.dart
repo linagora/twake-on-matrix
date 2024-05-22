@@ -27,8 +27,8 @@ class Avatar extends StatelessWidget {
     this.boxShadows,
     this.textStyle,
     this.textColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

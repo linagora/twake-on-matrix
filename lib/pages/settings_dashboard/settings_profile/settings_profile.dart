@@ -547,15 +547,15 @@ class SettingsProfileController extends State<SettingsProfile>
         (failure) => null,
         (success) {
           switch (success.runtimeType) {
-            case GetAvatarInStreamUIStateSuccess:
+            case const (GetAvatarInStreamUIStateSuccess):
               final uiState = success as GetAvatarInStreamUIStateSuccess;
               assetEntity = uiState.assetEntity;
               break;
-            case GetAvatarInBytesUIStateSuccess:
+            case const (GetAvatarInBytesUIStateSuccess):
               final uiState = success as GetAvatarInBytesUIStateSuccess;
               filePickerResult = uiState.filePickerResult;
               break;
-            case GetProfileUIStateSuccess:
+            case const (GetProfileUIStateSuccess):
               final uiState = success as GetProfileUIStateSuccess;
               currentProfile = uiState.profile;
               break;

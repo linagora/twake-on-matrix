@@ -7,11 +7,11 @@ class TwakeLinkView extends StatelessWidget {
   final String? firstValidUrl;
 
   const TwakeLinkView({
-    Key? key,
+    super.key,
     required this.body,
     required this.previewItemWidget,
     this.firstValidUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

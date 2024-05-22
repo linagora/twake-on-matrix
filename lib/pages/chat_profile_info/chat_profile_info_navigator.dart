@@ -18,13 +18,13 @@ class ChatProfileInfoNavigator extends StatelessWidget {
   final bool isDraftInfo;
 
   const ChatProfileInfoNavigator({
-    Key? key,
+    super.key,
     this.onBack,
     this.roomId,
     this.contact,
     required this.isInStack,
     this.isDraftInfo = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

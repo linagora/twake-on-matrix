@@ -22,9 +22,9 @@ class RecentItemWidget extends StatelessWidget {
     required this.presentationSearch,
     required this.highlightKeyword,
     this.onTap,
-    Key? key,
+    super.key,
     required this.client,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

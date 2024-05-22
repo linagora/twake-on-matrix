@@ -8,7 +8,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 
 class NewGroup extends StatefulWidget {
-  const NewGroup({Key? key}) : super(key: key);
+  const NewGroup({super.key});
 
   @override
   NewGroupController createState() => NewGroupController();

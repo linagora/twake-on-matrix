@@ -53,7 +53,7 @@ class ChatProfileInfoSharedView extends StatelessWidget {
                 forceElevated: innerBoxIsScrolled,
                 bottom: TabBar(
                   physics: const NeverScrollableScrollPhysics(),
-                  overlayColor: MaterialStateProperty.all(
+                  overlayColor: WidgetStateProperty.all(
                     Colors.transparent,
                   ),
                   tabs: controller.profileSharedPages().map((pages) {

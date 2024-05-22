@@ -19,8 +19,8 @@ class CopiableProfileRow extends StatelessWidget {
     required this.leadingIcon,
     required this.caption,
     required this.copiableText,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

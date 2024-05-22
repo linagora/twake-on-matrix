@@ -13,7 +13,7 @@ import 'package:fluffychat/utils/client_manager.dart';
 import 'settings_emotes_view.dart';
 
 class EmotesSettings extends StatefulWidget {
-  const EmotesSettings({Key? key}) : super(key: key);
+  const EmotesSettings({super.key});
 
   @override
   EmotesSettingsController createState() => EmotesSettingsController();

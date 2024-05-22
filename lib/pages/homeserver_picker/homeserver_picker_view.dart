@@ -13,7 +13,7 @@ import 'homeserver_picker.dart';
 class HomeserverPickerView extends StatelessWidget {
   final HomeserverPickerController controller;
 
-  const HomeserverPickerView(this.controller, {Key? key}) : super(key: key);
+  const HomeserverPickerView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

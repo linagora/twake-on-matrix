@@ -2,10 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
 class DioDuplicateDownloadException extends DioException with EquatableMixin {
-  DioDuplicateDownloadException({required RequestOptions requestOptions})
+  DioDuplicateDownloadException({required super.requestOptions})
       : super(
           message: 'Download already in progress',
-          requestOptions: requestOptions,
           type: DioExceptionType.unknown,
         );
 

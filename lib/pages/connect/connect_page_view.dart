@@ -13,7 +13,7 @@ import 'sso_button.dart';
 class ConnectPageView extends StatelessWidget {
   final ConnectPageController controller;
 
-  const ConnectPageView(this.controller, {Key? key}) : super(key: key);
+  const ConnectPageView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

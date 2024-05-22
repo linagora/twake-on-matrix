@@ -21,7 +21,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'settings_security_view.dart';
 
 class SettingsSecurity extends StatefulWidget {
-  const SettingsSecurity({Key? key}) : super(key: key);
+  const SettingsSecurity({super.key});
 
   @override
   SettingsSecurityController createState() => SettingsSecurityController();

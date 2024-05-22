@@ -10,12 +10,12 @@ class TwakeSmartRefresher extends StatefulWidget {
   final List<Widget> slivers;
 
   const TwakeSmartRefresher({
-    Key? key,
+    super.key,
     this.onRefresh,
     this.onLoading,
     required this.controller,
     required this.slivers,
-  }) : super(key: key);
+  });
 
   @override
   State<TwakeSmartRefresher> createState() => _TwakeSmartRefresherController();

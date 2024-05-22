@@ -21,9 +21,9 @@ class ParticipantListItem extends StatelessWidget {
 
   const ParticipantListItem(
     this.member, {
-    Key? key,
+    super.key,
     this.onUpdatedMembers,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

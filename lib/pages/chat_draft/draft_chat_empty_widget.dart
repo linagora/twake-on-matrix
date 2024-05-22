@@ -5,9 +5,9 @@ class DraftChatEmpty extends StatelessWidget {
   final void Function()? onTap;
 
   const DraftChatEmpty({
-    Key? key,
+    super.key,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

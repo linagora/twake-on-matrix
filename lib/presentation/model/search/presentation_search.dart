@@ -32,12 +32,9 @@ class ContactPresentationSearch extends PresentationSearch {
 
   const ContactPresentationSearch({
     this.matrixId,
-    String? email,
-    String? displayName,
-  }) : super(
-          displayName: displayName,
-          email: email,
-        );
+    super.email,
+    super.displayName,
+  });
 
   @override
   String get id => matrixId ?? email ?? '';
@@ -61,12 +58,9 @@ class RecentChatPresentationSearch extends PresentationSearch {
   const RecentChatPresentationSearch({
     this.roomId,
     this.roomSummary,
-    String? displayName,
-    String? directChatMatrixID,
-  }) : super(
-          displayName: displayName,
-          directChatMatrixID: directChatMatrixID,
-        );
+    super.displayName,
+    super.directChatMatrixID,
+  });
 
   @override
   String get id => roomId ?? '';

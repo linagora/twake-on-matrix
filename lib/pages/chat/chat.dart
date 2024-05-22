@@ -86,12 +86,12 @@ class Chat extends StatefulWidget {
   final void Function(RightColumnType)? onChangeRightColumnType;
 
   const Chat({
-    Key? key,
+    super.key,
     required this.roomId,
     this.shareFiles,
     this.roomName,
     this.onChangeRightColumnType,
-  }) : super(key: key);
+  });
 
   @override
   ChatController createState() => ChatController();

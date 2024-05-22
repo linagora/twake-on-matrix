@@ -12,8 +12,8 @@ class ProfileInfoContactRows extends StatelessWidget {
   const ProfileInfoContactRows({
     required this.user,
     required this.lookupContactNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final User user;
   final ValueListenable lookupContactNotifier;
 

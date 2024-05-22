@@ -24,7 +24,7 @@ class ChatAppBarTitle extends StatelessWidget {
   final String? roomName;
 
   const ChatAppBarTitle({
-    Key? key,
+    super.key,
     required this.actions,
     this.room,
     this.roomName,
@@ -33,7 +33,7 @@ class ChatAppBarTitle extends StatelessWidget {
     required this.sendController,
     required this.connectivityResultStream,
     required this.onPushDetails,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -25,11 +25,11 @@ class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
   final double? verticalPadding;
 
   const TwakeContextMenuArea({
-    Key? key,
+    super.key,
     required this.child,
     this.builder,
     this.verticalPadding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

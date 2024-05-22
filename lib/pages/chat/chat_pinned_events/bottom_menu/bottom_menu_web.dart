@@ -34,7 +34,7 @@ class BottomMenuWeb extends StatelessWidget {
               width: PinnedMessagesStyle.unpinButtonWidth,
               padding: PinnedMessagesStyle.actionBarPadding,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(
                   PinnedMessagesStyle.actionBarBorderRadius,
                 ),

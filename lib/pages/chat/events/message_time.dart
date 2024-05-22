@@ -13,13 +13,13 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class MessageTime extends StatelessWidget {
   const MessageTime({
-    Key? key,
+    super.key,
     required this.event,
     required this.ownMessage,
     required this.timeline,
     required this.timelineOverlayMessage,
     required this.room,
-  }) : super(key: key);
+  });
 
   final Event event;
   final bool ownMessage;

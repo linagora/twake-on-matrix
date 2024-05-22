@@ -7,9 +7,9 @@ class ReplyIconWidget extends StatelessWidget {
   final bool isOwnMessage;
 
   const ReplyIconWidget({
-    Key? key,
+    super.key,
     required this.isOwnMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

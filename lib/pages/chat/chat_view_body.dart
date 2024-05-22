@@ -22,7 +22,7 @@ import 'chat_input_row.dart';
 class ChatViewBody extends StatelessWidget with MessageContentMixin {
   final ChatController controller;
 
-  const ChatViewBody(this.controller, {Key? key}) : super(key: key);
+  const ChatViewBody(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

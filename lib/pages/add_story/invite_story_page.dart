@@ -15,8 +15,8 @@ class InviteStoryPage extends StatefulWidget {
   final Room? storiesRoom;
   const InviteStoryPage({
     required this.storiesRoom,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   InviteStoryPageState createState() => InviteStoryPageState();

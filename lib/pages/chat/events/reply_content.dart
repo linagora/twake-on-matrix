@@ -22,9 +22,9 @@ class ReplyContent extends StatelessWidget {
   const ReplyContent(
     this.replyEvent, {
     this.ownMessage = false,
-    Key? key,
+    super.key,
     this.timeline,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +135,9 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
   final Event event;
 
   const ReplyPreviewIconBuilder({
-    Key? key,
+    super.key,
     required this.event,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -176,9 +176,9 @@ class BlurHashPlaceHolder extends StatelessWidget {
   final Event event;
 
   const BlurHashPlaceHolder({
-    Key? key,
+    super.key,
     required this.event,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -195,7 +195,7 @@ class SearchableAppBar extends StatelessWidget {
         prefixIcon: !isFullScreen
             ? Icon(
                 Icons.search_outlined,
-                color: Theme.of(context).colorScheme.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               )
             : null,
         suffixIcon: const SizedBox.shrink(),

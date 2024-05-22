@@ -30,7 +30,7 @@ class TwakeTextButton extends StatelessWidget {
   final double? borderHover;
 
   const TwakeTextButton({
-    Key? key,
+    super.key,
     required this.message,
     this.styleMessage,
     this.onTap,
@@ -44,7 +44,7 @@ class TwakeTextButton extends StatelessWidget {
     this.margin = const EdgeInsetsDirectional.all(0),
     this.buttonDecoration,
     this.borderHover,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

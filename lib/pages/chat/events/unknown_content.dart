@@ -7,7 +7,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class UnknownContent extends StatelessWidget with MessageContentMixin {
   final Event event;
 
-  const UnknownContent({Key? key, required this.event}) : super(key: key);
+  const UnknownContent({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

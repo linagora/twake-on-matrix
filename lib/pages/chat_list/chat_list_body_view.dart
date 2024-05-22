@@ -19,7 +19,7 @@ import 'package:matrix/matrix.dart';
 class ChatListBodyView extends StatelessWidget {
   final ChatListController controller;
 
-  const ChatListBodyView(this.controller, {Key? key}) : super(key: key);
+  const ChatListBodyView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

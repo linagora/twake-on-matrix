@@ -11,7 +11,7 @@ class AppGridDashboardItem extends StatelessWidget {
 
   final LinagoraApp app;
 
-  const AppGridDashboardItem(this.app, {Key? key}) : super(key: key);
+  const AppGridDashboardItem(this.app, {super.key});
 
   @override
   Widget build(BuildContext context) {

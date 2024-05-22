@@ -72,8 +72,8 @@ class MxcImage extends StatefulWidget {
     this.closeRightColumn,
     this.cacheWidth,
     this.cacheHeight,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<MxcImage> createState() => _MxcImageState();

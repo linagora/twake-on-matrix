@@ -15,7 +15,7 @@ import '../../utils/platform_infos.dart';
 import 'login_view.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({super.key});
 
   @override
   LoginController createState() => LoginController();

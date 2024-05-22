@@ -42,7 +42,7 @@ class TwakeIconButton extends StatelessWidget {
   final Color? splashColor;
 
   const TwakeIconButton({
-    Key? key,
+    super.key,
     this.tooltip,
     this.onTap,
     this.icon,
@@ -60,7 +60,7 @@ class TwakeIconButton extends StatelessWidget {
     this.iconColor,
     this.highlightColor,
     this.splashColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

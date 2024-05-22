@@ -21,10 +21,10 @@ class BootstrapDialog extends StatefulWidget {
   final Client client;
 
   const BootstrapDialog({
-    Key? key,
+    super.key,
     this.wipe = false,
     required this.client,
-  }) : super(key: key);
+  });
 
   Future<bool?> show() => PlatformInfos.isCupertinoStyle
       ? TwakeDialog.showCupertinoDialogFullScreen(

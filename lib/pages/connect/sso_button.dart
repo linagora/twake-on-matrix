@@ -10,10 +10,10 @@ class SsoButton extends StatelessWidget {
   final IdentityProvider identityProvider;
   final void Function()? onPressed;
   const SsoButton({
-    Key? key,
+    super.key,
     required this.identityProvider,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

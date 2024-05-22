@@ -42,14 +42,14 @@ class MessageContent extends StatelessWidget
 
   const MessageContent(
     this.event, {
-    Key? key,
+    super.key,
     required this.textColor,
     required this.endOfBubbleWidget,
     required this.backgroundColor,
     this.onTapPreview,
     this.onTapSelectMode,
     required this.ownMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

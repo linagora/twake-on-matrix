@@ -20,8 +20,8 @@ class ChatDetailsEditView extends StatelessWidget {
 
   const ChatDetailsEditView(
     this.controller, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,17 +138,17 @@ class ChatDetailsEditView extends StatelessWidget {
                                         : menuController.open(),
                                   },
                                   style: ButtonStyle(
-                                    shape: MaterialStateProperty.all(
+                                    shape: WidgetStateProperty.all(
                                       const CircleBorder(),
                                     ),
-                                    padding: MaterialStateProperty.all(
+                                    padding: WidgetStateProperty.all(
                                       ChatDetailEditViewStyle
                                           .editIconMaterialPadding,
                                     ),
-                                    iconColor: MaterialStateProperty.all(
+                                    iconColor: WidgetStateProperty.all(
                                       Theme.of(context).colorScheme.onPrimary,
                                     ),
-                                    backgroundColor: MaterialStateProperty.all(
+                                    backgroundColor: WidgetStateProperty.all(
                                       Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
@@ -185,7 +185,7 @@ class ChatDetailsEditView extends StatelessWidget {
               ),
             ),
             Container(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.all(8.0),
               child: Text(
@@ -307,9 +307,8 @@ class _AvatarBuilder extends StatelessWidget {
 
 class _GroupNameField extends StatelessWidget {
   const _GroupNameField({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final ChatDetailsEditController controller;
 
@@ -357,9 +356,8 @@ class _GroupNameField extends StatelessWidget {
 
 class _DescriptionField extends StatelessWidget {
   const _DescriptionField({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final ChatDetailsEditController controller;
 

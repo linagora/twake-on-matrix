@@ -26,7 +26,7 @@ class FileTileWidgetStyle {
 
   TextStyle highlightTextStyle(BuildContext context) {
     return TextStyle(
-      color: Theme.of(context).colorScheme.onBackground,
+      color: Theme.of(context).colorScheme.onSurface,
       fontWeight: FontWeight.bold,
       backgroundColor: CssColor.fromCss('gold'),
     );
