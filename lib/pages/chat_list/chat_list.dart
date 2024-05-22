@@ -53,12 +53,12 @@ class ChatList extends StatefulWidget {
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   const ChatList({
-    Key? key,
+    super.key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
-  }) : super(key: key);
+  });
 
   @override
   ChatListController createState() => ChatListController();

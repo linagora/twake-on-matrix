@@ -17,7 +17,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ContactsSelectionView extends StatelessWidget {
   final ContactsSelectionController controller;
 
-  const ContactsSelectionView(this.controller, {Key? key}) : super(key: key);
+  const ContactsSelectionView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

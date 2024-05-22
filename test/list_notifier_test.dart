@@ -86,7 +86,7 @@ void main() {
       expect(
         listNotifier.value,
         equals(<MatrixFile>[
-          ...listNotifier.value.getRange(0, 2).toList(),
+          ...listNotifier.value.getRange(0, 2),
           replaceFile,
         ]),
       );

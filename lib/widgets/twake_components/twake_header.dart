@@ -17,10 +17,10 @@ class TwakeHeader extends StatelessWidget
   final VoidCallback onClearSelection;
 
   const TwakeHeader({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onClearSelection,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

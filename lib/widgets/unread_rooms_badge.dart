@@ -10,9 +10,9 @@ class UnreadRoomsBadge extends StatelessWidget {
   final bool Function(Room) filter;
 
   const UnreadRoomsBadge({
-    Key? key,
+    super.key,
     required this.filter,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

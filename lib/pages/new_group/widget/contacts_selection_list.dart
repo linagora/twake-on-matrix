@@ -17,23 +17,22 @@ import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart'
 
 class ContactsSelectionList extends StatelessWidget {
   final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
-  final ValueNotifier<List<PresentationSearch>>
-      presentationRecentContactNotifier;
+  final ValueNotifier<List<PresentationSearch>> presentationRecentContactNotifier;
   final ValueNotifier<Either<Failure, Success>> presentationContactNotifier;
   final Function() onSelectedContact;
   final List<String> disabledContactIds;
   final TextEditingController textEditingController;
 
   const ContactsSelectionList({
-    Key? key,
+    super.key,
     required this.presentationContactNotifier,
     required this.selectedContactsMapNotifier,
     required this.onSelectedContact,
     this.disabledContactIds = const [],
     required this.textEditingController,
     required this.presentationRecentContactNotifier,
-  }) : super(key: key);
-
+  });
+  
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -43,8 +42,7 @@ class ContactsSelectionList extends StatelessWidget {
 
         return state.fold(
           (failure) {
-            final recentContact =
-                presentationRecentContactNotifier.value.isEmpty;
+            final recentContact = presentationRecentContactNotifier.value.isEmpty;
             final textControllerIsEmpty = textEditingController.text.isEmpty;
             if (failure is GetPresentationContactsEmpty ||
                 failure is GetPresentationContactsFailure) {
@@ -53,9 +51,7 @@ class ContactsSelectionList extends StatelessWidget {
                   child: Padding(
                     padding: ContactsSelectionListStyle.notFoundPadding,
                     child: NoContactsFound(
-                      keyword: textControllerIsEmpty
-                          ? null
-                          : textEditingController.text,
+                      keyword: textControllerIsEmpty ? null : textEditingController.text,
                     ),
                   ),
                 );
@@ -107,9 +103,7 @@ class ContactsSelectionList extends StatelessWidget {
                     onSelectedContact: onSelectedContact,
                     highlightKeyword: textEditingController.text,
                     disabled: disabled,
-                    paddingTop: index == 0
-                        ? ContactsSelectionListStyle.listPaddingTop
-                        : 0,
+                    paddingTop: index == 0 ? ContactsSelectionListStyle.listPaddingTop : 0,
                   );
                 },
               );

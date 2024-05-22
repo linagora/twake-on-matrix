@@ -12,9 +12,9 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
   final GoRouterState state;
 
   const DraftChatAdaptiveScaffold({
-    Key? key,
+    super.key,
     required this.state,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

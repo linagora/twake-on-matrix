@@ -7,7 +7,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class EncryptedContent extends StatelessWidget with EncryptedMixin {
   final Event event;
 
-  const EncryptedContent({Key? key, required this.event}) : super(key: key);
+  const EncryptedContent({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

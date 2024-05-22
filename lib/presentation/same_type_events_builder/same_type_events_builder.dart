@@ -14,11 +14,11 @@ class SameTypeEventsBuilder extends StatelessWidget {
       builder;
 
   const SameTypeEventsBuilder({
-    Key? key,
+    super.key,
     required this.controller,
     required this.builder,
     this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

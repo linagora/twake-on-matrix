@@ -12,8 +12,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 class MultipleEmotesSettingsView extends StatelessWidget {
   final MultipleEmotesSettingsController controller;
 
-  const MultipleEmotesSettingsView(this.controller, {Key? key})
-      : super(key: key);
+  const MultipleEmotesSettingsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

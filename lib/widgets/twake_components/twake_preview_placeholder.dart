@@ -3,11 +3,11 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class TwakePreviewPlaceHolder extends StatelessWidget {
   const TwakePreviewPlaceHolder({
-    Key? key,
+    super.key,
     required this.width,
     required this.height,
     this.borderRadius = 12,
-  }) : super(key: key);
+  });
 
   final double width;
   final double height;

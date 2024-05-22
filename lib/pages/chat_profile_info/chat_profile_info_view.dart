@@ -107,14 +107,13 @@ class ChatProfileInfoView extends StatelessWidget {
 
 class _Information extends StatelessWidget {
   const _Information({
-    Key? key,
     this.avatarUri,
     this.displayName,
     this.matrixId,
     required this.lookupContactNotifier,
     this.goToProfileShared,
     required this.isDraftInfo,
-  }) : super(key: key);
+  });
 
   final Uri? avatarUri;
   final String? displayName;
@@ -277,10 +276,9 @@ class _Information extends StatelessWidget {
 
 class _CopiableRowWithMaterialIcon extends StatelessWidget {
   const _CopiableRowWithMaterialIcon({
-    Key? key,
     required this.icon,
     required this.text,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String text;
@@ -328,10 +326,9 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
 
 class _CopiableRowWithSvgIcon extends StatelessWidget {
   const _CopiableRowWithSvgIcon({
-    Key? key,
     required this.iconPath,
     required this.text,
-  }) : super(key: key);
+  });
 
   final String iconPath;
   final String text;

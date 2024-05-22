@@ -17,12 +17,12 @@ class ChatDetailsNavigator extends StatelessWidget {
   final bool isInStack;
 
   const ChatDetailsNavigator({
-    Key? key,
+    super.key,
     this.closeRightColumn,
     this.roomId,
     this.contact,
     required this.isInStack,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

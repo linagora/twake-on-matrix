@@ -21,7 +21,7 @@ enum ContextualRoomAction {
 class StoriesHeader extends StatelessWidget {
   final String filter;
 
-  const StoriesHeader({required this.filter, Key? key}) : super(key: key);
+  const StoriesHeader({required this.filter, super.key});
 
   void _addToStoryAction(BuildContext context) => context.go('/stories/create');
 
@@ -170,8 +170,7 @@ class _StoryButton extends StatelessWidget {
     this.hasPosts = true,
     this.unread = false,
     this.onLongPressed,
-    Key? key,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +205,9 @@ class _StoryButton extends StatelessWidget {
                           : null,
                       color: unread
                           ? null
-                          : Theme.of(context).colorScheme.surfaceVariant,
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                       borderRadius:
                           BorderRadius.circular(AvatarStyle.defaultSize),
                     ),

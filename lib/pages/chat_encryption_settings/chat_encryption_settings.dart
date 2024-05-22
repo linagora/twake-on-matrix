@@ -13,7 +13,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import '../key_verification/key_verification_dialog.dart';
 
 class ChatEncryptionSettings extends StatefulWidget {
-  const ChatEncryptionSettings({Key? key}) : super(key: key);
+  const ChatEncryptionSettings({super.key});
 
   @override
   ChatEncryptionSettingsController createState() =>

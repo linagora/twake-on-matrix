@@ -12,7 +12,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'layouts/login_scaffold.dart';
 
 class LockScreen extends StatefulWidget {
-  const LockScreen({Key? key}) : super(key: key);
+  const LockScreen({super.key});
 
   @override
   LockScreenState createState() => LockScreenState();
@@ -41,7 +41,7 @@ class LockScreenState extends State<LockScreen> {
           ),
           body: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
@@ -55,7 +55,7 @@ class LockScreenState extends State<LockScreen> {
                   Theme.of(context).secondaryHeaderColor.withAlpha(16),
                   Theme.of(context).primaryColor.withAlpha(16),
                   Theme.of(context).colorScheme.secondary.withAlpha(16),
-                  Theme.of(context).colorScheme.background.withAlpha(16),
+                  Theme.of(context).colorScheme.surface.withAlpha(16),
                 ],
               ),
             ),

@@ -7,7 +7,7 @@ import 'signup.dart';
 
 class SignupPageView extends StatelessWidget {
   final SignupPageController controller;
-  const SignupPageView(this.controller, {Key? key}) : super(key: key);
+  const SignupPageView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -15,7 +15,7 @@ import 'settings_emotes.dart';
 class EmotesSettingsView extends StatelessWidget {
   final EmotesSettingsController controller;
 
-  const EmotesSettingsView(this.controller, {Key? key}) : super(key: key);
+  const EmotesSettingsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

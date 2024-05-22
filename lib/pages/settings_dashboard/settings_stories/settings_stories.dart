@@ -7,7 +7,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_st
 import 'package:fluffychat/widgets/matrix.dart';
 
 class SettingsStories extends StatefulWidget {
-  const SettingsStories({Key? key}) : super(key: key);
+  const SettingsStories({super.key});
 
   @override
   SettingsStoriesController createState() => SettingsStoriesController();

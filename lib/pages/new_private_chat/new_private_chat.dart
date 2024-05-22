@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class NewPrivateChat extends StatefulWidget {
-  const NewPrivateChat({Key? key}) : super(key: key);
+  const NewPrivateChat({super.key});
 
   @override
   NewPrivateChatController createState() => NewPrivateChatController();

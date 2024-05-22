@@ -28,8 +28,8 @@ class ProfileInfoBody extends StatefulWidget {
     required this.user,
     this.onNewChatOpen,
     this.onUpdatedMembers,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final User? user;
 

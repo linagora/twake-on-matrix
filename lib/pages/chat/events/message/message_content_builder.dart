@@ -31,7 +31,7 @@ class MessageContentBuilder extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.onBackground;
+    final textColor = Theme.of(context).colorScheme.onSurface;
     final displayEvent = event.getDisplayEvent(timeline);
     final noPadding = {
       MessageTypes.File,

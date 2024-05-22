@@ -25,11 +25,11 @@ class TwakeContextMenu extends StatefulWidget {
   final double? verticalPadding;
 
   const TwakeContextMenu({
-    Key? key,
+    super.key,
     required this.position,
     required this.builder,
     this.verticalPadding,
-  }) : super(key: key);
+  });
 
   @override
   TwakeContextMenuState createState() => TwakeContextMenuState();
@@ -219,10 +219,9 @@ class _GrowingWidget extends StatefulWidget {
   final ValueChanged<double> onHeightChange;
 
   const _GrowingWidget({
-    Key? key,
     required this.child,
     required this.onHeightChange,
-  }) : super(key: key);
+  });
 
   @override
   __GrowingWidgetState createState() => __GrowingWidgetState();

@@ -9,11 +9,11 @@ import 'package:matrix/matrix.dart';
 
 class MediaViewerAppBar extends StatefulWidget {
   const MediaViewerAppBar({
-    Key? key,
+    super.key,
     this.showAppbarPreviewNotifier,
     this.event,
     this.enablePaddingAppbar = true,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool>? showAppbarPreviewNotifier;
   final Event? event;

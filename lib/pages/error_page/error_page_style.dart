@@ -39,20 +39,20 @@ class ErrorPageStyle {
               );
 
   static ButtonStyle buttonStyle(BuildContext context) => ButtonStyle(
-        iconSize: MaterialStateProperty.all<double>(18),
-        textStyle: MaterialStateProperty.all(
+        iconSize: WidgetStateProperty.all<double>(18),
+        textStyle: WidgetStateProperty.all(
           Theme.of(context).textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
         ),
-        backgroundColor: MaterialStateProperty.all<Color>(
+        backgroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.primary,
         ),
-        foregroundColor: MaterialStateProperty.all<Color>(
+        foregroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.onPrimary,
         ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
           ),

@@ -14,9 +14,9 @@ import 'package:matrix/matrix.dart';
 class MessageDownloadContentWeb extends StatefulWidget {
   const MessageDownloadContentWeb(
     this.event, {
-    Key? key,
+    super.key,
     this.highlightText,
-  }) : super(key: key);
+  });
 
   final Event event;
 

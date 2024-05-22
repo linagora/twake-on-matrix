@@ -11,8 +11,7 @@ import 'package:fluffychat/utils/beautify_string_extension.dart';
 class ChatEncryptionSettingsView extends StatelessWidget {
   final ChatEncryptionSettingsController controller;
 
-  const ChatEncryptionSettingsView(this.controller, {Key? key})
-      : super(key: key);
+  const ChatEncryptionSettingsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

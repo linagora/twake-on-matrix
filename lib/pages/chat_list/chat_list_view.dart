@@ -23,12 +23,12 @@ class ChatListView extends StatelessWidget {
   final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   ChatListView({
-    Key? key,
+    super.key,
     required this.controller,
     this.bottomNavigationBar,
     this.onOpenSearchPageInMultipleColumns,
     required this.onTapBottomNavigation,
-  }) : super(key: key);
+  });
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
 

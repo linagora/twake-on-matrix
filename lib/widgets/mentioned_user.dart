@@ -9,13 +9,13 @@ class MentionedUser extends StatelessWidget {
   final int? maxLines;
 
   const MentionedUser({
-    Key? key,
+    super.key,
     required this.displayName,
     required this.url,
     this.textStyle,
     this.onTap,
     this.maxLines,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

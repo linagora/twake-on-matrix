@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
 import 'package:matrix/matrix.dart';
 
@@ -7,16 +6,11 @@ class TwakeChatPresentationAccount extends TwakePresentationAccount {
 
   const TwakeChatPresentationAccount({
     required this.clientAccount,
-    required String accountName,
-    required String accountId,
-    required Widget avatar,
-    required AccountActiveStatus accountActiveStatus,
-  }) : super(
-          accountName: accountName,
-          accountId: accountId,
-          avatar: avatar,
-          accountActiveStatus: accountActiveStatus,
-        );
+    required super.accountName,
+    required super.accountId,
+    required super.avatar,
+    required super.accountActiveStatus,
+  });
 
   @override
   List<Object?> get props => [

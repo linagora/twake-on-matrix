@@ -17,16 +17,11 @@ import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 
 class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   FlutterHiveCollectionsDatabase(
-    String name,
-    String path, {
-    HiveCipher? key,
-    OnStartMigrating? onStartMigrating,
-  }) : super(
-          name,
-          path,
-          key: key,
-          onStartMigrating: onStartMigrating,
-        );
+    super.name,
+    String super.path, {
+    super.key,
+    super.onStartMigrating,
+  });
 
   @override
   int get version => 7;

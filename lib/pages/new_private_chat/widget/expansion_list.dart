@@ -304,9 +304,8 @@ class _NewGroupButton extends StatelessWidget {
   final Function() onPressed;
 
   const _NewGroupButton({
-    Key? key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

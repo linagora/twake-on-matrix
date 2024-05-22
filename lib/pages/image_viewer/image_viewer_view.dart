@@ -20,12 +20,12 @@ class ImageViewerView extends StatelessWidget {
 
   const ImageViewerView(
     this.controller, {
-    Key? key,
+    super.key,
     this.imageData,
     this.filePath,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

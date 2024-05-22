@@ -7,7 +7,7 @@ import 'chat.dart';
 
 class TombstoneDisplay extends StatelessWidget {
   final ChatController controller;
-  const TombstoneDisplay(this.controller, {Key? key}) : super(key: key);
+  const TombstoneDisplay(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class TombstoneDisplay extends StatelessWidget {
     return SizedBox(
       height: 72,
       child: Material(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 1,
         child: ListTile(
           leading: CircleAvatar(

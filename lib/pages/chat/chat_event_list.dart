@@ -21,9 +21,9 @@ class ChatEventList extends StatelessWidget {
   final ChatController controller;
 
   const ChatEventList({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +58,13 @@ class ChatEventList extends StatelessWidget {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         switch (notification.runtimeType) {
-          case ScrollStartNotification:
+          case const (ScrollStartNotification):
             controller.handleScrollStartNotification();
             break;
-          case ScrollEndNotification:
+          case const (ScrollEndNotification):
             controller.handleScrollEndNotification();
             break;
-          case ScrollUpdateNotification:
+          case const (ScrollUpdateNotification):
             controller.handleScrollUpdateNotification();
             break;
           default:

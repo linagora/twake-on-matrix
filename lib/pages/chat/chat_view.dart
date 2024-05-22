@@ -18,7 +18,7 @@ import 'package:matrix/matrix.dart';
 class ChatView extends StatelessWidget with MessageContentMixin {
   final ChatController controller;
 
-  const ChatView(this.controller, {Key? key}) : super(key: key);
+  const ChatView(this.controller, {super.key});
 
   Widget _appBarActions(BuildContext context) {
     if (controller.selectMode) {
