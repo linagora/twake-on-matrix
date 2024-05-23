@@ -81,7 +81,7 @@ class MatrixState extends State<Matrix>
   String? activeBundle;
   Store store = Store();
   HomeserverSummary? loginHomeserverSummary;
-  String? authUrl;
+  String? _authUrl;
   XFile? loginAvatar;
   String? loginUsername;
   LoginType? loginType;
@@ -95,6 +95,8 @@ class MatrixState extends State<Matrix>
   }
 
   BackgroundPush? backgroundPush;
+
+  String? get authUrl => _authUrl;
 
   Client get client {
     if (widget.clients.isEmpty) {
@@ -125,7 +127,7 @@ class MatrixState extends State<Matrix>
       _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
-      _setUpToMServicesWhenChangingActiveClient(newClient);
+      await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient!);
       return SetActiveClientState.success;
     } else {
@@ -375,13 +377,8 @@ class MatrixState extends State<Matrix>
         Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
         _handleFirstLoggedIn(client);
       } else {
-        Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
-        if (PlatformInfos.isMobile) {
-          _deletePersistActiveAccount(state);
-          TwakeApp.router.go('/home/twakeWelcome');
-        } else {
-          TwakeApp.router.go('/home', extra: true);
-        }
+        Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
+        await _handleLastLogout();
       }
     }
   }
@@ -392,7 +389,7 @@ class MatrixState extends State<Matrix>
   ) async {
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
-    ClientManager.removeClientNameFromStore(currentClient.clientName);
+    await ClientManager.removeClientNameFromStore(currentClient.clientName);
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -411,9 +408,9 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _handleFirstLoggedIn(Client newActiveClient) {
-    setUpToMServicesInLogin(newActiveClient);
-    _storePersistActiveAccount(newActiveClient);
+  Future<void> _handleFirstLoggedIn(Client newActiveClient) async {
+    await setUpToMServicesInLogin(newActiveClient);
+    await _storePersistActiveAccount(newActiveClient);
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInBodyArgs(
@@ -439,7 +436,7 @@ class MatrixState extends State<Matrix>
       _loginClientCandidate!.clientName,
     );
     if (activeClient == null) return;
-    setUpToMServicesInLogin(activeClient);
+    await setUpToMServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
     if (result.isSuccess) {
       TwakeApp.router.go(
@@ -452,7 +449,7 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _deletePersistActiveAccount(LoginState state) async {
+  Future<void> _deletePersistActiveAccount() async {
     try {
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
       await multipleAccountRepository.deletePersistActiveAccount();
@@ -566,7 +563,7 @@ class MatrixState extends State<Matrix>
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
       );
-      authUrl = toMConfigurations.authUrl;
+      _setupAuthUrl(url: toMConfigurations.authUrl);
       loginType = toMConfigurations.loginType;
     } catch (e) {
       Logs().e('MatrixState::_retrieveToMConfiguration: $e');
@@ -588,7 +585,7 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void setUpToMServicesInLogin(Client client) {
+  Future<void> setUpToMServicesInLogin(Client client) async {
     final tomServer = loginHomeserverSummary?.tomServer;
     Logs().d('MatrixState::setUpToMServicesInLogin: $tomServer');
     if (tomServer != null) {
@@ -598,9 +595,7 @@ class MatrixState extends State<Matrix>
         loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
     final homeServer =
         loginHomeserverSummary?.discoveryInformation?.mHomeserver;
-    final newAuthUrl = loginHomeserverSummary?.discoveryInformation
-        ?.additionalProperties["m.authentication"]?["issuer"];
-    authUrl = newAuthUrl is String ? newAuthUrl : null;
+    _setupAuthUrl();
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -608,7 +603,7 @@ class MatrixState extends State<Matrix>
       _setUpHomeServer(homeServer.baseUrl);
     }
     if (tomServer != null) {
-      _storeToMConfiguration(
+      await _storeToMConfiguration(
         client,
         ToMConfigurations(
           tomServerInformation: tomServer,
@@ -657,10 +652,10 @@ class MatrixState extends State<Matrix>
         .changeBaseUrl(identityServer.baseUrl.toString());
   }
 
-  void _storeToMConfiguration(
+  Future<void> _storeToMConfiguration(
     Client client,
     ToMConfigurations config,
-  ) {
+  ) async {
     try {
       Logs().e(
         'Matrix::_storeToMConfiguration: clientName - ${client.clientName}',
@@ -671,7 +666,7 @@ class MatrixState extends State<Matrix>
       if (client.userID == null) return;
       final ToMConfigurationsRepository configurationRepository =
           getIt.get<ToMConfigurationsRepository>();
-      configurationRepository.saveTomConfigurations(
+      await configurationRepository.saveTomConfigurations(
         client.userID!,
         config,
       );
@@ -683,7 +678,7 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _setUpToMServicesWhenChangingActiveClient(Client? client) async {
+  Future<void> _setUpToMServicesWhenChangingActiveClient(Client? client) async {
     Logs().d(
       'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
     );
@@ -697,6 +692,7 @@ class MatrixState extends State<Matrix>
         _setUpToMServer(null);
       } else {
         _setUpToMServer(toMConfigurations.tomServerInformation);
+        _setupAuthUrl(url: toMConfigurations.authUrl);
       }
     } catch (e) {
       _setUpToMServer(null);
@@ -713,12 +709,12 @@ class MatrixState extends State<Matrix>
       final persistActiveAccount =
           await multipleAccountRepository.getPersistActiveAccount();
       if (persistActiveAccount == null) {
-        _storePersistActiveAccount(client);
+        await _storePersistActiveAccount(client);
         return;
       } else {
         final newActiveClient = getClientByUserId(persistActiveAccount);
         if (newActiveClient != null) {
-          setActiveClient(newActiveClient);
+          await setActiveClient(newActiveClient);
         }
       }
     } catch (e) {
@@ -731,10 +727,10 @@ class MatrixState extends State<Matrix>
   Future<void> _storePersistActiveAccount(Client newClient) async {
     if (newClient.userID == null) return;
     try {
-      Logs().e(
+      Logs().d(
         'Matrix::_storePersistActiveAccount: clientName - ${newClient.clientName}',
       );
-      Logs().e(
+      Logs().d(
         'Matrix::_storePersistActiveAccount: userId - ${newClient.userID}',
       );
       final MultipleAccountRepository multipleAccountRepository =
@@ -755,6 +751,42 @@ class MatrixState extends State<Matrix>
 
   void onWindowBlur(html.Event e) {
     didChangeAppLifecycleState(AppLifecycleState.paused);
+  }
+
+  Future<void> _setupAuthUrl({
+    String? url,
+  }) async {
+    if (url != null) {
+      Logs().e(
+        'Matrix::_setupAuthUrl: newAuthUrl - $url',
+      );
+      _authUrl = url;
+    } else {
+      final newAuthUrl = loginHomeserverSummary?.discoveryInformation
+          ?.additionalProperties["m.authentication"]?["issuer"];
+      Logs().e(
+        'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
+      );
+      _authUrl = newAuthUrl is String ? newAuthUrl : url;
+    }
+  }
+
+  Future<void> _deleteAllTomConfigurations() async {
+    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+    await hiveCollectionToMDatabase.clear();
+    Logs().d(
+      'MatrixState::_deleteAllTomConfigurations: Delete ToM database success',
+    );
+  }
+
+  Future<void> _handleLastLogout() async {
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      TwakeApp.router.go('/home/twakeWelcome');
+    } else {
+      TwakeApp.router.go('/home', extra: true);
+    }
+    await _deleteAllTomConfigurations();
   }
 
   @override

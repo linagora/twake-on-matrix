@@ -7,4 +7,6 @@ abstract class ToMConfigurationsRepository {
     String userId,
     ToMConfigurations toMConfigurations,
   );
+
+  Future<void> deleteTomConfigurations(String userId);
 }
