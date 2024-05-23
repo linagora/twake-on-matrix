@@ -377,13 +377,8 @@ class MatrixState extends State<Matrix>
         Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
         _handleFirstLoggedIn(client);
       } else {
-        Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
-        if (PlatformInfos.isMobile) {
-          await _deletePersistActiveAccount();
-          TwakeApp.router.go('/home/twakeWelcome');
-        } else {
-          TwakeApp.router.go('/home', extra: true);
-        }
+        Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
+        await _handleLastLogout();
       }
     }
   }
@@ -457,10 +452,7 @@ class MatrixState extends State<Matrix>
   Future<void> _deletePersistActiveAccount() async {
     try {
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
-      await Future.wait([
-        multipleAccountRepository.deletePersistActiveAccount(),
-        _deleteAllTomConfigurations(),
-      ]);
+      await multipleAccountRepository.deletePersistActiveAccount();
       Logs().d(
         'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
       );
@@ -785,6 +777,16 @@ class MatrixState extends State<Matrix>
     Logs().d(
       'MatrixState::_deleteAllTomConfigurations: Delete ToM database success',
     );
+  }
+
+  Future<void> _handleLastLogout() async {
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      TwakeApp.router.go('/home/twakeWelcome');
+    } else {
+      TwakeApp.router.go('/home', extra: true);
+    }
+    await _deleteAllTomConfigurations();
   }
 
   @override
