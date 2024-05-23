@@ -80,7 +80,7 @@ mixin ConnectPageMixin {
     required String redirectUrl,
   }) {
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
-    return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&${AppConfig.appParameter}';
+    return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
   String? _getLogoutUrl(
