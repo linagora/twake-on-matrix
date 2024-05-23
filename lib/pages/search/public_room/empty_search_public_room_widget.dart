@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/search/public_room/empty_search_public_room_widget_style.dart';
 import 'package:fluffychat/pages/search/public_room/search_public_room_view_style.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -25,32 +25,8 @@ class EmptySearchPublicRoomWidget extends StatelessWidget {
           children: [
             Padding(
               padding: SearchPublicRoomViewStyle.paddingAvatar,
-              child: ClipRRect(
-                borderRadius:
-                    EmptySearchPublicRoomWidgetStyle.avatarBorderRadius,
-                child: Container(
-                  width: EmptySearchPublicRoomWidgetStyle.avatarSize,
-                  height: EmptySearchPublicRoomWidgetStyle.avatarSize,
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        EmptySearchPublicRoomWidgetStyle.avatarBorderRadius,
-                    color:
-                        EmptySearchPublicRoomWidgetStyle.avatarBackgroundColor(
-                      context,
-                    ),
-                    border:
-                        EmptySearchPublicRoomWidgetStyle.avatarBorder(context),
-                  ),
-                  child: Center(
-                    child: Text(
-                      genericSearchTerm[0],
-                      style: EmptySearchPublicRoomWidgetStyle
-                          .avatarLetterTextStyle(
-                        context,
-                      ),
-                    ),
-                  ),
-                ),
+              child: Avatar(
+                name: genericSearchTerm,
               ),
             ),
             Expanded(
@@ -68,11 +44,15 @@ class EmptySearchPublicRoomWidget extends StatelessWidget {
                     height: SearchPublicRoomViewStyle.nameToButtonSpace,
                   ),
                   TwakeTextButton(
-                    message: L10n.of(context)!.join,
+                    message: L10n.of(context)!.joinRoom,
                     styleMessage:
                         SearchPublicRoomViewStyle.joinButtonLabelStyle(context),
-                    paddingAll: 0.0,
+                    paddingAll: SearchPublicRoomViewStyle.paddingButton,
                     onTap: onTapJoin,
+                    buttonDecoration:
+                        SearchPublicRoomViewStyle.actionButtonDecoration(
+                      context,
+                    ),
                   ),
                 ],
               ),

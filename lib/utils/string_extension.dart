@@ -375,7 +375,9 @@ extension StringCasingExtension on String {
   }
 
   bool isRoomAlias() {
-    final regExp = RegExp(r'^[#][^:]+:.+$');
+    final regExp = RegExp(
+      r'^#[^:]+:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[[0-9A-Fa-f:.]{2,45}\]|[0-9A-Za-z-.]{1,255})(:\d{1,5})?$',
+    );
     final result = regExp.hasMatch(trim());
     return result;
   }
@@ -389,7 +391,9 @@ extension StringCasingExtension on String {
   }
 
   bool isRoomId() {
-    final regExp = RegExp(r'^[!][^:]+:.+$');
+    final regExp = RegExp(
+      r'^![^:]+:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[[0-9A-Fa-f:.]{2,45}\]|[0-9A-Za-z-.]{1,255})(:\d{1,5})?$',
+    );
     final result = regExp.hasMatch(trim());
     return result;
   }

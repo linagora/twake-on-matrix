@@ -3060,6 +3060,6 @@
       "user": {}
     }
   },
-  "view": "View",
-  "join": "Join"
+  "viewRoom": "View chat",
+  "joinRoomFailed": "Failed to join the room"
 }

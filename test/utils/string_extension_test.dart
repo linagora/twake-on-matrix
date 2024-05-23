@@ -381,7 +381,10 @@ void main() {
   group('[isRoomAlias TEST]', () {
     final testMap = <String, bool>{
       '#room:server.com': true,
-      '!room:server.com:': false,
+      '#room:192.168.1.1': true,
+      '#room:[2001:db8:85a3:8d3:1319:8a2e:370:7348]': true,
+      '#room:example.com:8080': true,
+      '!room:server.com': false,
       'room:server.com': false,
       '': false,
     };
@@ -415,8 +418,11 @@ void main() {
 
   group('[isRoomId TEST]', () {
     final testMap = <String, bool>{
+      '!room:server.com': true,
+      '!room:192.168.1.1': true,
+      '!room:[2001:db8:85a3:8d3:1319:8a2e:370:7348]': true,
+      '!room:example.com:8080': true,
       '#room:server.com': false,
-      '!room:server.com:': true,
       'room:server.com': false,
       '': false,
     };

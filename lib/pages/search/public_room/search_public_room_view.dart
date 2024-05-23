@@ -84,7 +84,8 @@ class SearchPublicRoomList extends StatelessWidget {
                                 TwakeTextButton(
                                   message: action.getLabel(context),
                                   styleMessage: action.getLabelStyle(context),
-                                  paddingAll: 0.0,
+                                  paddingAll:
+                                      SearchPublicRoomViewStyle.paddingButton,
                                   onTap: () => searchController
                                       .searchPublicRoomController
                                       .handlePublicRoomActions(
@@ -92,6 +93,9 @@ class SearchPublicRoomList extends StatelessWidget {
                                     room,
                                     action,
                                   ),
+                                  hoverColor: Colors.transparent,
+                                  buttonDecoration: SearchPublicRoomViewStyle
+                                      .actionButtonDecoration(context),
                                 ),
                             ],
                           ),

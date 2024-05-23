@@ -6,6 +6,8 @@ import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 class SearchPublicRoomViewStyle {
   static const double nameToButtonSpace = 8.0;
 
+  static const double paddingButton = 12.0;
+
   static const EdgeInsetsGeometry paddingListItem = EdgeInsets.all(8.0);
 
   static const EdgeInsetsGeometry paddingInsideListItem = EdgeInsets.all(8.0);
@@ -28,5 +30,14 @@ class SearchPublicRoomViewStyle {
     return Theme.of(context).textTheme.labelLarge?.copyWith(
           color: LinagoraSysColors.material().onSurface,
         );
+  }
+
+  static BoxDecoration actionButtonDecoration(BuildContext context) {
+    return BoxDecoration(
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      borderRadius: const BorderRadius.all(
+        Radius.circular(28.0),
+      ),
+    );
   }
 }

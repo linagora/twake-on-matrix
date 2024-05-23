@@ -9,9 +9,9 @@ enum PublicRoomActions {
   String getLabel(BuildContext context) {
     switch (this) {
       case PublicRoomActions.join:
-        return L10n.of(context)!.join;
+        return L10n.of(context)!.joinRoom;
       case PublicRoomActions.view:
-        return L10n.of(context)!.view;
+        return L10n.of(context)!.viewRoom;
     }
   }
 

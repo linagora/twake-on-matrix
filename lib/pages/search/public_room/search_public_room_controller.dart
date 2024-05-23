@@ -10,11 +10,14 @@ import 'package:fluffychat/presentation/model/search/public_room/presentation_se
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_empty.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class SearchPublicRoomController with SearchDebouncerMixin {
   SearchPublicRoomController();
@@ -82,9 +85,8 @@ class SearchPublicRoomController with SearchDebouncerMixin {
       }
 
       if (success is PublicRoomSuccess) {
-        if (success.publicRoomsChunk == null) {
-          searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
-        } else if (success.publicRoomsChunk!.isEmpty) {
+        if (success.publicRoomsChunk == null ||
+            success.publicRoomsChunk!.isEmpty) {
           searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
         } else {
           searchResultsNotifier.value = PresentationSearchPublicRoom(
@@ -101,6 +103,9 @@ class SearchPublicRoomController with SearchDebouncerMixin {
 
   void _viewRoom(BuildContext context, String roomId) {
     context.go('/rooms/$roomId');
+    if (!PlatformInfos.isMobile) {
+      Navigator.of(context, rootNavigator: false).pop();
+    }
   }
 
   String? getServerName(String? roomIdOrAlias) {
@@ -131,8 +136,13 @@ class SearchPublicRoomController with SearchDebouncerMixin {
       if (!client.getRoomById(result.result!)!.isSpace) {
         context.go('/rooms/${result.result!}');
       }
-      return;
+    } else {
+      TwakeSnackBar.show(context, L10n.of(context)!.joinRoomFailed);
     }
+    if (!PlatformInfos.isMobile) {
+      Navigator.of(context, rootNavigator: false).pop();
+    }
+    return;
   }
 
   void handlePublicRoomActions(
@@ -180,7 +190,6 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     super.disposeDebouncer();
     searchResultsNotifier.dispose();
     _resetSearchResults();
-    disposeDebouncer();
     _filter = null;
   }
 }
