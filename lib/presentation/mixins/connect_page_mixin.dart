@@ -177,6 +177,7 @@ mixin ConnectPageMixin {
       Logs().d('tryLogoutSso::result: $result');
     } catch (e) {
       Logs().d('tryLogoutSso::error: $e');
+      rethrow;
     }
   }
 

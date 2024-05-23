@@ -22,4 +22,9 @@ class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
       toMConfigurations,
     );
   }
+
+  @override
+  Future<void> deleteTomConfigurations(String userId) {
+    return tomConfigurationsDatasource.deleteTomConfigurations(userId);
+  }
 }

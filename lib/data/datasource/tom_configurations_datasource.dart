@@ -7,4 +7,6 @@ abstract class ToMConfigurationsDatasource {
     String userId,
     ToMConfigurations toMConfigurations,
   );
+
+  Future<void> deleteTomConfigurations(String userId);
 }

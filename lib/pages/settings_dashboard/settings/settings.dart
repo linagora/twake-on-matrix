@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
@@ -38,6 +38,8 @@ class Settings extends StatefulWidget {
 class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
+
+  final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
 
   StreamSubscription? onAccountDataSubscription;
 
@@ -86,13 +88,19 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         OkCancelResult.cancel) {
       return;
     }
-    final matrix = Matrix.of(context);
     if (PlatformInfos.isMobile) {
-      await tryLogoutSso(context);
+      await _logoutActionsOnMobile();
+    } else {
+      await _logoutActions();
     }
-    if (matrix.twakeSupported == true) {
-      final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
-      await hiveCollectionToMDatabase.clear();
+  }
+
+  Future<void> _logoutActionsOnMobile() async {
+    try {
+      await tryLogoutSso(context);
+    } catch (e) {
+      Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
+      return;
     }
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
@@ -100,12 +108,36 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           if (matrix.backgroundPush != null) {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
-          await matrix.client.logout();
+          await Future.wait([
+            matrix.client.logout(),
+            _deleteTomConfigurations(matrix.client),
+          ]);
         } catch (e) {
-          Logs().e('SettingsController()::logoutAction - error: $e');
+          Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
+        }
+      },
+    );
+  }
+
+  Future<void> _logoutActions() async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        try {
+          if (matrix.backgroundPush != null) {
+            await matrix.backgroundPush!.removeCurrentPusher();
+          }
+          await Future.wait([
+            matrix.client.logout(),
+            _deleteTomConfigurations(matrix.client),
+          ]);
+        } catch (e) {
+          Logs().e('SettingsController()::_logoutActions - error: $e');
         } finally {
-          if (PlatformInfos.isWeb) {
+          try {
             await tryLogoutSso(context);
+          } catch (e) {
+            Logs().e('SettingsController()::_logoutActions - error: $e');
+            return;
           }
         }
       },
@@ -242,6 +274,25 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         }
       }
     });
+  }
+
+  Future<void> _deleteTomConfigurations(Client currentClient) async {
+    try {
+      Logs().d(
+        'SettingsController::_deleteTomConfigurations - Client ID: ${currentClient.userID}',
+      );
+      if (matrix.twakeSupported) {
+        await tomConfigurationRepository
+            .deleteTomConfigurations(currentClient.userID!);
+      }
+      Logs().d(
+        'SettingsController::_deleteTomConfigurations - Success',
+      );
+    } catch (e) {
+      Logs().e(
+        'SettingsController::_deleteTomConfigurations - error: $e',
+      );
+    }
   }
 
   @override
