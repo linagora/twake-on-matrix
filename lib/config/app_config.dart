@@ -40,6 +40,8 @@ abstract class AppConfig {
   ///`HOME_SERVER`: Homeserver, sample is `https://example.com`
   static String homeserver = sampleValue;
 
+  static String appParameter = 'chat';
+
   static String? platform;
 
   static double toolbarHeight(BuildContext context) =>

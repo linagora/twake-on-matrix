@@ -40,7 +40,7 @@ class TwakeWelcome extends StatefulWidget {
 
 class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   void goToHomeserverPicker() {
-    if (widget.arg?.isAddAnotherAccount == true) {
+    if (widget.arg != null && widget.arg?.isAddAnotherAccount == true) {
       context.push('/rooms/addaccount/homeserverpicker');
     } else {
       context.push('/home/homeserverpicker');
@@ -54,14 +54,14 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       'post_registered_redirect_url';
 
   String get loginUrl =>
-      "${AppConfig.registrationUrl}?$postLoginRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
+      "${AppConfig.registrationUrl}?$postLoginRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect&app=${AppConfig.appParameter}";
 
   String get signupUrl =>
-      "${AppConfig.registrationUrl}?$postRegisteredRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect";
+      "${AppConfig.registrationUrl}?$postRegisteredRedirectUrlPathParams=${AppConfig.appOpenUrlScheme}://redirect&app=${AppConfig.appParameter}";
 
   MatrixState get matrix => Matrix.of(context);
 
-  void onClickSignIn() async {
+  void onClickSignIn() {
     Logs().d("TwakeIdController::onClickSignIn: Login Url - $loginUrl");
     _redirectRegistrationUrl(loginUrl);
   }
@@ -92,7 +92,9 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   }
 
   Future<bool> _homeserverExisted() async {
-    if (widget.arg?.isAddAnotherAccount == false) return false;
+    if (widget.arg != null && widget.arg?.isAddAnotherAccount == false) {
+      return false;
+    }
     try {
       final allHomeserverLoggedIn = (await ClientManager.getClients())
           .where((client) => client.homeserver != null)
