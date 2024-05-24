@@ -3059,5 +3059,7 @@
     "placeholders": {
       "user": {}
     }
-  }
+  },
+  "privacyPolicy": "Privacy Policy",
+  "byContinuingYourAgreeingToOur": "By continuing, you're agreeing to our"
 }

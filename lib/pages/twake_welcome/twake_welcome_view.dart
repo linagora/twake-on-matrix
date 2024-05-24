@@ -39,6 +39,9 @@ class TwakeWelcomeView extends StatelessWidget {
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
       onSignInOnTap: AppConfig.isSaasPlatForm ? controller.onClickSignIn : null,
+      privacyPolicy: L10n.of(context)!.privacyPolicy,
+      descriptionPrivacyPolicy: L10n.of(context)!.byContinuingYourAgreeingToOur,
+      onPrivacyPolicyOnTap: controller.onClickPrivacyPolicy,
       onCreateTwakeIdOnTap:
           AppConfig.isSaasPlatForm ? controller.onClickCreateTwakeId : null,
       logo: SvgPicture.asset(
