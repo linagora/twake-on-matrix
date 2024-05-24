@@ -22,7 +22,9 @@ class SettingsSecurityView extends StatelessWidget {
         context: context,
       ),
       body: ListTileTheme(
-        iconColor: Theme.of(context).colorScheme.onSurface,
+        // TODO: remove when the color scheme is updated
+        // ignore: deprecated_member_use
+        iconColor: Theme.of(context).colorScheme.onBackground,
         child: MaxWidthBody(
           withScrolling: true,
           child: Column(

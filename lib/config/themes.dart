@@ -199,6 +199,16 @@ abstract class TwakeThemes {
           onSecondaryContainer: brightness == Brightness.light
               ? LinagoraSysColors.material().onSecondaryContainer
               : LinagoraSysColors.material().onSecondaryContainerDark,
+          // TODO: remove when the color scheme is updated
+          // ignore: deprecated_member_use
+          background: brightness == Brightness.light
+              ? LinagoraSysColors.material().background
+              : LinagoraSysColors.material().backgroundDark,
+          // TODO: remove when the color scheme is updated
+          // ignore: deprecated_member_use
+          onBackground: brightness == Brightness.light
+              ? LinagoraSysColors.material().onBackground
+              : LinagoraSysColors.material().onBackgroundDark,
           error: brightness == Brightness.light
               ? LinagoraSysColors.material().error
               : LinagoraSysColors.material().errorDark,

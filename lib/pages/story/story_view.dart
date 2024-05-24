@@ -377,7 +377,9 @@ class StoryView extends StatelessWidget {
                                   onPressed: controller.replyAction,
                                   icon: const Icon(Icons.send_outlined),
                                 ),
-                          fillColor: Theme.of(context).colorScheme.surface,
+                          // TODO: change to colorSurface when its approved
+                          // ignore: deprecated_member_use
+                          fillColor: Theme.of(context).colorScheme.background,
                         ),
                       ),
                     ),
