@@ -44,6 +44,10 @@ abstract class AppConfig {
 
   static String? platform;
 
+  static String _appPolicy = 'https://twake.app/policy';
+
+  static String appTermsOfUse = 'https://twake.app/terms';
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -54,9 +58,8 @@ abstract class AppConfig {
   static const Color primaryColor = Color.fromARGB(255, 135, 103, 172);
   static const Color primaryColorLight = Color(0xFFCCBDEA);
   static const Color secondaryColor = Color(0xFF41a2bc);
-  static String _privacyUrl = 'https://twake.app/en/privacy/';
 
-  static String get privacyUrl => _privacyUrl;
+  static String get privacyUrl => _appPolicy;
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
@@ -210,7 +213,7 @@ abstract class AppConfig {
       _webBaseUrl = json['privacy_url'];
     }
     if (json['web_base_url'] is String) {
-      _privacyUrl = json['web_base_url'];
+      _appPolicy = json['web_base_url'];
     }
     if (json['render_html'] is bool) {
       renderHtml = json['render_html'];
