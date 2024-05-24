@@ -51,7 +51,9 @@ class NaviRailItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 color: isSelected
                     ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.surface,
+                    // TODO: change to colorSurface when its approved
+                    // ignore: deprecated_member_use
+                    : Theme.of(context).colorScheme.background,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8.0,

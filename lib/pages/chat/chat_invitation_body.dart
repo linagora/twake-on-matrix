@@ -47,7 +47,9 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
         child: Container(
           width: ChatInvitationBodyStyle.dialogWidth,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            // TODO: change to colorSurface when its approved
+            // ignore: deprecated_member_use
+            color: Theme.of(context).colorScheme.background,
             borderRadius: BorderRadius.circular(
               ChatInvitationBodyStyle.dialogBorderRadius,
             ),

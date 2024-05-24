@@ -141,8 +141,8 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
       animation: controller!,
       builder: (context, _) => LayoutBuilder(
         builder: (context, constraints) {
-          final width = constraints.maxWidth - _CuteOverlayContent.size;
-          final height = constraints.maxHeight + _CuteOverlayContent.size;
+          final width = constraints.maxWidth - CuteOverlayContent.size;
+          final height = constraints.maxHeight + CuteOverlayContent.size;
           return SizedBox(
             height: constraints.maxHeight,
             width: constraints.maxWidth,
@@ -157,8 +157,8 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
                               .25 *
                               position.height *
                               (controller?.value ?? 0)) -
-                          _CuteOverlayContent.size,
-                      child: _CuteOverlayContent(
+                          CuteOverlayContent.size,
+                      child: CuteOverlayContent(
                         emoji: widget.emoji,
                       ),
                     ),
@@ -178,11 +178,11 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
   }
 }
 
-class _CuteOverlayContent extends StatelessWidget {
+class CuteOverlayContent extends StatelessWidget {
   static const double size = 64.0;
   final String emoji;
 
-  const _CuteOverlayContent({required this.emoji});
+  const CuteOverlayContent({super.key, required this.emoji});
 
   @override
   Widget build(BuildContext context) {

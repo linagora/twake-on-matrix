@@ -37,7 +37,9 @@ class LoginScaffold extends StatelessWidget {
     if (isMobileMode) return scaffold;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurface,
+        // TODO: change to colorSurface when its approved
+        // ignore: deprecated_member_use
+        color: Theme.of(context).colorScheme.onBackground,
       ),
       child: Center(
         child: Padding(

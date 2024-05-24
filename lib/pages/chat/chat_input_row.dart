@@ -53,7 +53,7 @@ class ChatInputRow extends StatelessWidget {
                 Container(
                   height: ChatInputRowStyle.chatInputRowHeight,
                   alignment: Alignment.center,
-                  child: _ChatAccountPicker(controller),
+                  child: ChatAccountPicker(controller),
                 ),
               Expanded(
                 child:
@@ -206,10 +206,10 @@ class ActionSelectModeWidget extends StatelessWidget {
   }
 }
 
-class _ChatAccountPicker extends StatelessWidget {
+class ChatAccountPicker extends StatelessWidget {
   final ChatController controller;
 
-  const _ChatAccountPicker(this.controller);
+  const ChatAccountPicker(this.controller, {super.key});
 
   void _popupMenuButtonSelected(String mxid) {
     final client = controller.matrix!.currentBundle!
