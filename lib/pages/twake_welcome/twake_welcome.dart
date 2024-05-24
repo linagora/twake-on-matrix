@@ -4,6 +4,7 @@ import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -118,6 +119,13 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       return false;
     }
     return false;
+  }
+
+  void onClickPrivacyPolicy() {
+    UrlLauncher(
+      context,
+      url: AppConfig.privacyUrl,
+    ).openUrlInAppBrowser();
   }
 
   @override
