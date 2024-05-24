@@ -309,12 +309,13 @@ class ChatListController extends State<ChatList>
   Future<void> toggleMutedSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
+        final newRuleState = pushRuleState;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = activeClient.getRoomById(conversation.roomId)!;
-          if (room.pushRuleState == pushRuleState) continue;
+          if (room.pushRuleState == newRuleState) continue;
           await activeClient
               .getRoomById(conversation.roomId)!
-              .setPushRuleState(pushRuleState);
+              .setPushRuleState(newRuleState);
         }
       },
     );
