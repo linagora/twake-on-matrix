@@ -20,7 +20,9 @@ class ChatDetailsMediaStyle {
 
   static Decoration durationBoxDecoration(BuildContext context) =>
       ShapeDecoration(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        // TODO: change to colorSurface when its approved
+        // ignore: deprecated_member_use
+        color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
         shape: const StadiumBorder(),
       );
 
