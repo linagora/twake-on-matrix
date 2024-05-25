@@ -392,11 +392,7 @@ void main() {
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
         final result = entry.key.isRoomAlias();
-        if (entry.value) {
-          expect(result, isTrue);
-        } else {
-          expect(result, isFalse);
-        }
+        expect(result, entry.value);
       });
     }
   });
@@ -430,11 +426,7 @@ void main() {
     for (final entry in testMap.entries) {
       test('Testing: ${entry.key} => Expected: ${entry.value}', () {
         final result = entry.key.isRoomId();
-        if (entry.value) {
-          expect(result, isTrue);
-        } else {
-          expect(result, isFalse);
-        }
+        expect(result, entry.value);
       });
     }
   });

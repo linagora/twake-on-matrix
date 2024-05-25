@@ -8,13 +8,17 @@ class SearchPublicRoomViewStyle {
 
   static const double paddingButton = 12.0;
 
-  static const EdgeInsetsGeometry paddingListItem = EdgeInsets.all(8.0);
-
-  static const EdgeInsetsGeometry paddingInsideListItem = EdgeInsets.all(8.0);
+  static const EdgeInsetsGeometry paddingListItem = EdgeInsets.all(16.0);
 
   static const EdgeInsetsGeometry paddingAvatar = EdgeInsets.only(right: 12.0);
 
   static TextStyle roomNameTextStyle =
+      LinagoraTextStyle.material().bodyMedium2.copyWith(
+            color: LinagoraSysColors.material().onSurface,
+            fontFamily: GoogleFonts.inter().fontFamily,
+          );
+
+  static TextStyle roomAliasTextStyle =
       LinagoraTextStyle.material().bodyMedium3.copyWith(
             color: LinagoraSysColors.material().onSurface,
             fontFamily: GoogleFonts.inter().fontFamily,

@@ -52,56 +52,62 @@ class SearchPublicRoomList extends StatelessWidget {
                     .getAction(context, room);
                 return Padding(
                   padding: SearchPublicRoomViewStyle.paddingListItem,
-                  child: Padding(
-                    padding: SearchPublicRoomViewStyle.paddingInsideListItem,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: SearchPublicRoomViewStyle.paddingAvatar,
-                          child: Avatar(
-                            mxContent: room.avatarUrl,
-                            name: room.name,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: SearchPublicRoomViewStyle.paddingAvatar,
+                        child: Avatar(
+                          mxContent: room.avatarUrl,
+                          name: room.name,
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              room.name ?? room.roomId,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              softWrap: false,
+                              style:
+                                  SearchPublicRoomViewStyle.roomNameTextStyle,
+                            ),
+                            const SizedBox(
+                              height:
+                                  SearchPublicRoomViewStyle.nameToButtonSpace,
+                            ),
+                            Text(
+                              room.canonicalAlias ?? room.roomId,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              softWrap: false,
+                              style:
+                                  SearchPublicRoomViewStyle.roomAliasTextStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (action != null)
+                        TwakeTextButton(
+                          message: action.getLabel(context),
+                          styleMessage: action.getLabelStyle(context),
+                          paddingAll: SearchPublicRoomViewStyle.paddingButton,
+                          onTap: () => searchController
+                              .searchPublicRoomController
+                              .handlePublicRoomActions(
+                            context,
+                            room,
+                            action,
+                          ),
+                          hoverColor: Colors.transparent,
+                          buttonDecoration:
+                              SearchPublicRoomViewStyle.actionButtonDecoration(
+                            context,
                           ),
                         ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                room.name ?? room.roomId,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                softWrap: false,
-                                style:
-                                    SearchPublicRoomViewStyle.roomNameTextStyle,
-                              ),
-                              const SizedBox(
-                                height:
-                                    SearchPublicRoomViewStyle.nameToButtonSpace,
-                              ),
-                              if (action != null)
-                                TwakeTextButton(
-                                  message: action.getLabel(context),
-                                  styleMessage: action.getLabelStyle(context),
-                                  paddingAll:
-                                      SearchPublicRoomViewStyle.paddingButton,
-                                  onTap: () => searchController
-                                      .searchPublicRoomController
-                                      .handlePublicRoomActions(
-                                    context,
-                                    room,
-                                    action,
-                                  ),
-                                  hoverColor: Colors.transparent,
-                                  buttonDecoration: SearchPublicRoomViewStyle
-                                      .actionButtonDecoration(context),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 );
               }),

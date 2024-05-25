@@ -18,47 +18,44 @@ class EmptySearchPublicRoomWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: SearchPublicRoomViewStyle.paddingListItem,
-      child: Padding(
-        padding: SearchPublicRoomViewStyle.paddingInsideListItem,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: SearchPublicRoomViewStyle.paddingAvatar,
-              child: Avatar(
-                name: genericSearchTerm,
-              ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: SearchPublicRoomViewStyle.paddingAvatar,
+            child: Avatar(
+              name: genericSearchTerm,
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    genericSearchTerm,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: SearchPublicRoomViewStyle.roomNameTextStyle,
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  genericSearchTerm,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: SearchPublicRoomViewStyle.roomNameTextStyle,
+                ),
+                const SizedBox(
+                  height: SearchPublicRoomViewStyle.nameToButtonSpace,
+                ),
+                TwakeTextButton(
+                  message: L10n.of(context)!.joinRoom,
+                  styleMessage:
+                      SearchPublicRoomViewStyle.joinButtonLabelStyle(context),
+                  paddingAll: SearchPublicRoomViewStyle.paddingButton,
+                  onTap: onTapJoin,
+                  buttonDecoration:
+                      SearchPublicRoomViewStyle.actionButtonDecoration(
+                    context,
                   ),
-                  const SizedBox(
-                    height: SearchPublicRoomViewStyle.nameToButtonSpace,
-                  ),
-                  TwakeTextButton(
-                    message: L10n.of(context)!.joinRoom,
-                    styleMessage:
-                        SearchPublicRoomViewStyle.joinButtonLabelStyle(context),
-                    paddingAll: SearchPublicRoomViewStyle.paddingButton,
-                    onTap: onTapJoin,
-                    buttonDecoration:
-                        SearchPublicRoomViewStyle.actionButtonDecoration(
-                      context,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
