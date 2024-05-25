@@ -1,4 +1,15 @@
-## [2.5.3+2330] - 2024-05-03
+## [2.5.5+2330] - 2024-05-25
+
+### Fixed
+- #1526 cannot unmute more than 2 chats
+- #1785 Improve logout for multiple accounts
+
+### Added
+- #1722 Recents contacts for contact/search/create group chat screen
+- #1735 Search external contact in search screen
+- #1780 add parameter `app=chat` when connect with TWP platform
+
+## [2.5.3+2330] - 2024-05-19
 
 ### Fixed
 - #1650: Memory leak problems: Web and Mobile app
