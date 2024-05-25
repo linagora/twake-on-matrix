@@ -15,7 +15,6 @@ WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
     apt install -y openssh-client && \
     rm -rf assets/js/* && \
-    mkdir ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
 COPY --from=olm-builder /result/javascript assets/js/package
 RUN --mount=type=ssh,required=true ./scripts/build-web.sh
