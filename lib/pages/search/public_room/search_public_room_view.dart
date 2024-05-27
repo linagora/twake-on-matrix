@@ -25,7 +25,7 @@ class SearchPublicRoomList extends StatelessWidget {
           if (searchPublicRoomNotifier is PresentationSearchPublicRoomEmpty) {
             final genericSearchTerm =
                 searchController.searchPublicRoomController.genericSearchTerm;
-            if (genericSearchTerm != null || genericSearchTerm!.isNotEmpty) {
+            if (genericSearchTerm != null && genericSearchTerm.isNotEmpty) {
               return EmptySearchPublicRoomWidget(
                 genericSearchTerm: genericSearchTerm,
                 onTapJoin: () =>

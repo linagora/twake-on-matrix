@@ -79,22 +79,32 @@ class SearchPublicRoomController with SearchDebouncerMixin {
   }
 
   void _handleListenSearchPublicRoom(Either<Failure, Success> searchResult) {
-    searchResult.fold((failure) => _resetSearchResults(), (success) {
-      if (!searchTermIsNotEmpty) {
-        return;
-      }
-
-      if (success is PublicRoomSuccess) {
-        if (success.publicRoomsChunk == null ||
-            success.publicRoomsChunk!.isEmpty) {
-          searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
+    searchResult.fold(
+      (failure) {
+        if (searchResultsNotifier.value.props.isNotEmpty) {
+          return;
         } else {
-          searchResultsNotifier.value = PresentationSearchPublicRoom(
-            searchResults: success.publicRoomsChunk!,
-          );
+          _resetSearchResults();
+          searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
         }
-      }
-    });
+      },
+      (success) {
+        if (!searchTermIsNotEmpty) {
+          return;
+        }
+
+        if (success is PublicRoomSuccess) {
+          if (success.publicRoomsChunk == null ||
+              success.publicRoomsChunk!.isEmpty) {
+            searchResultsNotifier.value = PresentationSearchPublicRoomEmpty();
+          } else {
+            searchResultsNotifier.value = PresentationSearchPublicRoom(
+              searchResults: success.publicRoomsChunk!,
+            );
+          }
+        }
+      },
+    );
   }
 
   void _handleKeywordIsRoomId() {
@@ -121,7 +131,7 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     String? server,
   ) async {
     final client = Matrix.of(context).client;
-    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen<String>(
       future: () => client.joinRoom(
         roomIdOrAlias,
         serverName: server != null ? [server] : null,
@@ -129,8 +139,10 @@ class SearchPublicRoomController with SearchDebouncerMixin {
     );
     if (result.error == null) {
       if (client.getRoomById(result.result!) == null) {
-        await client.onSync.stream.firstWhere(
-          (sync) => sync.rooms?.join?.containsKey(result.result) ?? false,
+        await TwakeDialog.showFutureLoadingDialogFullScreen<SyncUpdate>(
+          future: () => client.onSync.stream.firstWhere(
+            (sync) => sync.rooms?.join?.containsKey(result.result) ?? false,
+          ),
         );
       }
       if (!client.getRoomById(result.result!)!.isSpace) {
