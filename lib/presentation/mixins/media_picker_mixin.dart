@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
@@ -218,10 +219,66 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                               }
                               Navigator.of(context).pop();
                             },
-                            child: SvgPicture.asset(
-                              ImagePaths.icSend,
-                              width: 40,
-                              height: 40,
+                            child: SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: Stack(
+                                children: [
+                                  SvgPicture.asset(
+                                    ImagePaths.icSend,
+                                    width: 40,
+                                    height: 40,
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable:
+                                        numberSelectedImagesNotifier,
+                                    builder:
+                                        (context, numberSelectedImages, child) {
+                                      if (numberSelectedImages == 0 &&
+                                          onPickerTypeTap != null) {
+                                        return child!;
+                                      }
+                                      return Positioned(
+                                        bottom: 0,
+                                        right: 0,
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          padding: const EdgeInsets.all(1.0),
+                                          decoration: ShapeDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            shape:
+                                                const CircleBorder().copyWith(
+                                              side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surface,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: AutoSizeText(
+                                            "$numberSelectedImages",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .surface,
+                                                ),
+                                            minFontSize: 8,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const SizedBox.shrink(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
