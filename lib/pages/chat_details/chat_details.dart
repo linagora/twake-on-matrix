@@ -120,6 +120,18 @@ class ChatDetailsController extends State<ChatDetails>
   @override
   void initState() {
     super.initState();
+    initControllers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      nestedScrollViewState.currentState?.innerController.addListener(
+        _listenerInnerController,
+      );
+      _refreshDataInTabviewInit();
+    });
+    initValueNotifiers();
+    _listenForRoomMembersChanged();
+  }
+
+  void initControllers() {
     tabController = TabController(
       length: chatDetailsPageView.length,
       vsync: this,
@@ -139,15 +151,12 @@ class ChatDetailsController extends State<ChatDetails>
       searchFunc: (event) => event.isAFile,
       limit: _filesFetchLimit,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      nestedScrollViewState.currentState?.innerController.addListener(
-        _listenerInnerController,
-      );
-      _refreshDataInTabviewInit();
-    });
+  }
+
+  void initValueNotifiers() {
     room = Matrix.of(context).client.getRoomById(roomId!);
     muteNotifier.value = room?.pushRuleState ?? PushRuleState.notify;
-    _listenForRoomMembersChanged();
+    membersNotifier.value ??= room?.getParticipants();
   }
 
   void _listenForRoomMembersChanged() {
@@ -163,6 +172,7 @@ class ChatDetailsController extends State<ChatDetails>
   void dispose() {
     tabController?.dispose();
     muteNotifier.dispose();
+    membersNotifier.dispose();
     mediaListController?.dispose();
     linksListController?.dispose();
     filesListController?.dispose();
