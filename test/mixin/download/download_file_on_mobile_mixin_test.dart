@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dartz/dartz.dart' hide State, OpenFile;
+import 'package:dartz/dartz.dart' hide State, OpenFile, id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/exception/downloading_exception.dart';
@@ -19,12 +19,10 @@ const fakeFilename = "fakeFilename";
 
 class MockRoom extends Mock implements Room {
   @override
-  // ignore: hash_and_equals
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    // ignore: unrelated_type_equality_checks
-    return other is Room && other.id == id;
-  }
+  bool operator ==(dynamic other) => (other is Room && other.id == id);
+
+  @override
+  int get hashCode => Object.hashAll([id]);
 
   @override
   Map<String, MatrixFile> get sendingFilePlaceholders => super.noSuchMethod(
@@ -81,7 +79,7 @@ class DummyWidgetState extends State<DummyWidget>
   MockSpec<DownloadManager>(),
 ])
 void main() {
-  group('DownloadFileOnMobileMixin: setupDownloadingProcess', () {
+  group('DownloadFileOnMobileMixin: setupDownloadingProcess - ENV: WEB', () {
     late DummyWidgetState dummyState;
     late Event fakeEvent;
     late Room fakeRoom;
@@ -97,7 +95,10 @@ void main() {
       getIt.reset();
     });
 
-    test('should handle failure', () {
+    test(
+        'WHEN the download fails because of an Exception \n'
+        'THEN downloadFileStateNotifier value should be DownloadErrorPresentationState \n',
+        () {
       final failure = DownloadFileFailureState(exception: Exception());
       dummyState.setupDownloadingProcess(Left(failure));
 
@@ -107,7 +108,10 @@ void main() {
       );
     });
 
-    test('should handle cancel', () {
+    test(
+        'WHEN the user cancel the download \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
+        () {
       final failure =
           DownloadFileFailureState(exception: CancelDownloadingException());
       dummyState.setupDownloadingProcess(Left(failure));
@@ -118,7 +122,10 @@ void main() {
       );
     });
 
-    test('should handle success with DownloadingFileState', () {
+    test(
+        'WHEN download is in progress \n'
+        'THEN downloadFileStateNotifier value should be DownloadingPresentationState \n',
+        () {
       const success = DownloadingFileState(receive: 10, total: 100);
       dummyState.setupDownloadingProcess(const Right(success));
 
@@ -128,7 +135,10 @@ void main() {
       );
     });
 
-    test('should handle success with DownloadNativeFileSuccessState', () {
+    test(
+        'WHEN download is successful \n'
+        'THEN downloadFileStateNotifier value should be DownloadedPresentationState \n',
+        () {
       const success = DownloadNativeFileSuccessState(filePath: 'path/to/file');
       dummyState.setupDownloadingProcess(const Right(success));
 
@@ -148,7 +158,9 @@ void main() {
       getIt.reset();
     });
 
-    test('should update downloadFileStateNotifier if file exists in memory',
+    test(
+        'WHEN file already exists \n'
+        'THEN downloadFileStateNotifier value should be DownloadedPresentationState \n',
         () {
       final fakeRoom = MockRoom();
       final fakeEvent = MockEvent(fakeRoom);
@@ -169,7 +181,8 @@ void main() {
     });
 
     test(
-        'should not update downloadFileStateNotifier if file does not exist in memory',
+        'WHEN file do not exists \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
         () {
       final fakeRoom = MockRoom();
       final fakeEvent = MockEvent(fakeRoom);
@@ -193,7 +206,9 @@ void main() {
     });
 
     test(
-        'should update downloadFileStateNotifier if file exists in app downloads',
+        'WHEN file already exists \n'
+        'AND file size is the same as the event size \n'
+        'THEN downloadFileStateNotifier value should be DownloadedPresentationState \n',
         () async {
       final fakeRoom = MockRoom();
       final fakeEvent = MockEvent(fakeRoom);
@@ -213,7 +228,9 @@ void main() {
       );
     });
 
-    test('should not update downloadFileStateNotifier if file does not exists',
+    test(
+        'WHEN file does not exists \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
         () async {
       final fakeRoom = MockRoom();
       final fakeEvent = MockEvent(fakeRoom);
@@ -234,7 +251,9 @@ void main() {
     });
 
     test(
-        'should not update downloadFileStateNotifier if file does have the same size as the event',
+        'WHEN file already exists \n'
+        'BUT file size is the not same as the event size \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
         () async {
       final fakeRoom = MockRoom();
       final fakeEvent = MockEvent(fakeRoom);

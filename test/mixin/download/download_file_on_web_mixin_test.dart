@@ -19,12 +19,10 @@ const fakeFilename = "fakeFilename";
 
 class MockRoom extends Mock implements Room {
   @override
-  // ignore: hash_and_equals
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    // ignore: unrelated_type_equality_checks
-    return other is Room && other.id == id;
-  }
+  bool operator ==(dynamic other) => (other is Room && other.id == id);
+
+  @override
+  int get hashCode => Object.hashAll([id]);
 
   @override
   Map<String, MatrixFile> get sendingFilePlaceholders => super.noSuchMethod(
@@ -101,7 +99,10 @@ void main() {
       getIt.reset();
     });
 
-    test('should handle failure', () {
+    test(
+        'WHEN the download fails because of an Exception \n'
+        'THEN downloadFileStateNotifier value should be DownloadErrorPresentationState \n',
+        () {
       final failure = DownloadFileFailureState(exception: Exception());
       dummyState.setupDownloadingProcess(Left(failure));
 
@@ -111,7 +112,10 @@ void main() {
       );
     });
 
-    test('should handle cancel', () {
+    test(
+        'WHEN the user cancel the download \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
+        () {
       final failure = DownloadFileFailureState(
         exception: CancelDownloadingException(),
       );
@@ -123,7 +127,10 @@ void main() {
       );
     });
 
-    test('should handle success with DownloadingFileState', () {
+    test(
+        'WHEN download is in progress \n'
+        'THEN downloadFileStateNotifier value should be DownloadingPresentationState \n',
+        () {
       const success = DownloadingFileState(receive: 10, total: 100);
       dummyState.setupDownloadingProcess(const Right(success));
 
@@ -133,7 +140,10 @@ void main() {
       );
     });
 
-    test('should handle success with DownloadMatrixFileSuccessState', () {
+    test(
+        'WHEN download is successful \n'
+        'THEN downloadFileStateNotifier value should be NotDownloadPresentationState \n',
+        () {
       TestWidgetsFlutterBinding.ensureInitialized();
 
       final success = DownloadMatrixFileSuccessState(
