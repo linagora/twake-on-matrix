@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dartz/dartz.dart' hide State, OpenFile;
+import 'package:dartz/dartz.dart' hide State, OpenFile, id;
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/exception/downloading_exception.dart';
@@ -19,7 +19,7 @@ const fakeFilename = "fakeFilename";
 
 class MockRoom extends Mock implements Room {
   @override
-  bool operator ==(dynamic other) => (other is Room && other.id == id);
+  bool operator ==(Object other) => (other is Room && other.id == id);
 
   @override
   int get hashCode => Object.hashAll([id]);
