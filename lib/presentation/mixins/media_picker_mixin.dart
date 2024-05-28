@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
+import 'package:fluffychat/presentation/style/media_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -88,22 +89,17 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
       context: context,
       controller: imagePickerController,
-      backgroundImageCamera: const AssetImage("assets/verification.png"),
-      initialChildSize: 0.6,
+      backgroundImageCamera: MediaPickerStyle.cameraIcon,
+      initialChildSize: MediaPickerStyle.initialChildSize,
       permissionStatus: permissionStatusPhotos,
-      gridPadding: const EdgeInsets.only(bottom: 150),
+      gridPadding: MediaPickerStyle.gridPadding,
       assetBackgroundColor: LinagoraSysColors.material().background,
       counterImageBuilder: (counterImage) {
         if (counterImage == 0) {
           return const SizedBox.shrink();
         }
         return Padding(
-          padding: const EdgeInsets.only(
-            left: 8.0,
-            right: 8.0,
-            bottom: 12.0,
-            top: 16.0,
-          ),
+          padding: MediaPickerStyle.textSelectedCounterPadding,
           child: Row(
             children: [
               Text(
@@ -130,7 +126,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         builder: (context, value, child) {
           if (value == 0 && onPickerTypeTap != null) {
             return Container(
-              padding: const EdgeInsets.only(top: 8.0, bottom: 34.0),
+              padding: MediaPickerStyle.itemPickerPadding,
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(
@@ -165,12 +161,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                 alignment: Alignment.bottomRight,
                 children: [
                   Container(
-                    padding: const EdgeInsets.only(
-                      right: 20.0,
-                      top: 8.0,
-                      bottom: 8.0,
-                      left: 4.0,
-                    ),
+                    padding: MediaPickerStyle.composerPadding,
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
@@ -209,10 +200,10 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 8),
+                          padding: MediaPickerStyle.sendButtonPadding,
                           child: InkWell(
                             borderRadius:
-                                const BorderRadius.all(Radius.circular(100)),
+                                MediaPickerStyle.sendButtonBorderRadius,
                             onTap: () {
                               if (onSendTap != null) {
                                 onSendTap();
@@ -220,14 +211,14 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                               Navigator.of(context).pop();
                             },
                             child: SizedBox(
-                              width: 48,
-                              height: 48,
+                              width: MediaPickerStyle.sendButtonSize,
+                              height: MediaPickerStyle.sendButtonSize,
                               child: Stack(
                                 children: [
                                   SvgPicture.asset(
                                     ImagePaths.icSend,
-                                    width: 40,
-                                    height: 40,
+                                    width: MediaPickerStyle.sendIconSize,
+                                    height: MediaPickerStyle.sendIconSize,
                                   ),
                                   ValueListenableBuilder(
                                     valueListenable:
@@ -242,9 +233,12 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                                         bottom: 0,
                                         right: 0,
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
-                                          padding: const EdgeInsets.all(1.0),
+                                          width:
+                                              MediaPickerStyle.counterIconSize,
+                                          height:
+                                              MediaPickerStyle.counterIconSize,
+                                          padding:
+                                              MediaPickerStyle.counterPadding,
                                           decoration: ShapeDecoration(
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -255,7 +249,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .surface,
-                                                width: 1.5,
+                                                width: MediaPickerStyle
+                                                    .borderSideWidth,
                                               ),
                                             ),
                                           ),
@@ -270,7 +265,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                                                       .colorScheme
                                                       .surface,
                                                 ),
-                                            minFontSize: 8,
+                                            minFontSize:
+                                                MediaPickerStyle.minFontSize,
                                           ),
                                         ),
                                       );
