@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
+import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -12,6 +13,7 @@ mixin PasteImageMixin {
     BuildContext context,
     Room room, {
     ClipboardReader? clipboardReader,
+    VoidCallback? onSendFileCallback,
   }) async {
     if (!(await TwakeClipboard.instance
         .isReadableImageFormat(clipboardReader: clipboardReader))) {
@@ -41,7 +43,7 @@ mixin PasteImageMixin {
         )
         .cast<MatrixImageFile>()
         .toList();
-    await showDialog(
+    final result = await showDialog(
       context: context,
       useRootNavigator: PlatformInfos.isWeb,
       builder: (context) {
@@ -51,5 +53,15 @@ mixin PasteImageMixin {
         );
       },
     );
+    if (result is SendMediaWithCaptionStatus) {
+      switch (result) {
+        case SendMediaWithCaptionStatus.done:
+        case SendMediaWithCaptionStatus.error:
+          onSendFileCallback?.call();
+          break;
+        case SendMediaWithCaptionStatus.cancel:
+          break;
+      }
+    }
   }
 }

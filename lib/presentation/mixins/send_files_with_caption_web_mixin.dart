@@ -12,6 +12,7 @@ mixin SendFilesWithCaptionWebMixin {
     BuildContext context, {
     Room? room,
     required List<MatrixFile> matrixFilesList,
+    VoidCallback? onSendFileCallback,
   }) async {
     if (matrixFilesList.length <= AppConfig.maxFilesSendPerDialog &&
         matrixFilesList.isNotEmpty) {
@@ -25,6 +26,7 @@ mixin SendFilesWithCaptionWebMixin {
           );
         },
       );
+      onSendFileCallback?.call();
       if (result is SendMediaWithCaptionStatus) {
         switch (result) {
           case SendMediaWithCaptionStatus.done:

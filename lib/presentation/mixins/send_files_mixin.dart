@@ -34,6 +34,7 @@ mixin SendFilesMixin {
     BuildContext context, {
     Room? room,
     List<FileInfo>? fileInfos,
+    VoidCallback? onSendFileCallback,
   }) async {
     if (room == null) {}
     final sendFileInteractor = getIt.get<SendFileInteractor>();
@@ -54,7 +55,7 @@ mixin SendFilesMixin {
         .toList();
 
     if (fileInfos == null || fileInfos.isEmpty == true) return;
-
+    onSendFileCallback?.call();
     sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
   }
 
@@ -72,12 +73,17 @@ mixin SendFilesMixin {
     required BuildContext context,
     Room? room,
     required PickerType type,
+    VoidCallback? onSendFileCallback,
   }) async {
     switch (type) {
       case PickerType.gallery:
         break;
       case PickerType.documents:
-        sendFileAction(context, room: room);
+        sendFileAction(
+          context,
+          room: room,
+          onSendFileCallback: onSendFileCallback,
+        );
         break;
       case PickerType.location:
         break;
