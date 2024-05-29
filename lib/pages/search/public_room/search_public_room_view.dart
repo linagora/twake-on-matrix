@@ -1,6 +1,6 @@
 import 'package:fluffychat/pages/search/public_room/empty_search_public_room_widget.dart';
+import 'package:fluffychat/pages/search/public_room/search_public_room_controller.dart';
 import 'package:fluffychat/pages/search/public_room/search_public_room_view_style.dart';
-import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room.dart';
 import 'package:fluffychat/presentation/model/search/public_room/presentation_search_public_room_empty.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -8,7 +8,7 @@ import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart' hide SearchController;
 
 class SearchPublicRoomList extends StatelessWidget {
-  final SearchController searchController;
+  final SearchPublicRoomController searchController;
 
   const SearchPublicRoomList({
     super.key,
@@ -19,21 +19,17 @@ class SearchPublicRoomList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: ValueListenableBuilder(
-        valueListenable:
-            searchController.searchPublicRoomController.searchResultsNotifier,
+        valueListenable: searchController.searchResultsNotifier,
         builder: (context, searchPublicRoomNotifier, child) {
           if (searchPublicRoomNotifier is PresentationSearchPublicRoomEmpty) {
-            final genericSearchTerm =
-                searchController.searchPublicRoomController.genericSearchTerm;
+            final genericSearchTerm = searchController.genericSearchTerm;
             if (genericSearchTerm != null && genericSearchTerm.isNotEmpty) {
               return EmptySearchPublicRoomWidget(
                 genericSearchTerm: genericSearchTerm,
-                onTapJoin: () =>
-                    searchController.searchPublicRoomController.joinRoom(
+                onTapJoin: () => searchController.joinRoom(
                   context,
                   genericSearchTerm,
-                  searchController.searchPublicRoomController
-                      .getServerName(genericSearchTerm),
+                  searchController.getServerName(genericSearchTerm),
                 ),
               );
             }
@@ -48,8 +44,7 @@ class SearchPublicRoomList extends StatelessWidget {
               padding: SearchPublicRoomViewStyle.paddingListItem,
               itemBuilder: ((context, index) {
                 final room = searchPublicRoomNotifier.searchResults[index];
-                final action = searchController.searchPublicRoomController
-                    .getAction(context, room);
+                final action = searchController.getAction(context, room);
                 return Padding(
                   padding: SearchPublicRoomViewStyle.paddingListItem,
                   child: Row(
@@ -70,7 +65,6 @@ class SearchPublicRoomList extends StatelessWidget {
                               room.name ?? room.roomId,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              softWrap: false,
                               style:
                                   SearchPublicRoomViewStyle.roomNameTextStyle,
                             ),
@@ -82,7 +76,6 @@ class SearchPublicRoomList extends StatelessWidget {
                               room.canonicalAlias ?? room.roomId,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              softWrap: false,
                               style:
                                   SearchPublicRoomViewStyle.roomAliasTextStyle,
                             ),
@@ -94,9 +87,7 @@ class SearchPublicRoomList extends StatelessWidget {
                           message: action.getLabel(context),
                           styleMessage: action.getLabelStyle(context),
                           paddingAll: SearchPublicRoomViewStyle.paddingButton,
-                          onTap: () => searchController
-                              .searchPublicRoomController
-                              .handlePublicRoomActions(
+                          onTap: () => searchController.handlePublicRoomActions(
                             context,
                             room,
                             action,

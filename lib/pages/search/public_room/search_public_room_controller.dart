@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -34,6 +35,8 @@ class SearchPublicRoomController with SearchDebouncerMixin {
 
   PublicRoomQueryFilter? _filter;
 
+  StreamSubscription? _searchSubscription;
+
   bool get searchTermIsNotEmpty =>
       _filter?.genericSearchTerm?.isNotEmpty == true;
 
@@ -67,7 +70,7 @@ class SearchPublicRoomController with SearchDebouncerMixin {
   }
 
   void _searchPublicRoom() {
-    _publicRoomInteractor
+    _searchSubscription = _publicRoomInteractor
         .execute(
           filter: _filter,
           limit: _limitPublicRoomSearchFilter,
@@ -200,6 +203,7 @@ class SearchPublicRoomController with SearchDebouncerMixin {
 
   void dispose() {
     super.disposeDebouncer();
+    _searchSubscription?.cancel();
     searchResultsNotifier.dispose();
     _resetSearchResults();
     _filter = null;

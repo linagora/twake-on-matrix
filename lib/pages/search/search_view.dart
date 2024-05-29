@@ -91,7 +91,9 @@ class SearchView extends StatelessWidget {
             }),
             child: _EmptySliverBox(),
           ),
-          SearchPublicRoomList(searchController: searchController),
+          SearchPublicRoomList(
+            searchController: searchController.searchPublicRoomController,
+          ),
           ValueListenableBuilder(
             valueListenable:
                 searchController.serverSearchController.searchResultsNotifier,

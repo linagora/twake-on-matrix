@@ -35,7 +35,6 @@ class EmptySearchPublicRoomWidget extends StatelessWidget {
                   genericSearchTerm,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  softWrap: false,
                   style: SearchPublicRoomViewStyle.roomNameTextStyle,
                 ),
                 const SizedBox(
