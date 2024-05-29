@@ -378,7 +378,12 @@ class ChatController extends State<Chat>
 
   void handleDragDone(DropDoneDetails details) async {
     final matrixFiles = await onDragDone(details);
-    sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
+    sendFileOnWebAction(
+      context,
+      room: room,
+      matrixFilesList: matrixFiles,
+      onSendFileCallback: scrollDown,
+    );
   }
 
   void _handleReceivedShareFiles() {
@@ -1292,7 +1297,12 @@ class ChatController extends State<Chat>
       _showMediaPicker(context);
     } else {
       final matrixFiles = await pickFilesFromSystem();
-      sendFileOnWebAction(context, room: room, matrixFilesList: matrixFiles);
+      sendFileOnWebAction(
+        context,
+        room: room,
+        matrixFilesList: matrixFiles,
+        onSendFileCallback: scrollDown,
+      );
     }
   }
 
@@ -1309,6 +1319,7 @@ class ChatController extends State<Chat>
         type: action,
         room: room,
         context: context,
+        onSendFileCallback: scrollDown,
       ),
       onSendTap: () {
         sendMedia(
@@ -1316,9 +1327,13 @@ class ChatController extends State<Chat>
           room: room,
           caption: _captionsController.text,
         );
+        scrollDown();
         _captionsController.clear();
       },
-      onCameraPicked: (_) => sendMedia(imagePickerController, room: room),
+      onCameraPicked: (_) {
+        sendMedia(imagePickerController, room: room);
+        scrollDown();
+      },
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
       typeAheadKey: _chatMediaPickerTypeAheadKey,
@@ -1876,7 +1891,9 @@ class ChatController extends State<Chat>
   @override
   void initState() {
     _initializePinnedEvents();
-    registerPasteShortcutListeners();
+    registerPasteShortcutListeners(
+      onSendFileCallback: scrollDown,
+    );
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
