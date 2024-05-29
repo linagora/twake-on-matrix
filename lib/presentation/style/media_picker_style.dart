@@ -42,4 +42,10 @@ class MediaPickerStyle {
   static const double borderSideWidth = 1.5;
 
   static const double minFontSize = 8;
+
+  static double photoPermissionIconSize = 48.0;
+
+  static double photoPermissionFontSize = 16;
+
+  static FontWeight photoPermissionFontWeight = FontWeight.w600;
 }
