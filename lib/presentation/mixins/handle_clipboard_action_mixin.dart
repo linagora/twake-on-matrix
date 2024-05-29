@@ -14,15 +14,25 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
 
   TextEditingController get sendController;
 
-  void registerPasteShortcutListeners() {
-    ClipboardEvents.instance?.registerPasteEventListener(_onPasteEvent);
+  void registerPasteShortcutListeners({
+    VoidCallback? onSendFileCallback,
+  }) {
+    ClipboardEvents.instance?.registerPasteEventListener(
+      (event) => _onPasteEvent(
+        event,
+        onSendFileCallback: onSendFileCallback,
+      ),
+    );
   }
 
   void unregisterPasteShortcutListeners() {
     ClipboardEvents.instance?.unregisterPasteEventListener(_onPasteEvent);
   }
 
-  void _onPasteEvent(ClipboardReadEvent event) async {
+  void _onPasteEvent(
+    ClipboardReadEvent event, {
+    VoidCallback? onSendFileCallback,
+  }) async {
     if (chatFocusNode.hasFocus != true) {
       return;
     }
@@ -30,7 +40,12 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
     if (await TwakeClipboard.instance
             .isReadableImageFormat(clipboardReader: clipboardReader) &&
         room != null) {
-      await pasteImage(context, room!, clipboardReader: clipboardReader);
+      await pasteImage(
+        context,
+        room!,
+        clipboardReader: clipboardReader,
+        onSendFileCallback: onSendFileCallback,
+      );
     } else {
       sendController.pasteText(clipboardReader: clipboardReader);
     }

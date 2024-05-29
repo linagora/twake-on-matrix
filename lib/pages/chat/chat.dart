@@ -1891,7 +1891,9 @@ class ChatController extends State<Chat>
   @override
   void initState() {
     _initializePinnedEvents();
-    registerPasteShortcutListeners();
+    registerPasteShortcutListeners(
+      onSendFileCallback: scrollDown,
+    );
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
