@@ -35,7 +35,7 @@ class MediaPickerStyle {
 
   static const double sendIconSize = 40.0;
 
-  static const double counterIconSize = 40.0;
+  static const double counterIconSize = 24.0;
 
   static const EdgeInsets counterPadding = EdgeInsets.all(1.0);
 
