@@ -167,7 +167,9 @@ class SearchController extends State<Search> {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchContactAndRecentChatController?.init();
-        serverSearchController.initSearch();
+        serverSearchController.initSearch(
+          context: context,
+        );
         fetchPreSearchRecentContacts();
         textEditingController.addListener(() {
           onSearchBarChanged(textEditingController.text);
