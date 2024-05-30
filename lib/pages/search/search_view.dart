@@ -49,7 +49,7 @@ class SearchView extends StatelessWidget {
                         flexibleSpace: FlexibleSpaceBar(
                           title: PreSearchRecentContactsContainer(
                             searchController: searchController,
-                            contactsList: data.users,
+                            recentRooms: data.rooms,
                           ),
                           titlePadding:
                               const EdgeInsetsDirectional.only(start: 0.0),
