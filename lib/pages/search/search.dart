@@ -81,7 +81,7 @@ class SearchController extends State<Search> {
   void fetchPreSearchRecentContacts() {
     _preSearchRecentContactsInteractor
         .execute(
-      recentRooms: Matrix.of(context).client.rooms,
+      allRooms: Matrix.of(context).client.rooms,
       limit: limitPrefetchedRecentContacts,
     )
         .listen((value) {

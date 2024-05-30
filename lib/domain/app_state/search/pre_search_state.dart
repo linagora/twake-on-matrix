@@ -3,12 +3,12 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
 
 class PreSearchRecentContactsSuccess extends Success {
-  final List<User> users;
+  final List<Room> rooms;
 
-  const PreSearchRecentContactsSuccess({required this.users});
+  const PreSearchRecentContactsSuccess({required this.rooms});
 
   @override
-  List<Object?> get props => [users];
+  List<Object?> get props => [rooms];
 }
 
 class PreSearchRecentContactsFailed extends Failure {
