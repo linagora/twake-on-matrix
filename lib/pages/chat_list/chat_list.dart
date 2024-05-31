@@ -741,7 +741,9 @@ class ChatListController extends State<ChatList>
       Logs().d(
         "ChatList::_handleAnotherAccountAdded(): Handle recovery data for another account",
       );
-      _trySync();
+      if (!matrixState.waitForFirstSync) {
+        _trySync();
+      }
     }
   }
 
