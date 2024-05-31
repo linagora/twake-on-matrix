@@ -555,7 +555,7 @@ class ChatListController extends State<ChatList>
       context: context,
       listActions: listContextActions,
     );
-    if (selectedActionIndex != null) {
+    if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
         listPopupActions[selectedActionIndex],
         room,

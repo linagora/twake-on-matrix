@@ -1468,16 +1468,16 @@ class ChatController extends State<Chat>
       event,
     );
     _handleStateContextMenu();
-    final selectedAction = await showTwakeContextMenu(
+    final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
       listActions: listContextMenuActions,
       onClose: _handleStateContextMenu,
     );
 
-    if (selectedAction != null) {
+    if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
-        listPopupMenuActions[selectedAction],
+        listPopupMenuActions[selectedActionIndex],
         event,
       );
     }
@@ -1815,7 +1815,7 @@ class ChatController extends State<Chat>
       listActions: listContextMenuActions,
     );
 
-    if (selectedActionIndex != null) {
+    if (selectedActionIndex != null && selectedActionIndex is int) {
       final selectedAction = listAppBarActions[selectedActionIndex];
       onSelectedAppBarActions(selectedAction);
     }

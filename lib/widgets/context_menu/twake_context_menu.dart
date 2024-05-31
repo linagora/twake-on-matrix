@@ -17,14 +17,14 @@ const double _kMinTileHeight = 24;
 /// If you just want to use a normal [TwakeContextMenu], please use [TwakeContextMenuArea].
 
 class TwakeContextMenu extends StatefulWidget {
+  /// The [BuildContext] of the dialog/modal that will display the [TwakeContextMenu]. This is used to close the dialog/modal when the [TwakeContextMenu] is closed.
   final BuildContext dialogContext;
+
+  /// The list of items to be displayed in the [TwakeContextMenu]. This is used to build the UI of items
   final List<ContextMenuAction> listActions;
 
   /// The [Offset] from coordinate origin the [TwakeContextMenu] will be displayed at.
   final Offset position;
-
-  /// The builder for the items to be displayed. [ListTile] is very useful in most cases.
-  // final ContextMenuBuilder builder;
 
   /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double? verticalPadding;
@@ -136,7 +136,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                                         child: action,
                                         closeMenuAction: () {
                                           closeContextMenu(
-                                            indexOfAction: widget.listActions
+                                            popResult: widget.listActions
                                                 .indexOf(action),
                                           );
                                         },
@@ -164,9 +164,9 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     );
   }
 
-  void closeContextMenu({int? indexOfAction}) {
+  void closeContextMenu({dynamic popResult}) {
     _animationController.reverse().whenComplete(() {
-      Navigator.of(widget.dialogContext).pop<int>(indexOfAction);
+      Navigator.of(widget.dialogContext).pop<dynamic>(popResult);
     });
   }
 
