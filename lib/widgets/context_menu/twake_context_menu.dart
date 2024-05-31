@@ -1,5 +1,7 @@
 // reference to: https://pub.dev/packages/contextmenu
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_position.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
@@ -15,19 +17,23 @@ const double _kMinTileHeight = 24;
 /// If you just want to use a normal [TwakeContextMenu], please use [TwakeContextMenuArea].
 
 class TwakeContextMenu extends StatefulWidget {
+  final BuildContext dialogContext;
+  final List<ContextMenuAction> listActions;
+
   /// The [Offset] from coordinate origin the [TwakeContextMenu] will be displayed at.
   final Offset position;
 
   /// The builder for the items to be displayed. [ListTile] is very useful in most cases.
-  final ContextMenuBuilder builder;
+  // final ContextMenuBuilder builder;
 
   /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double? verticalPadding;
 
   const TwakeContextMenu({
     super.key,
+    required this.dialogContext,
+    required this.listActions,
     required this.position,
-    required this.builder,
     this.verticalPadding,
   });
 
@@ -66,8 +72,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
 
   @override
   Widget build(BuildContext context) {
-    final children = widget.builder(context);
-    final contextMenuPosition = _calculatePosition(children);
+    final contextMenuPosition = _calculatePosition(widget.listActions);
 
     return GestureDetector(
       onTap: () => closeContextMenu(),
@@ -125,21 +130,21 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: children
+                                children: widget.listActions
                                     .map(
-                                      (e) => Listener(
-                                        onPointerDown: (_) =>
-                                            PlatformInfos.isMobile
-                                                ? closeContextMenu()
-                                                : null,
-                                        child: _GrowingWidget(
-                                          child: e,
-                                          onHeightChange: (height) {
-                                            setState(() {
-                                              _heights[ValueKey(e)] = height;
-                                            });
-                                          },
-                                        ),
+                                      (action) => _GrowingWidget(
+                                        child: action,
+                                        closeMenuAction: () {
+                                          closeContextMenu(
+                                            indexOfAction: widget.listActions
+                                                .indexOf(action),
+                                          );
+                                        },
+                                        onHeightChange: (height) {
+                                          setState(() {
+                                            _heights[ValueKey(action)] = height;
+                                          });
+                                        },
                                       ),
                                     )
                                     .toList(),
@@ -159,13 +164,13 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     );
   }
 
-  void closeContextMenu() {
-    _animationController
-        .reverse()
-        .whenComplete(() => Navigator.of(context).pop());
+  void closeContextMenu({int? indexOfAction}) {
+    _animationController.reverse().whenComplete(() {
+      Navigator.of(widget.dialogContext).pop<int>(indexOfAction);
+    });
   }
 
-  ContextMenuPosition _calculatePosition(List<Widget> children) {
+  ContextMenuPosition _calculatePosition(List<ContextMenuAction> children) {
     double height = 2 *
         (widget.verticalPadding ??
             TwakeContextMenuStyle.defaultVerticalPadding);
@@ -215,12 +220,14 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
 }
 
 class _GrowingWidget extends StatefulWidget {
-  final Widget child;
+  final ContextMenuAction child;
   final ValueChanged<double> onHeightChange;
+  final void Function()? closeMenuAction;
 
   const _GrowingWidget({
     required this.child,
     required this.onHeightChange,
+    this.closeMenuAction,
   });
 
   @override
@@ -234,7 +241,10 @@ class __GrowingWidgetState extends State<_GrowingWidget> with AfterLayoutMixin {
   Widget build(BuildContext context) {
     return Container(
       key: _key,
-      child: widget.child,
+      child: ContextMenuActionItemWidget(
+        action: widget.child,
+        closeMenuAction: widget.closeMenuAction,
+      ),
     );
   }
 
