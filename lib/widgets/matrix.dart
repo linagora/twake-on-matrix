@@ -86,6 +86,8 @@ class MatrixState extends State<Matrix>
   LoginType? loginType;
   bool? loginRegistrationSupported;
 
+  bool waitForFirstSync = false;
+
   bool get twakeSupported {
     final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.tomServerUrlInterceptorName,
@@ -418,6 +420,7 @@ class MatrixState extends State<Matrix>
     Client newActiveClient,
     LoginState loginState,
   ) async {
+    waitForFirstSync = false;
     await setUpToMServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
     onClientLoginStateChanged.add(
@@ -446,6 +449,7 @@ class MatrixState extends State<Matrix>
       _loginClientCandidate!.clientName,
     );
     if (activeClient == null) return;
+    waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
     if (result.isSuccess) {

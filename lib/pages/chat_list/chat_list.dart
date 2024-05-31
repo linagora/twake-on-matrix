@@ -100,8 +100,6 @@ class ChatListController extends State<ChatList>
 
   bool isTorBrowser = false;
 
-  bool waitForFirstSync = false;
-
   bool scrolledToTop = true;
 
   Client get activeClient => matrixState.client;
@@ -420,14 +418,18 @@ class ChatListController extends State<ChatList>
 
   Future<void> _waitForFirstSyncAfterLogin() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await TomBootstrapDialog(
+      final result = await TomBootstrapDialog(
         client: activeClient,
       ).show();
+
+      if (result != null) {
+        setState(() {});
+      }
     });
 
     if (!mounted) return;
     setState(() {
-      waitForFirstSync = true;
+      matrixState.waitForFirstSync = true;
     });
   }
 
@@ -439,7 +441,7 @@ class ChatListController extends State<ChatList>
     }
     if (!mounted) return;
     setState(() {
-      waitForFirstSync = true;
+      matrixState.waitForFirstSync = true;
     });
   }
 
@@ -768,7 +770,9 @@ class ChatListController extends State<ChatList>
     }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
-    _trySync();
+    if (!matrixState.waitForFirstSync) {
+      _trySync();
+    }
     _hackyWebRTCFixForWeb();
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
