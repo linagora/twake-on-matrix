@@ -16,6 +16,8 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix_api_lite/fake_matrix_api.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
+import '../../../../utils/shared_mocks.dart';
+
 class MockUpMessageContentBuilder with MessageContentBuilderMixin {}
 
 void main() {
@@ -29,70 +31,6 @@ void main() {
 
   final client = Client('client', httpClient: FakeMatrixApi());
   final room = Room(id: '!room:example.abc', client: client);
-  final fileEvent = Event(
-    content: {
-      'body': 'something-important.doc',
-      'filename': 'something-important.doc',
-      'info': {'mimetype': 'application/msword', 'size': 46144},
-      'msgtype': 'm.file',
-      'url': 'mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe',
-    },
-    type: 'm.room.message',
-    eventId: '\$143273582443PhrSn:example.org',
-    senderId: '@example:example.org',
-    originServerTs: DateTime.fromMillisecondsSinceEpoch(1894270481925),
-    room: room,
-  );
-  final imageEvent = Event(
-    content: {
-      'body': 'filename.jpg',
-      'info': {'h': 398, 'mimetype': 'image/jpeg', 'size': 31037, 'w': 394},
-      'msgtype': 'm.image',
-      'url': 'mxc://example.org/JWEIFJgwEIhweiWJE',
-    },
-    type: 'm.room.message',
-    eventId: '\$143273582443PhrSn:example.org',
-    senderId: '@example:example.org',
-    originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
-    room: room,
-  );
-  final videoEvent = Event(
-    content: {
-      'body': 'Gangnam Style',
-      'info': {
-        'duration': 2140786,
-        'h': 320,
-        'mimetype': 'video/mp4',
-        'size': 1563685,
-        'thumbnail_info': {
-          'h': 300,
-          'mimetype': 'image/jpeg',
-          'size': 46144,
-          'w': 300,
-        },
-        'thumbnail_url': 'mxc://example.org/FHyPlCeYUSFFxlgbQYZmoEoe',
-        'w': 480,
-      },
-      'msgtype': 'm.video',
-      'url': 'mxc://example.org/a526eYUSFFxlgbQYZmo442',
-    },
-    type: 'm.room.message',
-    eventId: '\$143273582443PhrSn:example.org',
-    senderId: '@example:example.org',
-    originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
-    room: room,
-  );
-  final emptyTextEvent = Event(
-    content: {
-      'body': '',
-      'msgtype': 'm.text',
-    },
-    type: 'm.room.message',
-    eventId: '\$143273582443PhrSn:example.org',
-    senderId: '@example:example.org',
-    originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
-    room: room,
-  );
 
   group(
     '[MessageContentBuilderMixin] TEST\n',
@@ -184,7 +122,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: fileEvent,
+                  event: EventGenerator.fileEvent(room),
                   maxWidth: messageMaxWidthWeb,
                 );
               },
@@ -195,7 +133,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: imageEvent,
+                  event: EventGenerator.imageEvent(room),
                   maxWidth: messageMaxWidthWeb,
                 );
               },
@@ -206,7 +144,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: videoEvent,
+                  event: EventGenerator.videoEvent(room),
                   maxWidth: messageMaxWidthWeb,
                 );
               },
@@ -219,7 +157,7 @@ void main() {
             (WidgetTester tester) async {
               await runTest(
                 tester,
-                event: emptyTextEvent,
+                event: EventGenerator.emptyTextEvent(room),
                 maxWidth: messageMaxWidthWeb,
               );
             },
@@ -439,7 +377,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: fileEvent,
+                  event: EventGenerator.fileEvent(room),
                   maxWidth: messageMaxWidthMobile,
                 );
               },
@@ -450,7 +388,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: imageEvent,
+                  event: EventGenerator.imageEvent(room),
                   maxWidth: messageMaxWidthMobile,
                 );
               },
@@ -461,7 +399,7 @@ void main() {
               (WidgetTester tester) async {
                 await runTest(
                   tester,
-                  event: videoEvent,
+                  event: EventGenerator.videoEvent(room),
                   maxWidth: messageMaxWidthMobile,
                 );
               },
@@ -474,7 +412,7 @@ void main() {
             (WidgetTester tester) async {
               await runTest(
                 tester,
-                event: emptyTextEvent,
+                event: EventGenerator.emptyTextEvent(room),
                 maxWidth: messageMaxWidthMobile,
               );
             },

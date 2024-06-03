@@ -11,43 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import '../../utils/shared_mocks.dart';
 import 'download_file_on_web_mixin_test.mocks.dart';
-
-const fakeEventId = "fakeEventId";
-const fakeFilename = "fakeFilename";
-
-class MockRoom extends Mock implements Room {
-  @override
-  bool operator ==(Object other) => (other is Room && other.id == id);
-
-  @override
-  int get hashCode => Object.hashAll([id]);
-
-  @override
-  Map<String, MatrixFile> get sendingFilePlaceholders => super.noSuchMethod(
-        Invocation.getter(#sendingFilePlaceholders),
-        returnValue: <String, MatrixFile>{},
-        returnValueForMissingStub: <String, MatrixFile>{},
-      );
-}
-
-class MockEvent extends Mock implements Event {
-  MockEvent(this.fakeRoom);
-  final Room fakeRoom;
-  @override
-  String get eventId => fakeEventId;
-
-  @override
-  Room get room => fakeRoom;
-
-  @override
-  Map get infoMap => super.noSuchMethod(
-        Invocation.getter(#infoMap),
-        returnValue: {},
-        returnValueForMissingStub: {},
-      );
-}
 
 class DummyWidget extends StatefulWidget {
   const DummyWidget({required this.event, super.key});
