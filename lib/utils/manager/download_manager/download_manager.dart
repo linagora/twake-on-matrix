@@ -26,14 +26,14 @@ class DownloadManager {
 
   final workingQueue = getIt.get<DownloadWorkerQueue>();
 
-  final Map<String, DownloadFileInfo> eventIdMapDownloadFileInfo = {};
+  final Map<String, DownloadFileInfo> _eventIdMapDownloadFileInfo = {};
 
   void cancelDownload(String eventId) {
-    final cancelToken = eventIdMapDownloadFileInfo[eventId]?.cancelToken;
+    final cancelToken = _eventIdMapDownloadFileInfo[eventId]?.cancelToken;
     if (cancelToken != null) {
       try {
         cancelToken.cancel();
-        eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
+        _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
               Left(
                 DownloadFileFailureState(
                   exception: CancelDownloadingException(),
@@ -44,7 +44,7 @@ class DownloadManager {
         Logs().e(
           'DownloadManager::cancelDownload(): $e',
         );
-        eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
+        _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
               Left(
                 DownloadFileFailureState(exception: e),
               ),
@@ -60,7 +60,7 @@ class DownloadManager {
   ) {
     final streamController = StreamController<Either<Failure, Success>>();
 
-    eventIdMapDownloadFileInfo[event.eventId] = DownloadFileInfo(
+    _eventIdMapDownloadFileInfo[event.eventId] = DownloadFileInfo(
       eventId: event.eventId,
       cancelToken: CancelToken(),
       downloadStateStreamController: streamController,
@@ -69,25 +69,25 @@ class DownloadManager {
   }
 
   Stream<Either<Failure, Success>>? getDownloadStateStream(String eventId) {
-    return eventIdMapDownloadFileInfo[eventId]?.downloadStream;
+    return _eventIdMapDownloadFileInfo[eventId]?.downloadStream;
   }
 
   Future<void> clear(String eventId) async {
     try {
-      await eventIdMapDownloadFileInfo[eventId]
+      await _eventIdMapDownloadFileInfo[eventId]
           ?.downloadStateStreamController
           .close();
     } catch (e) {
       Logs().e(
         'DownloadManager::_clear(): $e',
       );
-      eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
+      _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
             Left(
               DownloadFileFailureState(exception: e),
             ),
           );
     } finally {
-      eventIdMapDownloadFileInfo.remove(eventId);
+      _eventIdMapDownloadFileInfo.remove(eventId);
       Logs().i(
         'DownloadManager::clear with $eventId successfully',
       );
@@ -100,14 +100,14 @@ class DownloadManager {
     bool isFirstPriority = false,
   }) async {
     _initDownloadFileInfo(event);
-    final streamController = eventIdMapDownloadFileInfo[event.eventId]
+    final streamController = _eventIdMapDownloadFileInfo[event.eventId]
         ?.downloadStateStreamController;
-    final cancelToken = eventIdMapDownloadFileInfo[event.eventId]?.cancelToken;
+    final cancelToken = _eventIdMapDownloadFileInfo[event.eventId]?.cancelToken;
     if (streamController == null || cancelToken == null) {
       Logs().e(
         'DownloadManager::download(): streamController or cancelToken is null',
       );
-      eventIdMapDownloadFileInfo[event.eventId]
+      _eventIdMapDownloadFileInfo[event.eventId]
           ?.downloadStateStreamController
           .add(
             Left(

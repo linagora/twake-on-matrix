@@ -13,8 +13,6 @@ class StorageDirectoryManager {
 
   static StorageDirectoryManager get instance => _instance;
 
-  factory StorageDirectoryManager() => _instance;
-
   Future<String> getFileStoreDirectory() async {
     try {
       try {

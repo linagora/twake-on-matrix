@@ -18,8 +18,6 @@ import 'package:matrix/matrix.dart';
 mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   final downloadManager = getIt.get<DownloadManager>();
 
-  final storageDirectoryManager = StorageDirectoryManager();
-
   final downloadFileStateNotifier = ValueNotifier<DownloadPresentationState>(
     const NotDownloadPresentationState(),
   );
@@ -69,7 +67,7 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> checkFileInDownloadsInApp() async {
-    final filePath = await storageDirectoryManager.getFilePathInAppDownloads(
+    final filePath = await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: event.eventId,
       fileName: event.filename,
     );
