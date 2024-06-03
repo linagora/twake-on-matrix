@@ -10,6 +10,7 @@ import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
@@ -17,6 +18,8 @@ import 'package:matrix/matrix.dart';
 
 class ServerSearchController with SearchDebouncerMixin {
   final String? inRoomId;
+
+  BuildContext? currentContext;
 
   ServerSearchController({
     this.inRoomId,
@@ -42,8 +45,10 @@ class ServerSearchController with SearchDebouncerMixin {
       _searchCategories?.searchTerm.isNotEmpty == true;
 
   void initSearch({
+    BuildContext? context,
     Function(String)? onSearchEncryptedMessage,
   }) {
+    currentContext = context;
     initializeDebouncer((searchTerm) {
       if (onSearchEncryptedMessage != null) {
         onSearchEncryptedMessage(searchTerm);
@@ -92,8 +97,13 @@ class ServerSearchController with SearchDebouncerMixin {
                   ...(searchResultsNotifier.value
                           as PresentationServerSideSearch)
                       .searchResults,
-                ...success.results ?? [],
-              ],
+                ...success.results ?? <Result>[],
+              ]
+                  .where(
+                    (result) =>
+                        result.isDisplayableResult(context: currentContext),
+                  )
+                  .toList(),
             );
           }
         }

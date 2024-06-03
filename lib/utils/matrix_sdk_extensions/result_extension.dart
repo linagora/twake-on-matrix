@@ -13,4 +13,14 @@ extension ResultExtension on Result {
     }
     return Event.fromMatrixEvent(result!, room);
   }
+
+  bool isDisplayableResult({BuildContext? context}) {
+    if (context == null) {
+      return false;
+    }
+    final event = getEvent(context);
+    return event != null &&
+        (event.relationshipType == null ||
+            event.relationshipType != RelationshipTypes.reply);
+  }
 }
