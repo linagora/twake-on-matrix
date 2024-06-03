@@ -67,7 +67,8 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> checkFileInDownloadsInApp() async {
-    final filePath = await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+    final filePath =
+        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: event.eventId,
       fileName: event.filename,
     );
