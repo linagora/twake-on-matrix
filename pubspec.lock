@@ -1783,8 +1783,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "TW-1702/hotfix_download_error_handling"
-      resolved-ref: "2b891abc54b1c828a096ec8005feaa06f568bd07"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: "9ca42a75080549af1e4308ea2fc827b6e09dda48"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
