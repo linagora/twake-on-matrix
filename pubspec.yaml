@@ -12,7 +12,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: TW-1702/hotfix_download_error_handling
+      ref: twake-supported-0.22.6
 
   receive_sharing_intent:
     git:
