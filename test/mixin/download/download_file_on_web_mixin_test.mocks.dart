@@ -8,16 +8,14 @@ import 'dart:convert' as _i6;
 import 'dart:io' as _i2;
 import 'dart:typed_data' as _i7;
 
-import 'package:dartz/dartz.dart' as _i10;
-import 'package:fluffychat/app_state/failure.dart' as _i11;
-import 'package:fluffychat/app_state/success.dart' as _i12;
-import 'package:fluffychat/utils/manager/download_manager/download_file_info.dart'
-    as _i9;
+import 'package:dartz/dartz.dart' as _i9;
+import 'package:fluffychat/app_state/failure.dart' as _i10;
+import 'package:fluffychat/app_state/success.dart' as _i11;
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart'
     as _i8;
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart'
     as _i3;
-import 'package:matrix/matrix.dart' as _i13;
+import 'package:matrix/matrix.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i4;
 
@@ -995,14 +993,6 @@ class MockDownloadManager extends _i1.Mock implements _i8.DownloadManager {
       ) as _i3.DownloadWorkerQueue);
 
   @override
-  Map<String, _i9.DownloadFileInfo> get eventIdMapDownloadFileInfo =>
-      (super.noSuchMethod(
-        Invocation.getter(#eventIdMapDownloadFileInfo),
-        returnValue: <String, _i9.DownloadFileInfo>{},
-        returnValueForMissingStub: <String, _i9.DownloadFileInfo>{},
-      ) as Map<String, _i9.DownloadFileInfo>);
-
-  @override
   void cancelDownload(String? eventId) => super.noSuchMethod(
         Invocation.method(
           #cancelDownload,
@@ -1012,7 +1002,7 @@ class MockDownloadManager extends _i1.Mock implements _i8.DownloadManager {
       );
 
   @override
-  _i5.Stream<_i10.Either<_i11.Failure, _i12.Success>>? getDownloadStateStream(
+  _i5.Stream<_i9.Either<_i10.Failure, _i11.Success>>? getDownloadStateStream(
           String? eventId) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1020,7 +1010,7 @@ class MockDownloadManager extends _i1.Mock implements _i8.DownloadManager {
           [eventId],
         ),
         returnValueForMissingStub: null,
-      ) as _i5.Stream<_i10.Either<_i11.Failure, _i12.Success>>?);
+      ) as _i5.Stream<_i9.Either<_i10.Failure, _i11.Success>>?);
 
   @override
   _i5.Future<void> clear(String? eventId) => (super.noSuchMethod(
@@ -1034,7 +1024,7 @@ class MockDownloadManager extends _i1.Mock implements _i8.DownloadManager {
 
   @override
   _i5.Future<void> download({
-    required _i13.Event? event,
+    required _i12.Event? event,
     bool? getThumbnail = false,
     bool? isFirstPriority = false,
   }) =>
