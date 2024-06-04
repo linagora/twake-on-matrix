@@ -39,11 +39,18 @@ class SearchTextField extends StatelessWidget {
             size: SearchViewStyle.searchIconSize,
             color: Theme.of(context).colorScheme.onSurface,
           ),
-          suffixIcon: TwakeIconButton(
-            tooltip: L10n.of(context)!.close,
-            icon: Icons.close,
-            onTap: () {
-              textEditingController.clear();
+          suffixIcon: ValueListenableBuilder(
+            valueListenable: textEditingController,
+            builder: (context, value, child) {
+              return textEditingController.text.isNotEmpty
+                  ? TwakeIconButton(
+                      tooltip: L10n.of(context)!.close,
+                      icon: Icons.close,
+                      onTap: () {
+                        textEditingController.clear();
+                      },
+                    )
+                  : const SizedBox.shrink();
             },
           ),
         ),
