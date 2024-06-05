@@ -1,7 +1,22 @@
-Twake is The Open Digital Workplace. Team channels, direct chat, task management, drive and calendar; all in one place. Quickly and effortlessly access all your content, manage your workspaces, collaborators and customers, work efficiently and gain productivity.
+Twake Chat is a power tool for personal and corporate communication. We focus on your comfort and security – and we’re always here to help you.
 
-We are GDPR compliant, GAFAM and BATX free, driven by open-source and based in Europe. All your data is securely hosted in Europe, free from the Cloud act or the Patriot Act.
+CONVENIENCE
+Create group chats, start themed discussions or communicate directly with your teams, colleagues, friends or community the way you want! Chat, share files and stay in touch wherever you are – with more useful features to come.
 
-So what are you waiting for? Let's Twake together!
+MATRIX PROTOCOL
+We implemented Matrix, an open protocol for secure decentralized communications. Try it out! 
 
-Twake is powered by Linagora - creating digital independence.
+SYNCHRONIZATION
+Use Twake Chat on different devices – unlike most Matrix-based messengers, we allow you to easily access your chats both from your PC and mobile phone, regardless of the device storing the recovery key. 
+
+SECURITY
+Your information is safe with Twake Chat. To get an even more secure experience, you can enable end-to-end encryption. This way, no one will be able to access your data – not even us.
+
+FLEXIBILITY
+The Matrix protocol allows you to communicate with people both inside and outside Twake infrastructure. Chat easily inside the Matrix world and involve bridges to exchange messages with users of other instant messengers.
+
+OPEN SOURCE
+Twake Chat is Open source! Retain control of your data by hosting your own server or choosing the one you trust. Need a certain modification to your app? With Open Source, anything is possible.
+
+FEEDBACK
+We appreciate any feedback you can provide. If you find a bug or think our app lacks some important functionality, please, let us know. We will do all but impossible to help you.
