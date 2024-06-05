@@ -23,7 +23,7 @@ import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:slugify/slugify.dart';
 
-class InputBar extends StatelessWidget with PasteImageMixin {
+class InputBar extends StatefulWidget {
   final Room? room;
   final int? minLines;
   final int? maxLines;
@@ -42,7 +42,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   final ValueNotifier<bool>? showEmojiPickerNotifier;
   final SuggestionsController<Map<String, String?>>? suggestionsController;
 
-  InputBar({
+  const InputBar({
     this.room,
     this.minLines,
     this.maxLines,
@@ -67,21 +67,34 @@ class InputBar extends StatelessWidget with PasteImageMixin {
 
   static const debounceDurationTap = Duration(milliseconds: 100);
 
+  @override
+  State<InputBar> createState() => _InputBarState();
+}
+
+class _InputBarState extends State<InputBar> with PasteImageMixin {
+  final textFieldScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    textFieldScrollController.dispose();
+    super.dispose();
+  }
+
   List<Map<String, String?>> getSuggestions(String text) {
-    if (controller!.selection.baseOffset !=
-            controller!.selection.extentOffset ||
-        controller!.selection.baseOffset < 0) {
+    if (widget.controller!.selection.baseOffset !=
+            widget.controller!.selection.extentOffset ||
+        widget.controller!.selection.baseOffset < 0) {
       return []; // no entries if there is selected text
     }
-    final searchText =
-        controller!.text.substring(0, controller!.selection.baseOffset);
+    final searchText = widget.controller!.text
+        .substring(0, widget.controller!.selection.baseOffset);
     final List<Map<String, String?>> ret = <Map<String, String?>>[];
     const maxResults = 30;
 
     final commandMatch = RegExp(r'^/(\w*)$').firstMatch(searchText);
-    if (commandMatch != null && room != null) {
+    if (commandMatch != null && widget.room != null) {
       final commandSearch = commandMatch[1]!.toLowerCase();
-      for (final command in room!.client.commands.keys) {
+      for (final command in widget.room!.client.commands.keys) {
         if (command.contains(commandSearch)) {
           ret.add({
             'type': 'command',
@@ -94,10 +107,10 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     }
     final emojiMatch =
         RegExp(r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$').firstMatch(searchText);
-    if (emojiMatch != null && room != null) {
+    if (emojiMatch != null && widget.room != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
-      final emotePacks = room!.getImagePacks(ImagePackUsage.emoticon);
+      final emotePacks = widget.room!.getImagePacks(ImagePackUsage.emoticon);
       if (packSearch == null || packSearch.isEmpty) {
         for (final pack in emotePacks.entries) {
           for (final emote in pack.value.images.entries) {
@@ -181,11 +194,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
     const userMentionsRegex = r'(?:\s|^)@([-\w]*)$';
 
     final userMatch = RegExp(userMentionsRegex).firstMatch(searchText);
-    if (userMatch != null && room != null) {
+    if (userMatch != null && widget.room != null) {
       final userSearch = userMatch[1]!.toLowerCase();
-      final users = room!
+      final users = widget.room!
           .getParticipants()
-          .where((user) => user.senderId != room!.client.userID)
+          .where((user) => user.senderId != widget.room!.client.userID)
           .toList();
       for (final user in users) {
         if ((user.displayName != null &&
@@ -207,9 +220,9 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       }
     }
     final roomMatch = RegExp(r'(?:\s|^)#([-\w]+)$').firstMatch(searchText);
-    if (roomMatch != null && room != null) {
+    if (roomMatch != null && widget.room != null) {
       final roomSearch = roomMatch[1]!.toLowerCase();
-      for (final r in room!.client.rooms) {
+      for (final r in widget.room!.client.rooms) {
         if (r.getState(EventTypes.RoomTombstone) != null) {
           continue; // we don't care about tombstoned rooms
         }
@@ -248,13 +261,14 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   void insertSuggestion(Map<String, String?> suggestion) {
-    if (room!.isDirectChat) return;
-    final replaceText =
-        controller!.text.substring(0, controller!.selection.baseOffset);
+    if (widget.room!.isDirectChat) return;
+    final replaceText = widget.controller!.text
+        .substring(0, widget.controller!.selection.baseOffset);
     var startText = '';
-    final afterText = replaceText == controller!.text
+    final afterText = replaceText == widget.controller!.text
         ? ''
-        : controller!.text.substring(controller!.selection.baseOffset + 1);
+        : widget.controller!.text
+            .substring(widget.controller!.selection.baseOffset + 1);
     var insertText = '';
     if (suggestion['type'] == 'command') {
       insertText = '${suggestion['name']!} ';
@@ -270,11 +284,11 @@ class InputBar extends StatelessWidget with PasteImageMixin {
         (Match m) => insertText,
       );
     }
-    if (suggestion['type'] == 'emote' && room != null) {
+    if (suggestion['type'] == 'emote' && widget.room != null) {
       var isUnique = true;
       final insertEmote = suggestion['name'];
       final insertPack = suggestion['pack'];
-      final emotePacks = room!.getImagePacks(ImagePackUsage.emoticon);
+      final emotePacks = widget.room!.getImagePacks(ImagePackUsage.emoticon);
       for (final pack in emotePacks.entries) {
         if (pack.key == insertPack) {
           continue;
@@ -316,8 +330,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
       );
     }
     if (insertText.isNotEmpty && startText.isNotEmpty) {
-      controller!.text = startText + afterText;
-      controller!.selection = TextSelection(
+      widget.controller!.text = startText + afterText;
+      widget.controller!.selection = TextSelection(
         baseOffset: startText.length,
         extentOffset: startText.length,
       );
@@ -325,21 +339,22 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   Future<void> handlePaste(BuildContext context) async {
-    if (await TwakeClipboard.instance.isReadableImageFormat() && room != null) {
-      await pasteImage(context, room!);
+    if (await TwakeClipboard.instance.isReadableImageFormat() &&
+        widget.room != null) {
+      await pasteImage(context, widget.room!);
     } else {
-      await controller?.pasteText();
+      await widget.controller?.pasteText();
     }
   }
 
   void _onEnter(String text) {
-    if (focusSuggestionController.suggestions.isNotEmpty) {
+    if (widget.focusSuggestionController.suggestions.isNotEmpty) {
       insertSuggestion(
-        focusSuggestionController
-            .suggestions[focusSuggestionController.currentIndex.value],
+        widget.focusSuggestionController
+            .suggestions[widget.focusSuggestionController.currentIndex.value],
       );
     } else {
-      onSubmitted?.call(text);
+      widget.onSubmitted?.call(text);
     }
   }
 
@@ -356,45 +371,47 @@ class InputBar extends StatelessWidget with PasteImageMixin {
   }
 
   void onRawKeyEvent(RawKeyEvent event) {
-    if (focusSuggestionController.hasSuggestions) {
-      typeAheadFocusNode?.onKey = _onBlockUpDownArrowEvent;
+    if (widget.focusSuggestionController.hasSuggestions) {
+      widget.typeAheadFocusNode?.onKey = _onBlockUpDownArrowEvent;
       if (event.isKeyPressed(service.LogicalKeyboardKey.arrowUp)) {
-        focusSuggestionController.up();
+        widget.focusSuggestionController.up();
       } else if (event.isKeyPressed(service.LogicalKeyboardKey.arrowDown)) {
-        focusSuggestionController.down();
+        widget.focusSuggestionController.down();
       }
     } else {
-      typeAheadFocusNode?.onKey = _onIgnoreUpDownArrowEvent;
+      widget.typeAheadFocusNode?.onKey = _onIgnoreUpDownArrowEvent;
     }
   }
 
   void _handleSuggestionsCallbackWeb(List<Map<String, String?>> suggestions) {
     if (suggestions.isNotEmpty) {
-      suggestionsController?.open();
+      widget.suggestionsController?.open();
     } else {
-      suggestionsController?.close();
-      if (PlatformInfos.isWeb || showEmojiPickerNotifier?.value == false) {
-        typeAheadFocusNode?.requestFocus();
+      widget.suggestionsController?.close();
+      if (PlatformInfos.isWeb ||
+          widget.showEmojiPickerNotifier?.value == false) {
+        widget.typeAheadFocusNode?.requestFocus();
       }
     }
   }
 
   void _handleSuggestionsCallbackMobile() {
-    if (showEmojiPickerNotifier?.value == false) {
-      typeAheadFocusNode?.requestFocus();
+    if (widget.showEmojiPickerNotifier?.value == false) {
+      widget.typeAheadFocusNode?.requestFocus();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return InputBarShortcuts(
-      controller: controller,
-      focusSuggestionController: focusSuggestionController,
-      room: room,
+      controller: widget.controller,
+      focusSuggestionController: widget.focusSuggestionController,
+      scrollController: textFieldScrollController,
+      room: widget.room,
       onEnter: _onEnter,
       child: RawKeyboardListener(
-        key: typeAheadKey,
-        focusNode: rawKeyboardFocusNode ?? FocusNode(),
+        key: widget.typeAheadKey,
+        focusNode: widget.rawKeyboardFocusNode ?? FocusNode(),
         onKey: (event) {
           onRawKeyEvent(event);
         },
@@ -403,26 +420,27 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           hideOnEmpty: true,
           hideOnLoading: true,
           hideOnSelect: false,
-          debounceDuration: debounceDuration,
+          debounceDuration: InputBar.debounceDuration,
           autoFlipDirection: true,
-          scrollController: suggestionScrollController,
-          suggestionsController: suggestionsController,
-          controller: controller,
-          focusNode: typeAheadFocusNode,
+          scrollController: widget.suggestionScrollController,
+          suggestionsController: widget.suggestionsController,
+          controller: widget.controller,
+          focusNode: widget.typeAheadFocusNode,
           builder: (context, controller, focusNode) => TextField(
-            minLines: minLines,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            textInputAction: textInputAction,
-            autofocus: autofocus,
+            minLines: widget.minLines,
+            maxLines: widget.maxLines,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            scrollController: textFieldScrollController,
+            autofocus: widget.autofocus,
             style: InputBarStyle.getTypeAheadTextStyle(context),
             controller: controller,
-            decoration: decoration,
+            decoration: widget.decoration,
             focusNode: focusNode,
             onChanged: (text) {
-              suggestionsController?.open();
-              if (onChanged != null) {
-                onChanged!(text);
+              widget.suggestionsController?.open();
+              if (widget.onChanged != null) {
+                widget.onChanged!(text);
               }
             },
             contextMenuBuilder: PlatformInfos.isWeb
@@ -432,20 +450,20 @@ class InputBar extends StatelessWidget with PasteImageMixin {
                       editableTextState: editableTextState,
                     ),
             onTap: () async {
-              await Future.delayed(debounceDurationTap);
+              await Future.delayed(InputBar.debounceDurationTap);
               FocusScope.of(context).requestFocus(focusNode);
             },
             onSubmitted: PlatformInfos.isMobile
                 ? (text) {
-                    if (onSubmitted != null) {
-                      onSubmitted!(text);
+                    if (widget.onSubmitted != null) {
+                      widget.onSubmitted!(text);
                     }
                   }
                 : null,
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: (text) {
-            if (room!.isDirectChat) return [];
+            if (widget.room!.isDirectChat) return [];
             final suggestions = getSuggestions(text);
             if (PlatformInfos.isMobile) {
               _handleSuggestionsCallbackMobile();
@@ -454,7 +472,7 @@ class InputBar extends StatelessWidget with PasteImageMixin {
             if (PlatformInfos.isWeb) {
               _handleSuggestionsCallbackWeb(suggestions);
             }
-            focusSuggestionController.suggestions = suggestions;
+            widget.focusSuggestionController.suggestions = suggestions;
             return suggestions;
           },
           itemBuilder: (context, suggestion) => SuggestionTile(
@@ -470,8 +488,8 @@ class InputBar extends StatelessWidget with PasteImageMixin {
           // fix loading briefly showing no suggestions
           listBuilder: (context, widgets) => FocusSuggestionList(
             items: widgets,
-            scrollController: suggestionScrollController,
-            focusSuggestionController: focusSuggestionController,
+            scrollController: widget.suggestionScrollController,
+            focusSuggestionController: widget.focusSuggestionController,
           ),
         ),
       ),
