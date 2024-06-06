@@ -42,16 +42,15 @@ class SearchTextField extends StatelessWidget {
           suffixIcon: ValueListenableBuilder(
             valueListenable: textEditingController,
             builder: (context, value, child) {
-              return textEditingController.text.isNotEmpty
-                  ? TwakeIconButton(
-                      tooltip: L10n.of(context)!.close,
-                      icon: Icons.close,
-                      onTap: () {
-                        textEditingController.clear();
-                      },
-                    )
-                  : const SizedBox.shrink();
+              return value.text.isNotEmpty ? child! : const SizedBox.shrink();
             },
+            child: TwakeIconButton(
+              tooltip: L10n.of(context)!.close,
+              icon: Icons.close,
+              onTap: () {
+                textEditingController.clear();
+              },
+            ),
           ),
         ),
       ),
