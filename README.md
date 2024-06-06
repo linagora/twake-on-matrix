@@ -1,4 +1,4 @@
-# Twake
+# Twake Chat Client
 [![Contributors](https://img.shields.io/github/contributors/linagora/twake-on-matrix?label=Contributors
 )](
   https://github.com/linagora/twake-on-matrix/graphs/contributors
@@ -12,15 +12,21 @@
 <br />
 <div align="center">
   <a href="https://github.com/linagora/twake-on-matrix">
-    <img src="https://github.com/linagora/twake-on-matrix/assets/48354990/cda56167-f070-4064-90fb-81be7d20ab27">
+    <img src="https://github.com/linagora/twake-on-matrix/assets/146178981/56ed5159-bfa2-4e41-8b56-e5d10143d029">
   </a>
 
+<h3 align="center">twake-chat.com</h3>
+
   <p align="center">
+    <a href="https://twake-chat.com">Website</a>
+    •
     <a href="https://beta.twake.app/web/#/rooms">View Demo</a>
     •
     <a href="https://github.com/linagora/twake-on-matrix/issues">Report Bug</a>
     •
-    <a href="https://hosted.weblate.org/projects/linagora/twake-matrix/#repository">Translate Twake</a>
+    <a href="https://github.com/orgs/linagora/projects/6/views/5">Roadmap></a>
+    •
+    <a href="https://hosted.weblate.org/projects/linagora/twake-matrix/#repository">Translate Twake></a>
   </p>
 </div>
 
