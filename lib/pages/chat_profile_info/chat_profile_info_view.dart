@@ -155,9 +155,7 @@ class ChatProfileInfoView extends StatelessWidget {
             child: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               controller: controller.tabController,
-              children: controller.profileSharedPages().map((pages) {
-                return pages.child;
-              }).toList(),
+              children: controller.getTabViewChildren(),
             ),
           ),
         ),
