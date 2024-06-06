@@ -1,4 +1,3 @@
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
@@ -25,6 +24,8 @@ class AppAdaptiveScaffold extends StatelessWidget {
     this.secondaryBody,
     this.displayAppBar = true,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
+
+  static final _responsiveUtils = ResponsiveUtils();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
                         ),
                       },
                     ),
-                    bodyRatio: ResponsiveUtils.bodyRadioWidth / context.width,
+                    bodyRatio: _responsiveUtils.getChatBodyRatio(context),
                     secondaryBody: SlotLayout(
                       config: <Breakpoint, SlotLayoutConfig>{
                         const WidthPlatformBreakpoint(
