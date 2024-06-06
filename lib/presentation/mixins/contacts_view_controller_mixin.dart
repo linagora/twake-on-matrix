@@ -321,9 +321,6 @@ mixin class ContactsViewControllerMixin {
     textEditingController.clear();
     searchFocusNode.dispose();
     textEditingController.dispose();
-    presentationContactNotifier.dispose();
-    presentationPhonebookContactNotifier.dispose();
-    presentationRecentContactNotifier.dispose();
   }
 
   @visibleForTesting

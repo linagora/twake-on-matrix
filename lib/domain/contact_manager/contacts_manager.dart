@@ -34,7 +34,7 @@ class ContactsManager {
   ValueNotifier<Either<Failure, Success>> getPhonebookContactsNotifier() =>
       _phonebookContactsNotifier;
 
-  bool get _isInitial =>
+  bool get _isSynchronizedTomContacts =>
       _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
 
   bool get isDoNotShowWarningContactsBannerAgain =>
@@ -44,10 +44,14 @@ class ContactsManager {
     _doNotShowWarningContactsBannerAgain = value;
   }
 
+  Future<void> reSyncContacts() async {
+    _contactsNotifier.value = const Right(ContactsInitial());
+  }
+
   void initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
   }) async {
-    if (!_isInitial) {
+    if (!_isSynchronizedTomContacts) {
       return;
     }
     _getAllContacts(
@@ -76,6 +80,7 @@ class ContactsManager {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
+
     phonebookContactInteractor
         .execute(lookupChunkSize: _lookupChunkSize)
         .listen(
