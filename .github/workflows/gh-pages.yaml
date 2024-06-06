@@ -2,7 +2,7 @@ on:
   pull_request:
 
 env:
-  FLUTTER_VERSION: 3.22.0
+  FLUTTER_VERSION: 3.22.1
   LIBOLM_VERSION: 3.2.16
 
 name: Deploying on GitHub Pages
@@ -57,7 +57,6 @@ jobs:
           flutter clean
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          flutter pub get # In flutter 3.22, flutter gen-l10n is not working properly, so we need to run flutter pub get again
           flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
           echo "$TWAKE_PREVIEW_CONFIG" | yq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
 
