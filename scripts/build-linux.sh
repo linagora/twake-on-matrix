@@ -9,5 +9,4 @@ sudo apt-get install -y clang cmake ninja-build \
 flutter config --enable-linux-desktop
 flutter clean
 flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
-flutter pub get
 flutter build linux --release -v
