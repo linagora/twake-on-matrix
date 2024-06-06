@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -55,48 +56,108 @@ class ChatProfileInfoView extends StatelessWidget {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxWidth: ChatProfileInfoStyle.maxWidth),
-            child: Builder(
-              builder: (context) {
-                if (contact?.matrixId != null) {
-                  return FutureBuilder(
-                    future: Matrix.of(context).client.getProfileFromUserId(
-                          contact!.matrixId!,
-                          getFromRooms: false,
-                        ),
-                    builder: (context, snapshot) => _Information(
-                      avatarUri: snapshot.data?.avatarUrl,
-                      displayName:
-                          snapshot.data?.displayName ?? contact.displayName,
-                      matrixId: contact.matrixId,
-                      lookupContactNotifier: controller.lookupContactNotifier,
-                      goToProfileShared: controller.goToProfileShared,
-                      isDraftInfo: controller.widget.isDraftInfo,
+      body: NestedScrollView(
+        physics: const ClampingScrollPhysics(),
+        key: controller.nestedScrollViewState,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: SliverAppBar(
+                backgroundColor: LinagoraSysColors.material().onPrimary,
+                toolbarHeight: ChatDetailViewStyle.toolbarHeightSliverAppBar,
+                title: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: ChatProfileInfoStyle.maxWidth,
                     ),
-                  );
-                }
-                if (contact != null) {
-                  return _Information(
-                    displayName: contact.displayName,
-                    matrixId: contact.matrixId,
-                    lookupContactNotifier: controller.lookupContactNotifier,
-                    goToProfileShared: controller.goToProfileShared,
-                    isDraftInfo: controller.widget.isDraftInfo,
-                  );
-                }
-                return _Information(
-                  avatarUri: user?.avatarUrl,
-                  displayName: user?.calcDisplayname(),
-                  matrixId: user?.id,
-                  lookupContactNotifier: controller.lookupContactNotifier,
-                  goToProfileShared: controller.goToProfileShared,
-                  isDraftInfo: controller.widget.isDraftInfo,
-                );
-              },
+                    child: Builder(
+                      builder: (context) {
+                        if (contact?.matrixId != null) {
+                          return FutureBuilder(
+                            future:
+                                Matrix.of(context).client.getProfileFromUserId(
+                                      contact!.matrixId!,
+                                      getFromRooms: false,
+                                    ),
+                            builder: (context, snapshot) => _Information(
+                              avatarUri: snapshot.data?.avatarUrl,
+                              displayName: snapshot.data?.displayName ??
+                                  contact.displayName,
+                              matrixId: contact.matrixId,
+                              lookupContactNotifier:
+                                  controller.lookupContactNotifier,
+                              isDraftInfo: controller.widget.isDraftInfo,
+                            ),
+                          );
+                        }
+                        if (contact != null) {
+                          return _Information(
+                            displayName: contact.displayName,
+                            matrixId: contact.matrixId,
+                            lookupContactNotifier:
+                                controller.lookupContactNotifier,
+                            isDraftInfo: controller.widget.isDraftInfo,
+                          );
+                        }
+                        return _Information(
+                          avatarUri: user?.avatarUrl,
+                          displayName: user?.calcDisplayname(),
+                          matrixId: user?.id,
+                          lookupContactNotifier:
+                              controller.lookupContactNotifier,
+                          isDraftInfo: controller.widget.isDraftInfo,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                automaticallyImplyLeading: false,
+                pinned: true,
+                floating: true,
+                forceElevated: innerBoxIsScrolled,
+                bottom: TabBar(
+                  physics: const NeverScrollableScrollPhysics(),
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicatorColor: Theme.of(context).colorScheme.primary,
+                  indicatorPadding: ChatProfileInfoStyle.indicatorPadding,
+                  indicatorWeight: ChatProfileInfoStyle.indicatorWeight,
+                  labelStyle: ChatProfileInfoStyle.tabBarLabelStyle(context),
+                  unselectedLabelStyle:
+                      ChatProfileInfoStyle.tabBarUnselectedLabelStyle(context),
+                  tabs: controller.profileSharedPagesList.map((page) {
+                    return Tab(
+                      child: Text(
+                        page.getTitle(context),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.fade,
+                      ),
+                    );
+                  }).toList(),
+                  controller: controller.tabController,
+                ),
+              ),
+            ),
+          ];
+        },
+        body: ClipRRect(
+          borderRadius: BorderRadius.all(
+            Radius.circular(
+              ChatDetailViewStyle.chatDetailsPageViewWebBorderRadius,
+            ),
+          ),
+          child: Container(
+            width: ChatDetailViewStyle.chatDetailsPageViewWebWidth,
+            padding: ChatDetailViewStyle.paddingTabBarView,
+            decoration: ChatProfileInfoStyle.tabViewDecoration,
+            child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: controller.tabController,
+              children: controller.profileSharedPages().map((pages) {
+                return pages.child;
+              }).toList(),
             ),
           ),
         ),
@@ -111,7 +172,6 @@ class _Information extends StatelessWidget {
     this.displayName,
     this.matrixId,
     required this.lookupContactNotifier,
-    this.goToProfileShared,
     required this.isDraftInfo,
   });
 
@@ -119,7 +179,6 @@ class _Information extends StatelessWidget {
   final String? displayName;
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
-  final Function()? goToProfileShared;
   final bool isDraftInfo;
 
   @override
@@ -241,31 +300,6 @@ class _Information extends StatelessWidget {
                   ],
                 ),
               ),
-              if (!isDraftInfo)
-                InkWell(
-                  splashColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: goToProfileShared,
-                  child: Padding(
-                    padding:
-                        ChatProfileInfoStyle.titleSharedMediaAndFilesPadding,
-                    child: Row(
-                      children: [
-                        Text(
-                          L10n.of(context)!.sharedMediaAndLinks,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 18,
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
