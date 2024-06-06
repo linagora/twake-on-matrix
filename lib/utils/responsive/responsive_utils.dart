@@ -20,7 +20,16 @@ class ResponsiveUtils {
   static const double heightBottomNavigation = 72;
   static const double heightBottomNavigationBar = 56;
 
-  static const double bodyWithRightColumnRatio = 0.7;
+  static const double bodyWithRightColumnRatio = 0.64;
+  static const double groupDetailsMinWidth = 370;
+
+  double getChatBodyRatio(BuildContext context) =>
+      bodyRadioWidth / context.width;
+
+  double getMinDesktopWidth(BuildContext context) =>
+      ResponsiveUtils.groupDetailsMinWidth /
+      (1 - ResponsiveUtils.bodyWithRightColumnRatio) /
+      (1 - ResponsiveUtils().getChatBodyRatio(context));
 
   bool isScreenWithShortestSide(BuildContext context) =>
       context.mediaQueryShortestSide < minTabletWidth;
