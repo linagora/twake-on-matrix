@@ -12,6 +12,7 @@ import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.da
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
+import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
@@ -45,14 +46,15 @@ mixin class ContactsViewControllerMixin {
   final ValueNotifier<bool> isSearchModeNotifier = ValueNotifier(false);
 
   final presentationRecentContactNotifier =
-      ValueNotifier<List<PresentationSearch>>([]);
+      ValueNotifierCustom<List<PresentationSearch>>([]);
 
-  final presentationContactNotifier = ValueNotifier<Either<Failure, Success>>(
+  final presentationContactNotifier =
+      ValueNotifierCustom<Either<Failure, Success>>(
     const Right(ContactsInitial()),
   );
 
   final presentationPhonebookContactNotifier =
-      ValueNotifier<Either<Failure, Success>>(
+      ValueNotifierCustom<Either<Failure, Success>>(
     const Right(GetPhonebookContactsInitial()),
   );
 
@@ -123,6 +125,10 @@ mixin class ContactsViewControllerMixin {
   }) {
     final keyword = _debouncer.value;
     if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+      if (presentationContactNotifier.isDisposed &&
+          presentationPhonebookContactNotifier.isDisposed) {
+        return;
+      }
       presentationContactNotifier.value = Right(
         PresentationExternalContactSuccess(
           contact: PresentationContact(
@@ -151,6 +157,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _refreshContacts(String keyword) async {
+    if (presentationContactNotifier.isDisposed) return;
     presentationContactNotifier.value =
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
@@ -198,6 +205,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
+    if (presentationPhonebookContactNotifier.isDisposed) return;
     presentationPhonebookContactNotifier.value =
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
@@ -264,7 +272,7 @@ mixin class ContactsViewControllerMixin {
                 .contacts
                 .where((contact) => contact.directChatMatrixID != null)
                 .toList();
-
+            if (presentationRecentContactNotifier.isDisposed) return;
             presentationRecentContactNotifier.value = recent
                 .take(
                   keyword == null ? _defaultLimitRecentContacts : recent.length,
@@ -321,6 +329,11 @@ mixin class ContactsViewControllerMixin {
     textEditingController.clear();
     searchFocusNode.dispose();
     textEditingController.dispose();
+    warningBannerNotifier.dispose();
+    isSearchModeNotifier.dispose();
+    presentationRecentContactNotifier.dispose();
+    presentationContactNotifier.dispose();
+    presentationPhonebookContactNotifier.dispose();
   }
 
   @visibleForTesting

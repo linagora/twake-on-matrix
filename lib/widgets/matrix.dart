@@ -401,6 +401,7 @@ class MatrixState extends State<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
+    matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -426,6 +427,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     await setUpToMServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
+    matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -641,6 +643,9 @@ class MatrixState extends State<Matrix>
 
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    Logs().d(
+      'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
+    );
     authorizationInterceptor.accessToken = client.accessToken;
   }
 
@@ -706,8 +711,9 @@ class MatrixState extends State<Matrix>
       'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
     );
     if (client == null && client?.userID == null) return;
+    setUpAuthorization(client!);
     try {
-      final toMConfigurations = await getTomConfigurations(client!.userID!);
+      final toMConfigurations = await getTomConfigurations(client.userID!);
       Logs().d(
         'Matrix::_checkHomeserverExists: toMConfigurations - $toMConfigurations',
       );
@@ -805,6 +811,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _handleLastLogout() async {
+    matrixState.reSyncContacts();
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');
