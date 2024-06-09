@@ -52,6 +52,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   @override
   void initState() {
     super.initState();
+    bootstrap =
+        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
     _createBootstrap();
   }
 
@@ -67,12 +69,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   }
 
   Future<RecoveryWords?> _getRecoveryWords() async {
-    return await _getRecoveryWordsInteractor.execute().then(
-          (either) => either.fold(
-            (failure) => null,
-            (success) => success.words,
-          ),
-        );
+    final result = await _getRecoveryWordsInteractor.execute();
+    return result.fold(
+      (failure) => null,
+      (success) => success.words,
+    );
   }
 
   Future<void> _loadingData() async {
@@ -86,8 +87,6 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       _uploadRecoveryKeyState = UploadRecoveryKeyState.checkingRecoveryWork;
     });
     await _getRecoveryKeyState();
-    bootstrap =
-        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
   }
 
   Future<void> _getRecoveryKeyState() async {
@@ -106,6 +105,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         if (recoveryWords != null) {
           _recoveryWords = recoveryWords;
           _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
+          setState(() {});
+          return;
         } else {
           Logs().d(
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
@@ -125,9 +126,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       } else {
         _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
       }
+      setState(() {});
+      return;
     }
-
-    setState(() {});
   }
 
   bool get isDataLoadingState =>
