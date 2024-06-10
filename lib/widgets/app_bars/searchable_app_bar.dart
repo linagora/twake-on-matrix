@@ -132,7 +132,7 @@ class SearchableAppBar extends StatelessWidget {
                 ] else ...[
                   if (displayBackButton)
                     TwakeIconButton(
-                      onTap: () => context.pop(),
+                      onTap: () => Navigator.of(context).pop(),
                       tooltip: L10n.of(context)!.close,
                       icon: Icons.close,
                       paddingAll: SearchableAppBarStyle.closeButtonPaddingAll,

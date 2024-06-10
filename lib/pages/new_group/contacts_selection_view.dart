@@ -11,7 +11,6 @@ import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsSelectionView extends StatelessWidget {
@@ -140,7 +139,7 @@ class ContactsSelectionView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           TwakeTextButton(
-            onTap: () => context.pop(),
+            onTap: () => Navigator.of(context).pop(),
             message: L10n.of(context)!.cancel,
             borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
             margin: ContactsSelectionViewStyle.webActionsButtonMargin,
