@@ -44,15 +44,12 @@ mixin SendFilesMixin {
       allowMultiple: true,
     );
     final temporaryDirectory = await getTemporaryDirectory();
-    fileInfos ??= result?.files
-        .map(
-          (xFile) => FileInfo.fromMatrixFile(
-            xFile.toMatrixFileOnMobile(
-              temporaryDirectoryPath: temporaryDirectory.path,
-            ),
-          ),
-        )
-        .toList();
+    fileInfos ??= result?.files.map((xFile) {
+      final matrixFile = xFile.toMatrixFileOnMobile(
+        temporaryDirectoryPath: temporaryDirectory.path,
+      );
+      return FileInfo.fromMatrixFile(matrixFile);
+    }).toList();
 
     if (fileInfos == null || fileInfos.isEmpty == true) return;
     onSendFileCallback?.call();

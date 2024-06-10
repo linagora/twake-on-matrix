@@ -12,7 +12,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+      ref: TW-1806/add-conditions-for-message-type
 
   receive_sharing_intent:
     git:
