@@ -51,12 +51,22 @@ class UnencryptedImageWidget extends StatelessWidget {
       cacheHeight: (height * MediaQuery.devicePixelRatioOf(context)).round(),
       filterQuality: FilterQuality.medium,
       errorBuilder: (context, error, stackTrace) {
-        return SizedBox(
-          width: width,
-          height: height,
-          child: BlurHash(
-            hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
-          ),
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: width,
+              height: height,
+              child: BlurHash(
+                hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
+              ),
+            ),
+            Icon(
+              Icons.error,
+              size: MessageContentStyle.iconErrorSize,
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ],
         );
       },
       loadingBuilder: (context, child, loadingProgress) {
