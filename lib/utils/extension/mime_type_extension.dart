@@ -7,13 +7,19 @@ import 'package:matrix/matrix.dart';
 typedef TwakeMimeType = String?;
 
 extension TwakeMimeTypeExtension on TwakeMimeType {
+  static const String defaultUnsupportedImageMimeType = 'file/image';
+
+  static const String defaultUnsupportedVideoMimeType = 'file/video';
+
   bool isAndroidSupportedPreview() =>
       SupportedPreviewFileTypes.androidSupportedTypes.contains(this);
 
   bool isIOSSupportedPreview() =>
       SupportedPreviewFileTypes.iOSSupportedTypes.containsKey(this);
 
-  bool isImageFile() => SupportedPreviewFileTypes.imageMimeTypes.contains(this);
+  bool isImageFile() =>
+      SupportedPreviewFileTypes.imageMimeTypes.contains(this) ||
+      defaultUnsupportedImageMimeType == this;
 
   bool isDocFile({String? fileType}) =>
       SupportedPreviewFileTypes.docMimeTypes.contains(this) ||
@@ -39,7 +45,10 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
           SupportedPreviewFileTypes.zipFileTypes
               .contains(fileType.toLowerCase());
 
-  bool isVideoFile() => SupportedPreviewFileTypes.videoMimeTypes.contains(this);
+  bool isVideoFile() {
+    return SupportedPreviewFileTypes.videoMimeTypes.contains(this) ||
+        defaultUnsupportedVideoMimeType == this;
+  }
 
   bool isPdfFile({String? fileType}) =>
       SupportedPreviewFileTypes.pdfMimeTypes.contains(this) ||

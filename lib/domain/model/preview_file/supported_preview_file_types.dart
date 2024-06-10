@@ -40,6 +40,7 @@ class SupportedPreviewFileTypes {
   static const imageMimeTypes = [
     'image/bmp',
     'image/jpeg',
+    'image/jpg',
     'image/gif',
     'image/png',
   ];
@@ -48,6 +49,8 @@ class SupportedPreviewFileTypes {
     'video/mp4',
     'video/3gpp',
     'video/quicktime',
+    'vidoe/mov',
+    'video/mpeg',
   ];
 
   static const audioMimeTypes = [
