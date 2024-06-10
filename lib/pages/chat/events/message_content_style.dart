@@ -86,4 +86,6 @@ class MessageContentStyle {
           );
 
   static const blurhashSize = 32;
+
+  static const iconErrorSize = 36.0;
 }

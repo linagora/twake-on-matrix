@@ -2,6 +2,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/mime_type_uitls.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -30,6 +31,8 @@ mixin DragDrogFileMixin {
         MatrixFile(
           bytes: bytesList.result![i],
           name: details.files[i].name,
+          mimeType:
+              MimeTypeUitls.instance.getTwakeMimeType(details.files[i].name),
         ).detectFileType,
       );
     }
