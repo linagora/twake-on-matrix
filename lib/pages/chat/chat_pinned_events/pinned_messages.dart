@@ -22,6 +22,7 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -216,7 +217,26 @@ class PinnedMessagesController extends State<PinnedMessages>
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
-          children: pinnedMessagesActionsList(context, event),
+          children: getPinnedMessagesActionsList(event).map((action) {
+            return popupItemByTwakeAppRouter(
+              context,
+              action.getTitle(
+                context,
+                unpin: event.isPinned,
+                isSelected: isSelected(event),
+              ),
+              iconAction: action.getIconData(unpin: event.isPinned),
+              imagePath: action.getImagePath(unpin: event.isPinned),
+              colorIcon:
+                  action == ChatContextMenuActions.pinChat && event.isPinned
+                      ? Theme.of(context).colorScheme.onSurface
+                      : null,
+              onCallbackAction: () => _handleClickOnContextMenuItem(
+                action,
+                event,
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -284,21 +304,12 @@ class PinnedMessagesController extends State<PinnedMessages>
     openingPopupMenu.toggle();
   }
 
-  // Used for "Right Click" Context Menu
   List<Widget> pinnedMessagesActionsList(
     BuildContext context,
+    List<ChatContextMenuActions> actions,
     Event event,
   ) {
-    final listAction = [
-      ChatContextMenuActions.pinChat,
-      ChatContextMenuActions.select,
-      ChatContextMenuActions.jumpToMessage,
-      ChatContextMenuActions.copyMessage,
-      ChatContextMenuActions.forward,
-      if (PlatformInfos.isWeb && event.hasAttachment)
-        ChatContextMenuActions.downloadFile,
-    ];
-    return listAction.map((action) {
+    return actions.map((action) {
       return popupItemByTwakeAppRouter(
         context,
         action.getTitle(
@@ -319,13 +330,36 @@ class PinnedMessagesController extends State<PinnedMessages>
     }).toList();
   }
 
-  // Used for "More" Context Menu
-  List<Widget> _pinnedMessagesActionsTileList(
+  List<ChatContextMenuActions> getPinnedMessagesActionsList(Event event) {
+    final listAction = [
+      ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.select,
+      ChatContextMenuActions.jumpToMessage,
+      ChatContextMenuActions.copyMessage,
+      ChatContextMenuActions.forward,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatContextMenuActions.downloadFile,
+    ];
+    return listAction;
+  }
+
+  List<ContextMenuAction> pinnedMessagesContextMenuActionsList(
     BuildContext context,
     Event event,
   ) {
-    final actionTiles = pinnedMessagesActionsList(context, event).map((action) {
-      return action;
+    final actionTiles = getPinnedMessagesActionsList(event).map((action) {
+      return ContextMenuAction(
+        name: action.getTitle(
+          context,
+          unpin: event.isPinned,
+          isSelected: isSelected(event),
+        ),
+        icon: action.getIconData(unpin: event.isPinned),
+        imagePath: action.getImagePath(unpin: event.isPinned),
+        colorIcon: action == ChatContextMenuActions.pinChat && event.isPinned
+            ? Theme.of(context).colorScheme.onSurface
+            : null,
+      );
     }).toList();
     return actionTiles;
   }
@@ -382,15 +416,22 @@ class PinnedMessagesController extends State<PinnedMessages>
     BuildContext context,
     Event event,
     TapDownDetails tapDownDetails,
-  ) {
+  ) async {
     final offset = tapDownDetails.globalPosition;
+    final listActions = pinnedMessagesContextMenuActionsList(context, event);
     _handleStateContextMenu();
-    showTwakeContextMenu(
+    final selectedActionIndex = await showTwakeContextMenu(
       context: context,
       offset: offset,
-      builder: (context) => _pinnedMessagesActionsTileList(context, event),
+      listActions: listActions,
       onClose: _handleStateContextMenu,
     );
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        getPinnedMessagesActionsList(event)[selectedActionIndex],
+        event,
+      );
+    }
   }
 
   void _listenRoomUpdateEvent() {

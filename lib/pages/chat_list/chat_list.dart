@@ -25,6 +25,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
@@ -541,19 +542,28 @@ class ChatListController extends State<ChatList>
     BuildContext context,
     Room room,
     TapDownDetails details,
-  ) {
+  ) async {
     final offset = details.globalPosition;
-    showTwakeContextMenu(
+    final listPopupActions = _popupMenuActions(room);
+    final listContextActions = _mapPopupMenuActionsToContextMenuActions(
+      context,
+      room,
+      listPopupActions,
+    );
+    final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
-      builder: (context) => _popupMenuActionTile(context, room),
+      listActions: listContextActions,
     );
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        listPopupActions[selectedActionIndex],
+        room,
+      );
+    }
   }
 
-  List<Widget> _popupMenuActionTile(
-    BuildContext context,
-    Room room,
-  ) {
+  List<ChatListSelectionActions> _popupMenuActions(Room room) {
     final listAction = [
       if (!room.isInvitation) ...[
         ChatListSelectionActions.read,
@@ -561,15 +571,18 @@ class ChatListController extends State<ChatList>
       ],
       ChatListSelectionActions.mute,
     ];
-    return listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitleContextMenuSelection(context, room),
-        iconAction: action.getIconContextMenuSelection(room),
-        onCallbackAction: () => _handleClickOnContextMenuItem(
-          action,
-          room,
-        ),
+    return listAction;
+  }
+
+  List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions(
+    BuildContext context,
+    Room room,
+    List<ChatListSelectionActions> listActions,
+  ) {
+    return listActions.map((action) {
+      return ContextMenuAction(
+        name: action.getTitleContextMenuSelection(context, room),
+        icon: action.getIconContextMenuSelection(room),
       );
     }).toList();
   }
