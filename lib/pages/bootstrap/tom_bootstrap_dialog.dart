@@ -14,8 +14,6 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 
-import 'bootstrap_dialog.dart';
-
 class TomBootstrapDialog extends StatefulWidget {
   final Client client;
 
@@ -111,8 +109,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           Logs().d(
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
           );
-          Navigator.pop(context);
-          await BootstrapDialog(client: widget.client).show();
+          Navigator.of(context, rootNavigator: false).pop<bool>(false);
         }
       }
     } else {
@@ -197,14 +194,13 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         break;
       case UploadRecoveryKeyState.unlockError:
         WidgetsBinding.instance.addPostFrameCallback((_) async {
-          Navigator.pop(context);
-          await BootstrapDialog(client: widget.client).show();
+          Navigator.of(context, rootNavigator: false).pop<bool>(false);
         });
         break;
       case UploadRecoveryKeyState.uploadError:
         Logs().e('TomBootstrapDialogState::build(): upload recovery key error');
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context, rootNavigator: false).pop<bool>(false);
+          Navigator.of(context, rootNavigator: false).pop<bool>();
         });
         break;
       default:
@@ -337,7 +333,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           break;
         case BootstrapState.error:
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context, rootNavigator: false).pop<bool>(false);
+            Navigator.of(context, rootNavigator: false).pop<bool>();
           });
           break;
         case BootstrapState.done:

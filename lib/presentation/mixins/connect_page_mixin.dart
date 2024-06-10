@@ -254,23 +254,40 @@ mixin ConnectPageMixin {
     return list;
   }
 
-  void handleTokenFromRegistrationSite({
+  Future<SsoLoginState> handleTokenFromRegistrationSite({
     required MatrixState matrix,
     required String uri,
   }) async {
-    final token = Uri.parse(uri).queryParameters['loginToken'];
-    Logs().d(
-      "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
-    );
-    if (token == null || token.isEmpty == true) return;
-    matrix.loginType = LoginType.mLoginToken;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => matrix.getLoginClient().login(
-            LoginType.mLoginToken,
-            token: token,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          ),
-    );
+    try {
+      final token = Uri.parse(uri).queryParameters['loginToken'];
+      Logs().d(
+        "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
+      );
+      if (token == null || token.isEmpty == true) {
+        return SsoLoginState.tokenEmpty;
+      }
+      matrix.loginType = LoginType.mLoginToken;
+      await TwakeDialog.showStreamDialogFullScreen(
+        future: () => matrix
+            .getLoginClient()
+            .login(
+              LoginType.mLoginToken,
+              token: token,
+              initialDeviceDisplayName: PlatformInfos.clientName,
+            )
+            .timeout(
+          AutoHomeserverPickerController.autoHomeserverPickerTimeout,
+          onTimeout: () {
+            throw CheckHomeserverTimeoutException();
+          },
+        ),
+      );
+      return SsoLoginState.success;
+    } catch (e) {
+      Logs()
+          .e('ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e');
+      return SsoLoginState.error;
+    }
   }
 
   void resetLocationPathWithLoginToken({

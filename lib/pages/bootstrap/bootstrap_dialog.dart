@@ -106,7 +106,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.close),
-            onPressed: Navigator.of(context).pop,
+            onPressed: () => Navigator.of(context).pop(false),
           ),
           title: Text(L10n.of(context)!.recoveryKey),
         ),
@@ -233,7 +233,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
               centerTitle: true,
               leading: IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: Navigator.of(context).pop,
+                onPressed: () => Navigator.of(context).pop(false),
               ),
               title: Text(L10n.of(context)!.chatBackup),
             ),
