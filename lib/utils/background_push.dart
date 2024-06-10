@@ -24,6 +24,7 @@ import 'dart:io';
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -369,8 +370,8 @@ class BackgroundPush {
 
   Future<void> goToRoom(String? roomId) async {
     try {
-      _clearAllNavigatorAvailable();
       Logs().v('[Push] Attempting to go to room $roomId...');
+      _clearAllNavigatorAvailable(roomId: roomId);
       if (_matrixState == null || roomId == null) {
         return;
       }
@@ -609,8 +610,18 @@ class BackgroundPush {
     );
   }
 
-  void _clearAllNavigatorAvailable() {
-    final canPopNavigation = TwakeApp.router.canPop();
+  void _clearAllNavigatorAvailable({
+    String? roomId,
+  }) {
+    Logs().d(
+      "BackgroundPush:: - Current active room id  @2 ${TwakeApp.router.activeRoomId}",
+    );
+    if (roomId != null &&
+        TwakeApp.router.activeRoomId?.contains(roomId) == true) {
+      return;
+    }
+
+    final canPopNavigation = TwakeApp.router.routerDelegate.canPop();
     Logs().d("BackgroundPush:: - Can pop other Navigation  $canPopNavigation");
     if (canPopNavigation) {
       TwakeApp.router.routerDelegate.pop();
