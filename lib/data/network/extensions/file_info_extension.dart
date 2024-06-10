@@ -1,13 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:fluffychat/utils/mime_type_uitls.dart';
 import 'package:matrix/matrix.dart';
-import 'package:mime/mime.dart';
 
 extension FileInfoExtension on FileInfo {
   String get fileExtension => fileName.split('.').last;
 
-  String get mimeType =>
-      lookupMimeType(kIsWeb ? fileName : filePath) ??
-      'application/octet-stream';
+  String get mimeType => MimeTypeUitls.instance.getTwakeMimeType(filePath);
 
   Map<String, dynamic> get metadata => ({
         'mimetype': mimeType,

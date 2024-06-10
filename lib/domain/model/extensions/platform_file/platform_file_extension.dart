@@ -10,6 +10,7 @@ extension PlatformFileListExtension on PlatformFile {
       bytes: bytes,
       name: name,
       filePath: path ?? '$temporaryDirectoryPath/$name',
+      mimeType: MimeTypeUitls.instance.getTwakeMimeType(name),
       readStream: readStream,
       sizeInBytes: size,
     );

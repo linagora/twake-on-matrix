@@ -10,10 +10,11 @@ class MimeTypeUitls {
   String getTwakeMimeType(String path) {
     final mimeType = lookupMimeType(path);
     if (mimeType == null) {
-      return '';
+      return 'application/octet-stream';
     }
     if (mimeType.startsWith('image/')) {
-      if (SupportedPreviewFileTypes.imageMimeTypes.contains(mimeType)) {
+      if (SupportedPreviewFileTypes.crossPlatformImageMimeTypes
+          .contains(mimeType)) {
         return mimeType;
       } else {
         return TwakeMimeTypeExtension.defaultUnsupportedImageMimeType;
