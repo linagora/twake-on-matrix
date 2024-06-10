@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/utils/mime_type_uitls.dart';
 import 'package:matrix/matrix.dart';
 
 extension PlatformFileListExtension on PlatformFile {
@@ -21,6 +22,7 @@ extension PlatformFileListExtension on PlatformFile {
       filePath: '',
       readStream: readStream,
       sizeInBytes: size,
+      mimeType: MimeTypeUitls.instance.getTwakeMimeType(name),
     );
   }
 
