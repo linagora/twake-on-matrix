@@ -16,6 +16,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -61,6 +62,7 @@ class Message extends StatefulWidget {
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
   final void Function(Event)? onLongPress;
+  final List<ContextMenuAction> listAction;
 
   const Message(
     this.event, {
@@ -84,6 +86,7 @@ class Message extends StatefulWidget {
     this.focusNode,
     this.timestampCallback,
     this.onLongPress,
+    required this.listAction,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -204,6 +207,7 @@ class _MessageState extends State<Message> {
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
               onLongPress: widget.onLongPress,
+              listActions: widget.listAction,
             ),
           ),
         ];

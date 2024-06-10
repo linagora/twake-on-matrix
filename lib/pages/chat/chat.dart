@@ -12,6 +12,7 @@ import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -1394,10 +1395,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  List<Widget> _popupMenuActionTile(
-    BuildContext context,
-    Event event,
-  ) {
+  List<ChatContextMenuActions> _getListPopupMenuActions(Event event) {
     final listAction = [
       ChatContextMenuActions.select,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
@@ -1406,24 +1404,25 @@ class ChatController extends State<Chat>
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
     ];
-    return listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitle(
+    return listAction;
+  }
+
+  List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions(
+    List<ChatContextMenuActions> listActions,
+    Event event,
+  ) {
+    return listActions.map((action) {
+      return ContextMenuAction(
+        name: action.getTitle(
           context,
           unpin: isUnpinEvent(event),
           isSelected: isSelected(event),
         ),
-        iconAction: action.getIconData(
+        icon: action.getIconData(
           unpin: isUnpinEvent(event),
         ),
         imagePath: action.getImagePath(
           unpin: isUnpinEvent(event),
-        ),
-        isClearCurrentPage: false,
-        onCallbackAction: () => _handleClickOnContextMenuItem(
-          action,
-          event,
         ),
       );
     }).toList();
@@ -1461,15 +1460,27 @@ class ChatController extends State<Chat>
     BuildContext context,
     Event event,
     TapDownDetails tapDownDetails,
-  ) {
+  ) async {
     final offset = tapDownDetails.globalPosition;
+    final listPopupMenuActions = _getListPopupMenuActions(event);
+    final listContextMenuActions = _mapPopupMenuActionsToContextMenuActions(
+      listPopupMenuActions,
+      event,
+    );
     _handleStateContextMenu();
-    showTwakeContextMenu(
+    final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
-      builder: (context) => _popupMenuActionTile(context, event),
+      listActions: listContextMenuActions,
       onClose: _handleStateContextMenu,
     );
+
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        listPopupMenuActions[selectedActionIndex],
+        event,
+      );
+    }
   }
 
   void hideKeyboardChatScreen() {
@@ -1792,14 +1803,22 @@ class ChatController extends State<Chat>
   void handleAppbarMenuAction(
     BuildContext context,
     TapDownDetails tapDownDetails,
-  ) {
+  ) async {
     final offset = tapDownDetails.globalPosition;
-    showTwakeContextMenu(
+    final listAppBarActions = _getListActionAppBarMenu();
+    final listContextMenuActions =
+        _mapAppbarMenuActionToContextMenuAction(listAppBarActions);
+
+    final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
-      builder: (_) =>
-          _appbarMenuActionTile(context, _getListActionAppBarMenu()),
+      listActions: listContextMenuActions,
     );
+
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      final selectedAction = listAppBarActions[selectedActionIndex];
+      onSelectedAppBarActions(selectedAction);
+    }
   }
 
   List<ChatAppBarActions> _getListActionAppBarMenu() {
@@ -1829,23 +1848,19 @@ class ChatController extends State<Chat>
     ];
   }
 
-  List<Widget> _appbarMenuActionTile(
-    BuildContext context,
+  List<ContextMenuAction> _mapAppbarMenuActionToContextMenuAction(
     List<ChatAppBarActions> listAction,
   ) {
     return listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitle(context),
-        iconAction: action.getIcon(),
+      return ContextMenuAction(
+        name: action.getTitle(context),
+        icon: action.getIcon(),
         colorIcon: action.getColorIcon(context),
         styleName: action == ChatAppBarActions.leaveGroup
             ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.copyWith(
                 color: action.getColorIcon(context),
               )
             : null,
-        isClearCurrentPage: false,
-        onCallbackAction: () => onSelectedAppBarActions(action),
       );
     }).toList();
   }

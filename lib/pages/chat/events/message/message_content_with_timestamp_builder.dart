@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -32,6 +33,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final bool selectMode;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
+  final List<ContextMenuAction> listActions;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -50,6 +52,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.onMenuAction,
     this.menuChildren,
     this.focusNode,
+    required this.listActions,
   });
 
   @override
@@ -78,6 +81,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
               : null,
+          listActions: listActions,
           child: Container(
             alignment:
                 event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
