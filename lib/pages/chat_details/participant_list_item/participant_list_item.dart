@@ -9,7 +9,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -129,7 +128,7 @@ class ParticipantListItem extends StatelessWidget {
           userId: member.id,
           onUpdatedMembers: onUpdatedMembers,
           onNewChatOpen: () {
-            dialogContext.pop();
+            Navigator.of(dialogContext).pop();
           },
         );
       },
@@ -228,7 +227,7 @@ class ParticipantListItem extends StatelessWidget {
                       child: Padding(
                         padding: ParticipantListItemStyle.closeButtonPadding,
                         child: IconButton(
-                          onPressed: () => dialogContext.pop(),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
                           icon: const Icon(Icons.close),
                         ),
                       ),
@@ -236,7 +235,7 @@ class ParticipantListItem extends StatelessWidget {
                     ProfileInfoBody(
                       user: member,
                       onNewChatOpen: () {
-                        dialogContext.pop();
+                        Navigator.of(dialogContext).pop();
                       },
                       onUpdatedMembers: onUpdatedMembers,
                     ),
