@@ -57,7 +57,7 @@ class ChatProfileInfoView extends StatelessWidget {
         ),
       ),
       body: NestedScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: controller.getScrollPhysics(),
         key: controller.nestedScrollViewState,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -126,7 +126,7 @@ class ChatProfileInfoView extends StatelessWidget {
                   labelStyle: ChatProfileInfoStyle.tabBarLabelStyle(context),
                   unselectedLabelStyle:
                       ChatProfileInfoStyle.tabBarUnselectedLabelStyle(context),
-                  tabs: controller.profileSharedPagesList.map((page) {
+                  tabs: controller.tabList.map((page) {
                     return Tab(
                       child: Text(
                         page.getTitle(context),
@@ -155,7 +155,9 @@ class ChatProfileInfoView extends StatelessWidget {
             child: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               controller: controller.tabController,
-              children: controller.getTabViewChildren(),
+              children: controller.sharedPages().map((page) {
+                return page.child;
+              }).toList(),
             ),
           ),
         ),
