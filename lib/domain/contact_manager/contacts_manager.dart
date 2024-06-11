@@ -47,6 +47,8 @@ class ContactsManager {
 
   Future<void> reSyncContacts() async {
     _contactsNotifier.value = const Right(ContactsInitial());
+    _phonebookContactsNotifier.value =
+        const Right(GetPhonebookContactsInitial());
   }
 
   void initialSynchronizeContacts({

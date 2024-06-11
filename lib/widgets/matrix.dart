@@ -599,7 +599,9 @@ class MatrixState extends State<Matrix>
     ToMServerInformation tomServer,
     IdentityServerInformation? identityServer,
   ) {
-    Logs().d('MatrixState::setUpToMServices: $tomServer, $identityServer');
+    Logs().d(
+      'MatrixState::setUpToMServices: $tomServer, ${identityServer?.baseUrl}',
+    );
     _setUpToMServer(tomServer);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
@@ -711,22 +713,26 @@ class MatrixState extends State<Matrix>
       'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
     );
     if (client == null && client?.userID == null) return;
-    setUpAuthorization(client!);
     try {
-      final toMConfigurations = await getTomConfigurations(client.userID!);
+      final toMConfigurations = await getTomConfigurations(client!.userID!);
       Logs().d(
         'Matrix::_checkHomeserverExists: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
         _setUpToMServer(null);
         _setupAuthUrl();
+        setUpAuthorization(client);
       } else {
-        _setUpToMServer(toMConfigurations.tomServerInformation);
         _setupAuthUrl(url: toMConfigurations.authUrl);
+        setUpToMServices(
+          toMConfigurations.tomServerInformation,
+          toMConfigurations.identityServerInformation,
+        );
       }
     } catch (e) {
       _setUpToMServer(null);
       _setupAuthUrl();
+      setUpAuthorization(client!);
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
     Logs().d(
