@@ -32,10 +32,11 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
         context: context,
         controller: imagePickerController,
         backgroundImageCamera: const AssetImage("assets/verification.png"),
-        initialChildSize: 0.6,
+        initialChildSize: MediaPickerStyle.initialChildSize,
         permissionStatus: permissionStatusPhotos,
         assetBackgroundColor: LinagoraSysColors.material().background,
-        expandedWidget: const SizedBox(height: 50),
+        expandedWidget:
+            const SizedBox(height: MediaPickerStyle.expandedWidgetHeight),
         counterImageBuilder: (_) => const SizedBox.shrink(),
         goToSettingsWidget: Column(
           mainAxisAlignment: MainAxisAlignment.center,

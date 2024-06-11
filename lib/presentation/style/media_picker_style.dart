@@ -48,4 +48,6 @@ class MediaPickerStyle {
   static double photoPermissionFontSize = 16;
 
   static FontWeight photoPermissionFontWeight = FontWeight.w600;
+
+  static const double expandedWidgetHeight = 50;
 }
