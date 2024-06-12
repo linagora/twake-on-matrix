@@ -1,9 +1,11 @@
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 
 class UnencryptedImageWidget extends StatelessWidget {
   const UnencryptedImageWidget({
@@ -23,6 +25,17 @@ class UnencryptedImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
+      return AvifImage.network(
+        event
+            .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)!
+            .getDownloadLink(event.room.client)
+            .toString(),
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+      );
+    }
     return Image.network(
       event
           .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)!
@@ -62,7 +75,7 @@ class UnencryptedImageWidget extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.error,
+              Icons.arrow_downward,
               size: MessageContentStyle.iconErrorSize,
               color: Theme.of(context).colorScheme.onError,
             ),

@@ -105,4 +105,6 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
       return L10n.of(context)!.file.toUpperCase();
     }
   }
+
+  static const String avifMimeType = 'image/avif';
 }

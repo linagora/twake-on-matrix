@@ -3,10 +3,13 @@ import 'dart:typed_data';
 
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 import 'package:matrix/matrix.dart';
 
 import 'image_viewer.dart';
@@ -117,6 +120,17 @@ class _ImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (PlatformInfos.isWeb) {
+      if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
+        return AvifImage.network(
+          event
+              .attachmentOrThumbnailMxcUrl()!
+              .getDownloadLink(event.room.client)
+              .toString(),
+          height: height,
+          width: width,
+          fit: BoxFit.cover,
+        );
+      }
       return FutureBuilder(
         future: event.downloadAndDecryptAttachment(
           getThumbnail: true,
