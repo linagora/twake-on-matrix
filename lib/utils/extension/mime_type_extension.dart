@@ -107,4 +107,9 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
   }
 
   static const String avifMimeType = 'image/avif';
+
+  static const List<String> heicMimeTypes = [
+    'image/heic',
+    'image/heif',
+  ];
 }

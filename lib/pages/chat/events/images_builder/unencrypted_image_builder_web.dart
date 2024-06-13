@@ -75,7 +75,7 @@ class UnencryptedImageWidget extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.arrow_downward,
+              Icons.error,
               size: MessageContentStyle.iconErrorSize,
               color: Theme.of(context).colorScheme.onError,
             ),

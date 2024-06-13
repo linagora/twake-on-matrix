@@ -149,6 +149,14 @@ class _ImageWidget extends StatelessWidget {
       );
     } else {
       if (controller.filePath != null) {
+        if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
+          return AvifImage.file(
+            File(controller.filePath!),
+            height: height,
+            width: width,
+            fit: BoxFit.cover,
+          );
+        }
         return Image.file(
           File(controller.filePath!),
           fit: BoxFit.contain,

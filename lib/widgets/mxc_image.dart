@@ -3,11 +3,14 @@ import 'dart:typed_data';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/config/themes.dart';
@@ -304,6 +307,7 @@ class _MxcImageState extends State<MxcImage> {
                 : BorderRadius.zero,
             child: _ImageWidget(
               filePath: filePath,
+              event: widget.event,
               data: data,
               width: widget.width,
               height: widget.height,
@@ -326,6 +330,7 @@ class _ImageWidget extends StatelessWidget {
   final String? filePath;
   final Uint8List? data;
   final double? width;
+  final Event? event;
   final double? height;
   final bool needResize;
   final BoxFit? fit;
@@ -337,6 +342,7 @@ class _ImageWidget extends StatelessWidget {
     this.filePath,
     this.data,
     this.width,
+    this.event,
     this.height,
     required this.needResize,
     this.fit,
@@ -348,43 +354,97 @@ class _ImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return filePath != null && filePath!.isNotEmpty
-        ? Image.file(
-            File(filePath!),
+        ? _ImageNativeBuilder(
+            filePath: filePath,
             width: width,
             height: height,
-            cacheWidth: cacheWidth != null
-                ? cacheWidth!
-                : (width != null && needResize)
-                    ? context.getCacheSize(width!)
-                    : null,
-            cacheHeight: cacheHeight != null
-                ? cacheHeight!
-                : (height != null && needResize)
-                    ? context.getCacheSize(height!)
-                    : null,
+            cacheWidth: cacheWidth,
+            needResize: needResize,
+            cacheHeight: cacheHeight,
             fit: fit,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: imageErrorWidgetBuilder,
+            event: event,
+            imageErrorWidgetBuilder: imageErrorWidgetBuilder,
           )
         : data != null
-            ? Image.memory(
-                data!,
-                width: width,
-                height: height,
-                cacheWidth: cacheWidth != null
-                    ? cacheWidth!
-                    : (width != null && needResize)
-                        ? context.getCacheSize(width!)
-                        : null,
-                cacheHeight: cacheHeight != null
-                    ? cacheHeight!
-                    : (height != null && needResize)
-                        ? context.getCacheSize(height!)
-                        : null,
-                fit: fit,
-                filterQuality: FilterQuality.medium,
-                errorBuilder: imageErrorWidgetBuilder,
-              )
+            ? event?.mimeType == TwakeMimeTypeExtension.avifMimeType
+                ? AvifImage.memory(
+                    data!,
+                    height: height,
+                    width: width,
+                    fit: BoxFit.cover,
+                  )
+                : Image.memory(
+                    data!,
+                    width: width,
+                    height: height,
+                    cacheWidth: cacheWidth != null
+                        ? cacheWidth!
+                        : (width != null && needResize)
+                            ? context.getCacheSize(width!)
+                            : null,
+                    cacheHeight: cacheHeight != null
+                        ? cacheHeight!
+                        : (height != null && needResize)
+                            ? context.getCacheSize(height!)
+                            : null,
+                    fit: fit,
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: imageErrorWidgetBuilder,
+                  )
             : const SizedBox.shrink();
+  }
+}
+
+class _ImageNativeBuilder extends StatelessWidget {
+  const _ImageNativeBuilder({
+    this.filePath,
+    this.width,
+    this.height,
+    this.cacheWidth,
+    required this.needResize,
+    this.cacheHeight,
+    this.fit,
+    required this.imageErrorWidgetBuilder,
+    this.event,
+  });
+
+  final String? filePath;
+  final Event? event;
+  final double? width;
+  final double? height;
+  final int? cacheWidth;
+  final bool needResize;
+  final int? cacheHeight;
+  final BoxFit? fit;
+  final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    if (event?.mimeType == TwakeMimeTypeExtension.avifMimeType) {
+      return AvifImage.file(
+        File(filePath!),
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.file(
+      File(filePath!),
+      width: width,
+      height: height,
+      cacheWidth: cacheWidth != null
+          ? cacheWidth!
+          : (width != null && needResize)
+              ? context.getCacheSize(width!)
+              : null,
+      cacheHeight: cacheHeight != null
+          ? cacheHeight!
+          : (height != null && needResize)
+              ? context.getCacheSize(height!)
+              : null,
+      fit: fit,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: imageErrorWidgetBuilder,
+    );
   }
 }
