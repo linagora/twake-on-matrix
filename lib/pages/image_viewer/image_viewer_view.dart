@@ -161,6 +161,13 @@ class _ImageWidget extends StatelessWidget {
           File(controller.filePath!),
           fit: BoxFit.contain,
           filterQuality: FilterQuality.none,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.file(
+              File(controller.thumbnailFilePath!),
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.none,
+            );
+          },
         );
       } else {
         return const CupertinoActivityIndicator(
