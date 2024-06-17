@@ -71,7 +71,7 @@ class SupportedPreviewFileTypes {
     'video/mp4',
     'video/3gpp',
     'video/quicktime',
-    'vidoe/mov',
+    'video/mov',
     'video/mpeg',
   ];
 

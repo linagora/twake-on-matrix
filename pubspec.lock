@@ -1782,8 +1782,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "TW-1806/add-conditions-for-message-type"
-      resolved-ref: "904fb05d2ae70c152f83a76c49e81abcb66ae957"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: ad561ad17606bac31357a6107dbe977d806ed070
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

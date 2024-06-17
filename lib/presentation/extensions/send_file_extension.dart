@@ -376,6 +376,9 @@ extension SendFileExtension on Room {
                     'msgtype': messageType,
                     'body': fileInfo.fileName,
                     'filename': fileInfo.fileName,
+                    'info': {
+                      ...fileInfo.metadata,
+                    },
                   },
                   type: EventTypes.Message,
                   eventId: txid,
