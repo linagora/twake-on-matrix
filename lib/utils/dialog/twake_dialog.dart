@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
@@ -54,9 +57,30 @@ class TwakeDialog {
     );
   }
 
+  static Future<void> showStreamDialogFullScreen({
+    required Future Function() future,
+  }) async {
+    final twakeContext = TwakeApp.routerKey.currentContext;
+    if (twakeContext == null) {
+      Logs().e(
+        'TwakeLoadingDialog()::showStreamDialogFullScreen - Twake context is null',
+      );
+    }
+    return await showDialog(
+      context: twakeContext!,
+      builder: (context) => InitClientDialog(
+        future: future,
+      ),
+      barrierDismissible: true,
+      barrierColor: Colors.transparent,
+      useRootNavigator: false,
+    );
+  }
+
   static Future<bool?> showDialogFullScreen({
     required Widget Function() builder,
     bool barrierDismissible = true,
+    Color? barrierColor,
   }) {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -68,6 +92,7 @@ class TwakeDialog {
     return showDialog(
       context: twakeContext,
       builder: (context) => builder(),
+      barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
       useRootNavigator: false,
     );

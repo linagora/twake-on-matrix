@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
@@ -68,21 +70,25 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   }
 
   void _redirectRegistrationUrl(String url) async {
-    final homeserverExisted = await _homeserverExisted();
-    if (homeserverExisted) return;
-    matrix.loginHomeserverSummary =
-        await matrix.getLoginClient().checkHomeserver(
-              Uri.parse(AppConfig.twakeWorkplaceHomeserver),
-            );
-    final uri = await FlutterWebAuth2.authenticate(
-      url: url,
-      callbackUrlScheme: AppConfig.appOpenUrlScheme,
-      options: const FlutterWebAuth2Options(
-        intentFlags: ephemeralIntentFlags,
-      ),
-    );
-    Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
-    handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+    try {
+      final homeserverExisted = await _homeserverExisted();
+      if (homeserverExisted) return;
+      matrix.loginHomeserverSummary =
+          await matrix.getLoginClient().checkHomeserver(
+                Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+              );
+      final uri = await FlutterWebAuth2.authenticate(
+        url: url,
+        callbackUrlScheme: AppConfig.appOpenUrlScheme,
+        options: const FlutterWebAuth2Options(
+          intentFlags: ephemeralIntentFlags,
+        ),
+      );
+      Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
+      await handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+    } catch (e) {
+      Logs().e("TwakeIdController::_redirectRegistrationUrl: $e");
+    }
   }
 
   void onClickCreateTwakeId() {
