@@ -4,6 +4,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -141,18 +142,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -216,15 +217,17 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(ValueNotifier(const Left(GetContactsIsEmpty())));
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
-        ).thenReturn(ValueNotifier(const Right(GetPhonebookContactsInitial())));
+        ).thenReturn(
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
+        );
 
         mockContactsViewControllerMixin.initialFetchContacts(
           client: mockClient,
@@ -287,17 +290,19 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
-        ).thenReturn(ValueNotifier(const Right(GetPhonebookContactsInitial())));
+        ).thenReturn(
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
+        );
 
         mockContactsViewControllerMixin.initialFetchContacts(
           client: mockClient,
@@ -374,19 +379,21 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             const Left(GetContactsFailure(keyword: '', exception: dynamic)),
           ),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
-        ).thenReturn(ValueNotifier(const Right(GetPhonebookContactsInitial())));
+        ).thenReturn(
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
+        );
 
         mockContactsViewControllerMixin.initialFetchContacts(
           client: mockClient,
@@ -471,18 +478,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -533,18 +540,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -641,18 +648,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -703,18 +710,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -811,18 +818,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -873,18 +880,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -981,18 +988,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -1043,12 +1050,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(
               GetPresentationContactsSuccess(
                 contacts: tomContacts,
@@ -1061,7 +1068,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -1180,18 +1187,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -1242,12 +1249,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(
               GetPresentationContactsSuccess(
                 contacts: tomContacts,
@@ -1260,7 +1267,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -1335,12 +1342,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             const Right(
               GetPresentationContactsSuccess(
                 contacts: [],
@@ -1353,7 +1360,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Right(GetPhonebookContactsInitial())),
+          ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -1447,18 +1454,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -1522,15 +1529,17 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(ValueNotifier(const Left(GetContactsIsEmpty())));
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
-        ).thenReturn(ValueNotifier(const Left(GetPhonebookContactsIsEmpty())));
+        ).thenReturn(
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
+        );
 
         mockContactsViewControllerMixin.initialFetchContacts(
           client: mockClient,
@@ -1593,18 +1602,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(GetPhonebookContactsSuccess(contacts: phonebookContacts)),
           ),
         );
@@ -1694,12 +1703,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             const Left(GetContactsFailure(keyword: '', exception: dynamic)),
           ),
         );
@@ -1707,7 +1716,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             const Left(GetPhonebookContactsFailure(exception: dynamic)),
           ),
         );
@@ -1795,18 +1804,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -1857,18 +1866,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -1965,18 +1974,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
@@ -2027,18 +2036,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -2135,18 +2144,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(GetPhonebookContactsSuccess(contacts: phonebookContacts)),
           ),
         );
@@ -2199,18 +2208,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier([]));
+        ).thenReturn(ValueNotifierCustom([]));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -2307,18 +2316,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(GetPhonebookContactsSuccess(contacts: phonebookContacts)),
           ),
         );
@@ -2371,12 +2380,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(
               GetPresentationContactsSuccess(
                 contacts: tomContacts,
@@ -2389,7 +2398,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -2508,18 +2517,18 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(Right(GetContactsSuccess(contacts: tomContacts))),
+          ValueNotifierCustom(Right(GetContactsSuccess(contacts: tomContacts))),
         );
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(GetPhonebookContactsSuccess(contacts: phonebookContacts)),
           ),
         );
@@ -2572,12 +2581,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             Right(
               GetPresentationContactsSuccess(
                 contacts: tomContacts,
@@ -2590,7 +2599,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
@@ -2665,12 +2674,12 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationRecentContactNotifier,
-        ).thenReturn(ValueNotifier(recentContacts));
+        ).thenReturn(ValueNotifierCustom(recentContacts));
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
         ).thenReturn(
-          ValueNotifier(
+          ValueNotifierCustom(
             const Right(
               GetPresentationContactsSuccess(
                 contacts: [],
@@ -2683,7 +2692,7 @@ void main() {
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
-          ValueNotifier(const Left(GetPhonebookContactsIsEmpty())),
+          ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(

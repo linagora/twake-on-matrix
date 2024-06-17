@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -75,6 +76,8 @@ class Matrix extends StatefulWidget {
 class MatrixState extends State<Matrix>
     with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
+
+  final _contactsManager = getIt.get<ContactsManager>();
 
   int _activeClient = -1;
   String? activeBundle;
@@ -398,6 +401,7 @@ class MatrixState extends State<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
+    matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -423,6 +427,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     await setUpToMServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
+    matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -452,6 +457,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
+    matrixState.reSyncContacts();
     if (result.isSuccess) {
       onClientLoginStateChanged.add(
         ClientLoginStateEvent(
@@ -593,7 +599,9 @@ class MatrixState extends State<Matrix>
     ToMServerInformation tomServer,
     IdentityServerInformation? identityServer,
   ) {
-    Logs().d('MatrixState::setUpToMServices: $tomServer, $identityServer');
+    Logs().d(
+      'MatrixState::setUpToMServices: $tomServer, ${identityServer?.baseUrl}',
+    );
     _setUpToMServer(tomServer);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
@@ -637,6 +645,9 @@ class MatrixState extends State<Matrix>
 
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    Logs().d(
+      'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
+    );
     authorizationInterceptor.accessToken = client.accessToken;
   }
 
@@ -710,13 +721,18 @@ class MatrixState extends State<Matrix>
       if (toMConfigurations == null) {
         _setUpToMServer(null);
         _setupAuthUrl();
+        setUpAuthorization(client);
       } else {
-        _setUpToMServer(toMConfigurations.tomServerInformation);
         _setupAuthUrl(url: toMConfigurations.authUrl);
+        setUpToMServices(
+          toMConfigurations.tomServerInformation,
+          toMConfigurations.identityServerInformation,
+        );
       }
     } catch (e) {
       _setUpToMServer(null);
       _setupAuthUrl();
+      setUpAuthorization(client!);
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
     Logs().d(
@@ -801,6 +817,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _handleLastLogout() async {
+    matrixState.reSyncContacts();
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');
@@ -808,6 +825,10 @@ class MatrixState extends State<Matrix>
       TwakeApp.router.go('/home', extra: true);
     }
     await _deleteAllTomConfigurations();
+  }
+
+  Future<void> reSyncContacts() async {
+    _contactsManager.reSyncContacts();
   }
 
   @override
