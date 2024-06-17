@@ -289,18 +289,20 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         ),
       ),
       goToSettingsWidget: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
             ImagePaths.icPhotosSettingPermission,
-            width: 40,
-            height: 40,
+            width: MediaPickerStyle.photoPermissionIconSize,
+            height: MediaPickerStyle.photoPermissionIconSize,
           ),
           Text(
             L10n.of(context)!.tapToAllowAccessToYourGallery,
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(color: LinagoraRefColors.material().neutral),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: LinagoraRefColors.material().neutral,
+                  fontWeight: MediaPickerStyle.photoPermissionFontWeight,
+                  fontSize: MediaPickerStyle.photoPermissionFontSize,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
