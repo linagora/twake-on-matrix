@@ -59,7 +59,7 @@ class ChatListBodyView extends StatelessWidget {
                   key: Key(controller.activeSpaceId ?? 'Spaces'),
                 );
               }
-              if (controller.waitForFirstSync &&
+              if (controller.matrixState.waitForFirstSync &&
                   controller.activeClient.prevBatch != null) {
                 if (controller.chatListBodyIsEmpty) {
                   return Column(

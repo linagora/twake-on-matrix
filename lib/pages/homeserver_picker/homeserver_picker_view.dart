@@ -23,7 +23,9 @@ class HomeserverPickerView extends StatelessWidget {
           ? AppBar(
               leading: TwakeIconButton(
                 icon: Icons.arrow_back,
-                onTap: () => context.pop(),
+                onTap: controller.state != HomeserverState.loading
+                    ? () => context.pop()
+                    : null,
                 tooltip: L10n.of(context)!.back,
               ),
             )

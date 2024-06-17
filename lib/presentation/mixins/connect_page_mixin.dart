@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
+import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -22,7 +23,7 @@ mixin ConnectPageMixin {
 
   static const windowNameValue = '_self';
 
-  static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
+  static const redirectPublicPlatformOnWeb = 'post_registered_redirect_url';
 
   bool supportsFlow({
     required BuildContext context,
@@ -116,47 +117,54 @@ mixin ConnectPageMixin {
     );
   }
 
-  Future<void> ssoLoginAction({
+  Future<SsoLoginState> ssoLoginAction({
     required BuildContext context,
     required String id,
   }) async {
     if (PlatformInfos.isWeb) {
-      await ssoLoginActionWeb(context: context, id: id);
+      return ssoLoginActionWeb(context: context, id: id);
     } else {
-      ssoLoginActionMobile(context: context, id: id);
+      return ssoLoginActionMobile(context: context, id: id);
     }
   }
 
-  Future<void> ssoLoginActionWeb({
+  Future<SsoLoginState> ssoLoginActionWeb({
     required BuildContext context,
     required String id,
   }) async {
     await authenticateWithWebAuth(context: context, id: id);
+    return SsoLoginState.success;
   }
 
-  void ssoLoginActionMobile({
+  Future<SsoLoginState> ssoLoginActionMobile({
     required BuildContext context,
     required String id,
   }) async {
-    final result = await authenticateWithWebAuth(context: context, id: id);
-    final token = Uri.parse(result).queryParameters['loginToken'];
-    if (token?.isEmpty ?? false) return;
-    Matrix.of(context).loginType = LoginType.mLoginToken;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context)
-          .getLoginClient()
-          .login(
-            LoginType.mLoginToken,
-            token: token,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          )
-          .timeout(
-        AutoHomeserverPickerController.autoHomeserverPickerTimeout,
-        onTimeout: () {
-          throw CheckHomeserverTimeoutException();
-        },
-      ),
-    );
+    try {
+      final result = await authenticateWithWebAuth(context: context, id: id);
+      final token = Uri.parse(result).queryParameters['loginToken'];
+      if (token?.isEmpty ?? false) return SsoLoginState.tokenEmpty;
+      Matrix.of(context).loginType = LoginType.mLoginToken;
+      await TwakeDialog.showStreamDialogFullScreen(
+        future: () => Matrix.of(context)
+            .getLoginClient()
+            .login(
+              LoginType.mLoginToken,
+              token: token,
+              initialDeviceDisplayName: PlatformInfos.clientName,
+            )
+            .timeout(
+          AutoHomeserverPickerController.autoHomeserverPickerTimeout,
+          onTimeout: () {
+            throw CheckHomeserverTimeoutException();
+          },
+        ),
+      );
+      return SsoLoginState.success;
+    } catch (e) {
+      Logs().e('ConnectPageMixin:: ssoLoginActionMobil(): error: $e');
+      return SsoLoginState.error;
+    }
   }
 
   Future<void> tryLogoutSso(BuildContext context) async {
@@ -246,23 +254,40 @@ mixin ConnectPageMixin {
     return list;
   }
 
-  void handleTokenFromRegistrationSite({
+  Future<SsoLoginState> handleTokenFromRegistrationSite({
     required MatrixState matrix,
     required String uri,
   }) async {
-    final token = Uri.parse(uri).queryParameters['loginToken'];
-    Logs().d(
-      "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
-    );
-    if (token == null || token.isEmpty == true) return;
-    matrix.loginType = LoginType.mLoginToken;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => matrix.getLoginClient().login(
-            LoginType.mLoginToken,
-            token: token,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          ),
-    );
+    try {
+      final token = Uri.parse(uri).queryParameters['loginToken'];
+      Logs().d(
+        "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
+      );
+      if (token == null || token.isEmpty == true) {
+        return SsoLoginState.tokenEmpty;
+      }
+      matrix.loginType = LoginType.mLoginToken;
+      await TwakeDialog.showStreamDialogFullScreen(
+        future: () => matrix
+            .getLoginClient()
+            .login(
+              LoginType.mLoginToken,
+              token: token,
+              initialDeviceDisplayName: PlatformInfos.clientName,
+            )
+            .timeout(
+          AutoHomeserverPickerController.autoHomeserverPickerTimeout,
+          onTimeout: () {
+            throw CheckHomeserverTimeoutException();
+          },
+        ),
+      );
+      return SsoLoginState.success;
+    } catch (e) {
+      Logs()
+          .e('ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e');
+      return SsoLoginState.error;
+    }
   }
 
   void resetLocationPathWithLoginToken({
