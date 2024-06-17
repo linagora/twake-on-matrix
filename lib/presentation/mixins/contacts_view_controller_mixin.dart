@@ -134,6 +134,11 @@ mixin class ContactsViewControllerMixin {
       );
       presentationPhonebookContactNotifier.value =
           const Right(GetPhonebookContactsInitial());
+      _refreshRecentContacts(
+        client: client,
+        keyword: keyword.isEmpty ? null : keyword,
+        matrixLocalizations: matrixLocalizations,
+      );
       return;
     }
     _refreshContacts(keyword);
@@ -319,5 +324,16 @@ mixin class ContactsViewControllerMixin {
     presentationContactNotifier.dispose();
     presentationPhonebookContactNotifier.dispose();
     presentationRecentContactNotifier.dispose();
+  }
+
+  @visibleForTesting
+  void refreshAllContactsTest({
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) {
+    _refreshAllContacts(
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
   }
 }
