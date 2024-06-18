@@ -1,16 +1,18 @@
 import 'dart:async';
-
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_shared/chat_profile_info_shared.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
+import 'package:fluffychat/presentation/enum/chat/chat_details_screen_enum.dart';
+import 'package:fluffychat/presentation/mixins/chat_details_tab_mixin.dart';
+import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatProfileInfo extends StatefulWidget {
@@ -33,7 +35,12 @@ class ChatProfileInfo extends StatefulWidget {
   State<ChatProfileInfo> createState() => ChatProfileInfoController();
 }
 
-class ChatProfileInfoController extends State<ChatProfileInfo> {
+class ChatProfileInfoController extends State<ChatProfileInfo>
+    with
+        HandleVideoDownloadMixin,
+        PlayVideoActionMixin,
+        SingleTickerProviderStateMixin,
+        ChatDetailsTabMixin<ChatProfileInfo> {
   final _lookupMatchContactInteractor =
       getIt.get<LookupMatchContactInteractor>();
 
@@ -44,9 +51,13 @@ class ChatProfileInfoController extends State<ChatProfileInfo> {
     const Right(LookupContactsInitial()),
   );
 
+  @override
   Room? get room => widget.roomId != null
       ? Matrix.of(context).client.getRoomById(widget.roomId!)
       : null;
+
+  @override
+  ChatDetailsScreenEnum get chatType => ChatDetailsScreenEnum.direct;
 
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
@@ -61,31 +72,25 @@ class ChatProfileInfoController extends State<ChatProfileInfo> {
         );
   }
 
-  void goToProfileShared() {
-    if (widget.isDraftInfo || widget.roomId == null) return;
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) {
-          return ChatProfileInfoShared(
-            roomId: widget.roomId!,
-            closeRightColumn: widget.onBack,
-          );
-        },
-      ),
-    );
+  ScrollPhysics getScrollPhysics() {
+    if (tabList.isEmpty) {
+      return const NeverScrollableScrollPhysics();
+    } else {
+      return const ClampingScrollPhysics();
+    }
   }
 
   @override
   void initState() {
-    lookupMatchContactAction();
     super.initState();
+    lookupMatchContactAction();
   }
 
   @override
   void dispose() {
+    super.dispose();
     lookupContactNotifier.dispose();
     lookupContactNotifierSub?.cancel();
-    super.dispose();
   }
 
   @override
