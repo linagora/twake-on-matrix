@@ -1,10 +1,11 @@
 # Specify versions
 ARG FLUTTER_VERSION=3.22.2
-ARG OLM_VERSION=3.2.15
+ARG OLM_VERSION=3.2.16
+ARG NIX_VERSION=2.22.1
 
 # Building libolm
 # libolm only has amd64
-FROM --platform=linux/amd64 nixos/nix AS olm-builder
+FROM --platform=linux/amd64 nixos/nix:${NIX_VERSION} AS olm-builder
 ARG OLM_VERSION
 RUN nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/${OLM_VERSION}?host=gitlab.matrix.org\#javascript
 
