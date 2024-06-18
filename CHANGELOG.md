@@ -1,3 +1,32 @@
+## [2.5.9+2330] - 2024-06-18
+
+### Fixed
+- #1615 Not auto jump to lastest message when user send an attachment in case user seeing older message
+- members list always have to reload
+- #1793 Recent contacts aren't recent
+- #1356 Rework account picker
+- #1635 Irrelevant search results
+- #1698 Group details is small in width
+- #1855 hot-fix: fix the error l10n not found after build runner build
+- #1841 Can't close invitation dialog in Chat
+- #1787 Improve when leave group chat
+- #1812 Remove X from the search bar when it's empty
+- #1644 “Tap to allow access to your Gallery” button is not in center of its container
+- #1602 When typing and shift + ctrl to get a line break, the internal mouse cursor disappears
+- #1825 When adding members to a group chat, search results aren't displayed correctly
+- #1791 Improve display contacts on multiple homeserver
+- #1869 Can not open keyboard when tap on the textfield in IOS
+- #1806 Images are displayed weirdly if they didn't yet load
+- #1587 Can't open chat in chat list when click on notification
+- #1777 Changing greeting message: include tag in greeting message
+
+### Added
+- #1645 Missing counting selected image at send icon
+- Update store metadata
+- update of README.md
+- #979 Improve tom bootstrap dialog
+- #1836 Move the Shared media part to the Profile part
+
 ## [2.5.8+2330] - 2024-05-25
 - #1781 Upgrade to Flutter SDK 3.22.0
 
