@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as img;
@@ -70,8 +71,25 @@ extension SendFileExtension on Room {
       rethrow;
     }
 
-    final encryptedService = EncryptedService();
     final tempDir = await getTemporaryDirectory();
+
+    if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
+        fileInfo is ImageFileInfo) {
+      final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
+      final targetPath =
+          await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
+              .create();
+      await _generateThumbnail(fileInfo, targetPath: targetPath.path);
+      fileInfo = ImageFileInfo(
+        fileInfo.fileName,
+        targetPath.path,
+        await targetPath.length(),
+        width: fileInfo.width,
+        height: fileInfo.height,
+      );
+    }
+
+    final encryptedService = EncryptedService();
     final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
     final tempEncryptedFile =
         await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
@@ -358,6 +376,9 @@ extension SendFileExtension on Room {
                     'msgtype': messageType,
                     'body': fileInfo.fileName,
                     'filename': fileInfo.fileName,
+                    'info': {
+                      ...fileInfo.metadata,
+                    },
                   },
                   type: EventTypes.Message,
                   eventId: txid,

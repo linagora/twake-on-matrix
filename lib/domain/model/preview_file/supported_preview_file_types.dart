@@ -1,4 +1,5 @@
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 
 enum SupportedIconFileTypesEnum {
   image,
@@ -40,14 +41,38 @@ class SupportedPreviewFileTypes {
   static const imageMimeTypes = [
     'image/bmp',
     'image/jpeg',
+    'image/jpg',
     'image/gif',
     'image/png',
   ];
+
+  static const imageMimeTypesAndroid = [
+    ...imageMimeTypes,
+    'image/webp',
+  ];
+
+  static const imageMimeTypesIOS = [
+    ...imageMimeTypes,
+    'image/heic',
+    'image/heif',
+  ];
+
+  static List<String> get crossPlatformImageMimeTypes {
+    if (PlatformInfos.isAndroid) {
+      return imageMimeTypesAndroid;
+    } else if (PlatformInfos.isIOS) {
+      return imageMimeTypesIOS;
+    } else {
+      return imageMimeTypes;
+    }
+  }
 
   static const videoMimeTypes = [
     'video/mp4',
     'video/3gpp',
     'video/quicktime',
+    'video/mov',
+    'video/mpeg',
   ];
 
   static const audioMimeTypes = [
