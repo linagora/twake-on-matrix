@@ -198,10 +198,10 @@ class ChatDetailsView extends StatelessWidget {
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                      tabs: controller.chatDetailsPages().map((pages) {
+                      tabs: controller.tabList.map((page) {
                         return Tab(
                           child: Text(
-                            pages.page.getTitle(context),
+                            page.getTitle(context),
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.fade,
@@ -226,7 +226,7 @@ class ChatDetailsView extends StatelessWidget {
                 child: TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
                   controller: controller.tabController,
-                  children: controller.chatDetailsPages().map((pages) {
+                  children: controller.sharedPages().map((pages) {
                     return pages.child;
                   }).toList(),
                 ),
