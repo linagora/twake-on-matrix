@@ -120,6 +120,8 @@ extension RoomStatusExtension on Room {
           return L10n.of(context)!.onlineHourAgo(
             (timeOffline.inMinutes / 60).round(),
           );
+        } else {
+          return L10n.of(context)!.aWhileAgo;
         }
       }
     }

@@ -1376,6 +1376,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "aWhileAgo": "A while ago",
   "ok": "Ok",
   "@ok": {
     "type": "text",
