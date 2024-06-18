@@ -89,6 +89,8 @@ class DraftChatController extends State<DraftChat>
 
   ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
+  final ValueNotifier<Profile?> _userProfile = ValueNotifier(null);
+
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   final isSendingNotifier = ValueNotifier(false);
@@ -146,6 +148,9 @@ class DraftChatController extends State<DraftChat>
   void initState() {
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getProfile();
+    });
     super.initState();
   }
 
@@ -157,6 +162,7 @@ class DraftChatController extends State<DraftChat>
     focusSuggestionController.dispose();
     inputText.dispose();
     showEmojiPickerNotifier.dispose();
+    _userProfile.dispose();
     super.dispose();
   }
 
@@ -165,6 +171,22 @@ class DraftChatController extends State<DraftChat>
   void setActiveClient(Client c) => setState(() {
         Matrix.of(context).setActiveClient(c);
       });
+
+  Future<String> _triggerTagGreetingMessage() async {
+    if (_userProfile.value == null) {
+      return sendController.value.text;
+    } else {
+      final displayName = _userProfile.value?.displayName;
+      if (sendController.value.text.contains(displayName ?? '') == true) {
+        return sendController.value.text.replaceAll(
+          "${displayName ?? ''}!",
+          presentationContact?.matrixId ?? '',
+        );
+      } else {
+        return sendController.value.text;
+      }
+    }
+  }
 
   Future<void> sendText({
     OnRoomCreatedFailed onCreateRoomFailed,
@@ -175,11 +197,12 @@ class DraftChatController extends State<DraftChat>
       selection: const TextSelection.collapsed(offset: 0),
     );
     inputFocus.unfocus();
+    final textEvent = await _triggerTagGreetingMessage();
     isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) {
         room.sendTextEvent(
-          sendController.text,
+          textEvent,
         );
       },
       onRoomCreatedFailed: onCreateRoomFailed,
@@ -206,12 +229,11 @@ class DraftChatController extends State<DraftChat>
           final room = Matrix.of(context).client.getRoomById(success.roomId);
           if (room != null) {
             onRoomCreatedSuccess?.call(room);
-            final user = await _getProfile();
             context.go(
               '/rooms/${room.id}/',
               extra: ChatRouterInputArgument(
                 type: ChatRouterInputArgumentType.draft,
-                data: user.displayName ??
+                data: _userProfile.value?.displayName ??
                     presentationContact?.displayName ??
                     room.name,
               ),
@@ -361,26 +383,28 @@ class DraftChatController extends State<DraftChat>
   }
 
   Future<void> handleDraftAction(BuildContext context) async {
-    Profile? profile;
-    try {
-      profile = await _getProfile();
-    } catch (e) {
-      Logs().e('Error getting profile: $e');
-    }
     inputFocus.requestFocus();
     sendController.value = TextEditingValue(
       text: L10n.of(context)!.draftChatHookPhrase(
-        profile?.displayName ?? presentationContact?.displayName ?? '',
+        _userProfile.value?.displayName ??
+            presentationContact?.displayName ??
+            '',
       ),
     );
     onInputBarChanged(sendController.text);
   }
 
-  Future<Profile> _getProfile() async {
-    return await Matrix.of(context).client.getProfileFromUserId(
-          presentationContact!.matrixId!,
-          getFromRooms: false,
-        );
+  Future<void> _getProfile() async {
+    try {
+      final profile = await Matrix.of(context).client.getProfileFromUserId(
+            presentationContact!.matrixId!,
+            getFromRooms: false,
+          );
+      _userProfile.value = profile;
+    } catch (e) {
+      Logs().e('Error _getProfile profile: $e');
+      _userProfile.value = null;
+    }
   }
 
   void hideKeyboardChatScreen() {

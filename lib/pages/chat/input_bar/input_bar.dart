@@ -41,6 +41,7 @@ class InputBar extends StatefulWidget {
   final ValueKey? typeAheadKey;
   final ValueNotifier<bool>? showEmojiPickerNotifier;
   final SuggestionsController<Map<String, String?>>? suggestionsController;
+  final bool isDraftChat;
 
   const InputBar({
     this.room,
@@ -60,6 +61,7 @@ class InputBar extends StatefulWidget {
     this.rawKeyboardFocusNode,
     this.suggestionsController,
     this.showEmojiPickerNotifier,
+    this.isDraftChat = false,
     super.key,
   });
 
@@ -261,7 +263,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
   }
 
   void insertSuggestion(Map<String, String?> suggestion) {
-    if (widget.room!.isDirectChat) return;
+    if (widget.room!.isDirectChat && !widget.isDraftChat) return;
     final replaceText = widget.controller!.text
         .substring(0, widget.controller!.selection.baseOffset);
     var startText = '';
