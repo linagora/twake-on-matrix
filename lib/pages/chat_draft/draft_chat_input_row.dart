@@ -110,6 +110,7 @@ class DraftChatInputRow extends StatelessWidget {
       ),
       onChanged: onInputBarChanged,
       focusSuggestionController: focusSuggestionController,
+      isDraftChat: true,
     );
   }
 }
