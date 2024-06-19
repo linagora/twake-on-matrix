@@ -115,10 +115,14 @@ extension RoomStatusExtension on Room {
           return L10n.of(context)!.onlineMinAgo(
             currentDateTime.difference(lastActiveDateTime).inMinutes,
           );
-        } else if (lastActiveDateTime.isLessThanTenHoursAgo()) {
+        } else if (lastActiveDateTime.isLessThanADayAgo()) {
           final timeOffline = currentDateTime.difference(lastActiveDateTime);
           return L10n.of(context)!.onlineHourAgo(
             (timeOffline.inMinutes / 60).round(),
+          );
+        } else if (lastActiveDateTime.isLessThan30DaysAgo()) {
+          return L10n.of(context)!.onlineDayAgo(
+            currentDateTime.difference(lastActiveDateTime).inDays,
           );
         } else {
           return L10n.of(context)!.aWhileAgo;

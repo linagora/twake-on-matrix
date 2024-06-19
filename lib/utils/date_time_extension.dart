@@ -160,9 +160,14 @@ extension DateTimeExtension on DateTime {
     return other.difference(this) < const Duration(hours: 1);
   }
 
-  bool isLessThanTenHoursAgo({DateTime? other}) {
+  bool isLessThanADayAgo({DateTime? other}) {
     other ??= DateTime.now();
-    return other.difference(this) < const Duration(hours: 10);
+    return other.difference(this) < const Duration(hours: 24);
+  }
+
+  bool isLessThan30DaysAgo({DateTime? other}) {
+    other ??= DateTime.now();
+    return other.difference(this) < const Duration(days: 30);
   }
 
   String _formatDateWithLocale(BuildContext context, String pattern) {
