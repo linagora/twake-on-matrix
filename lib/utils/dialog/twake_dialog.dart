@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
 
@@ -18,7 +20,11 @@ class TwakeDialog {
 
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
-      TwakeApp.router.routerDelegate.pop();
+      if (TwakeApp.routerKey.currentContext != null) {
+        Navigator.pop(TwakeApp.routerKey.currentContext!);
+      } else {
+        Navigator.pop(context);
+      }
     } else {
       Navigator.pop(context);
     }
@@ -26,7 +32,7 @@ class TwakeDialog {
 
   static void showLoadingDialog(BuildContext context) {
     showGeneralDialog(
-      barrierColor: Colors.black.withOpacity(0.1),
+      barrierColor: LinagoraSysColors.material().onPrimary.withOpacity(0.75),
       useRootNavigator: PlatformInfos.isWeb,
       transitionDuration: const Duration(milliseconds: 700),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -61,41 +67,70 @@ class TwakeDialog {
         stackTrace: StackTrace.current,
       );
     }
+
+    if (PlatformInfos.isWeb) {
+      return _dialogFullScreenWeb(future: future, context: twakeContext);
+    } else {
+      return _dialogFullScreenMobile(future: future, context: twakeContext);
+    }
+  }
+
+  static Future<LoadingDialogResult<T>> _dialogFullScreenWeb<T>({
+    required Future<T> Function() future,
+    required BuildContext context,
+  }) async {
     return await showFutureLoadingDialog(
-      context: twakeContext,
+      context: context,
       future: future,
       loadingIcon: LottieBuilder.asset(
-        'assets/twake_loading.json',
-        width: PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
-        height: PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
+        ImagePaths.lottieTwakeLoading,
+        width: lottieSizeWeb,
+        height: lottieSizeWeb,
       ),
-      barrierColor: Colors.black.withOpacity(0.1),
-      loadingTitle: L10n.of(twakeContext)!.loading,
-      loadingTitleStyle: PlatformInfos.isWeb
-          ? Theme.of(twakeContext).textTheme.titleLarge
-          : Theme.of(twakeContext).textTheme.titleMedium,
-      maxWidth: !PlatformInfos.isMobile ? maxWidthLoadingDialogWeb : null,
-      errorTitle: L10n.of(twakeContext)!.errorDialogTitle,
-      errorTitleStyle: PlatformInfos.isWeb
-          ? Theme.of(twakeContext).textTheme.titleLarge
-          : Theme.of(twakeContext).textTheme.titleMedium,
-      errorBackLabel: L10n.of(twakeContext)!.cancel,
-      errorBackLabelStyle: PlatformInfos.isWeb
-          ? Theme.of(twakeContext).textTheme.titleLarge?.copyWith(
-                color: Theme.of(twakeContext).colorScheme.primary,
-              )
-          : Theme.of(twakeContext).textTheme.titleMedium?.copyWith(
-                color: Theme.of(twakeContext).colorScheme.primary,
-              ),
-      errorNextLabel: L10n.of(twakeContext)!.next,
-      errorNextLabelStyle: PlatformInfos.isWeb
-          ? Theme.of(twakeContext).textTheme.titleLarge?.copyWith(
-                color: Theme.of(twakeContext).colorScheme.onPrimary,
-              )
-          : Theme.of(twakeContext).textTheme.titleMedium?.copyWith(
-                color: Theme.of(twakeContext).colorScheme.onPrimary,
-              ),
-      backgroundNextLabel: Theme.of(twakeContext).colorScheme.primary,
+      barrierColor: LinagoraSysColors.material().onPrimary.withOpacity(0.75),
+      loadingTitle: L10n.of(context)!.loading,
+      loadingTitleStyle: Theme.of(context).textTheme.titleLarge,
+      maxWidth: maxWidthLoadingDialogWeb,
+      errorTitle: L10n.of(context)!.errorDialogTitle,
+      errorTitleStyle: Theme.of(context).textTheme.titleLarge,
+      errorBackLabel: L10n.of(context)!.cancel,
+      errorBackLabelStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+      errorNextLabel: L10n.of(context)!.next,
+      errorNextLabelStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+      backgroundNextLabel: Theme.of(context).colorScheme.primary,
+    );
+  }
+
+  static Future<LoadingDialogResult<T>> _dialogFullScreenMobile<T>({
+    required Future<T> Function() future,
+    required BuildContext context,
+  }) async {
+    return await showFutureLoadingDialog(
+      context: context,
+      future: future,
+      loadingIcon: LottieBuilder.asset(
+        ImagePaths.lottieTwakeLoading,
+        width: lottieSizeMobile,
+        height: lottieSizeMobile,
+      ),
+      barrierColor: LinagoraSysColors.material().onPrimary.withOpacity(0.75),
+      loadingTitle: L10n.of(context)!.loading,
+      loadingTitleStyle: Theme.of(context).textTheme.titleMedium,
+      errorTitle: L10n.of(context)!.errorDialogTitle,
+      errorTitleStyle: Theme.of(context).textTheme.titleMedium,
+      errorBackLabel: L10n.of(context)!.cancel,
+      errorBackLabelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+      errorNextLabel: L10n.of(context)!.next,
+      errorNextLabelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+      backgroundNextLabel: Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -175,7 +210,7 @@ class ProgressDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LottieBuilder.asset(
-            'assets/twake_loading.json',
+            ImagePaths.lottieTwakeLoading,
             width: lottieSize,
             height: lottieSize,
           ),

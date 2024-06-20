@@ -1294,8 +1294,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: twake-custom-style-dialog
-      resolved-ref: "78bfc205d6879a15a39603d724d0be4f75ca631c"
+      ref: main
+      resolved-ref: "08e1e697919615410f8a855e500ef5617f90333b"
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"

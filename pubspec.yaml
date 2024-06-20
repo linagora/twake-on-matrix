@@ -58,7 +58,7 @@ dependencies:
   future_loading_dialog:
     git:
       url: git@github.com:linagora/future-loading-dialog.git
-      ref: twake-custom-style-dialog
+      ref: main
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
