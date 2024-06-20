@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -7,9 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
 
 class TwakeDialog {
+  static const double maxWidthLoadingDialogWeb = 448;
+
+  static const double lottieSizeWeb = 80;
+
+  static const double lottieSizeMobile = 48;
+
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
       TwakeApp.router.routerDelegate.pop();
@@ -20,14 +26,18 @@ class TwakeDialog {
 
   static void showLoadingDialog(BuildContext context) {
     showGeneralDialog(
+      barrierColor: Colors.black.withOpacity(0.1),
       useRootNavigator: PlatformInfos.isWeb,
       transitionDuration: const Duration(milliseconds: 700),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
           opacity: Tween<double>(begin: 0, end: 1).animate(animation),
-          child: const PopScope(
+          child: PopScope(
             canPop: false,
-            child: ProgressDialog(),
+            child: ProgressDialog(
+              lottieSize:
+                  PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
+            ),
           ),
         );
       },
@@ -54,6 +64,38 @@ class TwakeDialog {
     return await showFutureLoadingDialog(
       context: twakeContext,
       future: future,
+      loadingIcon: LottieBuilder.asset(
+        'assets/twake_loading.json',
+        width: PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
+        height: PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
+      ),
+      barrierColor: Colors.black.withOpacity(0.1),
+      loadingTitle: L10n.of(twakeContext)!.loading,
+      loadingTitleStyle: PlatformInfos.isWeb
+          ? Theme.of(twakeContext).textTheme.titleLarge
+          : Theme.of(twakeContext).textTheme.titleMedium,
+      maxWidth: !PlatformInfos.isMobile ? maxWidthLoadingDialogWeb : null,
+      errorTitle: L10n.of(twakeContext)!.errorDialogTitle,
+      errorTitleStyle: PlatformInfos.isWeb
+          ? Theme.of(twakeContext).textTheme.titleLarge
+          : Theme.of(twakeContext).textTheme.titleMedium,
+      errorBackLabel: L10n.of(twakeContext)!.cancel,
+      errorBackLabelStyle: PlatformInfos.isWeb
+          ? Theme.of(twakeContext).textTheme.titleLarge?.copyWith(
+                color: Theme.of(twakeContext).colorScheme.primary,
+              )
+          : Theme.of(twakeContext).textTheme.titleMedium?.copyWith(
+                color: Theme.of(twakeContext).colorScheme.primary,
+              ),
+      errorNextLabel: L10n.of(twakeContext)!.next,
+      errorNextLabelStyle: PlatformInfos.isWeb
+          ? Theme.of(twakeContext).textTheme.titleLarge?.copyWith(
+                color: Theme.of(twakeContext).colorScheme.onPrimary,
+              )
+          : Theme.of(twakeContext).textTheme.titleMedium?.copyWith(
+                color: Theme.of(twakeContext).colorScheme.onPrimary,
+              ),
+      backgroundNextLabel: Theme.of(twakeContext).colorScheme.primary,
     );
   }
 
@@ -118,22 +160,32 @@ class TwakeDialog {
 }
 
 class ProgressDialog extends StatelessWidget {
-  const ProgressDialog({super.key});
+  final double lottieSize;
+
+  const ProgressDialog({
+    super.key,
+    required this.lottieSize,
+  });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Row(
+      backgroundColor: Colors.transparent,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircularProgressIndicator.adaptive(),
+          LottieBuilder.asset(
+            'assets/twake_loading.json',
+            width: lottieSize,
+            height: lottieSize,
           ),
-          Expanded(
-            child: Text(
-              L10n.of(context)!.loadingPleaseWait,
-              overflow: TextOverflow.ellipsis,
-            ),
+          const SizedBox(height: 24),
+          Text(
+            L10n.of(context)!.loading,
+            style: PlatformInfos.isWeb
+                ? Theme.of(context).textTheme.titleLarge
+                : Theme.of(context).textTheme.titleMedium,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

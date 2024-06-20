@@ -1293,11 +1293,12 @@ packages:
   future_loading_dialog:
     dependency: "direct main"
     description:
-      name: future_loading_dialog
-      sha256: "6227dddb32ad5c7d233a54668f862acb4beb5a5e0dde072de372347cc0799e63"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.4"
+      path: "."
+      ref: twake-custom-style-dialog
+      resolved-ref: "78bfc205d6879a15a39603d724d0be4f75ca631c"
+      url: "git@github.com:linagora/future-loading-dialog.git"
+    source: git
+    version: "0.3.0"
   gal:
     dependency: "direct main"
     description:
