@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -12,6 +13,7 @@ import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
@@ -257,6 +259,42 @@ class ChatController extends State<Chat>
 
   SuggestionsController<Map<String, String?>> suggestionsController =
       SuggestionsController();
+
+  ValueNotifier<CachedPresence?> cachedPresenceNotifier = ValueNotifier(null);
+
+  final StreamController<ConnectivityResult>
+      connectivityResultStreamController = StreamController.broadcast();
+
+  StreamController<CachedPresence> cachedPresenceStreamController =
+      StreamController.broadcast();
+
+  Future<void> initCachedPresence() async {
+    cachedPresenceNotifier.value = room?.directChatPresence;
+    if (room?.directChatMatrixID != null) {
+      Matrix.of(context).client.onlatestPresenceChanged.stream.listen((event) {
+        if (event.userid == room!.directChatMatrixID) {
+          Logs().v(
+            'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
+          );
+          cachedPresenceStreamController.add(event);
+        }
+      });
+      try {
+        final getPresenceResponse = await client.getPresence(
+          room!.directChatMatrixID!,
+        );
+
+        cachedPresenceNotifier.value = CachedPresence.fromPresenceResponse(
+          getPresenceResponse,
+          room!.directChatMatrixID!,
+        );
+      } catch (e) {
+        Logs().e('Failed to get presence', e);
+        cachedPresenceNotifier.value =
+            CachedPresence.neverSeen(room!.directChatMatrixID!);
+      }
+    }
+  }
 
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
@@ -1923,6 +1961,7 @@ class ChatController extends State<Chat>
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
+      initCachedPresence();
     });
   }
 
@@ -1968,6 +2007,7 @@ class ChatController extends State<Chat>
     keyboardVisibilitySubscription?.cancel();
     InViewNotifierListCustom.of(context)?.dispose();
     replyEventNotifier.dispose();
+    cachedPresenceStreamController.close();
     super.dispose();
   }
 
