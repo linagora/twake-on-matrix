@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../utils/localized_exception_extension.dart';
 
 class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+  const SignupPage({super.key});
 
   @override
   SignupPageController createState() => SignupPageController();

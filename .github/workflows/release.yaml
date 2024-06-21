@@ -4,7 +4,7 @@ on:
       - "v*.*.*"
 
 env:
-  FLUTTER_VERSION: 3.16.5
+  FLUTTER_VERSION: 3.22.2
   XCODE_VERSION: ^15.0.1
 
 name: Release
@@ -21,7 +21,7 @@ jobs:
           - os: android
             runner: ubuntu-latest
           - os: ios
-            runner: macos-13
+            runner: macos-latest
       fail-fast: false
 
     steps:
@@ -52,7 +52,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: "temurin" # See 'Supported distributions' for available options
-          java-version: "11"
+          java-version: "17"
 
       - name: Select Xcode version
         if: matrix.os == 'ios'

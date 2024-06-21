@@ -8,11 +8,11 @@ class ChatEmojiPicker extends StatelessWidget {
   final void Function() emojiPickerBackspace;
 
   const ChatEmojiPicker({
-    Key? key,
+    super.key,
     required this.showEmojiPickerNotifier,
     required this.onEmojiSelected,
     required this.emojiPickerBackspace,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

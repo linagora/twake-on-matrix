@@ -19,7 +19,7 @@ import 'input_bar/input_bar.dart';
 class ChatInputRow extends StatelessWidget {
   final ChatController controller;
 
-  const ChatInputRow(this.controller, {Key? key}) : super(key: key);
+  const ChatInputRow(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class ChatInputRow extends StatelessWidget {
                 Container(
                   height: ChatInputRowStyle.chatInputRowHeight,
                   alignment: Alignment.center,
-                  child: _ChatAccountPicker(controller),
+                  child: ChatAccountPicker(controller),
                 ),
               Expanded(
                 child:
@@ -206,10 +206,10 @@ class ActionSelectModeWidget extends StatelessWidget {
   }
 }
 
-class _ChatAccountPicker extends StatelessWidget {
+class ChatAccountPicker extends StatelessWidget {
   final ChatController controller;
 
-  const _ChatAccountPicker(this.controller, {Key? key}) : super(key: key);
+  const ChatAccountPicker(this.controller, {super.key});
 
   void _popupMenuButtonSelected(String mxid) {
     final client = controller.matrix!.currentBundle!

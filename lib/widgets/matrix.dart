@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
+import 'package:fluffychat/presentation/model/client_login_state_event.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -25,9 +28,6 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
@@ -62,8 +62,8 @@ class Matrix extends StatefulWidget {
     this.child,
     required this.clients,
     this.queryParameters,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   MatrixState createState() => MatrixState();
@@ -77,15 +77,19 @@ class MatrixState extends State<Matrix>
     with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
 
+  final _contactsManager = getIt.get<ContactsManager>();
+
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
   HomeserverSummary? loginHomeserverSummary;
-  String? authUrl;
+  String? _authUrl;
   XFile? loginAvatar;
   String? loginUsername;
   LoginType? loginType;
   bool? loginRegistrationSupported;
+
+  bool waitForFirstSync = false;
 
   bool get twakeSupported {
     final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
@@ -96,11 +100,16 @@ class MatrixState extends State<Matrix>
 
   BackgroundPush? backgroundPush;
 
+  bool get isValidActiveClient =>
+      _activeClient >= 0 && _activeClient < widget.clients.length;
+
+  String? get authUrl => _authUrl;
+
   Client get client {
     if (widget.clients.isEmpty) {
       widget.clients.add(getLoginClient());
     }
-    if (_activeClient < 0 || _activeClient >= widget.clients.length) {
+    if (!isValidActiveClient) {
       return currentBundle!.first!;
     }
     return widget.clients[_activeClient];
@@ -120,12 +129,14 @@ class MatrixState extends State<Matrix>
   RequestTokenResponse? currentThreepidCreds;
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
-    final index = widget.clients.indexWhere((client) => client == newClient);
+    final index = widget.clients.indexWhere(
+      (client) => newClient != null && client.userID == newClient.userID,
+    );
     if (index != -1) {
       _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
-      _setUpToMServicesWhenChangingActiveClient(newClient);
+      await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient!);
       return SetActiveClientState.success;
     } else {
@@ -189,7 +200,7 @@ class MatrixState extends State<Matrix>
         .stream
         .where((l) => l == LoginState.loggedIn)
         .first
-        .then((_) => _handleAddAnotherAccount());
+        .then((state) => _handleAddAnotherAccount(state));
     return candidate;
   }
 
@@ -247,6 +258,8 @@ class MatrixState extends State<Matrix>
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
+  final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
+      StreamController.broadcast();
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
 
@@ -373,15 +386,10 @@ class MatrixState extends State<Matrix>
     } else {
       if (state == LoginState.loggedIn) {
         Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
-        _handleFirstLoggedIn(client);
+        _handleFirstLoggedIn(client, state);
       } else {
-        Logs().v('[MATRIX]:_listenLoginStateChanged:: Log out successful');
-        if (PlatformInfos.isMobile) {
-          _deletePersistActiveAccount(state);
-          TwakeApp.router.go('/home/twakeWelcome');
-        } else {
-          TwakeApp.router.go('/home', extra: true);
-        }
+        Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
+        await _handleLastLogout();
       }
     }
   }
@@ -392,7 +400,8 @@ class MatrixState extends State<Matrix>
   ) async {
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
-    ClientManager.removeClientNameFromStore(currentClient.clientName);
+    await ClientManager.removeClientNameFromStore(currentClient.clientName);
+    matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -411,18 +420,24 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _handleFirstLoggedIn(Client newActiveClient) {
-    setUpToMServicesInLogin(newActiveClient);
-    _storePersistActiveAccount(newActiveClient);
-    TwakeApp.router.go(
-      '/rooms',
-      extra: LoggedInBodyArgs(
-        newActiveClient: newActiveClient,
+  Future<void> _handleFirstLoggedIn(
+    Client newActiveClient,
+    LoginState loginState,
+  ) async {
+    waitForFirstSync = false;
+    await setUpToMServicesInLogin(newActiveClient);
+    await _storePersistActiveAccount(newActiveClient);
+    matrixState.reSyncContacts();
+    onClientLoginStateChanged.add(
+      ClientLoginStateEvent(
+        client: client,
+        loginState: loginState,
+        multipleAccountLoginType: MultipleAccountLoginType.firstLoggedIn,
       ),
     );
   }
 
-  Future<void> _handleAddAnotherAccount() async {
+  Future<void> _handleAddAnotherAccount(LoginState loginState) async {
     Logs().d(
       'MatrixState::_handleAddAnotherAccount() - Add another account successful',
     );
@@ -439,20 +454,24 @@ class MatrixState extends State<Matrix>
       _loginClientCandidate!.clientName,
     );
     if (activeClient == null) return;
-    setUpToMServicesInLogin(activeClient);
+    waitForFirstSync = false;
+    await setUpToMServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
+    matrixState.reSyncContacts();
     if (result.isSuccess) {
-      TwakeApp.router.go(
-        '/rooms',
-        extra: LoggedInOtherAccountBodyArgs(
-          newActiveClient: activeClient,
+      onClientLoginStateChanged.add(
+        ClientLoginStateEvent(
+          client: client,
+          loginState: loginState,
+          multipleAccountLoginType:
+              MultipleAccountLoginType.otherAccountLoggedIn,
         ),
       );
       _loginClientCandidate = null;
     }
   }
 
-  void _deletePersistActiveAccount(LoginState state) async {
+  Future<void> _deletePersistActiveAccount() async {
     try {
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
       await multipleAccountRepository.deletePersistActiveAccount();
@@ -561,12 +580,15 @@ class MatrixState extends State<Matrix>
     if (client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
-      if (toMConfigurations == null) return;
+      if (toMConfigurations == null) {
+        _setupAuthUrl();
+        return;
+      }
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
       );
-      authUrl = toMConfigurations.authUrl;
+      _setupAuthUrl(url: toMConfigurations.authUrl);
       loginType = toMConfigurations.loginType;
     } catch (e) {
       Logs().e('MatrixState::_retrieveToMConfiguration: $e');
@@ -577,7 +599,9 @@ class MatrixState extends State<Matrix>
     ToMServerInformation tomServer,
     IdentityServerInformation? identityServer,
   ) {
-    Logs().d('MatrixState::setUpToMServices: $tomServer, $identityServer');
+    Logs().d(
+      'MatrixState::setUpToMServices: $tomServer, ${identityServer?.baseUrl}',
+    );
     _setUpToMServer(tomServer);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
@@ -588,7 +612,7 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void setUpToMServicesInLogin(Client client) {
+  Future<void> setUpToMServicesInLogin(Client client) async {
     final tomServer = loginHomeserverSummary?.tomServer;
     Logs().d('MatrixState::setUpToMServicesInLogin: $tomServer');
     if (tomServer != null) {
@@ -598,9 +622,7 @@ class MatrixState extends State<Matrix>
         loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
     final homeServer =
         loginHomeserverSummary?.discoveryInformation?.mHomeserver;
-    final newAuthUrl = loginHomeserverSummary?.discoveryInformation
-        ?.additionalProperties["m.authentication"]?["issuer"];
-    authUrl = newAuthUrl is String ? newAuthUrl : null;
+    _setupAuthUrl();
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -608,7 +630,7 @@ class MatrixState extends State<Matrix>
       _setUpHomeServer(homeServer.baseUrl);
     }
     if (tomServer != null) {
-      _storeToMConfiguration(
+      await _storeToMConfiguration(
         client,
         ToMConfigurations(
           tomServerInformation: tomServer,
@@ -623,6 +645,9 @@ class MatrixState extends State<Matrix>
 
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    Logs().d(
+      'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
+    );
     authorizationInterceptor.accessToken = client.accessToken;
   }
 
@@ -657,10 +682,10 @@ class MatrixState extends State<Matrix>
         .changeBaseUrl(identityServer.baseUrl.toString());
   }
 
-  void _storeToMConfiguration(
+  Future<void> _storeToMConfiguration(
     Client client,
     ToMConfigurations config,
-  ) {
+  ) async {
     try {
       Logs().e(
         'Matrix::_storeToMConfiguration: clientName - ${client.clientName}',
@@ -671,7 +696,7 @@ class MatrixState extends State<Matrix>
       if (client.userID == null) return;
       final ToMConfigurationsRepository configurationRepository =
           getIt.get<ToMConfigurationsRepository>();
-      configurationRepository.saveTomConfigurations(
+      await configurationRepository.saveTomConfigurations(
         client.userID!,
         config,
       );
@@ -683,7 +708,7 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void _setUpToMServicesWhenChangingActiveClient(Client? client) async {
+  Future<void> _setUpToMServicesWhenChangingActiveClient(Client? client) async {
     Logs().d(
       'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
     );
@@ -695,11 +720,19 @@ class MatrixState extends State<Matrix>
       );
       if (toMConfigurations == null) {
         _setUpToMServer(null);
+        _setupAuthUrl();
+        setUpAuthorization(client);
       } else {
-        _setUpToMServer(toMConfigurations.tomServerInformation);
+        _setupAuthUrl(url: toMConfigurations.authUrl);
+        setUpToMServices(
+          toMConfigurations.tomServerInformation,
+          toMConfigurations.identityServerInformation,
+        );
       }
     } catch (e) {
       _setUpToMServer(null);
+      _setupAuthUrl();
+      setUpAuthorization(client!);
       Logs().e('Matrix::_checkHomeserverExists: error - $e');
     }
     Logs().d(
@@ -713,12 +746,12 @@ class MatrixState extends State<Matrix>
       final persistActiveAccount =
           await multipleAccountRepository.getPersistActiveAccount();
       if (persistActiveAccount == null) {
-        _storePersistActiveAccount(client);
+        await _storePersistActiveAccount(client);
         return;
       } else {
         final newActiveClient = getClientByUserId(persistActiveAccount);
         if (newActiveClient != null) {
-          setActiveClient(newActiveClient);
+          await setActiveClient(newActiveClient);
         }
       }
     } catch (e) {
@@ -731,10 +764,10 @@ class MatrixState extends State<Matrix>
   Future<void> _storePersistActiveAccount(Client newClient) async {
     if (newClient.userID == null) return;
     try {
-      Logs().e(
+      Logs().d(
         'Matrix::_storePersistActiveAccount: clientName - ${newClient.clientName}',
       );
-      Logs().e(
+      Logs().d(
         'Matrix::_storePersistActiveAccount: userId - ${newClient.userID}',
       );
       final MultipleAccountRepository multipleAccountRepository =
@@ -755,6 +788,47 @@ class MatrixState extends State<Matrix>
 
   void onWindowBlur(html.Event e) {
     didChangeAppLifecycleState(AppLifecycleState.paused);
+  }
+
+  Future<void> _setupAuthUrl({
+    String? url,
+  }) async {
+    if (url != null) {
+      Logs().e(
+        'Matrix::_setupAuthUrl: newAuthUrl - $url',
+      );
+      _authUrl = url;
+    } else {
+      final newAuthUrl = loginHomeserverSummary?.discoveryInformation
+          ?.additionalProperties["m.authentication"]?["issuer"];
+      Logs().e(
+        'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
+      );
+      _authUrl = newAuthUrl is String ? newAuthUrl : url;
+    }
+  }
+
+  Future<void> _deleteAllTomConfigurations() async {
+    final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
+    await hiveCollectionToMDatabase.clear();
+    Logs().d(
+      'MatrixState::_deleteAllTomConfigurations: Delete ToM database success',
+    );
+  }
+
+  Future<void> _handleLastLogout() async {
+    matrixState.reSyncContacts();
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      TwakeApp.router.go('/home/twakeWelcome');
+    } else {
+      TwakeApp.router.go('/home', extra: true);
+    }
+    await _deleteAllTomConfigurations();
+  }
+
+  Future<void> reSyncContacts() async {
+    _contactsManager.reSyncContacts();
   }
 
   @override
@@ -829,6 +903,7 @@ class MatrixState extends State<Matrix>
     onKeyVerificationRequestSub.values.map((s) => s.cancel());
     onLoginStateChanged.values.map((s) => s.cancel());
     onNotification.values.map((s) => s.cancel());
+    onClientLoginStateChanged.close();
     client.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
@@ -853,16 +928,11 @@ class MatrixState extends State<Matrix>
 
 class FixedThreepidCreds extends ThreepidCreds {
   FixedThreepidCreds({
-    required String sid,
-    required String clientSecret,
-    String? idServer,
-    String? idAccessToken,
-  }) : super(
-          sid: sid,
-          clientSecret: clientSecret,
-          idServer: idServer,
-          idAccessToken: idAccessToken,
-        );
+    required super.sid,
+    required super.clientSecret,
+    super.idServer,
+    super.idAccessToken,
+  });
 
   @override
   Map<String, dynamic> toJson() {

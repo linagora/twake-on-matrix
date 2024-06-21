@@ -2690,7 +2690,7 @@
   "@noImagesFound": {},
   "captionForImagesIsNotSupportYet": "Caption for images is not support yet.",
   "@captionForImagesIsNotSupportYet": {},
-  "tapToAllowAccessToYourGallery": "Tap to allow access to your Gallery",
+  "tapToAllowAccessToYourGallery": "Tap to allow gallery access",
   "@tapToAllowAccessToYourGallery": {},
   "tapToAllowAccessToYourCamera": "You can enable camera access in the Settings app to make video calls in",
   "@tapToAllowAccessToYourCamera": {},
@@ -3031,6 +3031,11 @@
     }
   },
   "downloading": "Downloading",
+  "settingUpYourTwake": "Setting up your Twake\nIt could take a while",
+  "performingAutomaticalLogin": "Performing automatical login  via SSO",
+  "backingUpYourMessage": "Preparing server environment for backing up your messages",
+  "recoveringYourEncryptedChats": "Recovering your encrypted chats",
+  "configureDataEncryption": "Configure data encryption",
   "configurationNotFound": "The configuration data not found",
   "fileSavedToGallery": "File saved to Gallery",
   "saveFileToGalleryError": "Failed to save file to Gallery",
@@ -3059,5 +3064,9 @@
     "placeholders": {
       "user": {}
     }
-  }
+  },
+  "switchAccounts": "Switch accounts",
+  "selectAccount": "Select account",
+  "privacyPolicy": "Privacy Policy",
+  "byContinuingYourAgreeingToOur": "By continuing, you're agreeing to our"
 }

@@ -26,6 +26,8 @@ class FileTileWidgetStyle {
 
   TextStyle highlightTextStyle(BuildContext context) {
     return TextStyle(
+      // TODO: change to colorSurface when its approved
+      // ignore: deprecated_member_use
       color: Theme.of(context).colorScheme.onBackground,
       fontWeight: FontWeight.bold,
       backgroundColor: CssColor.fromCss('gold'),

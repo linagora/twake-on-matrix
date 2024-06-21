@@ -1,6 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class TwakeHeaderStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -16,8 +16,6 @@ class TwakeHeaderStyle {
 
   static double get avatarFontSizeInAppBar => 14.0;
   static const double avatarOfMultipleAccountSize = 48.0;
-  static const double logoAppOfMultipleHeight = 28.0;
-  static const double logoAppOfMultipleWidth = 152.0;
 
   static bool isDesktop(BuildContext context) => responsive.isDesktop(context);
 
@@ -46,4 +44,9 @@ class TwakeHeaderStyle {
 
   static const EdgeInsetsDirectional counterSelectionPadding =
       EdgeInsetsDirectional.only(start: 4);
+
+  static TextStyle? selectAccountTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          );
 }

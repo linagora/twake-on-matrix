@@ -6,7 +6,7 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
-import 'package:flutter/foundation.dart';
+import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 
 class ContactsManager {
   static const int _lookupChunkSize = 50;
@@ -17,24 +17,25 @@ class ContactsManager {
 
   bool _doNotShowWarningContactsBannerAgain = false;
 
-  final ValueNotifier<Either<Failure, Success>> _contactsNotifier =
-      ValueNotifier(const Right(ContactsInitial()));
+  final ValueNotifierCustom<Either<Failure, Success>> _contactsNotifier =
+      ValueNotifierCustom(const Right(ContactsInitial()));
 
-  final ValueNotifier<Either<Failure, Success>> _phonebookContactsNotifier =
-      ValueNotifier(const Right(GetPhonebookContactsInitial()));
+  final ValueNotifierCustom<Either<Failure, Success>>
+      _phonebookContactsNotifier =
+      ValueNotifierCustom(const Right(GetPhonebookContactsInitial()));
 
   ContactsManager({
     required this.getTomContactsInteractor,
     required this.phonebookContactInteractor,
   });
 
-  ValueNotifier<Either<Failure, Success>> getContactsNotifier() =>
+  ValueNotifierCustom<Either<Failure, Success>> getContactsNotifier() =>
       _contactsNotifier;
 
-  ValueNotifier<Either<Failure, Success>> getPhonebookContactsNotifier() =>
-      _phonebookContactsNotifier;
+  ValueNotifierCustom<Either<Failure, Success>>
+      getPhonebookContactsNotifier() => _phonebookContactsNotifier;
 
-  bool get _isInitial =>
+  bool get _isSynchronizedTomContacts =>
       _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
 
   bool get isDoNotShowWarningContactsBannerAgain =>
@@ -44,10 +45,16 @@ class ContactsManager {
     _doNotShowWarningContactsBannerAgain = value;
   }
 
+  Future<void> reSyncContacts() async {
+    _contactsNotifier.value = const Right(ContactsInitial());
+    _phonebookContactsNotifier.value =
+        const Right(GetPhonebookContactsInitial());
+  }
+
   void initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
   }) async {
-    if (!_isInitial) {
+    if (!_isSynchronizedTomContacts) {
       return;
     }
     _getAllContacts(
@@ -76,6 +83,7 @@ class ContactsManager {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
+
     phonebookContactInteractor
         .execute(lookupChunkSize: _lookupChunkSize)
         .listen(

@@ -28,6 +28,13 @@ class GetPhonebookContactsSuccess extends Success {
   List<Object?> get props => [contacts];
 }
 
+class GetPhonebookContactsIsEmpty extends Failure {
+  const GetPhonebookContactsIsEmpty();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class GetPhonebookContactsFailure extends Failure {
   final dynamic exception;
 

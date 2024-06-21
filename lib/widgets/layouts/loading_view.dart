@@ -7,7 +7,7 @@ import 'package:fluffychat/utils/update_checker_no_store.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class LoadingView extends StatelessWidget {
-  const LoadingView({Key? key}) : super(key: key);
+  const LoadingView({super.key});
 
   @override
   Widget build(BuildContext context) {

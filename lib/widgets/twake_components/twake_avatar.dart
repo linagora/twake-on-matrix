@@ -20,8 +20,8 @@ class TwakeAvatar extends StatelessWidget {
     this.onTap,
     this.client,
     this.fontSize = 18,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

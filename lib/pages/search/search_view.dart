@@ -2,6 +2,7 @@ import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
 import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/pages/search/search.dart';
+import 'package:fluffychat/pages/search/search_external_contact.dart';
 import 'package:fluffychat/pages/search/search_text_field.dart';
 import 'package:fluffychat/pages/search/search_view_style.dart';
 import 'package:fluffychat/pages/search/server_search_view.dart';
@@ -12,6 +13,7 @@ import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class SearchView extends StatelessWidget {
   final SearchController searchController;
@@ -35,7 +37,7 @@ class SearchView extends StatelessWidget {
             builder: (context, value, emptyChild) =>
                 value.fold((failure) => emptyChild!, (success) {
               switch (success.runtimeType) {
-                case PreSearchRecentContactsSuccess:
+                case const (PreSearchRecentContactsSuccess):
                   final data = success as PreSearchRecentContactsSuccess;
                   return ValueListenableBuilder(
                     valueListenable: searchController.textEditingController,
@@ -47,7 +49,7 @@ class SearchView extends StatelessWidget {
                         flexibleSpace: FlexibleSpaceBar(
                           title: PreSearchRecentContactsContainer(
                             searchController: searchController,
-                            contactsList: data.users,
+                            recentRooms: data.rooms,
                           ),
                           titlePadding:
                               const EdgeInsetsDirectional.only(start: 0.0),
@@ -125,6 +127,13 @@ class SearchView extends StatelessWidget {
                 .recentAndContactsNotifier,
             builder: (context, contacts, emptyChild) {
               if (contacts.isEmpty) {
+                final keyword = searchController.textEditingController.text;
+                if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+                  return SearchExternalContactWidget(
+                    keyword: keyword,
+                    searchController: searchController,
+                  );
+                }
                 return emptyChild!;
               }
 

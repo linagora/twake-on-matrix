@@ -22,7 +22,7 @@ import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
@@ -375,7 +375,11 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
-                const HomeserverPicker(),
+                TwakeWelcome(
+                  arg: state.extra is TwakeWelcomeArg?
+                      ? state.extra as TwakeWelcomeArg?
+                      : null,
+                ),
               ),
               routes: [
                 GoRoute(
@@ -387,20 +391,11 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'twakeWelcome',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const TwakeWelcome(),
-                  ),
-                  redirect: loggedInRedirect,
-                ),
-                GoRoute(
                   path: 'homeserverpicker',
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     const HomeserverPicker(),
                   ),
-                  redirect: loggedInRedirect,
                 ),
               ],
             ),

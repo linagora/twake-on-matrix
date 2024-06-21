@@ -1,5 +1,5 @@
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';

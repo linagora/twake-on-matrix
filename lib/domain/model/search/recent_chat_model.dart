@@ -9,12 +9,9 @@ class RecentChatSearchModel extends SearchModel {
   const RecentChatSearchModel(
     this.roomId, {
     this.roomSummary,
-    String? displayName,
-    String? directChatMatrixID,
-  }) : super(
-          displayName: displayName,
-          directChatMatrixID: directChatMatrixID,
-        );
+    super.displayName,
+    super.directChatMatrixID,
+  });
 
   @override
   String get id => roomId ?? '';

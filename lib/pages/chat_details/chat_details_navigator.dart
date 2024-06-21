@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsRoutes {
@@ -17,12 +17,12 @@ class ChatDetailsNavigator extends StatelessWidget {
   final bool isInStack;
 
   const ChatDetailsNavigator({
-    Key? key,
+    super.key,
     this.closeRightColumn,
     this.roomId,
     this.contact,
     required this.isInStack,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

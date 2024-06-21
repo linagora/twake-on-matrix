@@ -11,8 +11,8 @@ class MaxWidthBody extends StatelessWidget {
     this.child,
     this.maxWidth = 600,
     this.withScrolling = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   @override
   Widget build(BuildContext context) {
     return SafeArea(

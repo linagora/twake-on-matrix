@@ -59,6 +59,7 @@ class ChatSearchController extends State<ChatSearch> {
       ),
     );
     serverSearchController.initSearch(
+      context: context,
       onSearchEncryptedMessage: sameTypeEventsBuilderController != null
           ? _listenSearchEncryptedMessage
           : null,

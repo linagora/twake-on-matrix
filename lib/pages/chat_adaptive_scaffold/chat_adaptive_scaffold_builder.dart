@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -38,6 +37,8 @@ class ChatAdaptiveScaffoldBuilderController
     extends State<ChatAdaptiveScaffoldBuilder> {
   final rightColumnTypeNotifier = ValueNotifier<RightColumnType?>(null);
 
+  final responsiveUtils = ResponsiveUtils();
+
   void hideRightColumn() {
     if (PlatformInfos.isMobile) {
       Navigator.of(context).pop();
@@ -70,8 +71,7 @@ class ChatAdaptiveScaffoldBuilderController
 
   @override
   Widget build(BuildContext context) {
-    const breakpoint = ResponsiveUtils.minTabletWidth +
-        MessageStyle.messageBubbleDesktopMaxWidth;
+    final breakpoint = responsiveUtils.getMinDesktopWidth(context);
     return ValueListenableBuilder(
       valueListenable: rightColumnTypeNotifier,
       builder: (context, rightColumnType, body) {
@@ -80,7 +80,7 @@ class ChatAdaptiveScaffoldBuilderController
           child: AdaptiveLayout(
             body: SlotLayout(
               config: {
-                const WidthPlatformBreakpoint(
+                WidthPlatformBreakpoint(
                   end: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
@@ -96,7 +96,7 @@ class ChatAdaptiveScaffoldBuilderController
                     ],
                   ),
                 ),
-                const WidthPlatformBreakpoint(
+                WidthPlatformBreakpoint(
                   begin: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
@@ -117,13 +117,13 @@ class ChatAdaptiveScaffoldBuilderController
             secondaryBody: rightColumnType != null
                 ? SlotLayout(
                     config: {
-                      const WidthPlatformBreakpoint(
+                      WidthPlatformBreakpoint(
                         end: breakpoint,
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointMobileKey,
                         builder: null,
                       ),
-                      const WidthPlatformBreakpoint(
+                      WidthPlatformBreakpoint(
                         begin: breakpoint,
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,

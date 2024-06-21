@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_saver
   file_selector_windows
+  flutter_avif_windows
   flutter_webrtc
   gal
   irondash_engine_context
@@ -18,6 +19,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   record_windows
   screen_brightness_windows
+  share_plus
   super_native_extensions
   url_launcher_windows
   window_to_front

@@ -17,8 +17,7 @@ class MessageReactions extends StatelessWidget {
   final Event event;
   final Timeline timeline;
 
-  const MessageReactions(this.event, this.timeline, {Key? key})
-      : super(key: key);
+  const MessageReactions(this.event, this.timeline, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +58,12 @@ class MessageReactions extends StatelessWidget {
 
 class ReactionsList extends StatelessWidget {
   const ReactionsList({
-    Key? key,
+    super.key,
     required this.reactionList,
     required this.allReactionEvents,
     required this.event,
     required this.client,
-  }) : super(key: key);
+  });
 
   final List<ReactionEntry> reactionList;
   final Set<Event> allReactionEvents;
@@ -94,36 +93,34 @@ class ReactionsList extends StatelessWidget {
         );
       },
       children: [
-        ...reactionList
-            .map(
-              (r) => _Reaction(
-                reactionKey: r.key,
-                count: r.count,
-                reacted: r.reacted,
-                onTap: () {
-                  if (r.reacted) {
-                    final evt = allReactionEvents.firstWhereOrNull((e) {
-                      final relatedTo = e.content['m.relates_to'];
-                      return e.senderId == e.room.client.userID &&
-                          relatedTo is Map &&
-                          relatedTo['key'] == r.key;
-                    });
-                    if (evt != null) {
-                      TwakeDialog.showFutureLoadingDialogFullScreen(
-                        future: () => evt.redactEvent(),
-                      );
-                    }
-                  } else {
-                    event.room.sendReaction(event.eventId, r.key!);
-                  }
-                },
-                onLongPress: () async => await _AdaptableReactorsDialog(
-                  client: client,
-                  reactionEntry: r,
-                ).show(context),
-              ),
-            )
-            .toList(),
+        ...reactionList.map(
+          (r) => _Reaction(
+            reactionKey: r.key,
+            count: r.count,
+            reacted: r.reacted,
+            onTap: () {
+              if (r.reacted) {
+                final evt = allReactionEvents.firstWhereOrNull((e) {
+                  final relatedTo = e.content['m.relates_to'];
+                  return e.senderId == e.room.client.userID &&
+                      relatedTo is Map &&
+                      relatedTo['key'] == r.key;
+                });
+                if (evt != null) {
+                  TwakeDialog.showFutureLoadingDialogFullScreen(
+                    future: () => evt.redactEvent(),
+                  );
+                }
+              } else {
+                event.room.sendReaction(event.eventId, r.key!);
+              }
+            },
+            onLongPress: () async => await _AdaptableReactorsDialog(
+              client: client,
+              reactionEntry: r,
+            ).show(context),
+          ),
+        ),
         if (allReactionEvents.any((e) => e.status.isSending))
           SizedBox(
             width: MessageReactionsStyle.loadingReactionSize,
@@ -244,10 +241,9 @@ class _AdaptableReactorsDialog extends StatelessWidget {
   final ReactionEntry? reactionEntry;
 
   const _AdaptableReactorsDialog({
-    Key? key,
     this.client,
     this.reactionEntry,
-  }) : super(key: key);
+  });
 
   Future<bool?> show(BuildContext context) => PlatformInfos.isCupertinoStyle
       ? showCupertinoDialog(

@@ -46,8 +46,8 @@ class ImageBubble extends StatelessWidget {
     this.noResizeThumbnail = false,
     this.isPreview = true,
     this.imageData,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const animationSwitcherDuration = Duration(seconds: 1);
 

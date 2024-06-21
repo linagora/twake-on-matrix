@@ -132,7 +132,7 @@ class SearchableAppBar extends StatelessWidget {
                 ] else ...[
                   if (displayBackButton)
                     TwakeIconButton(
-                      onTap: () => context.pop(),
+                      onTap: () => Navigator.of(context).pop(),
                       tooltip: L10n.of(context)!.close,
                       icon: Icons.close,
                       paddingAll: SearchableAppBarStyle.closeButtonPaddingAll,
@@ -195,6 +195,8 @@ class SearchableAppBar extends StatelessWidget {
         prefixIcon: !isFullScreen
             ? Icon(
                 Icons.search_outlined,
+                // TODO: change to colorSurface when its approved
+                // ignore: deprecated_member_use
                 color: Theme.of(context).colorScheme.onBackground,
               )
             : null,

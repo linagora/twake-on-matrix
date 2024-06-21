@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/style/media_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -31,24 +32,27 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
         context: context,
         controller: imagePickerController,
         backgroundImageCamera: const AssetImage("assets/verification.png"),
-        initialChildSize: 0.6,
+        initialChildSize: MediaPickerStyle.initialChildSize,
         permissionStatus: permissionStatusPhotos,
         assetBackgroundColor: LinagoraSysColors.material().background,
-        expandedWidget: const SizedBox(height: 50),
+        expandedWidget:
+            const SizedBox(height: MediaPickerStyle.expandedWidgetHeight),
         counterImageBuilder: (_) => const SizedBox.shrink(),
         goToSettingsWidget: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
               ImagePaths.icPhotosSettingPermission,
-              width: 40,
-              height: 40,
+              width: MediaPickerStyle.photoPermissionIconSize,
+              height: MediaPickerStyle.photoPermissionIconSize,
             ),
             Text(
               L10n.of(context)!.tapToAllowAccessToYourGallery,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(color: LinagoraRefColors.material().neutral),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: LinagoraRefColors.material().neutral,
+                    fontWeight: MediaPickerStyle.photoPermissionFontWeight,
+                    fontSize: MediaPickerStyle.photoPermissionFontSize,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],

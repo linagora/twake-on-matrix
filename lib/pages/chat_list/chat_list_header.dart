@@ -12,18 +12,22 @@ class ChatListHeader extends StatelessWidget {
   final VoidCallback? onOpenSearchPageInMultipleColumns;
 
   const ChatListHeader({
-    Key? key,
+    super.key,
     required this.controller,
     this.onOpenSearchPageInMultipleColumns,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TwakeHeader(
-          controller: controller,
           onClearSelection: controller.onClickClearSelection,
+          client: controller.activeClient,
+          selectModeNotifier: controller.selectModeNotifier,
+          conversationSelectionNotifier:
+              controller.conversationSelectionNotifier,
+          onClickAvatar: controller.onClickAvatar,
         ),
         Container(
           height: ChatListHeaderStyle.searchBarContainerHeight,

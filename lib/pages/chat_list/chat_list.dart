@@ -6,12 +6,9 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
-import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
@@ -26,7 +23,9 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
@@ -53,12 +52,12 @@ class ChatList extends StatefulWidget {
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   const ChatList({
-    Key? key,
+    super.key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
-  }) : super(key: key);
+  });
 
   @override
   ChatListController createState() => ChatListController();
@@ -74,8 +73,6 @@ class ChatListController extends State<ChatList>
         PopupMenuWidgetMixin,
         GoToGroupChatMixin,
         TwakeContextMenuMixin {
-  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
-
   final responsive = getIt.get<ResponsiveUtils>();
 
   final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
@@ -84,10 +81,6 @@ class ChatListController extends State<ChatList>
 
   final ValueNotifier<SelectMode> selectModeNotifier =
       ValueNotifier(SelectMode.normal);
-
-  final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
-    Profile(userId: ''),
-  );
 
   final ValueNotifier<List<ConversationSelectionPresentation>>
       conversationSelectionNotifier = ValueNotifier([]);
@@ -107,8 +100,6 @@ class ChatListController extends State<ChatList>
   QueryPublicRoomsResponse? roomSearchResult;
 
   bool isTorBrowser = false;
-
-  bool waitForFirstSync = false;
 
   bool scrolledToTop = true;
 
@@ -309,12 +300,13 @@ class ChatListController extends State<ChatList>
   Future<void> toggleMutedSelections() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
+        final newRuleState = pushRuleState;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = activeClient.getRoomById(conversation.roomId)!;
-          if (room.pushRuleState == pushRuleState) continue;
+          if (room.pushRuleState == newRuleState) continue;
           await activeClient
               .getRoomById(conversation.roomId)!
-              .setPushRuleState(pushRuleState);
+              .setPushRuleState(newRuleState);
         }
       },
     );
@@ -416,51 +408,43 @@ class ChatListController extends State<ChatList>
     DioCacheInterceptorForClient(userId).setup(getIt);
   }
 
+  Future<void> _trySync() async {
+    if (widget.adaptiveScaffoldBodyArgs is LoggedInBodyArgs ||
+        widget.adaptiveScaffoldBodyArgs is LoggedInOtherAccountBodyArgs) {
+      _waitForFirstSyncAfterLogin();
+    } else {
+      _waitForFirstSync();
+    }
+  }
+
+  Future<void> _waitForFirstSyncAfterLogin() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final result = await TomBootstrapDialog(
+        client: activeClient,
+      ).show();
+
+      setState(() {});
+
+      if (result == false) {
+        await BootstrapDialog(client: activeClient).show();
+      }
+    });
+
+    if (!mounted) return;
+    setState(() {
+      matrixState.waitForFirstSync = true;
+    });
+  }
+
   Future<void> _waitForFirstSync() async {
     await activeClient.roomsLoading;
     await activeClient.accountDataLoading;
     if (activeClient.userID != null) {
       await setupAdditionalDioCacheOption(activeClient.userID!);
     }
-    if (activeClient.prevBatch == null) {
-      await activeClient.onSync.stream.first;
-      await activeClient.initCompleter?.future;
-
-      // Display first login bootstrap if enabled
-      if (activeClient.encryption?.keyManager.enabled == true) {
-        Logs().d(
-          'ChatList::_waitForFirstSync: Showing bootstrap dialog when encryption is enabled',
-        );
-        if (await activeClient.encryption?.keyManager.isCached() == false ||
-            await activeClient.encryption?.crossSigning.isCached() == false ||
-            activeClient.isUnknownSession && mounted) {
-          final recoveryWords = await _getRecoveryWords();
-          if (recoveryWords != null) {
-            await TomBootstrapDialog(
-              client: activeClient,
-              recoveryWords: recoveryWords,
-            ).show();
-          } else {
-            Logs().d(
-              'ChatListController::_waitForFirstSync(): no recovery existed then call bootstrap',
-            );
-            await BootstrapDialog(client: activeClient).show();
-          }
-        }
-      } else {
-        Logs().d(
-          'ChatListController::_waitForFirstSync(): encryption is not enabled',
-        );
-        final recoveryWords = await _getRecoveryWords();
-        await TomBootstrapDialog(
-          client: activeClient,
-          wipeRecovery: recoveryWords != null,
-        ).show();
-      }
-    }
     if (!mounted) return;
     setState(() {
-      waitForFirstSync = true;
+      matrixState.waitForFirstSync = true;
     });
   }
 
@@ -545,19 +529,28 @@ class ChatListController extends State<ChatList>
     BuildContext context,
     Room room,
     TapDownDetails details,
-  ) {
+  ) async {
     final offset = details.globalPosition;
-    showTwakeContextMenu(
+    final listPopupActions = _popupMenuActions(room);
+    final listContextActions = _mapPopupMenuActionsToContextMenuActions(
+      context,
+      room,
+      listPopupActions,
+    );
+    final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
-      builder: (context) => _popupMenuActionTile(context, room),
+      listActions: listContextActions,
     );
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        listPopupActions[selectedActionIndex],
+        room,
+      );
+    }
   }
 
-  List<Widget> _popupMenuActionTile(
-    BuildContext context,
-    Room room,
-  ) {
+  List<ChatListSelectionActions> _popupMenuActions(Room room) {
     final listAction = [
       if (!room.isInvitation) ...[
         ChatListSelectionActions.read,
@@ -565,15 +558,18 @@ class ChatListController extends State<ChatList>
       ],
       ChatListSelectionActions.mute,
     ];
-    return listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitleContextMenuSelection(context, room),
-        iconAction: action.getIconContextMenuSelection(room),
-        onCallbackAction: () => _handleClickOnContextMenuItem(
-          action,
-          room,
-        ),
+    return listAction;
+  }
+
+  List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions(
+    BuildContext context,
+    Room room,
+    List<ChatListSelectionActions> listActions,
+  ) {
+    return listActions.map((action) {
+      return ContextMenuAction(
+        name: action.getTitleContextMenuSelection(context, room),
+        icon: action.getIconContextMenuSelection(room),
       );
     }).toList();
   }
@@ -713,15 +709,6 @@ class ChatListController extends State<ChatList>
     isTorBrowser = isTor;
   }
 
-  Future<RecoveryWords?> _getRecoveryWords() async {
-    return await _getRecoveryWordsInteractor.execute().then(
-          (either) => either.fold(
-            (failure) => null,
-            (success) => success.words,
-          ),
-        );
-  }
-
   Future<void> dehydrate() =>
       SettingsSecurityController.dehydrateDevice(context);
 
@@ -748,27 +735,8 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
-    );
-    Logs().d(
-      'ChatList::_getCurrentProfile() - currentProfile: $profile',
-    );
-    currentProfileNotifier.value = profile;
-  }
-
-  void onGoToAccountSettings() {
-    widget.onOpenSettings?.call();
-  }
-
   void onClickAvatar() {
-    MultipleAccountsPickerController(context: context)
-        .showMultipleAccountsPicker(
-      activeClient,
-      onGoToAccountSettings: onGoToAccountSettings,
-    );
+    context.push('/rooms/profile');
   }
 
   void _handleRecovery() {
@@ -776,7 +744,9 @@ class ChatListController extends State<ChatList>
       Logs().d(
         "ChatList::_handleAnotherAccountAdded(): Handle recovery data for another account",
       );
-      _waitForFirstSync();
+      if (!matrixState.waitForFirstSync) {
+        _trySync();
+      }
     }
   }
 
@@ -791,7 +761,6 @@ class ChatListController extends State<ChatList>
     );
     if (newActiveClient != null && newActiveClient.userID != null) {
       setState(() {
-        _getCurrentProfile(newActiveClient);
         _clientStream.add(newActiveClient);
         _handleRecovery();
       });
@@ -806,16 +775,16 @@ class ChatListController extends State<ChatList>
     }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
-    _waitForFirstSync();
+    if (!matrixState.waitForFirstSync) {
+      _trySync();
+    }
     _hackyWebRTCFixForWeb();
-    _getCurrentProfile(activeClient);
     // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
     // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
         await matrixState.retrievePersistedActiveClient();
-        _getCurrentProfile(activeClient);
       }
     });
     _checkTorBrowser();

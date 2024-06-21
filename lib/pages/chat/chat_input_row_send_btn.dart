@@ -12,11 +12,11 @@ class ChatInputRowSendBtn extends StatelessWidget {
   final void Function() onTap;
 
   const ChatInputRowSendBtn({
-    Key? key,
+    super.key,
     required this.inputText,
     required this.onTap,
     this.sendingNotifier,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

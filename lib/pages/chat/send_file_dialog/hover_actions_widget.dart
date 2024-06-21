@@ -20,6 +20,8 @@ class SendFileDialogActionsWidget extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          // TODO: change to colorSurface when its approved
+          // ignore: deprecated_member_use
           color: Theme.of(context).colorScheme.background,
         ),
         margin: SendFileDialogStyle.paddingRemoveButton,

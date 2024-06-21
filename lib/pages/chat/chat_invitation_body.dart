@@ -9,7 +9,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
   final ChatController controller;
 
-  const ChatInvitationBody(this.controller, {Key? key}) : super(key: key);
+  const ChatInvitationBody(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +47,8 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
         child: Container(
           width: ChatInvitationBodyStyle.dialogWidth,
           decoration: BoxDecoration(
+            // TODO: change to colorSurface when its approved
+            // ignore: deprecated_member_use
             color: Theme.of(context).colorScheme.background,
             borderRadius: BorderRadius.circular(
               ChatInvitationBodyStyle.dialogBorderRadius,
@@ -130,21 +132,21 @@ class InvitationAcceptButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
+        backgroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.primary,
         ),
-        foregroundColor: MaterialStateProperty.all<Color>(
+        foregroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.onPrimary,
         ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
               ChatInvitationBodyStyle.dialogButtonBorderRadius,
             ),
           ),
         ),
-        side: MaterialStateProperty.all<BorderSide>(BorderSide.none),
-        fixedSize: MaterialStateProperty.all<Size>(
+        side: WidgetStateProperty.all<BorderSide>(BorderSide.none),
+        fixedSize: WidgetStateProperty.all<Size>(
           const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
       ),
@@ -166,21 +168,21 @@ class InvitationRejectButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
+        backgroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.surface,
         ),
-        foregroundColor: MaterialStateProperty.all<Color>(
+        foregroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.error,
         ),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
               ChatInvitationBodyStyle.dialogButtonBorderRadius,
             ),
           ),
         ),
-        side: MaterialStateProperty.all<BorderSide>(BorderSide.none),
-        fixedSize: MaterialStateProperty.all<Size>(
+        side: WidgetStateProperty.all<BorderSide>(BorderSide.none),
+        fixedSize: WidgetStateProperty.all<Size>(
           const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
       ),
@@ -201,7 +203,7 @@ class InvitationBottomBar extends StatelessWidget {
       padding: const EdgeInsets.all(
         ChatInvitationBodyStyle.chatInvitationBottomBarPadding,
       ),
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       height: ChatInvitationBodyStyle.chatInvitationBottomBarHeight,
       child: Center(
         child: Row(

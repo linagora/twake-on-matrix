@@ -24,7 +24,7 @@ class HtmlMessage extends StatelessWidget {
   final Widget? bottomWidgetSpan;
 
   const HtmlMessage({
-    Key? key,
+    super.key,
     required this.html,
     this.maxLines,
     required this.room,
@@ -32,7 +32,7 @@ class HtmlMessage extends StatelessWidget {
     this.linkStyle,
     this.emoteSize,
     this.bottomWidgetSpan,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +180,8 @@ class HtmlMessage extends StatelessWidget {
         final user = room.getUser(identifier);
         final displayName = user?.displayName ?? identifier;
         return MentionedUser(
-          displayName: displayName.displayMentioned,
+          displayName:
+              !room.isDirectChat ? displayName.displayMentioned : displayName,
           url: url,
           onTap: !room.isDirectChat ? onTap : null,
           textStyle: !room.isDirectChat

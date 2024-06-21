@@ -9,7 +9,7 @@ import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interact
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_constant.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
@@ -28,8 +28,8 @@ class ProfileInfoBody extends StatefulWidget {
     required this.user,
     this.onNewChatOpen,
     this.onUpdatedMembers,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final User? user;
 

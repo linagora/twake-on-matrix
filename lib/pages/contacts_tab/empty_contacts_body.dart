@@ -24,6 +24,8 @@ class EmptyContactBody extends StatelessWidget {
           Text(
             L10n.of(context)!.soonThereHaveContacts,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  // TODO: change to colorSurface when its approved
+                  // ignore: deprecated_member_use
                   color: Theme.of(context).colorScheme.onBackground,
                 ),
             textAlign: TextAlign.center,

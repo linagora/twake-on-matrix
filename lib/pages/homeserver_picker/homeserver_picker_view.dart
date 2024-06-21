@@ -13,7 +13,7 @@ import 'homeserver_picker.dart';
 class HomeserverPickerView extends StatelessWidget {
   final HomeserverPickerController controller;
 
-  const HomeserverPickerView(this.controller, {Key? key}) : super(key: key);
+  const HomeserverPickerView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,9 @@ class HomeserverPickerView extends StatelessWidget {
           ? AppBar(
               leading: TwakeIconButton(
                 icon: Icons.arrow_back,
-                onTap: () => context.pop(),
+                onTap: controller.state != HomeserverState.loading
+                    ? () => context.pop()
+                    : null,
                 tooltip: L10n.of(context)!.back,
               ),
             )

@@ -14,7 +14,7 @@ import 'package:fluffychat/utils/string_extension.dart';
 class ChatDetailsView extends StatelessWidget {
   final ChatDetailsController controller;
 
-  const ChatDetailsView(this.controller, {Key? key}) : super(key: key);
+  const ChatDetailsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +178,7 @@ class ChatDetailsView extends StatelessWidget {
                     forceElevated: innerBoxIsScrolled,
                     bottom: TabBar(
                       physics: const NeverScrollableScrollPhysics(),
-                      overlayColor: MaterialStateProperty.all(
+                      overlayColor: WidgetStateProperty.all(
                         Colors.transparent,
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
@@ -198,10 +198,10 @@ class ChatDetailsView extends StatelessWidget {
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                      tabs: controller.chatDetailsPages().map((pages) {
+                      tabs: controller.tabList.map((page) {
                         return Tab(
                           child: Text(
-                            pages.page.getTitle(context),
+                            page.getTitle(context),
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.fade,
@@ -226,7 +226,7 @@ class ChatDetailsView extends StatelessWidget {
                 child: TabBarView(
                   physics: const NeverScrollableScrollPhysics(),
                   controller: controller.tabController,
-                  children: controller.chatDetailsPages().map((pages) {
+                  children: controller.sharedPages().map((pages) {
                     return pages.child;
                   }).toList(),
                 ),
@@ -241,9 +241,8 @@ class ChatDetailsView extends StatelessWidget {
 
 class _AddMembersButton extends StatelessWidget {
   const _AddMembersButton({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final ChatDetailsController controller;
 
@@ -296,9 +295,8 @@ class _AddMembersButton extends StatelessWidget {
 
 class _TileSubtitleText extends StatelessWidget {
   const _TileSubtitleText({
-    Key? key,
     required this.subtitle,
-  }) : super(key: key);
+  });
 
   final String subtitle;
 
@@ -316,9 +314,8 @@ class _TileSubtitleText extends StatelessWidget {
 
 class _TileTitleText extends StatelessWidget {
   const _TileTitleText({
-    Key? key,
     required this.title,
-  }) : super(key: key);
+  });
 
   final String title;
 
@@ -335,11 +332,10 @@ class _TileTitleText extends StatelessWidget {
 
 class _GroupInformation extends StatelessWidget {
   const _GroupInformation({
-    Key? key,
     this.avatarUri,
     this.displayName,
     this.membersCount,
-  }) : super(key: key);
+  });
 
   final Uri? avatarUri;
   final String? displayName;

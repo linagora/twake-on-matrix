@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -21,9 +22,9 @@ class ChatEventList extends StatelessWidget {
   final ChatController controller;
 
   const ChatEventList({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +59,13 @@ class ChatEventList extends StatelessWidget {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         switch (notification.runtimeType) {
-          case ScrollStartNotification:
+          case const (ScrollStartNotification):
             controller.handleScrollStartNotification();
             break;
-          case ScrollEndNotification:
+          case const (ScrollEndNotification):
             controller.handleScrollEndNotification();
             break;
-          case ScrollUpdateNotification:
+          case const (ScrollUpdateNotification):
             controller.handleScrollUpdateNotification();
             break;
           default:
@@ -189,6 +190,13 @@ class ChatEventList extends StatelessWidget {
                               );
                             },
                             onLongPress: controller.onSelectMessage,
+                            listAction: controller
+                                .listHorizontalActionMenuBuilder(event)
+                                .map((action) {
+                              return ContextMenuAction(
+                                name: action.action.name,
+                              );
+                            }).toList(),
                           )
                         : const SizedBox(),
                   );

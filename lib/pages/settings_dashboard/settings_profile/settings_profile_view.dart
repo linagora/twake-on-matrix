@@ -75,7 +75,7 @@ class SettingsProfileView extends StatelessWidget {
       backgroundColor: responsive.isWebDesktop(context)
           ? Theme.of(context).colorScheme.surface
           : LinagoraSysColors.material().onPrimary,
-      body: SingleChildScrollView(
+      body: Padding(
         padding: SettingsProfileViewStyle.paddingBody,
         child: SlotLayout(
           config: <Breakpoint, SlotLayoutConfig>{
@@ -88,6 +88,12 @@ class SettingsProfileView extends StatelessWidget {
                   client: controller.client,
                   settingsProfileUIState: controller.settingsProfileUIState,
                   onTapAvatar: controller.onTapAvatarInMobile,
+                  onTapMultipleAccountsButton: (multipleAccounts) =>
+                      controller.onBottomButtonTap(
+                    multipleAccounts: multipleAccounts,
+                  ),
+                  settingsMultiAccountsUIState:
+                      controller.settingsMultiAccountsUIState,
                   menuChildren: controller.listContextMenuBuilder(context),
                   menuController: controller.menuController,
                   settingsProfileOptions: ListView.separated(

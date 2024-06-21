@@ -34,6 +34,7 @@ mixin SendFilesMixin {
     BuildContext context, {
     Room? room,
     List<FileInfo>? fileInfos,
+    VoidCallback? onSendFileCallback,
   }) async {
     if (room == null) {}
     final sendFileInteractor = getIt.get<SendFileInteractor>();
@@ -43,18 +44,15 @@ mixin SendFilesMixin {
       allowMultiple: true,
     );
     final temporaryDirectory = await getTemporaryDirectory();
-    fileInfos ??= result?.files
-        .map(
-          (xFile) => FileInfo.fromMatrixFile(
-            xFile.toMatrixFileOnMobile(
-              temporaryDirectoryPath: temporaryDirectory.path,
-            ),
-          ),
-        )
-        .toList();
+    fileInfos ??= result?.files.map((xFile) {
+      final matrixFile = xFile.toMatrixFileOnMobile(
+        temporaryDirectoryPath: temporaryDirectory.path,
+      );
+      return FileInfo.fromMatrixFile(matrixFile);
+    }).toList();
 
     if (fileInfos == null || fileInfos.isEmpty == true) return;
-
+    onSendFileCallback?.call();
     sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
   }
 
@@ -72,12 +70,17 @@ mixin SendFilesMixin {
     required BuildContext context,
     Room? room,
     required PickerType type,
+    VoidCallback? onSendFileCallback,
   }) async {
     switch (type) {
       case PickerType.gallery:
         break;
       case PickerType.documents:
-        sendFileAction(context, room: room);
+        sendFileAction(
+          context,
+          room: room,
+          onSendFileCallback: onSendFileCallback,
+        );
         break;
       case PickerType.location:
         break;

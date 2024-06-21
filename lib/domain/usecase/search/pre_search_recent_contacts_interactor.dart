@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -8,43 +10,19 @@ class PreSearchRecentContactsInteractor {
   PreSearchRecentContactsInteractor();
 
   Stream<Either<Failure, Success>> execute({
-    required List<Room> recentRooms,
-    int? limit,
+    required List<Room> allRooms,
+    int limit = 5,
   }) async* {
     try {
-      final List<User> result = [];
-
-      for (final room in recentRooms) {
-        final users = room
-            .getParticipants()
-            .where(
-              (user) =>
-                  user.membership.isInvite == true && user.displayName != null,
-            )
-            .toSet();
-
-        for (final user in users) {
-          final isDuplicateUser =
-              result.any((existingUser) => existingUser.id == user.id);
-
-          if (!isDuplicateUser) {
-            result.add(user);
-          }
-
-          if (result.length == limit) {
-            break;
-          }
-        }
-
-        if (result.length == limit) {
-          break;
-        }
-      }
-      if (result.isEmpty) {
+      final directRooms = allRooms.where((room) => room.isDirectChat).toList();
+      if (directRooms.isEmpty) {
         yield const Left(PreSearchRecentContactsEmpty());
-      } else {
-        yield Right(PreSearchRecentContactsSuccess(users: result));
+        return;
       }
+      final recentRooms =
+          directRooms.getRange(0, min(directRooms.length, limit)).toList();
+
+      yield Right(PreSearchRecentContactsSuccess(rooms: recentRooms));
     } catch (e) {
       yield Left(PreSearchRecentContactsFailed(exception: e));
     }

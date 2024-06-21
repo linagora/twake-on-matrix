@@ -34,7 +34,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: SettingsProfileViewWebStyle.paddingBody,
-      child: Center(
+      child: Align(
+        alignment: Alignment.topCenter,
         child: SingleChildScrollView(
           physics: const NeverScrollableScrollPhysics(),
           child: Column(

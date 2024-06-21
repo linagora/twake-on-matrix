@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_saver
   file_selector_linux
+  flutter_avif_linux
   flutter_secure_storage_linux
   flutter_webrtc
   handy_window

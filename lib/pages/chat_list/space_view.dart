@@ -20,9 +20,9 @@ class SpaceView extends StatefulWidget {
   final ScrollController scrollController;
   const SpaceView(
     this.controller, {
-    Key? key,
+    super.key,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   State<SpaceView> createState() => _SpaceViewState();
@@ -160,6 +160,8 @@ class _SpaceViewState extends State<SpaceView> {
             MatrixLocals(L10n.of(context)!),
           );
           return Material(
+            // TODO: change to colorSurface when its approved
+            // ignore: deprecated_member_use
             color: Theme.of(context).colorScheme.background,
             child: ListTile(
               leading: Avatar(
@@ -324,7 +326,7 @@ class _SpaceViewState extends State<SpaceView> {
                         : L10n.of(context)!.enterRoom),
                 maxLines: 1,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onBackground,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               trailing:

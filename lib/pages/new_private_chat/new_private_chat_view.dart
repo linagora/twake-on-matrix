@@ -10,7 +10,7 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 class NewPrivateChatView extends StatelessWidget {
   final NewPrivateChatController controller;
 
-  const NewPrivateChatView(this.controller, {Key? key}) : super(key: key);
+  const NewPrivateChatView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {

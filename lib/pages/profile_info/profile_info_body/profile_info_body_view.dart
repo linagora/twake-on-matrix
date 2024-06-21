@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 class ProfileInfoBodyView extends StatelessWidget {
   const ProfileInfoBodyView({
     required this.controller,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final ProfileInfoBodyController controller;
 
   @override

@@ -5,8 +5,7 @@ import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendati
 
 class HomeserverBottomSheet extends StatelessWidget {
   final HomeserverBenchmarkResult homeserver;
-  const HomeserverBottomSheet({required this.homeserver, Key? key})
-      : super(key: key);
+  const HomeserverBottomSheet({required this.homeserver, super.key});
 
   @override
   Widget build(BuildContext context) {

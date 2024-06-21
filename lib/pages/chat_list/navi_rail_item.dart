@@ -16,8 +16,8 @@ class NaviRailItem extends StatelessWidget {
     required this.onTap,
     required this.icon,
     this.selectedIcon,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +51,8 @@ class NaviRailItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 color: isSelected
                     ? Theme.of(context).colorScheme.primaryContainer
+                    // TODO: change to colorSurface when its approved
+                    // ignore: deprecated_member_use
                     : Theme.of(context).colorScheme.background,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

@@ -1,4 +1,5 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,9 @@ typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 /// with the corresponding location [Offset].
 
 class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
+  /// The list of items to be displayed in the [TwakeContextMenu]. This is used to build the UI of items
+  final List<ContextMenuAction> listActions;
+
   /// The widget displayed inside the [TwakeContextMenuArea]
   final Widget child;
 
@@ -25,11 +29,12 @@ class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
   final double? verticalPadding;
 
   const TwakeContextMenuArea({
-    Key? key,
+    super.key,
+    required this.listActions,
     required this.child,
     this.builder,
     this.verticalPadding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,7 @@ class TwakeContextMenuArea extends StatelessWidget with TwakeContextMenuMixin {
       onSecondaryTapDown: (details) => showTwakeContextMenu(
         offset: details.globalPosition,
         context: context,
-        builder: builder!,
+        listActions: listActions,
         verticalPadding:
             verticalPadding ?? TwakeContextMenuStyle.defaultVerticalPadding,
       ),

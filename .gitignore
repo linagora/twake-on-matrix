@@ -11,7 +11,10 @@
 .history
 .svn/
 prime
+
+#generated file
 *.g.dart
+**/*.mocks.dart
 
 # libolm package
 /assets/js/package
@@ -62,4 +65,3 @@ ios/Podfile.lock
 /macos/out
 .vs
 olm
-test/interceptor/*.mocks.dart

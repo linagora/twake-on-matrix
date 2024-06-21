@@ -199,9 +199,13 @@ abstract class TwakeThemes {
           onSecondaryContainer: brightness == Brightness.light
               ? LinagoraSysColors.material().onSecondaryContainer
               : LinagoraSysColors.material().onSecondaryContainerDark,
+          // TODO: remove when the color scheme is updated
+          // ignore: deprecated_member_use
           background: brightness == Brightness.light
               ? LinagoraSysColors.material().background
               : LinagoraSysColors.material().backgroundDark,
+          // TODO: remove when the color scheme is updated
+          // ignore: deprecated_member_use
           onBackground: brightness == Brightness.light
               ? LinagoraSysColors.material().onBackground
               : LinagoraSysColors.material().onBackgroundDark,
@@ -226,7 +230,7 @@ abstract class TwakeThemes {
           surfaceTint: brightness == Brightness.light
               ? LinagoraSysColors.material().surfaceTint
               : LinagoraSysColors.material().surfaceTintDark,
-          surfaceVariant: brightness == Brightness.light
+          surfaceContainerHighest: brightness == Brightness.light
               ? LinagoraSysColors.material().surfaceVariant
               : LinagoraSysColors.material().surfaceVariantDark,
           onSurfaceVariant: brightness == Brightness.light
@@ -252,8 +256,8 @@ abstract class TwakeThemes {
         ),
         iconButtonTheme: IconButtonThemeData(
           style: ButtonStyle(
-            iconSize: MaterialStateProperty.all(iconSize),
-            iconColor: MaterialStateProperty.all(
+            iconSize: WidgetStateProperty.all(iconSize),
+            iconColor: WidgetStateProperty.all(
               brightness == Brightness.light
                   ? LinagoraSysColors.material().onSurface
                   : LinagoraSysColors.material().onSurfaceDark,
@@ -268,9 +272,9 @@ abstract class TwakeThemes {
         ),
         switchTheme: SwitchThemeData(
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          overlayColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return brightness == Brightness.light
                     ? LinagoraSysColors.material().primary
                     : LinagoraSysColors.material().primaryDark;
@@ -281,9 +285,9 @@ abstract class TwakeThemes {
               }
             },
           ),
-          thumbColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+          thumbColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return brightness == Brightness.light
                     ? LinagoraSysColors.material().onPrimary
                     : LinagoraSysColors.material().onPrimaryDark;
@@ -294,9 +298,9 @@ abstract class TwakeThemes {
               }
             },
           ),
-          trackColor: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
+          trackColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
                 return brightness == Brightness.light
                     ? LinagoraSysColors.material().primary
                     : LinagoraSysColors.material().primaryDark;

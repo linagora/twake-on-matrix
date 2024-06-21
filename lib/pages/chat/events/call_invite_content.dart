@@ -7,7 +7,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class CallInviteContent extends StatelessWidget with MessageContentMixin {
   final Event event;
 
-  const CallInviteContent({Key? key, required this.event}) : super(key: key);
+  const CallInviteContent({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

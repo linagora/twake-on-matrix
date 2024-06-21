@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class ProfileInfoHeader extends StatelessWidget {
-  const ProfileInfoHeader(this.user, {Key? key}) : super(key: key);
+  const ProfileInfoHeader(this.user, {super.key});
   final User user;
 
   @override

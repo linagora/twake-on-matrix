@@ -11,7 +11,7 @@ import 'settings_security.dart';
 class SettingsSecurityView extends StatelessWidget {
   final SettingsSecurityController controller;
 
-  const SettingsSecurityView(this.controller, {Key? key}) : super(key: key);
+  const SettingsSecurityView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +22,8 @@ class SettingsSecurityView extends StatelessWidget {
         context: context,
       ),
       body: ListTileTheme(
+        // TODO: remove when the color scheme is updated
+        // ignore: deprecated_member_use
         iconColor: Theme.of(context).colorScheme.onBackground,
         child: MaxWidthBody(
           withScrolling: true,

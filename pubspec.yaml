@@ -1,7 +1,7 @@
 name: fluffychat
-description: The open digital workplace.
+description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.5.3+2330
+version: 2.5.9+2330
 
 environment:
   sdk: ">=3.1.3 <4.0.0"
@@ -67,13 +67,13 @@ dependencies:
   desktop_drop: ^0.4.4
   desktop_lifecycle: ^0.1.0
   desktop_notifications: ^0.6.3
-  device_info_plus: ^9.0.3
+  device_info_plus: ^10.1.0
   dynamic_color: ^1.6.0
   emoji_picker_flutter: ^1.5.1
   emoji_proposal: ^0.0.1
   emojis: ^0.9.9
   fcm_shared_isolate: ^0.1.0
-  file_picker: ^5.3.0
+  file_picker: ^8.0.3
   flutter:
     sdk: flutter
   flutter_app_badger: ^1.5.0
@@ -81,21 +81,21 @@ dependencies:
   flutter_blurhash: ^0.8.2
   flutter_cache_manager: ^3.3.0
   flutter_foreground_task: ^3.10.0
-  flutter_local_notifications: ^12.0.2
+  flutter_local_notifications: ^17.1.2
   flutter_localizations:
     sdk: flutter
-  flutter_map: ^3.1.0
+  flutter_map: ^4.0.0
   #  flutter_matrix_html: ^1.1.0
   flutter_olm: ^1.2.0
-  flutter_openssl_crypto: ^0.1.0
+  flutter_openssl_crypto: ^0.3.0
   flutter_ringtone_player: ^3.1.1
-  flutter_secure_storage: ^7.0.1
+  flutter_secure_storage: ^9.2.1
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
   flutter_web_auth_2: ^3.1.1
   # flutter_webrtc: # Until https://github.com/flutter-webrtc/flutter-webrtc/issues/1212 is fixed
   #   git: https://github.com/radzio-it/flutter-webrtc.git
-  flutter_webrtc: ^0.9.31
+  flutter_webrtc: ^0.10.6
   future_loading_dialog: ^0.2.3
   handy_window: ^0.1.9
   hive: ^2.2.3
@@ -111,9 +111,9 @@ dependencies:
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
   native_imaging: ^0.1.0
-  package_info_plus: ^4.0.0
+  package_info_plus: ^8.0.0
   path_provider: ^2.0.15
-  permission_handler: ^10.4.5
+  permission_handler: ^11.0.1
   pin_code_text_field: ^1.8.0
   provider: ^6.0.2
   punycode: ^1.0.0
@@ -121,21 +121,25 @@ dependencies:
   qr_flutter: ^4.0.0
   record: ^4.4.4
   scroll_to_index: ^3.0.1
-  share_plus: ^4.0.10+1
-  shared_preferences: 2.0.15 # Pinned because https://github.com/flutter/flutter/issues/118401
+  share_plus: ^9.0.0
+  shared_preferences: ^2.2.3
   slugify: ^2.0.0
-  skeletons: ^0.0.3
+  skeletons:
+    # TODO: Remove when https://github.com/badjio/skeletons/pull/9 is merged
+    git:
+      url: https://github.com/alirezat66/skeletons.git
+      ref: master
   tor_detector_web: ^1.1.0
   uni_links: ^0.5.1
-  unifiedpush: ^4.0.3
+  unifiedpush: ^5.0.1
   universal_html: ^2.0.8
   url_launcher: ^6.0.20
   vibration: ^1.7.4-nullsafety.0
-  go_router: ^10.0.0
+  go_router: ^14.1.2
   wakelock: ^0.6.2
   webrtc_interface: ^1.0.10
   overflow_view: ^0.3.1
-  json_annotation: ^4.8.1
+  json_annotation: 4.9.0
   equatable: ^2.0.5
   get_it: ^7.2.0
   dio: ^5.1.1
@@ -146,10 +150,10 @@ dependencies:
   fluttertoast: ^8.2.2
   rxdart: ^0.27.7
   photo_manager: ^3.0.0-dev.5
-  flutter_inappwebview: ^5.8.0
+  flutter_inappwebview: ^6.0.0
   tuple: ^2.0.2
-  lottie: ^2.3.2
-  wechat_camera_picker: 4.2.1
+  lottie: ^3.0.0
+  wechat_camera_picker: 4.2.2
   open_file: ^3.3.2
   mime: ^1.0.4
   async: ^2.11.0
@@ -163,7 +167,7 @@ dependencies:
   media_kit_libs_video: ^1.0.1
   video_player: ^2.7.2
   js: ^0.6.7
-  super_clipboard: 0.8.4
+  super_clipboard: 0.8.15
   google_fonts: ^4.0.4
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
@@ -171,26 +175,29 @@ dependencies:
   after_layout: ^1.2.0
   photo_manager_image_provider: ^2.1.0
   flutter_slidable: ^3.0.1
-  skeletonizer: 1.1.0
+  skeletonizer: 1.1.2+1
   flutter_portal: 1.1.4
   external_path: 1.0.3
   gal: 2.3.0
+  auto_size_text: 3.0.0
+  flutter_avif: 2.4.1
 
 dev_dependencies:
   build_runner: ^2.3.3
   flutter_launcher_icons: ^0.13.1
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.2
   flutter_native_splash: ^2.0.3+1
   flutter_test:
     sdk: flutter
-  hive_generator: 2.0.0
+  hive_generator: 2.0.1
   import_sorter: ^4.6.0
   integration_test:
     sdk: flutter
   json_serializable: ^6.6.2
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
-  mockito: 5.4.2
+  mockito: 5.4.4
+
 
 flutter_launcher_icons:
   android: false
@@ -235,6 +242,7 @@ msix_config:
 dependency_overrides:
   # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
   ffi: 2.0.0
+  http: 1.2.1
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
   file_selector: ^0.9.2+2
   file_selector_linux: ^0.9.1

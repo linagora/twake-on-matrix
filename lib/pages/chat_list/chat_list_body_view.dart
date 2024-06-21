@@ -19,7 +19,7 @@ import 'package:matrix/matrix.dart';
 class ChatListBodyView extends StatelessWidget {
   final ChatListController controller;
 
-  const ChatListBodyView(this.controller, {Key? key}) : super(key: key);
+  const ChatListBodyView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class ChatListBodyView extends StatelessWidget {
                   key: Key(controller.activeSpaceId ?? 'Spaces'),
                 );
               }
-              if (controller.waitForFirstSync &&
+              if (controller.matrixState.waitForFirstSync &&
                   controller.activeClient.prevBatch != null) {
                 if (controller.chatListBodyIsEmpty) {
                   return Column(

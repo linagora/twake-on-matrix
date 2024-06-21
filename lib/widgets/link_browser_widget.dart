@@ -5,8 +5,7 @@ class LinkBrowserWidget extends StatelessWidget {
   final Uri uri;
   final Widget child;
 
-  const LinkBrowserWidget({Key? key, required this.uri, required this.child})
-      : super(key: key);
+  const LinkBrowserWidget({super.key, required this.uri, required this.child});
 
   @override
   Widget build(BuildContext context) {

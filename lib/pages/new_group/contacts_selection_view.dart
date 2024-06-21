@@ -1,20 +1,22 @@
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view_style.dart';
+import 'package:fluffychat/pages/new_group/widget/contact_item.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list.dart';
+import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
+import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsSelectionView extends StatelessWidget {
   final ContactsSelectionController controller;
 
-  const ContactsSelectionView(this.controller, {Key? key}) : super(key: key);
+  const ContactsSelectionView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,43 @@ class ContactsSelectionView extends StatelessWidget {
                       contactsSelectionController: controller,
                     ),
                   ),
+                  ValueListenableBuilder(
+                    valueListenable:
+                        controller.presentationRecentContactNotifier,
+                    builder: (context, recentContacts, child) {
+                      if (recentContacts.isEmpty) {
+                        return child!;
+                      }
+                      return SliverExpandableList(
+                        title: L10n.of(context)!.recent,
+                        itemCount: recentContacts.length,
+                        itemBuilder: (context, index) {
+                          final disabled =
+                              controller.disabledContactIds.contains(
+                            recentContacts[index].directChatMatrixID,
+                          );
+                          return ContactItem(
+                            contact:
+                                recentContacts[index].toPresentationContact(),
+                            selectedContactsMapNotifier:
+                                controller.selectedContactsMapNotifier,
+                            onSelectedContact: controller.onSelectedContact,
+                            highlightKeyword:
+                                controller.textEditingController.text,
+                            disabled: disabled,
+                          );
+                        },
+                      );
+                    },
+                    child: const SliverToBoxAdapter(
+                      child: SizedBox(),
+                    ),
+                  ),
                   ContactsSelectionList(
                     presentationContactNotifier:
                         controller.presentationContactNotifier,
+                    presentationRecentContactNotifier:
+                        controller.presentationRecentContactNotifier,
                     selectedContactsMapNotifier:
                         controller.selectedContactsMapNotifier,
                     onSelectedContact: controller.onSelectedContact,
@@ -103,7 +139,7 @@ class ContactsSelectionView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           TwakeTextButton(
-            onTap: () => context.pop(),
+            onTap: () => Navigator.of(context).pop(),
             message: L10n.of(context)!.cancel,
             borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
             margin: ContactsSelectionViewStyle.webActionsButtonMargin,

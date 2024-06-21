@@ -25,12 +25,12 @@ class ChatDetailsMediaPage extends StatelessWidget {
   final VoidCallback? closeRightColumn;
 
   const ChatDetailsMediaPage({
-    Key? key,
+    super.key,
     required this.controller,
     required this.handleDownloadVideoEvent,
     this.cacheMap,
     this.closeRightColumn,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -6,10 +6,10 @@ class StickyTimestampWidget extends StatelessWidget {
   final bool isStickyHeader;
 
   const StickyTimestampWidget({
-    Key? key,
+    super.key,
     required this.content,
     this.isStickyHeader = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

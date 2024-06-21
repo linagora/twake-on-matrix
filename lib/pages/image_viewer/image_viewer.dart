@@ -20,13 +20,13 @@ class ImageViewer extends StatefulWidget {
   final double? height;
 
   const ImageViewer({
-    Key? key,
+    super.key,
     this.event,
     this.imageData,
     this.filePath,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   ImageViewerController createState() => ImageViewerController();
@@ -42,6 +42,8 @@ class ImageViewerController extends State<ImageViewer> {
 
   String? filePath;
 
+  String? thumbnailFilePath;
+
   final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
 
   StreamSubscription? streamSubcription;
@@ -51,6 +53,7 @@ class ImageViewerController extends State<ImageViewer> {
     super.initState();
     if (!PlatformInfos.isWeb && widget.event != null) {
       handleDownloadFile(widget.event!);
+      handleDownloadThumbnailFile(widget.event!);
     }
   }
 
@@ -68,6 +71,31 @@ class ImageViewerController extends State<ImageViewer> {
             if (success is DownloadMediaFileSuccess) {
               setState(() {
                 filePath = success.filePath;
+              });
+            }
+          },
+        );
+      });
+    } catch (e) {
+      Logs().e('Error downloading file', e);
+    }
+  }
+
+  Future<void> handleDownloadThumbnailFile(Event event) async {
+    try {
+      streamSubcription = downloadMediaFileInteractor
+          .execute(event: event, getThumbnail: true)
+          .listen((state) {
+        state.fold(
+          (failure) {
+            if (failure is DownloadMediaFileFailure) {
+              Logs().e('Error downloading file', failure.exception);
+            }
+          },
+          (success) {
+            if (success is DownloadMediaFileSuccess) {
+              setState(() {
+                thumbnailFilePath = success.filePath;
               });
             }
           },

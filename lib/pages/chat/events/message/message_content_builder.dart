@@ -31,6 +31,8 @@ class MessageContentBuilder extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    // TODO: change to colorSurface when its approved
+    // ignore: deprecated_member_use
     final textColor = Theme.of(context).colorScheme.onBackground;
     final displayEvent = event.getDisplayEvent(timeline);
     final noPadding = {

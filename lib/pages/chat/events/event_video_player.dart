@@ -38,7 +38,7 @@ class EventVideoPlayer extends StatelessWidget {
 
   const EventVideoPlayer(
     this.event, {
-    Key? key,
+    super.key,
     this.width,
     this.height,
     this.rounded = true,
@@ -48,7 +48,7 @@ class EventVideoPlayer extends StatelessWidget {
     this.noResizeThumbnail = false,
     this.onVideoTapped,
     this.centerWidget = const CenterVideoButton(icon: Icons.play_arrow),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -12,8 +12,8 @@ class VerificationRequestContent extends StatelessWidget {
   const VerificationRequestContent({
     required this.event,
     required this.timeline,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +39,8 @@ class VerificationRequestContent extends StatelessWidget {
               color: Theme.of(context).dividerColor,
             ),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            // TODO: change to colorSurface when its approved
+            // ignore: deprecated_member_use
             color: Theme.of(context).colorScheme.background,
           ),
           child: Row(

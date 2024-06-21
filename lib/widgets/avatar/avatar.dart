@@ -27,8 +27,8 @@ class Avatar extends StatelessWidget {
     this.boxShadows,
     this.textStyle,
     this.textColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +45,7 @@ class Avatar extends StatelessWidget {
           height: size,
           cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
           cacheKey: mxContent.toString(),
+          animated: true,
           placeholder: (context) => _fallbackAvatar(),
         ),
       ),

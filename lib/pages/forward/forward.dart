@@ -24,10 +24,10 @@ class Forward extends StatefulWidget {
   final bool? isFullScreen;
 
   const Forward({
-    Key? key,
+    super.key,
     this.sendFromRoomId,
     this.isFullScreen = true,
-  }) : super(key: key);
+  });
 
   @override
   ForwardController createState() => ForwardController();
@@ -122,14 +122,14 @@ class ForwardController extends State<Forward>
         'ForwardController::_handleForwardMessageOnData() - success: $success',
       );
       switch (success.runtimeType) {
-        case ForwardMessageSuccess:
+        case const (ForwardMessageSuccess):
           final dataOnSuccess = success as ForwardMessageSuccess;
           if (Navigator.of(context).canPop()) {
             Navigator.of(context).pop(const PopResultFromForward());
           }
           context.go('/rooms/${dataOnSuccess.room.id}');
           break;
-        case ForwardMessageIsShareFileState:
+        case const (ForwardMessageIsShareFileState):
           final dataOnSuccess = success as ForwardMessageIsShareFileState;
           await showDialog(
             context: context,

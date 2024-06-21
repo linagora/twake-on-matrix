@@ -7,10 +7,10 @@ class LoginScaffold extends StatelessWidget {
   final AppBar? appBar;
 
   const LoginScaffold({
-    Key? key,
+    super.key,
     required this.body,
     this.appBar,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +37,8 @@ class LoginScaffold extends StatelessWidget {
     if (isMobileMode) return scaffold;
     return Container(
       decoration: BoxDecoration(
+        // TODO: change to colorSurface when its approved
+        // ignore: deprecated_member_use
         color: Theme.of(context).colorScheme.onBackground,
       ),
       child: Center(

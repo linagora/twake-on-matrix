@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
+import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
@@ -27,7 +29,7 @@ import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 
 class HomeserverPicker extends StatefulWidget {
-  const HomeserverPicker({Key? key}) : super(key: key);
+  const HomeserverPicker({super.key});
 
   @override
   HomeserverPickerController createState() => HomeserverPickerController();
@@ -145,9 +147,12 @@ class HomeserverPickerController extends State<HomeserverPicker>
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
-
+      final allHomeserverLoggedIn = (await ClientManager.getClients())
+          .map((client) => client.homeserver.toString())
+          .toList();
+      Logs().i('All homeservers: $allHomeserverLoggedIn');
       final homeserverExists =
-          homeserver == matrix.client.homeserver && matrix.client.isLogged();
+          allHomeserverLoggedIn.contains(homeserver.toString());
 
       if (homeserverExists &&
           !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
@@ -187,9 +192,14 @@ class HomeserverPickerController extends State<HomeserverPicker>
             identityProviders(rawLoginTypes: rawLoginTypes);
 
         if (supportsSso(context) && identitiesProvider?.length == 1) {
-          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
+          final result = await ssoLoginAction(
+            context: context,
+            id: identitiesProvider!.single.id!,
+          );
+          if (result == SsoLoginState.error) {
+            state = HomeserverState.ssoLoginServer;
+          }
         }
-        state = HomeserverState.ssoLoginServer;
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       } else {
@@ -243,7 +253,10 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   Widget build(BuildContext context) {
-    return HomeserverPickerView(this);
+    return PopScope(
+      canPop: state != HomeserverState.loading,
+      child: HomeserverPickerView(this),
+    );
   }
 
   Future<void> restoreBackup() async {

@@ -9,9 +9,8 @@ class IconCopiableProfileRow extends CopiableProfileRow {
     required IconData icon,
     required super.caption,
     required super.copiableText,
-    Key? key,
+    super.key,
   }) : super(
-          key: key,
           leadingIcon: Icon(
             icon,
             size: ChatProfileInfoStyle.iconSize,

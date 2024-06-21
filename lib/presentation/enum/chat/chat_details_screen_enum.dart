@@ -1,0 +1,1 @@
+enum ChatDetailsScreenEnum { group, direct }

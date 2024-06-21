@@ -36,7 +36,7 @@ class SendFileDialogStyle {
             )
             .copyWith(letterSpacing: -0.15),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceVariant,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       );
 
   static const spaceBwInputBarAndButton = SizedBox(height: 8.0);

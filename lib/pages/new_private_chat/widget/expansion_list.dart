@@ -5,8 +5,10 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
-import 'package:fluffychat/presentation/model/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/presentation_contact_success.dart';
+import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
+import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +53,26 @@ class ExpansionList extends StatelessWidget {
       valueListenable: presentationContactsNotifier,
       builder: (context, state, child) {
         return state.fold(
-          (_) => child!,
+          (failure) {
+            final textControllerIsEmpty = textEditingController.text.isEmpty;
+            if (failure is GetPresentationContactsEmpty ||
+                failure is GetPresentationContactsFailure) {
+              return Column(
+                children: [
+                  ..._buildResponsiveButtons(context),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  NoContactsFound(
+                    keyword: textControllerIsEmpty
+                        ? null
+                        : textEditingController.text,
+                  ),
+                ],
+              );
+            }
+            return child!;
+          },
           (success) {
             if (success is ContactsLoading) {
               return Column(
@@ -283,9 +304,8 @@ class _NewGroupButton extends StatelessWidget {
   final Function() onPressed;
 
   const _NewGroupButton({
-    Key? key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
