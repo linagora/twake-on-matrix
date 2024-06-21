@@ -97,7 +97,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'android'
         with:
-          name: twake-release
+          name: twake-release-${{ matrix.os }}
           path: twake-${{ github.ref_name }}*
 
   package_desktop:
