@@ -2572,7 +2572,7 @@
       "hour": {}
     }
   },
-  "onlineDayAgo": "online {day} day ago",
+  "onlineDayAgo": "online {day}d ago",
   "@onlineDayAgo": {
     "placeholders": {
       "day": {}

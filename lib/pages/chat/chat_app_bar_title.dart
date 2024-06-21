@@ -190,18 +190,18 @@ class _DirectChatAppBarStatusContent extends StatelessWidget {
                 );
                 if (connectivitySnapshot.hasData &&
                     connectivityResult == ConnectivityResult.none) {
-                  return _ChatAppBarTitleText(
+                  return ChatAppBarTitleText(
                     text: L10n.of(context)!.noConnection,
                   );
                 }
                 if (directChatPresence == null) {
-                  return _ChatAppBarTitleText(
+                  return ChatAppBarTitleText(
                     text: L10n.of(context)!.loading,
                   );
                 }
                 final typingText = room.getLocalizedTypingText(context);
                 if (typingText.isEmpty) {
-                  return _ChatAppBarTitleText(
+                  return ChatAppBarTitleText(
                     text: room
                         .getLocalizedStatus(
                           context,
@@ -241,11 +241,11 @@ class _GroupChatAppBarStatusContent extends StatelessWidget {
         );
 
         if (snapshot.hasData && connectivityResult == ConnectivityResult.none) {
-          return _ChatAppBarTitleText(text: L10n.of(context)!.noConnection);
+          return ChatAppBarTitleText(text: L10n.of(context)!.noConnection);
         }
         final typingText = room.getLocalizedTypingText(context);
         if (typingText.isEmpty) {
-          return _ChatAppBarTitleText(
+          return ChatAppBarTitleText(
             text: room.getLocalizedStatus(context).capitalize(context),
           );
         } else {
@@ -256,8 +256,9 @@ class _GroupChatAppBarStatusContent extends StatelessWidget {
   }
 }
 
-class _ChatAppBarTitleText extends StatelessWidget {
-  const _ChatAppBarTitleText({
+class ChatAppBarTitleText extends StatelessWidget {
+  const ChatAppBarTitleText({
+    super.key,
     required this.text,
   });
 

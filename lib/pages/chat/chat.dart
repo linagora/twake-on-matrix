@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -261,9 +260,6 @@ class ChatController extends State<Chat>
       SuggestionsController();
 
   ValueNotifier<CachedPresence?> cachedPresenceNotifier = ValueNotifier(null);
-
-  final StreamController<ConnectivityResult>
-      connectivityResultStreamController = StreamController.broadcast();
 
   StreamController<CachedPresence> cachedPresenceStreamController =
       StreamController.broadcast();
@@ -2008,6 +2004,7 @@ class ChatController extends State<Chat>
     InViewNotifierListCustom.of(context)?.dispose();
     replyEventNotifier.dispose();
     cachedPresenceStreamController.close();
+    cachedPresenceNotifier.dispose();
     super.dispose();
   }
 

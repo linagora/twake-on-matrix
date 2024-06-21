@@ -16,7 +16,7 @@ extension RoomStatusExtension on Room {
 
   String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
     if (isDirectChat) {
-      return _getLocalizedStatusDirectChat(presence, context);
+      return getLocalizedStatusDirectChat(presence, context);
     }
 
     return _getLocalizedStatusGroupChat(context);
@@ -98,7 +98,7 @@ extension RoomStatusExtension on Room {
     return L10n.of(context)!.countMembers(totalMembers);
   }
 
-  String _getLocalizedStatusDirectChat(
+  String getLocalizedStatusDirectChat(
     CachedPresence? directChatPresence,
     BuildContext context,
   ) {
