@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -371,14 +372,20 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     cancelLabel: L10n.of(context)!.cancel,
                                     isDestructiveAction: true,
                                   )) {
-                                await TomBootstrapDialog(
-                                  client: widget.client,
-                                ).show().then(
-                                      (value) => Navigator.of(
-                                        context,
-                                        rootNavigator: false,
-                                      ).pop<bool>(false),
-                                    );
+                                if (Matrix.of(context).twakeSupported) {
+                                  await TomBootstrapDialog(
+                                    client: widget.client,
+                                    wipe: true,
+                                    wipeRecovery: true,
+                                  ).show().then(
+                                        (value) => Navigator.of(
+                                          context,
+                                          rootNavigator: false,
+                                        ).pop<bool>(false),
+                                      );
+                                } else {
+                                  _createBootstrap(true);
+                                }
                               }
                             },
                     ),

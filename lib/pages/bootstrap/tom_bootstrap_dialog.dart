@@ -6,6 +6,8 @@ import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -16,10 +18,14 @@ import 'package:matrix/matrix.dart';
 
 class TomBootstrapDialog extends StatefulWidget {
   final Client client;
+  final bool wipe;
+  final bool wipeRecovery;
 
   const TomBootstrapDialog({
     super.key,
     required this.client,
+    this.wipe = false,
+    this.wipeRecovery = false,
   });
 
   Future<bool?> show() => TwakeDialog.showDialogFullScreen(
@@ -81,10 +87,17 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
     if (widget.client.userID != null) {
       await setupAdditionalDioCacheOption(widget.client.userID!);
     }
-    setState(() {
-      _uploadRecoveryKeyState = UploadRecoveryKeyState.checkingRecoveryWork;
-    });
-    await _getRecoveryKeyState();
+    if (widget.wipeRecovery) {
+      setState(() {
+        _uploadRecoveryKeyState = UploadRecoveryKeyState.wipeRecovery;
+        _wipe = widget.wipe;
+      });
+    } else {
+      setState(() {
+        _uploadRecoveryKeyState = UploadRecoveryKeyState.checkingRecoveryWork;
+      });
+      await _getRecoveryKeyState();
+    }
   }
 
   Future<void> _getRecoveryKeyState() async {
@@ -165,6 +178,10 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         });
         break;
       case UploadRecoveryKeyState.wipeRecoveryFailed:
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          TwakeSnackBar.show(context, L10n.of(context)!.cannotEnableKeyBackup);
+          Navigator.of(context, rootNavigator: false).pop<bool>();
+        });
         break;
       case UploadRecoveryKeyState.created:
         if (_createNewRecoveryKeySuccess()) {
@@ -352,10 +369,17 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
               Logs().e(
                 'TomBootstrapDialogState::_wipeRecoveryWord(): wipe recoveryWords failed',
               );
-              setState(
-                () => _uploadRecoveryKeyState =
-                    UploadRecoveryKeyState.wipeRecoveryFailed,
-              );
+              if (Matrix.of(context).twakeSupported) {
+                setState(
+                  () => _uploadRecoveryKeyState =
+                      UploadRecoveryKeyState.wipeRecoveryFailed,
+                );
+              } else {
+                setState(
+                  () =>
+                      _uploadRecoveryKeyState = UploadRecoveryKeyState.initial,
+                );
+              }
             },
             (success) => setState(
               () => _uploadRecoveryKeyState = UploadRecoveryKeyState.initial,
