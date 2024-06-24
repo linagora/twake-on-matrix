@@ -17,6 +17,7 @@ class LinagoraApp with EquatableMixin {
   final String? androidPackageId;
   final String? iosUrlScheme;
   final String? iosAppStoreLink;
+  final Uri? publicIconUri;
 
   LinagoraApp(
     this.appName,
@@ -25,6 +26,7 @@ class LinagoraApp with EquatableMixin {
     this.androidPackageId,
     this.iosUrlScheme,
     this.iosAppStoreLink,
+    this.publicIconUri,
   });
 
   factory LinagoraApp.fromJson(Map<String, dynamic> json) =>
@@ -40,5 +42,6 @@ class LinagoraApp with EquatableMixin {
         androidPackageId,
         iosUrlScheme,
         iosAppStoreLink,
+        publicIconUri,
       ];
 }

@@ -15,6 +15,7 @@
       "appName": "Twake Chat",
       "icon": "ic_twake_chat.svg",
       "appLink": "https://beta.twake.app/",
+      "publicIconUri": "xxx",
     }
 ```
 
@@ -26,12 +27,14 @@
     {
       "appName": "Twake Mail",
       "icon": "ic_twake_mail.svg",
-      "appLink": "http://tmail.linagora.com/"
+      "appLink": "http://tmail.linagora.com/",
+      "publicIconUri": "xxx",
     },
     {
       "appName": "Twake Chat",
       "icon": "ic_twake_chat.svg",
-      "appLink": "https://beta.twake.app/"
+      "appLink": "https://beta.twake.app/",
+      "publicIconUri": "xxx",
     },
     ...
   ]
@@ -39,8 +42,9 @@
 ```
 
 - `appName`: The name will be showed in App Grid
-- `icon`: Name of icon was added in `configurations\icons` folder
+- `icon`: Name of icon was added in `configurations\icons` folder, used when `publicIconUri` is null or empty
 - `appLink`: Service URL
+- `publicIconUri`: Public link for the icon
 
 2. Enable it in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/config.sample.json)
 ```
