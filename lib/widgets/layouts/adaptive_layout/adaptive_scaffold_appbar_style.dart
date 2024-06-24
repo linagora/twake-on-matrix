@@ -5,7 +5,7 @@ class AdaptiveScaffoldAppBarStyle {
 
   static const EdgeInsetsDirectional appBarPadding =
       EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
+    horizontal: 30,
   );
 
   static const double sizeWidthIcTwakeImageLogo = 238.0;
