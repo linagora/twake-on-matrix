@@ -40,7 +40,7 @@ class EventInfoDialog extends StatelessWidget {
       appBar: AppBar(
         title: Text(L10n.of(context)!.messageInfo),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_downward_outlined),
+          icon: const Icon(Icons.close_outlined),
           onPressed: Navigator.of(context, rootNavigator: false).pop,
           tooltip: L10n.of(context)!.close,
         ),
