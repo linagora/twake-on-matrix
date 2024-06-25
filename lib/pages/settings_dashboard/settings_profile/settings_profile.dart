@@ -472,12 +472,10 @@ class SettingsProfileController extends State<SettingsProfile>
           'SettingsProfile::_handleUploadProfileOnData() - success: $success',
         );
         if (success is UpdateProfileSuccess) {
-          _clearImageInLocal();
           final newProfile = Profile(
             userId: client.userID!,
             displayName: success.displayName ?? displayName,
-            avatarUrl:
-                success.avatar == null ? currentProfile?.avatarUrl : null,
+            avatarUrl: success.avatar ?? currentProfile?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
           if (!success.isDeleteAvatar) {
@@ -675,6 +673,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   @override
   void dispose() {
+    _clearImageInLocal();
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();
     displayNameFocusNode.dispose();

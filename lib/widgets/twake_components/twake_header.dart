@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -52,12 +55,33 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
     currentProfileNotifier.value = profile;
   }
 
+  StreamSubscription? _onAccountDataSubscription;
+
+  void _handleOnAccountDataSubscription() {
+    _onAccountDataSubscription =
+        Matrix.of(context).client.onAccountData.stream.listen((event) {
+      if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
+        final newProfile = Profile.fromJson(event.content);
+        Logs().d(
+          'TwakeHeader::_handleOnAccountDataSubscription() - newProfile: ${newProfile.avatarUrl}',
+        );
+        if (newProfile.avatarUrl != currentProfileNotifier.value.avatarUrl ||
+            newProfile.displayName !=
+                currentProfileNotifier.value.displayName) {
+          currentProfileNotifier.value = newProfile;
+        }
+      }
+    });
+  }
+
   @override
   void didUpdateWidget(covariant TwakeHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (Matrix.of(context).isValidActiveClient &&
         widget.client != oldWidget.client) {
       getCurrentProfile(widget.client);
+      _onAccountDataSubscription?.cancel();
+      _handleOnAccountDataSubscription();
     }
     if (currentProfileNotifier.value.userId.isEmpty) {
       getCurrentProfile(widget.client);
@@ -68,6 +92,13 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
   void dispose() {
     super.dispose();
     currentProfileNotifier.dispose();
+    _onAccountDataSubscription?.cancel();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _handleOnAccountDataSubscription();
   }
 
   @override
