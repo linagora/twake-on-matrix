@@ -11,10 +11,10 @@ class AppGridDashboardOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: AppGridDashboardOverlayStyle.margin,
       width: AppGridDashboardOverlayStyle.widthAppGrid(_linagoraApplications),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.onPrimary,
+        boxShadow: AppGridDashboardOverlayStyle.boxShadow,
         borderRadius: BorderRadius.circular(
           AppGridDashboardOverlayStyle.borderRadius,
         ),

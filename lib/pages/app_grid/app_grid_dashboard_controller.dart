@@ -22,6 +22,8 @@ class AppGridDashboardController extends State<AppGridDashboard> {
 
   final linagoraApplications = ValueNotifier<LinagoraApplications?>(null);
 
+  final hoverColor = ValueNotifier<Color>(Colors.transparent);
+
   void _getAppGridConfiguration() {
     _getAppGridConfigurationInteractor
         .execute(
@@ -79,6 +81,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
   void dispose() {
     isOpenAppGridDashboardNotifier.dispose();
     linagoraApplications.dispose();
+    hoverColor.dispose();
     super.dispose();
   }
 

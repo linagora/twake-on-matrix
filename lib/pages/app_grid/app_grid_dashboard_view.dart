@@ -29,36 +29,57 @@ class AppGridDashboardView extends StatelessWidget {
             },
             onTapOutside: (_) {
               controller.hideAppGridDashboard();
+              controller.hoverColor.value = Colors.transparent;
             },
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: PortalTarget(
-                portalFollower: const SizedBox(
-                  width: AppGridDashboardViewStyle.sizIcAppGrid,
-                ),
-                visible: isOpenAppGridDashboard,
-                child: PortalTarget(
-                  anchor: const Aligned(
-                    follower: Alignment.topRight,
-                    target: Alignment.bottomRight,
-                  ),
-                  portalFollower: ValueListenableBuilder(
-                    valueListenable: controller.linagoraApplications,
-                    builder: (context, linagoraApplications, child) {
-                      if (linagoraApplications == null) return child!;
-                      return AppGridDashboardOverlay(
-                        linagoraApplications,
-                      );
-                    },
-                    child: const SizedBox.shrink(),
-                  ),
-                  visible: isOpenAppGridDashboard,
-                  child: SvgPicture.asset(
-                    ImagePaths.icApplicationGrid,
-                    width: AppGridDashboardViewStyle.sizIcAppGrid,
-                    height: AppGridDashboardViewStyle.sizIcAppGrid,
-                  ),
-                ),
+              onEnter: (_) => controller.hoverColor.value =
+                  AppGridDashboardViewStyle.hoverColor,
+              onExit: (_) {
+                if (!isOpenAppGridDashboard) {
+                  controller.hoverColor.value = Colors.transparent;
+                }
+              },
+              child: ValueListenableBuilder(
+                valueListenable: controller.hoverColor,
+                builder: (context, color, child) {
+                  return PortalTarget(
+                    portalFollower: const SizedBox(
+                      width: AppGridDashboardViewStyle.sizIcAppGrid,
+                    ),
+                    visible: isOpenAppGridDashboard,
+                    child: PortalTarget(
+                      anchor: const Aligned(
+                        follower: Alignment.topRight,
+                        target: Alignment.bottomRight,
+                      ),
+                      portalFollower: ValueListenableBuilder(
+                        valueListenable: controller.linagoraApplications,
+                        builder: (context, linagoraApplications, child) {
+                          if (linagoraApplications == null) return child!;
+                          return AppGridDashboardOverlay(
+                            linagoraApplications,
+                          );
+                        },
+                        child: const SizedBox.shrink(),
+                      ),
+                      visible: isOpenAppGridDashboard,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius:
+                              AppGridDashboardViewStyle.appGridIconBorderRadius,
+                        ),
+                        padding: AppGridDashboardViewStyle.appGridIconPadding,
+                        child: SvgPicture.asset(
+                          ImagePaths.icApplicationGrid,
+                          width: AppGridDashboardViewStyle.sizIcAppGrid,
+                          height: AppGridDashboardViewStyle.sizIcAppGrid,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           );
