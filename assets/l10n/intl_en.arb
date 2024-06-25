@@ -1180,6 +1180,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "loading": "Loading status...",
   "loadMore": "Load more…",
   "@loadMore": {
     "type": "text",
@@ -1373,6 +1374,11 @@
   },
   "offline": "Offline",
   "@offline": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "aWhileAgo": "a while ago",
+  "@aWhileAgo": {
     "type": "text",
     "placeholders": {}
   },
@@ -2564,6 +2570,12 @@
   "@onlineHourAgo": {
     "placeholders": {
       "hour": {}
+    }
+  },
+  "onlineDayAgo": "online {day}d ago",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
     }
   },
   "noMessageHereYet": "No message here yet...",

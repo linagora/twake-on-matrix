@@ -16,7 +16,7 @@ extension RoomStatusExtension on Room {
 
   String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
     if (isDirectChat) {
-      return _getLocalizedStatusDirectChat(presence, context);
+      return getLocalizedStatusDirectChat(presence, context);
     }
 
     return _getLocalizedStatusGroupChat(context);
@@ -98,7 +98,7 @@ extension RoomStatusExtension on Room {
     return L10n.of(context)!.countMembers(totalMembers);
   }
 
-  String _getLocalizedStatusDirectChat(
+  String getLocalizedStatusDirectChat(
     CachedPresence? directChatPresence,
     BuildContext context,
   ) {
@@ -115,11 +115,17 @@ extension RoomStatusExtension on Room {
           return L10n.of(context)!.onlineMinAgo(
             currentDateTime.difference(lastActiveDateTime).inMinutes,
           );
-        } else if (lastActiveDateTime.isLessThanTenHoursAgo()) {
+        } else if (lastActiveDateTime.isLessThanADayAgo()) {
           final timeOffline = currentDateTime.difference(lastActiveDateTime);
           return L10n.of(context)!.onlineHourAgo(
             (timeOffline.inMinutes / 60).round(),
           );
+        } else if (lastActiveDateTime.isLessThan30DaysAgo()) {
+          return L10n.of(context)!.onlineDayAgo(
+            currentDateTime.difference(lastActiveDateTime).inDays,
+          );
+        } else {
+          return L10n.of(context)!.aWhileAgo;
         }
       }
     }

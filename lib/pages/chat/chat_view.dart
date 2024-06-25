@@ -136,6 +136,10 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             actions: _appBarActions(context),
                             onPushDetails: controller.onPushDetails,
                             roomName: controller.roomName,
+                            cachedPresenceNotifier:
+                                controller.cachedPresenceNotifier,
+                            cachedPresenceStreamController:
+                                controller.cachedPresenceStreamController,
                           ),
                         ),
                       ],
