@@ -35,7 +35,8 @@ class UploadContentInteractor {
           );
         }
 
-        final response = await mediaApi.uploadFile(fileInfo: contentFileInfo);
+        final response =
+            await mediaApi.uploadFileMobile(fileInfo: contentFileInfo);
 
         if (response.contentUri != null) {
           final contentUri = Uri.parse(response.contentUri!);

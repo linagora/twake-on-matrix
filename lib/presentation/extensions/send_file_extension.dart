@@ -215,12 +215,13 @@ extension SendFileExtension on Room {
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
         final mediaApi = getIt.get<MediaAPI>();
-        final response = await mediaApi.uploadFile(fileInfo: tempfileInfo);
+        final response =
+            await mediaApi.uploadFileMobile(fileInfo: tempfileInfo);
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
         if (uploadResp != null && thumbnail != null) {
-          final thumbnailResponse = await mediaApi.uploadFile(
+          final thumbnailResponse = await mediaApi.uploadFileMobile(
             fileInfo: FileInfo(
               thumbnail.fileName,
               isRoomEncrypted()
