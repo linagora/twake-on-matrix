@@ -79,4 +79,9 @@ abstract class WorkerQueue {
     _queue.clear();
     _releaseCompleter();
   }
+
+  void clearTaskInQueue(String taskId) {
+    Logs().i('WorkerQueue<$workerName>::clearTaskInQueue(): $taskId');
+    _queue.removeWhere((task) => task.id == taskId);
+  }
 }
