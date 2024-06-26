@@ -5,6 +5,7 @@ import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interac
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -230,7 +231,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
                 Padding(
                   padding: TomBootstrapDialogStyle.lottiePadding,
                   child: LottieBuilder.asset(
-                    'assets/twake_loading.json',
+                    ImagePaths.lottieTwakeLoading,
                     width: TomBootstrapDialogStyle.lottieSize,
                     height: TomBootstrapDialogStyle.lottieSize,
                   ),
