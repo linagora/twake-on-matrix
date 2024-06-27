@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:file_picker/file_picker.dart';
@@ -31,6 +33,7 @@ import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +59,8 @@ class SettingsProfileController extends State<SettingsProfile>
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin {
+        PopupMenuWidgetMixin,
+        OnProfileChangeMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
@@ -67,6 +71,8 @@ class SettingsProfileController extends State<SettingsProfile>
   Profile? currentProfile;
   AssetEntity? assetEntity;
   FilePickerResult? filePickerResult;
+
+  List<TwakeChatPresentationAccount> _multipleAccounts = [];
 
   final TwakeEventDispatcher twakeEventDispatcher =
       getIt.get<TwakeEventDispatcher>();
@@ -554,7 +560,7 @@ class SettingsProfileController extends State<SettingsProfile>
     try {
       settingsMultiAccountsUIState.value = Right(GetClientsLoadingUIState());
       final profileBundles = await _getClientProfiles();
-      final multipleAccounts = profileBundles
+      _multipleAccounts = profileBundles
           .where((clientProfile) => clientProfile != null)
           .map(
             (clientProfile) => clientProfile!.toTwakeChatPresentationAccount(
@@ -564,7 +570,7 @@ class SettingsProfileController extends State<SettingsProfile>
           .toList();
       settingsMultiAccountsUIState.value = Right(
         GetClientsSuccessUIState(
-          multipleAccounts: multipleAccounts,
+          multipleAccounts: _multipleAccounts,
         ),
       );
     } catch (e) {
@@ -666,14 +672,40 @@ class SettingsProfileController extends State<SettingsProfile>
     _handleViewState();
     _getCurrentProfile(client);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      updateNewProfileForAccount();
       _getMultipleAccounts(client);
     });
     super.initState();
   }
 
+  void updateNewProfileForAccount() {
+    listenOnProfileChangeStream(
+      client: Matrix.of(context).client,
+      currentProfile: currentProfile,
+      onProfileChanged: (newProfile) {
+        final indexOldAccount = _multipleAccounts
+            .indexWhere((element) => element.accountId == client.userID);
+        if (indexOldAccount < 0) {
+          return;
+        }
+        final newAccount = ClientProfilePresentation(
+          client: Matrix.of(context).client,
+          profile: newProfile,
+        ).toTwakeChatPresentationAccount(Matrix.of(context).client);
+        _multipleAccounts[indexOldAccount] = newAccount;
+        settingsMultiAccountsUIState.value = Right<Failure, Success>(
+          GetClientsSuccessUIState(
+            multipleAccounts: _multipleAccounts,
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _clearImageInLocal();
+    onAccountDataSubscription?.cancel();
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();
     displayNameFocusNode.dispose();
