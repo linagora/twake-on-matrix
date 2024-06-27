@@ -9,9 +9,11 @@ class UploadFileInfo extends UploadInfo {
   final StreamController<Either<Failure, Success>> uploadStateStreamController;
   final Stream<Either<Failure, Success>> uploadStream;
   final CancelToken cancelToken;
+  final DateTime createdAt;
 
   UploadFileInfo({
     required super.txid,
+    required this.createdAt,
     required this.uploadStateStreamController,
     required this.uploadStream,
     required this.cancelToken,

@@ -1,6 +1,5 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:matrix/matrix.dart';
 
 class UploadFileInitial extends Success {
   const UploadFileInitial();
@@ -23,65 +22,96 @@ class GeneratingThumbnailState extends Success {
   List<Object?> get props => [];
 }
 
+class GenerateThumbnailSuccess extends Success {
+  const GenerateThumbnailSuccess();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class GenerateThumbnailFailed extends Failure {
-  const GenerateThumbnailFailed();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class EncryptingFileState extends Success {
-  const EncryptingFileState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class EncryptedFileState extends Success {
-  const EncryptedFileState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class EncryptFailedFileState extends Failure {
-  const EncryptFailedFileState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class UploadingFileState extends Success {
-  final int receive;
-  final int total;
-
-  const UploadingFileState({
-    required this.receive,
-    required this.total,
-  });
-
-  @override
-  List<Object?> get props => [receive, total];
-}
-
-class UploadMatrixFileSuccessState extends Success {
-  final MatrixFile file;
-
-  const UploadMatrixFileSuccessState({
-    required this.file,
-  });
-
-  @override
-  List<Object?> get props => [file];
-}
-
-class UploadMatrixFileFailedState extends Failure {
   final dynamic exception;
-
-  const UploadMatrixFileFailedState({
+  const GenerateThumbnailFailed({
     required this.exception,
   });
 
   @override
   List<Object?> get props => [exception];
+}
+
+class EncryptingFileState extends Success {
+  final bool isThumbnail;
+  const EncryptingFileState({
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [isThumbnail];
+}
+
+class EncryptedFileState extends Success {
+  final bool isThumbnail;
+  const EncryptedFileState({
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [isThumbnail];
+}
+
+class EncryptFailedFileState extends Failure {
+  final bool isThumbnail;
+  final dynamic exception;
+  const EncryptFailedFileState({
+    required this.exception,
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [isThumbnail, exception];
+}
+
+class UploadingFileState extends Success {
+  final int receive;
+  final int total;
+  final bool isThumbnail;
+
+  const UploadingFileState({
+    required this.receive,
+    required this.total,
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [
+        receive,
+        total,
+        isThumbnail,
+      ];
+}
+
+class UploadFileSuccessState extends Success {
+  final String? eventId;
+  final bool isThumbnail;
+
+  const UploadFileSuccessState({
+    this.eventId,
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [eventId, isThumbnail];
+}
+
+class UploadFileFailedState extends Failure {
+  final dynamic exception;
+  final bool isThumbnail;
+
+  const UploadFileFailedState({
+    required this.exception,
+    this.isThumbnail = false,
+  });
+
+  @override
+  List<Object?> get props => [exception, isThumbnail];
 }
