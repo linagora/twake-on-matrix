@@ -30,7 +30,7 @@ class SendMediaInteractor {
           continue;
         }
 
-        await room.sendFileEvent(
+        await room.sendFileEventMobile(
           fakeSendingFileInfo.fileInfo,
           msgType: fakeSendingFileInfo.messageType,
           fakeImageEvent: fakeSendingFileInfo.fakeImageEvent,

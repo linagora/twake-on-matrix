@@ -2,6 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dartz/dartz.dart' hide id;
+import 'package:dio/dio.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -10,8 +15,10 @@ import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/exception/upload_exception.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
@@ -28,28 +35,21 @@ typedef MessageType = String;
 typedef FakeImageEvent = SyncUpdate;
 
 extension SendFileExtension on Room {
-  Future<String?> sendFileEvent(
+  Future<String?> sendFileEventMobile(
     FileInfo fileInfo, {
     String msgType = MessageTypes.Image,
-    SyncUpdate? fakeImageEvent,
-    String? txid,
+    required SyncUpdate fakeImageEvent,
+    required String txid,
     Event? inReplyTo,
     String? editEventId,
     int? shrinkImageMaxDimension,
     ImageFileInfo? thumbnail,
     Map<String, dynamic>? extraContent,
+    StreamController<Either<Failure, Success>>? uploadStreamController,
+    CancelToken? cancelToken,
+    DateTime? sentDate,
   }) async {
     FileInfo tempfileInfo = fileInfo;
-    txid ??= client.generateUniqueTransactionId();
-    fakeImageEvent ??= await sendFakeImagePickerFileEvent(
-      fileInfo,
-      txid: txid,
-      messageType: msgType,
-      inReplyTo: inReplyTo,
-      editEventId: editEventId,
-      shrinkImageMaxDimension: shrinkImageMaxDimension,
-      extraContent: extraContent,
-    );
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
     try {
@@ -59,7 +59,16 @@ extension SendFileExtension on Room {
         'SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize',
       );
       if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
-        throw FileTooBigMatrixException(fileInfo.fileSize, maxMediaSize);
+        uploadStreamController?.add(
+          Left(
+            UploadFileFailedState(
+              exception: FileTooBigMatrixException(
+                fileInfo.fileSize,
+                maxMediaSize,
+              ),
+            ),
+          ),
+        );
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
@@ -79,7 +88,11 @@ extension SendFileExtension on Room {
       final targetPath =
           await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
               .create();
-      await _generateThumbnail(fileInfo, targetPath: targetPath.path);
+      await _generateThumbnail(
+        fileInfo,
+        targetPath: targetPath.path,
+        uploadStreamController: uploadStreamController,
+      );
       fileInfo = ImageFileInfo(
         fileInfo.fileName,
         targetPath.path,
@@ -112,6 +125,7 @@ extension SendFileExtension on Room {
       thumbnail ??= await _generateThumbnail(
         fileInfo,
         targetPath: tempThumbnailFile.path,
+        uploadStreamController: uploadStreamController,
       );
       fileInfo = ImageFileInfo(
         fileInfo.fileName,
@@ -145,7 +159,12 @@ extension SendFileExtension on Room {
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
       );
-      thumbnail ??= await _getThumbnailVideo(tempThumbnailFile, fileInfo, txid);
+      thumbnail ??= await _getThumbnailVideo(
+        tempThumbnailFile,
+        fileInfo,
+        txid,
+        uploadStreamController: uploadStreamController,
+      );
       if (fileInfo.width == null || fileInfo.height == null) {
         fileInfo = VideoFileInfo(
           fileInfo.fileName,
@@ -188,20 +207,53 @@ extension SendFileExtension on Room {
         FileSendingStatus.encrypting.name,
       );
 
-      encryptedFileInfo = await encryptedService.encryptFile(
-        fileInfo: fileInfo,
-        outputFile: tempEncryptedFile,
-      );
+      try {
+        uploadStreamController?.add(
+          const Right(EncryptingFileState()),
+        );
+        encryptedFileInfo = await encryptedService.encryptFile(
+          fileInfo: fileInfo,
+          outputFile: tempEncryptedFile,
+        );
+        uploadStreamController?.add(
+          const Right(EncryptedFileState()),
+        );
+      } catch (e) {
+        uploadStreamController?.add(
+          Left(EncryptFailedFileState(exception: e)),
+        );
+      }
+
       tempfileInfo = FileInfo(
         fileInfo.fileName,
         tempEncryptedFile.path,
         fileInfo.fileSize,
       );
       if (thumbnail != null) {
-        encryptedThumbnail = await encryptedService.encryptFile(
-          fileInfo: thumbnail,
-          outputFile: tempEncryptedThumbnailFile,
-        );
+        try {
+          uploadStreamController?.add(
+            const Right(
+              EncryptingFileState(
+                isThumbnail: true,
+              ),
+            ),
+          );
+          encryptedThumbnail = await encryptedService.encryptFile(
+            fileInfo: thumbnail,
+            outputFile: tempEncryptedThumbnailFile,
+          );
+          uploadStreamController?.add(
+            const Right(
+              EncryptedFileState(
+                isThumbnail: true,
+              ),
+            ),
+          );
+        } catch (e) {
+          uploadStreamController?.add(
+            Left(EncryptFailedFileState(exception: e, isThumbnail: true)),
+          );
+        }
       }
     }
     Uri? uploadResp, thumbnailUploadResp;
@@ -215,8 +267,21 @@ extension SendFileExtension on Room {
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       try {
         final mediaApi = getIt.get<MediaAPI>();
-        final response =
-            await mediaApi.uploadFileMobile(fileInfo: tempfileInfo);
+        final response = await mediaApi.uploadFileMobile(
+          fileInfo: tempfileInfo,
+          cancelToken: cancelToken,
+          onSendProgress: (receive, total) {
+            if (uploadStreamController?.isClosed == true) return;
+            uploadStreamController?.add(
+              Right(
+                UploadingFileState(
+                  receive: receive,
+                  total: total,
+                ),
+              ),
+            );
+          },
+        );
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
         }
@@ -229,10 +294,30 @@ extension SendFileExtension on Room {
                   : thumbnail.filePath,
               thumbnail.fileSize,
             ),
+            cancelToken: cancelToken,
+            onSendProgress: (receive, total) {
+              if (uploadStreamController?.isClosed == true) return;
+              uploadStreamController?.add(
+                Right(
+                  UploadingFileState(
+                    receive: receive,
+                    total: total,
+                    isThumbnail: true,
+                  ),
+                ),
+              );
+            },
           );
           thumbnailUploadResp =
               Uri.tryParse(thumbnailResponse.contentUri ?? "");
         }
+        uploadStreamController?.add(
+          Right(
+            UploadFileSuccessState(
+              eventId: txid,
+            ),
+          ),
+        );
       } on MatrixException catch (e) {
         await _updateFakeSync(
           fakeImageEvent,
@@ -242,6 +327,17 @@ extension SendFileExtension on Room {
         Logs().e('Error: $e');
         rethrow;
       } catch (e) {
+        if (e is CancelRequestException) {
+          Logs().i('User cancel the upload');
+          uploadStreamController?.add(
+            Left(
+              UploadFileFailedState(
+                exception: CancelUploadException(),
+              ),
+            ),
+          );
+          return null;
+        }
         await _updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,
@@ -305,6 +401,7 @@ extension SendFileExtension on Room {
       txid: txid,
       inReplyTo: inReplyTo,
       editEventId: editEventId,
+      sentDate: sentDate,
     );
     if (eventId != null) {
       await _copyFileInMemToAppDownloadsFolder(
@@ -363,6 +460,7 @@ extension SendFileExtension on Room {
     String? editEventId,
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
+    DateTime? sentDate,
   }) async {
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEvent = SyncUpdate(
@@ -384,7 +482,7 @@ extension SendFileExtension on Room {
                   type: EventTypes.Message,
                   eventId: txid,
                   senderId: client.userID!,
-                  originServerTs: DateTime.now(),
+                  originServerTs: sentDate ?? DateTime.now(),
                   unsigned: {
                     messageSendingStatusKey: EventStatus.sending.intValue,
                     'transaction_id': txid,
@@ -468,8 +566,11 @@ extension SendFileExtension on Room {
   Future<ImageFileInfo?> _generateThumbnail(
     ImageFileInfo originalFile, {
     required String targetPath,
+    required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
+      uploadStreamController?.add(const Right(GeneratingThumbnailState()));
+
       final result = await FlutterImageCompress.compressAndGetFile(
         originalFile.filePath,
         targetPath,
@@ -488,6 +589,7 @@ extension SendFileExtension on Room {
         width = imageDimension.width.toInt();
         height = imageDimension.height.toInt();
       }
+      uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
       return ImageFileInfo(
         result.name,
         result.path,
@@ -496,6 +598,9 @@ extension SendFileExtension on Room {
         height: height,
       );
     } catch (e) {
+      uploadStreamController?.add(
+        Left(GenerateThumbnailFailed(exception: e)),
+      );
       Logs().e('Error while generating thumbnail', e);
       return null;
     }
@@ -525,8 +630,10 @@ extension SendFileExtension on Room {
   Future<ImageFileInfo> _getThumbnailVideo(
     File tempThumbnailFile,
     VideoFileInfo fileInfo,
-    String txid,
-  ) async {
+    String txid, {
+    required StreamController<Either<Failure, Success>>? uploadStreamController,
+  }) async {
+    uploadStreamController?.add(const Right(GeneratingThumbnailState()));
     final int fileSize;
     if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
       await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
@@ -550,6 +657,9 @@ extension SendFileExtension on Room {
         width = imageDimension.width.toInt();
         height = imageDimension.height.toInt();
       } catch (e) {
+        uploadStreamController?.add(
+          Left(GenerateThumbnailFailed(exception: e)),
+        );
         Logs().e(
           '_getThumbnailVideo():: Error while calculating image dimension',
           e,
@@ -557,6 +667,7 @@ extension SendFileExtension on Room {
       }
     }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
+    uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
     final newThumbnail = ImageFileInfo(
       tempThumbnailFile.path.split("/").last,
       tempThumbnailFile.path,

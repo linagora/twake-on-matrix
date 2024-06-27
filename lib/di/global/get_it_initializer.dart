@@ -89,6 +89,8 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controlle
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -163,6 +165,12 @@ class GetItInitializer {
     );
     getIt.registerSingleton<DownloadManager>(
       DownloadManager(),
+    );
+    getIt.registerSingleton<UploadWorkerQueue>(
+      UploadWorkerQueue(),
+    );
+    getIt.registerSingleton<UploadManager>(
+      UploadManager(),
     );
   }
 

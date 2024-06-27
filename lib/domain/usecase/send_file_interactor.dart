@@ -18,13 +18,25 @@ class SendFileInteractor {
         final txid = room.storePlaceholderFileInMem(
           fileInfo: fileInfo,
         );
-        room.sendFileEvent(
+
+        final fakeImageEvent = await room.sendFakeImagePickerFileEvent(
+          fileInfo,
+          txid: txid,
+          messageType: fileInfo.msgType,
+          inReplyTo: inReplyTo,
+          editEventId: editEventId,
+          shrinkImageMaxDimension: shrinkImageMaxDimension,
+          extraContent: extraContent,
+        );
+
+        room.sendFileEventMobile(
           fileInfo,
           msgType: fileInfo.msgType,
           txid: txid,
           editEventId: editEventId,
           inReplyTo: inReplyTo,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
+          fakeImageEvent: fakeImageEvent,
         );
       }
     } catch (error) {
