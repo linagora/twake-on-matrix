@@ -1,6 +1,8 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -50,13 +52,21 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    const _PlayVideoButton(),
-                    SizedBox(
-                      width: MessageContentStyle.videoCenterButtonSize,
-                      height: MessageContentStyle.videoCenterButtonSize,
-                      child: CircularProgressIndicator(
-                        strokeWidth: MessageContentStyle.strokeVideoWidth,
-                        color: LinagoraRefColors.material().primary[100],
+                    _PlayVideoButton(
+                      event: event,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        final uploadManager = getIt<UploadManager>();
+                        uploadManager.cancelUpload(event);
+                      },
+                      child: SizedBox(
+                        width: MessageContentStyle.videoCenterButtonSize,
+                        height: MessageContentStyle.videoCenterButtonSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: MessageContentStyle.strokeVideoWidth,
+                          color: LinagoraRefColors.material().primary[100],
+                        ),
                       ),
                     ),
                   ],
@@ -141,7 +151,8 @@ class VideoWidget extends StatelessWidget {
 }
 
 class _PlayVideoButton extends StatelessWidget {
-  const _PlayVideoButton();
+  final Event? event;
+  const _PlayVideoButton({this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +165,7 @@ class _PlayVideoButton extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Icon(
-        Icons.play_arrow_rounded,
+        event != null ? Icons.close : Icons.play_arrow_rounded,
         color: LinagoraRefColors.material().primary[100],
         size: MessageContentStyle.iconInsideVideoButtonSize,
       ),

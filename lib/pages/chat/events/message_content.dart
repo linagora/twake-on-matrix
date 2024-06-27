@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/events/images_builder/message_content_imag
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
+import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
@@ -13,11 +14,13 @@ import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
@@ -126,9 +129,15 @@ class MessageContent extends StatelessWidget
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!PlatformInfos.isWeb) ...[
-                  MessageDownloadContent(
-                    event,
-                  ),
+                  if (event.isSending()) ...[
+                    MessageUploadingContent(
+                      event: event,
+                      style: const MessageFileTileStyle(),
+                    ),
+                  ] else
+                    MessageDownloadContent(
+                      event,
+                    ),
                 ] else ...[
                   MessageDownloadContentWeb(
                     event,

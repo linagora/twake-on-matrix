@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
@@ -71,9 +73,15 @@ class SendingImageInfoWidget extends StatelessWidget {
                   strokeWidth: 2,
                   color: LinagoraRefColors.material().primary[100],
                 ),
-                Icon(
-                  Icons.close,
-                  color: LinagoraRefColors.material().primary[100],
+                InkWell(
+                  child: Icon(
+                    Icons.close,
+                    color: LinagoraRefColors.material().primary[100],
+                  ),
+                  onTap: () {
+                    final uploadManager = getIt.get<UploadManager>();
+                    uploadManager.cancelUpload(event);
+                  },
                 ),
               ],
             ],
