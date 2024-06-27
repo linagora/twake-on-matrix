@@ -36,13 +36,14 @@ class UploadManager {
     if (cancelToken != null) {
       Logs().d('Remove eventid: ${event.eventId}');
       cancelToken.cancel();
-      await event.remove();
       _clearFileTask(event.eventId);
+      event.remove();
     }
   }
 
   Future<void> _clearFileTask(String eventId) async {
     try {
+      uploadWorkerQueue.clearTaskInQueue(eventId);
       await _eventIdMapUploadFileInfo[eventId]
           ?.uploadStateStreamController
           .close();
@@ -52,7 +53,6 @@ class UploadManager {
       );
     } finally {
       _eventIdMapUploadFileInfo.remove(eventId);
-      uploadWorkerQueue.clearTaskInQueue(eventId);
       Logs().i(
         'UploadManager:: Clear with $eventId successfully',
       );
@@ -109,6 +109,8 @@ class UploadManager {
       if (fakeSendingFileInfo == null) {
         continue;
       }
+
+      Logs().d('UploadManager::uploadMediaMobile(): txid: $txid');
 
       _initUploadFileInfo(txid: txid);
 
