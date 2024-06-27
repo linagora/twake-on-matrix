@@ -1,11 +1,9 @@
-import 'dart:async';
-
-import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +36,8 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
       const Size.fromHeight(TwakeHeaderStyle.toolbarHeight);
 }
 
-class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
+class _TwakeHeaderState extends State<TwakeHeader>
+    with ShowDialogMixin, OnProfileChangeMixin {
   final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
     Profile(userId: ''),
   );
@@ -55,33 +54,20 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
     currentProfileNotifier.value = profile;
   }
 
-  StreamSubscription? _onAccountDataSubscription;
-
-  void _handleOnAccountDataSubscription() {
-    _onAccountDataSubscription =
-        Matrix.of(context).client.onAccountData.stream.listen((event) {
-      if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
-        final newProfile = Profile.fromJson(event.content);
-        Logs().d(
-          'TwakeHeader::_handleOnAccountDataSubscription() - newProfile: ${newProfile.avatarUrl}',
-        );
-        if (newProfile.avatarUrl != currentProfileNotifier.value.avatarUrl ||
-            newProfile.displayName !=
-                currentProfileNotifier.value.displayName) {
-          currentProfileNotifier.value = newProfile;
-        }
-      }
-    });
-  }
-
   @override
   void didUpdateWidget(covariant TwakeHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (Matrix.of(context).isValidActiveClient &&
         widget.client != oldWidget.client) {
       getCurrentProfile(widget.client);
-      _onAccountDataSubscription?.cancel();
-      _handleOnAccountDataSubscription();
+      onAccountDataSubscription?.cancel();
+      listenOnProfileChangeStream(
+        client: Matrix.of(context).client,
+        currentProfile: currentProfileNotifier.value,
+        onProfileChanged: (newProfile) {
+          currentProfileNotifier.value = newProfile;
+        },
+      );
     }
     if (currentProfileNotifier.value.userId.isEmpty) {
       getCurrentProfile(widget.client);
@@ -92,13 +78,19 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
   void dispose() {
     super.dispose();
     currentProfileNotifier.dispose();
-    _onAccountDataSubscription?.cancel();
+    onAccountDataSubscription?.cancel();
   }
 
   @override
   void initState() {
     super.initState();
-    _handleOnAccountDataSubscription();
+    listenOnProfileChangeStream(
+      client: Matrix.of(context).client,
+      currentProfile: currentProfileNotifier.value,
+      onProfileChanged: (newProfile) {
+        currentProfileNotifier.value = newProfile;
+      },
+    );
   }
 
   @override
