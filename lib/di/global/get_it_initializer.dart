@@ -78,10 +78,6 @@ import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_inte
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
@@ -275,12 +271,10 @@ class GetItInitializer {
     getIt.registerFactory<PhonebookContactInteractor>(
       () => PhonebookContactInteractor(),
     );
-    getIt.registerSingleton<SendMediaInteractor>(SendMediaInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
     );
     getIt.registerSingleton<SendFileInteractor>(SendFileInteractor());
-    getIt.registerSingleton<SendFileOnWebInteractor>(SendFileOnWebInteractor());
     getIt.registerSingleton<CreateNewGroupChatInteractor>(
       CreateNewGroupChatInteractor(),
     );
@@ -328,9 +322,6 @@ class GetItInitializer {
         getIt.get<LocalizationsRepository>(),
       ),
     );
-    getIt.registerFactory<SendMediaOnWebWithCaptionInteractor>(
-      () => SendMediaOnWebWithCaptionInteractor(),
-    );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
     getIt.registerFactory<LookupMatchContactInteractor>(
       () => LookupMatchContactInteractor(),
@@ -340,9 +331,6 @@ class GetItInitializer {
     );
     getIt.registerLazySingleton<UpdatePinnedMessagesInteractor>(
       () => UpdatePinnedMessagesInteractor(),
-    );
-    getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
-      () => SendFilesOnWebWithCaptionInteractor(),
     );
 
     getIt.registerFactory<GenerateThumbnailsMediaInteractor>(
