@@ -62,7 +62,7 @@ class MediaAPI {
         .postToGetBody(
       HomeserverEndpoint.uploadMediaServicePath
           .generateHomeserverMediaEndpoint(),
-      data: file,
+      data: file.bytes,
       queryParameters: {
         'fileName': file.name,
       },
