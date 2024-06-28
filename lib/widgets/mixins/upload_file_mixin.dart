@@ -10,7 +10,7 @@ import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-mixin UploadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
+mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
   final uploadManager = getIt.get<UploadManager>();
 
   final uploadFileStateNotifier = ValueNotifier<UploadFileUIState>(
@@ -30,7 +30,7 @@ mixin UploadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     state.fold(
       (failure) {
         Logs().e(
-          'UploadFileOnMobileMixin::setupUploadProcess(): Failure $failure',
+          'UploadFileMixin::setupUploadProcess(): Failure $failure',
         );
         if (failure is UploadFileFailedState &&
             failure.exception is CancelUploadException) {
@@ -40,7 +40,7 @@ mixin UploadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
       },
       (success) {
         Logs().d(
-          'UploadFileOnMobileMixin::setupUploadProcess(): Success $success',
+          'UploadFileMixin::setupUploadProcess(): Success $success',
         );
         if (success is UploadingFileState) {
           if (!success.isThumbnail) {

@@ -8,8 +8,15 @@ class UploadFileInitial extends Success {
   List<Object?> get props => [];
 }
 
-class ConvertStreamToBytesState extends Success {
-  const ConvertStreamToBytesState();
+class ConvertingStreamToBytesState extends Success {
+  const ConvertingStreamToBytesState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class ConvertedStreamToBytesState extends Success {
+  const ConvertedStreamToBytesState();
 
   @override
   List<Object?> get props => [];

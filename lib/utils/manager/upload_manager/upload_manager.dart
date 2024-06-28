@@ -8,6 +8,7 @@ import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_file_info.dart';
@@ -162,7 +163,73 @@ class UploadManager {
       );
     }
     if (caption != null && caption.isNotEmpty) {
-      _addCaptionTaskToWorkerQueueMobile(
+      _addCaptionTaskToWorkerQueue(
+        room: room,
+        caption: caption,
+      );
+    }
+  }
+
+  Future<void> uploadFilesWeb({
+    required Room room,
+    required List<MatrixFile> files,
+    Map<MatrixFile, MatrixImageFile?>? thumbnails,
+    String? caption,
+  }) async {
+    for (final MatrixFile matrixFile in files) {
+      final txid = room.client.generateUniqueTransactionId();
+
+      _initUploadFileInfo(txid: txid);
+
+      room.sendingFilePlaceholders[txid] = matrixFile;
+      final fakeFileEvent = await room.sendFakeFileEvent(
+        matrixFile,
+        txid: txid,
+      );
+
+      final streamController =
+          _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController;
+
+      final cancelToken = _eventIdMapUploadFileInfo[txid]?.cancelToken;
+
+      final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
+
+      if (streamController == null || cancelToken == null) {
+        Logs().e(
+          'DownloadManager::download(): streamController or cancelToken is null',
+        );
+        _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController.add(
+              Left(
+                UploadFileFailedState(
+                  exception: Exception(
+                    'streamController or cancelToken is null',
+                  ),
+                ),
+              ),
+            );
+        return;
+      }
+
+      streamController.add(
+        const Right(
+          UploadFileInitial(),
+        ),
+      );
+
+      _addFileTaskToWorkerQueueWeb(
+        txid: txid,
+        fakeImageEvent: fakeFileEvent,
+        room: room,
+        matrixFile: matrixFile,
+        streamController: streamController,
+        cancelToken: cancelToken,
+        thumbnail: thumbnails?[matrixFile],
+        sentDate: sentDate,
+      );
+    }
+
+    if (caption != null && caption.isNotEmpty) {
+      _addCaptionTaskToWorkerQueue(
         room: room,
         caption: caption,
       );
@@ -185,7 +252,7 @@ class UploadManager {
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
 
-      final fakeImageEvent = await room.sendFakeImagePickerFileEvent(
+      final fakeEvent = await room.sendFakeImagePickerFileEvent(
         fileInfo,
         txid: txid,
         messageType: fileInfo.msgType,
@@ -221,7 +288,7 @@ class UploadManager {
 
       _addFileTaskToWorkerQueueMobile(
         txid: txid,
-        fakeImageEvent: fakeImageEvent,
+        fakeImageEvent: fakeEvent,
         room: room,
         fileInfo: fileInfo,
         streamController: streamController,
@@ -230,14 +297,14 @@ class UploadManager {
       );
     }
     if (caption != null && caption.isNotEmpty) {
-      _addCaptionTaskToWorkerQueueMobile(
+      _addCaptionTaskToWorkerQueue(
         room: room,
         caption: caption,
       );
     }
   }
 
-  Future<void> _addCaptionTaskToWorkerQueueMobile({
+  Future<void> _addCaptionTaskToWorkerQueue({
     required Room room,
     required String caption,
   }) async {
@@ -297,6 +364,43 @@ class UploadManager {
               txid: txid,
               fakeImageEvent: fakeImageEvent,
               shrinkImageMaxDimension: shrinkImageMaxDimension,
+              uploadStreamController: streamController,
+              cancelToken: cancelToken,
+              sentDate: sentDate,
+            );
+          } catch (e) {
+            streamController.add(
+              Left(
+                UploadFileFailedState(exception: e),
+              ),
+            );
+          }
+        },
+        onTaskCompleted: () => _clearFileTask(txid),
+      ),
+    );
+  }
+
+  void _addFileTaskToWorkerQueueWeb({
+    required String txid,
+    required SyncUpdate fakeImageEvent,
+    required Room room,
+    required MatrixFile matrixFile,
+    required StreamController<Either<Failure, Success>> streamController,
+    required CancelToken cancelToken,
+    MatrixImageFile? thumbnail,
+    DateTime? sentDate,
+  }) {
+    uploadWorkerQueue.addTask(
+      Task(
+        id: txid,
+        runnable: () async {
+          try {
+            await room.sendFileOnWebEvent(
+              matrixFile,
+              fakeImageEvent: fakeImageEvent,
+              txid: txid,
+              thumbnail: thumbnail,
               uploadStreamController: streamController,
               cancelToken: cancelToken,
               sentDate: sentDate,
