@@ -5,7 +5,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/widgets/file_widget/base_file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
-import 'package:fluffychat/widgets/mixins/upload_file_on_mobile_mixin.dart';
+import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
@@ -26,7 +26,7 @@ class MessageUploadingContent extends StatefulWidget {
 }
 
 class _MessageUploadingContentState extends State<MessageUploadingContent>
-    with UploadFileOnMobileMixin<MessageUploadingContent> {
+    with UploadFileMixin<MessageUploadingContent> {
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
+import 'package:fluffychat/pages/chat/events/message_video_upload_content.dart';
 import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
@@ -139,9 +140,15 @@ class MessageContent extends StatelessWidget
                       event,
                     ),
                 ] else ...[
-                  MessageDownloadContentWeb(
-                    event,
-                  ),
+                  if (event.isSending()) ...[
+                    MessageUploadingContent(
+                      event: event,
+                      style: const MessageFileTileStyle(),
+                    ),
+                  ] else
+                    MessageDownloadContentWeb(
+                      event,
+                    ),
                 ],
                 Padding(
                   padding: MessageContentStyle.endOfBubbleWidgetPadding,
@@ -293,6 +300,13 @@ class _MessageVideoBuilder extends StatelessWidget {
       );
     }
     if (PlatformInfos.isWeb) {
+      if (event.isSending()) {
+        return MessageVideoUploadContentWeb(
+          event: event,
+          width: displayImageInfo.size.width,
+          height: displayImageInfo.size.height,
+        );
+      }
       return MessageVideoDownloadContentWeb(
         event: event,
         width: displayImageInfo.size.width,

@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
-import 'package:fluffychat/widgets/mixins/upload_file_on_mobile_mixin.dart';
+import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -26,7 +26,7 @@ class SendingVideoWidget extends StatefulWidget {
 }
 
 class _SendingVideoWidgetState extends State<SendingVideoWidget>
-    with PlayVideoActionMixin, UploadFileOnMobileMixin {
+    with PlayVideoActionMixin, UploadFileMixin {
   final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
   @override
   Event get event => widget.event;

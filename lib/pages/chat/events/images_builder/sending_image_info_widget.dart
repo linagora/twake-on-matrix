@@ -8,7 +8,7 @@ import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
-import 'package:fluffychat/widgets/mixins/upload_file_on_mobile_mixin.dart';
+import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -36,7 +36,7 @@ class SendingImageInfoWidget extends StatefulWidget {
 }
 
 class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
-    with UploadFileOnMobileMixin {
+    with UploadFileMixin {
   @override
   Event get event => widget.event;
 
