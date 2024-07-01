@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.d
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,8 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
       const Size.fromHeight(TwakeHeaderStyle.toolbarHeight);
 }
 
-class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
+class _TwakeHeaderState extends State<TwakeHeader>
+    with ShowDialogMixin, OnProfileChangeMixin {
   final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
     Profile(userId: ''),
   );
@@ -58,6 +60,14 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
     if (Matrix.of(context).isValidActiveClient &&
         widget.client != oldWidget.client) {
       getCurrentProfile(widget.client);
+      onAccountDataSubscription?.cancel();
+      listenOnProfileChangeStream(
+        client: Matrix.of(context).client,
+        currentProfile: currentProfileNotifier.value,
+        onProfileChanged: (newProfile) {
+          currentProfileNotifier.value = newProfile;
+        },
+      );
     }
     if (currentProfileNotifier.value.userId.isEmpty) {
       getCurrentProfile(widget.client);
@@ -68,6 +78,19 @@ class _TwakeHeaderState extends State<TwakeHeader> with ShowDialogMixin {
   void dispose() {
     super.dispose();
     currentProfileNotifier.dispose();
+    onAccountDataSubscription?.cancel();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    listenOnProfileChangeStream(
+      client: Matrix.of(context).client,
+      currentProfile: currentProfileNotifier.value,
+      onProfileChanged: (newProfile) {
+        currentProfileNotifier.value = newProfile;
+      },
+    );
   }
 
   @override
