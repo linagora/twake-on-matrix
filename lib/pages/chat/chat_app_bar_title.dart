@@ -266,7 +266,7 @@ class ChatAppBarTitleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle? statusTextStyle = text == L10n.of(context)!.activeNow
+    final TextStyle? statusTextStyle = text == L10n.of(context)!.online
         ? ChatAppBarTitleStyle.onlineStatusTextStyle(context)
         : ChatAppBarTitleStyle.offlineStatusTextStyle(context);
 

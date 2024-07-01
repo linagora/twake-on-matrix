@@ -104,13 +104,13 @@ extension RoomStatusExtension on Room {
   ) {
     if (directChatPresence != null) {
       if (directChatPresence.presence == PresenceType.online) {
-        return L10n.of(context)!.activeNow;
+        return L10n.of(context)!.online;
       }
       final lastActiveDateTime = directChatPresence.lastActiveTimestamp;
       final currentDateTime = DateTime.now();
       if (lastActiveDateTime != null) {
         if (lastActiveDateTime.isLessThanOneMinuteAgo()) {
-          return L10n.of(context)!.activeNow;
+          return L10n.of(context)!.online;
         } else if (lastActiveDateTime.isLessThanOneHourAgo()) {
           return L10n.of(context)!.onlineMinAgo(
             currentDateTime.difference(lastActiveDateTime).inMinutes,

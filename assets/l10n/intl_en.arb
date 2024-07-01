@@ -2943,7 +2943,6 @@
   "contactsCount": "Contacts ({count})",
   "linagoraContactsCount": "Linagora contacts ({count})",
   "fetchingPhonebookContacts": "Fetching contacts from device...({progress}% completed)",
-  "activeNow": "Active now",
   "languageEnglish": "English",
   "@languageEnglish": {
     "type": "text",
