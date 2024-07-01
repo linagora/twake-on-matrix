@@ -61,7 +61,7 @@ void main() {
       expect(find.text("Hint"), findsOneWidget);
       expect(find.byIcon(Icons.search_outlined), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_back), findsNothing);
+      expect(find.byIcon(Icons.arrow_back_ios), findsNothing);
     });
 
     testWidgets("Still one textfield when clicking on title",
@@ -102,7 +102,7 @@ void main() {
       expect(find.text("Title"), findsOneWidget);
       expect(find.text("Hint"), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
@@ -137,7 +137,7 @@ void main() {
       expect(find.text("Hint"), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsNothing);
       expect(find.byIcon(Icons.close), findsNothing);
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
     });
 
     testWidgets("change displayBackButton does nothing", (widgetTester) async {
@@ -150,7 +150,7 @@ void main() {
       expect(find.text("Title"), findsOneWidget);
       expect(find.text("Hint"), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
     });
   });

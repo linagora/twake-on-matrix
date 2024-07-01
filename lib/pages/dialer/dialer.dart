@@ -631,7 +631,7 @@ class MyCallingPage extends State<Calling> {
                         left: 24.0,
                         child: IconButton(
                           color: Colors.black45,
-                          icon: const Icon(Icons.arrow_back),
+                          icon: const Icon(Icons.arrow_back_ios),
                           onPressed: () {
                             PIPView.of(context)?.setFloating(true);
                           },

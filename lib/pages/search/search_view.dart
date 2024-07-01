@@ -178,7 +178,7 @@ class SearchView extends StatelessWidget {
           children: [
             TwakeIconButton(
               tooltip: L10n.of(context)!.back,
-              icon: Icons.arrow_back,
+              icon: Icons.arrow_back_ios,
               onTap: () => Navigator.of(context).pop(),
               paddingAll: SearchViewStyle.paddingBackButton,
             ),

@@ -43,7 +43,7 @@ class ProfileInfoView extends StatelessWidget {
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back_ios),
                 ),
               ),
               Flexible(

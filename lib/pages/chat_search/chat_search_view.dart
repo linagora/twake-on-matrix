@@ -329,7 +329,7 @@ class _ChatSearchAppBar extends StatelessWidget {
         Padding(
           padding: ChatViewStyle.paddingLeading(context),
           child: TwakeIconButton(
-            icon: Icons.arrow_back,
+            icon: Icons.arrow_back_ios,
             onTap: controller.onBack,
             tooltip: L10n.of(context)!.back,
           ),

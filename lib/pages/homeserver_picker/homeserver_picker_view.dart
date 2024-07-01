@@ -22,7 +22,7 @@ class HomeserverPickerView extends StatelessWidget {
       appBar: PlatformInfos.isMobile
           ? AppBar(
               leading: TwakeIconButton(
-                icon: Icons.arrow_back,
+                icon: Icons.arrow_back_ios,
                 onTap: controller.state != HomeserverState.loading
                     ? () => context.pop()
                     : null,

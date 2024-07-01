@@ -233,7 +233,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
         padding: const EdgeInsets.only(left: 8),
         child: TwakeIconButton(
           tooltip: L10n.of(context)!.back,
-          icon: Icons.arrow_back,
+          icon: Icons.arrow_back_ios,
           onTap: controller.onBackPress,
           paddingAll: 8.0,
           margin: const EdgeInsets.symmetric(vertical: 12.0),
