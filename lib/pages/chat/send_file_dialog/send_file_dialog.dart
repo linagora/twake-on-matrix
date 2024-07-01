@@ -121,7 +121,7 @@ class SendFileDialogController extends State<SendFileDialog> {
   void sendMediaWithCaption() {
     if (widget.room == null) {
       Logs().e("sendMediaWithCaption:: room is null");
-      Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
+      Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
       return;
     }
     if (filesNotifier.value.isEmpty) {
@@ -158,7 +158,7 @@ class SendFileDialogController extends State<SendFileDialog> {
   void sendFilesWithCaption() async {
     if (widget.room == null) {
       Logs().e("sendFilesWithCaption:: room is null");
-      Navigator.of(context).pop(SendMediaWithCaptionStatus.error);
+      Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
       return;
     }
 

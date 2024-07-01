@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
@@ -134,16 +135,9 @@ class DraftChatController extends State<DraftChat>
   }
 
   void handleDragDone(DropDoneDetails details) async {
-    return _createRoom(
-      onRoomCreatedSuccess: (newRoom) async {
-        final matrixFiles = await super.onDragDone(details);
-        sendImagesWithCaption(
-          room: newRoom,
-          context: context,
-          matrixFiles: matrixFiles,
-        );
-      },
-    );
+    final matrixFilesList = await super.onDragDone(details);
+
+    _handleSendFileOnWeb(context, matrixFilesList);
   }
 
   @override
@@ -343,11 +337,7 @@ class DraftChatController extends State<DraftChat>
     );
   }
 
-  void sendFileOnWebAction(
-    BuildContext context, {
-    Room? room,
-  }) async {
-    final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
+  void sendFileOnWebAction(BuildContext context) async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
     );
@@ -359,26 +349,68 @@ class DraftChatController extends State<DraftChat>
         )
         .toList();
 
-    await sendImagesWithCaption(
+    _handleSendFileOnWeb(context, matrixFilesList);
+  }
+
+  Future<void> _handleSendFileOnWeb(
+    BuildContext context,
+    List<MatrixFile> matrixFilesList,
+  ) async {
+    const int maxFileQuantity = 1;
+    if (matrixFilesList.length > maxFileQuantity) {
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.countFilesSendPerDialog(maxFileQuantity),
+      );
+      return;
+    }
+
+    if (matrixFilesList.isEmpty) {
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.failedToSendFiles,
+      );
+      return;
+    }
+
+    final dialogStatus = await sendImagesWithCaption(
       context: context,
       matrixFiles: [matrixFilesList.first],
     );
-    isSendingNotifier.value = true;
-    _createRoom(
-      onRoomCreatedSuccess: (newRoom) {
-        if (matrixFilesList.first is MatrixImageFile) {
-          sendMediaWithCaptionInteractor.execute(
-            room: newRoom,
-            media: matrixFilesList.first,
-          );
-        } else {
-          sendFileOnWebInteractor.execute(
-            room: newRoom,
-            files: matrixFilesList,
-          );
-        }
-      },
-    );
+
+    if (dialogStatus is SendMediaWithCaptionStatus) {
+      _handleSendFileDialogStatus(dialogStatus, matrixFilesList);
+    }
+  }
+
+  void _handleSendFileDialogStatus(
+    SendMediaWithCaptionStatus status,
+    List<MatrixFile> matrixFilesList,
+  ) {
+    switch (status) {
+      case SendMediaWithCaptionStatus.cancel:
+        break;
+      case SendMediaWithCaptionStatus.done:
+      case SendMediaWithCaptionStatus.emptyRoom:
+        final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
+        isSendingNotifier.value = true;
+        _createRoom(
+          onRoomCreatedSuccess: (newRoom) {
+            if (matrixFilesList.first is MatrixImageFile) {
+              sendMediaWithCaptionInteractor.execute(
+                room: newRoom,
+                media: matrixFilesList.first,
+              );
+            } else {
+              sendFileOnWebInteractor.execute(
+                room: newRoom,
+                files: matrixFilesList,
+              );
+            }
+          },
+        );
+        break;
+    }
   }
 
   void onPushDetails() {

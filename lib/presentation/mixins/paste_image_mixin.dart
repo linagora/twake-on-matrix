@@ -58,7 +58,7 @@ mixin PasteImageMixin {
     if (result is SendMediaWithCaptionStatus) {
       switch (result) {
         case SendMediaWithCaptionStatus.done:
-        case SendMediaWithCaptionStatus.error:
+        case SendMediaWithCaptionStatus.emptyRoom:
           onSendFileCallback?.call();
           break;
         case SendMediaWithCaptionStatus.cancel:
