@@ -74,6 +74,8 @@ class DraftChatController extends State<DraftChat>
   final FocusSuggestionController focusSuggestionController =
       FocusSuggestionController();
 
+  StreamSubscription? _createRoomSubscription;
+
   final ValueKey draftChatComposerTypeAheadKey =
       const ValueKey('draftChatComposerTypeAheadKey');
 
@@ -159,6 +161,7 @@ class DraftChatController extends State<DraftChat>
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
+    _createRoomSubscription?.cancel();
     focusSuggestionController.dispose();
     inputText.dispose();
     showEmojiPickerNotifier.dispose();
@@ -213,7 +216,7 @@ class DraftChatController extends State<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
-    createDirectChatInteractor
+    _createRoomSubscription = createDirectChatInteractor
         .execute(
       contactMxId: presentationContact!.matrixId!,
       client: Matrix.of(context).client,
