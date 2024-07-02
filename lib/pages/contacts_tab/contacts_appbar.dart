@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/contacts_tab/contacts_appbar_style.dart';
-import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/pages/search/search_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -49,46 +48,11 @@ class ContactsAppBar extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        onTapOutside: (event) {
-                          dismissKeyboard(context);
-                        },
+                      child: SearchTextField(
+                        textEditingController: textEditingController,
+                        hintText: L10n.of(context)!.searchForContacts,
+                        autofocus: false,
                         focusNode: searchFocusNode,
-                        controller: textEditingController,
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          contentPadding: ContactsAppbarStyle.contentPadding,
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              ContactsAppbarStyle.textFieldBorderRadius,
-                            ),
-                            borderSide: BorderSide.none,
-                          ),
-                          hintText: L10n.of(context)!.searchForContacts,
-                          hintStyle: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
-                              ),
-                          prefixIcon: Icon(
-                            Icons.search_outlined,
-                            size: ContactsAppbarStyle.iconSize,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          suffixIcon: isSearchMode
-                              ? TwakeIconButton(
-                                  tooltip: L10n.of(context)!.clear,
-                                  icon: Icons.close,
-                                  onTap: clearSearchBar,
-                                  size: ContactsAppbarStyle.iconSize,
-                                  iconColor:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )
-                              : null,
-                        ),
                       ),
                     ),
                   ],
