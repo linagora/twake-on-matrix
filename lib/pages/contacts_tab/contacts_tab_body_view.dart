@@ -249,7 +249,7 @@ class _SliverContactsList extends StatelessWidget {
                     horizontal: ContactsTabViewStyle.padding,
                   ),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
                     onTap: () {
                       controller.onContactTap(
                         context: context,
@@ -425,7 +425,7 @@ class _Contact extends StatelessWidget {
         horizontal: ContactsTabViewStyle.padding,
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
         onTap: () {
           controller.onContactTap(
             context: context,
