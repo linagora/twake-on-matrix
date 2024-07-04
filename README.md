@@ -16,7 +16,6 @@
   </a>
 
 
-<h3 align="center">twake-chat.com</h3>
 
   <p align="center">
     <a href="https://twake-chat.com">Website</a>
