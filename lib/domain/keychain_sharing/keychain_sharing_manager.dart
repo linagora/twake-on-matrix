@@ -10,6 +10,8 @@ class KeychainSharingManager {
         iOptions: IOSOptions(
           groupId: AppConfig.iOSKeychainSharingId,
           accountName: AppConfig.iOSKeychainSharingAccount,
+          synchronizable: true,
+          accessibility: KeychainAccessibility.first_unlock_this_device,
         ),
       );
 
