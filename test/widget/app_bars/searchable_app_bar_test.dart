@@ -10,6 +10,7 @@ final getIt = GetIt.instance;
 
 void main() {
   final searchModeNotifier = ValueNotifier(false);
+  final textEditingController = TextEditingController();
 
   Widget makeTestableAppBar({
     bool isFullScreen = true,
@@ -33,7 +34,7 @@ void main() {
                 title: "Title",
                 hintText: "Hint",
                 focusNode: FocusNode(),
-                textEditingController: TextEditingController(),
+                textEditingController: textEditingController,
                 openSearchBar: () => searchModeNotifier.value = true,
                 closeSearchBar: () => searchModeNotifier.value = false,
                 isFullScreen: isFullScreen,
@@ -106,13 +107,32 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
-    testWidgets("Still one textfield when clicking on title",
+    testWidgets(
+        "Still one textfield when clicking on title (searchMode enabled and search text is empty)",
         (widgetTester) async {
       await widgetTester.pumpWidget(
         makeTestableAppBar(),
       );
 
       await widgetTester.tap(find.byIcon(Icons.search));
+      await widgetTester.pump();
+
+      expect(find.text("Title"), findsNothing);
+      expect(find.text("Hint"), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byIcon(Icons.search_outlined), findsNothing);
+      expect(find.byIcon(Icons.close), findsNothing);
+    });
+
+    testWidgets(
+        "Still one textfield when clicking on title (searchMode enabled and search text is not empty)",
+        (widgetTester) async {
+      await widgetTester.pumpWidget(
+        makeTestableAppBar(),
+      );
+
+      await widgetTester.tap(find.byIcon(Icons.search));
+      textEditingController.text = "Search text";
       await widgetTester.pump();
 
       expect(find.text("Title"), findsNothing);
