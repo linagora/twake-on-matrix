@@ -40,6 +40,12 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   @override
   Event get event => widget.event;
 
+  @override
+  void dispose() {
+    sendingFileProgressNotifier.dispose();
+    super.dispose();
+  }
+
   final ValueNotifier<double> sendingFileProgressNotifier = ValueNotifier(0);
 
   void _onTap(BuildContext context) async {

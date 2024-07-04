@@ -1,5 +1,3 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
@@ -24,8 +22,6 @@ class Share extends StatefulWidget {
 
 class ShareController extends State<Share>
     with SendFilesMixin, SearchRecentChat {
-  final sendFileInteractor = getIt.get<SendFileInteractor>();
-
   final isSearchModeNotifier = ValueNotifier(false);
 
   final AutoScrollController recentChatScrollController =

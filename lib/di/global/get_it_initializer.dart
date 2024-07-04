@@ -77,7 +77,6 @@ import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
@@ -274,7 +273,6 @@ class GetItInitializer {
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
     );
-    getIt.registerSingleton<SendFileInteractor>(SendFileInteractor());
     getIt.registerSingleton<CreateNewGroupChatInteractor>(
       CreateNewGroupChatInteractor(),
     );

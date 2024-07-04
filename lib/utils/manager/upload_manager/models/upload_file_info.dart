@@ -25,5 +25,6 @@ class UploadFileInfo extends UploadInfo {
         uploadStateStreamController,
         uploadStream,
         cancelToken,
+        createdAt,
       ];
 }
