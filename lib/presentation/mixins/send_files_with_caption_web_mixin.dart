@@ -31,7 +31,7 @@ mixin SendFilesWithCaptionWebMixin {
         switch (result) {
           case SendMediaWithCaptionStatus.done:
             break;
-          case SendMediaWithCaptionStatus.error:
+          case SendMediaWithCaptionStatus.emptyRoom:
             TwakeSnackBar.show(
               context,
               L10n.of(context)!.failedToSendFiles,
