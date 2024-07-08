@@ -1,6 +1,7 @@
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
@@ -18,6 +19,7 @@ import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
@@ -208,9 +210,21 @@ class _SliverContactsList extends StatelessWidget {
                   (failure) {
                     if (failure is GetPresentationContactsFailure ||
                         failure is GetPresentationContactsEmpty) {
-                      if (controller.textEditingController.text.isEmpty) {
+                      final keyword = controller.textEditingController.text;
+                      if (keyword.isEmpty) {
                         return const SliverToBoxAdapter(
                           child: EmptyContactBody(),
+                        );
+                      } else if (keyword.isValidMatrixId &&
+                          keyword.startsWith("@")) {
+                        final externalContact = PresentationContact(
+                          matrixId: keyword,
+                          displayName: keyword.substring(1),
+                          type: ContactType.external,
+                        );
+                        return _SilverExternalContact(
+                          controller: controller,
+                          externalContact: externalContact,
                         );
                       } else {
                         return SliverToBoxAdapter(
@@ -243,26 +257,9 @@ class _SliverContactsList extends StatelessWidget {
 
             if (success is PresentationExternalContactSuccess) {
               final externalContact = success.contact;
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: ContactsTabViewStyle.padding,
-                  ),
-                  child: InkWell(
-                    borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
-                    onTap: () {
-                      controller.onContactTap(
-                        context: context,
-                        path: 'rooms',
-                        contact: externalContact,
-                      );
-                    },
-                    child: ExpansionContactListTile(
-                      contact: externalContact,
-                      highlightKeyword: controller.textEditingController.text,
-                    ),
-                  ),
-                ),
+              return _SilverExternalContact(
+                controller: controller,
+                externalContact: externalContact,
               );
             }
 
@@ -284,6 +281,41 @@ class _SliverContactsList extends StatelessWidget {
       },
       child: const SliverToBoxAdapter(
         child: SizedBox(),
+      ),
+    );
+  }
+}
+
+class _SilverExternalContact extends StatelessWidget {
+  final ContactsTabController controller;
+  final PresentationContact externalContact;
+
+  const _SilverExternalContact({
+    required this.controller,
+    required this.externalContact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: ContactsTabViewStyle.padding,
+        ),
+        child: InkWell(
+          borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+          onTap: () {
+            controller.onContactTap(
+              context: context,
+              path: 'rooms',
+              contact: externalContact,
+            );
+          },
+          child: ExpansionContactListTile(
+            contact: externalContact,
+            highlightKeyword: controller.textEditingController.text,
+          ),
+        ),
       ),
     );
   }
