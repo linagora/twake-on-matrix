@@ -242,10 +242,26 @@ class _SliverContactsList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
+              final externalContact = success.contact;
               return SliverToBoxAdapter(
-                child: ExpansionContactListTile(
-                  contact: success.contact,
-                  highlightKeyword: controller.textEditingController.text,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: ContactsTabViewStyle.padding,
+                  ),
+                  child: InkWell(
+                    borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+                    onTap: () {
+                      controller.onContactTap(
+                        context: context,
+                        path: 'rooms',
+                        contact: externalContact,
+                      );
+                    },
+                    child: ExpansionContactListTile(
+                      contact: externalContact,
+                      highlightKeyword: controller.textEditingController.text,
+                    ),
+                  ),
                 ),
               );
             }
@@ -409,7 +425,7 @@ class _Contact extends StatelessWidget {
         horizontal: ContactsTabViewStyle.padding,
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
         onTap: () {
           controller.onContactTap(
             context: context,
