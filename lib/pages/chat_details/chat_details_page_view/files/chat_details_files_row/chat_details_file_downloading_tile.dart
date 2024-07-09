@@ -14,6 +14,7 @@ class ChatDetailsDownloadingFileTile extends StatelessWidget {
     required this.fileType,
     required this.sizeString,
     required this.downloadFileStateNotifier,
+    this.hasError = false,
   });
 
   final GestureTapCallback onTap;
@@ -22,6 +23,7 @@ class ChatDetailsDownloadingFileTile extends StatelessWidget {
   final String? fileType;
   final String? sizeString;
   final ValueNotifier<DownloadPresentationState> downloadFileStateNotifier;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class ChatDetailsDownloadingFileTile extends StatelessWidget {
       hoverColor: LinagoraSysColors.material().surfaceVariant,
       onTap: onTap,
       child: ChatDetailsFileRowDownloadingWrapper(
+        hasError: hasError,
         mimeType: mimeType,
         fileType: fileType,
         downloadFileStateNotifier: downloadFileStateNotifier,

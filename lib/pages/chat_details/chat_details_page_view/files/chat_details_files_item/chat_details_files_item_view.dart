@@ -24,7 +24,8 @@ class ChatDetailsFilesView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.downloadFileStateNotifier,
       builder: (context, DownloadPresentationState state, child) {
-        if (state is DownloadingPresentationState) {
+        if (state is DownloadingPresentationState ||
+            state is DownloadErrorPresentationState) {
           return ChatDetailsDownloadingFileTile(
             mimeType: controller.event.mimeType,
             fileType: filetype,
@@ -37,6 +38,7 @@ class ChatDetailsFilesView extends StatelessWidget {
               controller.downloadManager
                   .cancelDownload(controller.event.eventId);
             },
+            hasError: state is DownloadErrorPresentationState,
           );
         } else if (state is DownloadedPresentationState) {
           return ChatDetailsDownloadedFileTile(
