@@ -49,6 +49,8 @@ class GenerateThumbnailsMediaInteractor {
               thumbnail: thumbnail,
             ),
           );
+        } else {
+          yield const Left(GenerateThumbnailsMediaFailure('thumbnail is null'));
         }
       }
     } catch (e) {

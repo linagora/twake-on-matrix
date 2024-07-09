@@ -7,8 +7,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
@@ -19,6 +17,7 @@ import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -69,6 +68,8 @@ class DraftChatController extends State<DraftChat>
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
+  final uploadManager = getIt.get<UploadManager>();
+
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
 
@@ -102,9 +103,6 @@ class DraftChatController extends State<DraftChat>
 
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
-
-  final sendMediaWithCaptionInteractor =
-      getIt.get<SendMediaOnWebWithCaptionInteractor>();
 
   void _updateScrollController() {
     if (!mounted) {
@@ -337,7 +335,10 @@ class DraftChatController extends State<DraftChat>
     );
   }
 
-  void sendFileOnWebAction(BuildContext context) async {
+  void sendFileOnWebAction(
+    BuildContext context, {
+    Room? room,
+  }) async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
     );
@@ -392,17 +393,16 @@ class DraftChatController extends State<DraftChat>
         break;
       case SendMediaWithCaptionStatus.done:
       case SendMediaWithCaptionStatus.emptyRoom:
-        final sendFileOnWebInteractor = getIt.get<SendFileOnWebInteractor>();
         isSendingNotifier.value = true;
         _createRoom(
           onRoomCreatedSuccess: (newRoom) {
             if (matrixFilesList.first is MatrixImageFile) {
-              sendMediaWithCaptionInteractor.execute(
+              uploadManager.uploadFilesWeb(
                 room: newRoom,
-                media: matrixFilesList.first,
+                files: [matrixFilesList.first],
               );
             } else {
-              sendFileOnWebInteractor.execute(
+              uploadManager.uploadFilesWeb(
                 room: newRoom,
                 files: matrixFilesList,
               );

@@ -21,7 +21,7 @@ class MediaAPI {
   Future<UploadFileResponse> uploadFileMobile({
     required FileInfo fileInfo,
     CancelToken? cancelToken,
-    ProgressCallback? onReceiveProgress,
+    ProgressCallback? onSendProgress,
   }) async {
     final dioHeaders = _client.getHeaders();
     dioHeaders[HttpHeaders.contentLengthHeader] =
@@ -29,17 +29,23 @@ class MediaAPI {
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
     final response = await _client
         .postToGetBody(
-          HomeserverEndpoint.uploadMediaServicePath
-              .generateHomeserverMediaEndpoint(),
-          data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
-          queryParameters: {
-            'fileName': fileInfo.fileName,
-          },
-          cancelToken: cancelToken,
-          onReceiveProgress: onReceiveProgress,
-          options: Options(headers: dioHeaders),
-        )
-        .onError((error, stackTrace) => throw Exception(error));
+      HomeserverEndpoint.uploadMediaServicePath
+          .generateHomeserverMediaEndpoint(),
+      data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
+      queryParameters: {
+        'fileName': fileInfo.fileName,
+      },
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      options: Options(headers: dioHeaders),
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException && error.type == DioExceptionType.cancel) {
+        throw CancelRequestException();
+      } else {
+        throw Exception(error);
+      }
+    });
 
     return UploadFileResponse.fromJson(response);
   }
@@ -47,24 +53,30 @@ class MediaAPI {
   Future<UploadFileResponse> uploadFileWeb({
     required MatrixFile file,
     CancelToken? cancelToken,
-    ProgressCallback? onReceiveProgress,
+    ProgressCallback? onSendProgress,
   }) async {
     final dioHeaders = _client.getHeaders();
     dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes?.length;
     dioHeaders[HttpHeaders.contentTypeHeader] = file.mimeType;
     final response = await _client
         .postToGetBody(
-          HomeserverEndpoint.uploadMediaServicePath
-              .generateHomeserverMediaEndpoint(),
-          data: file,
-          queryParameters: {
-            'fileName': file.name,
-          },
-          onReceiveProgress: onReceiveProgress,
-          cancelToken: cancelToken,
-          options: Options(headers: dioHeaders),
-        )
-        .onError((error, stackTrace) => throw Exception(error));
+      HomeserverEndpoint.uploadMediaServicePath
+          .generateHomeserverMediaEndpoint(),
+      data: file.bytes,
+      queryParameters: {
+        'fileName': file.name,
+      },
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+      options: Options(headers: dioHeaders),
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException && error.type == DioExceptionType.cancel) {
+        throw CancelRequestException();
+      } else {
+        throw Exception(error);
+      }
+    });
 
     return UploadFileResponse.fromJson(response);
   }

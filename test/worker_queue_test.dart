@@ -315,5 +315,118 @@ void main() {
       expect(alreadyRunTasks, containsAllInOrder([1, 2, 3]));
       expect(completedTasks, containsAllInOrder([1, 2, 3]));
     });
+
+    test("""
+      WHEN add 2 tasks to the worker queue
+      THEN task 1 is processing
+      THEN remove the task 2 from the queue
+      SHOULD the queue executes task except the removed task
+    """, () async {
+      final completedTasks = <int>[];
+      final alreadyRunTasks = <int>[];
+
+      final tasks = List.generate(2, (index) {
+        return generateTask(
+          index.toString(),
+          () async => await Future.delayed(const Duration(seconds: 2), () {
+            alreadyRunTasks.add(index + 1);
+            return index + 1;
+          }),
+          onTaskCompleted: () async {
+            Logs().i('task${index + 1} completed');
+            completedTasks.add(index + 1);
+          },
+        );
+      });
+
+      final workerQueue = DownloadWorkerQueue();
+      Future.wait(tasks.map((task) => workerQueue.addTask(task)));
+      await Future.delayed(const Duration(seconds: 1));
+
+      workerQueue.clearTaskInQueue('2');
+      expect(workerQueue.queue.length, 1);
+      expect(workerQueue.queue.first.id, '1');
+
+      await Future.delayed(const Duration(seconds: 7));
+      // Verify that all tasks completed in the expected order
+      expect(alreadyRunTasks, containsAllInOrder([1]));
+      expect(completedTasks, containsAllInOrder([1]));
+    });
+
+    test("""
+      WHEN add 4 tasks to the worker queue
+      THEN task 1 is processing
+      THEN remove the task 2 and task 3 from the queue
+      SHOULD the queue executes task except the removed task
+    """, () async {
+      final completedTasks = <int>[];
+      final alreadyRunTasks = <int>[];
+
+      final tasks = List.generate(4, (index) {
+        return generateTask(
+          index.toString(),
+          () async => await Future.delayed(const Duration(seconds: 2), () {
+            alreadyRunTasks.add(index + 1);
+            return index + 1;
+          }),
+          onTaskCompleted: () async {
+            Logs().i('task${index + 1} completed');
+            completedTasks.add(index + 1);
+          },
+        );
+      });
+
+      final workerQueue = DownloadWorkerQueue();
+      Future.wait(tasks.map((task) => workerQueue.addTask(task)));
+      await Future.delayed(const Duration(seconds: 1));
+
+      workerQueue.clearTaskInQueue('1');
+      workerQueue.clearTaskInQueue('2');
+      expect(workerQueue.queue.length, 1);
+      expect(workerQueue.queue.first.id, '3');
+
+      await Future.delayed(const Duration(seconds: 7));
+      // Verify that all tasks completed in the expected order
+      expect(alreadyRunTasks, containsAllInOrder([1, 4]));
+      expect(completedTasks, containsAllInOrder([1, 4]));
+    });
+
+    test("""
+      WHEN add 4 tasks to the worker queue
+      THEN task 1 is processing
+      THEN remove remaining tasks from the queue
+      SHOULD the queue executes task except the removed task
+    """, () async {
+      final completedTasks = <int>[];
+      final alreadyRunTasks = <int>[];
+
+      final tasks = List.generate(4, (index) {
+        return generateTask(
+          index.toString(),
+          () async => await Future.delayed(const Duration(seconds: 2), () {
+            alreadyRunTasks.add(index + 1);
+            return index + 1;
+          }),
+          onTaskCompleted: () async {
+            Logs().i('task${index + 1} completed');
+            completedTasks.add(index + 1);
+          },
+        );
+      });
+
+      final workerQueue = DownloadWorkerQueue();
+      Future.wait(tasks.map((task) => workerQueue.addTask(task)));
+      await Future.delayed(const Duration(seconds: 1));
+
+      workerQueue.clearTaskInQueue('1');
+      workerQueue.clearTaskInQueue('2');
+      workerQueue.clearTaskInQueue('3');
+      expect(workerQueue.queue.length, 0);
+
+      await Future.delayed(const Duration(seconds: 7));
+      // Verify that all tasks completed in the expected order
+      expect(alreadyRunTasks, containsAllInOrder([1]));
+      expect(completedTasks, containsAllInOrder([1]));
+    });
   });
 }

@@ -1,10 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
@@ -20,13 +19,13 @@ mixin SendFilesMixin {
       return;
     }
     final selectedAssets = imagePickerController.sortedSelectedAssets;
-    final sendMediaInteractor = getIt.get<SendMediaInteractor>();
-    await sendMediaInteractor.execute(
+    final uploadManger = getIt.get<UploadManager>();
+    uploadManger.uploadMediaMobile(
       room: room,
-      caption: caption,
       entities: selectedAssets.map<FileAssetEntity>((entity) {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),
+      caption: caption,
     );
   }
 
@@ -37,7 +36,6 @@ mixin SendFilesMixin {
     VoidCallback? onSendFileCallback,
   }) async {
     if (room == null) {}
-    final sendFileInteractor = getIt.get<SendFileInteractor>();
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
       withReadStream: true,
@@ -53,7 +51,8 @@ mixin SendFilesMixin {
 
     if (fileInfos == null || fileInfos.isEmpty == true) return;
     onSendFileCallback?.call();
-    sendFileInteractor.execute(room: room!, fileInfos: fileInfos);
+    final uploadManger = getIt.get<UploadManager>();
+    uploadManger.uploadFileMobile(room: room!, fileInfos: fileInfos);
   }
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {

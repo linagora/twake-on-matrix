@@ -11,6 +11,7 @@ import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_fold
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
@@ -29,7 +30,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
@@ -423,9 +423,9 @@ class ChatController extends State<Chat>
 
   void _handleReceivedShareFiles() {
     if (shareFiles != null && room != null) {
-      final sendFileInteractor = getIt.get<SendFileInteractor>();
       final filesIsNotNull = shareFiles!.where((file) => file != null);
-      sendFileInteractor.execute(
+      final uploadManger = getIt.get<UploadManager>();
+      uploadManger.uploadFileMobile(
         room: room!,
         fileInfos: filesIsNotNull
             .map((file) => FileInfo.fromMatrixFile(file!))
