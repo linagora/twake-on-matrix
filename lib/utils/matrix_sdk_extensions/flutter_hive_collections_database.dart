@@ -181,17 +181,12 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String? prevBatch,
     String? olmAccount,
   ) async {
-    if (PlatformInfos.isIOS) {
-      final restoreToken = KeychainSharingRestoreToken(
-        session: KeychainSharingSession(
-          accessToken: token,
-          userId: userId,
-          deviceId: deviceId ?? "",
-          homeserverUrl: homeserverUrl,
-        ),
-      );
-      await KeychainSharingManager.save(restoreToken);
-    }
+    await _updateIOSKeychainSharingRestoreToken(
+      homeserverUrl: homeserverUrl,
+      token: token,
+      userId: userId,
+      deviceId: deviceId,
+    );
     return super.updateClient(
       homeserverUrl,
       token,
@@ -201,6 +196,37 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       prevBatch,
       olmAccount,
     );
+  }
+
+  Future<void> _updateIOSKeychainSharingRestoreToken({
+    required String homeserverUrl,
+    required String token,
+    required String userId,
+    required String? deviceId,
+  }) async {
+    if (!PlatformInfos.isIOS) {
+      return;
+    }
+    try {
+      final oldToken = await KeychainSharingManager.read(userId: userId);
+      if (oldToken?.session.accessToken != token ||
+          oldToken?.session.userId != userId ||
+          oldToken?.session.homeserverUrl != homeserverUrl ||
+          oldToken?.session.deviceId != deviceId) {
+        final restoreToken = KeychainSharingRestoreToken(
+          session: KeychainSharingSession(
+            accessToken: token,
+            userId: userId,
+            deviceId: deviceId ?? "",
+            homeserverUrl: homeserverUrl,
+          ),
+        );
+        await KeychainSharingManager.save(restoreToken);
+      }
+    } catch (e) {
+      Logs().w('insertClient::current token: $token');
+      Logs().w('insertClient::Unable to save restore token', e);
+    }
   }
 
   @override
@@ -214,17 +240,12 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String? prevBatch,
     String? olmAccount,
   ) async {
-    if (PlatformInfos.isIOS) {
-      final restoreToken = KeychainSharingRestoreToken(
-        session: KeychainSharingSession(
-          accessToken: token,
-          userId: userId,
-          deviceId: deviceId ?? "",
-          homeserverUrl: homeserverUrl,
-        ),
-      );
-      await KeychainSharingManager.save(restoreToken);
-    }
+    await _updateIOSKeychainSharingRestoreToken(
+      homeserverUrl: homeserverUrl,
+      token: token,
+      userId: userId,
+      deviceId: deviceId,
+    );
     return super.insertClient(
       name,
       homeserverUrl,
