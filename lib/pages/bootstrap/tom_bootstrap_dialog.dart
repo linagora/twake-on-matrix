@@ -64,6 +64,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   void _createBootstrap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Matrix.of(context).showToMBootstrap.value = true;
+
       await _loadingData();
     });
   }
@@ -123,6 +125,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           Logs().d(
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
           );
+          Matrix.of(context).showToMBootstrap.value = false;
+
           Navigator.of(context, rootNavigator: false).pop<bool>(false);
         }
       }
@@ -181,6 +185,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       case UploadRecoveryKeyState.wipeRecoveryFailed:
         WidgetsBinding.instance.addPostFrameCallback((_) {
           TwakeSnackBar.show(context, L10n.of(context)!.cannotEnableKeyBackup);
+          Matrix.of(context).showToMBootstrap.value = false;
+
           Navigator.of(context, rootNavigator: false).pop<bool>();
         });
         break;
@@ -212,12 +218,16 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         break;
       case UploadRecoveryKeyState.unlockError:
         WidgetsBinding.instance.addPostFrameCallback((_) async {
+          Matrix.of(context).showToMBootstrap.value = false;
+
           Navigator.of(context, rootNavigator: false).pop<bool>(false);
         });
         break;
       case UploadRecoveryKeyState.uploadError:
         Logs().e('TomBootstrapDialogState::build(): upload recovery key error');
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          Matrix.of(context).showToMBootstrap.value = false;
+
           Navigator.of(context, rootNavigator: false).pop<bool>();
         });
         break;
@@ -229,10 +239,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: TomBootstrapDialogStyle.sizedDialogWeb,
           width: TomBootstrapDialogStyle.sizedDialogWeb,
-          decoration: TomBootstrapDialogStyle.decorationDialog,
           child: Padding(
             padding: TomBootstrapDialogStyle.paddingDialog,
             child: Column(
