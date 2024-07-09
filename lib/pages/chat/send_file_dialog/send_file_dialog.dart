@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
@@ -49,6 +51,8 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   ValueNotifier<bool> haveErrorFilesNotifier = ValueNotifier(false);
 
+  StreamSubscription? _thumbnailsForMediaSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +75,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     filesNotifier.dispose();
     maxMediaSizeNotifier.dispose();
     haveErrorFilesNotifier.dispose();
+    _thumbnailsForMediaSubscription?.cancel();
     super.dispose();
   }
 
@@ -84,7 +89,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     if (widget.room == null) {
       return;
     }
-    generateThumbnailsMediaInteractor
+    _thumbnailsForMediaSubscription = generateThumbnailsMediaInteractor
         .execute(
       room: widget.room!,
       files: files,
