@@ -12,6 +12,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactsTab extends StatefulWidget {
   final Widget? bottomNavigationBar;
@@ -28,6 +29,8 @@ class ContactsTab extends StatefulWidget {
 class ContactsTabController extends State<ContactsTab>
     with ComparablePresentationContactMixin, ContactsViewControllerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
+
+  Client get client => Matrix.of(context).client;
 
   @override
   void initState() {

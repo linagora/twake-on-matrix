@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
@@ -377,9 +378,22 @@ class _SliverRecentContacts extends StatelessWidget {
           return SliverExpandableList(
             title: L10n.of(context)!.recent,
             itemCount: recentContacts.length,
-            itemBuilder: (context, index) => _Contact(
-              contact: recentContacts[index].toPresentationContact(),
-              controller: controller,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: ContactsTabViewStyle.padding,
+              ),
+              child: RecentItemWidget(
+                presentationSearch: recentContacts[index],
+                highlightKeyword: "",
+                client: controller.client,
+                key: Key('contact_recent_${recentContacts[index].id}'),
+                onTap: () => controller.onContactTap(
+                  contact: recentContacts[index].toPresentationContact(),
+                  context: context,
+                  path: 'rooms',
+                ),
+                avatarSize: ContactsTabViewStyle.avatarSize,
+              ),
             ),
           );
         },
