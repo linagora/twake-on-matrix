@@ -60,7 +60,7 @@ class ChatDetailsView extends StatelessWidget {
                       highlightColor: Colors.transparent,
                       onPressed: controller.widget.closeRightColumn,
                       icon: controller.widget.isInStack
-                          ? const Icon(Icons.arrow_back)
+                          ? const Icon(Icons.arrow_back_ios)
                           : const Icon(Icons.close),
                     ),
                   ),

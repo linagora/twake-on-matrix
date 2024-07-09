@@ -45,11 +45,11 @@ class ChatAppBarTitleStyle {
   static TextStyle? onlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
           ? Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: LinagoraRefColors.material().secondary,
+                color: LinagoraRefColors.material().secondary[40],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
               )
           : Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: LinagoraRefColors.material().secondary,
+                color: LinagoraRefColors.material().secondary[40],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
 }

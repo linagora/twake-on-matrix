@@ -47,7 +47,7 @@ class DraftChatView extends StatelessWidget {
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       tooltip: L10n.of(context)!.back,
-                      icon: Icons.arrow_back,
+                      icon: Icons.arrow_back_ios,
                       onTap: () => context.pop(),
                       paddingAll: 8.0,
                       margin: const EdgeInsets.symmetric(vertical: 12.0),

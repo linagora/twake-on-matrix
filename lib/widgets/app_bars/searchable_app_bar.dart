@@ -60,7 +60,7 @@ class SearchableAppBar extends StatelessWidget {
               children: [
                 if (isFullScreen) ...[
                   TwakeIconButton(
-                    icon: Icons.arrow_back,
+                    icon: Icons.arrow_back_ios,
                     onTap: () {
                       if (!FirstColumnInnerRoutes.instance
                           .goRouteAvailableInFirstColumn()) {

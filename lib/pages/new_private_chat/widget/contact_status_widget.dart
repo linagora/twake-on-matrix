@@ -13,7 +13,7 @@ class ContactStatusWidget extends StatelessWidget {
     required this.status,
   });
 
-  final Color activeColor = const Color(0xFF43A843);
+  final Color? activeColor = LinagoraRefColors.material().secondary[40];
   final Color? inactiveColor = LinagoraRefColors.material().neutral[60];
 
   @override
@@ -30,7 +30,7 @@ class ContactStatusWidget extends StatelessWidget {
           ),
           status == ContactStatus.active
               ? Text(
-                  " ${L10n.of(context)!.active}",
+                  " ${L10n.of(context)!.online}",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: activeColor,
                       ),

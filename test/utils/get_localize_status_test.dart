@@ -20,10 +20,14 @@ void main() async {
 
   group("getLocalizedStatus function test", () {
     const textWidgetKey = ValueKey('textWidget');
+    const offlineStatus = 'Offline';
+    const onlineStatus = 'Online';
+    const mockUserId = 'mockUserid';
+    const aWhileAgoStatus = 'a while ago';
 
     testWidgets(
         'GIVEN the presenceType be online\n'
-        'THEN should display the status as active now\n',
+        'THEN should display the status as Online\n',
         (WidgetTester tester) async {
       // Given
       final presence = CachedPresence(
@@ -31,7 +35,7 @@ void main() async {
         0,
         "",
         true,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -46,12 +50,12 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('Active now'));
+      expect(textWidget.data, equals(onlineStatus));
     });
 
     testWidgets(
         'GIVEN the presence time to be one minute from present with currently active be false\n'
-        'THEN should display the status as active now\n',
+        'THEN should display the status as Online\n',
         (WidgetTester tester) async {
       // Given
       final lessThanOneMinuteAgo = const Duration(seconds: 30).inMilliseconds;
@@ -60,7 +64,7 @@ void main() async {
         lessThanOneMinuteAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -74,7 +78,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('Active now'));
+      expect(textWidget.data, equals(onlineStatus));
     });
 
     testWidgets(
@@ -88,7 +92,7 @@ void main() async {
         lessThan10MinutesAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -116,7 +120,7 @@ void main() async {
         lessThan10MinutesAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -144,7 +148,7 @@ void main() async {
         lessThan20hoursAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -172,7 +176,7 @@ void main() async {
         lessThan5daysAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -200,7 +204,7 @@ void main() async {
         lessThan60daysAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -214,7 +218,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('a while ago'));
+      expect(textWidget.data, equals(aWhileAgoStatus));
     });
 
     testWidgets(
@@ -228,7 +232,7 @@ void main() async {
         lessThan60daysAgo,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -242,7 +246,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('a while ago'));
+      expect(textWidget.data, equals(aWhileAgoStatus));
     });
 
     testWidgets(
@@ -255,7 +259,7 @@ void main() async {
         null,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -269,7 +273,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('Offline'));
+      expect(textWidget.data, equals(offlineStatus));
     });
 
     testWidgets(
@@ -282,7 +286,7 @@ void main() async {
         null,
         "",
         false,
-        "testuserid",
+        mockUserId,
       );
 
       // WHEN
@@ -296,7 +300,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('Offline'));
+      expect(textWidget.data, equals(offlineStatus));
     });
 
     testWidgets(
@@ -317,7 +321,7 @@ void main() async {
 
       expect(textWidget.data, isNotNull);
 
-      expect(textWidget.data, equals('Offline'));
+      expect(textWidget.data, equals(offlineStatus));
     });
   });
 }
