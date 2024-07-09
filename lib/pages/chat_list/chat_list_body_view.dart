@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view_style.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_skeletonizer_widget.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_builder.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
@@ -59,8 +60,7 @@ class ChatListBodyView extends StatelessWidget {
                   key: Key(controller.activeSpaceId ?? 'Spaces'),
                 );
               }
-              if (controller.matrixState.waitForFirstSync &&
-                  controller.activeClient.prevBatch != null) {
+              if (controller.activeClient.prevBatch != null) {
                 if (controller.chatListBodyIsEmpty) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -197,6 +197,9 @@ class ChatListBodyView extends StatelessWidget {
                     ],
                   ),
                 );
+              }
+              if (controller.matrixState.waitForFirstSync) {
+                return const ChatListSkeletonizerWidget();
               }
               return const SizedBox.shrink();
             },
