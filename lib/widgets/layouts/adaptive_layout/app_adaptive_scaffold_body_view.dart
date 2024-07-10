@@ -257,11 +257,11 @@ class _ColumnPageView extends StatelessWidget {
           key: bottomNavigationKey,
           builder: (_) {
             return Container(
+              decoration: AppAdaptiveScaffoldBodyViewStyle.navBarBorder,
               height: ResponsiveUtils.heightBottomNavigation,
-              color: LinagoraSysColors.material().surface,
               padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
               child: ListView(
-                padding: EdgeInsets.zero,
+                padding: AppAdaptiveScaffoldBodyViewStyle.paddingNavigationBar,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   NavigationBar(
@@ -271,6 +271,7 @@ class _ColumnPageView extends StatelessWidget {
                     selectedIndex: _getActiveBottomNavigationBarIndex(),
                     destinations: getNavigationDestinations(context),
                     onDestinationSelected: onDestinationSelected,
+                    indicatorColor: Colors.transparent,
                   ),
                 ],
               ),

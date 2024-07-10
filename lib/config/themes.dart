@@ -345,6 +345,11 @@ abstract class TwakeThemes {
               ? Colors.black.withOpacity(0.15)
               : Colors.white.withOpacity(0.15),
           elevation: 4.0,
+          overlayColor: WidgetStateColor.resolveWith(
+            (states) {
+              return Colors.transparent;
+            },
+          ),
         ),
         navigationRailTheme: NavigationRailThemeData(
           indicatorColor: brightness == Brightness.light

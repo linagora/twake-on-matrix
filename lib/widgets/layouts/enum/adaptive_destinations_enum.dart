@@ -24,7 +24,7 @@ enum AdaptiveDestinationEnum {
       case AdaptiveDestinationEnum.contacts:
         return NavigationDestination(
           icon: TwakeNavigationIcon(
-            color: !_responsive.isDesktop(context)
+            color: _responsive.isMobile(context)
                 ? LinagoraSysColors.material().tertiary
                 : LinagoraSysColors.material().onBackground,
             icon: Icons.supervised_user_circle_outlined,
@@ -38,7 +38,7 @@ enum AdaptiveDestinationEnum {
       case AdaptiveDestinationEnum.rooms:
         return NavigationDestination(
           icon: UnreadRoomsBadge(
-            color: !_responsive.isDesktop(context)
+            color: _responsive.isMobile(context)
                 ? LinagoraSysColors.material().tertiary
                 : LinagoraSysColors.material().onBackground,
             filter: (room) => !room.isSpace && !room.isStoryRoom,
@@ -51,18 +51,15 @@ enum AdaptiveDestinationEnum {
         );
       case AdaptiveDestinationEnum.settings:
         return NavigationDestination(
-          icon: !_responsive.isDesktop(context)
+          icon: _responsive.isMobile(context)
               ? BottomNavigationAvatar(
                   profile: profile,
                   isSelected: false,
                 )
-              : TwakeNavigationIcon(
-                  color: !_responsive.isDesktop(context)
-                      ? LinagoraSysColors.material().tertiary
-                      : LinagoraSysColors.material().onBackground,
+              : const TwakeNavigationIcon(
                   icon: Icons.settings_outlined,
                 ),
-          selectedIcon: !_responsive.isDesktop(context)
+          selectedIcon: _responsive.isMobile(context)
               ? BottomNavigationAvatar(profile: profile, isSelected: true)
               : const TwakeNavigationIcon(
                   icon: Icons.settings_outlined,
