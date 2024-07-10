@@ -1,17 +1,19 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
-
 import 'matrix.dart';
 
 class UnreadRoomsBadge extends StatelessWidget {
   final bool Function(Room) filter;
+  final bool isSelected;
+  final Color? color;
 
   const UnreadRoomsBadge({
     super.key,
     required this.filter,
+    this.isSelected = false,
+    this.color,
   });
 
   @override
@@ -26,8 +28,10 @@ class UnreadRoomsBadge extends StatelessWidget {
         final unreadCount = getNotificationsCount(context);
 
         return TwakeNavigationIcon(
-          icon: Icons.chat,
+          icon: Icons.chat_bubble,
           notificationCount: unreadCount,
+          isSelected: isSelected,
+          color: color,
         );
       },
     );
