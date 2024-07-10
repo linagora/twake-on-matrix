@@ -188,15 +188,12 @@ class _DirectChatInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          width: RecentItemStyle.avatarSize,
-          child: Avatar(
-            name: recentChatPresentationSearch.displayName,
-            mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
-              client: client,
-            ),
-            size: avatarSize ?? RecentItemStyle.avatarSize,
+        Avatar(
+          name: recentChatPresentationSearch.displayName,
+          mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
+            client: client,
           ),
+          size: avatarSize ?? RecentItemStyle.avatarSize,
         ),
         const SizedBox(width: 8),
         Flexible(
