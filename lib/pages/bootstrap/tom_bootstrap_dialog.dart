@@ -53,6 +53,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   static const breakpointWebAndDesktopDialogKey =
       Key('BreakpointWebAndDesktopKeyDialog');
 
+  static const Duration getRecoveryWordsDelay = Duration(seconds: 5);
+
   Bootstrap? bootstrap;
 
   UploadRecoveryKeyState _uploadRecoveryKeyState =
@@ -132,9 +134,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           Logs().d(
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
           );
-          Matrix.of(context).showToMBootstrap.value = false;
 
-          Navigator.of(context, rootNavigator: false).pop<bool>(false);
+          Future.delayed(
+            getRecoveryWordsDelay,
+            () {
+              Matrix.of(context).showToMBootstrap.value = false;
+              Navigator.of(context, rootNavigator: false).pop<bool>(false);
+            },
+          );
         }
       }
     } else {
