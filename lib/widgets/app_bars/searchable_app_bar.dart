@@ -111,13 +111,21 @@ class SearchableAppBar extends StatelessWidget {
                     valueListenable: searchModeNotifier,
                     builder: (context, isSearchModeEnabled, child) {
                       if (isSearchModeEnabled) {
-                        return TwakeIconButton(
-                          onTap: closeSearchBar,
-                          tooltip: L10n.of(context)!.close,
-                          icon: Icons.close,
-                          paddingAll:
-                              SearchableAppBarStyle.closeButtonPaddingAll,
-                          margin: SearchableAppBarStyle.closeButtonMargin,
+                        return ValueListenableBuilder(
+                          valueListenable: textEditingController,
+                          builder: (context, value, child) {
+                            return value.text.isNotEmpty
+                                ? child!
+                                : const SizedBox.shrink();
+                          },
+                          child: TwakeIconButton(
+                            onTap: closeSearchBar,
+                            tooltip: L10n.of(context)!.close,
+                            icon: Icons.close,
+                            paddingAll:
+                                SearchableAppBarStyle.closeButtonPaddingAll,
+                            margin: SearchableAppBarStyle.closeButtonMargin,
+                          ),
                         );
                       }
                       return TwakeIconButton(

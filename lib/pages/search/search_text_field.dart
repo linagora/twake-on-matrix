@@ -6,10 +6,16 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class SearchTextField extends StatelessWidget {
   final TextEditingController textEditingController;
+  final bool autofocus;
+  final String? hintText;
+  final FocusNode? focusNode;
 
   const SearchTextField({
     super.key,
     required this.textEditingController,
+    this.autofocus = true,
+    this.hintText,
+    this.focusNode,
   });
 
   @override
@@ -23,7 +29,8 @@ class SearchTextField extends StatelessWidget {
         controller: textEditingController,
         textInputAction: TextInputAction.search,
         enabled: true,
-        autofocus: true,
+        focusNode: focusNode,
+        autofocus: autofocus,
         decoration: InputDecoration(
           filled: true,
           contentPadding: SearchViewStyle.contentPaddingAppBar,
@@ -32,7 +39,7 @@ class SearchTextField extends StatelessWidget {
             borderSide: BorderSide.none,
             borderRadius: SearchViewStyle.borderRadiusTextField,
           ),
-          hintText: L10n.of(context)!.search,
+          hintText: hintText ?? L10n.of(context)!.search,
           floatingLabelBehavior: FloatingLabelBehavior.never,
           prefixIcon: Icon(
             Icons.search_outlined,
