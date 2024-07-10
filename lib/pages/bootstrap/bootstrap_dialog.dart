@@ -377,7 +377,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     client: widget.client,
                                     wipe: true,
                                     wipeRecovery: true,
-                                  ).show().then(
+                                  ).show(context).then(
                                         (value) => Navigator.of(
                                           context,
                                           rootNavigator: false,

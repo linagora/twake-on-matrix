@@ -4,15 +4,16 @@ import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:lottie/lottie.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -29,9 +30,9 @@ class TomBootstrapDialog extends StatefulWidget {
     this.wipeRecovery = false,
   });
 
-  Future<bool?> show() => TwakeDialog.showDialogFullScreen(
+  Future<bool?> show(BuildContext context) => TwakeDialog.showDialogFullScreen(
         builder: () => this,
-        barrierColor: TomBootstrapDialogStyle.barrierColor,
+        barrierColor: TomBootstrapDialogStyle.barrierColor(context),
       );
 
   @override
@@ -46,6 +47,12 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   final _deleteRecoveryWordsInteractor =
       getIt.get<DeleteRecoveryWordsInteractor>();
+
+  static const breakpointMobileDialogKey = Key('BreakPointMobileDialog');
+
+  static const breakpointWebAndDesktopDialogKey =
+      Key('BreakpointWebAndDesktopKeyDialog');
+
   Bootstrap? bootstrap;
 
   UploadRecoveryKeyState _uploadRecoveryKeyState =
@@ -236,44 +243,25 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         break;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: SizedBox(
-          height: TomBootstrapDialogStyle.sizedDialogWeb,
-          width: TomBootstrapDialogStyle.sizedDialogWeb,
-          child: Padding(
-            padding: TomBootstrapDialogStyle.paddingDialog,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  L10n.of(context)!.settingUpYourTwake,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: LinagoraSysColors.material().onBackground,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(
-                  padding: TomBootstrapDialogStyle.lottiePadding,
-                  child: LottieBuilder.asset(
-                    ImagePaths.lottieTwakeLoading,
-                    width: TomBootstrapDialogStyle.lottieSize,
-                    height: TomBootstrapDialogStyle.lottieSize,
-                  ),
-                ),
-                Text(
-                  _description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraSysColors.material().onBackground,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+    return SlotLayout(
+      config: <Breakpoint, SlotLayoutConfig>{
+        const WidthPlatformBreakpoint(
+          end: ResponsiveUtils.maxMobileWidth,
+        ): SlotLayout.from(
+          key: breakpointMobileDialogKey,
+          builder: (_) => TomBootstrapDialogMobileView(
+            description: _description,
           ),
         ),
-      ),
+        const WidthPlatformBreakpoint(
+          begin: ResponsiveUtils.minTabletWidth,
+        ): SlotLayout.from(
+          key: breakpointWebAndDesktopDialogKey,
+          builder: (_) => TomBootstrapDialogWebView(
+            description: _description,
+          ),
+        ),
+      },
     );
   }
 
