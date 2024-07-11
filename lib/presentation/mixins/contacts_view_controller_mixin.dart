@@ -124,29 +124,6 @@ mixin class ContactsViewControllerMixin {
     required MatrixLocalizations matrixLocalizations,
   }) {
     final keyword = _debouncer.value;
-    if (keyword.isValidMatrixId && keyword.startsWith("@")) {
-      if (presentationContactNotifier.isDisposed &&
-          presentationPhonebookContactNotifier.isDisposed) {
-        return;
-      }
-      presentationContactNotifier.value = Right(
-        PresentationExternalContactSuccess(
-          contact: PresentationContact(
-            matrixId: keyword,
-            displayName: keyword.substring(1),
-            type: ContactType.external,
-          ),
-        ),
-      );
-      presentationPhonebookContactNotifier.value =
-          const Right(GetPhonebookContactsInitial());
-      _refreshRecentContacts(
-        client: client,
-        keyword: keyword.isEmpty ? null : keyword,
-        matrixLocalizations: matrixLocalizations,
-      );
-      return;
-    }
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
     _refreshRecentContacts(
@@ -185,11 +162,23 @@ mixin class ContactsViewControllerMixin {
               .expand((contact) => contact.toPresentationContacts())
               .toList();
           if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
+            if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+              return Right(
+                PresentationExternalContactSuccess(
+                  contact: PresentationContact(
+                    matrixId: keyword,
+                    displayName: keyword.substring(1),
+                    type: ContactType.external,
+                  ),
+                ),
+              );
+            } else {
+              return Left(
+                GetPresentationContactsEmpty(
+                  keyword: keyword,
+                ),
+              );
+            }
           } else {
             return Right(
               GetPresentationContactsSuccess(

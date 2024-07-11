@@ -5,6 +5,7 @@ class ContactsTabViewStyle {
   static const double padding = 8.0;
   static const EdgeInsets loadingPadding = EdgeInsets.all(16);
   static const double loadingSpacer = 16;
+  static const double avatarSize = 48.0;
 
   static const searchItemsHoverRadius = BorderRadius.all(Radius.circular(12));
 }

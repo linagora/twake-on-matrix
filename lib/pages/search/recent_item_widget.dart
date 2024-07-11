@@ -17,6 +17,7 @@ class RecentItemWidget extends StatelessWidget {
   final String highlightKeyword;
   final Client client;
   final void Function()? onTap;
+  final double? avatarSize;
 
   const RecentItemWidget({
     required this.presentationSearch,
@@ -24,6 +25,7 @@ class RecentItemWidget extends StatelessWidget {
     this.onTap,
     super.key,
     required this.client,
+    this.avatarSize,
   });
 
   @override
@@ -53,6 +55,7 @@ class RecentItemWidget extends StatelessWidget {
         contactPresentationSearch:
             presentationSearch as ContactPresentationSearch,
         searchKeyword: highlightKeyword,
+        avatarSize: avatarSize,
       );
     } else {
       final recentChatPresentationSearch =
@@ -62,12 +65,14 @@ class RecentItemWidget extends StatelessWidget {
           client: client,
           recentChatPresentationSearch: recentChatPresentationSearch,
           searchKeyword: highlightKeyword,
+          avatarSize: avatarSize,
         );
       } else {
         return _DirectChatInformation(
           client: client,
           recentChatPresentationSearch: recentChatPresentationSearch,
           searchKeyword: highlightKeyword,
+          avatarSize: avatarSize,
         );
       }
     }
@@ -78,11 +83,13 @@ class _GroupChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
   final Client client;
   final String? searchKeyword;
+  final double? avatarSize;
 
   const _GroupChatInformation({
     required this.recentChatPresentationSearch,
     this.searchKeyword,
     required this.client,
+    this.avatarSize,
   });
 
   @override
@@ -99,7 +106,7 @@ class _GroupChatInformation extends StatelessWidget {
             mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
               client: client,
             ),
-            size: RecentItemStyle.avatarSize,
+            size: avatarSize ?? RecentItemStyle.avatarSize,
           ),
         ),
         const SizedBox(width: 8),
@@ -167,11 +174,13 @@ class _DirectChatInformation extends StatelessWidget {
   final RecentChatPresentationSearch recentChatPresentationSearch;
   final Client client;
   final String? searchKeyword;
+  final double? avatarSize;
 
   const _DirectChatInformation({
     required this.recentChatPresentationSearch,
     this.searchKeyword,
     required this.client,
+    this.avatarSize,
   });
 
   @override
@@ -179,15 +188,12 @@ class _DirectChatInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          width: RecentItemStyle.avatarSize,
-          child: Avatar(
-            name: recentChatPresentationSearch.displayName,
-            mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
-              client: client,
-            ),
-            size: RecentItemStyle.avatarSize,
+        Avatar(
+          name: recentChatPresentationSearch.displayName,
+          mxContent: recentChatPresentationSearch.getAvatarUriByMatrixId(
+            client: client,
           ),
+          size: avatarSize ?? RecentItemStyle.avatarSize,
         ),
         const SizedBox(width: 8),
         Flexible(
@@ -228,11 +234,13 @@ class _ContactInformation extends StatelessWidget {
   final ContactPresentationSearch contactPresentationSearch;
   final String? searchKeyword;
   final Client client;
+  final double? avatarSize;
 
   const _ContactInformation({
     required this.contactPresentationSearch,
     this.searchKeyword,
     required this.client,
+    this.avatarSize,
   });
 
   @override
@@ -246,7 +254,7 @@ class _ContactInformation extends StatelessWidget {
             return Avatar(
               mxContent: snapshot.data?.avatarUrl,
               name: contactPresentationSearch.displayName,
-              size: RecentItemStyle.avatarSize,
+              size: avatarSize ?? RecentItemStyle.avatarSize,
             );
           },
         ),
