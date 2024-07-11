@@ -8,6 +8,8 @@ import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
@@ -16,6 +18,7 @@ import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -34,6 +37,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -795,6 +799,60 @@ class ChatListController extends State<ChatList>
     if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.pushInner('innernavigator/search');
     }
+  }
+
+  List<Widget> getSlidables(BuildContext context, Room room) {
+    return [
+      if (!room.isInvitation)
+        ChatCustomSlidableAction(
+          label:
+              room.isUnread ? L10n.of(context)!.read : L10n.of(context)!.unread,
+          icon: Icon(
+            room.isUnread
+                ? Icons.mark_chat_read_outlined
+                : Icons.mark_chat_unread_outlined,
+            size: ChatListViewStyle.slidableIconSize,
+          ),
+          onPressed: (_) => toggleRead(room),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: ChatListViewStyle.readSlidableColor(room.isUnread)!,
+        ),
+      ChatCustomSlidableAction(
+        label: room.isMuted ? L10n.of(context)!.unmute : L10n.of(context)!.mute,
+        icon: Icon(
+          room.isMuted
+              ? Icons.notifications_on_outlined
+              : Icons.notifications_off_outlined,
+          size: ChatListViewStyle.slidableIconSize,
+        ),
+        onPressed: (_) => toggleMuteRoom(room),
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: ChatListViewStyle.muteSlidableColor(room.isMuted)!,
+      ),
+      if (!room.isInvitation)
+        ChatCustomSlidableAction(
+          label: room.isFavourite
+              ? L10n.of(context)!.unpin
+              : L10n.of(context)!.pin,
+          icon: room.isFavourite
+              ? SvgPicture.asset(
+                  ImagePaths.icUnpin,
+                  width: ChatListViewStyle.slidableIconSize,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onPrimary,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : const Icon(
+                  Icons.push_pin_outlined,
+                  size: ChatListViewStyle.slidableIconSize,
+                ),
+          onPressed: (_) => togglePin(room),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor:
+              ChatListViewStyle.pinSlidableColor(room.isFavourite)!,
+        ),
+    ];
   }
 
   @override
