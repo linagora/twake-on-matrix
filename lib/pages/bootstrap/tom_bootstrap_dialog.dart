@@ -14,7 +14,6 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/encryption.dart';
-import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 
 class TomBootstrapDialog extends StatefulWidget {
@@ -57,19 +56,17 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   @override
   void initState() {
     super.initState();
-    bootstrap =
-        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
-    _createBootstrap();
+    _initData();
   }
 
-  void _createBootstrap() async {
+  void _initData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadingData();
     });
   }
 
   Future<void> setupAdditionalDioCacheOption(String userId) async {
-    Logs().d('TomBootstrapDialog::setupAdditionalDioCacheOption: $userId');
+    Logs().i('TomBootstrapDialog::setupAdditionalDioCacheOption: $userId');
     DioCacheInterceptorForClient(userId).setup(getIt);
   }
 
@@ -83,8 +80,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   Future<void> _loadingData() async {
     _uploadRecoveryKeyState = UploadRecoveryKeyState.dataLoading;
+    Logs().i('_loadingData: $_uploadRecoveryKeyState');
     await widget.client.roomsLoading;
     await widget.client.accountDataLoading;
+
+    Logs().i('_loadingData: roomDataLoaded & accountDataLoaded');
     if (widget.client.userID != null) {
       await setupAdditionalDioCacheOption(widget.client.userID!);
     }
@@ -107,30 +107,32 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
     // Display first login bootstrap if enabled
     if (widget.client.encryption?.keyManager.enabled == true) {
-      Logs().d(
+      Logs().i(
         'TomBootstrapDialog::_initializeRecoveryKeyState: Showing bootstrap dialog when encryption is enabled',
       );
       if (await widget.client.encryption?.keyManager.isCached() == false ||
           await widget.client.encryption?.crossSigning.isCached() == false ||
           widget.client.isUnknownSession && mounted) {
         final recoveryWords = await _getRecoveryWords();
+        _createBootstrap();
         if (recoveryWords != null) {
           _recoveryWords = recoveryWords;
           _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
           setState(() {});
           return;
         } else {
-          Logs().d(
+          Logs().i(
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
           );
           Navigator.of(context, rootNavigator: false).pop<bool>(false);
         }
       }
     } else {
-      Logs().d(
+      Logs().i(
         'TomBootstrapDialog::_initializeRecoveryKeyState(): encryption is not enabled',
       );
       final recoveryWords = await _getRecoveryWords();
+      _createBootstrap();
       _wipe = recoveryWords != null;
       if (recoveryWords != null) {
         _uploadRecoveryKeyState = UploadRecoveryKeyState.wipeRecovery;
@@ -140,6 +142,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       setState(() {});
       return;
     }
+  }
+
+  void _createBootstrap() {
+    bootstrap =
+        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
   }
 
   bool get isDataLoadingState =>
@@ -160,11 +167,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   @override
   Widget build(BuildContext context) {
-    Logs().d(
+    Logs().i(
       'TomBootstrapDialogState::build(): BootstrapState = ${bootstrap?.state}',
     );
 
-    Logs().d(
+    Logs().i(
       'TomBootstrapDialogState::build(): RecoveryKeyState = $_uploadRecoveryKeyState',
     );
 
@@ -186,12 +193,12 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         break;
       case UploadRecoveryKeyState.created:
         if (_createNewRecoveryKeySuccess()) {
-          Logs().d(
+          Logs().i(
             'TomBootstrapDialogState::build(): start backup process with key ${bootstrap?.newSsssKey!.recoveryKey}',
           );
           final key = bootstrap?.newSsssKey!.recoveryKey;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Logs().d(
+            Logs().i(
               'TomBootstrapDialogState::build(): check if key is already in TOM = ${_existedRecoveryWordsInTom(
                 key,
               )} - ${_recoveryWords?.words}',
@@ -216,7 +223,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         });
         break;
       case UploadRecoveryKeyState.uploadError:
-        Logs().e('TomBootstrapDialogState::build(): upload recovery key error');
+        Logs().i('TomBootstrapDialogState::build(): upload recovery key error');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.of(context, rootNavigator: false).pop<bool>();
         });
@@ -269,6 +276,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   }
 
   bool _existedRecoveryWordsInTom(String? key) {
+    Logs().i(
+      'TomBootstrapDialogState::_existedRecoveryWordsInTom(): $key, $_recoveryWords',
+    );
     if (key == null && _recoveryWords != null) {
       return true;
     }
@@ -285,6 +295,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       _uploadRecoveryKeyState != UploadRecoveryKeyState.checkingRecoveryWork;
 
   void _handleBootstrapState() {
+    Logs().i(
+      'TomBootstrapDialogState::_handleBootstrapState(): ${bootstrap?.state}',
+    );
     if (bootstrap != null && _setUpSuccess) {
       switch (bootstrap!.state) {
         case BootstrapState.loading:
@@ -367,7 +380,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
     await _deleteRecoveryWordsInteractor.execute().then(
           (either) => either.fold(
             (failure) {
-              Logs().e(
+              Logs().i(
                 'TomBootstrapDialogState::_wipeRecoveryWord(): wipe recoveryWords failed',
               );
               if (Matrix.of(context).twakeSupported) {
@@ -392,7 +405,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   Future<void> _backUpInRecoveryVault(String? key) async {
     if (key == null) {
       setState(() {
-        Logs().d(
+        Logs().i(
           'TomBootstrapDialogState::_backUpInRecoveryVault(): key null, upload failed',
         );
         _uploadRecoveryKeyState = UploadRecoveryKeyState.uploadError;
@@ -401,7 +414,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
     await _saveRecoveryWordsInteractor.execute(key!).then(
           (either) => either.fold(
             (failure) {
-              Logs().d(
+              Logs().i(
                 'TomBootstrapDialogState::_backUpInRecoveryVault(): upload recoveryWords failed',
               );
               setState(
@@ -419,22 +432,24 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   Future<void> _unlockBackUp() async {
     final recoveryWords = _recoveryWords;
     if (recoveryWords == null) {
-      Logs().e('TomBootstrapDialogState::_unlockBackUp(): recoveryWords null');
+      Logs().i('TomBootstrapDialogState::_unlockBackUp(): recoveryWords null');
       setState(() {
         _uploadRecoveryKeyState = UploadRecoveryKeyState.unlockError;
       });
       return;
     }
     try {
-      Logs().d('TomBootstrapDialogState::_unlockBackUp() unlocking');
+      Logs().i(
+        'TomBootstrapDialogState::_unlockBackUp() unlocking: ${recoveryWords.words}',
+      );
       await bootstrap?.newSsssKey!.unlock(
         keyOrPassphrase: recoveryWords.words,
       );
-      Logs().d('TomBootstrapDialogState::_unlockBackUp() self Signing');
+      Logs().i('TomBootstrapDialogState::_unlockBackUp() self Signing');
       await bootstrap?.client.encryption!.crossSigning.selfSign(
         keyOrPassphrase: recoveryWords.words,
       );
-      Logs().d('TomBootstrapDialogState::_unlockBackUp() open existing SSSS');
+      Logs().i('TomBootstrapDialogState::_unlockBackUp() open existing SSSS');
       await bootstrap?.openExistingSsss();
     } catch (e, s) {
       Logs().w(
@@ -442,6 +457,11 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         e,
         s,
       );
+      if (e is InvalidPassphraseException) {
+        Logs().i(
+          'TomBootstrapDialogState::_unlockBackUp(): InvalidPassphraseException: ${e.cause}',
+        );
+      }
       setState(() {
         _uploadRecoveryKeyState = UploadRecoveryKeyState.unlockError;
       });
