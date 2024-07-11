@@ -55,7 +55,11 @@ class TomBootstrapDialogMobileView extends StatelessWidget {
             child: TextField(
               textInputAction: TextInputAction.search,
               enabled: false,
-              decoration: ChatListHeaderStyle.searchInputDecoration(context),
+              decoration: ChatListHeaderStyle.searchInputDecoration(
+                context,
+                hintText: '',
+                prefixIconColor: LinagoraRefColors.material().neutral[90],
+              ),
             ),
           ),
           Padding(
