@@ -74,8 +74,8 @@ class ChatListViewBuilder extends StatelessWidget {
         label: room.isMuted ? L10n.of(context)!.unmute : L10n.of(context)!.mute,
         icon: Icon(
           room.isMuted
-              ? Icons.notifications_off_outlined
-              : Icons.notifications_on_outlined,
+              ? Icons.notifications_on_outlined
+              : Icons.notifications_off_outlined,
           size: ChatListViewStyle.slidableIconSize,
         ),
         onPressed: (_) => controller.toggleMuteRoom(room),
