@@ -421,7 +421,7 @@ class ChatListController extends State<ChatList>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final result = await TomBootstrapDialog(
         client: activeClient,
-      ).show();
+      ).show(context);
 
       setState(() {});
 

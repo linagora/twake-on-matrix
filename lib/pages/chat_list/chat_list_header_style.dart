@@ -20,7 +20,11 @@ class ChatListHeaderStyle {
 
   static const EdgeInsetsDirectional paddingZero = EdgeInsetsDirectional.zero;
 
-  static InputDecoration searchInputDecoration(BuildContext context) {
+  static InputDecoration searchInputDecoration(
+    BuildContext context, {
+    String? hintText,
+    Color? prefixIconColor,
+  }) {
     return InputDecoration(
       filled: true,
       contentPadding: ChatListHeaderStyle.paddingZero,
@@ -31,7 +35,7 @@ class ChatListHeaderStyle {
           ChatListHeaderStyle.searchRadiusBorder,
         ),
       ),
-      hintText: L10n.of(context)!.search,
+      hintText: hintText ?? L10n.of(context)!.search,
       hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: LinagoraRefColors.material().neutral[60],
           ),
@@ -39,7 +43,7 @@ class ChatListHeaderStyle {
       prefixIcon: Icon(
         Icons.search_outlined,
         size: ChatListHeaderStyle.searchIconSize,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: prefixIconColor ?? Theme.of(context).colorScheme.onSurface,
       ),
       suffixIcon: const SizedBox.shrink(),
     );

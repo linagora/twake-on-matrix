@@ -4,6 +4,7 @@ import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -26,9 +27,17 @@ class ChatBlank extends StatelessWidget {
         backgroundColor: LinagoraSysColors.material().onPrimary,
       ),
       extendBodyBehindAppBar: true,
-      body: loading
-          ? _ChatBlankLoading(context: context)
-          : _ChatBlankNotChat(context: context),
+      body: ValueListenableBuilder(
+        valueListenable: Matrix.of(context).showToMBootstrap,
+        builder: (context, value, _) {
+          if (value) {
+            return const SizedBox.shrink();
+          }
+          return loading
+              ? _ChatBlankLoading(context: context)
+              : _ChatBlankNotChat(context: context);
+        },
+      ),
     );
   }
 }

@@ -91,6 +91,8 @@ class MatrixState extends State<Matrix>
 
   bool waitForFirstSync = false;
 
+  ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
+
   bool get twakeSupported {
     final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.tomServerUrlInterceptorName,
@@ -905,7 +907,7 @@ class MatrixState extends State<Matrix>
     onFocusSub?.cancel();
     onBlurSub?.cancel();
     backgroundPush?.onRoomSync?.cancel();
-
+    showToMBootstrap.dispose();
     linuxNotifications?.close();
 
     super.dispose();
