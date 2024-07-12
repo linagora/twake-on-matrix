@@ -68,6 +68,9 @@ class BackgroundPush {
         (await L10n.delegate.load(View.of(context!).platformDispatcher.locale));
   }
 
+  bool isCurrentRoomActive(String? roomId) =>
+      roomId != null && TwakeApp.router.activeRoomId?.contains(roomId) == true;
+
   final pendingTests = <String, Completer<void>>{};
 
   final dynamic fcmSharedIsolate = FcmSharedIsolate();
@@ -346,7 +349,8 @@ class BackgroundPush {
   void iOSUserSelectedNoti(dynamic noti) {
     // roomId is payload if noti is local
     final roomId = noti['room_id'] ?? noti['payload'];
-    goToRoom(roomId);
+    final eventId = noti['event_id'];
+    goToRoom(roomId, eventId: eventId);
   }
 
   void onReceiveNotification(dynamic message) {
@@ -359,16 +363,28 @@ class BackgroundPush {
       client: client,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
-      onSelectNotification: onSelectNotification,
+      onSelectNotification: (data) => onSelectNotification(
+        data,
+        eventId: notification.eventId,
+      ),
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
   }
 
-  Future<void> onSelectNotification(NotificationResponse? response) {
-    return goToRoom(response?.payload);
+  Future<void> onSelectNotification(
+    NotificationResponse? response, {
+    String? eventId,
+  }) {
+    Logs().d(
+      'BackgroundPush::onSelectNotification() roomId - ${response?.payload} ||eventId - $eventId',
+    );
+    return goToRoom(response?.payload, eventId: eventId);
   }
 
-  Future<void> goToRoom(String? roomId) async {
+  Future<void> goToRoom(
+    String? roomId, {
+    String? eventId,
+  }) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
       _clearAllNavigatorAvailable(roomId: roomId);
@@ -388,7 +404,7 @@ class BackgroundPush {
         Logs().v('[Push] Room $roomId not found, syncing...');
         await client.waitForRoomInSync(roomId);
       }
-      TwakeApp.router.go('/rooms/$roomId');
+      _handleRedirectRoom(roomId, eventId: eventId);
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
@@ -614,10 +630,9 @@ class BackgroundPush {
     String? roomId,
   }) {
     Logs().d(
-      "BackgroundPush:: - Current active room id  @2 ${TwakeApp.router.activeRoomId}",
+      "BackgroundPush:: - Current active room id ${TwakeApp.router.activeRoomId}",
     );
-    if (roomId != null &&
-        TwakeApp.router.activeRoomId?.contains(roomId) == true) {
+    if (isCurrentRoomActive(roomId)) {
       return;
     }
 
@@ -626,5 +641,16 @@ class BackgroundPush {
     if (canPopNavigation) {
       TwakeApp.router.routerDelegate.pop();
     }
+  }
+
+  void _handleRedirectRoom(
+    String roomId, {
+    String? eventId,
+  }) {
+    if (eventId != null) {
+      TwakeApp.router.go('/rooms/$roomId?event=$eventId');
+      return;
+    }
+    TwakeApp.router.go('/rooms/$roomId');
   }
 }
