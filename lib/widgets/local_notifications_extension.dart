@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
@@ -68,6 +69,7 @@ extension LocalNotificationsExtension on MatrixState {
         body,
         icon,
         eventUpdate.roomID,
+        eventUpdate.eventId,
       ]);
     } else if (Platform.isLinux) {
       final appIconUrl = room.avatar?.getThumbnail(
