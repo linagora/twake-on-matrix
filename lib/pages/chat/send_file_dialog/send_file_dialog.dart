@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +27,7 @@ class SendFileDialog extends StatefulWidget {
 }
 
 class SendFileDialogController extends State<SendFileDialog> {
-  final sendMediaOnWebWithCaptionInteractor =
-      getIt.get<SendMediaOnWebWithCaptionInteractor>();
-
-  final sendFilesOnWebWithCaptionInteractor =
-      getIt.get<SendFilesOnWebWithCaptionInteractor>();
+  final uploadManager = getIt.get<UploadManager>();
 
   final generateThumbnailsMediaInteractor =
       getIt.get<GenerateThumbnailsMediaInteractor>();
@@ -54,6 +51,8 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   ValueNotifier<bool> haveErrorFilesNotifier = ValueNotifier(false);
 
+  StreamSubscription? _thumbnailsForMediaSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +75,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     filesNotifier.dispose();
     maxMediaSizeNotifier.dispose();
     haveErrorFilesNotifier.dispose();
+    _thumbnailsForMediaSubscription?.cancel();
     super.dispose();
   }
 
@@ -89,7 +89,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     if (widget.room == null) {
       return;
     }
-    generateThumbnailsMediaInteractor
+    _thumbnailsForMediaSubscription = generateThumbnailsMediaInteractor
         .execute(
       room: widget.room!,
       files: files,
@@ -127,9 +127,9 @@ class SendFileDialogController extends State<SendFileDialog> {
     if (filesNotifier.value.isEmpty) {
       return;
     }
-    sendMediaOnWebWithCaptionInteractor.execute(
+    uploadManager.uploadFilesWeb(
       room: widget.room!,
-      media: filesNotifier.value.first,
+      files: [filesNotifier.value.first],
       caption: textEditingController.text,
     );
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
@@ -161,8 +161,7 @@ class SendFileDialogController extends State<SendFileDialog> {
       Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
       return;
     }
-
-    sendFilesOnWebWithCaptionInteractor.execute(
+    uploadManager.uploadFilesWeb(
       room: widget.room!,
       files: await getFilesNotError(),
       caption: textEditingController.text,

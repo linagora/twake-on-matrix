@@ -77,11 +77,6 @@ import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_file_on_web_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_files_on_web_with_caption_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_images_interactor.dart';
-import 'package:fluffychat/domain/usecase/send_media_on_web_with_caption_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
@@ -89,6 +84,8 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controlle
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -163,6 +160,12 @@ class GetItInitializer {
     );
     getIt.registerSingleton<DownloadManager>(
       DownloadManager(),
+    );
+    getIt.registerSingleton<UploadWorkerQueue>(
+      UploadWorkerQueue(),
+    );
+    getIt.registerSingleton<UploadManager>(
+      UploadManager(),
     );
   }
 
@@ -267,12 +270,9 @@ class GetItInitializer {
     getIt.registerFactory<PhonebookContactInteractor>(
       () => PhonebookContactInteractor(),
     );
-    getIt.registerSingleton<SendMediaInteractor>(SendMediaInteractor());
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
     );
-    getIt.registerSingleton<SendFileInteractor>(SendFileInteractor());
-    getIt.registerSingleton<SendFileOnWebInteractor>(SendFileOnWebInteractor());
     getIt.registerSingleton<CreateNewGroupChatInteractor>(
       CreateNewGroupChatInteractor(),
     );
@@ -320,9 +320,6 @@ class GetItInitializer {
         getIt.get<LocalizationsRepository>(),
       ),
     );
-    getIt.registerFactory<SendMediaOnWebWithCaptionInteractor>(
-      () => SendMediaOnWebWithCaptionInteractor(),
-    );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
     getIt.registerFactory<LookupMatchContactInteractor>(
       () => LookupMatchContactInteractor(),
@@ -332,9 +329,6 @@ class GetItInitializer {
     );
     getIt.registerLazySingleton<UpdatePinnedMessagesInteractor>(
       () => UpdatePinnedMessagesInteractor(),
-    );
-    getIt.registerFactory<SendFilesOnWebWithCaptionInteractor>(
-      () => SendFilesOnWebWithCaptionInteractor(),
     );
 
     getIt.registerFactory<GenerateThumbnailsMediaInteractor>(

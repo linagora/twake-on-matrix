@@ -1,33 +1,41 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
+class SendingVideoWidget extends StatefulWidget {
   final Event event;
 
   final MatrixVideoFile matrixFile;
 
   final DisplayImageInfo displayImageInfo;
 
-  SendingVideoWidget({
+  const SendingVideoWidget({
     super.key,
     required this.event,
     required this.matrixFile,
     required this.displayImageInfo,
   });
 
-  final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
+  @override
+  State<SendingVideoWidget> createState() => _SendingVideoWidgetState();
+}
 
+class _SendingVideoWidgetState extends State<SendingVideoWidget>
+    with PlayVideoActionMixin, UploadFileMixin {
+  final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
+  @override
+  Event get event => widget.event;
   @override
   Widget build(BuildContext context) {
     _checkSendingFileStatus();
 
     return ValueListenableBuilder<SendingVideoStatus>(
-      key: ValueKey(event.eventId),
+      key: ValueKey(widget.event.eventId),
       valueListenable: sendingFileProgressNotifier,
       builder: ((context, value, child) {
         return ClipRRect(
@@ -37,10 +45,10 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
             children: [
               SizedBox(
                 width: MessageContentStyle.imageBubbleWidth(
-                  displayImageInfo.size.width,
+                  widget.displayImageInfo.size.width,
                 ),
                 height: MessageContentStyle.imageBubbleHeight(
-                  displayImageInfo.size.height,
+                  widget.displayImageInfo.size.height,
                 ),
                 child:
                     const BlurHash(hash: MessageContentStyle.defaultBlurHash),
@@ -50,13 +58,20 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    const _PlayVideoButton(),
-                    SizedBox(
-                      width: MessageContentStyle.videoCenterButtonSize,
-                      height: MessageContentStyle.videoCenterButtonSize,
-                      child: CircularProgressIndicator(
-                        strokeWidth: MessageContentStyle.strokeVideoWidth,
-                        color: LinagoraRefColors.material().primary[100],
+                    _PlayVideoButton(
+                      event: widget.event,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        uploadManager.cancelUpload(widget.event);
+                      },
+                      child: SizedBox(
+                        width: MessageContentStyle.videoCenterButtonSize,
+                        height: MessageContentStyle.videoCenterButtonSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: MessageContentStyle.strokeVideoWidth,
+                          color: LinagoraRefColors.material().primary[100],
+                        ),
                       ),
                     ),
                   ],
@@ -78,35 +93,35 @@ class SendingVideoWidget extends StatelessWidget with PlayVideoActionMixin {
         );
       }),
       child: Hero(
-        tag: event.eventId,
+        tag: widget.event.eventId,
         child: VideoWidget(
-          imageHeight: displayImageInfo.size.height,
-          imageWidth: displayImageInfo.size.width,
-          matrixFile: matrixFile,
-          event: event,
+          imageHeight: widget.displayImageInfo.size.height,
+          imageWidth: widget.displayImageInfo.size.width,
+          matrixFile: widget.matrixFile,
+          event: widget.event,
         ),
       ),
     );
   }
 
   void _onPlayVideo(BuildContext context) async {
-    if (matrixFile.filePath == null) {
+    if (widget.matrixFile.filePath == null) {
       return;
     }
     playVideoAction(
       context,
-      matrixFile.filePath!,
-      event: event,
+      widget.matrixFile.filePath!,
+      event: widget.event,
       isReplacement: false,
     );
   }
 
   void _checkSendingFileStatus() {
-    if ((event.status == EventStatus.sent ||
-            event.status == EventStatus.synced) &&
+    if ((widget.event.status == EventStatus.sent ||
+            widget.event.status == EventStatus.synced) &&
         sendingFileProgressNotifier.value != SendingVideoStatus.sent) {
       sendingFileProgressNotifier.value = SendingVideoStatus.sent;
-    } else if (event.status == EventStatus.error) {
+    } else if (widget.event.status == EventStatus.error) {
       sendingFileProgressNotifier.value = SendingVideoStatus.error;
     }
   }
@@ -141,7 +156,8 @@ class VideoWidget extends StatelessWidget {
 }
 
 class _PlayVideoButton extends StatelessWidget {
-  const _PlayVideoButton();
+  final Event? event;
+  const _PlayVideoButton({this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +170,7 @@ class _PlayVideoButton extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Icon(
-        Icons.play_arrow_rounded,
+        event != null ? Icons.close : Icons.play_arrow_rounded,
         color: LinagoraRefColors.material().primary[100],
         size: MessageContentStyle.iconInsideVideoButtonSize,
       ),
