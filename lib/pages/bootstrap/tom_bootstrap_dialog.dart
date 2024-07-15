@@ -377,29 +377,29 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   }
 
   Future<void> _wipeRecoveryWord() async {
-    await _deleteRecoveryWordsInteractor.execute().then(
-          (either) => either.fold(
-            (failure) {
-              Logs().i(
-                'TomBootstrapDialogState::_wipeRecoveryWord(): wipe recoveryWords failed',
-              );
-              if (Matrix.of(context).twakeSupported) {
-                setState(
-                  () => _uploadRecoveryKeyState =
-                      UploadRecoveryKeyState.wipeRecoveryFailed,
-                );
-              } else {
-                setState(
-                  () =>
-                      _uploadRecoveryKeyState = UploadRecoveryKeyState.initial,
-                );
-              }
-            },
-            (success) => setState(
+    await _deleteRecoveryWordsInteractor.execute().then((either) {
+      _createBootstrap();
+      either.fold(
+        (failure) {
+          Logs().i(
+            'TomBootstrapDialogState::_wipeRecoveryWord(): wipe recoveryWords failed',
+          );
+          if (Matrix.of(context).twakeSupported) {
+            setState(
+              () => _uploadRecoveryKeyState =
+                  UploadRecoveryKeyState.wipeRecoveryFailed,
+            );
+          } else {
+            setState(
               () => _uploadRecoveryKeyState = UploadRecoveryKeyState.initial,
-            ),
-          ),
-        );
+            );
+          }
+        },
+        (success) => setState(() {
+          _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
+        }),
+      );
+    });
   }
 
   Future<void> _backUpInRecoveryVault(String? key) async {
