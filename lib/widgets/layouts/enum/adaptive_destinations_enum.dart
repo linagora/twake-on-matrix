@@ -98,8 +98,10 @@ enum AdaptiveDestinationEnum {
             profile: profile,
             isSelected: false,
           ),
-          activeIcon:
-              BottomNavigationAvatar(profile: profile, isSelected: true),
+          activeIcon: BottomNavigationAvatar(
+            profile: profile,
+            isSelected: true,
+          ),
           label: L10n.of(context)!.settings,
         );
       default:

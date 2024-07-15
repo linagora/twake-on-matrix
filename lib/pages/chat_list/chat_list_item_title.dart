@@ -16,14 +16,11 @@ import 'package:matrix/matrix.dart';
 class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
   final Room room;
 
-  final TextStyle? textStyle;
-
   final DateTime? originServerTs;
 
   const ChatListItemTitle({
     super.key,
     required this.room,
-    this.textStyle,
     this.originServerTs,
   });
 
@@ -40,26 +37,28 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
             children: [
               Row(
                 children: [
-                  if (room.encrypted)
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(right: 4, top: 2, bottom: 2),
-                      child: SvgPicture.asset(
-                        ImagePaths.icEncrypted,
-                        width: 20,
-                        height: 20,
+                  Flexible(
+                    child: Padding(
+                      padding: ChatListItemTitleStyle.paddingRightTitle,
+                      child: Text(
+                        displayName,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        softWrap: false,
+                        style:
+                            ChatLitTitleTextStyleView.textStyle.textStyle(room),
                       ),
                     ),
-                  Flexible(
-                    child: Text(
-                      displayName,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: textStyle ??
-                          ChatLitTitleTextStyleView.textStyle.textStyle(room),
-                    ),
                   ),
+                  if (room.encrypted)
+                    Padding(
+                      padding: ChatListItemTitleStyle.paddingLeftIcon,
+                      child: SvgPicture.asset(
+                        ImagePaths.icEncrypted,
+                        width: ChatListItemTitleStyle.encryptedInconWidth,
+                        height: ChatListItemTitleStyle.encryptedInconHeight,
+                      ),
+                    ),
                   if (room.isFavourite)
                     Padding(
                       padding: ChatListItemTitleStyle.paddingLeftIcon,
@@ -90,7 +89,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               if (room.isTypingText(context)) ...[
                 Icon(
                   Icons.schedule,
-                  color: LinagoraRefColors.material().neutral[50],
+                  color: LinagoraRefColors.material().tertiary[30],
                   size: ChatListItemTitleStyle.iconScheduleSize,
                 ),
               ],
@@ -100,9 +99,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                   (originServerTs ?? room.timeCreated)
                       .localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: room.isUnreadOrInvited
-                            ? Theme.of(context).colorScheme.onSurface
-                            : LinagoraRefColors.material().neutral[50],
+                        color: LinagoraRefColors.material().tertiary[30],
                       ),
                 ),
               ),

@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/chat_list/chat_list_view_builder.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
@@ -148,15 +147,7 @@ class ChatListBodyView extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ExpandableTitleBuilder(
-                                  title: L10n.of(context)!.countPinChat(
-                                    controller.filteredRoomsForPin.length,
-                                  ),
-                                  isExpanded: isExpanded,
-                                  onTap: controller
-                                      .expandRoomsForPinNotifier.toggle,
-                                ),
-                                if (isExpanded) child!,
+                                child!,
                               ],
                             );
                           },
@@ -166,33 +157,15 @@ class ChatListBodyView extends StatelessWidget {
                           ),
                         ),
                       if (!controller.filteredRoomsForAllIsEmpty)
-                        ValueListenableBuilder(
-                          valueListenable: controller.expandRoomsForAllNotifier,
-                          builder: (context, isExpanded, child) {
-                            return Padding(
-                              padding: ChatListBodyViewStyle
-                                  .paddingTopExpandableTitleBuilder,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ExpandableTitleBuilder(
-                                    title: L10n.of(context)!.countAllChat(
-                                      controller.filteredRoomsForAll.length,
-                                    ),
-                                    isExpanded: isExpanded,
-                                    onTap: controller
-                                        .expandRoomsForAllNotifier.toggle,
-                                  ),
-                                  if (isExpanded) child!,
-                                ],
-                              ),
-                            );
-                          },
-                          child: ChatListViewBuilder(
-                            controller: controller,
-                            rooms: controller.filteredRoomsForAll,
-                          ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ChatListViewBuilder(
+                              controller: controller,
+                              rooms: controller.filteredRoomsForAll,
+                            ),
+                          ],
                         ),
                     ],
                   ),

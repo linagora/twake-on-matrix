@@ -18,8 +18,8 @@ class ChatListSubtitleTextStyle implements ChatListSubtitleTextStyleDecorator {
   ChatListSubtitleTextStyle(this._interfaceTextStyleComponent);
 
   @override
-  TextStyle textStyle(Room room) {
-    return _interfaceTextStyleComponent.textStyle(room);
+  TextStyle textStyle(Room room, BuildContext context) {
+    return _interfaceTextStyleComponent.textStyle(room, context);
   }
 
   @override
@@ -30,8 +30,8 @@ class ChatListSubtitleTextStyle implements ChatListSubtitleTextStyleDecorator {
 class ReadChatListSubtitleTextStyleDecorator
     implements ChatListSubtitleTextStyleComponent {
   @override
-  TextStyle textStyle(Room room) {
-    return LinagoraTextStyle.material().bodyMedium3.copyWith(
+  TextStyle textStyle(Room room, BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: LinagoraSysColors.material().onSurface,
           fontFamily: GoogleFonts.inter().fontFamily,
         );
@@ -45,15 +45,15 @@ class UnreadChatListSubtitleTextStyleDecorator
   UnreadChatListSubtitleTextStyleDecorator(this._interfaceTextStyleComponent);
 
   @override
-  TextStyle textStyle(Room room) {
+  TextStyle textStyle(Room room, BuildContext context) {
     if (room.isUnreadOrInvited) {
-      return _interfaceTextStyleComponent.textStyle(room).merge(
-            LinagoraTextStyle.material().bodyMedium2.copyWith(
+      return _interfaceTextStyleComponent.textStyle(room, context).merge(
+            Theme.of(context).textTheme.bodyMedium!.copyWith(
                   color: LinagoraSysColors.material().onSurface,
                 ),
           );
     } else {
-      return _interfaceTextStyleComponent.textStyle(room);
+      return _interfaceTextStyleComponent.textStyle(room, context);
     }
   }
 
@@ -69,13 +69,13 @@ class MuteChatListSubtitleTextStyleDecorator
   MuteChatListSubtitleTextStyleDecorator(this._interfaceTextStyleComponent);
 
   @override
-  TextStyle textStyle(Room room) {
+  TextStyle textStyle(Room room, BuildContext context) {
     if (room.isMuted) {
-      return _interfaceTextStyleComponent.textStyle(room).copyWith(
-            color: LinagoraRefColors.material().tertiary[20],
+      return _interfaceTextStyleComponent.textStyle(room, context).copyWith(
+            color: LinagoraSysColors.material().onSurface,
           );
     } else {
-      return _interfaceTextStyleComponent.textStyle(room);
+      return _interfaceTextStyleComponent.textStyle(room, context);
     }
   }
 
