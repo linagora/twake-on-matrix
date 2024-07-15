@@ -5,7 +5,7 @@ class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
 
   static Color? get pinnedIconColor =>
-      LinagoraRefColors.material().tertiary[30];
+      LinagoraRefColors.material().tertiary[40];
 
   static const double readIconSize = 20;
 
@@ -13,7 +13,7 @@ class ChatListItemStyle {
 
   static const double mentionIconWidth = 20;
 
-  static const double chatItemHeight = 85;
+  static const double chatItemHeight = 80;
 
   static double unreadBadgeSize(
     bool unread,
@@ -27,14 +27,19 @@ class ChatListItemStyle {
         : 0.0;
   }
 
-  static const EdgeInsetsDirectional paddingConversation =
-      EdgeInsetsDirectional.symmetric(
+  static const EdgeInsets paddingConversation = EdgeInsets.fromLTRB(
+    8,
+    8,
+    8,
+    8,
+  );
+
+  static const EdgeInsets padding = EdgeInsets.symmetric(
     horizontal: 8,
-    vertical: 2,
   );
 
   static const EdgeInsetsDirectional paddingAvatar =
-      EdgeInsetsDirectional.only(end: 8);
+      EdgeInsetsDirectional.only(start: 8, end: 8);
 
   static const EdgeInsetsDirectional paddingIconGroup =
       EdgeInsetsDirectional.all(4);
@@ -57,4 +62,10 @@ class ChatListItemStyle {
   }
 
   static const double letterSpaceDisplayName = 0.15;
+
+  static final chatlistItemBorderRadius = BorderRadius.circular(4);
+
+  static const paddingIcon = EdgeInsets.only(bottom: 4);
+
+  static const chatListBottomBorderWidht = 1.0;
 }

@@ -44,7 +44,7 @@ class ChatListHeaderStyle {
       prefixIcon: Icon(
         Icons.search,
         size: ChatListHeaderStyle.searchIconSize,
-        color: prefixIconColor ?? Theme.of(context).colorScheme.onSurface,
+        color: prefixIconColor ?? LinagoraRefColors.material().neutral[60],
       ),
       suffixIcon: const SizedBox.shrink(),
     );

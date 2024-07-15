@@ -91,10 +91,11 @@ class ChatAppBarTitle extends StatelessWidget {
                         padding: const EdgeInsets.all(2.0),
                         child: SvgPicture.asset(
                           ImagePaths.icEncrypted,
-                          width: 20,
-                          height: 20,
+                          width: 16,
+                          height: 16,
                         ),
                       ),
+                    const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         roomName ??

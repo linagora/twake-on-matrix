@@ -38,6 +38,7 @@ class MxcImage extends StatefulWidget {
   final void Function()? onTapSelectMode;
   final ImageData? imageData;
   final bool isPreview;
+  final bool enableHeroAnimation;
 
   /// Enable it if the image is stretched, and you don't want to resize it
   final bool noResize;
@@ -75,6 +76,7 @@ class MxcImage extends StatefulWidget {
     this.closeRightColumn,
     this.cacheWidth,
     this.cacheHeight,
+    this.enableHeroAnimation = true,
     super.key,
   });
 
@@ -272,7 +274,7 @@ class _MxcImageState extends State<MxcImage> {
           )
         : _buildImageWidget();
 
-    if (widget.event?.eventId != null) {
+    if (widget.event?.eventId != null && widget.enableHeroAnimation) {
       imageWidget = Hero(
         tag: widget.event!.eventId,
         child: imageWidget,

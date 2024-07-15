@@ -38,4 +38,8 @@ class ChatListViewStyle {
         ? LinagoraRefColors.material().primary[50]
         : LinagoraRefColors.material().primary[40];
   }
+
+  static double dividerHeight = 1.0;
+  static double dividerIndent = 8.0;
+  static double dividerThickness = 1.0;
 }

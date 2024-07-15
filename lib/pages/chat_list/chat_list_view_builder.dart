@@ -23,6 +23,9 @@ class ChatListViewBuilder extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: rooms.length,
       itemBuilder: (BuildContext context, int index) {
+        if (index == rooms.length) {
+          return const SizedBox.shrink();
+        }
         return ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
           builder: (context, selectMode, _) {

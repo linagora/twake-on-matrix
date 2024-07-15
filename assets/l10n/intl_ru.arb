@@ -800,11 +800,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "friday": "Пятница",
-  "@friday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "fromJoining": "С момента присоединения",
   "@fromJoining": {
     "type": "text",
@@ -1131,11 +1126,6 @@
   },
   "moderator": "Модератор",
   "@moderator": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "monday": "Понедельник",
-  "@monday": {
     "type": "text",
     "placeholders": {}
   },
@@ -1527,11 +1517,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "saturday": "Суббота",
-  "@saturday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "saveFile": "Сохранить файл",
   "@saveFile": {
     "type": "text",
@@ -1770,11 +1755,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sunday": "Воскресенье",
-  "@sunday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "synchronizingPleaseWait": "Синхронизация… Пожалуйста, подождите.",
   "@synchronizingPleaseWait": {
     "type": "text",
@@ -1797,11 +1777,6 @@
   },
   "thisRoomHasBeenArchived": "Эта комната была заархивирована.",
   "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "thursday": "Четверг",
-  "@thursday": {
     "type": "text",
     "placeholders": {}
   },
@@ -1838,11 +1813,6 @@
   },
   "tryToSendAgain": "Попробуйте отправить ещё раз",
   "@tryToSendAgain": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "tuesday": "Вторник",
-  "@tuesday": {
     "type": "text",
     "placeholders": {}
   },
@@ -2013,11 +1983,6 @@
   },
   "warning": "Предупреждение!",
   "@warning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "wednesday": "Среда",
-  "@wednesday": {
     "type": "text",
     "placeholders": {}
   },
