@@ -115,6 +115,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                   child: Stack(
                     children: [
                       Avatar(
+                        size: 56,
                         mxContent: room.avatar,
                         name: displayName,
                         onTap: onTapAvatar,

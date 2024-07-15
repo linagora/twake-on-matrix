@@ -40,16 +40,6 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
             children: [
               Row(
                 children: [
-                  if (room.encrypted)
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(right: 4, top: 2, bottom: 2),
-                      child: SvgPicture.asset(
-                        ImagePaths.icEncrypted,
-                        width: 20,
-                        height: 20,
-                      ),
-                    ),
                   Flexible(
                     child: Text(
                       displayName,
@@ -60,6 +50,16 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                           ChatLitTitleTextStyleView.textStyle.textStyle(room),
                     ),
                   ),
+                  if (room.encrypted)
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 8, top: 2, bottom: 2),
+                      child: SvgPicture.asset(
+                        ImagePaths.icEncrypted,
+                        width: 20,
+                        height: 20,
+                      ),
+                    ),
                   if (room.isFavourite)
                     Padding(
                       padding: ChatListItemTitleStyle.paddingLeftIcon,

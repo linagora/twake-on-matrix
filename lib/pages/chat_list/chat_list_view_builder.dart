@@ -8,6 +8,8 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -23,11 +25,14 @@ class ChatListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: rooms.length,
+      itemCount: rooms.length + 1,
       itemBuilder: (BuildContext context, int index) {
+        if (index == rooms.length) {
+          return const SizedBox.shrink();
+        }
         return ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
           builder: (context, selectMode, _) {
@@ -49,6 +54,15 @@ class ChatListViewBuilder extends StatelessWidget {
               room: rooms[index],
             );
           },
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return Divider(
+          thickness: 1,
+          indent: 8,
+          endIndent: 8,
+          color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
+              .opacityLayer3,
         );
       },
     );
