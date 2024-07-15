@@ -164,11 +164,16 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
 
   @override
   void initState() {
+    super.initState();
     activeRoomIdNotifier.value = widget.activeRoomId;
     resetLocationPathWithLoginToken();
-    getCurrentProfile();
-    _handleProfileDataChange();
-    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await matrix.retrievePersistedActiveClient();
+        getCurrentProfile();
+        _handleProfileDataChange();
+      }
+    });
   }
 
   @override

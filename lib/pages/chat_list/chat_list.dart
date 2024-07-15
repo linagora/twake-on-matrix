@@ -788,7 +788,6 @@ class ChatListController extends State<ChatList>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
-        await matrixState.retrievePersistedActiveClient();
       }
     });
     _checkTorBrowser();

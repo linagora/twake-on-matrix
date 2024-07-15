@@ -809,11 +809,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "friday": "Vendredi",
-  "@friday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "fromJoining": "À partir de l'entrée dans le salon",
   "@fromJoining": {
     "type": "text",
@@ -1140,11 +1135,6 @@
   },
   "moderator": "Modérateur·rice",
   "@moderator": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "monday": "Lundi",
-  "@monday": {
     "type": "text",
     "placeholders": {}
   },
@@ -1541,11 +1531,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "saturday": "Samedi",
-  "@saturday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "saveFile": "Enregistrer le fichier",
   "@saveFile": {
     "type": "text",
@@ -1785,11 +1770,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sunday": "Dimanche",
-  "@sunday": {
-    "type": "text",
-    "placeholders": {}
-  },
   "synchronizingPleaseWait": "Synchronisation... Veuillez patienter.",
   "@synchronizingPleaseWait": {
     "type": "text",
@@ -1812,11 +1792,6 @@
   },
   "thisRoomHasBeenArchived": "Ce salon a été archivé.",
   "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "thursday": "Jeudi",
-  "@thursday": {
     "type": "text",
     "placeholders": {}
   },
@@ -1853,11 +1828,6 @@
   },
   "tryToSendAgain": "Retenter l'envoi",
   "@tryToSendAgain": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "tuesday": "Mardi",
-  "@tuesday": {
     "type": "text",
     "placeholders": {}
   },
@@ -2028,11 +1998,6 @@
   },
   "warning": "Attention !",
   "@warning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "wednesday": "Mercredi",
-  "@wednesday": {
     "type": "text",
     "placeholders": {}
   },

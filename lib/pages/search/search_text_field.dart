@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class SearchTextField extends StatelessWidget {
   final TextEditingController textEditingController;
@@ -46,7 +47,7 @@ class SearchTextField extends StatelessWidget {
           prefixIcon: Icon(
             Icons.search_outlined,
             size: SearchViewStyle.searchIconSize,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: LinagoraRefColors.material().neutral[60],
           ),
           suffixIcon: ValueListenableBuilder(
             valueListenable: textEditingController,

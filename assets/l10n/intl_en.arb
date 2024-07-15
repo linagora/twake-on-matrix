@@ -899,7 +899,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "friday": "Friday",
+  "friday": "Fri",
   "@friday": {
     "type": "text",
     "placeholders": {}
@@ -1247,7 +1247,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "monday": "Monday",
+  "monday": "Mon",
   "@monday": {
     "type": "text",
     "placeholders": {}
@@ -1692,7 +1692,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "saturday": "Saturday",
+  "saturday": "Sat",
   "@saturday": {
     "type": "text",
     "placeholders": {}
@@ -1951,7 +1951,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "sunday": "Sunday",
+  "sunday": "Sun",
   "@sunday": {
     "type": "text",
     "placeholders": {}
@@ -1981,7 +1981,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "thursday": "Thursday",
+  "thursday": "Thu",
   "@thursday": {
     "type": "text",
     "placeholders": {}
@@ -2022,7 +2022,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "tuesday": "Tuesday",
+  "tuesday": "Tue",
   "@tuesday": {
     "type": "text",
     "placeholders": {}
@@ -2199,7 +2199,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "wednesday": "Wednesday",
+  "wednesday": "Wed",
   "@wednesday": {
     "type": "text",
     "placeholders": {}
@@ -3102,5 +3102,7 @@
   "sCameraLensDirectionLabel": "Camera lens direction: {value}",
   "sCameraPreviewLabel": "Camera preview: {value}",
   "sFlashModeLabel": "Flash mode: {mode}",
-  "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera"
+  "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera",
+  "photo": "Photo",
+  "video": "Video"
 }
