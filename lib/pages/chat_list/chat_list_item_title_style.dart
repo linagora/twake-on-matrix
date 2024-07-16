@@ -7,4 +7,8 @@ class ChatListItemTitleStyle {
       EdgeInsetsDirectional.only(
     start: 4,
   );
+  static const EdgeInsetsDirectional paddingRightTitle =
+      EdgeInsetsDirectional.only(
+    end: 3,
+  );
 }

@@ -41,23 +41,25 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               Row(
                 children: [
                   Flexible(
-                    child: Text(
-                      displayName,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: textStyle ??
-                          ChatLitTitleTextStyleView.textStyle.textStyle(room),
+                    child: Padding(
+                      padding: ChatListItemTitleStyle.paddingRightTitle,
+                      child: Text(
+                        displayName,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: textStyle ??
+                            ChatLitTitleTextStyleView.textStyle.textStyle(room),
+                      ),
                     ),
                   ),
                   if (room.encrypted)
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 8, top: 2, bottom: 2),
+                      padding: ChatListItemTitleStyle.paddingLeftIcon,
                       child: SvgPicture.asset(
                         ImagePaths.icEncrypted,
-                        width: 20,
-                        height: 20,
+                        width: 14,
+                        height: 16,
                       ),
                     ),
                   if (room.isFavourite)
@@ -90,7 +92,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               if (room.isTypingText(context)) ...[
                 Icon(
                   Icons.schedule,
-                  color: LinagoraRefColors.material().neutral[50],
+                  color: LinagoraRefColors.material().tertiary[30],
                   size: ChatListItemTitleStyle.iconScheduleSize,
                 ),
               ],
@@ -100,9 +102,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                   (originServerTs ?? room.timeCreated)
                       .localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: room.isUnreadOrInvited
-                            ? Theme.of(context).colorScheme.onSurface
-                            : LinagoraRefColors.material().neutral[50],
+                        color: LinagoraRefColors.material().tertiary[30],
                       ),
                 ),
               ),

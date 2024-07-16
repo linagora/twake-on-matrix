@@ -5,7 +5,7 @@ class ChatListItemStyle {
   static Color? get readIconColor => LinagoraRefColors.material().tertiary[20];
 
   static Color? get pinnedIconColor =>
-      LinagoraRefColors.material().tertiary[30];
+      LinagoraRefColors.material().tertiary[40];
 
   static const double readIconSize = 20;
 
@@ -27,10 +27,8 @@ class ChatListItemStyle {
         : 0.0;
   }
 
-  static const EdgeInsetsDirectional paddingConversation =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 8,
-    vertical: 2,
+  static const EdgeInsets paddingConversation = EdgeInsets.all(
+    8,
   );
 
   static const EdgeInsetsDirectional paddingAvatar =

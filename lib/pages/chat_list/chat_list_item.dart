@@ -1,5 +1,4 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
@@ -93,7 +92,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     return Padding(
       padding: ChatListItemStyle.paddingConversation,
       child: Material(
-        borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+        borderRadius: BorderRadius.circular(4),
         clipBehavior: Clip.hardEdge,
         color: isSelectedItem
             ? Theme.of(context).colorScheme.primaryContainer
@@ -145,8 +144,12 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 ),
                 Expanded(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ChatListItemTitle(room: room),
+                      ChatListItemTitle(
+                        room: room,
+                        textStyle: LinagoraTextStyle.material().bodyMedium2,
+                      ),
                       ChatListItemSubtitle(room: room),
                     ],
                   ),

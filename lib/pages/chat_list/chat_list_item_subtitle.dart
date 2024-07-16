@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -110,9 +111,11 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             color:
                 room.highlightCount > 0 || room.membership == Membership.invite
                     ? Theme.of(context).colorScheme.primary
-                    : room.notificationCount > 0 || room.markedUnread
-                        ? Theme.of(context).colorScheme.primary
-                        : LinagoraRefColors.material().tertiary[30],
+                    : room.notificationCount > 0 && room.isMuted
+                        ? LinagoraRefColors.material().tertiary[30]
+                        : room.notificationCount > 0 || room.markedUnread
+                            ? Theme.of(context).colorScheme.primary
+                            : LinagoraRefColors.material().tertiary[30],
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           ),
           child: Center(

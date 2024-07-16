@@ -3,6 +3,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
@@ -38,7 +39,9 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+          style: LinagoraTextStyle.material().bodyMedium3.copyWith(
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
         );
       },
     );
@@ -113,12 +116,27 @@ mixin ChatListItemMixin {
             ) ??
             L10n.of(context)!.emptyChat;
 
-        return Text(
-          "${snapshot.data!.calcDisplayname()}: $subscriptions",
-          softWrap: false,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              snapshot.data!.calcDisplayname(),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              softWrap: false,
+              style: LinagoraTextStyle.material().bodyMedium3,
+            ),
+            Text(
+              subscriptions,
+              softWrap: false,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: LinagoraTextStyle.material().bodyMedium3.copyWith(
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
+            ),
+          ],
         );
       },
     );

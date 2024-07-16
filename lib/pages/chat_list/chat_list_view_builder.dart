@@ -58,6 +58,7 @@ class ChatListViewBuilder extends StatelessWidget {
       },
       separatorBuilder: (BuildContext context, int index) {
         return Divider(
+          height: 1,
           thickness: 1,
           indent: 8,
           endIndent: 8,
