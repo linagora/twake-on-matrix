@@ -1,13 +1,12 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_avatar.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -27,6 +26,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final void Function()? onTapAvatar;
   final void Function(TapDownDetails)? onSecondaryTapDown;
   final void Function()? onLongPress;
+  final JoinedRoomUpdate? joinedRoomUpdate;
 
   const ChatListItem(
     this.room, {
@@ -39,6 +39,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.onSecondaryTapDown,
     this.onLongPress,
     super.key,
+    this.joinedRoomUpdate,
   });
 
   void clickAction(BuildContext context) async {
@@ -87,9 +88,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)!),
-    );
     return Padding(
       padding: ChatListItemStyle.paddingConversation,
       child: Material(
@@ -114,10 +112,10 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                   padding: ChatListItemStyle.paddingAvatar,
                   child: Stack(
                     children: [
-                      Avatar(
-                        mxContent: room.avatar,
-                        name: displayName,
+                      ChatListItemAvatar(
+                        room: room,
                         onTap: onTapAvatar,
+                        joinedRoomUpdate: joinedRoomUpdate,
                       ),
                       if (_isGroupChat)
                         Positioned(

@@ -51,8 +51,11 @@ class ChatListBodyView extends StatelessWidget {
             ),
             stream: controller.activeClient.onSync.stream
                 .where((s) => s.hasRoomUpdate)
-                .rateLimit(const Duration(seconds: 1)),
-            builder: (context, _) {
+                .rateLimitWithSyncUpdate(const Duration(seconds: 1)),
+            builder: (context, syncUpdateSnapshot) {
+              Logs().v(
+                'ChatListBodyView: StreamBuilder: snapshot: ${syncUpdateSnapshot.data?.rooms}',
+              );
               if (controller.activeFilter == ActiveFilter.spaces) {
                 return SpaceView(
                   controller,
@@ -163,6 +166,7 @@ class ChatListBodyView extends StatelessWidget {
                           child: ChatListViewBuilder(
                             controller: controller,
                             rooms: controller.filteredRoomsForPin,
+                            syncUpdate: syncUpdateSnapshot.data,
                           ),
                         ),
                       if (!controller.filteredRoomsForAllIsEmpty)
@@ -192,6 +196,7 @@ class ChatListBodyView extends StatelessWidget {
                           child: ChatListViewBuilder(
                             controller: controller,
                             rooms: controller.filteredRoomsForAll,
+                            syncUpdate: syncUpdateSnapshot.data,
                           ),
                         ),
                     ],

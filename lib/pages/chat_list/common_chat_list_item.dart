@@ -7,11 +7,13 @@ import 'package:matrix/matrix.dart';
 class CommonChatListItem extends StatelessWidget {
   final ChatListController controller;
   final Room room;
+  final JoinedRoomUpdate? joinedRoomUpdate;
 
   const CommonChatListItem({
     super.key,
     required this.controller,
     required this.room,
+    this.joinedRoomUpdate,
   });
 
   @override
@@ -49,6 +51,7 @@ class CommonChatListItem extends StatelessWidget {
             },
           ),
           activeChat: activeRoomId == room.id,
+          joinedRoomUpdate: joinedRoomUpdate,
         );
       },
     );
