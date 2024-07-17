@@ -148,15 +148,7 @@ class ChatListBodyView extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ExpandableTitleBuilder(
-                                  title: L10n.of(context)!.countPinChat(
-                                    controller.filteredRoomsForPin.length,
-                                  ),
-                                  isExpanded: isExpanded,
-                                  onTap: controller
-                                      .expandRoomsForPinNotifier.toggle,
-                                ),
-                                if (isExpanded) child!,
+                                child!,
                               ],
                             );
                           },
@@ -176,15 +168,19 @@ class ChatListBodyView extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ExpandableTitleBuilder(
-                                    title: L10n.of(context)!.countAllChat(
-                                      controller.filteredRoomsForAll.length,
+                                  if (!controller.responsive
+                                      .isMobile(context)) ...[
+                                    ExpandableTitleBuilder(
+                                      title: L10n.of(context)!.countAllChat(
+                                        controller.filteredRoomsForAll.length,
+                                      ),
+                                      isExpanded: isExpanded,
+                                      onTap: controller
+                                          .expandRoomsForAllNotifier.toggle,
                                     ),
-                                    isExpanded: isExpanded,
-                                    onTap: controller
-                                        .expandRoomsForAllNotifier.toggle,
-                                  ),
-                                  if (isExpanded) child!,
+                                    if (isExpanded) child!,
+                                  ] else
+                                    child!,
                                 ],
                               ),
                             );
