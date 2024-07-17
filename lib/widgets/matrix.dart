@@ -887,20 +887,6 @@ class MatrixState extends State<Matrix>
         .then((value) => AppConfig.experimentalVoip = value);
   }
 
-  // bool _hasClicked = false;
-
-  // Future<void> _handleFirstClick() async {
-  //   print("tez: _handleFirstClick() _hasClicked: $_hasClicked");
-  //   if (PlatformInfos.isWeb && !_hasClicked) {
-  //     // final res = html.Notification.requestPermission();
-  //     final res = await Permission.notification.request();
-  //     print("tez: Notification.requestPermission() res: $res");
-  //     setState(() {
-  //       _hasClicked = true;
-  //     });
-  //   }
-  // }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
