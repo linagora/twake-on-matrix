@@ -14,8 +14,8 @@ mixin CommonMediaPickerMixin {
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
 
-  Future<PermissionStatus?>? getCurrentMediaPermission() {
-    return _permissionHandlerService.requestPermissionForMediaActions();
+  Future<PermissionStatus?>? getCurrentMediaPermission(BuildContext context) {
+    return _permissionHandlerService.requestPermissionForMediaActions(context);
   }
 
   Future<PermissionStatus>? getCurrentCameraPermission() {
@@ -23,7 +23,7 @@ mixin CommonMediaPickerMixin {
   }
 
   Future<PermissionStatus>? getCurrentMicroPermission() {
-    return _permissionHandlerService.requestPermissionForMircoActions();
+    return _permissionHandlerService.requestPermissionForMicroActions();
   }
 
   void goToSettings(

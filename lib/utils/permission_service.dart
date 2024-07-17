@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionHandlerService {
@@ -14,14 +17,16 @@ class PermissionHandlerService {
 
   PermissionHandlerService._internal();
 
-  Future<PermissionStatus?>? requestPermissionForMediaActions() async {
+  Future<PermissionStatus?>? requestPermissionForMediaActions(
+    BuildContext context,
+  ) async {
     if (Platform.isIOS) {
-      return _handlePhotosPermissionIOSAction();
+      return _handlePhotosPermissionIOSAction(context);
     } else if (Platform.isAndroid) {
       if (await _getCurrentAndroidVersion() >= 33) {
-        return _handleMediaPickerPermissionAndroidHigher33Action();
+        return _handleMediaPickerPermissionAndroidHigher33Action(context);
       }
-      return _handleMediaPermissionAndroidAction();
+      return _handleMediaPermissionAndroidAction(context);
     } else {
       return null;
     }
@@ -45,7 +50,7 @@ class PermissionHandlerService {
     }
   }
 
-  Future<PermissionStatus> requestPermissionForMircoActions() async {
+  Future<PermissionStatus> requestPermissionForMicroActions() async {
     final currentStatus = await Permission.microphone.status;
     if (currentStatus == PermissionStatus.denied ||
         currentStatus == PermissionStatus.permanentlyDenied) {
@@ -55,27 +60,71 @@ class PermissionHandlerService {
     }
   }
 
-  Future<PermissionStatus> _handlePhotosPermissionIOSAction() async {
+  Future<PermissionStatus> _handlePhotosPermissionIOSAction(
+    BuildContext context,
+  ) async {
     final currentStatus = await Permission.photos.status;
-    return _handlePhotoPermission(currentStatus);
+    return _handlePhotoPermission(
+      currentStatus: currentStatus,
+      context: context,
+    );
   }
 
-  Future<PermissionStatus> _handleMediaPermissionAndroidAction() async {
+  Future<PermissionStatus> _handleMediaPermissionAndroidAction(
+    BuildContext context,
+  ) async {
     final currentStatus = await Permission.storage.status;
-    return _handlePhotoPermission(currentStatus);
+    return _handlePhotoPermission(
+      currentStatus: currentStatus,
+      context: context,
+    );
   }
 
-  Future<PermissionStatus>
-      _handleMediaPickerPermissionAndroidHigher33Action() async {
-    PermissionStatus? photoPermission = await Permission.photos.status;
-    if (photoPermission == PermissionStatus.denied) {
-      photoPermission = await Permission.photos.request();
+  Future<PermissionStatus> _handleMediaPickerPermissionAndroidHigher33Action(
+    BuildContext context,
+  ) async {
+    if (await Permission.photos.status == PermissionStatus.denied) {
+      await showDialog(
+        useRootNavigator: false,
+        context: context,
+        builder: (dialogContext) {
+          return PermissionDialog(
+            icon: const Icon(Icons.photo),
+            permission: Permission.contacts,
+            explainTextRequestPermission: Text(
+              L10n.of(context)!.explainPermissionToAccessPhotos,
+            ),
+            onAcceptButton: () async {
+              Navigator.of(dialogContext).pop();
+              await Permission.photos.request();
+            },
+          );
+        },
+      );
     }
 
-    PermissionStatus? videosPermission = await Permission.videos.status;
-    if (videosPermission == PermissionStatus.denied) {
-      videosPermission = await Permission.videos.request();
+    if (await Permission.videos.status == PermissionStatus.denied) {
+      await showDialog(
+        useRootNavigator: false,
+        context: context,
+        builder: (dialogContext) {
+          return PermissionDialog(
+            icon: const Icon(Icons.video_camera_back_outlined),
+            permission: Permission.contacts,
+            explainTextRequestPermission: Text(
+              L10n.of(context)!.explainPermissionToAccessVideos,
+            ),
+            onAcceptButton: () async {
+              Navigator.of(dialogContext).pop();
+              await Permission.videos.request();
+            },
+          );
+        },
+      );
     }
+
+    final photoPermission = await Permission.photos.status;
+    final videosPermission = await Permission.videos.status;
 
     if (photoPermission == PermissionStatus.granted ||
         videosPermission == PermissionStatus.granted) {
@@ -85,15 +134,37 @@ class PermissionHandlerService {
     return PermissionStatus.denied;
   }
 
-  Future<PermissionStatus> _handlePhotoPermission(
-    PermissionStatus currentStatus,
-  ) async {
+  Future<PermissionStatus> _handlePhotoPermission({
+    required PermissionStatus currentStatus,
+    required BuildContext context,
+  }) async {
     switch (currentStatus) {
       case PermissionStatus.permanentlyDenied:
       case PermissionStatus.denied:
+        await showDialog(
+          useRootNavigator: false,
+          context: context,
+          builder: (dialogContext) {
+            return PermissionDialog(
+              icon: const Icon(Icons.photo),
+              permission:
+                  Platform.isIOS ? Permission.photos : Permission.storage,
+              explainTextRequestPermission: Text(
+                L10n.of(context)!.explainPermissionToAccessMedias,
+              ),
+              onAcceptButton: () async {
+                Navigator.of(dialogContext).pop();
+                Platform.isIOS
+                    ? await Permission.photos.request()
+                    : await Permission.storage.request();
+              },
+            );
+          },
+        );
         final newStatus = Platform.isIOS
-            ? await Permission.photos.request()
-            : await Permission.storage.request();
+            ? await Permission.photos.status
+            : await Permission.storage.status;
+
         return newStatus.isGranted ? PermissionStatus.granted : newStatus;
 
       case PermissionStatus.granted:
@@ -118,10 +189,12 @@ class PermissionHandlerService {
 
   Future<PermissionStatus> requestContactsPermissionActions() async {
     final currentStatus = await contactsPermissionStatus;
-    if (currentStatus == PermissionStatus.denied ||
-        currentStatus == PermissionStatus.permanentlyDenied) {
+    if (currentStatus == PermissionStatus.denied) {
       final newStatus = await Permission.contacts.request();
       return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+    } else if (currentStatus == PermissionStatus.permanentlyDenied) {
+      await goToSettingsForPermissionActions();
+      return await contactsPermissionStatus;
     } else {
       return currentStatus;
     }
@@ -136,7 +209,7 @@ class PermissionHandlerService {
     return await Permission.photosAddOnly.request();
   }
 
-  void goToSettingsForPermissionActions() {
-    openAppSettings();
+  Future goToSettingsForPermissionActions() async {
+    return openAppSettings();
   }
 }

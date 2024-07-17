@@ -2714,6 +2714,10 @@
       "count": {}
     }
   },
+  "explainPermissionToAccessContacts": "Twake chat doit accéder à vos contacts pour savoir si vos amis sont sur le serveur matrix. Cela se fait localement et vos contacts ne sont pas synchronisés avec notre serveur.",
+  "explainPermissionToAccessMedias": "Twake chat a besoin d'accéder au stockage pour que vous puissiez envoyer et enregistrer des photos, vidéos, musiques et autres documents. Appuyez sur Paramètres > Autorisations puis activez l'autorisation de stockage: Photos et vidéos.",
+  "explainPermissionToAccessPhotos": "Twake chat a besoin d'accéder à vos photos pour que vous puissiez envoyer et de enregistrer des images. Allez dans Paramètres > Autorisations, puis activez l'autorisation de stockage : Photos.",
+  "explainPermissionToAccessVideos": "Twake chat a besoin d'accéder à vos vidéos pour que vous puissiez envoyer et de sauvegarder des vidéos. Allez dans Paramètres > Autorisations, puis activez l'autorisation de stockage : Vidéos.",
   "recentChat": "DISCUSSION RÉCENTE",
   "@recentChat": {},
   "muteThisMessage": "Couper le son de ce salon",

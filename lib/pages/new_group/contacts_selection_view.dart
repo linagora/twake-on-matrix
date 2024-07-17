@@ -54,8 +54,8 @@ class ContactsSelectionView extends StatelessWidget {
                       warningBannerNotifier: controller.warningBannerNotifier,
                       closeContactsWarningBanner:
                           controller.closeContactsWarningBanner,
-                      goToSettingsForPermissionActions:
-                          controller.goToSettingsForPermissionActions,
+                      goToSettingsForPermissionActions: () =>
+                          controller.displayContactPermissionDialog(context),
                     ),
                   ),
                   SliverToBoxAdapter(

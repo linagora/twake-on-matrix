@@ -10,7 +10,6 @@ import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -164,7 +163,6 @@ class ExpansionList extends StatelessWidget {
                     const SizedBox(
                       height: 12,
                     ),
-                    _contactsWarningBannerViewBuilder(),
                     ..._buildResponsiveButtons(context),
                     for (final child in expansionList) ...[child],
                   ] else ...[
@@ -185,15 +183,6 @@ class ExpansionList extends StatelessWidget {
           ..._buildResponsiveButtons(context),
         ],
       ),
-    );
-  }
-
-  Widget _contactsWarningBannerViewBuilder() {
-    return ContactsWarningBannerView(
-      warningBannerNotifier: warningBannerNotifier,
-      isShowMargin: false,
-      closeContactsWarningBanner: closeContactsWarningBanner,
-      goToSettingsForPermissionActions: goToSettingsForPermissionActions,
     );
   }
 

@@ -3041,6 +3041,10 @@
       }
     }
   },
+  "explainPermissionToAccessContacts": "Twake chat needs access to your contacts to find out whether your friends are on the matrix server. This is done locally, and your contacts are not synchronized with our server.",
+  "explainPermissionToAccessMedias": "Twake chat needs access to storage so you can send and save photos, videos, music and other documents. Press Settings > Authorizations, then activate Storage authorization: Photos and videos.",
+  "explainPermissionToAccessPhotos": "Twake chat needs access to your photos so you can send and save images. Press Settings > Permissions, then enable Storage permission: Photos.",
+  "explainPermissionToAccessVideos": "Twake chat needs access to your videos so you can send and save videos. Press Settings > Permissions, then enable Storage permission: Videos.",
   "downloading": "Downloading",
   "settingUpYourTwake": "Setting up your Twake\nIt could take a while",
   "performingAutomaticalLogin": "Performing automatical login  via SSO",

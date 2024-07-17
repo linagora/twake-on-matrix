@@ -17,6 +17,8 @@ class ContactsManager {
 
   bool _doNotShowWarningContactsBannerAgain = false;
 
+  bool _doNotShowWarningContactsDialogAgain = false;
+
   final ValueNotifierCustom<Either<Failure, Success>> _contactsNotifier =
       ValueNotifierCustom(const Right(ContactsInitial()));
 
@@ -41,8 +43,15 @@ class ContactsManager {
   bool get isDoNotShowWarningContactsBannerAgain =>
       _doNotShowWarningContactsBannerAgain;
 
+  bool get isDoNotShowWarningContactsDialogAgain =>
+      _doNotShowWarningContactsDialogAgain;
+
   set updateNotShowWarningContactsBannerAgain(bool value) {
     _doNotShowWarningContactsBannerAgain = value;
+  }
+
+  set updateNotShowWarningContactsDialogAgain(bool value) {
+    _doNotShowWarningContactsDialogAgain = value;
   }
 
   Future<void> reSyncContacts() async {
@@ -92,4 +101,7 @@ class ContactsManager {
       },
     );
   }
+
+  void refreshPhonebookContacts() =>
+      _fetchPhonebookContacts(isAvailableSupportPhonebookContacts: true);
 }

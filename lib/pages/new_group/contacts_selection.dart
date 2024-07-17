@@ -6,14 +6,17 @@ import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>
     extends State<T>
-    with InviteExternalContactMixin, ContactsViewControllerMixin {
+    with
+        InviteExternalContactMixin,
+        ContactsViewControllerMixin,
+        WidgetsBindingObserver {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
 
   String getTitle(BuildContext context);
@@ -34,12 +37,16 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   Client get client => Matrix.of(context).client;
 
+  final autoDisplayPermissionDialogNotifier = ValueNotifier(true);
+
   @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         initialFetchContacts(
-          client: client,
+          context: context,
+          client: Matrix.of(context).client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
       }
@@ -48,8 +55,16 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    await handleDidChangeAppLifecycleState(state);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     disposeContactsMixin();
+    selectedContactsMapNotifier.dispose();
+    autoDisplayPermissionDialogNotifier.dispose();
     super.dispose();
   }
 
