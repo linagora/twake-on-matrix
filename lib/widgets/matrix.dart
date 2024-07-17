@@ -364,7 +364,6 @@ class MatrixState extends State<Matrix>
         currentClient.onUiaRequest.stream.listen(uiaRequestHandler);
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       currentClient.onSync.stream.first.then((s) {
-        html.Notification.requestPermission();
         onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>
@@ -887,6 +886,20 @@ class MatrixState extends State<Matrix>
         .getItemBool(SettingKeys.experimentalVoip, AppConfig.experimentalVoip)
         .then((value) => AppConfig.experimentalVoip = value);
   }
+
+  // bool _hasClicked = false;
+
+  // Future<void> _handleFirstClick() async {
+  //   print("tez: _handleFirstClick() _hasClicked: $_hasClicked");
+  //   if (PlatformInfos.isWeb && !_hasClicked) {
+  //     // final res = html.Notification.requestPermission();
+  //     final res = await Permission.notification.request();
+  //     print("tez: Notification.requestPermission() res: $res");
+  //     setState(() {
+  //       _hasClicked = true;
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
