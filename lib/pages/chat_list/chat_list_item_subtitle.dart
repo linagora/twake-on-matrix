@@ -10,6 +10,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
@@ -65,35 +66,46 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             final isMentionned = snapshot.data!
                 .getAllMentionedUserIdsFromMessage(room)
                 .contains(Matrix.of(context).client.userID);
-            return AnimatedContainer(
-              duration: TwakeThemes.animationDuration,
-              curve: TwakeThemes.animationCurve,
-              padding: const EdgeInsets.only(bottom: 4),
-              height: ChatListItemStyle.mentionIconWidth,
-              width: isMentionned && room.isUnreadOrInvited
-                  ? ChatListItemStyle.mentionIconWidth
-                  : 0,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-              ),
-              child: Center(
-                child: isMentionned && room.isUnreadOrInvited
-                    ? Text(
-                        '@',
-                        style: TextStyle(
-                          color: isMentionned
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                          fontSize:
-                              Theme.of(context).textTheme.labelMedium?.fontSize,
-                        ),
-                      )
-                    : Container(),
-              ),
-            );
+            return room.lastEvent?.senderId == Matrix.of(context).client.userID
+                ? Icon(
+                    Icons.done_all,
+                    color: room.lastEvent!.receipts.isEmpty
+                        ? LinagoraRefColors.material().tertiary[30]
+                        : LinagoraSysColors.material().secondary,
+                    size: 20,
+                  )
+                : AnimatedContainer(
+                    duration: TwakeThemes.animationDuration,
+                    curve: TwakeThemes.animationCurve,
+                    padding: const EdgeInsets.only(bottom: 4),
+                    height: ChatListItemStyle.mentionIconWidth,
+                    width: isMentionned && room.isUnreadOrInvited
+                        ? ChatListItemStyle.mentionIconWidth
+                        : 0,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius:
+                          BorderRadius.circular(AppConfig.borderRadius),
+                    ),
+                    child: Center(
+                      child: isMentionned && room.isUnreadOrInvited
+                          ? Text(
+                              '@',
+                              style: TextStyle(
+                                color: isMentionned
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.fontSize,
+                              ),
+                            )
+                          : Container(),
+                    ),
+                  );
           },
         ),
         const SizedBox(width: 4),
