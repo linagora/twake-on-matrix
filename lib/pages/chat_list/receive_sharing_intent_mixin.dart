@@ -21,6 +21,10 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
   StreamSubscription? intentUriStreamSubscription;
 
+  bool _intentOpenApp(String text) {
+    return text.contains('twake.chat://openApp');
+  }
+
   void _processIncomingSharedFiles(List<SharedMediaFile> files) {
     if (files.isEmpty) return;
     matrixState.shareContentList = files
@@ -36,6 +40,9 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
   void _processIncomingSharedText(String? text) {
     if (text == null) return;
+    if (_intentOpenApp(text)) {
+      return;
+    }
     if (text.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         text.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         (text.toLowerCase().startsWith(AppConfig.schemePrefix) &&
@@ -52,6 +59,9 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   void _processIncomingUris(String? text) async {
     Logs().d("ReceiveSharingIntentMixin: _processIncomingUris: $text");
     if (text == null) return;
+    if (_intentOpenApp(text)) {
+      return;
+    }
     TwakeApp.router.go('/share');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UrlLauncher(context, url: text).openMatrixToUrl();
