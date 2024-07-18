@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'package:animations/animations.dart';
 import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -226,4 +230,181 @@ class ProgressDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+enum ConfirmResult {
+  ok,
+  cancel,
+}
+
+Future<ConfirmResult> showConfirmAlertDialog({
+  required BuildContext context,
+  required ResponsiveUtils responsiveUtils,
+  bool useRootNavigator = true,
+  bool barrierDismissible = true,
+  bool isDestructiveAction = false,
+  String? title,
+  String? message,
+  String? okLabel,
+  String? cancelLabel,
+  void Function()? onClose,
+}) async {
+  final result = await showModal<ConfirmResult>(
+    context: context,
+    configuration: FadeScaleTransitionConfiguration(
+      barrierDismissible: barrierDismissible,
+    ),
+    useRootNavigator: useRootNavigator,
+    builder: (context) {
+      return GestureDetector(
+        onTap: () => Navigator.of(context).pop(ConfirmResult.cancel),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Center(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: responsiveUtils.isMobile(context)
+                      ? responsiveUtils.getSizeScreenWidth(context) - 48
+                      : 448,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                      spreadRadius: 3,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: TwakeIconButton(
+                        icon: Icons.close,
+                        iconColor: isDestructiveAction
+                            ? CupertinoColors.destructiveRed
+                            : LinagoraSysColors.material().onSurfaceVariant,
+                        onTap: () {
+                          Navigator.of(context).pop(ConfirmResult.cancel);
+                          onClose?.call();
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (title != null)
+                            Center(
+                              child: Text(
+                                title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      color: LinagoraSysColors.material()
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                            ),
+                          const SizedBox(height: 27),
+                          if (message != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 28.0),
+                              child: Text(
+                                message,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      color: LinagoraSysColors.material()
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                            ),
+                          const SizedBox(height: 65),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              right: 20.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TwakeTextButton(
+                                  message:
+                                      cancelLabel ?? L10n.of(context)!.cancel,
+                                  styleMessage: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                  hoverColor: Colors.transparent,
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .pop(ConfirmResult.cancel);
+                                    onClose?.call();
+                                  },
+                                ),
+                                const SizedBox(width: 27),
+                                TwakeTextButton(
+                                  buttonDecoration: BoxDecoration(
+                                    color: LinagoraSysColors.material().primary,
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(100),
+                                    ),
+                                  ),
+                                  margin: const EdgeInsetsDirectional.symmetric(
+                                    horizontal: 24.0,
+                                    vertical: 14.0,
+                                  ),
+                                  message: okLabel ?? L10n.of(context)!.ok,
+                                  styleMessage: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onPrimary,
+                                      ),
+                                  hoverColor: Colors.transparent,
+                                  onTap: () {
+                                    Navigator.of(context).pop(ConfirmResult.ok);
+                                    onClose?.call();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24.0),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  return result ?? ConfirmResult.cancel;
 }
