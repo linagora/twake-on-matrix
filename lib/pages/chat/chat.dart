@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -1971,6 +1972,16 @@ class ChatController extends State<Chat>
     }
   }
 
+  void requestNotificationPermission() {
+    if (kIsWeb) {
+      try {
+        html.Notification.requestPermission();
+      } catch (e) {
+        Logs().e("Error requesting notification permission: $e");
+      }
+    }
+  }
+
   @override
   void dispose() {
     unregisterPasteShortcutListeners();
@@ -2015,7 +2026,10 @@ class ChatController extends State<Chat>
   Widget build(BuildContext context) {
     return MouseRegion(
       onHover: (_) => _resetLocationPath(),
-      child: ChatView(this, key: widget.key),
+      child: GestureDetector(
+        onTap: requestNotificationPermission,
+        child: ChatView(this, key: widget.key),
+      ),
     );
   }
 }
