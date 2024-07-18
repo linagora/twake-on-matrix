@@ -2679,10 +2679,6 @@
       "count": {}
     }
   },
-  "explainPermissionToAccessContacts": "",
-  "explainPermissionToAccessMedias": "",
-  "explainPermissionToAccessPhotos": "",
-  "explainPermissionToAccessVideos": "",
   "recentChat": "DISCUSSION RÉCENTE",
   "@recentChat": {},
   "muteThisMessage": "Couper le son de ce salon",
@@ -3050,13 +3046,116 @@
   "@searchContacts": {},
   "phone": "Téléphone",
   "viewProfile": "Voir le profil",
+  "@viewProfile": {},
   "profileInfo": "Informations du profil",
+  "@profileInfo": {},
+  "loading": "Chargement en cours...",
+  "@loading": {},
+  "onlineDayAgo": "en ligne il y a {day} jours",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "downloading": "Téléchargement en cours",
+  "@downloading": {},
+  "settingUpYourTwake": "Configuration de votre Twake\nCela peut prendre un certain temps",
+  "@settingUpYourTwake": {},
+  "performingAutomaticalLogin": "Connexion automatique via SSO en cours",
+  "@performingAutomaticalLogin": {},
+  "backingUpYourMessage": "Préparation de l'environnement serveur pour sauvegarder vos messages",
+  "@backingUpYourMessage": {},
+  "recoveringYourEncryptedChats": "Récupération de vos conversations chiffrées",
+  "@recoveringYourEncryptedChats": {},
+  "configureDataEncryption": "Configurer le chiffrement des données",
+  "@configureDataEncryption": {},
+  "configurationNotFound": "Les données de configuration sont introuvables",
+  "@configurationNotFound": {},
+  "fileSavedToGallery": "Fichier enregistré dans la galerie",
+  "@fileSavedToGallery": {},
+  "saveFileToGalleryError": "Échec de l'enregistrement du fichier dans la galerie",
+  "@saveFileToGalleryError": {},
+  "tokenNotFound": "Le jeton de connexion est introuvable",
+  "@tokenNotFound": {},
+  "dangerZone": "Zone de danger",
+  "@dangerZone": {},
+  "leaveGroupSubtitle": "Ce groupe existera toujours après votre départ",
+  "@leaveGroupSubtitle": {},
+  "leaveChatFailed": "Échec de la sortie du chat",
+  "@leaveChatFailed": {},
+  "invalidLoginToken": "Jeton de connexion invalide",
+  "@invalidLoginToken": {},
+  "copiedPublicKeyToClipboard": "Clé publique copiée dans le presse-papiers.",
+  "@copiedPublicKeyToClipboard": {},
+  "removeFromGroup": "Retirer du groupe",
+  "@removeFromGroup": {},
+  "removeReason": "Retirer {user} du groupe",
+  "@removeReason": {
+    "type": "text",
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "selectAccount": "Sélectionner le compte",
+  "@selectAccount": {},
+  "privacyPolicy": "Politique de confidentialité",
+  "@privacyPolicy": {},
+  "byContinuingYourAgreeingToOur": "En continuant, vous acceptez notre",
+  "@byContinuingYourAgreeingToOur": {},
+  "youDontHaveAnyContactsYet": "Vous n'avez pas encore de contacts.",
+  "@youDontHaveAnyContactsYet": {},
+  "errorDialogTitle": "Oups, quelque chose s'est mal passé",
+  "@errorDialogTitle": {},
+  "aWhileAgo": "il y a un moment",
+  "@aWhileAgo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editWorkIdentitiesDescriptions": "Modifiez vos paramètres d'identité professionnelle, y compris l'ID Matrix, l'email ou le nom de votre entreprise.",
+  "@editWorkIdentitiesDescriptions": {},
+  "showInChat": "Afficher dans le chat",
+  "@showInChat": {},
+  "tapToAllowAccessToYourMicrophone": "Vous pouvez activer l'accès au micro dans l'application Paramètres pour utiliser la voix",
+  "@tapToAllowAccessToYourMicrophone": {},
+  "saveToDownloads": "Enregistrer dans Téléchargements",
+  "@saveToDownloads": {},
+  "saveToGallery": "Enregistrer dans la gallerie",
+  "@saveToGallery": {},
+  "fileSavedToDownloads": "Fichier enregistré dans le dossier Téléchargements",
+  "@fileSavedToDownloads": {},
+  "explainPermissionToDownloadFiles": "Pour continuer, veuillez autoriser {appName} à accéder aux autorisations de stockage. Cette autorisation est essentielle pour enregistrer les fichiers dans le dossier Téléchargements.",
+  "@explainPermissionToDownloadFiles": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "saveFileToDownloadsError": "Echec de la sauvegarde du fichier dans le dossier Téléchargements",
+  "@saveFileToDownloadsError": {},
+  "explainPermissionToGallery": "Pour continuer, veuillez autoriser {appName} à accéder aux photos. Cette autorisation est essentielle pour enregistrer les fichiers dans la galerie.",
+  "@explainPermissionToGallery": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "removeUser": "Supprimer l'utilisateur",
+  "@removeUser": {},
+  "switchAccounts": "Changer de compte",
+  "@switchAccounts": {},
   "shootingTips": "Appuyez pour prendre une photo.",
   "shootingWithRecordingTips": "Appuyez pour prendre une photo. Appuyez longuement pour enregistrer une vidéo.",
   "shootingOnlyRecordingTips": "Appuyez longuement pour enregistrer une vidéo.",
   "shootingTapRecordingTips": "Appuyez pour enregistrer une vidéo.",
   "loadFailed": "Échec du chargement",
-  "loading": "Chargement...",
   "saving": "Enregistrement...",
   "sActionManuallyFocusHint": "mettre au point manuellement",
   "sActionPreviewHint": "aperçu",
