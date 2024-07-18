@@ -364,6 +364,19 @@ abstract class TwakeThemes {
               ? LinagoraSysColors.material().background
               : LinagoraSysColors.material().backgroundDark,
         ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: LinagoraSysColors.material().surface,
+          selectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+            fontSize: 11,
+            color: LinagoraSysColors.material().primary,
+          ),
+          unselectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+            fontSize: 11,
+            color: LinagoraSysColors.material().tertiary,
+          ),
+          selectedItemColor: LinagoraSysColors.material().primary,
+          unselectedItemColor: LinagoraSysColors.material().tertiary,
+        ),
       );
 }
 

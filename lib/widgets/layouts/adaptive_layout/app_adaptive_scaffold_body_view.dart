@@ -167,6 +167,17 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     );
   }
 
+  List<BottomNavigationBarItem> getNavigationDestinationsForBottomNavigation(
+    BuildContext context,
+  ) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestinationForBottomBar(
+        context,
+        currentProfile,
+      );
+    }).toList();
+  }
+
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
       return destination.getNavigationDestination(
@@ -261,17 +272,19 @@ class _ColumnPageView extends StatelessWidget {
               height: ResponsiveUtils.heightBottomNavigation,
               padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
               child: ListView(
-                padding: AppAdaptiveScaffoldBodyViewStyle.paddingNavigationBar,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  NavigationBar(
-                    backgroundColor: LinagoraSysColors.material().surface,
-                    elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
-                    height: ResponsiveUtils.heightBottomNavigationBar,
-                    selectedIndex: _getActiveBottomNavigationBarIndex(),
-                    destinations: getNavigationDestinations(context),
-                    onDestinationSelected: onDestinationSelected,
-                    indicatorColor: Colors.transparent,
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                    ),
+                    child: BottomNavigationBar(
+                      elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
+                      currentIndex: _getActiveBottomNavigationBarIndex(),
+                      onTap: onDestinationSelected,
+                      items: getNavigationDestinationsForBottomBar(context),
+                    ),
                   ),
                 ],
               ),
@@ -285,6 +298,17 @@ class _ColumnPageView extends StatelessWidget {
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
       return destination.getNavigationDestination(
+        context,
+        currentProfile,
+      );
+    }).toList();
+  }
+
+  List<BottomNavigationBarItem> getNavigationDestinationsForBottomBar(
+    BuildContext context,
+  ) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestinationForBottomBar(
         context,
         currentProfile,
       );

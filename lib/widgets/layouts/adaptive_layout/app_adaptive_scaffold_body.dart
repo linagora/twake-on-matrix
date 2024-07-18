@@ -123,6 +123,9 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   void _handleLogout(AppAdaptiveScaffoldBody oldWidget) {
     activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
     pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+    getCurrentProfile();
+    onAccountDataSubscription?.cancel();
+    _handleProfileDataChange();
   }
 
   void _handleSwitchAccount(AppAdaptiveScaffoldBody oldWidget) {

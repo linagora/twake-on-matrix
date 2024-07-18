@@ -8,9 +8,6 @@ class AppAdaptiveScaffoldBodyViewStyle {
   static const EdgeInsets paddingBottomNavigation = EdgeInsets.only(
     top: 4,
   );
-  static const paddingNavigationBar = EdgeInsets.only(
-    bottom: 24,
-  );
 
   static BoxDecoration navBarBorder = BoxDecoration(
     color: LinagoraSysColors.material().surface,
