@@ -1,3 +1,33 @@
+## [2.6.0+2330] - 2024-07-18
+
+### Fixed
+
+- #1879 Fix online status is not updated correctly
+- #1892 Handle error recovery key lost
+- #1898 Fix memory leak in file picker
+- #1897 Fix profile image is not updated in multiple account
+- #1903 Check dialog status before sending file
+- #1911 Fix can't open chat when search exact Matrix ID
+- #1921 Fix iOS is forced to log out many times
+- #1910 Remove x when searchbar is empty 
+- #1938 Fix wrong responsive when size of screen is small
+- #1930 Improve search exact Matrix ID inside Contact tab
+- #1948 Fix jump exactly to message in the notification on Mobile
+- #1946 Fix 500,404 error in POST request when login
+
+### Added
+
+- #1940 Upload feature
+- #1890 Renamed artifact to describe the OS
+- #1880 Standarlize Appbar and Appgrid popup
+- #1889 Change style loading dialog
+- #1894 Change message info dialog close button
+- #1905 Update online status based on design
+- #1937 Improve style for backup dialog
+- #1951 Integration dynamic link on android mobile
+- #1944 Update quick actions
+- #1956 Create permission dialogs for contacts and media
+
 ## [2.5.8+2330] - 2024-05-25
 - #1781 Upgrade to Flutter SDK 3.22.0
 
@@ -2353,6 +2383,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.6.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.6.0
 [2.5.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.5.2
 [2.4.20+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.20
 [2.4.19+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.19
