@@ -37,8 +37,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
 
   Client get client => Matrix.of(context).client;
 
-  final autoDisplayPermissionDialogNotifier = ValueNotifier(true);
-
   @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -46,7 +44,7 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
       if (mounted) {
         initialFetchContacts(
           context: context,
-          client: Matrix.of(context).client,
+          client: client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
       }
@@ -64,7 +62,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
     WidgetsBinding.instance.removeObserver(this);
     disposeContactsMixin();
     selectedContactsMapNotifier.dispose();
-    autoDisplayPermissionDialogNotifier.dispose();
     super.dispose();
   }
 

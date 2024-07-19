@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
+import 'package:fluffychat/pages/new_private_chat/new_private_chat_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
@@ -32,15 +33,20 @@ class NewPrivateChatView extends StatelessWidget {
         keyboardDismissBehavior: PlatformInfos.isMobile
             ? ScrollViewKeyboardDismissBehavior.manual
             : ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+        padding: NewPrivateChatStyle.paddingBody,
         controller: controller.scrollController,
         child: Column(
           children: [
-            ContactsWarningBannerView(
-              warningBannerNotifier: controller.warningBannerNotifier,
-              closeContactsWarningBanner: controller.closeContactsWarningBanner,
-              goToSettingsForPermissionActions: () =>
-                  controller.displayContactPermissionDialog(context),
+            Padding(
+              padding: NewPrivateChatStyle.paddingWarningBanner,
+              child: ContactsWarningBannerView(
+                warningBannerNotifier: controller.warningBannerNotifier,
+                closeContactsWarningBanner:
+                    controller.closeContactsWarningBanner,
+                goToSettingsForPermissionActions: () =>
+                    controller.displayContactPermissionDialog(context),
+                isShowMargin: false,
+              ),
             ),
             ExpansionList(
               presentationContactsNotifier:
