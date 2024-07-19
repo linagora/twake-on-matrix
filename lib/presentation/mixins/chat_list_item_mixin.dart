@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -139,6 +140,42 @@ mixin ChatListItemMixin {
           ],
         );
       },
+    );
+  }
+
+  Widget chatlistItemImagePreviewSubTitle(
+    BuildContext context,
+    Room room,
+  ) {
+    return Row(
+      children: [
+        if (room.lastEvent?.status != EventStatus.synced)
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(),
+          )
+        else
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: MxcImage(
+              uri: room.lastEvent?.attachmentMxcUrl,
+              placeholder: (BuildContext context) => const SizedBox.shrink(),
+              width: 20,
+              height: 20,
+              fit: BoxFit.fill,
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.only(left: 5.0),
+          child: Text(
+            L10n.of(context)!.photo,
+            style: LinagoraTextStyle.material()
+                .bodyMedium3
+                .copyWith(color: LinagoraRefColors.material().tertiary[30]),
+          ),
+        ),
+      ],
     );
   }
 }

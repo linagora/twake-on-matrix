@@ -34,17 +34,22 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         Expanded(
           child: typingText.isNotEmpty
               ? typingTextWidget(typingText, context)
-              : (isGroup
-                  ? chatListItemSubtitleForGroup(
-                      context: context,
-                      room: room,
-                    )
-                  : textContentWidget(
-                      room,
+              : room.lastEvent?.messageType == MessageTypes.Image
+                  ? chatlistItemImagePreviewSubTitle(
                       context,
-                      isGroup,
-                      room.isUnreadOrInvited,
-                    )),
+                      room,
+                    )
+                  : isGroup
+                      ? chatListItemSubtitleForGroup(
+                          context: context,
+                          room: room,
+                        )
+                      : textContentWidget(
+                          room,
+                          context,
+                          isGroup,
+                          room.isUnreadOrInvited,
+                        ),
         ),
         const SizedBox(width: 8),
         FutureBuilder<String>(
@@ -62,7 +67,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 room.lastEvent == null) {
               return const SizedBox.shrink();
             }
-
             final isMentionned = snapshot.data!
                 .getAllMentionedUserIdsFromMessage(room)
                 .contains(Matrix.of(context).client.userID);
