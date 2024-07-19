@@ -7,11 +7,12 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact_const
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 class ContactsTab extends StatefulWidget {
@@ -27,7 +28,10 @@ class ContactsTab extends StatefulWidget {
 }
 
 class ContactsTabController extends State<ContactsTab>
-    with ComparablePresentationContactMixin, ContactsViewControllerMixin {
+    with
+        ComparablePresentationContactMixin,
+        ContactsViewControllerMixin,
+        WidgetsBindingObserver {
   final responsive = getIt.get<ResponsiveUtils>();
 
   Client get client => Matrix.of(context).client;
@@ -35,8 +39,10 @@ class ContactsTabController extends State<ContactsTab>
   @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         initialFetchContacts(
+          context: context,
           client: Matrix.of(context).client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
@@ -101,8 +107,14 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    await handleDidChangeAppLifecycleState(state);
+  }
+
+  @override
   void dispose() {
     disposeContactsMixin();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

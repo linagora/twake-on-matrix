@@ -25,6 +25,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         GoToDraftChatMixin,
+        WidgetsBindingObserver,
         InviteExternalContactMixin,
         GoToGroupChatMixin {
   final isShowContactsNotifier = ValueNotifier(true);
@@ -34,8 +35,10 @@ class NewPrivateChatController extends State<NewPrivateChat>
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         initialFetchContacts(
+          context: context,
           client: Matrix.of(context).client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
@@ -85,8 +88,15 @@ class NewPrivateChatController extends State<NewPrivateChat>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    await handleDidChangeAppLifecycleState(state);
+  }
+
+  @override
   void dispose() {
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    isShowContactsNotifier.dispose();
     disposeContactsMixin();
     scrollController.dispose();
   }

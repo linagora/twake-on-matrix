@@ -44,7 +44,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     TextEditingController? captionController,
     ValueKey? typeAheadKey,
   }) async {
-    final currentPermissionPhotos = await getCurrentMediaPermission();
+    final currentPermissionPhotos = await getCurrentMediaPermission(context);
     if (currentPermissionPhotos != null) {
       showMediasPickerBottomSheet(
         context: context,

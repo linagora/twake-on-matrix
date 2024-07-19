@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef OnAcceptButton = void Function()?;
+typedef OnRefuseTap = void Function()?;
 
 class PermissionDialog extends StatefulWidget {
   final Permission permission;
@@ -13,12 +14,15 @@ class PermissionDialog extends StatefulWidget {
 
   final OnAcceptButton onAcceptButton;
 
+  final OnRefuseTap onRefuseTap;
+
   const PermissionDialog({
     super.key,
     required this.permission,
     required this.explainTextRequestPermission,
     this.icon,
     this.onAcceptButton,
+    this.onRefuseTap,
   });
 
   @override
@@ -74,6 +78,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                       context: context,
                       text: L10n.of(context)!.deny,
                       onPressed: () {
+                        widget.onRefuseTap?.call();
                         Navigator.of(context).pop();
                       },
                     ),

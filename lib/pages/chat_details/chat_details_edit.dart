@@ -136,7 +136,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       _getImageOnWeb(context);
       return;
     }
-    final currentPermissionPhotos = await getCurrentMediaPermission();
+    final currentPermissionPhotos = await getCurrentMediaPermission(context);
     if (currentPermissionPhotos != null) {
       final imagePickerController = createImagePickerController();
       showImagePickerBottomSheet(

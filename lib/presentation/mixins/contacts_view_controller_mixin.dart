@@ -20,9 +20,11 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -67,15 +69,106 @@ mixin class ContactsViewControllerMixin {
 
   final contactsManager = getIt.get<ContactsManager>();
 
-  PermissionStatus contactsPermissionStatus = PermissionStatus.granted;
+  PermissionStatus? contactsPermissionStatus;
+
+  Future displayContactPermissionDialog(BuildContext context) async {
+    final fetchContactsPermissionStatus =
+        await _permissionHandlerService.contactsPermissionStatus;
+
+    contactsPermissionStatus = fetchContactsPermissionStatus;
+
+    if (PlatformInfos.isMobile && !fetchContactsPermissionStatus.isGranted) {
+      await showDialog(
+        useRootNavigator: false,
+        context: context,
+        builder: (dialogContext) {
+          return PermissionDialog(
+            icon: const Icon(Icons.contact_page_outlined),
+            permission: Permission.contacts,
+            explainTextRequestPermission: Text(
+              L10n.of(context)!.explainPermissionToAccessContacts,
+            ),
+            onRefuseTap: _handleDenyPermissionDialog,
+            onAcceptButton: () async {
+              Navigator.of(dialogContext).pop();
+              await _handleRequestContactsPermission();
+            },
+          );
+        },
+      );
+    }
+  }
+
+  void _handleDenyPermissionDialog() {
+    warningBannerNotifier.value = WarningContactsBannerState.display;
+    contactsManager.updateNotShowWarningContactsDialogAgain = true;
+  }
+
+  Future<void> _initWarningBanner() async {
+    final currentContactPermission =
+        await _permissionHandlerService.contactsPermissionStatus;
+    Logs().i(
+      'ContactsViewControllerMixin::_initWarningBanner: Contact Permission $currentContactPermission',
+    );
+
+    if (currentContactPermission.isGranted) {
+      contactsPermissionStatus = currentContactPermission;
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
+      return;
+    }
+
+    if (!contactsManager.isDoNotShowWarningContactsBannerAgain &&
+        contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      warningBannerNotifier.value = WarningContactsBannerState.display;
+      return;
+    }
+  }
+
+  Future<void> handleDidChangeAppLifecycleState(AppLifecycleState state) async {
+    if (!PlatformInfos.isMobile) {
+      return;
+    }
+    Logs().i(
+      'ContactsViewControllerMixin::handleDidChangeAppLifecycleState: $state',
+    );
+
+    if (state == AppLifecycleState.resumed) {
+      final currentContactPermission =
+          await _permissionHandlerService.contactsPermissionStatus;
+
+      Logs().i(
+        'ContactsViewControllerMixin::handleDidChangeAppLifecycleState: Contact Permission $currentContactPermission',
+      );
+
+      if (currentContactPermission != contactsPermissionStatus &&
+          currentContactPermission.isDenied) {
+        if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
+          warningBannerNotifier.value = WarningContactsBannerState.display;
+        }
+        contactsPermissionStatus = currentContactPermission;
+        return;
+      }
+
+      if (currentContactPermission != contactsPermissionStatus &&
+          currentContactPermission.isGranted) {
+        contactsPermissionStatus = currentContactPermission;
+        warningBannerNotifier.value = WarningContactsBannerState.hide;
+        contactsManager.refreshPhonebookContacts();
+        return;
+      }
+    }
+  }
 
   void initialFetchContacts({
+    required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
     if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsBannerAgain) {
-      await _handleRequestContactsPermission();
+        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      await displayContactPermissionDialog(context);
+    } else {
+      await _initWarningBanner();
     }
     _refreshAllContacts(
       client: client,
@@ -97,6 +190,7 @@ mixin class ContactsViewControllerMixin {
     });
     contactsManager.initialSynchronizeContacts(
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
+          contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
     );
   }
@@ -296,8 +390,11 @@ mixin class ContactsViewControllerMixin {
     final currentContactsPermissionStatus =
         await _permissionHandlerService.requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
+      contactsManager.refreshPhonebookContacts();
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
+      contactsManager.updateNotShowWarningContactsDialogAgain = true;
+
       if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
         warningBannerNotifier.value = WarningContactsBannerState.display;
       }

@@ -418,8 +418,8 @@ class _SliverWarningBanner extends StatelessWidget {
       child: ContactsWarningBannerView(
         warningBannerNotifier: controller.warningBannerNotifier,
         closeContactsWarningBanner: controller.closeContactsWarningBanner,
-        goToSettingsForPermissionActions:
-            controller.goToSettingsForPermissionActions,
+        goToSettingsForPermissionActions: () =>
+            controller.displayContactPermissionDialog(context),
       ),
     );
   }

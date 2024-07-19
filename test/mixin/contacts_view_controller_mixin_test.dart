@@ -33,6 +33,7 @@ class ConcretePresentationSearch extends PresentationSearch {
 }
 
 @GenerateNiceMocks([
+  MockSpec<BuildContext>(),
   MockSpec<Client>(),
   MockSpec<MatrixLocalizations>(),
   MockSpec<ContactsViewControllerMixin>(),
@@ -114,11 +115,13 @@ void main() {
   late MockContactsViewControllerMixin mockContactsViewControllerMixin;
   late Client mockClient;
   late MatrixLocalizations mockMatrixLocalizations;
+  late BuildContext mockBuildContext;
 
   setUp(() {
     mockContactsViewControllerMixin = MockContactsViewControllerMixin();
     mockMatrixLocalizations = MockMatrixLocalizations();
     mockClient = MockClient();
+    mockBuildContext = MockBuildContext();
   });
 
   group('Test ContactsViewControllerMixin on Web', () {
@@ -157,12 +160,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -230,12 +235,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -305,12 +312,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -396,12 +405,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -493,12 +504,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -663,12 +676,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -833,12 +848,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1003,12 +1020,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1202,12 +1221,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1469,12 +1490,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1542,12 +1565,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1619,12 +1644,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1722,12 +1749,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1819,12 +1848,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1989,12 +2020,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2161,12 +2194,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2333,12 +2368,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2534,12 +2571,14 @@ void main() {
         );
 
         mockContactsViewControllerMixin.initialFetchContacts(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
 
         verify(
           mockContactsViewControllerMixin.initialFetchContacts(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
