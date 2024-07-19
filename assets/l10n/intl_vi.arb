@@ -3062,5 +3062,115 @@
   "errorSendingFiles": "Một số tệp không thể gửi do hạn chế về kích thước, định dạng hoặc các lỗi không mong đợi. Những tệp này sẽ không được bao gồm trong quá trình gửi.",
   "@errorSendingFiles": {},
   "removeFileBeforeSend": "Loại bỏ các tệp lỗi trước khi gửi",
-  "@removeFileBeforeSend": {}
+  "@removeFileBeforeSend": {},
+  "loading": "Đang tải...",
+  "@loading": {},
+  "editWorkIdentitiesDescriptions": "Chỉnh sửa các cài đặt về danh tính của bạn như Matrix ID, email hoặc tên công ty.",
+  "@editWorkIdentitiesDescriptions": {},
+  "tapToAllowAccessToYourMicrophone": "Bạn có thể bật quyền truy cập micrô trong ứng dụng Cài đặt để tạo giọng nói",
+  "@tapToAllowAccessToYourMicrophone": {},
+  "showInChat": "Hiển thị trong cuộc trò chuyện",
+  "@showInChat": {},
+  "fileSavedToDownloads": "Tệp đã được lưu vào thư mục Tải xuống",
+  "@fileSavedToDownloads": {},
+  "saveFileToDownloadsError": "Không lưu được tệp vào thư mục Tải xuống",
+  "@saveFileToDownloadsError": {},
+  "explainPermissionToGallery": "Để tiếp tục, vui lòng cho phép {appName} có quyền truy cập ảnh. Quyền này cần thiết để lưu tập tin vào thư viện.",
+  "@explainPermissionToGallery": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "backingUpYourMessage": "Chuẩn bị môi trường máy chủ để sao lưu tin nhắn của bạn",
+  "@backingUpYourMessage": {},
+  "aWhileAgo": "một lúc trước",
+  "@aWhileAgo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendMessage": "Gửi tin nhắn",
+  "@sendMessage": {},
+  "onlineDayAgo": "trực tuyến{ngày}trước",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "phone": "Điện thoại",
+  "@phone": {},
+  "viewProfile": "Xem hồ sơ",
+  "@viewProfile": {},
+  "profileInfo": "Thông tin hồ sơ",
+  "@profileInfo": {},
+  "saveToDownloads": "Lưu vào phần tải xuống",
+  "@saveToDownloads": {},
+  "saveToGallery": "Lưu vào bộ sưu tập",
+  "@saveToGallery": {},
+  "explainPermissionToDownloadFiles": "Để tiếp tục, vui lòng cho phép {appName} truy cập quyền lưu trữ. Quyền này rất cần thiết để lưu tệp vào thư mục Tải xuống.",
+  "@explainPermissionToDownloadFiles": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "downloading": "Đang tải",
+  "@downloading": {},
+  "settingUpYourTwake": "Đang thiết lập Twake của bạn\nNó có thể mất một thời gian",
+  "@settingUpYourTwake": {},
+  "performingAutomaticalLogin": "Thực hiện đăng nhập tự động qua SSO",
+  "@performingAutomaticalLogin": {},
+  "recoveringYourEncryptedChats": "Khôi phục các cuộc trò chuyện được mã hóa của bạn",
+  "@recoveringYourEncryptedChats": {},
+  "configureDataEncryption": "Cấu hình mã hóa dữ liệu",
+  "@configureDataEncryption": {},
+  "configurationNotFound": "Không tìm thấy dữ liệu cấu hình",
+  "@configurationNotFound": {},
+  "fileSavedToGallery": "Đã lưu tệp vào Thư viện",
+  "@fileSavedToGallery": {},
+  "saveFileToGalleryError": "Không lưu được tệp vào Thư viện",
+  "@saveFileToGalleryError": {},
+  "tokenNotFound": "Không tìm thấy mã đăng nhập",
+  "@tokenNotFound": {},
+  "dangerZone": "Khu vực nguy hiểm",
+  "@dangerZone": {},
+  "leaveGroupSubtitle": "Nhóm này sẽ vẫn còn sau khi bạn rời đi",
+  "@leaveGroupSubtitle": {},
+  "leaveChatFailed": "Không thể rời khỏi cuộc trò chuyện",
+  "@leaveChatFailed": {},
+  "invalidLoginToken": "Mã đăng nhập không hợp lệ",
+  "@invalidLoginToken": {},
+  "copiedPublicKeyToClipboard": "Đã sao chép khóa công khai vào bảng nhớ tạm.",
+  "@copiedPublicKeyToClipboard": {},
+  "removeFromGroup": "Loại bỏ khỏi nhóm",
+  "@removeFromGroup": {},
+  "removeUser": "Xóa người dùng",
+  "@removeUser": {},
+  "removeReason": "Xóa {user} khỏi nhóm",
+  "@removeReason": {
+    "type": "text",
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "switchAccounts": "Chuyển đổi tài khoản",
+  "@switchAccounts": {},
+  "selectAccount": "Chọn tài khoản",
+  "@selectAccount": {},
+  "privacyPolicy": "Chính sách bảo mật",
+  "@privacyPolicy": {},
+  "byContinuingYourAgreeingToOur": "Bằng cách tiếp tục, bạn đồng ý với chúng tôi",
+  "@byContinuingYourAgreeingToOur": {},
+  "youDontHaveAnyContactsYet": "Bạn chưa có bất kỳ liên hệ nào.",
+  "@youDontHaveAnyContactsYet": {},
+  "errorDialogTitle": "Rất tiếc, đã xảy ra lỗi",
+  "@errorDialogTitle": {}
 }
