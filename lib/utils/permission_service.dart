@@ -193,7 +193,7 @@ class PermissionHandlerService {
       final newStatus = await Permission.contacts.request();
       return newStatus.isGranted ? PermissionStatus.granted : newStatus;
     } else if (currentStatus == PermissionStatus.permanentlyDenied) {
-      await goToSettingsForPermissionActions();
+      goToSettingsForPermissionActions();
       return await contactsPermissionStatus;
     } else {
       return currentStatus;
@@ -209,7 +209,7 @@ class PermissionHandlerService {
     return await Permission.photosAddOnly.request();
   }
 
-  Future goToSettingsForPermissionActions() async {
-    return openAppSettings();
+  void goToSettingsForPermissionActions() {
+    openAppSettings();
   }
 }

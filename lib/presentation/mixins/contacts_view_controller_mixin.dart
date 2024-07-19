@@ -142,7 +142,9 @@ mixin class ContactsViewControllerMixin {
 
       if (currentContactPermission != contactsPermissionStatus &&
           currentContactPermission.isDenied) {
-        warningBannerNotifier.value = WarningContactsBannerState.display;
+        if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
+          warningBannerNotifier.value = WarningContactsBannerState.display;
+        }
         contactsPermissionStatus = currentContactPermission;
         return;
       }
@@ -388,6 +390,7 @@ mixin class ContactsViewControllerMixin {
     final currentContactsPermissionStatus =
         await _permissionHandlerService.requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
+      contactsManager.refreshPhonebookContacts();
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
       contactsManager.updateNotShowWarningContactsDialogAgain = true;
