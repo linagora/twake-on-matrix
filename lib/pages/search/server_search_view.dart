@@ -28,11 +28,13 @@ class ServerSearchMessagesList extends StatelessWidget {
             searchController.serverSearchController.searchResultsNotifier,
         builder: (context, serverSearchNotifier, child) {
           if (serverSearchNotifier is PresentationServerSideEmptySearch) {
+            final keyword = searchController.textEditingController.text;
             if (searchController.searchContactAndRecentChatController!
-                .recentAndContactsNotifier.value.isNotEmpty) {
-              return const SizedBox.shrink();
+                    .recentAndContactsNotifier.value.isEmpty &&
+                !(keyword.isValidMatrixId && keyword.startsWith('@'))) {
+              return child!;
             }
-            return child!;
+            return const SizedBox.shrink();
           }
 
           if (serverSearchNotifier is PresentationServerSideSearch) {
