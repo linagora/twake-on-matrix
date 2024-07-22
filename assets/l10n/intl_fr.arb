@@ -89,7 +89,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "areGuestsAllowedToJoin": "Les invités peuvent-i·e·ls rejoindre",
+  "areGuestsAllowedToJoin": "Les invités peuvent-ils/elles rejoindre",
   "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
@@ -358,7 +358,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "chooseAUsername": "Choisissez un nom d'utilisateur·ice",
+  "chooseAUsername": "Choisissez un nom d'utilisateur/trice",
   "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
