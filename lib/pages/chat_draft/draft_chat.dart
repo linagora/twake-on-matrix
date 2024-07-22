@@ -340,7 +340,8 @@ class DraftChatController extends State<DraftChat>
     Room? room,
   }) async {
     final result = await FilePicker.platform.pickFiles(
-      withData: true,
+      withReadStream: true,
+      allowMultiple: true,
     );
     if (result == null || result.files.isEmpty) return;
 
@@ -357,15 +358,6 @@ class DraftChatController extends State<DraftChat>
     BuildContext context,
     List<MatrixFile> matrixFilesList,
   ) async {
-    const int maxFileQuantity = 1;
-    if (matrixFilesList.length > maxFileQuantity) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.countFilesSendPerDialog(maxFileQuantity),
-      );
-      return;
-    }
-
     if (matrixFilesList.isEmpty) {
       TwakeSnackBar.show(
         context,
@@ -376,7 +368,7 @@ class DraftChatController extends State<DraftChat>
 
     final dialogStatus = await sendImagesWithCaption(
       context: context,
-      matrixFiles: [matrixFilesList.first],
+      matrixFiles: matrixFilesList,
     );
 
     if (dialogStatus is SendMediaWithCaptionStatus) {
