@@ -2714,10 +2714,10 @@
       "count": {}
     }
   },
-  "explainPermissionToAccessContacts": "Twake chat doit accéder à vos contacts pour savoir si vos amis sont sur le serveur matrix. Cela se fait localement et vos contacts ne sont pas synchronisés avec notre serveur.",
-  "explainPermissionToAccessMedias": "Twake chat a besoin d'accéder au stockage pour que vous puissiez envoyer et enregistrer des photos, vidéos, musiques et autres documents. Appuyez sur Paramètres > Autorisations puis activez l'autorisation de stockage: Photos et vidéos.",
-  "explainPermissionToAccessPhotos": "Twake chat a besoin d'accéder à vos photos pour que vous puissiez envoyer et de enregistrer des images. Allez dans Paramètres > Autorisations, puis activez l'autorisation de stockage : Photos.",
-  "explainPermissionToAccessVideos": "Twake chat a besoin d'accéder à vos vidéos pour que vous puissiez envoyer et de sauvegarder des vidéos. Allez dans Paramètres > Autorisations, puis activez l'autorisation de stockage : Vidéos.",
+  "explainPermissionToAccessContacts": "Twake chat collecte vos contacts uniquement lorsque vous êtes sur un écran de recherche de contacts pour vérifier si vos amis sont sur le serveur Matrix, ce qui permet de se connecter avec eux. Vos contacts ne sont pas synchronisés avec notre serveur.",
+  "explainPermissionToAccessMedias": "Twake chat collecte vos photos, vidéos, musiques et autres documents pour permettre l'envoi et la sauvegarde des fichiers sélectionnés. Veuillez aller dans Paramètres > Autorisations et activer l'autorisation de stockage : Photos et vidéos.",
+  "explainPermissionToAccessPhotos": "Twake chat collecte vos photos pour permettre l'envoi et la sauvegarde des photos sélectionnées uniquement lorsque l'application est en cours d'utilisation. Appuyez sur Paramètres > Autorisations, puis activez l'autorisation de stockage : Photos.",
+  "explainPermissionToAccessVideos": "Twake chat collecte vos vidéos pour permettre l'envoi et la sauvegarde des vidéos sélectionnées uniquement lorsque l'application est en cours d'utilisation. Appuyez sur Paramètres > Autorisations, puis activez l'autorisation de stockage : Vidéos.",
   "recentChat": "DISCUSSION RÉCENTE",
   "@recentChat": {},
   "muteThisMessage": "Couper le son de ce salon",

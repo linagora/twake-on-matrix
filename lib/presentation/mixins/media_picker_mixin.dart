@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/presentation/style/media_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -33,6 +34,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         // PickerType.contact,
       ];
 
+  final PermissionHandlerService _permissionHandlerService =
+      PermissionHandlerService();
+
   void showMediaPickerBottomSheetAction({
     required BuildContext context,
     required ImagePickerGridController imagePickerGridController,
@@ -44,21 +48,26 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     TextEditingController? captionController,
     ValueKey? typeAheadKey,
   }) async {
-    final currentPermissionPhotos = await getCurrentMediaPermission(context);
-    if (currentPermissionPhotos != null) {
-      showMediasPickerBottomSheet(
-        context: context,
-        imagePickerController: imagePickerGridController,
-        permissionStatusPhotos: currentPermissionPhotos,
-        onSendTap: onSendTap,
-        room: room,
-        onPickerTypeTap: onPickerTypeTap,
-        onCameraPicked: onCameraPicked,
-        focusSuggestionController: focusSuggestionController,
-        captionController: captionController,
-        typeAheadKey: typeAheadKey,
+    await getCurrentMediaPermission(context)?.then((currentPermissionPhotos) {
+      if (currentPermissionPhotos != null) {
+        showMediasPickerBottomSheet(
+          context: context,
+          imagePickerController: imagePickerGridController,
+          permissionStatusPhotos: currentPermissionPhotos,
+          onSendTap: onSendTap,
+          room: room,
+          onPickerTypeTap: onPickerTypeTap,
+          onCameraPicked: onCameraPicked,
+          focusSuggestionController: focusSuggestionController,
+          captionController: captionController,
+          typeAheadKey: typeAheadKey,
+        );
+      }
+    }).onError((error, _) {
+      Logs().e(
+        "MediaPickerMixin::showMediaPickerBottomSheetAction(): error - $error",
       );
-    }
+    });
   }
 
   Future<void> showMediasPickerBottomSheet({
@@ -288,6 +297,11 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
           ),
         ),
       ),
+      onGoToSettings: (context) async {
+        Navigator.pop(context);
+        await _permissionHandlerService
+            .requestPermissionForMediaActions(context);
+      },
       goToSettingsWidget: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
