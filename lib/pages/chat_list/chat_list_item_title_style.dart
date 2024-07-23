@@ -11,4 +11,6 @@ class ChatListItemTitleStyle {
       EdgeInsetsDirectional.only(
     end: 3,
   );
+  static const encryptedInconHeight = 16.0;
+  static const encryptedInconWidth = 14.0;
 }

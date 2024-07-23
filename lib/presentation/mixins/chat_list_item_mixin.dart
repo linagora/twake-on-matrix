@@ -49,13 +49,13 @@ mixin ChatListItemMixin {
   }
 
   Widget typingTextWidget(String typingText, BuildContext context) {
-    final displayedTypingText = "~ $typingText…";
+    final displayedTypingText = "$typingText…";
     return Text(
       displayedTypingText,
-      style: Theme.of(context).textTheme.labelLarge?.merge(
+      style: LinagoraTextStyle.material().bodyMedium2.merge(
             TextStyle(
               overflow: TextOverflow.ellipsis,
-              color: LinagoraRefColors.material().secondary,
+              color: LinagoraRefColors.material().tertiary[30],
             ),
           ),
       maxLines: 2,

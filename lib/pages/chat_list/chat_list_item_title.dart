@@ -58,8 +58,8 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                       padding: ChatListItemTitleStyle.paddingLeftIcon,
                       child: SvgPicture.asset(
                         ImagePaths.icEncrypted,
-                        width: 14,
-                        height: 16,
+                        width: ChatListItemTitleStyle.encryptedInconWidth,
+                        height: ChatListItemTitleStyle.encryptedInconHeight,
                       ),
                     ),
                   if (room.isFavourite)
