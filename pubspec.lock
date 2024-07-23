@@ -1702,8 +1702,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: add_on_go_to_settings_on_image_picker
-      resolved-ref: "32e89d080560e75177e51a76328f1d9d3602975a"
+      ref: master
+      resolved-ref: "0f666ca14fd4f0710775ca3de03cde73b21de7d6"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
