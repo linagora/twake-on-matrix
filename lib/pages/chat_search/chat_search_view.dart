@@ -45,7 +45,10 @@ class ChatSearchView extends StatelessWidget {
         toolbarHeight: AppConfig.toolbarHeight(context),
         backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
-        title: _ChatSearchAppBar(controller),
+        title: Padding(
+          padding: ChatSearchStyle.searchAppBarPadding,
+          child: _ChatSearchAppBar(controller),
+        ),
       ),
       body: controller.sameTypeEventsBuilderController != null
           ? _TimelineSearchView(
