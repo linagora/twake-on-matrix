@@ -1,3 +1,5 @@
+import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
+import 'package:fluffychat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -150,24 +152,30 @@ mixin ChatListItemMixin {
     return Row(
       children: [
         if (room.lastEvent?.status != EventStatus.synced)
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(),
-          )
+          const SizedBox.shrink()
         else
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: MxcImage(
-              uri: room.lastEvent?.attachmentMxcUrl,
-              placeholder: (BuildContext context) => const SizedBox.shrink(),
-              width: 20,
-              height: 20,
-              fit: BoxFit.fill,
+          SizedBox(
+            height: SubtitleImagePreviewStyle.height,
+            width: SubtitleImagePreviewStyle.width,
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(SubtitleImagePreviewStyle.borderRadius),
+              child: MxcImage(
+                key: ValueKey(room.lastEvent!.eventId),
+                cacheKey: room.lastEvent!.eventId,
+                event: room.lastEvent!,
+                placeholder: (context) => ImagePlaceholder(
+                  event: room.lastEvent!,
+                  width: SubtitleImagePreviewStyle.width,
+                  height: SubtitleImagePreviewStyle.height,
+                  fit: SubtitleImagePreviewStyle.fit,
+                ),
+                fit: SubtitleImagePreviewStyle.fit,
+              ),
             ),
           ),
         Padding(
-          padding: const EdgeInsets.only(left: 5.0),
+          padding: SubtitleImagePreviewStyle.labelPadding,
           child: Text(
             L10n.of(context)!.photo,
             style: LinagoraTextStyle.material()
