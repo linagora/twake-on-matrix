@@ -105,6 +105,9 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _initWarningBanner() async {
+    if (!PlatformInfos.isMobile) {
+      return;
+    }
     final currentContactPermission =
         await _permissionHandlerService.contactsPermissionStatus;
     Logs().i(
