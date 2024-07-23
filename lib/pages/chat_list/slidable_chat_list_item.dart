@@ -9,7 +9,6 @@ class SlidableChatListItem extends StatelessWidget {
     required this.controller,
     required this.slidables,
     required this.chatListItem,
-    
   });
 
   final ChatListController controller;
