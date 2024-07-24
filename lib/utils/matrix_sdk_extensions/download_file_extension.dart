@@ -276,6 +276,10 @@ extension DownloadFileExtension on Event {
       throw "getFileInfo: This event hasn't any attachment or thumbnail.";
     }
 
+    if (getThumbnail && thumbnailMimetype.startsWith('image') != true) {
+      throw ('getFileInfo: This event has a thumbnail but it is not an image.');
+    }
+
     final isFileEncrypted =
         getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
     if (isEncryptionDisabled(isFileEncrypted)) {

@@ -182,26 +182,33 @@ class _MxcImageState extends State<MxcImage> {
     }
 
     if (event != null) {
-      if (!PlatformInfos.isWeb) {
-        final fileInfo = await event.getFileInfo(
+      try {
+        if (!PlatformInfos.isWeb) {
+          final fileInfo = await event.getFileInfo(
+            getThumbnail: widget.isThumbnail,
+          );
+          if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
+            setState(() {
+              filePath = fileInfo.filePath;
+            });
+            return;
+          }
+        }
+
+        final matrixFile = await event.downloadAndDecryptAttachment(
           getThumbnail: widget.isThumbnail,
         );
-        if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
-          setState(() {
-            filePath = fileInfo.filePath;
-          });
-          return;
-        }
-      }
-
-      final matrixFile = await event.downloadAndDecryptAttachment(
-        getThumbnail: widget.isThumbnail,
-      );
-      if (!mounted) return;
-      setState(() {
+        if (!mounted) return;
         _imageData = matrixFile.bytes;
-      });
-      return;
+        return;
+      } catch (e) {
+        Logs().e('MxcImage::Error while downloading image: $e');
+      } finally {
+        setState(() {
+          isLoadDone = true;
+        });
+      }
+      if (!mounted) return;
     }
   }
 
@@ -372,6 +379,7 @@ class _ImageWidget extends StatelessWidget {
                     height: height,
                     width: width,
                     fit: BoxFit.cover,
+                    errorBuilder: imageErrorWidgetBuilder,
                   )
                 : Image.memory(
                     data!,
@@ -426,6 +434,7 @@ class _ImageNativeBuilder extends StatelessWidget {
         height: height,
         width: width,
         fit: BoxFit.cover,
+        errorBuilder: imageErrorWidgetBuilder,
       );
     }
     return Image.file(
