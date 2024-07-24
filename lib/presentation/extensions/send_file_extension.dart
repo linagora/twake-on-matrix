@@ -575,7 +575,7 @@ extension SendFileExtension on Room {
         originalFile.filePath,
         targetPath,
         quality: AppConfig.thumbnailQuality,
-        format: CompressFormat.jpeg,
+        format: AppConfig.imageCompressFormmat,
       );
       if (result == null) return null;
       final size = await result.length();
@@ -591,7 +591,7 @@ extension SendFileExtension on Room {
       }
       uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
       return ImageFileInfo(
-        result.name,
+        '${result.name}.${AppConfig.imageCompressFormmat.name}',
         result.path,
         size,
         width: width,

@@ -188,9 +188,7 @@ class _MxcImageState extends State<MxcImage> {
             getThumbnail: widget.isThumbnail,
           );
           if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
-            setState(() {
-              filePath = fileInfo.filePath;
-            });
+            filePath = fileInfo.filePath;
             return;
           }
         }
@@ -203,10 +201,6 @@ class _MxcImageState extends State<MxcImage> {
         return;
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
-      } finally {
-        setState(() {
-          isLoadDone = true;
-        });
       }
       if (!mounted) return;
     }

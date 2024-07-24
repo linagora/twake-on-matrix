@@ -372,6 +372,7 @@ extension SendFileWebExtension on Room {
       final result = await FlutterImageCompress.compressWithList(
         originalFile.bytes!,
         quality: AppConfig.thumbnailQuality,
+        format: AppConfig.imageCompressFormmat,
       );
 
       final blurHash = await runBenchmarked(
@@ -385,7 +386,7 @@ extension SendFileWebExtension on Room {
 
       return MatrixImageFile(
         bytes: result,
-        name: originalFile.name,
+        name: '${originalFile.name}.${AppConfig.imageCompressFormmat.name}',
         mimeType: originalFile.mimeType,
         width: originalFile.width,
         height: originalFile.height,
@@ -425,9 +426,10 @@ extension SendFileWebExtension on Room {
         );
         throw exception;
       }
+
       final result = await VideoThumbnail.thumbnailData(
         video: url,
-        imageFormat: ImageFormat.JPEG,
+        imageFormat: AppConfig.videoThumbnailFormat,
         quality: AppConfig.thumbnailQuality,
       );
       final thumbnailBitmap = await convertUint8ListToBitmap(result);
@@ -442,7 +444,8 @@ extension SendFileWebExtension on Room {
 
       return MatrixImageFile(
         bytes: result,
-        name: originalFile.name,
+        name:
+            '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}',
         mimeType: originalFile.mimeType,
         width: thumbnailBitmap?.width,
         height: thumbnailBitmap?.height,

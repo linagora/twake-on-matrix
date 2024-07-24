@@ -6,7 +6,9 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 abstract class AppConfig {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -115,6 +117,8 @@ abstract class AppConfig {
   static const String iOSKeychainSharingAccount = 'app.twake.ios.chat.sessions';
   static const int maxFilesSendPerDialog = 6;
   static const bool supportMultipleAccountsInTheSameHomeserver = false;
+  static const imageCompressFormmat = CompressFormat.jpeg;
+  static const videoThumbnailFormat = ImageFormat.JPEG;
 
   static String? issueId;
 
