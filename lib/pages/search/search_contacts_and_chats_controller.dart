@@ -96,13 +96,7 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         return false;
       }
 
-      final matchedName =
-          contact.displayName!.toLowerCase().contains(keyword.toLowerCase());
-
-      final matchedEmail =
-          contact.email!.toLowerCase().contains(keyword.toLowerCase());
-
-      return matchedName || matchedEmail;
+      return _doesMatchKeyword(contact, keyword);
     }).toList();
     _searchRecentChatInteractor
         .execute(
@@ -124,6 +118,23 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         );
       },
     );
+  }
+
+  bool _doesMatchKeyword(PresentationSearch recentChat, String keyword) {
+    final matchedMatrixId = recentChat.directChatMatrixID
+            ?.toLowerCase()
+            .contains(keyword.toLowerCase()) ??
+        false;
+
+    final matchedName =
+        recentChat.displayName?.toLowerCase().contains(keyword.toLowerCase()) ??
+            false;
+
+    final matchedEmail =
+        recentChat.email?.toLowerCase().contains(keyword.toLowerCase()) ??
+            false;
+
+    return matchedName || matchedEmail || matchedMatrixId;
   }
 
   void onSearchBarChanged(String keyword) {
