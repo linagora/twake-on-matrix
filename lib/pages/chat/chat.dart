@@ -828,7 +828,7 @@ class ChatController extends State<Chat>
       );
     }
     _clearSelectEvent();
-    context.go(
+    context.push(
       '/rooms/forward',
       extra: ForwardArgument(
         fromRoomId: roomId ?? '',
