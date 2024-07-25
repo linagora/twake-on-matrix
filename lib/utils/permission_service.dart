@@ -84,43 +84,52 @@ class PermissionHandlerService {
     BuildContext context,
   ) async {
     if (await Permission.photos.status == PermissionStatus.denied) {
-      await showDialog(
+      final result = await showDialog<bool>(
         useRootNavigator: false,
         context: context,
+        barrierDismissible: false,
         builder: (dialogContext) {
           return PermissionDialog(
             icon: const Icon(Icons.photo),
-            permission: Permission.contacts,
+            permission: Permission.photos,
             explainTextRequestPermission: Text(
               L10n.of(context)!.explainPermissionToAccessPhotos,
             ),
             onAcceptButton: () async {
-              Navigator.of(dialogContext).pop();
-              await Permission.photos.request();
+              Navigator.of(dialogContext).pop(true);
             },
           );
         },
       );
+
+      if (result != null && result) {
+        final newStatus = await Permission.photos.request();
+        return newStatus;
+      }
     }
 
     if (await Permission.videos.status == PermissionStatus.denied) {
-      await showDialog(
+      final result = await showDialog<bool>(
         useRootNavigator: false,
         context: context,
+        barrierDismissible: false,
         builder: (dialogContext) {
           return PermissionDialog(
             icon: const Icon(Icons.video_camera_back_outlined),
-            permission: Permission.contacts,
+            permission: Permission.videos,
             explainTextRequestPermission: Text(
               L10n.of(context)!.explainPermissionToAccessVideos,
             ),
             onAcceptButton: () async {
-              Navigator.of(dialogContext).pop();
-              await Permission.videos.request();
+              Navigator.of(dialogContext).pop(true);
             },
           );
         },
       );
+      if (result != null && result) {
+        final newStatus = await Permission.videos.request();
+        return newStatus;
+      }
     }
 
     final photoPermission = await Permission.photos.status;
@@ -141,9 +150,10 @@ class PermissionHandlerService {
     switch (currentStatus) {
       case PermissionStatus.permanentlyDenied:
       case PermissionStatus.denied:
-        await showDialog(
+        final result = await showDialog<bool>(
           useRootNavigator: false,
           context: context,
+          barrierDismissible: false,
           builder: (dialogContext) {
             return PermissionDialog(
               icon: const Icon(Icons.photo),
@@ -153,19 +163,20 @@ class PermissionHandlerService {
                 L10n.of(context)!.explainPermissionToAccessMedias,
               ),
               onAcceptButton: () async {
-                Navigator.of(dialogContext).pop();
-                Platform.isIOS
-                    ? await Permission.photos.request()
-                    : await Permission.storage.request();
+                Navigator.of(dialogContext).pop(true);
               },
             );
           },
         );
-        final newStatus = Platform.isIOS
-            ? await Permission.photos.status
-            : await Permission.storage.status;
+        if (result != null && result) {
+          final newStatus = Platform.isIOS
+              ? await Permission.photos.request()
+              : await Permission.storage.request();
 
-        return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+          return newStatus.isGranted ? PermissionStatus.granted : newStatus;
+        } else {
+          return currentStatus;
+        }
 
       case PermissionStatus.granted:
       case PermissionStatus.limited:
