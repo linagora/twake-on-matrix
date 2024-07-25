@@ -13,11 +13,19 @@ extension RoomListExtension on List<Room> {
     )
         .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
         .where(
-          (model) =>
-              model.displayName != null &&
-              model.displayName!.toLowerCase().contains(
-                    keyword.toLowerCase(),
-                  ),
+          (model) {
+            final matchedMatrixId = model.directChatMatrixID
+                    ?.toLowerCase()
+                    .contains(keyword.toLowerCase()) ??
+                false;
+
+            final matchedName = model.displayName
+                    ?.toLowerCase()
+                    .contains(keyword.toLowerCase()) ??
+                false;
+
+            return matchedName || matchedMatrixId;
+          },
         )
         .take(limit ?? length)
         .toList();
