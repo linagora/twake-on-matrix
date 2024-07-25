@@ -1,3 +1,14 @@
+## [2.6.1+2330] - 2024-07-25
+
+### Fixed
+
+- #1959 Spelling errors
+- #1966 Hotfix: can't get contact on web
+- #1976 Hotfix: prominent disclosure update
+- #1971 Fix navigation problem in forward pages
+- #1979 Crash app when open play video mobile
+- #1967 Support send multiple file in draft chat
+
 ## [2.6.0+2330] - 2024-07-18
 
 ### Fixed
