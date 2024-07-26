@@ -2732,7 +2732,7 @@
   "@chatsAndContacts": {},
   "externalContactTitle": "Invite new users",
   "@externalContactTitle": {},
-  "externalContactMessage": "Some of the users you want to add are not in your contacs. Do you want to invite them?",
+  "externalContactMessage": "Some of the users you want to add are not in your contacts. Do you want to invite them?",
   "@externalContactMessage": {},
   "clear": "Clear",
   "@clear": {},
