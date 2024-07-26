@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
@@ -11,6 +12,7 @@ import 'package:fluffychat/utils/manager/download_manager/download_file_state.da
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_web_extension.dart';
+import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
@@ -27,6 +29,9 @@ class DownloadManager {
   final workingQueue = getIt.get<DownloadWorkerQueue>();
 
   final Map<String, DownloadFileInfo> _eventIdMapDownloadFileInfo = {};
+
+  final NetworkConnectionService _connectivityService =
+      getIt.get<NetworkConnectionService>();
 
   void cancelDownload(String eventId) {
     final cancelToken = _eventIdMapDownloadFileInfo[eventId]?.cancelToken;
@@ -132,6 +137,26 @@ class DownloadManager {
       cancelToken: cancelToken,
       isFirstPriority: isFirstPriority,
     );
+
+    _connectivityService.connectivity.onConnectivityChanged
+        .listen((connectivity) async {
+      if (connectivity == ConnectivityResult.none) {
+        Logs().e(
+          'DownloadManager::download(): No internet connectivity',
+        );
+        streamController.add(
+          Left(
+            DownloadFileFailureState(
+              exception: Exception(
+                'No internet connectivity',
+              ),
+            ),
+          ),
+        );
+        cancelDownload(event.eventId);
+        return;
+      }
+    });
   }
 
   void _addTaskToWorkerQueue({
