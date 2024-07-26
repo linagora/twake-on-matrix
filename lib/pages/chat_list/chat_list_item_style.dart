@@ -27,8 +27,11 @@ class ChatListItemStyle {
         : 0.0;
   }
 
-  static const EdgeInsets paddingConversation = EdgeInsets.all(
+  static const EdgeInsets paddingConversation = EdgeInsets.fromLTRB(
     8,
+    8,
+    8,
+    0,
   );
 
   static const EdgeInsetsDirectional paddingAvatar =
@@ -55,4 +58,7 @@ class ChatListItemStyle {
   }
 
   static const double letterSpaceDisplayName = 0.15;
+
+  static final chatlistItemBorderRadius = BorderRadius.circular(4);
+  static const paddingIcon = EdgeInsets.only(bottom: 4);
 }

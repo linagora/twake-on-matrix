@@ -76,12 +76,12 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     color: room.lastEvent!.receipts.isEmpty
                         ? LinagoraRefColors.material().tertiary[30]
                         : LinagoraSysColors.material().secondary,
-                    size: 20,
+                    size: ChatListItemStyle.readIconSize,
                   )
                 : AnimatedContainer(
                     duration: TwakeThemes.animationDuration,
                     curve: TwakeThemes.animationCurve,
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: ChatListItemStyle.paddingIcon,
                     height: ChatListItemStyle.mentionIconWidth,
                     width: isMentionned && room.isUnreadOrInvited
                         ? ChatListItemStyle.mentionIconWidth

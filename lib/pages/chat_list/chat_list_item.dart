@@ -92,7 +92,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     return Padding(
       padding: ChatListItemStyle.paddingConversation,
       child: Material(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: ChatListItemStyle.chatlistItemBorderRadius,
         clipBehavior: Clip.hardEdge,
         color: isSelectedItem
             ? Theme.of(context).colorScheme.primaryContainer
