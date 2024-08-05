@@ -2,6 +2,7 @@ import 'package:fluffychat/domain/app_state/room/chat_get_pinned_events_state.da
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_style.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
@@ -230,6 +231,22 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                 hideReply: true,
               ),
               builder: (context, snapshot) {
+                if (currentEvent.isAFile) {
+                  return LinkText(
+                    text: currentEvent.filename,
+                    maxLines: 1,
+                    textStyle:
+                        LinagoraTextStyle.material().bodyMedium3.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              overflow: TextOverflow.ellipsis,
+                              decoration: currentEvent.redacted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                  );
+                }
                 return LinkText(
                   text: snapshot.data ??
                       currentEvent.calcLocalizedBodyFallback(
