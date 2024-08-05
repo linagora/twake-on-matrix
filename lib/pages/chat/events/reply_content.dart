@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -50,6 +51,13 @@ class ReplyContent extends StatelessWidget {
         maxLines: 1,
         room: displayEvent.room,
         emoteSize: ReplyContentStyle.fontSizeDisplayContent * 1.5,
+      );
+    } else if (displayEvent.isAFile) {
+      replyBody = Text(
+        displayEvent.filename,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: ReplyContentStyle.replyBodyTextStyle(context),
       );
     } else {
       replyBody = Text(
@@ -148,6 +156,16 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
         event.mimeType!.getIcon(
           fileType: event.fileType,
         ),
+        width: ReplyContentStyle.replyContentSize,
+        height: ReplyContentStyle.replyContentSize,
+      );
+    }
+    if (event.isAFile) {
+      return SvgPicture.asset(
+        event.mimeType?.getIcon(
+              fileType: event.fileType,
+            ) ??
+            ImagePaths.icFileUnknown,
         width: ReplyContentStyle.replyContentSize,
         height: ReplyContentStyle.replyContentSize,
       );
