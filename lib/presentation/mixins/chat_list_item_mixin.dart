@@ -1,4 +1,5 @@
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -112,6 +113,15 @@ mixin ChatListItemMixin {
               removeBreakLine: true,
             ) ??
             L10n.of(context)!.emptyChat;
+        if (room.lastEvent?.isAFile == true) {
+          return Text(
+            "${snapshot.data!.calcDisplayname()}: ${room.lastEvent?.filename ?? subscriptions}",
+            softWrap: false,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room),
+          );
+        }
 
         return Text(
           "${snapshot.data!.calcDisplayname()}: $subscriptions",
