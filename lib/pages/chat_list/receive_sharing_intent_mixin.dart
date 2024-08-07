@@ -35,7 +35,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
           },
         )
         .toList();
-    TwakeApp.router.go('/share');
+    TwakeApp.router.push('/share');
   }
 
   void _processIncomingSharedText(String? text) {
@@ -53,7 +53,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       'msgtype': 'm.text',
       'body': text,
     };
-    TwakeApp.router.go('/share');
+    TwakeApp.router.push('/share');
   }
 
   void _processIncomingUris(String? text) async {
@@ -62,7 +62,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (_intentOpenApp(text)) {
       return;
     }
-    TwakeApp.router.go('/share');
+    TwakeApp.router.push('/share');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UrlLauncher(context, url: text).openMatrixToUrl();
     });
