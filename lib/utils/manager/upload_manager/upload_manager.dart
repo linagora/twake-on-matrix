@@ -37,9 +37,9 @@ class UploadManager {
     final captionInfo = _eventIdMapUploadFileInfo[event.eventId]?.captionInfo;
     if (cancelToken != null) {
       Logs().d('Remove eventid: ${event.eventId}');
-      cancelToken.cancel();
       _clearFileTask(event.eventId);
       event.remove();
+      cancelToken.cancel();
       if (captionInfo != null) {
         _handleCancelCaptionEvent(
           txid: captionInfo.txid,
@@ -72,7 +72,7 @@ class UploadManager {
           .close();
     } catch (e) {
       Logs().e(
-        'UploadManager::_clear(): $e',
+        'UploadManager::_clear(): Error $e',
       );
     } finally {
       _eventIdMapUploadFileInfo.remove(eventId);
@@ -113,7 +113,7 @@ class UploadManager {
       uploadStream: uploadController.stream.asBroadcastStream(),
       cancelToken: CancelToken(),
       createdAt: DateTime.now(),
-      captionInfo: captionInfo != null
+      captionInfo: captionInfo != null && captionInfo.isNotEmpty
           ? UploadCaptionInfo(
               txid: room.client.generateUniqueTransactionId(),
               caption: captionInfo,
@@ -356,7 +356,8 @@ class UploadManager {
     String? messageTxid,
     String? caption,
   }) async {
-    if (messageTxid == null || caption == null) {
+    if ((messageTxid == null && messageTxid!.isEmpty) ||
+        (caption == null && caption!.isEmpty)) {
       return;
     }
     final messageContent = room.getEventContentFromMsgText(message: caption);

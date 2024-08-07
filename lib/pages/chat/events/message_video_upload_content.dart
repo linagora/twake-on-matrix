@@ -49,6 +49,9 @@ class _MessageVideoUploadContentWebState
           width: widget.width,
           height: widget.height,
           onVideoTapped: () {
+            if (uploadState is UploadFileSuccessUIState) {
+              return;
+            }
             uploadManager.cancelUpload(event);
           },
           centerWidget: Stack(
@@ -58,10 +61,13 @@ class _MessageVideoUploadContentWebState
                 width: MessageContentStyle.videoCenterButtonSize,
                 height: MessageContentStyle.videoCenterButtonSize,
               ),
-              const CenterVideoButton(
-                icon: Icons.close,
-                iconSize: MessageContentStyle.cancelButtonSize,
-              ),
+              if (uploadState is UploadFileSuccessUIState) ...[
+                const SizedBox.shrink(),
+              ] else
+                const CenterVideoButton(
+                  icon: Icons.close,
+                  iconSize: MessageContentStyle.cancelButtonSize,
+                ),
               SizedBox(
                 width: MessageContentStyle.iconInsideVideoButtonSize,
                 height: MessageContentStyle.iconInsideVideoButtonSize,

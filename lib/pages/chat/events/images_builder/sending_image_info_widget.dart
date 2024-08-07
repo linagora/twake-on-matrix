@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
@@ -87,14 +88,23 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                   strokeWidth: 2,
                   color: LinagoraRefColors.material().primary[100],
                 ),
-                InkWell(
-                  child: Icon(
-                    Icons.close,
-                    color: LinagoraRefColors.material().primary[100],
-                  ),
-                  onTap: () {
-                    uploadManager.cancelUpload(widget.event);
+                ValueListenableBuilder(
+                  valueListenable: uploadFileStateNotifier,
+                  builder: (context, state, child) {
+                    if (state is UploadFileSuccessUIState) {
+                      return child!;
+                    }
+                    return InkWell(
+                      child: Icon(
+                        Icons.close,
+                        color: LinagoraRefColors.material().primary[100],
+                      ),
+                      onTap: () {
+                        uploadManager.cancelUpload(widget.event);
+                      },
+                    );
                   },
+                  child: const SizedBox.shrink(),
                 ),
               ],
             ],
