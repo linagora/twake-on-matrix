@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -228,6 +229,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                   ),
               contentPadding: NewGroupChatInfoStyle.contentPadding,
             ),
+            contextMenuBuilder: mobileTwakeContextMenuBuilder,
           );
         },
       ),

@@ -74,7 +74,8 @@ class ShareController extends State<Share>
     );
     final shareContentList = Matrix.of(context).shareContentList;
     final shareContent = Matrix.of(context).shareContent;
-
+    Logs().d('ShareController::shareTo() shareContent: $shareContent');
+    Logs().d('ShareController::shareTo() shareContentList: $shareContentList');
     if (shareContentList.isNotEmpty) {
       _handleShareFilesContent(
         room: room,

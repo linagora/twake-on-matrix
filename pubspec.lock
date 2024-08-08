@@ -205,10 +205,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "1414d6d733a85d8ad2f1dfcb3ea7945759e35a123cb99ccfac75d0758f75edfa"
+      sha256: dd09dd4e2b078992f42aac7f1a622f01882a8492fef08486b27ddde929c19f04
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.10"
+    version: "2.4.12"
   build_runner_core:
     dependency: transitive
     description:
@@ -262,10 +262,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "7d8a0a6f1d40c926e2c287d8a1bdf089dd499cf6"
-      url: "https://github.com/flutter-webrtc/callkeep.git"
+      resolved-ref: a3c46737b4467898321c51affbbc03a153169d40
+      url: "https://github.com/flutter-webrtc/callkeep"
     source: git
-    version: "0.3.3"
+    version: "0.4.0"
   camera:
     dependency: transitive
     description:
@@ -406,8 +406,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: upgrade-targetAndCompileSdkVersion
-      resolved-ref: a0862ae22bf07ab3cfed8b31724b990df84bcd29
+      ref: master
+      resolved-ref: a26353c9d8ce23321f11ed9d3386844dc0b0df65
       url: "git@github.com:linagora/flutter_contacts.git"
     source: git
     version: "0.6.3"
@@ -648,8 +648,8 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "908336895e7bbd3c0c6823366699b2417462fc0e"
-      url: "https://gitlab.com/sherlockvn/fcm_shared_isolate.git"
+      resolved-ref: dd834a577372b74df6d95b9a08d30e38a2d64bbc
+      url: "https://github.com/famedly/fcm_shared_isolate.git"
     source: git
     version: "0.1.0"
   ffi:
@@ -2031,8 +2031,8 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "4f7dd0b060686536003c5312a7634d695e772d35"
-      url: "https://gitlab.com/sherlockvn/native_imaging.git"
+      resolved-ref: d76335e2039c041585df8103f5d4f5924e9e2add
+      url: "https://github.com/famedly/dart_native_imaging"
     source: git
     version: "0.1.1"
   nested:
@@ -2407,10 +2407,10 @@ packages:
     dependency: transitive
     description:
       name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   random_string:
     dependency: transitive
     description:
@@ -2422,11 +2422,12 @@ packages:
   receive_sharing_intent:
     dependency: "direct main"
     description:
-      name: receive_sharing_intent
-      sha256: f127989f8662ea15e193bd1e10605e5a0ab6bb92dffd51f3ce002feb0ce24c93
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.8.0"
+      path: "."
+      ref: master
+      resolved-ref: f23f7fb0fad25ae80a88350ad8654851f1ee682f
+      url: "https://github.com/linagora/receive_sharing_intent.git"
+    source: git
+    version: "1.4.5"
   record:
     dependency: "direct main"
     description:
@@ -3383,5 +3384,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.4.0 <4.0.0"
+  dart: ">=3.5.0-259.0.dev <4.0.0"
   flutter: ">=3.19.0"

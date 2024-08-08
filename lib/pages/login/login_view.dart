@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -40,6 +41,7 @@ class LoginView extends StatelessWidget {
                     autocorrect: false,
                     autofocus: true,
                     onChanged: controller.checkWellKnownWithCoolDown,
+                    contextMenuBuilder: mobileTwakeContextMenuBuilder,
                     controller: controller.usernameController,
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
@@ -60,6 +62,7 @@ class LoginView extends StatelessWidget {
                     autocorrect: false,
                     autofillHints:
                         controller.loading ? null : [AutofillHints.password],
+                    contextMenuBuilder: mobileTwakeContextMenuBuilder,
                     controller: controller.passwordController,
                     textInputAction: TextInputAction.go,
                     obscureText: !controller.showPassword,

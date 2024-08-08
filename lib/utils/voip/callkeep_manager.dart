@@ -111,8 +111,7 @@ class CallKeepManager {
   Future<void> showCallkitIncoming(CallSession call) async {
     if (!setupDone) {
       await _callKeep.setup(
-        null,
-        <String, dynamic>{
+        options: <String, dynamic>{
           'ios': <String, dynamic>{
             'appName': appName,
           },
@@ -201,12 +200,12 @@ class CallKeepManager {
   }
 
   Future<void> setOnHold(String callUUID, bool held) async {
-    await _callKeep.setOnHold(callUUID, held);
+    await _callKeep.setOnHold(uuid: callUUID, shouldHold: held);
     setCallHeld(callUUID, held);
   }
 
   Future<void> setMutedCall(String callUUID, bool muted) async {
-    await _callKeep.setMutedCall(callUUID, muted);
+    await _callKeep.setMutedCall(uuid: callUUID, shouldMute: muted);
     setCallMuted(callUUID, muted);
   }
 
@@ -214,13 +213,13 @@ class CallKeepManager {
     // Workaround because Android doesn't display well displayName, se we have to switch ...
     if (isIOS) {
       await _callKeep.updateDisplay(
-        callUUID,
+        uuid: callUUID,
         callerName: 'New Name',
         handle: callUUID,
       );
     } else {
       await _callKeep.updateDisplay(
-        callUUID,
+        uuid: callUUID,
         callerName: callUUID,
         handle: 'New Name',
       );
@@ -231,8 +230,8 @@ class CallKeepManager {
     final callKeeper = CallKeeper(this, call);
     addCall(call.callId, callKeeper);
     await _callKeep.displayIncomingCall(
-      call.callId,
-      '${call.room.getLocalizedDisplayname()} (Twake Chat)',
+      uuid: call.callId,
+      handle: '${call.room.getLocalizedDisplayname()} (Twake Chat)',
       callerName: '${call.room.getLocalizedDisplayname()} (Twake Chat)',
       handleType: 'number',
       hasVideo: call.type == CallType.kVideo,
@@ -278,16 +277,18 @@ class CallKeepManager {
   }
 
   void openCallingAccountsPage(BuildContext context) async {
-    await _callKeep.setup(context, <String, dynamic>{
-      'ios': <String, dynamic>{
-        'appName': appName,
+    await _callKeep.setup(
+      options: <String, dynamic>{
+        'ios': <String, dynamic>{
+          'appName': appName,
+        },
+        'android': alertOptions,
       },
-      'android': alertOptions,
-    });
+    );
     final hasPhoneAccount = await _callKeep.hasPhoneAccount();
     Logs().e(hasPhoneAccount.toString());
     if (!hasPhoneAccount) {
-      await _callKeep.hasDefaultPhoneAccount(context, alertOptions);
+      await _callKeep.hasDefaultPhoneAccount(alertOptions);
     } else {
       await _callKeep.openPhoneAccounts();
     }
@@ -333,9 +334,9 @@ class CallKeepManager {
       addCall(callUUID, CallKeeper(this, call));
     }
     await _callKeep.startCall(
-      callUUID,
-      event.callData.handle!,
-      event.callData.handle!,
+      uuid: callUUID,
+      handle: event.callData.handle!,
+      callerName: event.callData.handle!,
     );
     Timer(const Duration(seconds: 1), () {
       _callKeep.setCurrentCallActive(callUUID);

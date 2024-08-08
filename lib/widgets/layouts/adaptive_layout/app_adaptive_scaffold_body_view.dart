@@ -61,6 +61,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
         builder: (context, activeNavigationBar, __) {
           return PopScope(
             canPop: activeNavigationBar == AdaptiveDestinationEnum.rooms,
+            // ignore: deprecated_member_use
             onPopInvoked: onPopInvoked,
             child: Row(
               children: [

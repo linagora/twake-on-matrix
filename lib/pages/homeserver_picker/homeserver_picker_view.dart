@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -155,6 +156,7 @@ class HomeserverTextField extends StatelessWidget {
           autocorrect: false,
           enabled: true,
           controller: controller.homeserverController,
+          contextMenuBuilder: mobileTwakeContextMenuBuilder,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderSide:

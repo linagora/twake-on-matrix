@@ -14,7 +14,10 @@ dependencies:
       url: git@github.com:linagora/matrix-dart-sdk.git
       ref: twake-supported-0.22.6
 
-  receive_sharing_intent: 1.8.0
+  receive_sharing_intent:
+    git:
+      url: https://github.com/linagora/receive_sharing_intent.git
+      ref: master
 
   # TODO: Android native lib build error: https://github.com/jonataslaw/VideoCompress/issues/240
   # video_compress: ^3.1.1
@@ -35,7 +38,7 @@ dependencies:
   contacts_service:
     git:
       url: git@github.com:linagora/flutter_contacts.git
-      ref: upgrade-targetAndCompileSdkVersion
+      ref: master
 
   # TODO: Remove it after this PR merged
   # https://github.com/justsoft/video_thumbnail/pull/135
@@ -61,10 +64,10 @@ dependencies:
   flutter_adaptive_scaffold: ^0.1.4
   animations: ^2.0.7
   blurhash_dart: ^1.1.0
-  # TODO: remove it after it release a new version
+  # TODO: remove it after it release a new version, the PR is merged to master
   callkeep: 
     git:
-      url: https://github.com/flutter-webrtc/callkeep.git
+      url: https://github.com/flutter-webrtc/callkeep
       ref: master
   chewie: ^1.3.6
   collection: ^1.16.0
@@ -78,9 +81,10 @@ dependencies:
   emoji_picker_flutter: ^1.5.1
   emoji_proposal: ^0.0.1
   emojis: ^0.9.9
+  # TODO: remove this after this PR is merged https://gitlab.com/famedly/company/frontend/libraries/native_imaging/-/merge_requests/22
   fcm_shared_isolate:
     git:
-      url: https://gitlab.com/sherlockvn/fcm_shared_isolate.git
+      url: https://github.com/famedly/fcm_shared_isolate.git
       ref: main
   file_picker: ^8.0.5
   flutter:
@@ -122,9 +126,10 @@ dependencies:
   latlong2: ^0.8.1
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
+  # TODO: remove this after this PR is merged https://gitlab.com/famedly/company/frontend/libraries/native_imaging/-/merge_requests/22
   native_imaging: 
     git:
-      url: https://gitlab.com/sherlockvn/native_imaging.git
+      url: https://github.com/famedly/dart_native_imaging
       ref: main
   package_info_plus: ^8.0.0
   path_provider: ^2.0.15
@@ -174,6 +179,7 @@ dependencies:
   async: ^2.11.0
   cached_network_image: ^3.2.3
   flutter_image_compress: ^2.0.4
+  # TODO: remove when https://github.com/hui-z/image_gallery_saver/pull/310 is merged
   image_gallery_saver:
     git:
       url: https://github.com/FlutterStudioIst/image_gallery_saver.git
@@ -202,7 +208,7 @@ dependencies:
   heif_converter: 1.0.0
 
 dev_dependencies:
-  build_runner: ^2.3.3
+  build_runner: 2.4.12
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
   flutter_native_splash: ^2.0.3+1

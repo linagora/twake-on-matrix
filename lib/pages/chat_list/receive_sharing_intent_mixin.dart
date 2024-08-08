@@ -96,38 +96,24 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (!PlatformInfos.isMobile) return;
 
     // For sharing images coming from outside the app while the app is in the memory
-    intentFileStreamSubscription = ReceiveSharingIntent.instance
-        .getMediaStream()
+    intentFileStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen(_processIncomingSharedFiles, onError: print);
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance
-        .getInitialMedia()
-        .then(_processIncomingSharedFiles);
+    ReceiveSharingIntent.getInitialMedia().then(_processIncomingSharedFiles);
 
-    ReceiveSharingIntent.instance.getMediaStream().listen((value) {
-      // TODO: Handle mutliple text sharing
-      if (value.isNotEmpty) {
-        if (value.first is String) {
-          _processIncomingSharedText(value.first as String);
-        }
-      }
-    });
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    intentDataStreamSubscription = ReceiveSharingIntent.getTextStream()
+        .listen(_processIncomingSharedText, onError: print);
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
-      // TODO: Handle mutliple text sharing
-      if (value.isNotEmpty) {
-        if (value.first is String) {
-          _processIncomingSharedText(value.first as String);
-        }
-      }
-    });
+    ReceiveSharingIntent.getInitialText().then(_processIncomingSharedText);
 
     // For receiving shared Uris
     final appLinks = AppLinks();
     intentUriStreamSubscription =
         appLinks.stringLinkStream.listen(_processIncomingUris);
+
     if (TwakeApp.gotInitialLink == false) {
       TwakeApp.gotInitialLink = true;
       appLinks.getInitialLinkString().then(_processIncomingUris);
