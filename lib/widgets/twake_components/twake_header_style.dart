@@ -20,6 +20,7 @@ class TwakeHeaderStyle {
   static bool isDesktop(BuildContext context) => responsive.isDesktop(context);
 
   static AlignmentGeometry alignment = AlignmentDirectional.centerStart;
+  static MainAxisAlignment mobileTitleAllignement = MainAxisAlignment.center;
 
   static const EdgeInsetsDirectional logoAppOfMultiplePadding =
       EdgeInsetsDirectional.all(16);

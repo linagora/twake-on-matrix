@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_action_enum.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -6,6 +9,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
@@ -42,6 +46,8 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
+  final currentProfileNotifier = ValueNotifier<Profile?>(Profile(userId: ''));
+  StreamSubscription? onAccountDataSubscription;
 
   final PageController pageController =
       PageController(initialPage: 1, keepPage: true);
@@ -117,11 +123,32 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   void _handleLogout(AppAdaptiveScaffoldBody oldWidget) {
     activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
     pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+    getCurrentProfile();
+    onAccountDataSubscription?.cancel();
+    _handleProfileDataChange();
   }
 
   void _handleSwitchAccount(AppAdaptiveScaffoldBody oldWidget) {
     activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
     pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+    getCurrentProfile();
+    onAccountDataSubscription?.cancel();
+    _handleProfileDataChange();
+  }
+
+  void getCurrentProfile() async {
+    final profile =
+        await matrix.client.fetchOwnProfile(getFromRooms: false, cache: false);
+    currentProfileNotifier.value = profile;
+  }
+
+  void _handleProfileDataChange() {
+    onAccountDataSubscription =
+        matrix.client.onAccountData.stream.listen((event) {
+      if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
+        getCurrentProfile();
+      }
+    });
   }
 
   MatrixState get matrix => Matrix.of(context);
@@ -130,6 +157,8 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   void initState() {
     activeRoomIdNotifier.value = widget.activeRoomId;
     resetLocationPathWithLoginToken();
+    getCurrentProfile();
+    _handleProfileDataChange();
     super.initState();
   }
 
@@ -147,6 +176,12 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     }
 
     if (oldWidget.args != widget.args &&
+        widget.args is LoggedInOtherAccountBodyArgs) {
+      getCurrentProfile();
+      _handleProfileDataChange();
+    }
+
+    if (oldWidget.args != widget.args &&
         widget.args is SwitchActiveAccountBodyArgs) {
       _handleSwitchAccount(oldWidget);
     }
@@ -158,6 +193,8 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     activeRoomIdNotifier.dispose();
     activeNavigationBarNotifier.dispose();
     pageController.dispose();
+    currentProfileNotifier.dispose();
+    onAccountDataSubscription?.cancel();
     super.dispose();
   }
 
@@ -172,5 +209,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
         onPopInvoked: _onPopInvoked,
         onOpenSettings: _onOpenSettingsPage,
         adaptiveScaffoldBodyArgs: widget.args,
+        currentProfile: currentProfileNotifier,
       );
 }

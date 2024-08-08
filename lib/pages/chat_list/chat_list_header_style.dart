@@ -9,13 +9,14 @@ class ChatListHeaderStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static const double searchRadiusBorder = 24.0;
-  static const double searchBarContainerHeight = 64.0;
+  static const double searchBarContainerHeight = 57.0;
   static const double searchIconSize = 24.0;
 
   static const EdgeInsetsDirectional searchInputPadding =
       EdgeInsetsDirectional.only(
     start: 16,
     end: 16,
+    bottom: 8,
   );
 
   static const EdgeInsetsDirectional paddingZero = EdgeInsetsDirectional.zero;
@@ -41,11 +42,14 @@ class ChatListHeaderStyle {
           ),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       prefixIcon: Icon(
-        Icons.search_outlined,
+        Icons.search,
         size: ChatListHeaderStyle.searchIconSize,
         color: prefixIconColor ?? Theme.of(context).colorScheme.onSurface,
       ),
       suffixIcon: const SizedBox.shrink(),
     );
   }
+
+  static const dividerHeight = 1.0;
+  static const dividerThickness = 1.0;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class AdaptiveScaffoldPrimaryNavigationStyle {
   static const EdgeInsetsDirectional primaryNavigationMargin =
@@ -9,6 +10,13 @@ class AdaptiveScaffoldPrimaryNavigationStyle {
   static TextStyle? labelTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Theme.of(context).colorScheme.onSurface,
+          overflow: TextOverflow.ellipsis,
+        );
+  }
+
+  static TextStyle? selectedLabelTextStyle(BuildContext context) {
+    return Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: LinagoraSysColors.material().primary,
           overflow: TextOverflow.ellipsis,
         );
   }
