@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -15,6 +16,7 @@ class HomeserverAppBar extends StatelessWidget {
     return TextField(
       focusNode: controller.homeserverFocusNode,
       controller: controller.homeserverController,
+      contextMenuBuilder: mobileTwakeContextMenuBuilder,
       onChanged: controller.onChanged,
       decoration: InputDecoration(
         prefixIcon: Navigator.of(context).canPop()

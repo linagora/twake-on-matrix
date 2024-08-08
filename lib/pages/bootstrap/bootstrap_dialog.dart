@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -136,6 +137,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   maxLines: 4,
                   readOnly: true,
                   style: GoogleFonts.robotoMono(),
+                  contextMenuBuilder: mobileTwakeContextMenuBuilder,
                   controller: TextEditingController(text: key),
                   decoration: const InputDecoration(
                     contentPadding: EdgeInsets.all(16),
@@ -261,6 +263,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       maxLines: 2,
                       autocorrect: false,
                       readOnly: _recoveryKeyInputLoading,
+                      contextMenuBuilder: mobileTwakeContextMenuBuilder,
                       autofillHints: _recoveryKeyInputLoading
                           ? null
                           : [AutofillHints.password],
