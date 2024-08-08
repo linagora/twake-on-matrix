@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
@@ -36,6 +37,7 @@ class SettingsIgnoreListView extends StatelessWidget {
                 children: [
                   TextField(
                     controller: controller.controller,
+                    contextMenuBuilder: mobileTwakeContextMenuBuilder,
                     autocorrect: false,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => controller.ignoreUser(context),
