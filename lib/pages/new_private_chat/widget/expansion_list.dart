@@ -17,6 +17,7 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:matrix/matrix.dart';
 
 class ExpansionList extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> presentationContactsNotifier;
@@ -56,6 +57,35 @@ class ExpansionList extends StatelessWidget {
             final textControllerIsEmpty = textEditingController.text.isEmpty;
             if (failure is GetPresentationContactsEmpty ||
                 failure is GetPresentationContactsFailure) {
+              if (!textControllerIsEmpty &&
+                  textEditingController.text.isValidMatrixId &&
+                  textEditingController.text.startsWith("@")) {
+                final contact = PresentationContact(
+                  matrixId: textEditingController.text,
+                  displayName: textEditingController.text.substring(1),
+                );
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ..._buildResponsiveButtons(context),
+                    InkWell(
+                      onTap: () {
+                        onContactTap(
+                          context,
+                          contact,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(16.0),
+                      child: ExpansionContactListTile(
+                        contact: contact,
+                        highlightKeyword: textEditingController.text,
+                      ),
+                    ),
+                  ],
+                );
+              }
+
               return Column(
                 children: [
                   ..._buildResponsiveButtons(context),

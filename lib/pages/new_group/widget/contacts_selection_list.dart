@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactsSelectionList extends StatelessWidget {
   final SelectedContactsMapChangeNotifier selectedContactsMapNotifier;
@@ -48,6 +50,24 @@ class ContactsSelectionList extends StatelessWidget {
             final textControllerIsEmpty = textEditingController.text.isEmpty;
             if (failure is GetPresentationContactsEmpty ||
                 failure is GetPresentationContactsFailure) {
+              if (!textControllerIsEmpty &&
+                  textEditingController.text.isValidMatrixId &&
+                  textEditingController.text.startsWith("@")) {
+                final contact = PresentationContact(
+                  matrixId: textEditingController.text,
+                  displayName: textEditingController.text.substring(1),
+                );
+
+                return SliverToBoxAdapter(
+                  child: ContactItem(
+                    contact: contact,
+                    selectedContactsMapNotifier: selectedContactsMapNotifier,
+                    onSelectedContact: onSelectedContact,
+                    highlightKeyword: textEditingController.text,
+                    disabled: false,
+                  ),
+                );
+              }
               if (recentContact) {
                 return SliverToBoxAdapter(
                   child: Padding(

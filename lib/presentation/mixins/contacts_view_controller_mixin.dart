@@ -235,6 +235,18 @@ mixin class ContactsViewControllerMixin {
     presentationContactNotifier.value =
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
+        if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+          return Right(
+            PresentationExternalContactSuccess(
+              contact: PresentationContact(
+                matrixId: keyword,
+                displayName: keyword.substring(1),
+                type: ContactType.external,
+              ),
+            ),
+          );
+        }
+
         if (failure is GetContactsFailure) {
           return Left(
             GetPresentationContactsFailure(
@@ -259,23 +271,11 @@ mixin class ContactsViewControllerMixin {
               .expand((contact) => contact.toPresentationContacts())
               .toList();
           if (filteredContacts.isEmpty) {
-            if (keyword.isValidMatrixId && keyword.startsWith("@")) {
-              return Right(
-                PresentationExternalContactSuccess(
-                  contact: PresentationContact(
-                    matrixId: keyword,
-                    displayName: keyword.substring(1),
-                    type: ContactType.external,
-                  ),
-                ),
-              );
-            } else {
-              return Left(
-                GetPresentationContactsEmpty(
-                  keyword: keyword,
-                ),
-              );
-            }
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
           } else {
             return Right(
               GetPresentationContactsSuccess(

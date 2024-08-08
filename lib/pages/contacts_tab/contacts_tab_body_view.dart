@@ -36,6 +36,7 @@ class ContactsTabBodyView extends StatelessWidget {
       slivers: [
         _SliverWarningBanner(controller: controller),
         _SliverPhonebookLoading(controller: controller),
+        _SilverUnknownContact(controller: controller),
         _SliverRecentContacts(controller: controller),
         _SliverContactsList(controller: controller),
         _SliverPhonebookList(controller: controller),
@@ -72,11 +73,15 @@ class _SliverPhonebookList extends StatelessWidget {
       builder: (context, phonebookContactState, child) {
         return phonebookContactState.fold(
           (failure) {
-            if (!PlatformInfos.isMobile) {
+            final keyword = controller.textEditingController.text;
+            if (!PlatformInfos.isMobile ||
+                keyword.isValidMatrixId && keyword.startsWith("@")) {
               return child!;
             }
+
             final presentationRecentContact =
                 controller.presentationRecentContactNotifier.value;
+
             if (failure is GetPresentationContactsFailure) {
               if (presentationRecentContact.isEmpty) {
                 return controller.presentationContactNotifier.value.fold(
@@ -148,6 +153,22 @@ class _SliverPhonebookList extends StatelessWidget {
                 ),
               );
             }
+
+            final keyword = controller.textEditingController.text;
+
+            if (success is GetPhonebookContactsInitial &&
+                keyword.isValidMatrixId &&
+                keyword.startsWith("@")) {
+              final externalContact = PresentationContact(
+                matrixId: keyword,
+                displayName: keyword.substring(1),
+                type: ContactType.external,
+              );
+              return _SilverExternalContact(
+                controller: controller,
+                externalContact: externalContact,
+              );
+            }
             return child!;
           },
         );
@@ -173,7 +194,9 @@ class _SliverContactsList extends StatelessWidget {
       builder: (context, state, child) {
         return state.fold(
           (failure) {
-            if (PlatformInfos.isMobile) {
+            final keyword = controller.textEditingController.text;
+            if (PlatformInfos.isMobile ||
+                keyword.isValidMatrixId && keyword.startsWith("@")) {
               return child!;
             }
             final presentationRecentContact =
@@ -215,17 +238,6 @@ class _SliverContactsList extends StatelessWidget {
                       if (keyword.isEmpty) {
                         return const SliverToBoxAdapter(
                           child: EmptyContactBody(),
-                        );
-                      } else if (keyword.isValidMatrixId &&
-                          keyword.startsWith("@")) {
-                        final externalContact = PresentationContact(
-                          matrixId: keyword,
-                          displayName: keyword.substring(1),
-                          type: ContactType.external,
-                        );
-                        return _SilverExternalContact(
-                          controller: controller,
-                          externalContact: externalContact,
                         );
                       } else {
                         return SliverToBoxAdapter(
@@ -484,6 +496,68 @@ class _Contact extends StatelessWidget {
           highlightKeyword: controller.textEditingController.text,
         ),
       ),
+    );
+  }
+}
+
+class _SilverUnknownContact extends StatelessWidget {
+  final ContactsTabController controller;
+
+  const _SilverUnknownContact({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.presentationRecentContactNotifier,
+      builder: (_, recentContacts, __) {
+        return ValueListenableBuilder(
+          valueListenable: controller.presentationContactNotifier,
+          builder: (___, presentationContactState, ____) {
+            return ValueListenableBuilder(
+              valueListenable: controller.presentationPhonebookContactNotifier,
+              builder: (context, phonebookContactState, child) {
+                final phonebookContactFailure =
+                    phonebookContactState.getFailureOrNull();
+
+                final phonebookContactSuccess =
+                    phonebookContactState.getSuccessOrNull();
+
+                final phonebookContactFetchFailed = phonebookContactFailure !=
+                        null ||
+                    (phonebookContactSuccess != null &&
+                        phonebookContactSuccess is GetPhonebookContactsInitial);
+
+                final contactFailure =
+                    presentationContactState.getFailureOrNull();
+
+                final keyword = controller.textEditingController.text;
+
+                if (keyword.isNotEmpty &&
+                    keyword.isValidMatrixId &&
+                    keyword.startsWith("@") &&
+                    recentContacts.isEmpty &&
+                    phonebookContactFetchFailed &&
+                    contactFailure != null) {
+                  final externalContact = PresentationContact(
+                    matrixId: keyword,
+                    displayName: keyword.substring(1),
+                    type: ContactType.external,
+                  );
+
+                  return _SilverExternalContact(
+                    controller: controller,
+                    externalContact: externalContact,
+                  );
+                }
+
+                return const SliverToBoxAdapter(
+                  child: SizedBox.shrink(),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }
