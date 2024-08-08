@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   connectivity_plus
   desktop_drop
   desktop_lifecycle
@@ -10,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_saver
   file_selector_windows
+  firebase_core
   flutter_avif_windows
   flutter_webrtc
   gal
