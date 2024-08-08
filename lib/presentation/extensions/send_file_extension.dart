@@ -165,7 +165,10 @@ extension SendFileExtension on Room {
         txid,
         uploadStreamController: uploadStreamController,
       );
-      if (fileInfo.width == null || fileInfo.height == null) {
+      if (fileInfo.width == null ||
+          fileInfo.height == null ||
+          fileInfo.width == 0 ||
+          fileInfo.height == 0) {
         fileInfo = VideoFileInfo(
           fileInfo.fileName,
           fileInfo.filePath,
@@ -581,7 +584,7 @@ extension SendFileExtension on Room {
       final size = await result.length();
       var width = originalFile.width;
       var height = originalFile.height;
-      if (width == null || height == null) {
+      if (width == null || height == null || width == 0 || height == 0) {
         final imageDimension = await runBenchmarked(
           '_calculateImageDimension',
           () => _calculateImageDimension(result.path),

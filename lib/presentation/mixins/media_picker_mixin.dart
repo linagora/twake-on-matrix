@@ -360,12 +360,21 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     OnCameraPicked? onCameraPicked,
     bool onlyImage = false,
   }) async {
-    final assetEntity =
+    var assetEntity =
         await pickMediaFromCameraAction(context: context, onlyImage: onlyImage);
     Logs().d(
       "MediaPickerMixin::_pickFromCameraAction(): assetEntity - $assetEntity",
     );
     if (assetEntity != null) {
+      // TODO: TW-1844: Remove this when the issue https://github.com/fluttercandies/flutter_wechat_camera_picker/issues/266
+      if (PlatformInfos.isAndroid) {
+        assetEntity = AssetEntity(
+          id: assetEntity.id,
+          width: 0,
+          height: 0,
+          typeInt: assetEntity.typeInt,
+        );
+      }
       imagePickerGridController.pickAssetFromCamera(assetEntity);
 
       if (onCameraPicked != null) {
