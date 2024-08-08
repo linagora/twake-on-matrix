@@ -20,6 +20,7 @@ import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:flutter/widgets.dart';
+import 'package:heif_converter/heif_converter.dart';
 import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/foundation.dart';
@@ -49,7 +50,6 @@ extension SendFileExtension on Room {
     CancelToken? cancelToken,
     DateTime? sentDate,
   }) async {
-    FileInfo tempfileInfo = fileInfo;
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
     try {
@@ -84,16 +84,25 @@ extension SendFileExtension on Room {
 
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
+      try {
+        final oldFilePath = fileInfo.filePath;
+        fileInfo = await convertHeicToJpgImage(fileInfo);
+        File(oldFilePath).delete();
+      } catch (e) {
+        Logs().e('sendFileEvent::Error while converting heic to jpg', e);
+      }
+
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
       final targetPath =
           await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
               .create();
+      fileInfo = fileInfo as ImageFileInfo;
       await _generateThumbnail(
         fileInfo,
         targetPath: targetPath.path,
         uploadStreamController: uploadStreamController,
       );
-      fileInfo = ImageFileInfo(
+      thumbnail = ImageFileInfo(
         fileInfo.fileName,
         targetPath.path,
         await targetPath.length(),
@@ -224,7 +233,7 @@ extension SendFileExtension on Room {
         );
       }
 
-      tempfileInfo = FileInfo(
+      fileInfo = FileInfo(
         fileInfo.fileName,
         tempEncryptedFile.path,
         fileInfo.fileSize,
@@ -268,7 +277,7 @@ extension SendFileExtension on Room {
       try {
         final mediaApi = getIt.get<MediaAPI>();
         final response = await mediaApi.uploadFileMobile(
-          fileInfo: tempfileInfo,
+          fileInfo: fileInfo,
           cancelToken: cancelToken,
           onSendProgress: (receive, total) {
             if (uploadStreamController?.isClosed == true) return;
@@ -416,6 +425,35 @@ extension SendFileExtension on Room {
       tempEncryptedThumbnailFile.delete(),
     ]);
     return eventId;
+  }
+
+  Future<ImageFileInfo> convertHeicToJpgImage(ImageFileInfo fileInfo) async {
+    final convertedFilePath =
+        StorageDirectoryManager.instance.convertFileExtension(
+      fileInfo.filePath,
+      'jpg',
+    );
+    final newPath = await HeifConverter.convert(
+      fileInfo.filePath,
+      output: convertedFilePath,
+    );
+    Logs().d('sendFileEvent::Heic converted to jpg', newPath);
+    if (newPath != null) {
+      final newConvertedFile = File(convertedFilePath);
+      fileInfo = ImageFileInfo(
+        newConvertedFile.path.split("/").last,
+        newConvertedFile.path,
+        await newConvertedFile.length(),
+        width: fileInfo.width,
+        height: fileInfo.height,
+      );
+    } else {
+      Logs().e(
+        'sendFileEvent::Error while converting heic to jpg:newPath is null',
+      );
+      throw Exception('sendFileEvent::Error while converting heic to jpg');
+    }
+    return fileInfo;
   }
 
   Future<void> _copyFileInMemToAppDownloadsFolder({

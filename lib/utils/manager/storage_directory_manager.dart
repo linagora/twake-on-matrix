@@ -76,4 +76,15 @@ class StorageDirectoryManager {
         await StorageDirectoryManager.instance.getFileStoreDirectory();
     return '$fileStoreDirectory/$eventId/decrypted-$fileName';
   }
+
+  String convertFileExtension(String filename, String newExtension) {
+    final lastDotIndex = filename.lastIndexOf('.');
+
+    if (lastDotIndex == -1) {
+      return '$filename.$newExtension';
+    } else {
+      final nameWithoutExtension = filename.substring(0, lastDotIndex);
+      return '$nameWithoutExtension.$newExtension';
+    }
+  }
 }
