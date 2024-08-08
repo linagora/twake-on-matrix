@@ -3,7 +3,7 @@ import Flutter
 
 let apnTokenKey = "apnToken"
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
   var twakeApnChannel: FlutterMethodChannel?
   var initialNotiInfo: Any?
