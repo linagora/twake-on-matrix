@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_skeletonizer_widget.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -55,6 +56,7 @@ class TomBootstrapDialogMobileView extends StatelessWidget {
             child: TextField(
               textInputAction: TextInputAction.search,
               enabled: false,
+              contextMenuBuilder: mobileTwakeContextMenuBuilder,
               decoration: ChatListHeaderStyle.searchInputDecoration(
                 context,
                 hintText: '',

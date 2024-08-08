@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,6 +53,7 @@ class EmotesSettingsView extends StatelessWidget {
                     ),
                     child: TextField(
                       controller: controller.newImageCodeController,
+                      contextMenuBuilder: mobileTwakeContextMenuBuilder,
                       autocorrect: false,
                       minLines: 1,
                       maxLines: 1,
@@ -158,6 +160,8 @@ class EmotesSettingsView extends StatelessWidget {
                                 child: TextField(
                                   readOnly: controller.readonly,
                                   controller: textEditingController,
+                                  contextMenuBuilder:
+                                      mobileTwakeContextMenuBuilder,
                                   autocorrect: false,
                                   minLines: 1,
                                   maxLines: 1,

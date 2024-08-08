@@ -12,6 +12,7 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
@@ -445,12 +446,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                 widget.onChanged!(text);
               }
             },
-            contextMenuBuilder: PlatformInfos.isWeb
-                ? null
-                : (_, editableTextState) =>
-                    AdaptiveTextSelectionToolbar.editableText(
-                      editableTextState: editableTextState,
-                    ),
+            contextMenuBuilder:
+                PlatformInfos.isWeb ? null : mobileTwakeContextMenuBuilder,
             onTap: () async {
               await Future.delayed(InputBar.debounceDurationTap);
               FocusScope.of(context).requestFocus(focusNode);

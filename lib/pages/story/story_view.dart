@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -355,6 +356,7 @@ class StoryView extends StatelessWidget {
                         onSubmitted: controller.replyAction,
                         textInputAction: TextInputAction.send,
                         readOnly: controller.replyLoading,
+                        contextMenuBuilder: mobileTwakeContextMenuBuilder,
                         decoration: InputDecoration(
                           contentPadding:
                               const EdgeInsets.fromLTRB(0, 16, 0, 16),

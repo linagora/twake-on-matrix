@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/search/search_view_style.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
@@ -28,6 +29,7 @@ class SearchTextField extends StatelessWidget {
         },
         controller: textEditingController,
         textInputAction: TextInputAction.search,
+        contextMenuBuilder: mobileTwakeContextMenuBuilder,
         enabled: true,
         focusNode: focusNode,
         autofocus: autofocus,

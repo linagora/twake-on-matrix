@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart'
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -319,6 +320,7 @@ class _GroupNameField extends StatelessWidget {
       child: TextField(
         style: ChatDetailEditViewStyle.textFieldStyle(context),
         controller: controller.groupNameTextEditingController,
+        contextMenuBuilder: mobileTwakeContextMenuBuilder,
         focusNode: controller.groupNameFocusNode,
         decoration: InputDecoration(
           border: OutlineInputBorder(
@@ -370,6 +372,7 @@ class _DescriptionField extends StatelessWidget {
           TextField(
             style: ChatDetailEditViewStyle.textFieldStyle(context),
             controller: controller.descriptionTextEditingController,
+            contextMenuBuilder: mobileTwakeContextMenuBuilder,
             focusNode: controller.descriptionFocusNode,
             decoration: InputDecoration(
               border: OutlineInputBorder(
