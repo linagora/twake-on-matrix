@@ -157,8 +157,8 @@ class CallKeepManager {
   }
 
   void didDisplayIncomingCall(CallKeepDidDisplayIncomingCall event) {
-    final callUUID = event.callUUID;
-    final number = event.handle;
+    final callUUID = event.callData.callUUID;
+    final number = event.callData.handle;
     Logs().v('[displayIncomingCall] $callUUID number: $number');
     // addCall(callUUID, CallKeeper(this null));
   }
@@ -168,20 +168,18 @@ class CallKeepManager {
   }
 
   Future<void> initialize() async {
-    _callKeep.on(CallKeepPerformAnswerCallAction(), answerCall);
-    _callKeep.on(CallKeepDidPerformDTMFAction(), didPerformDTMFAction);
-    _callKeep.on(
-      CallKeepDidReceiveStartCallAction(),
+    _callKeep.on<CallKeepPerformAnswerCallAction>(answerCall);
+    _callKeep.on<CallKeepDidPerformDTMFAction>(didPerformDTMFAction);
+    _callKeep.on<CallKeepDidReceiveStartCallAction>(
       didReceiveStartCallAction,
     );
-    _callKeep.on(CallKeepDidToggleHoldAction(), didToggleHoldCallAction);
-    _callKeep.on(
-      CallKeepDidPerformSetMutedCallAction(),
+    _callKeep.on<CallKeepDidToggleHoldAction>(didToggleHoldCallAction);
+    _callKeep.on<CallKeepDidPerformSetMutedCallAction>(
       didPerformSetMutedCallAction,
     );
-    _callKeep.on(CallKeepPerformEndCallAction(), endCall);
-    _callKeep.on(CallKeepPushKitToken(), onPushKitToken);
-    _callKeep.on(CallKeepDidDisplayIncomingCall(), didDisplayIncomingCall);
+    _callKeep.on<CallKeepPerformEndCallAction>(endCall);
+    _callKeep.on<CallKeepPushKitToken>(onPushKitToken);
+    _callKeep.on<CallKeepDidDisplayIncomingCall>(didDisplayIncomingCall);
     Logs().i('[VOIP] Initialized');
   }
 
@@ -217,13 +215,13 @@ class CallKeepManager {
     if (isIOS) {
       await _callKeep.updateDisplay(
         callUUID,
-        displayName: 'New Name',
+        callerName: 'New Name',
         handle: callUUID,
       );
     } else {
       await _callKeep.updateDisplay(
         callUUID,
-        displayName: callUUID,
+        callerName: callUUID,
         handle: 'New Name',
       );
     }
@@ -235,8 +233,7 @@ class CallKeepManager {
     await _callKeep.displayIncomingCall(
       call.callId,
       '${call.room.getLocalizedDisplayname()} (Twake Chat)',
-      localizedCallerName:
-          '${call.room.getLocalizedDisplayname()} (Twake Chat)',
+      callerName: '${call.room.getLocalizedDisplayname()} (Twake Chat)',
       handleType: 'number',
       hasVideo: call.type == CallType.kVideo,
     );
@@ -298,8 +295,8 @@ class CallKeepManager {
 
   /// CallActions.
   Future<void> answerCall(CallKeepPerformAnswerCallAction event) async {
-    final callUUID = event.callUUID;
-    final keeper = calls[event.callUUID]!;
+    final callUUID = event.callData.callUUID;
+    final keeper = calls[event.callData.callUUID]!;
     if (!keeper.connected) {
       Logs().e('answered');
       // Answer Call
@@ -325,17 +322,21 @@ class CallKeepManager {
   Future<void> didReceiveStartCallAction(
     CallKeepDidReceiveStartCallAction event,
   ) async {
-    if (event.handle == null) {
+    if (event.callData.handle == null) {
       // @TODO: sometime we receive `didReceiveStartCallAction` with handle` undefined`
       return;
     }
-    final callUUID = event.callUUID!;
-    if (event.callUUID == null) {
-      final call =
-          await _voipPlugin!.voip.inviteToCall(event.handle!, CallType.kVideo);
+    final callUUID = event.callData.callUUID!;
+    if (event.callData.callUUID == null) {
+      final call = await _voipPlugin!.voip
+          .inviteToCall(event.callData.handle!, CallType.kVideo);
       addCall(callUUID, CallKeeper(this, call));
     }
-    await _callKeep.startCall(callUUID, event.handle!, event.handle!);
+    await _callKeep.startCall(
+      callUUID,
+      event.callData.handle!,
+      event.callData.handle!,
+    );
     Timer(const Duration(seconds: 1), () {
       _callKeep.setCurrentCallActive(callUUID);
     });

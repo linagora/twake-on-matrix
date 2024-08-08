@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
@@ -11,7 +12,6 @@ import 'dart:async';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:uni_links/uni_links.dart';
 
 mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   MatrixState get matrixState;
@@ -96,24 +96,41 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (!PlatformInfos.isMobile) return;
 
     // For sharing images coming from outside the app while the app is in the memory
-    intentFileStreamSubscription = ReceiveSharingIntent.getMediaStream()
+    intentFileStreamSubscription = ReceiveSharingIntent.instance
+        .getMediaStream()
         .listen(_processIncomingSharedFiles, onError: print);
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then(_processIncomingSharedFiles);
+    ReceiveSharingIntent.instance
+        .getInitialMedia()
+        .then(_processIncomingSharedFiles);
 
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    intentDataStreamSubscription = ReceiveSharingIntent.getTextStream()
-        .listen(_processIncomingSharedText, onError: print);
+    ReceiveSharingIntent.instance.getMediaStream().listen((value) {
+      // TODO: Handle mutliple text sharing
+      if (value.isNotEmpty) {
+        if (value.first is String) {
+          _processIncomingSharedText(value.first as String);
+        }
+      }
+    });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then(_processIncomingSharedText);
+    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
+      // TODO: Handle mutliple text sharing
+      if (value.isNotEmpty) {
+        if (value.first is String) {
+          _processIncomingSharedText(value.first as String);
+        }
+      }
+    });
 
     // For receiving shared Uris
-    intentUriStreamSubscription = linkStream.listen(_processIncomingUris);
+    final appLinks = AppLinks();
+    intentUriStreamSubscription =
+        appLinks.stringLinkStream.listen(_processIncomingUris);
     if (TwakeApp.gotInitialLink == false) {
       TwakeApp.gotInitialLink = true;
-      getInitialLink().then(_processIncomingUris);
+      appLinks.getInitialLinkString().then(_processIncomingUris);
     }
   }
 }
