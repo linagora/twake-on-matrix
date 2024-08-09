@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
+import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
@@ -61,18 +62,26 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                     _PlayVideoButton(
                       event: widget.event,
                     ),
-                    InkWell(
-                      onTap: () {
-                        uploadManager.cancelUpload(widget.event);
+                    ValueListenableBuilder(
+                      valueListenable: uploadFileStateNotifier,
+                      builder: (context, state, child) {
+                        return InkWell(
+                          onTap: () {
+                            if (state is UploadFileSuccessUIState) {
+                              return;
+                            }
+                            uploadManager.cancelUpload(widget.event);
+                          },
+                          child: SizedBox(
+                            width: MessageContentStyle.videoCenterButtonSize,
+                            height: MessageContentStyle.videoCenterButtonSize,
+                            child: CircularProgressIndicator(
+                              strokeWidth: MessageContentStyle.strokeVideoWidth,
+                              color: LinagoraRefColors.material().primary[100],
+                            ),
+                          ),
+                        );
                       },
-                      child: SizedBox(
-                        width: MessageContentStyle.videoCenterButtonSize,
-                        height: MessageContentStyle.videoCenterButtonSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: MessageContentStyle.strokeVideoWidth,
-                          color: LinagoraRefColors.material().primary[100],
-                        ),
-                      ),
                     ),
                   ],
                 ),
