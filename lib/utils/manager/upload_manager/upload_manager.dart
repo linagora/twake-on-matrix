@@ -135,39 +135,40 @@ class UploadManager {
       entities: entities,
     );
 
-    for (final txid in txids.keys.toList().asMap().entries) {
-      final fakeSendingFileInfo = txids[txid.value];
+    for (final txid in txids.entries) {
+      final txidKey = txid.key;
+      final fakeSendingFileInfo = txids[txidKey];
       if (fakeSendingFileInfo == null) {
         continue;
       }
 
-      Logs().d('UploadManager::uploadMediaMobile(): txid: ${txid.value}');
+      Logs().d('UploadManager::uploadMediaMobile(): txid: $txidKey');
 
       _initUploadFileInfo(
-        txid: txid.value,
+        txid: txidKey,
         room: room,
-        captionInfo: txid.key == txids.keys.length - 1 ? caption : null,
+        captionInfo: txidKey == txids.keys.last ? caption : null,
       );
 
-      final sentDate = _eventIdMapUploadFileInfo[txid.value]?.createdAt;
+      final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
 
       final fakeImageEvent = await room.sendFakeImagePickerFileEvent(
         fakeSendingFileInfo.fileInfo,
-        txid: txid.value,
+        txid: txidKey,
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
       );
 
       final streamController =
-          _eventIdMapUploadFileInfo[txid.value]?.uploadStateStreamController;
+          _eventIdMapUploadFileInfo[txidKey]?.uploadStateStreamController;
 
-      final cancelToken = _eventIdMapUploadFileInfo[txid.value]?.cancelToken;
+      final cancelToken = _eventIdMapUploadFileInfo[txidKey]?.cancelToken;
 
       if (streamController == null || cancelToken == null) {
         Logs().e(
           'DownloadManager::download(): streamController or cancelToken is null',
         );
-        _eventIdMapUploadFileInfo[txid.value]?.uploadStateStreamController.add(
+        _eventIdMapUploadFileInfo[txidKey]?.uploadStateStreamController.add(
               Left(
                 UploadFileFailedState(
                   exception: Exception(
@@ -186,7 +187,7 @@ class UploadManager {
       );
 
       _addFileTaskToWorkerQueueMobile(
-        txid: txid.value,
+        txid: txidKey,
         fakeImageEvent: fakeImageEvent,
         room: room,
         fileInfo: fakeSendingFileInfo.fileInfo,
@@ -196,13 +197,13 @@ class UploadManager {
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
       );
 
-      if (_eventIdMapUploadFileInfo[txid.value]?.captionInfo != null) {
+      if (_eventIdMapUploadFileInfo[txidKey]?.captionInfo != null) {
         _addCaptionTaskToWorkerQueue(
           room: room,
           messageTxid:
-              _eventIdMapUploadFileInfo[txid.value]?.captionInfo?.txid ?? '',
+              _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.txid ?? '',
           caption:
-              _eventIdMapUploadFileInfo[txid.value]?.captionInfo?.caption ?? '',
+              _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption ?? '',
         );
       }
     }
@@ -216,16 +217,18 @@ class UploadManager {
   }) async {
     for (final matrixFile in files.asMap().entries) {
       final txid = room.client.generateUniqueTransactionId();
+      final fileIndex = matrixFile.key;
+      final fileInfo = matrixFile.value;
 
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: matrixFile.key == files.length - 1 ? caption : null,
+        captionInfo: fileIndex == files.length - 1 ? caption : null,
       );
 
-      room.sendingFilePlaceholders[txid] = matrixFile.value;
+      room.sendingFilePlaceholders[txid] = fileInfo;
       final fakeFileEvent = await room.sendFakeFileEvent(
-        matrixFile.value,
+        fileInfo,
         txid: txid,
       );
 
@@ -262,10 +265,10 @@ class UploadManager {
         txid: txid,
         fakeImageEvent: fakeFileEvent,
         room: room,
-        matrixFile: matrixFile.value,
+        matrixFile: fileInfo,
         streamController: streamController,
         cancelToken: cancelToken,
-        thumbnail: thumbnails?[matrixFile.value],
+        thumbnail: thumbnails?[fileInfo],
         sentDate: sentDate,
       );
       if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null) {
@@ -284,8 +287,11 @@ class UploadManager {
     String? caption,
   }) async {
     for (final fileInfo in fileInfos.asMap().entries) {
+      final fileIndex = fileInfo.key;
+      final fileValue = fileInfo.value;
+
       final txid = room.storePlaceholderFileInMem(
-        fileInfo: fileInfo.value,
+        fileInfo: fileValue,
       );
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
@@ -293,15 +299,15 @@ class UploadManager {
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: fileInfo.key == fileInfos.length - 1 ? caption : null,
+        captionInfo: fileIndex == fileInfos.length - 1 ? caption : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
 
       final fakeEvent = await room.sendFakeImagePickerFileEvent(
-        fileInfo.value,
+        fileValue,
         txid: txid,
-        messageType: fileInfo.value.msgType,
+        messageType: fileValue.msgType,
         sentDate: sentDate,
       );
 
@@ -336,7 +342,7 @@ class UploadManager {
         txid: txid,
         fakeImageEvent: fakeEvent,
         room: room,
-        fileInfo: fileInfo.value,
+        fileInfo: fileValue,
         streamController: streamController,
         cancelToken: cancelToken,
         sentDate: sentDate,
