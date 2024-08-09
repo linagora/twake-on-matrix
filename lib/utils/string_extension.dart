@@ -251,10 +251,13 @@ extension StringCasingExtension on String {
       ];
     }
 
+    // Escape special characters in the highlightText
+    final escapedHighlightText = RegExp.escape(highlightText);
+
     // Split the text into parts by the search word and create a TextSpan for
     // each part. The search word is not case sensitive.
     final List<TextSpan> spans = splitMapJoinToList<TextSpan>(
-      RegExp(highlightText, caseSensitive: false),
+      RegExp(escapedHighlightText, caseSensitive: false),
       onMatch: (Match match) {
         return TextSpan(
           text: match.group(0),
