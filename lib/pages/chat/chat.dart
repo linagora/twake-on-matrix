@@ -19,7 +19,6 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
-import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -388,11 +387,20 @@ class ChatController extends State<Chat>
     if (scrollController.position.pixels == 0 ||
         scrollController.position.pixels == _isPortionAvailableToScroll) {
       requestFuture();
-    } else if (scrollController.position.pixels ==
+    }
+
+    _handleRequestHistory();
+  }
+
+  void _handleRequestHistory() {
+    if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent ||
         scrollController.position.pixels + _isPortionAvailableToScroll ==
             scrollController.position.maxScrollExtent) {
-      await requestHistory();
+      if (timeline?.isRequestingHistory == true) return;
+      if (timeline?.canRequestHistory == true) {
+        requestHistory();
+      }
     }
   }
 
@@ -934,6 +942,7 @@ class ChatController extends State<Chat>
     if (timeline == null) return;
     if (!timeline!.allowNewEvent) {
       setState(() {
+        timeline = null;
         loadTimelineFuture = _getTimeline().onError(
           (e, s) {
             Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
@@ -954,26 +963,42 @@ class ChatController extends State<Chat>
     return eventIndex + addedHeadItemsInChat;
   }
 
+  int _getEventIndex(String eventId) {
+    final foundEvent =
+        timeline!.events.firstWhereOrNull((event) => event.eventId == eventId);
+
+    final eventIndex = foundEvent == null
+        ? -1
+        : timeline!.events.indexWhere(
+            (event) => event.eventId == foundEvent.eventId,
+          );
+
+    return eventIndex;
+  }
+
   Future<void> scrollToEventId(String eventId, {bool highlight = true}) async {
-    final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
+    final eventIndex = _getEventIndex(eventId);
     if (eventIndex == -1) {
-      loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
-        (e, s) {
-          Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
-        },
-      );
+      setState(() {
+        timeline = null;
+        loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
+          (e, s) {
+            Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
+          },
+        );
+      });
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         scrollToEventId(eventId, highlight: highlight);
       });
-      setState(() {});
       return;
     }
+
     await scrollToIndex(getDisplayEventIndex(eventIndex), highlight: highlight);
     _updateScrollController();
   }
 
-  Future scrollToIndex(int index, {bool highlight = false}) async {
+  Future scrollToIndex(int index, {bool highlight = true}) async {
     await scrollController.scrollToIndex(
       index,
       preferPosition: AutoScrollPosition.middle,
@@ -2001,7 +2026,6 @@ class ChatController extends State<Chat>
     pinnedMessageScrollController.dispose();
     onUpdateEventStreamSubcription?.cancel();
     keyboardVisibilitySubscription?.cancel();
-    InViewNotifierListCustom.of(context)?.dispose();
     replyEventNotifier.dispose();
     cachedPresenceStreamController.close();
     cachedPresenceNotifier.dispose();
