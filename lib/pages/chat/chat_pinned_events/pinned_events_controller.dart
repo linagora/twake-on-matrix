@@ -79,21 +79,27 @@ class PinnedEventsController {
     void Function(String)? scrollToEventId,
   }) async {
     final nextIndex = _nextIndexOfPinnedMessage(pinnedEvents);
-    final event = pinnedEvents[nextIndex];
+    final nextEvent = pinnedEvents[nextIndex];
+    final currentEvent = currentPinnedEventNotifier.value;
     Logs().d(
-      "PinnedEventsController()::jumpToPinnedMessage(): eventID: ${event?.eventId}",
+      "PinnedEventsController()::jumpToPinnedMessage(): eventID: ${nextEvent?.eventId}",
     );
-    if (event != null) {
-      currentPinnedEventNotifier.value = event;
+    if (currentEvent != null) {
+      currentPinnedEventNotifier.value = nextEvent;
       if (scrollToEventId != null) {
-        scrollToEventId.call(event.eventId);
+        scrollToEventId.call(currentEvent.eventId);
       }
     }
   }
 
   int currentIndexOfPinnedMessage(List<Event?> pinnedEvents) {
     final index = pinnedEvents.indexWhere(
-      (event) => event?.eventId == currentPinnedEventNotifier.value?.eventId,
+      (event) {
+        Logs().d(
+          "PinnedEventsController()::currentIndexOfPinnedMessage(): ${currentPinnedEventNotifier.value?.eventId}",
+        );
+        return event?.eventId == currentPinnedEventNotifier.value?.eventId;
+      },
     );
     if (index < 0) {
       currentPinnedEventNotifier.value = pinnedEvents.first;
