@@ -954,7 +954,7 @@ class ChatController extends State<Chat>
     return eventIndex + addedHeadItemsInChat;
   }
 
-  Future<void> scrollToEventId(String eventId, {bool highlight = false}) async {
+  Future<void> scrollToEventId(String eventId, {bool highlight = true}) async {
     final eventIndex = timeline!.events.indexWhere((e) => e.eventId == eventId);
     if (eventIndex == -1) {
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(

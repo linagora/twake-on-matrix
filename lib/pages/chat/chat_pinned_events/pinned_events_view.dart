@@ -187,6 +187,7 @@ class _PinnedEventsIndicator extends StatelessWidget {
         currentEvent.eventId,
       ),
       index: index,
+      highlightColor: Theme.of(context).highlightColor,
       controller: scrollController,
       child: Container(
         width: PinnedEventsStyle.maxWidthIndicator,
