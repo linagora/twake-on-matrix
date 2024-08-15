@@ -86,10 +86,13 @@ class _ChatListItemAvatarState extends State<ChatListItemAvatar> {
   void updateDirectChatAvatar() {
     final event = widget.joinedRoomUpdate?.timeline?.events?.last;
     final avatarMxc = event?.content['avatar_url'];
-    if (avatarMxc is String &&
-        avatarMxc.isNotEmpty &&
-        event?.senderId == widget.room.directChatMatrixID) {
+    if (event?.senderId != widget.room.directChatMatrixID) {
+      return;
+    }
+    if (avatarMxc is String && avatarMxc.isNotEmpty) {
       avatarUrlNotifier.value = Uri.tryParse(avatarMxc);
+    } else {
+      avatarUrlNotifier.value = Uri();
     }
   }
 
@@ -99,6 +102,8 @@ class _ChatListItemAvatarState extends State<ChatListItemAvatar> {
 
     if (avatarMxc is String && avatarMxc.isNotEmpty) {
       avatarUrlNotifier.value = Uri.tryParse(avatarMxc);
+    } else {
+      avatarUrlNotifier.value = Uri();
     }
   }
 }
