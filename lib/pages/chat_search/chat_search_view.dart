@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content.dart';
@@ -43,7 +42,7 @@ class ChatSearchView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
-        toolbarHeight: AppConfig.toolbarHeight(context),
+        toolbarHeight: ChatSearchStyle.toolbarHeight(context),
         backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
         title: Padding(
