@@ -1,7 +1,7 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
@@ -41,6 +41,8 @@ class _TwakeHeaderState extends State<TwakeHeader>
   final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
     Profile(userId: ''),
   );
+
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   void getCurrentProfile(Client client) async {
     currentProfileNotifier.value = Profile(userId: '');
@@ -96,7 +98,9 @@ class _TwakeHeaderState extends State<TwakeHeader>
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: responsive.isMobile(context)
+          ? LinagoraSysColors.material().background
+          : LinagoraSysColors.material().onPrimary,
       toolbarHeight: TwakeHeaderStyle.toolbarHeight,
       automaticallyImplyLeading: false,
       leadingWidth: TwakeHeaderStyle.leadingWidth,
@@ -106,10 +110,15 @@ class _TwakeHeaderState extends State<TwakeHeader>
           return Align(
             alignment: TwakeHeaderStyle.alignment,
             child: Row(
+              mainAxisAlignment: responsive.isMobile(context)
+                  ? TwakeHeaderStyle.mobileTitleAllignement
+                  : MainAxisAlignment.start,
               children: [
                 if (selectMode != SelectMode.select) ...[
                   Padding(
-                    padding: TwakeHeaderStyle.paddingTitleHeader,
+                    padding: responsive.isMobile(context)
+                        ? EdgeInsets.zero
+                        : TwakeHeaderStyle.paddingTitleHeader,
                     child: Text(
                       L10n.of(context)!.chats,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -169,36 +178,6 @@ class _TwakeHeaderState extends State<TwakeHeader>
                     ),
                   ),
                 ],
-                Expanded(
-                  flex: TwakeHeaderStyle.flexActions,
-                  child: Padding(
-                    padding: TwakeHeaderStyle.actionsPadding,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: PlatformInfos.isMobile
-                          ? InkWell(
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: widget.onClickAvatar,
-                              child: ValueListenableBuilder(
-                                valueListenable: currentProfileNotifier,
-                                builder: (context, profile, _) {
-                                  return Avatar(
-                                    mxContent: profile.avatarUrl,
-                                    name: profile.displayName ??
-                                        profile.userId.localpart,
-                                    size: TwakeHeaderStyle.avatarSize,
-                                    fontSize:
-                                        TwakeHeaderStyle.avatarFontSizeInAppBar,
-                                  );
-                                },
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
               ],
             ),
           );

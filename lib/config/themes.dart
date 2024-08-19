@@ -1,3 +1,5 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,8 @@ abstract class TwakeThemes {
 
   static bool getDisplayNavigationRail(BuildContext context) =>
       !(GoRouterState.of(context).path?.startsWith('/settings') == true);
+
+  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static var fallbackTextTheme = TextTheme(
     bodyLarge: GoogleFonts.inter(
@@ -64,6 +68,7 @@ abstract class TwakeThemes {
     ),
     titleLarge: GoogleFonts.inter(
       fontWeight: FontWeight.w600,
+      letterSpacing: -0.15,
     ),
     titleMedium: GoogleFonts.inter(
       fontWeight: FontWeight.w500,
@@ -314,6 +319,25 @@ abstract class TwakeThemes {
         ),
         navigationBarTheme: NavigationBarThemeData(
           height: 64,
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) {
+              if (states.contains(WidgetState.selected)) {
+                return fallbackTextTheme.labelSmall?.copyWith(
+                  fontSize: 11,
+                  color: LinagoraSysColors.material().primary,
+                );
+              }
+              return responsive.isDesktop(context)
+                  ? fallbackTextTheme.labelSmall?.copyWith(
+                      fontSize: 11,
+                      color: LinagoraRefColors.material().neutral[10],
+                    )
+                  : fallbackTextTheme.labelSmall?.copyWith(
+                      fontSize: 11,
+                      color: LinagoraSysColors.material().tertiary,
+                    );
+            },
+          ),
           backgroundColor: brightness == Brightness.light
               ? LinagoraSysColors.material().surface
               : LinagoraSysColors.material().surfaceDark,
@@ -321,10 +345,15 @@ abstract class TwakeThemes {
               ? Colors.black.withOpacity(0.15)
               : Colors.white.withOpacity(0.15),
           elevation: 4.0,
+          overlayColor: WidgetStateColor.resolveWith(
+            (states) {
+              return Colors.transparent;
+            },
+          ),
         ),
         navigationRailTheme: NavigationRailThemeData(
           indicatorColor: brightness == Brightness.light
-              ? LinagoraSysColors.material().secondaryContainer
+              ? LinagoraSysColors.material().inversePrimary
               : LinagoraSysColors.material().secondaryContainerDark,
         ),
         bottomSheetTheme: BottomSheetThemeData(
@@ -334,6 +363,19 @@ abstract class TwakeThemes {
           surfaceTintColor: brightness == Brightness.light
               ? LinagoraSysColors.material().background
               : LinagoraSysColors.material().backgroundDark,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: LinagoraSysColors.material().surface,
+          selectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+            fontSize: 11,
+            color: LinagoraSysColors.material().primary,
+          ),
+          unselectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+            fontSize: 11,
+            color: LinagoraSysColors.material().tertiary,
+          ),
+          selectedItemColor: LinagoraSysColors.material().primary,
+          unselectedItemColor: LinagoraSysColors.material().tertiary,
         ),
       );
 }

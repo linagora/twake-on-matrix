@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide WidgetBuilder;
+import 'package:matrix/matrix.dart';
 
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
@@ -24,7 +25,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final OnPopInvoked onPopInvoked;
   final VoidCallback onOpenSettings;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
-
+  final ValueNotifier<Profile?> currentProfile;
   final ValueNotifier<String?> activeRoomIdNotifier;
 
   static const ValueKey scaffoldWithNestedNavigationKey =
@@ -46,6 +47,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onPopInvoked,
     required this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
+    required this.currentProfile,
   }) : super(key: key ?? scaffoldWithNestedNavigationKey);
 
   @override
@@ -126,6 +128,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                     onOpenSettings: onOpenSettings,
                                     adaptiveScaffoldBodyArgs:
                                         adaptiveScaffoldBodyArgs,
+                                    currentProfile: currentProfile,
                                   );
                                 },
                               );
@@ -152,6 +155,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       bottomNavigationKey: bottomNavigationKey,
                       onOpenSettings: onOpenSettings,
                       adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
+                      currentProfile: currentProfile,
                     ),
                   ),
                 ],
@@ -163,9 +167,23 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     );
   }
 
+  List<BottomNavigationBarItem> getNavigationDestinationsForBottomNavigation(
+    BuildContext context,
+  ) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestinationForBottomBar(
+        context,
+        currentProfile,
+      );
+    }).toList();
+  }
+
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
-      return destination.getNavigationDestination(context);
+      return destination.getNavigationDestination(
+        context,
+        currentProfile,
+      );
     }).toList();
   }
 }
@@ -180,6 +198,7 @@ class _ColumnPageView extends StatelessWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
+  final ValueNotifier<Profile?> currentProfile;
 
   const _ColumnPageView({
     required this.activeNavigationBarNotifier,
@@ -191,6 +210,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.bottomNavigationKey,
     required this.onOpenSettings,
     required this.adaptiveScaffoldBodyArgs,
+    required this.currentProfile,
   });
 
   @override
@@ -248,20 +268,23 @@ class _ColumnPageView extends StatelessWidget {
           key: bottomNavigationKey,
           builder: (_) {
             return Container(
+              decoration: AppAdaptiveScaffoldBodyViewStyle.navBarBorder,
               height: ResponsiveUtils.heightBottomNavigation,
-              color: LinagoraSysColors.material().surface,
               padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
               child: ListView(
-                padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  NavigationBar(
-                    backgroundColor: LinagoraSysColors.material().surface,
-                    elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
-                    height: ResponsiveUtils.heightBottomNavigationBar,
-                    selectedIndex: _getActiveBottomNavigationBarIndex(),
-                    destinations: getNavigationDestinations(context),
-                    onDestinationSelected: onDestinationSelected,
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                    ),
+                    child: BottomNavigationBar(
+                      elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
+                      currentIndex: _getActiveBottomNavigationBarIndex(),
+                      onTap: onDestinationSelected,
+                      items: getNavigationDestinationsForBottomBar(context),
+                    ),
                   ),
                 ],
               ),
@@ -274,7 +297,21 @@ class _ColumnPageView extends StatelessWidget {
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
-      return destination.getNavigationDestination(context);
+      return destination.getNavigationDestination(
+        context,
+        currentProfile,
+      );
+    }).toList();
+  }
+
+  List<BottomNavigationBarItem> getNavigationDestinationsForBottomBar(
+    BuildContext context,
+  ) {
+    return destinations.map((destination) {
+      return destination.getNavigationDestinationForBottomBar(
+        context,
+        currentProfile,
+      );
     }).toList();
   }
 
