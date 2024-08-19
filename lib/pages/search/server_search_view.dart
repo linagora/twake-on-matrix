@@ -28,10 +28,9 @@ class ServerSearchMessagesList extends StatelessWidget {
             searchController.serverSearchController.searchResultsNotifier,
         builder: (context, serverSearchNotifier, child) {
           if (serverSearchNotifier is PresentationServerSideEmptySearch) {
-            final keyword = searchController.textEditingController.text;
             if (searchController.searchContactAndRecentChatController!
                     .recentAndContactsNotifier.value.isEmpty &&
-                !(keyword.isValidMatrixId && keyword.startsWith('@'))) {
+                !(searchController.isSearchWordUserId)) {
               return child!;
             }
             return const SizedBox.shrink();
