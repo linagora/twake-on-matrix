@@ -6,9 +6,9 @@ import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -44,7 +44,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   });
 
   void clickAction(BuildContext context) async {
-    if (kIsWeb) {
+    if (PlatformInfos.isWeb) {
       try {
         html.Notification.requestPermission();
       } catch (e) {
