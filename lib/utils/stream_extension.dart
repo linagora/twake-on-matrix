@@ -56,17 +56,15 @@ extension StreamExtension on Stream {
     void processMessage() {
       if (controller.isClosed) return;
 
-      if (timer == null) {
-        if (pendingMessage != null) {
-          controller.add(pendingMessage!);
-          pendingMessage = null;
-          timer = Timer(t, () {
-            timer = null;
-            if (pendingMessage != null) {
-              processMessage();
-            }
-          });
-        }
+      if (timer == null && pendingMessage != null) {
+        controller.add(pendingMessage!);
+        pendingMessage = null;
+        timer = Timer(t, () {
+          timer = null;
+          if (pendingMessage != null) {
+            processMessage();
+          }
+        });
       }
     }
 
