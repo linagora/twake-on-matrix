@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dar
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
+import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -109,7 +110,10 @@ extension SendFileWebExtension on Room {
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
-      thumbnail ??= await generateVideoThumbnail(file);
+      thumbnail ??= await generateVideoThumbnail(
+        file,
+        uploadStreamController: uploadStreamController,
+      );
     }
 
     EncryptedFile? encryptedFile;
@@ -442,11 +446,13 @@ extension SendFileWebExtension on Room {
         const Right(GenerateThumbnailSuccess()),
       );
 
+      final thumbnailFileName =
+          '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
+
       return MatrixImageFile(
         bytes: result,
-        name:
-            '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}',
-        mimeType: originalFile.mimeType,
+        name: thumbnailFileName,
+        mimeType: lookupMimeType(thumbnailFileName) ?? 'image/jpeg',
         width: thumbnailBitmap?.width,
         height: thumbnailBitmap?.height,
         blurhash: blurHash,
