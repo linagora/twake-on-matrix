@@ -89,7 +89,25 @@ class ServerSearchController with SearchDebouncerMixin {
         if (success is ServerSearchChatSuccess) {
           updateNextBatch(success.nextBatch);
           if (success.results?.isEmpty == true) {
-            searchResultsNotifier.value = PresentationServerSideEmptySearch();
+            if (isLoadingMoreNotifier.value) {
+              searchResultsNotifier.value = PresentationServerSideSearch(
+                searchResults: [
+                  if (searchResultsNotifier.value
+                      is PresentationServerSideSearch)
+                    ...(searchResultsNotifier.value
+                            as PresentationServerSideSearch)
+                        .searchResults,
+                  ...success.results ?? <Result>[],
+                ]
+                    .where(
+                      (result) =>
+                          result.isDisplayableResult(context: currentContext),
+                    )
+                    .toList(),
+              );
+            } else {
+              searchResultsNotifier.value = PresentationServerSideEmptySearch();
+            }
           } else {
             searchResultsNotifier.value = PresentationServerSideSearch(
               searchResults: [
