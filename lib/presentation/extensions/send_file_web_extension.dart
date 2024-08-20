@@ -169,7 +169,7 @@ extension SendFileWebExtension on Room {
             : null;
         if (uploadThumbnail != null && uploadThumbnail.bytes != null) {
           final uploadThumbnailResponse = await mediaApi.uploadFileWeb(
-            file: file,
+            file: uploadThumbnail,
             cancelToken: cancelToken,
             onSendProgress: (receive, total) {
               uploadStreamController?.add(
