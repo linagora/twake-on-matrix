@@ -112,6 +112,9 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                   ),
                   InkWell(
                     onTap: () {
+                      if (uploadFileState is UploadFileSuccessUIState) {
+                        return;
+                      }
                       uploadManager.cancelUpload(event);
                     },
                     mouseCursor: SystemMouseCursors.click,
