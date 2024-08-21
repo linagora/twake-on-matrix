@@ -3046,12 +3046,122 @@
   "@unselect": {},
   "searchContacts": "Поиск контактов",
   "@searchContacts": {},
+  "leaveGroupSubtitle": "Этот групповой чат останется после того, как вы его покинете",
+  "@leaveGroupSubtitle": {},
+  "fileSavedToDownloads": "Файл сохранен в \"Загрузки\"",
+  "@fileSavedToDownloads": {},
+  "saveFileToDownloadsError": "Не удалось сохранить файл в \"Загрузки\"",
+  "@saveFileToDownloadsError": {},
+  "explainPermissionToDownloadFiles": "Чтобы продолжить, предоставьте {appName} доступ к хранилищу. Это разрешение необходимо, чтобы сохранить файл в папке «Загрузки».",
+  "@explainPermissionToDownloadFiles": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "tapToAllowAccessToYourMicrophone": "Предоставьте доступ к микрофону в «Настройках», чтобы записывать голос",
+  "@tapToAllowAccessToYourMicrophone": {},
+  "phone": "Телефон",
+  "@phone": {},
+  "saveToGallery": "Сохранить в \"Галерею\"",
+  "@saveToGallery": {},
+  "saveFileToGalleryError": "Не удалось сохранить файл в \"Галерею\"",
+  "@saveFileToGalleryError": {},
+  "copiedPublicKeyToClipboard": "Открытый ключ скопирован в буфер обмена.",
+  "@copiedPublicKeyToClipboard": {},
+  "removeFromGroup": "Удалить из группового чата",
+  "@removeFromGroup": {},
+  "removeUser": "Удалить пользователя",
+  "@removeUser": {},
+  "removeReason": "Удалить {user} из группового чата",
+  "@removeReason": {
+    "type": "text",
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "editWorkIdentitiesDescriptions": "Просматривайте ваш профиль: идентификатор Matrix, адрес электронной почты и название компании.",
+  "@editWorkIdentitiesDescriptions": {},
+  "loading": "Загрузка...",
+  "@loading": {},
+  "aWhileAgo": "некоторое время назад",
+  "@aWhileAgo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sendMessage": "Отправить сообщение",
+  "@sendMessage": {},
+  "onlineDayAgo": "онлайн {day}д назад",
+  "@onlineDayAgo": {
+    "placeholders": {
+      "day": {}
+    }
+  },
+  "downloading": "Загрузка",
+  "@downloading": {},
+  "settingUpYourTwake": "Настройка аккаунта\nЭто может занять некоторое время",
+  "@settingUpYourTwake": {},
+  "performingAutomaticalLogin": "Выполнение автоматического входа   через SSO",
+  "@performingAutomaticalLogin": {},
+  "backingUpYourMessage": "Подготовка серверной среды для резервного копирования сообщений",
+  "@backingUpYourMessage": {},
+  "recoveringYourEncryptedChats": "Восстановление зашифрованных чатов",
+  "@recoveringYourEncryptedChats": {},
+  "configureDataEncryption": "Настройка шифрования данных",
+  "@configureDataEncryption": {},
+  "configurationNotFound": "Данные конфигурации не найдены",
+  "@configurationNotFound": {},
+  "fileSavedToGallery": "Файл сохранен в \"Галерею\"",
+  "@fileSavedToGallery": {},
+  "showInChat": "Показать в чате",
+  "@showInChat": {},
+  "viewProfile": "Показать профиль",
+  "@viewProfile": {},
+  "profileInfo": "Профиль",
+  "@profileInfo": {},
+  "saveToDownloads": "Сохранить в \"Загрузки\"",
+  "@saveToDownloads": {},
+  "explainPermissionToGallery": "Чтобы продолжить, разрешите {appName} доступ к галерее. Это необходимо, чтобы сохранить файл.",
+  "@explainPermissionToGallery": {
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "placeholders": {
+          "count": {}
+        }
+      }
+    }
+  },
+  "switchAccounts": "Сменить аккаунт",
+  "@switchAccounts": {},
+  "selectAccount": "Выбор аккаунта",
+  "@selectAccount": {},
+  "youDontHaveAnyContactsYet": "У вас еще нет контактов.",
+  "@youDontHaveAnyContactsYet": {},
+  "errorDialogTitle": "Что-то пошло не так",
+  "@errorDialogTitle": {},
+  "tokenNotFound": "Токен входа не найден",
+  "@tokenNotFound": {},
+  "dangerZone": "Будьте внимательны",
+  "@dangerZone": {},
+  "leaveChatFailed": "Не удалось покинуть чат",
+  "@leaveChatFailed": {},
+  "invalidLoginToken": "Недействительный токен входа",
+  "@invalidLoginToken": {},
+  "privacyPolicy": "Политика конфиденциальности",
+  "@privacyPolicy": {},
+  "byContinuingYourAgreeingToOur": "Продолжая, вы принимаете",
+  "@byContinuingYourAgreeingToOur": {},
+  "@searchContacts": {},
   "shootingTips": "Нажмите, чтобы сделать фото.",
   "shootingWithRecordingTips": "Нажмите, чтобы сделать фото. Удерживайте для записи видео.",
   "shootingOnlyRecordingTips": "Удерживайте для записи видео.",
   "shootingTapRecordingTips": "Нажмите, чтобы записать видео.",
   "loadFailed": "Не удалось загрузить",
-  "loading": "Загрузка...",
   "saving": "Сохранение...",
   "sActionManuallyFocusHint": "ручная фокусировка",
   "sActionPreviewHint": "предпросмотр",
