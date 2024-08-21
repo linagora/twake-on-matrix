@@ -85,7 +85,7 @@ class ExpansionContactListTile extends StatelessWidget {
                             ),
                           ],
                           const SizedBox(width: 8.0),
-                          if (contact.status != null)
+                          if (contact.status == ContactStatus.inactive)
                             ContactStatusWidget(
                               status: contact.status!,
                             ),

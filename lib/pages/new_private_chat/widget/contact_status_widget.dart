@@ -13,7 +13,6 @@ class ContactStatusWidget extends StatelessWidget {
     required this.status,
   });
 
-  final Color? activeColor = LinagoraRefColors.material().secondary[40];
   final Color? inactiveColor = LinagoraRefColors.material().neutral[60];
 
   @override
@@ -26,21 +25,14 @@ class ContactStatusWidget extends StatelessWidget {
           SvgPicture.asset(
             ImagePaths.icStatus,
             // ignore: deprecated_member_use
-            color: status == ContactStatus.active ? activeColor : inactiveColor,
+            color: inactiveColor,
           ),
-          status == ContactStatus.active
-              ? Text(
-                  " ${L10n.of(context)!.online}",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: activeColor,
-                      ),
-                )
-              : Text(
-                  " ${L10n.of(context)!.inactive}",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: inactiveColor,
-                      ),
+          Text(
+            " ${L10n.of(context)!.inactive}",
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: inactiveColor,
                 ),
+          ),
         ],
       ),
     );
