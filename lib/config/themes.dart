@@ -162,6 +162,7 @@ abstract class TwakeThemes {
             ),
           ),
         ),
+        highlightColor: LinagoraRefColors.material().tertiary[80],
         colorScheme: ColorScheme.fromSeed(
           seedColor: seed ?? AppConfig.colorSchemeSeed,
           brightness: brightness,

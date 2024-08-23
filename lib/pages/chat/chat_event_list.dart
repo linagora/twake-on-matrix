@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -150,7 +149,7 @@ class ChatEventList extends StatelessWidget {
                     key: ValueKey(event.eventId),
                     index: index,
                     controller: controller.scrollController,
-                    highlightColor: LinagoraRefColors.material().primary[99],
+                    highlightColor: Theme.of(context).highlightColor,
                     child: event.isVisibleInGui
                         ? Message(
                             key: ValueKey(event.eventId),
