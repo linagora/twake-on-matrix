@@ -477,7 +477,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "contactHasBeenInvitedToTheGroup": "Le contact a été invité au groupe",
+  "contactHasBeenInvitedToTheGroup": "Le contact a été invité au salon",
   "@contactHasBeenInvitedToTheGroup": {
     "type": "text",
     "placeholders": {}
@@ -824,32 +824,32 @@
     "type": "text",
     "placeholders": {}
   },
-  "group": "Groupe",
+  "group": "Salon",
   "@group": {
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Description du groupe",
+  "groupDescription": "Description du salon",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "La description du groupe a été modifiée",
+  "groupDescriptionHasBeenChanged": "La description du salon a été modifiée",
   "@groupDescriptionHasBeenChanged": {
     "type": "text",
     "placeholders": {}
   },
-  "groupIsPublic": "Le groupe est public",
+  "groupIsPublic": "Le salon est public",
   "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
   },
-  "groups": "Groupes",
+  "groups": "Salons",
   "@groups": {
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "Groupe avec {displayname}",
+  "groupWith": "Salon avec {displayname}",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -1293,7 +1293,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Optionnel) Nom du groupe",
+  "optionalGroupName": "(Optionnel) Nom du salon",
   "@optionalGroupName": {
     "type": "text",
     "placeholders": {}
@@ -2011,7 +2011,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoIsAllowedToJoinThisGroup": "Qui est autorisé·e à rejoindre ce groupe",
+  "whoIsAllowedToJoinThisGroup": "Qui est autorisé à rejoindre ce salon",
   "@whoIsAllowedToJoinThisGroup": {
     "type": "text",
     "placeholders": {}
@@ -2327,7 +2327,7 @@
       "user": {}
     }
   },
-  "separateChatTypes": "Séparer les discussions directes et les groupes",
+  "separateChatTypes": "Séparer les discussions directes et les salons",
   "@separateChatTypes": {
     "type": "text",
     "placeholders": {}
@@ -2727,7 +2727,7 @@
   "@noConnection": {},
   "markThisChatAsRead": "Marquer ce message comme lu",
   "@markThisChatAsRead": {},
-  "hasCreatedAGroupChat": "a créé une discussion “{groupName}”",
+  "hasCreatedAGroupChat": "a créé un salon “{groupName}”",
   "@hasCreatedAGroupChat": {
     "type": "text",
     "placeholders": {
@@ -2979,7 +2979,7 @@
   "@showMore": {},
   "unreadMessages": "Messages non lus",
   "@unreadMessages": {},
-  "groupInformation": "Informations sur le groupe",
+  "groupInformation": "Informations sur le salon",
   "@groupInformation": {},
   "linkInvite": "Lien d'invitation",
   "@linkInvite": {},
@@ -2987,11 +2987,11 @@
   "@noDescription": {},
   "description": "Description",
   "@description": {},
-  "groupName": "Nom du groupe",
+  "groupName": "Nom du salon",
   "@groupName": {},
-  "descriptionHelper": "Vous pouvez fournir une description facultative pour votre groupe.",
+  "descriptionHelper": "Vous pouvez fournir une description facultative pour votre salon.",
   "@descriptionHelper": {},
-  "groupNameCannotBeEmpty": "Le nom du groupe ne peut pas être vide",
+  "groupNameCannotBeEmpty": "Le nom du salon ne peut pas être vide",
   "@groupNameCannotBeEmpty": {},
   "sharedMediaAndFiles": "Médias et fichiers partagés",
   "@sharedMediaAndFiles": {},
@@ -3079,17 +3079,17 @@
   "@tokenNotFound": {},
   "dangerZone": "Zone de danger",
   "@dangerZone": {},
-  "leaveGroupSubtitle": "Ce groupe existera toujours après votre départ",
+  "leaveGroupSubtitle": "Ce salon existera toujours après votre départ",
   "@leaveGroupSubtitle": {},
-  "leaveChatFailed": "Échec de la sortie du chat",
+  "leaveChatFailed": "Échec de la sortie du salon",
   "@leaveChatFailed": {},
   "invalidLoginToken": "Jeton de connexion invalide",
   "@invalidLoginToken": {},
   "copiedPublicKeyToClipboard": "Clé publique copiée dans le presse-papiers.",
   "@copiedPublicKeyToClipboard": {},
-  "removeFromGroup": "Retirer du groupe",
+  "removeFromGroup": "Retirer du salon",
   "@removeFromGroup": {},
-  "removeReason": "Retirer {user} du groupe",
+  "removeReason": "Retirer {user} du salon",
   "@removeReason": {
     "type": "text",
     "placeholders": {
