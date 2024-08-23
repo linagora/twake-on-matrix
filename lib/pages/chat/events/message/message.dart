@@ -258,7 +258,7 @@ class _MessageState extends State<Message> {
                 constraints: BoxConstraints(
                   maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                padding: MessageStyle.paddingMessage,
                 alignment: Alignment.bottomCenter,
                 child: SwipeableMessage(
                   event: widget.event,

@@ -92,6 +92,9 @@ class MessageStyle {
         bottom: 4.0,
       );
 
+  static EdgeInsets get paddingMessage =>
+      const EdgeInsets.symmetric(vertical: 2.0);
+
   static EdgeInsets get paddingTimestamp => const EdgeInsets.only(
         left: 8.0,
         right: 4.0,
