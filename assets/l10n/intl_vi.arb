@@ -3095,7 +3095,7 @@
   },
   "sendMessage": "Gửi tin nhắn",
   "@sendMessage": {},
-  "onlineDayAgo": "trực tuyến{ngày}trước",
+  "onlineDayAgo": "trực tuyến {day} trước",
   "@onlineDayAgo": {
     "placeholders": {
       "day": {}
