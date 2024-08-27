@@ -86,7 +86,7 @@ dependencies:
   flutter_blurhash: ^0.8.2
   flutter_cache_manager: ^3.3.0
   flutter_foreground_task: ^3.10.0
-  flutter_local_notifications: ^17.1.2
+  flutter_local_notifications: 17.2.2
   flutter_localizations:
     sdk: flutter
   flutter_map: ^4.0.0
