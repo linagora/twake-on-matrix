@@ -1,3 +1,9 @@
+## [2.6.2+2330] - 2024-08-27
+
+### Fixed
+- #2002 Remove unused deeplink
+- #2002 Upgrade flutter_local_notifications to fix USE_FULL_SCREEN_INTENT permission
+
 ## [2.6.1+2330] - 2024-07-25
 
 ### Fixed
