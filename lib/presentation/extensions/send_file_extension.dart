@@ -94,17 +94,16 @@ extension SendFileExtension on Room {
       }
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
-      final targetPath =
-          await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
-              .create();
-      fileInfo = fileInfo as ImageFileInfo;
+      final fileName =
+          '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
+      final targetPath = await File('${tempDir.path}/$fileName').create();
       await _generateThumbnail(
-        fileInfo,
+        fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
         uploadStreamController: uploadStreamController,
       );
       thumbnail = ImageFileInfo(
-        fileInfo.fileName,
+        fileName,
         targetPath.path,
         await targetPath.length(),
         width: fileInfo.width,
@@ -629,13 +628,10 @@ extension SendFileExtension on Room {
         height = imageDimension.height.toInt();
       }
       uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
-      final newFileName =
-          '${result.name}.${AppConfig.imageCompressFormmat.name}';
       return ImageFileInfo(
-        newFileName,
+        result.name,
         result.path,
         size,
-        customMimeType: lookupMimeType(newFileName) ?? 'image/jpeg',
         width: width,
         height: height,
       );
