@@ -25,7 +25,6 @@ import 'package:image/image.dart' as img;
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
-import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -706,11 +705,9 @@ extension SendFileExtension on Room {
     }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
-    final newFileName = '${tempThumbnailFile.path.split("/").last}.jpg';
     final newThumbnail = ImageFileInfo(
-      newFileName,
+      tempThumbnailFile.path.split('/').last,
       tempThumbnailFile.path,
-      customMimeType: lookupMimeType(newFileName) ?? 'image/jpeg',
       fileSize,
       width: width,
       height: height,
