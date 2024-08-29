@@ -110,10 +110,7 @@ extension SendFileWebExtension on Room {
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
-      thumbnail ??= await generateVideoThumbnail(
-        file,
-        uploadStreamController: uploadStreamController,
-      );
+      thumbnail ??= await generateVideoThumbnail(file);
     }
 
     EncryptedFile? encryptedFile;
