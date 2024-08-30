@@ -24,8 +24,7 @@ class ContactStatusWidget extends StatelessWidget {
         children: [
           SvgPicture.asset(
             ImagePaths.icStatus,
-            // ignore: deprecated_member_use
-            color: inactiveColor,
+            colorFilter: ColorFilter.mode(inactiveColor!, BlendMode.srcIn),
           ),
           Text(
             " ${L10n.of(context)!.inactive}",
