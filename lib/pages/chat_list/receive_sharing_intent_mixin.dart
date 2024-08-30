@@ -1,5 +1,5 @@
 import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
+import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -40,10 +40,11 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void openSharePage() {
-    if (TwakeApp.router.activeRoomId?.isNotEmpty == true) {
-      TwakeApp.router.go('/rooms');
-    }
-    TwakeApp.router.push('/share');
+    Navigator.of(TwakeApp.routerKey.currentContext!).push(
+      MaterialPageRoute(
+        builder: (context) => const Share(),
+      ),
+    );
   }
 
   void _processIncomingSharedText(String? text) {
