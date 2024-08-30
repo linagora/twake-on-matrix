@@ -429,7 +429,9 @@ extension SendFileExtension on Room {
       await File('${tempDir.path}/$fileName').create();
 
   String _generateThumbnailFileName(
-          String formattedDateTime, FileInfo fileInfo,) =>
+    String formattedDateTime,
+    FileInfo fileInfo,
+  ) =>
       '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
 
   Future<ImageFileInfo> convertHeicToJpgImage(ImageFileInfo fileInfo) async {
