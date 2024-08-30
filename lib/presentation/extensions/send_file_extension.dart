@@ -93,9 +93,8 @@ extension SendFileExtension on Room {
       }
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
-      final fileName =
-          '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
-      final targetPath = await File('${tempDir.path}/$fileName').create();
+      final fileName = _generateThumbnailFileName(formattedDateTime, fileInfo);
+      final targetPath = await _getTargetParh(tempDir, fileName);
       await _generateThumbnail(
         fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
@@ -426,6 +425,13 @@ extension SendFileExtension on Room {
     return eventId;
   }
 
+  Future<File> _getTargetParh(Directory tempDir, String fileName) async =>
+      await File('${tempDir.path}/$fileName').create();
+
+  String _generateThumbnailFileName(
+          String formattedDateTime, FileInfo fileInfo,) =>
+      '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
+
   Future<ImageFileInfo> convertHeicToJpgImage(ImageFileInfo fileInfo) async {
     final convertedFilePath =
         StorageDirectoryManager.instance.convertFileExtension(
@@ -706,7 +712,7 @@ extension SendFileExtension on Room {
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
     final newThumbnail = ImageFileInfo(
-      tempThumbnailFile.path.split('/').last,
+      tempThumbnailFile.path.split("/").last,
       tempThumbnailFile.path,
       fileSize,
       width: width,

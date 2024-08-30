@@ -443,8 +443,7 @@ extension SendFileWebExtension on Room {
         const Right(GenerateThumbnailSuccess()),
       );
 
-      final thumbnailFileName =
-          '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
+      final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
 
       return MatrixImageFile(
         bytes: result,
@@ -466,6 +465,9 @@ extension SendFileWebExtension on Room {
       return null;
     }
   }
+
+  String _getVideoThumbnailFileName(MatrixVideoFile originalFile) =>
+      '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
 
   Future<int?> _getVideoDuration(
     MatrixVideoFile originalFile,
