@@ -236,17 +236,23 @@ mixin class ContactsViewControllerMixin {
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
         if (failure is GetContactsFailure) {
-          return Left(
-            GetPresentationContactsFailure(
-              keyword: keyword,
+          return _handleSearchExternalContact(
+            keyword,
+            otherResult: Left(
+              GetPresentationContactsFailure(
+                keyword: keyword,
+              ),
             ),
           );
         }
 
         if (failure is GetContactsIsEmpty) {
-          return Left(
-            GetPresentationContactsEmpty(
-              keyword: keyword,
+          return _handleSearchExternalContact(
+            keyword,
+            otherResult: Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
             ),
           );
         }
@@ -296,17 +302,23 @@ mixin class ContactsViewControllerMixin {
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
         if (failure is GetPhonebookContactsFailure) {
-          return Left(
-            GetPresentationContactsFailure(
-              keyword: keyword,
+          return _handleSearchExternalContact(
+            keyword,
+            otherResult: Left(
+              GetPresentationContactsFailure(
+                keyword: keyword,
+              ),
             ),
           );
         }
 
         if (failure is GetPhonebookContactsIsEmpty) {
-          return Left(
-            GetPresentationContactsEmpty(
-              keyword: keyword,
+          return _handleSearchExternalContact(
+            keyword,
+            otherResult: Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
             ),
           );
         }
@@ -336,6 +348,25 @@ mixin class ContactsViewControllerMixin {
         return Right(success);
       },
     );
+  }
+
+  Either<Failure, Success> _handleSearchExternalContact(
+    String keyword, {
+    required Either<Failure, Success> otherResult,
+  }) {
+    if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+      return Right(
+        PresentationExternalContactSuccess(
+          contact: PresentationContact(
+            matrixId: keyword,
+            displayName: keyword.substring(1),
+            type: ContactType.external,
+          ),
+        ),
+      );
+    } else {
+      return otherResult;
+    }
   }
 
   Future<void> _refreshRecentContacts({
