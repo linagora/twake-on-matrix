@@ -40,6 +40,10 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void openSharePage() {
+    if (TwakeApp.router.routeInformationProvider.value.uri.path
+        .startsWith('/rooms/')) {
+      TwakeApp.router.go('/rooms');
+    }
     Navigator.of(TwakeApp.routerKey.currentContext!).push(
       MaterialPageRoute(
         builder: (context) => const Share(),
