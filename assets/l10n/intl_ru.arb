@@ -3080,5 +3080,22 @@
   "unselect": "Отменить выбор",
   "@unselect": {},
   "searchContacts": "Поиск контактов",
-  "@searchContacts": {}
+  "@searchContacts": {},
+  "shootingTips": "Нажмите, чтобы сделать фото.",
+  "shootingWithRecordingTips": "Нажмите, чтобы сделать фото. Удерживайте для записи видео.",
+  "shootingOnlyRecordingTips": "Удерживайте для записи видео.",
+  "shootingTapRecordingTips": "Нажмите, чтобы записать видео.",
+  "loadFailed": "Не удалось загрузить",
+  "loading": "Загрузка...",
+  "saving": "Сохранение...",
+  "sActionManuallyFocusHint": "ручная фокусировка",
+  "sActionPreviewHint": "предпросмотр",
+  "sActionRecordHint": "запись",
+  "sActionShootHint": "сделать фото",
+  "sActionShootingButtonTooltip": "кнопка съемки",
+  "sActionStopRecordingHint": "остановить запись",
+  "sCameraLensDirectionLabel": "Направление объектива камеры: {value}",
+  "sCameraPreviewLabel": "Предпросмотр камеры: {value}",
+  "sFlashModeLabel": "Режим вспышки: {mode}",
+  "sSwitchCameraLensDirectionLabel": "Переключиться на камеру {value}"
 }

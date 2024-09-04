@@ -3086,5 +3086,21 @@
   "byContinuingYourAgreeingToOur": "By continuing, you're agreeing to our",
   "youDontHaveAnyContactsYet": "You dont have any contacts yet.",
   "loading": "Loading...",
-  "errorDialogTitle": "Oops, something went wrong"
+  "errorDialogTitle": "Oops, something went wrong",
+  "shootingTips": "Tap to take photo.",
+  "shootingWithRecordingTips": "Tap to take photo. Long press to record video.",
+  "shootingOnlyRecordingTips": "Long press to record video.",
+  "shootingTapRecordingTips": "Tap to record video.",
+  "loadFailed": "Load failed",
+  "saving": "Saving...",
+  "sActionManuallyFocusHint": "manually focus",
+  "sActionPreviewHint": "preview",
+  "sActionRecordHint": "record",
+  "sActionShootHint": "take picture",
+  "sActionShootingButtonTooltip": "shooting button",
+  "sActionStopRecordingHint": "stop recording",
+  "sCameraLensDirectionLabel": "Camera lens direction: {value}",
+  "sCameraPreviewLabel": "Camera preview: {value}",
+  "sFlashModeLabel": "Flash mode: {mode}",
+  "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera"
 }

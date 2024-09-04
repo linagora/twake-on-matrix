@@ -1,3 +1,5 @@
+import 'package:fluffychat/config/localizations/localization_service.dart';
+import 'package:fluffychat/utils/localized_camera_picker_text_delegate.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:flutter/material.dart';
@@ -80,14 +82,36 @@ mixin CommonMediaPickerMixin {
       context,
       pickerConfig: onlyImage
           ? CameraPickerConfig(
+              textDelegate: getTextDelegateForLocale(
+                context,
+              ),
               enableAudio: false,
               onError: (e, a) => _onError(context: context, error: e),
             )
           : CameraPickerConfig(
+              textDelegate: getTextDelegateForLocale(
+                context,
+              ),
               enableRecording: true,
               onError: (e, a) => _onError(context: context, error: e),
             ),
-      locale: View.of(context).platformDispatcher.locale,
     );
+  }
+
+  CameraPickerTextDelegate getTextDelegateForLocale(
+    BuildContext context,
+  ) {
+    switch (LocalizationService.currentLocale.value.languageCode) {
+      case 'ru':
+      case 'fr':
+        return LocalizedCameraPickerTextDelegate(
+          context,
+          LocalizationService.currentLocale.value.languageCode,
+        );
+      default:
+        return cameraPickerTextDelegateFromLocale(
+          LocalizationService.currentLocale.value,
+        );
+    }
   }
 }
