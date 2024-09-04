@@ -94,7 +94,7 @@ extension SendFileExtension on Room {
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
       final fileName = _generateThumbnailFileName(formattedDateTime, fileInfo);
-      final targetPath = await _getTargetParh(tempDir, fileName);
+      final targetPath = await _createThumbnailFile(tempDir, fileName);
       await _generateThumbnail(
         fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
@@ -425,7 +425,7 @@ extension SendFileExtension on Room {
     return eventId;
   }
 
-  Future<File> _getTargetParh(Directory tempDir, String fileName) async =>
+  Future<File> _createThumbnailFile(Directory tempDir, String fileName) async =>
       await File('${tempDir.path}/$fileName').create();
 
   String _generateThumbnailFileName(
