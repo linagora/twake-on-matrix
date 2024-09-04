@@ -93,17 +93,15 @@ extension SendFileExtension on Room {
       }
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
-      final targetPath =
-          await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
-              .create();
-      fileInfo = fileInfo as ImageFileInfo;
+      final fileName = _generateThumbnailFileName(formattedDateTime, fileInfo);
+      final targetPath = await _createThumbnailFile(tempDir, fileName);
       await _generateThumbnail(
-        fileInfo,
+        fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
         uploadStreamController: uploadStreamController,
       );
       thumbnail = ImageFileInfo(
-        fileInfo.fileName,
+        fileName,
         targetPath.path,
         await targetPath.length(),
         width: fileInfo.width,
@@ -430,6 +428,15 @@ extension SendFileExtension on Room {
     return eventId;
   }
 
+  Future<File> _createThumbnailFile(Directory tempDir, String fileName) async =>
+      await File('${tempDir.path}/$fileName').create();
+
+  String _generateThumbnailFileName(
+    String formattedDateTime,
+    FileInfo fileInfo,
+  ) =>
+      '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
+
   Future<ImageFileInfo> convertHeicToJpgImage(ImageFileInfo fileInfo) async {
     final convertedFilePath =
         StorageDirectoryManager.instance.convertFileExtension(
@@ -632,7 +639,7 @@ extension SendFileExtension on Room {
       }
       uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
       return ImageFileInfo(
-        '${result.name}.${AppConfig.imageCompressFormmat.name}',
+        result.name,
         result.path,
         size,
         width: width,

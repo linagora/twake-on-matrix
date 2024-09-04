@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dar
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 import 'package:image/image.dart';
+import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -169,7 +170,7 @@ extension SendFileWebExtension on Room {
             : null;
         if (uploadThumbnail != null && uploadThumbnail.bytes != null) {
           final uploadThumbnailResponse = await mediaApi.uploadFileWeb(
-            file: file,
+            file: uploadThumbnail,
             cancelToken: cancelToken,
             onSendProgress: (receive, total) {
               uploadStreamController?.add(
@@ -442,11 +443,12 @@ extension SendFileWebExtension on Room {
         const Right(GenerateThumbnailSuccess()),
       );
 
+      final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
+
       return MatrixImageFile(
         bytes: result,
-        name:
-            '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}',
-        mimeType: originalFile.mimeType,
+        name: thumbnailFileName,
+        mimeType: lookupMimeType(thumbnailFileName) ?? 'image/jpeg',
         width: thumbnailBitmap?.width,
         height: thumbnailBitmap?.height,
         blurhash: blurHash,
@@ -463,6 +465,9 @@ extension SendFileWebExtension on Room {
       return null;
     }
   }
+
+  String _getVideoThumbnailFileName(MatrixVideoFile originalFile) =>
+      '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
 
   Future<int?> _getVideoDuration(
     MatrixVideoFile originalFile,
