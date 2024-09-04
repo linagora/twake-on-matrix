@@ -40,16 +40,27 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void openSharePage() {
-    if (TwakeApp.router.routeInformationProvider.value.uri.path
-        .startsWith('/rooms/')) {
+    if (isCurrentPageIsNotRooms()) {
+      return;
+    }
+    if (isCurrentPageIsInRooms()) {
       TwakeApp.router.go('/rooms');
     }
+
     Navigator.of(TwakeApp.routerKey.currentContext!).push(
       MaterialPageRoute(
         builder: (context) => const Share(),
       ),
     );
   }
+
+  bool isCurrentPageIsInRooms() =>
+      TwakeApp.router.routeInformationProvider.value.uri.path
+          .startsWith('/rooms/');
+
+  bool isCurrentPageIsNotRooms() =>
+      !TwakeApp.router.routeInformationProvider.value.uri.path
+          .startsWith('/rooms');
 
   void _processIncomingSharedText(String? text) {
     if (text == null) return;
