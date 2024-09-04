@@ -3085,5 +3085,22 @@
   "@searchContacts": {},
   "phone": "Téléphone",
   "viewProfile": "Voir le profil",
-  "profileInfo": "Informations du profil"
+  "profileInfo": "Informations du profil",
+  "shootingTips": "Appuyez pour prendre une photo.",
+  "shootingWithRecordingTips": "Appuyez pour prendre une photo. Appuyez longuement pour enregistrer une vidéo.",
+  "shootingOnlyRecordingTips": "Appuyez longuement pour enregistrer une vidéo.",
+  "shootingTapRecordingTips": "Appuyez pour enregistrer une vidéo.",
+  "loadFailed": "Échec du chargement",
+  "loading": "Chargement...",
+  "saving": "Enregistrement...",
+  "sActionManuallyFocusHint": "mettre au point manuellement",
+  "sActionPreviewHint": "aperçu",
+  "sActionRecordHint": "enregistrer",
+  "sActionShootHint": "prendre une photo",
+  "sActionShootingButtonTooltip": "bouton de prise de vue",
+  "sActionStopRecordingHint": "arrêter l'enregistrement",
+  "sCameraLensDirectionLabel": "Direction de la lentille de la caméra : {value}",
+  "sCameraPreviewLabel": "Aperçu de la caméra : {value}",
+  "sFlashModeLabel": "Mode flash : {mode}",
+  "sSwitchCameraLensDirectionLabel": "Passer à la caméra {value}"
 }
