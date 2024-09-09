@@ -186,11 +186,11 @@ class ParticipantListItem extends StatelessWidget {
                           Icons.person_search,
                           color: LinagoraSysColors.material().onSurface,
                         ),
-                        label: L10n.of(context)?.viewProfile != null
+                        label: L10n.of(bottomSheetContext)?.viewProfile != null
                             ? Row(
                                 children: [
                                   Text(
-                                    L10n.of(context)!.viewProfile,
+                                    L10n.of(bottomSheetContext)!.viewProfile,
                                     style: TextStyle(
                                       color: LinagoraSysColors.material()
                                           .onSurface,
