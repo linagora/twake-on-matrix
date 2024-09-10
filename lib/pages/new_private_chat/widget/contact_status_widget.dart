@@ -17,23 +17,26 @@ class ContactStatusWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            ImagePaths.icStatus,
-            colorFilter: ColorFilter.mode(inactiveColor!, BlendMode.srcIn),
-          ),
-          Text(
-            " ${L10n.of(context)!.inactive}",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: inactiveColor,
+    return status == ContactStatus.inactive
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  ImagePaths.icStatus,
+                  colorFilter:
+                      ColorFilter.mode(inactiveColor!, BlendMode.srcIn),
                 ),
-          ),
-        ],
-      ),
-    );
+                Text(
+                  " ${L10n.of(context)!.inactive}",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: inactiveColor,
+                      ),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }

@@ -43,5 +43,22 @@ void main() {
             ?.fontSize,
       );
     });
+
+    testWidgets('renders correctly for active status',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: Scaffold(
+            body: ContactStatusWidget(status: ContactStatus.active),
+          ),
+        ),
+      );
+
+      expect(find.byType(SvgPicture), findsNothing);
+      expect(find.byType(Text), findsNothing);
+      expect(find.byType(SizedBox), findsOneWidget);
+    });
   });
 }
