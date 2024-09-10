@@ -93,6 +93,7 @@ class ShareController extends State<Share>
     Map<String, dynamic>? textContent,
   }) {
     if (textContent == null) return;
+    Navigator.pop(context);
     room.sendEvent(textContent);
     context.go('/rooms/${room.id}');
   }
@@ -107,6 +108,7 @@ class ShareController extends State<Share>
             content?.tryGet<String>('msgtype') ==
             TwakeEventTypes.shareFileEventType,
       )) {
+        Navigator.pop(context);
         context.go(
           '/rooms/${room.id}',
           extra: ChatRouterInputArgument(
