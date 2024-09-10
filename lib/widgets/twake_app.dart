@@ -44,6 +44,12 @@ class TwakeApp extends StatefulWidget {
     },
   );
 
+  static bool isCurrentPageIsInRooms() =>
+      router.routeInformationProvider.value.uri.path.startsWith('/rooms/');
+
+  static bool isCurrentPageIsNotRooms() =>
+      !router.routeInformationProvider.value.uri.path.startsWith('/rooms');
+
   @override
   TwakeAppState createState() => TwakeAppState();
 }

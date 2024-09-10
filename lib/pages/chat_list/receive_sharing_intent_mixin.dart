@@ -3,6 +3,8 @@ import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
+import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -40,11 +42,17 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void openSharePage() {
-    if (isCurrentPageIsNotRooms()) {
+    if (TwakeApp.isCurrentPageIsNotRooms()) {
       return;
     }
-    if (isCurrentPageIsInRooms()) {
-      TwakeApp.router.go('/rooms');
+    if (TwakeApp.isCurrentPageIsInRooms()) {
+      TwakeApp.router.go(
+        '/rooms',
+        extra: ReceiveContentArgs(
+          newActiveClient: matrixState.client,
+          activeDestination: AdaptiveDestinationEnum.rooms,
+        ),
+      );
     }
 
     Navigator.of(TwakeApp.routerKey.currentContext!).push(
@@ -53,14 +61,6 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       ),
     );
   }
-
-  bool isCurrentPageIsInRooms() =>
-      TwakeApp.router.routeInformationProvider.value.uri.path
-          .startsWith('/rooms/');
-
-  bool isCurrentPageIsNotRooms() =>
-      !TwakeApp.router.routeInformationProvider.value.uri.path
-          .startsWith('/rooms');
 
   void _processIncomingSharedText(String? text) {
     if (text == null) return;
