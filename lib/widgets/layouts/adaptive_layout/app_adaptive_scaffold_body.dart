@@ -11,6 +11,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -151,6 +152,14 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     });
   }
 
+  void _handleReceiveContent(ReceiveContentArgs args) {
+    if (args.activeDestination == null) return;
+    if (args.activeDestination != AdaptiveDestinationEnum.rooms) {
+      activeNavigationBarNotifier.value = AdaptiveDestinationEnum.rooms;
+      pageController.jumpToPage(AdaptiveDestinationEnum.rooms.index);
+    }
+  }
+
   MatrixState get matrix => Matrix.of(context);
 
   @override
@@ -184,6 +193,10 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     if (oldWidget.args != widget.args &&
         widget.args is SwitchActiveAccountBodyArgs) {
       _handleSwitchAccount(oldWidget);
+    }
+
+    if (widget.args is ReceiveContentArgs) {
+      _handleReceiveContent(widget.args as ReceiveContentArgs);
     }
     super.didUpdateWidget(oldWidget);
   }

@@ -27,6 +27,8 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
+import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -387,7 +389,7 @@ class BackgroundPush {
   }) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
-      _clearAllNavigatorAvailable(roomId: roomId);
+      await _clearAllNavigatorAvailable(roomId: roomId);
       if (_matrixState == null || roomId == null) {
         return;
       }
@@ -626,9 +628,27 @@ class BackgroundPush {
     );
   }
 
-  void _clearAllNavigatorAvailable({
+  Future<void> _handleInnerNavigation() async {
+    if (TwakeApp.isCurrentPageIsNotRooms()) {
+      return;
+    }
+
+    if (TwakeApp.isCurrentPageIsInRooms()) {
+      Logs().d("BackgroundPush::_handleInnerNavigation():  CurrentRoomActive");
+      TwakeApp.router.go(
+        '/rooms',
+        extra: ReceiveContentArgs(
+          newActiveClient: client,
+          activeDestination: AdaptiveDestinationEnum.rooms,
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+  }
+
+  Future<void> _clearAllNavigatorAvailable({
     String? roomId,
-  }) {
+  }) async {
     Logs().d(
       "BackgroundPush:: - Current active room id ${TwakeApp.router.activeRoomId}",
     );
@@ -636,11 +656,7 @@ class BackgroundPush {
       return;
     }
 
-    final canPopNavigation = TwakeApp.router.routerDelegate.canPop();
-    Logs().d("BackgroundPush:: - Can pop other Navigation  $canPopNavigation");
-    if (canPopNavigation) {
-      TwakeApp.router.routerDelegate.pop();
-    }
+    await _handleInnerNavigation();
   }
 
   void _handleRedirectRoom(
