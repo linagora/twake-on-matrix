@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:fluffychat/utils/sync_update_extension.dart';
@@ -33,7 +32,8 @@ extension StreamExtension on Stream<SyncUpdate> {
           processMessage();
           return;
         }
-        final mergeData = pendingMessage!.combineJoinedRoomUpdateEvents(other: data);
+        final mergeData =
+            pendingMessage!.combineJoinedRoomUpdateEvents(other: data);
         pendingMessage = mergeData;
         processMessage();
       },

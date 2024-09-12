@@ -75,15 +75,21 @@ class _ChatListItemAvatarState extends State<ChatListItemAvatar> {
 
   bool get isDirectChatAvatarUpdated {
     return widget.room.isDirectChat &&
-        widget.joinedRoomUpdate?.timeline?.events?.where(
-          (event) => event.type == EventTypes.RoomMember,
-        ).isNotEmpty == true;
+        widget.joinedRoomUpdate?.timeline?.events
+                ?.where(
+                  (event) => event.type == EventTypes.RoomMember,
+                )
+                .isNotEmpty ==
+            true;
   }
 
   bool get isGroupChatAvatarUpdated =>
-      widget.joinedRoomUpdate?.timeline?.events?.where(
-        (event) => event.type == EventTypes.RoomAvatar,
-      ).isNotEmpty == true;
+      widget.joinedRoomUpdate?.timeline?.events
+          ?.where(
+            (event) => event.type == EventTypes.RoomAvatar,
+          )
+          .isNotEmpty ==
+      true;
 
   void updateDirectChatAvatar() {
     final event = widget.joinedRoomUpdate?.timeline?.events?.lastWhere(
@@ -97,10 +103,11 @@ class _ChatListItemAvatarState extends State<ChatListItemAvatar> {
   }
 
   void updateGroupAvatar() {
-    final avatarMxc =
-        widget.joinedRoomUpdate?.timeline?.events?.lastWhere(
+    final avatarMxc = widget.joinedRoomUpdate?.timeline?.events
+        ?.lastWhere(
           (event) => event.type == EventTypes.RoomAvatar,
-        ).content['url'];
+        )
+        .content['url'];
     updateAvatarUrl(avatarMxc);
   }
 

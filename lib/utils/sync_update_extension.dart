@@ -15,7 +15,8 @@ extension SyncUpdateExtension on SyncUpdate {
             other.rooms!.join![roomId]!.timeline?.events ?? {},
           );
         } else {
-          if (newSyncUpdate.rooms?.join != null && other.rooms?.join?[roomId] != null) {
+          if (newSyncUpdate.rooms?.join != null &&
+              other.rooms?.join?[roomId] != null) {
             newSyncUpdate.rooms!.join![roomId] = other.rooms!.join![roomId]!;
           }
         }
