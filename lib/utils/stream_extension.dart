@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:matrix/matrix.dart';
-
 extension StreamExtension on Stream {
   /// Returns a new Stream which outputs only `true` for every update of the original
   /// stream, ratelimited by the Duration t
@@ -45,44 +43,6 @@ extension StreamExtension on Stream {
       subscription.cancel();
       controller.close();
     };
-    return controller.stream;
-  }
-
-  Stream<SyncUpdate> rateLimitWithSyncUpdate(Duration t) {
-    final controller = StreamController<SyncUpdate>();
-    Timer? timer;
-    SyncUpdate? pendingMessage;
-
-    void processMessage() {
-      if (controller.isClosed) return;
-
-      if (timer == null && pendingMessage != null) {
-        controller.add(pendingMessage!);
-        pendingMessage = null;
-        timer = Timer(t, () {
-          timer = null;
-          if (pendingMessage != null) {
-            processMessage();
-          }
-        });
-      }
-    }
-
-    final subscription = listen(
-      (data) {
-        pendingMessage = data;
-        processMessage();
-      },
-      onDone: () => controller.close(),
-      onError: (e, s) => controller.addError(e, s),
-    );
-
-    controller.onCancel = () {
-      subscription.cancel();
-      timer?.cancel();
-      controller.close();
-    };
-
     return controller.stream;
   }
 }

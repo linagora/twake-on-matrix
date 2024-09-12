@@ -8,7 +8,7 @@ import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/utils/stream_extension.dart';
+import 'package:fluffychat/utils/stream_sync_update_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
