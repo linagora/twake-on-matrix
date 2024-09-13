@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -40,6 +41,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
+  final _responsiveUtils = getIt.get<ResponsiveUtils>();
 
   StreamSubscription? onAccountDataSubscription;
 
@@ -69,23 +71,22 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       settingEnum == optionsSelectNotifier.value;
 
   void logoutAction() async {
-    final noBackup = showChatBackupSwitch.value == true;
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
       Logs().e(
         'SettingsController()::logoutAction - Twake context is null',
       );
     }
-    if (await showOkCancelAlertDialog(
+    if (await showConfirmAlertDialog(
           useRootNavigator: false,
           context: twakeContext!,
+          responsiveUtils: _responsiveUtils,
           title: L10n.of(context)!.areYouSureYouWantToLogout,
-          message: L10n.of(context)!.noBackupWarning,
-          isDestructiveAction: noBackup,
+          message: L10n.of(context)!.logoutDialogWarning,
           okLabel: L10n.of(context)!.logout,
           cancelLabel: L10n.of(context)!.cancel,
         ) ==
-        OkCancelResult.cancel) {
+        ConfirmResult.cancel) {
       return;
     }
     if (PlatformInfos.isMobile) {

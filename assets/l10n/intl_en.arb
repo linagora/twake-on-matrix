@@ -3086,5 +3086,6 @@
   "byContinuingYourAgreeingToOur": "By continuing, you're agreeing to our",
   "youDontHaveAnyContactsYet": "You dont have any contacts yet.",
   "loading": "Loading...",
-  "errorDialogTitle": "Oops, something went wrong"
+  "errorDialogTitle": "Oops, something went wrong",
+  "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before loggingout"
 }
