@@ -53,25 +53,24 @@ class _PermissionDialogState extends State<PermissionDialog>
             borderRadius: BorderRadius.circular(28.0),
             color: Theme.of(context).colorScheme.surface,
           ),
-          width: 312,
-          height: 280,
+          width: MediaQuery.sizeOf(context).width * 0.85,
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.icon != null) ...[
+          child: IntrinsicHeight(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (widget.icon != null) ...[
+                  const SizedBox(
+                    height: 24.0,
+                  ),
+                  widget.icon!,
+                ],
                 const SizedBox(
-                  height: 24.0,
+                  height: 16.0,
                 ),
-                widget.icon!,
-              ],
-              const SizedBox(
-                height: 16.0,
-              ),
-              widget.explainTextRequestPermission,
-              const SizedBox(height: 24.0),
-              Expanded(
-                child: Row(
+                widget.explainTextRequestPermission,
+                const SizedBox(height: 24.0),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     _PermissionTextButton(
@@ -97,8 +96,9 @@ class _PermissionDialogState extends State<PermissionDialog>
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24.0),
+              ],
+            ),
           ),
         ),
       ),

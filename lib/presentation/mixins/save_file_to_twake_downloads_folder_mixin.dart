@@ -244,6 +244,7 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
                 L10n.of(context)!.explainPermissionToDownloadFiles(
                   AppConfig.applicationName,
                 ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               onAcceptButton: () =>
                   PermissionHandlerService().goToSettingsForPermissionActions(),

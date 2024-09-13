@@ -42,7 +42,7 @@ class ContactsWarningBannerView extends StatelessWidget {
                 Padding(
                   padding: ContactsWarningBannerStyle.paddingForContentBanner,
                   child: Text(
-                    L10n.of(context)!.contactsWarningBannerTitle,
+                    L10n.of(context)!.explainPermissionToAccessContacts,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
