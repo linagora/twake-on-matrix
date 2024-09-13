@@ -83,27 +83,8 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         .toList();
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
-        .where((contact) {
-      if (contact is! ContactPresentationSearch) {
-        return false;
-      }
-
-      if (contact.displayName == null) {
-        return false;
-      }
-
-      if (contact.email == null) {
-        return false;
-      }
-
-      final matchedName =
-          contact.displayName!.toLowerCase().contains(keyword.toLowerCase());
-
-      final matchedEmail =
-          contact.email!.toLowerCase().contains(keyword.toLowerCase());
-
-      return matchedName || matchedEmail;
-    }).toList();
+        .where((contact) => _doesMatchKeyword(contact, keyword))
+        .toList();
     _searchRecentChatInteractor
         .execute(
       keyword: keyword,
@@ -124,6 +105,45 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         );
       },
     );
+  }
+
+  bool _matchedMatrixId(PresentationSearch contact, String keyword) {
+    return contact.directChatMatrixID
+            ?.toLowerCase()
+            .contains(keyword.toLowerCase()) ??
+        false;
+  }
+
+  bool _matchedName(PresentationSearch contact, String keyword) {
+    return contact.displayName?.toLowerCase().contains(keyword.toLowerCase()) ??
+        false;
+  }
+
+  bool _matchedEmail(PresentationSearch contact, String keyword) {
+    return contact.email?.toLowerCase().contains(keyword.toLowerCase()) ??
+        false;
+  }
+
+  bool _matchedContactInfo(PresentationSearch contact, String keyword) {
+    return _matchedName(contact, keyword) ||
+        _matchedEmail(contact, keyword) ||
+        _matchedMatrixId(contact, keyword);
+  }
+
+  bool _doesMatchKeyword(PresentationSearch contact, String keyword) {
+    if (contact is! ContactPresentationSearch) {
+      return false;
+    }
+
+    if (contact.displayName == null) {
+      return false;
+    }
+
+    if (contact.email == null) {
+      return false;
+    }
+
+    return _matchedContactInfo(contact, keyword);
   }
 
   void onSearchBarChanged(String keyword) {
