@@ -94,6 +94,7 @@ class PermissionHandlerService {
             permission: Permission.photos,
             explainTextRequestPermission: Text(
               L10n.of(context)!.explainPermissionToAccessPhotos,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             onAcceptButton: () async {
               Navigator.of(dialogContext).pop(true);
@@ -119,6 +120,7 @@ class PermissionHandlerService {
             permission: Permission.videos,
             explainTextRequestPermission: Text(
               L10n.of(context)!.explainPermissionToAccessVideos,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             onAcceptButton: () async {
               Navigator.of(dialogContext).pop(true);
@@ -161,6 +163,7 @@ class PermissionHandlerService {
                   Platform.isIOS ? Permission.photos : Permission.storage,
               explainTextRequestPermission: Text(
                 L10n.of(context)!.explainPermissionToAccessMedias,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               onAcceptButton: () async {
                 Navigator.of(dialogContext).pop(true);

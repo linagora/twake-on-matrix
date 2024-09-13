@@ -40,11 +40,11 @@ mixin CommonMediaPickerMixin {
             text: isMicrophone
                 ? L10n.of(context)!.tapToAllowAccessToYourMicrophone
                 : L10n.of(context)!.tapToAllowAccessToYourCamera,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.bodyMedium,
             children: <TextSpan>[
               TextSpan(
                 text: ' ${L10n.of(context)!.twake}.',
-                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),

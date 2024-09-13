@@ -196,7 +196,7 @@ class _DirectChatAppBarStatusContent extends StatelessWidget {
                 }
                 if (directChatPresence == null) {
                   return ChatAppBarTitleText(
-                    text: L10n.of(context)!.loading,
+                    text: L10n.of(context)!.loadingStatus,
                   );
                 }
                 final typingText = room.getLocalizedTypingText(context);

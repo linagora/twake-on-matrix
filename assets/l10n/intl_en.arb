@@ -1180,7 +1180,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "loading": "Loading status...",
+  "loadingStatus": "Loading status...",
   "loadMore": "Load more…",
   "@loadMore": {
     "type": "text",
@@ -3041,10 +3041,10 @@
       }
     }
   },
-  "explainPermissionToAccessContacts": "Twake chat collects your contacts only when you are on a contact search screen to find out whether your friends are on the Matrix server, enabling connection with them. Your contacts are not synchronized with our server.",
-  "explainPermissionToAccessMedias": "Twake chat collects your photos, videos, music, and other documents to enable sending and saving selected files. Please go to Settings > Permissions and activate Storage permission: Photos and Videos.",
-  "explainPermissionToAccessPhotos": "Twake chat collects your photos to enable sending and saving selected photos only when the app is in use. Press Settings > Permissions, then enable Storage permission: Photos.",
-  "explainPermissionToAccessVideos": "Twake chat collects your videos to enable sending and saving selected videos only when the app is in use. Press Settings > Permissions, then enable Storage permission: Videos.",
+  "explainPermissionToAccessContacts": "Twake Chat DOES NOT collect your contacts. Twake Chat sends only contact hashes to the Twake Chat servers to understand who from your friends already joined Twake Chat, enabling connection with them. Your contacts ARE NOT synchronized with our server.",
+  "explainPermissionToAccessMedias": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Photos and Videos permission. You can also deny access to your media library at any time.",
+  "explainPermissionToAccessPhotos": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Photos permission. You can also deny access to your media library at any time.",
+  "explainPermissionToAccessVideos": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Videos permission. You can also deny access to your media library at any time.",
   "downloading": "Downloading",
   "settingUpYourTwake": "Setting up your Twake\nIt could take a while",
   "performingAutomaticalLogin": "Performing automatical login  via SSO",
