@@ -87,6 +87,7 @@ mixin class ContactsViewControllerMixin {
             permission: Permission.contacts,
             explainTextRequestPermission: Text(
               L10n.of(context)!.explainPermissionToAccessContacts,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             onRefuseTap: _handleDenyPermissionDialog,
             onAcceptButton: () async {

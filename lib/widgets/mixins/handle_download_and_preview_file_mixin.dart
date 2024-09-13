@@ -62,8 +62,10 @@ mixin HandleDownloadAndPreviewFileMixin {
           builder: (context) {
             return PermissionDialog(
               permission: Permission.storage,
-              explainTextRequestPermission:
-                  Text(L10n.of(context)!.explainStoragePermission),
+              explainTextRequestPermission: Text(
+                L10n.of(context)!.explainStoragePermission,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               icon: const Icon(Icons.preview_outlined),
             );
           },
@@ -89,8 +91,10 @@ mixin HandleDownloadAndPreviewFileMixin {
           builder: (context) {
             return PermissionDialog(
               permission: Permission.storage,
-              explainTextRequestPermission:
-                  Text(L10n.of(context)!.explainGoToStorageSetting),
+              explainTextRequestPermission: Text(
+                L10n.of(context)!.explainGoToStorageSetting,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               icon: const Icon(Icons.preview_outlined),
             );
           },

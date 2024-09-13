@@ -137,6 +137,7 @@ mixin SaveMediaToGalleryAndroidMixin
               L10n.of(context)!.explainPermissionToGallery(
                 AppConfig.applicationName,
               ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             onAcceptButton: () =>
                 permissionHandlerService.goToSettingsForPermissionActions(),
