@@ -13,36 +13,30 @@ class ContactStatusWidget extends StatelessWidget {
     required this.status,
   });
 
-  final Color? activeColor = LinagoraRefColors.material().secondary[40];
   final Color? inactiveColor = LinagoraRefColors.material().neutral[60];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            ImagePaths.icStatus,
-            // ignore: deprecated_member_use
-            color: status == ContactStatus.active ? activeColor : inactiveColor,
-          ),
-          status == ContactStatus.active
-              ? Text(
-                  " ${L10n.of(context)!.online}",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: activeColor,
-                      ),
-                )
-              : Text(
+    return status == ContactStatus.inactive
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  ImagePaths.icStatus,
+                  colorFilter:
+                      ColorFilter.mode(inactiveColor!, BlendMode.srcIn),
+                ),
+                Text(
                   " ${L10n.of(context)!.inactive}",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: inactiveColor,
                       ),
                 ),
-        ],
-      ),
-    );
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }
