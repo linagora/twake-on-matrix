@@ -477,7 +477,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "contactHasBeenInvitedToTheGroup": "Le contact a été invité au salon",
+  "contactHasBeenInvitedToTheGroup": "Le contact a été invité dans ce groupe",
   "@contactHasBeenInvitedToTheGroup": {
     "type": "text",
     "placeholders": {}
@@ -538,7 +538,7 @@
       "username": {}
     }
   },
-  "createNewGroup": "Créer un nouveau groupe",
+  "createNewGroup": "Créer un nouveau groupe de discussion",
   "@createNewGroup": {
     "type": "text",
     "placeholders": {}
@@ -839,7 +839,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupIsPublic": "Le salon est public",
+  "groupIsPublic": "Ce salon est public",
   "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
@@ -849,7 +849,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "Salon avec {displayname}",
+  "groupWith": "Discussion avec {displayname}",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -1057,7 +1057,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "loadCountMoreParticipants": "Charger {count} participant·es de plus",
+  "loadCountMoreParticipants": "Afficher {count} de plus",
   "@loadCountMoreParticipants": {
     "type": "text",
     "placeholders": {
@@ -1128,7 +1128,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "messageWillBeRemovedWarning": "Le message sera supprimé pour tous les participants",
+  "messageWillBeRemovedWarning": "Le message sera supprimé pour tous les membres",
   "@messageWillBeRemovedWarning": {
     "type": "text",
     "placeholders": {}
@@ -1303,7 +1303,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "participant": "Participant(e)",
+  "participant": "Membre",
   "@participant": {
     "type": "text",
     "placeholders": {}
@@ -1580,6 +1580,7 @@
     "placeholders": {}
   },
   "sendMessage": "Envoyer un message",
+  "@sendMessage": {},
   "sendAsText": "Envoyer un texte",
   "@sendAsText": {
     "type": "text"
@@ -1671,7 +1672,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "setGroupDescription": "Définir une description du groupe",
+  "setGroupDescription": "Définir la description du groupe",
   "@setGroupDescription": {
     "type": "text",
     "placeholders": {}
@@ -1961,7 +1962,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "visibleForAllParticipants": "Visible pour tous les participant·es",
+  "visibleForAllParticipants": "Visible par tous les membres",
   "@visibleForAllParticipants": {
     "type": "text",
     "placeholders": {}
@@ -2402,7 +2403,7 @@
   "@allSpaces": {},
   "commandHint_markasdm": "Marquer comme salon de messagerie directe",
   "@commandHint_markasdm": {},
-  "commandHint_markasgroup": "Marquer comme groupe",
+  "commandHint_markasgroup": "Marquer comme salon",
   "@commandHint_markasgroup": {},
   "confirmMatrixId": "Veuillez confirmer votre identifiant Matrix afin de supprimer votre compte.",
   "@confirmMatrixId": {},
@@ -2512,7 +2513,7 @@
   "@noBackupWarning": {},
   "fileIsTooBigForServer": "Le serveur reporte que le fichier est trop large pour être envoyé.",
   "@fileIsTooBigForServer": {},
-  "participantsCount": "Participants ({count})",
+  "participantsCount": "Membres ({count})",
   "@participantsCount": {
     "placeholders": {
       "count": {}
@@ -2555,7 +2556,7 @@
   "@inactive": {},
   "noMoreResult": "Plus de résultat !",
   "@noMoreResult": {},
-  "youCreatedGroupChat": "Vous avez créé une discussion de groupe",
+  "youCreatedGroupChat": "Vous avez créé un groupe de discussion",
   "@youCreatedGroupChat": {},
   "searchForPeopleAndChannels": "Personnes ou Salons",
   "@searchForPeopleAndChannels": {},
@@ -2565,7 +2566,7 @@
       "keyword": {}
     }
   },
-  "multiInteractionThreadedDiscussion": "Discussions multi-interaction par fils",
+  "multiInteractionThreadedDiscussion": "Discussions simultanées multiples",
   "@multiInteractionThreadedDiscussion": {},
   "statusDot": "⬤",
   "@statusDot": {},
@@ -2585,7 +2586,7 @@
   "@chatMessage": {},
   "shrink": "Rétrécir",
   "@shrink": {},
-  "persistentChatHistory": "Historique des discussions persistantes",
+  "persistentChatHistory": "Historique des discussions persistant",
   "@persistentChatHistory": {},
   "previous": "Précédent",
   "@previous": {},
@@ -2597,7 +2598,7 @@
   "@more": {},
   "whoWouldYouLikeToAdd": "Qui voulez-vous ajouter ?",
   "@whoWouldYouLikeToAdd": {},
-  "sendMessageGuide": "Envoyez un message ou tapez sur l'image en dessous.",
+  "sendMessageGuide": "Envoyez un message ou appuyez sur la salutation ci-dessous.",
   "@sendMessageGuide": {},
   "noMessageHereYet": "Pas encore de message...",
   "@noMessageHereYet": {},
@@ -2661,7 +2662,7 @@
   "@acceptInvite": {},
   "downloadImageError": "Erreur d'enregistrement de l'image",
   "@downloadImageError": {},
-  "externalContactMessage": "Certains des utilisateurs que vous souhaitez ajouter ne figurent pas dans vos contacts. Voulez-vous les inviter ?",
+  "externalContactMessage": "Certains des utilisateurs que vous souhaitez ajouter ne figurent pas dans vos contacts. Voulez-vous les inviter ?",
   "@externalContactMessage": {},
   "appLanguage": "Langue de l'application",
   "@appLanguage": {},
@@ -2713,7 +2714,7 @@
   },
   "addMembers": "Ajouter des membres",
   "@addMembers": {},
-  "changeChatAvatar": "Modifier l'avatar de la discussion",
+  "changeChatAvatar": "Modifier l'image du salon",
   "@changeChatAvatar": {},
   "email": "E-mail",
   "@email": {},
@@ -2727,7 +2728,7 @@
   "@noConnection": {},
   "markThisChatAsRead": "Marquer ce message comme lu",
   "@markThisChatAsRead": {},
-  "hasCreatedAGroupChat": "a créé un salon “{groupName}”",
+  "hasCreatedAGroupChat": "a créé le salon « {groupName} »",
   "@hasCreatedAGroupChat": {
     "type": "text",
     "placeholders": {
@@ -2830,7 +2831,7 @@
   "@recent": {},
   "askToInvite": " veut que vous participiez à cette discussion. Qu'en dites-vous ?",
   "@askToInvite": {},
-  "media": "Media",
+  "media": "Médias",
   "@media": {},
   "workIdentitiesInfo": "INFORMATIONS PROFESSIONNELLES",
   "@workIdentitiesInfo": {},
@@ -2913,7 +2914,7 @@
   "@sendFiles": {},
   "failedToSendFiles": "Échec de l'envoi des fichiers",
   "@failedToSendFiles": {},
-  "noResults": "Pas de résultats",
+  "noResults": "Pas de résultat",
   "@noResults": {},
   "addAnotherAccount": "Ajouter un autre compte",
   "@addAnotherAccount": {},
@@ -3045,6 +3046,7 @@
   "searchContacts": "Rechercher des contacts",
   "@searchContacts": {},
   "phone": "Téléphone",
+  "@phone": {},
   "viewProfile": "Voir le profil",
   "@viewProfile": {},
   "profileInfo": "Informations du profil",
@@ -3077,9 +3079,9 @@
   "@saveFileToGalleryError": {},
   "tokenNotFound": "Le jeton de connexion est introuvable",
   "@tokenNotFound": {},
-  "dangerZone": "Zone de danger",
+  "dangerZone": "Zone dangereuse",
   "@dangerZone": {},
-  "leaveGroupSubtitle": "Ce salon existera toujours après votre départ",
+  "leaveGroupSubtitle": "Ce salon continuera d'exister après votre départ",
   "@leaveGroupSubtitle": {},
   "leaveChatFailed": "Échec de la sortie du salon",
   "@leaveChatFailed": {},
@@ -3152,19 +3154,84 @@
   "switchAccounts": "Changer de compte",
   "@switchAccounts": {},
   "shootingTips": "Appuyez pour prendre une photo.",
+  "@shootingTips": {},
   "shootingWithRecordingTips": "Appuyez pour prendre une photo. Appuyez longuement pour enregistrer une vidéo.",
+  "@shootingWithRecordingTips": {},
   "shootingOnlyRecordingTips": "Appuyez longuement pour enregistrer une vidéo.",
+  "@shootingOnlyRecordingTips": {},
   "shootingTapRecordingTips": "Appuyez pour enregistrer une vidéo.",
+  "@shootingTapRecordingTips": {},
   "loadFailed": "Échec du chargement",
+  "@loadFailed": {},
   "saving": "Enregistrement...",
+  "@saving": {},
   "sActionManuallyFocusHint": "mettre au point manuellement",
+  "@sActionManuallyFocusHint": {},
   "sActionPreviewHint": "aperçu",
+  "@sActionPreviewHint": {},
   "sActionRecordHint": "enregistrer",
+  "@sActionRecordHint": {},
   "sActionShootHint": "prendre une photo",
+  "@sActionShootHint": {},
   "sActionShootingButtonTooltip": "bouton de prise de vue",
+  "@sActionShootingButtonTooltip": {},
   "sActionStopRecordingHint": "arrêter l'enregistrement",
+  "@sActionStopRecordingHint": {},
   "sCameraLensDirectionLabel": "Direction de la lentille de la caméra : {value}",
+  "@sCameraLensDirectionLabel": {},
   "sCameraPreviewLabel": "Aperçu de la caméra : {value}",
+  "@sCameraPreviewLabel": {},
   "sFlashModeLabel": "Mode flash : {mode}",
-  "sSwitchCameraLensDirectionLabel": "Passer à la caméra {value}"
+  "@sFlashModeLabel": {},
+  "sSwitchCameraLensDirectionLabel": "Passer à la caméra {value}",
+  "@sSwitchCameraLensDirectionLabel": {},
+  "tuesday": "Mar",
+  "@tuesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "wednesday": "Mer",
+  "@wednesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "friday": "Ven",
+  "@friday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "monday": "Lun",
+  "@monday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "sunday": "Dim",
+  "@sunday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "thursday": "Jeu",
+  "@thursday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "video": "Vidéo",
+  "@video": {},
+  "loadingStatus": "Chargement du statut...",
+  "@loadingStatus": {},
+  "explainPermissionToAccessPhotos": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés dans la discussion sont cryptés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Photos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
+  "@explainPermissionToAccessPhotos": {},
+  "explainPermissionToAccessContacts": "Twake Chat NE COLLECTE PAS vos contacts. Twake Chat envoie uniquement des empreintes (hash) des contacts aux serveurs Twake Chat pour identifier lesquels ont déjà rejoint Twake Chat, afin de vous permettre d'établir ainsi la connexion avec eux. Vos contacts NE SONT PAS synchronisés ni conservés sur notre serveur.",
+  "@explainPermissionToAccessContacts": {},
+  "photo": "Photo",
+  "@photo": {},
+  "saturday": "Sam",
+  "@saturday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "explainPermissionToAccessVideos": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés dans la discussion sont cryptés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Vidéos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
+  "@explainPermissionToAccessVideos": {},
+  "explainPermissionToAccessMedias": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés au chat sont cryptés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Photos et vidéos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
+  "@explainPermissionToAccessMedias": {}
 }
