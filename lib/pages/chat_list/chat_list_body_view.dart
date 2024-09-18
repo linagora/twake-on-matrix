@@ -8,7 +8,7 @@ import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/utils/stream_extension.dart';
+import 'package:fluffychat/utils/stream_sync_update_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -51,8 +51,11 @@ class ChatListBodyView extends StatelessWidget {
             ),
             stream: controller.activeClient.onSync.stream
                 .where((s) => s.hasRoomUpdate)
-                .rateLimit(const Duration(seconds: 1)),
-            builder: (context, _) {
+                .rateLimitWithSyncUpdate(const Duration(seconds: 1)),
+            builder: (context, syncUpdateSnapshot) {
+              Logs().v(
+                'ChatListBodyView: StreamBuilder: snapshot: ${syncUpdateSnapshot.data?.rooms}',
+              );
               if (controller.activeFilter == ActiveFilter.spaces) {
                 return SpaceView(
                   controller,
@@ -163,6 +166,7 @@ class ChatListBodyView extends StatelessWidget {
                           child: ChatListViewBuilder(
                             controller: controller,
                             rooms: controller.filteredRoomsForPin,
+                            syncUpdate: syncUpdateSnapshot.data,
                           ),
                         ),
                       if (!controller.filteredRoomsForAllIsEmpty)
@@ -192,6 +196,7 @@ class ChatListBodyView extends StatelessWidget {
                           child: ChatListViewBuilder(
                             controller: controller,
                             rooms: controller.filteredRoomsForAll,
+                            syncUpdate: syncUpdateSnapshot.data,
                           ),
                         ),
                     ],

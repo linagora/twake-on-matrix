@@ -9,11 +9,13 @@ import 'package:matrix/matrix.dart';
 class ChatListViewBuilder extends StatelessWidget {
   final ChatListController controller;
   final List<Room> rooms;
+  final SyncUpdate? syncUpdate;
 
   const ChatListViewBuilder({
     super.key,
     required this.controller,
     required this.rooms,
+    this.syncUpdate,
   });
 
   @override
@@ -36,12 +38,14 @@ class ChatListViewBuilder extends StatelessWidget {
                 chatListItem: CommonChatListItem(
                   controller: controller,
                   room: rooms[index],
+                  joinedRoomUpdate: syncUpdate?.rooms?.join?[rooms[index].id],
                 ),
               );
             }
             return CommonChatListItem(
               controller: controller,
               room: rooms[index],
+              joinedRoomUpdate: syncUpdate?.rooms?.join?[rooms[index].id],
             );
           },
         );
