@@ -8,7 +8,6 @@ import 'package:fluffychat/widgets/swipe_to_dismiss_wrap.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatListHeader extends StatelessWidget {
@@ -98,12 +97,8 @@ class ChatListHeader extends StatelessWidget {
                   textInputAction: TextInputAction.search,
                   contextMenuBuilder: mobileTwakeContextMenuBuilder,
                   enabled: false,
-                  decoration: ChatListHeaderStyle.searchInputDecoration(
-                    context,
-                    hintText: value ? '' : null,
-                    prefixIconColor:
-                        value ? LinagoraRefColors.material().neutral[90] : null,
-                  ),
+                  decoration:
+                      ChatListHeaderStyle.searchInputDecoration(context),
                 );
               },
             ),
