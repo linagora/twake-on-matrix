@@ -7,9 +7,10 @@ class SettingsViewStyle {
 
   static const AlignmentGeometry alignment = AlignmentDirectional.centerStart;
 
-  static const EdgeInsetsDirectional titlePadding =
-      EdgeInsetsDirectional.only(start: 16);
-
+  static const EdgeInsetsDirectional titlePaddingMobile =
+      EdgeInsetsDirectional.only(top: 12, bottom: 11);
+  static const EdgeInsetsDirectional titlePaddingWeb =
+      EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8);
   static EdgeInsetsDirectional itemBuilderPadding =
       const EdgeInsetsDirectional.all(16.0);
 

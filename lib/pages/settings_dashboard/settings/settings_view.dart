@@ -1,8 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import 'settings.dart';
 class SettingsView extends StatelessWidget {
   final SettingsController controller;
   final Widget? bottomNavigationBar;
+  static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   const SettingsView(
     this.controller, {
@@ -26,17 +29,40 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
+        backgroundColor: responsiveUtils.isMobile(context)
+            ? LinagoraSysColors.material().background
+            : LinagoraRefColors.material().primary[100],
         toolbarHeight: AppConfig.toolbarHeight(context),
-        title: Align(
-          alignment: SettingsViewStyle.alignment,
-          child: Padding(
-            padding: SettingsViewStyle.titlePadding,
-            child: Text(
-              L10n.of(context)!.settings,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+        title: Container(
+          decoration: responsiveUtils.isMobile(context)
+              ? BoxDecoration(
+                  color: LinagoraSysColors.material().background,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: LinagoraStateLayer(
+                        LinagoraSysColors.material().surfaceTint,
+                      ).opacityLayer3,
+                    ),
                   ),
+                )
+              : null,
+          child: Padding(
+            padding: responsiveUtils.isMobile(context)
+                ? SettingsViewStyle.titlePaddingMobile
+                : SettingsViewStyle.titlePaddingWeb,
+            child: Align(
+              alignment: responsiveUtils.isMobile(context)
+                  ? Alignment.center
+                  : Alignment.topLeft,
+              child: Text(
+                L10n.of(context)!.settings,
+                style: responsiveUtils.isMobile(context)
+                    ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          height: 24 / 17,
+                        )
+                    : Theme.of(context).textTheme.headlineSmall,
+              ),
             ),
           ),
         ),
