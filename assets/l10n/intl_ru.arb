@@ -3156,21 +3156,85 @@
   "@privacyPolicy": {},
   "byContinuingYourAgreeingToOur": "Продолжая, вы принимаете",
   "@byContinuingYourAgreeingToOur": {},
-  "@searchContacts": {},
   "shootingTips": "Нажмите, чтобы сделать фото.",
+  "@shootingTips": {},
   "shootingWithRecordingTips": "Нажмите, чтобы сделать фото. Удерживайте для записи видео.",
+  "@shootingWithRecordingTips": {},
   "shootingOnlyRecordingTips": "Удерживайте для записи видео.",
+  "@shootingOnlyRecordingTips": {},
   "shootingTapRecordingTips": "Нажмите, чтобы записать видео.",
+  "@shootingTapRecordingTips": {},
   "loadFailed": "Не удалось загрузить",
+  "@loadFailed": {},
   "saving": "Сохранение...",
+  "@saving": {},
   "sActionManuallyFocusHint": "ручная фокусировка",
+  "@sActionManuallyFocusHint": {},
   "sActionPreviewHint": "предпросмотр",
+  "@sActionPreviewHint": {},
   "sActionRecordHint": "запись",
+  "@sActionRecordHint": {},
   "sActionShootHint": "сделать фото",
+  "@sActionShootHint": {},
   "sActionShootingButtonTooltip": "кнопка съемки",
+  "@sActionShootingButtonTooltip": {},
   "sActionStopRecordingHint": "остановить запись",
+  "@sActionStopRecordingHint": {},
   "sCameraLensDirectionLabel": "Направление объектива камеры: {value}",
+  "@sCameraLensDirectionLabel": {},
   "sCameraPreviewLabel": "Предпросмотр камеры: {value}",
+  "@sCameraPreviewLabel": {},
   "sFlashModeLabel": "Режим вспышки: {mode}",
-  "sSwitchCameraLensDirectionLabel": "Переключиться на камеру {value}"
+  "@sFlashModeLabel": {},
+  "sSwitchCameraLensDirectionLabel": "Переключиться на камеру {value}",
+  "@sSwitchCameraLensDirectionLabel": {},
+  "wednesday": "Ср",
+  "@wednesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "friday": "Пт",
+  "@friday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "saturday": "Сб",
+  "@saturday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tuesday": "Вт",
+  "@tuesday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "loadingStatus": "Загрузка статуса...",
+  "@loadingStatus": {},
+  "photo": "Фото",
+  "@photo": {},
+  "video": "Видео",
+  "@video": {},
+  "monday": "Пн",
+  "@monday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "explainPermissionToAccessContacts": "Twake Chat НЕ собирает ваши контакты. Twake Chat отправляет только хэши контактов на серверы Twake Chat, чтобы понять, кто из ваших друзей уже присоединился к приложению, и установить с ними связь. Ваши контакты НЕ синхронизируются с нашим сервером.",
+  "@explainPermissionToAccessContacts": {},
+  "explainPermissionToAccessMedias": "Twake Chat не синхронизирует данные между вашим устройством и нашими серверами. Мы храним только медиафайлы, которые вы отправили в чат. Все медиафайлы, отправленные в чат, зашифрованы и хранятся в безопасности. Перейдите в Настройки > Разрешения и активируйте разрешение Хранилище: Фото и видео. Вы также можете в любое время запретить доступ к своей медиатеке.",
+  "@explainPermissionToAccessMedias": {},
+  "explainPermissionToAccessPhotos": "Twake Chat не синхронизирует данные между вашим устройством и нашими серверами. Мы храним только медиафайлы, которые вы отправили в чат. Все медиафайлы, отправленные в чат, зашифрованы и надежно хранятся. Перейдите в Настройки > Разрешения и активируйте разрешение Хранилище: Фотографии. Вы также можете в любое время запретить доступ к своей медиатеке.",
+  "@explainPermissionToAccessPhotos": {},
+  "explainPermissionToAccessVideos": "Twake Chat не синхронизирует данные между вашим устройством и нашими серверами. Мы храним только медиафайлы, которые вы отправили в чат. Все медиафайлы, отправленные в чат, зашифрованы и надежно хранятся. Перейдите в Настройки > Разрешения и активируйте разрешение Хранилище: Видео. Вы также можете в любое время запретить доступ к своей медиатеке.",
+  "@explainPermissionToAccessVideos": {},
+  "sunday": "Вс",
+  "@sunday": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "thursday": "Чт",
+  "@thursday": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
