@@ -1,3 +1,54 @@
+## [2.6.4+2330] - 2024-09-18
+
+### Added
+
+- #1817 Added french and russian translation in camera screen
+- Set uploaded appbundles status to completed
+- #1813 Change event description for pinned files
+- #1980 Convert HEIC files to jpg file
+- #1886 Update chat list UI part 1
+- #1972 Update logic for cancel upload files with captions
+- #1968 Break UI when search with keyword
+- #1542 make message highlight brighter
+
+### Fixed
+
+- #1878 Fix can't open notification when open Media in chat details
+- #1918 Fixed typo error in externalContactMessage
+- #1994 Fix load more for chat search
+- #1844 Fix distorted images when using camera in android phone
+- #2001 No previews for video
+- #1974 Fix cannot jump to reply
+- #1982 Fix can't create direct chat when search in contact tab
+- #1936 Fix the share screen don't show up when sharing an image
+- #1926 Permission is always asked when paste in iOS
+- #1963 Update search keyword matching
+- #1878 Fix can't open notification when open Media in chat details
+
+## [2.6.3+2330] - 2024-09-17
+
+### Fixed
+
+- #2022 Change explain text in permission dialog
+
+## [2.6.2+2330] - 2024-08-27
+
+### Fixed
+
+- #2002 Remove unused deeplink
+- #2002 Upgrade flutter_local_notifications to fix USE_FULL_SCREEN_INTENT permission
+
+## [2.6.1+2330] - 2024-07-25
+
+### Fixed
+
+- #1959 Spelling errors
+- #1966 Hotfix: can't get contact on web
+- #1976 Hotfix: prominent disclosure update
+- #1971 Fix navigation problem in forward pages
+- #1979 Crash app when open play video mobile
+- #1967 Support send multiple file in draft chat
+
 ## [2.6.0+2330] - 2024-07-18
 
 ### Fixed
