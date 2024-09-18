@@ -64,7 +64,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Monday of current week\n'
         'THEN should display the Monday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Monday';
+      const expectedDisplayText = 'Mon';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2021, 12, 27, 12, 5);
 
@@ -105,7 +105,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Tuesday of current week\n'
         'THEN should display Tuesday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Tuesday';
+      const expectedDisplayText = 'Tue';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2021, 12, 28, 12, 5);
 
@@ -146,7 +146,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Wednesday of current week\n'
         'THEN should display Wednesday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Wednesday';
+      const expectedDisplayText = 'Wed';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2021, 12, 29, 12, 5);
 
@@ -187,7 +187,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Thursday of current week\n'
         'THEN should display Thursday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Thursday';
+      const expectedDisplayText = 'Thu';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2021, 12, 30, 12, 5);
 
@@ -228,7 +228,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Friday of current week\n'
         'THEN should display Friday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Friday';
+      const expectedDisplayText = 'Fri';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2021, 12, 31, 12, 5);
 
@@ -269,7 +269,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Saturday of current week\n'
         'THEN should display Saturday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Saturday';
+      const expectedDisplayText = 'Sat';
       final currentTime = DateTime(2024, 2, 25);
       final timeToTest = DateTime(2024, 2, 24, 12, 5);
 
@@ -310,7 +310,7 @@ void main() async {
     testWidgets(
         'GIVEN the date time to display is Sunday of current week\n'
         'THEN should display Sunday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Sunday';
+      const expectedDisplayText = 'Sun';
       final currentTime = DateTime(2022, 1, 1);
       final timeToTest = DateTime(2022, 1, 2, 12, 5);
 
@@ -352,7 +352,7 @@ void main() async {
         'GIVEN the current time is Sunday\n'
         'AND the date time to display is Friday of current week\n'
         'THEN should display Friday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Friday';
+      const expectedDisplayText = 'Fri';
       final currentTime = DateTime(2024, 3, 3);
       final timeToTest = DateTime(2024, 3, 1, 12, 5);
 
@@ -394,7 +394,7 @@ void main() async {
         'GIVEN the current time is Sunday\n'
         'AND the date time to display is Saturday of current week\n'
         'THEN should display Saturday\n', (WidgetTester tester) async {
-      const expectedDisplayText = 'Saturday';
+      const expectedDisplayText = 'Sat';
       final currentTime = DateTime(2024, 3, 3);
       final timeToTest = DateTime(2024, 3, 2, 12, 5);
 
