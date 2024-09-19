@@ -10,6 +10,7 @@
 - #1972 Update logic for cancel upload files with captions
 - #1968 Break UI when search with keyword
 - #1542 make message highlight brighter
+- Translate ru, fr, vi
 
 ### Fixed
 
