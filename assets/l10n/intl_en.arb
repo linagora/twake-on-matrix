@@ -19,7 +19,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "updateAvailable": "FluffyChat update available",
+  "updateAvailable": "Twake Chat update available",
   "@updateAvailable": {},
   "updateNow": "Start update in background",
   "@updateNow": {},
@@ -924,27 +924,27 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Chat description",
+  "groupDescription": "Group chat description",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Chat description changed",
+  "groupDescriptionHasBeenChanged": "Group chat description changed",
   "@groupDescriptionHasBeenChanged": {
     "type": "text",
     "placeholders": {}
   },
-  "groupIsPublic": "Chat is public",
+  "groupIsPublic": "Group chat is public",
   "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
   },
-  "groups": "Chats",
+  "groups": "Group chats",
   "@groups": {
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "Chat with {displayname}",
+  "groupWith": "Group chat with {displayname}",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -2609,7 +2609,7 @@
       "user": {}
     }
   },
-  "startNewChatMessage": "It's nice having a chat with your friends and collaborating with your teams.\nLet's start a dialog, create a chat, or join an existing one.",
+  "startNewChatMessage": "It's nice having a chat with your friends and collaborating with your teams.\nLet's start a chat, create a group chat, or join an existing one.",
   "@startNewChatMessage": {},
   "statusDot": "⬤",
   "@statusDot": {},
@@ -2750,9 +2750,9 @@
   },
   "continueProcess": "Continue",
   "@continueProcess": {},
-  "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Image upload error! Do you still want to continue creating chat?",
+  "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Image upload error! Do you still want to continue creating group chat?",
   "@youAreUploadingPhotosDoYouWantToCancelOrContinue": {},
-  "hasCreatedAGroupChat": "created a chat “{groupName}”",
+  "hasCreatedAGroupChat": "created a group chat “{groupName}”",
   "@hasCreatedAGroupChat": {
     "type": "text",
     "placeholders": {
