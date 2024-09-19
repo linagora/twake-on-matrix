@@ -1,3 +1,7 @@
+## [2.6.5+2330] - 2024-09-19
+### Fixed
+- 2 types of Chat: Chat and Group Chat
+
 ## [2.6.4+2330] - 2024-09-18
 
 ### Added
