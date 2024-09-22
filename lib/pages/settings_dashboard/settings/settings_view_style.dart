@@ -1,6 +1,9 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 class SettingsViewStyle {
+  static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
   static const double iconSize = 24.0;
 
   static const double fontSizeAvatar = 9 * 2.5;
@@ -12,7 +15,7 @@ class SettingsViewStyle {
   static const EdgeInsetsDirectional titlePaddingWeb =
       EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8);
   static EdgeInsetsDirectional itemBuilderPadding =
-      const EdgeInsetsDirectional.all(16.0);
+      const EdgeInsetsDirectional.only(top: 16.0, bottom: 16.0, start: 8.0);
 
   static EdgeInsetsDirectional leadingItemBuilderPadding =
       const EdgeInsetsDirectional.only(end: 8);
@@ -32,4 +35,18 @@ class SettingsViewStyle {
 
   static EdgeInsetsDirectional avatarPadding =
       const EdgeInsetsDirectional.only(end: 8);
+
+  static const double borderRadius = 4.0;
+  static const double settingsItemDividerHeight = 1.0;
+  static const double settingsItemDividerThikness = 1;
+  static EdgeInsets settingsItemDividerPadding(BuildContext context) =>
+      EdgeInsets.only(
+        left: 48.0,
+        right: responsiveUtils.isMobile(context) ? 0 : 8.0,
+      );
+  static EdgeInsets profileItemDividerPadding(BuildContext context) =>
+      EdgeInsets.only(
+        right: responsiveUtils.isMobile(context) ? 0 : 16.0,
+      );
+  static const double titleLineHeightMobile = 24 / 17;
 }

@@ -59,7 +59,7 @@ class SettingsView extends StatelessWidget {
                 style: responsiveUtils.isMobile(context)
                     ? LinagoraTextStyle.material().bodyLarge1.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
-                          height: 24 / 17,
+                          height: SettingsViewStyle.titleLineHeightMobile,
                         )
                     : Theme.of(context).textTheme.headlineSmall,
               ),
@@ -78,7 +78,8 @@ class SettingsView extends StatelessWidget {
             Padding(
               padding: SettingsViewStyle.bodySettingsScreenPadding,
               child: Material(
-                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                borderRadius:
+                    BorderRadius.circular(SettingsViewStyle.borderRadius),
                 clipBehavior: Clip.hardEdge,
                 color: controller.optionsSelectNotifier.value ==
                         SettingEnum.profile
@@ -155,7 +156,7 @@ class SettingsView extends StatelessWidget {
                                           .labelLarge
                                           ?.copyWith(
                                             color: LinagoraRefColors.material()
-                                                .neutral[40],
+                                                .tertiary[30],
                                           ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -163,9 +164,11 @@ class SettingsView extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.chevron_right_outlined,
                                 size: SettingsViewStyle.iconSize,
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
                               ),
                             ],
                           ),
@@ -176,7 +179,16 @@ class SettingsView extends StatelessWidget {
                 ),
               ),
             ),
-            const Divider(thickness: 1),
+            Padding(
+              padding: SettingsViewStyle.profileItemDividerPadding(context),
+              child: Divider(
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer3,
+                thickness: SettingsViewStyle.settingsItemDividerThikness,
+                height: SettingsViewStyle.settingsItemDividerHeight,
+              ),
+            ),
             if (!controller.matrix.twakeSupported)
               ValueListenableBuilder(
                 valueListenable: controller.showChatBackupSwitch,
@@ -198,16 +210,37 @@ class SettingsView extends StatelessWidget {
               ),
             Column(
               children: controller.getListSettingItem.map((item) {
-                return Padding(
-                  padding: SettingsViewStyle.bodySettingsScreenPadding,
-                  child: SettingsItemBuilder(
-                    title: item.titleSettings(context),
-                    subtitle: item.subtitleSettings(context),
-                    leading: item.iconLeading(),
-                    onTap: () => controller.onClickToSettingsItem(item),
-                    isHideTrailingIcon: item.isHideTrailingIcon,
-                    isSelected: controller.optionSelected(item),
-                  ),
+                return Column(
+                  children: [
+                    Padding(
+                      padding: SettingsViewStyle.bodySettingsScreenPadding,
+                      child: SettingsItemBuilder(
+                        title: item.titleSettings(context),
+                        subtitle: item.subtitleSettings(context),
+                        leading: item.iconLeading(),
+                        onTap: () => controller.onClickToSettingsItem(item),
+                        isHideTrailingIcon: item.isHideTrailingIcon,
+                        isSelected: controller.optionSelected(item),
+                      ),
+                    ),
+                    item.index == SettingEnum.logout.index
+                        ? const SizedBox()
+                        : Padding(
+                            padding:
+                                SettingsViewStyle.settingsItemDividerPadding(
+                              context,
+                            ),
+                            child: Divider(
+                              color: LinagoraStateLayer(
+                                LinagoraSysColors.material().surfaceTint,
+                              ).opacityLayer3,
+                              thickness:
+                                  SettingsViewStyle.settingsItemDividerThikness,
+                              height:
+                                  SettingsViewStyle.settingsItemDividerHeight,
+                            ),
+                          ),
+                  ],
                 );
               }).toList(),
             ),

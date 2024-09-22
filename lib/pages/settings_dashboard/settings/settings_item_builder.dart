@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -24,7 +23,7 @@ class SettingsItemBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+      borderRadius: BorderRadius.circular(SettingsViewStyle.borderRadius),
       clipBehavior: Clip.hardEdge,
       color: isSelected
           ? Theme.of(context).colorScheme.secondaryContainer
@@ -43,7 +42,7 @@ class SettingsItemBuilder extends StatelessWidget {
                   size: SettingsViewStyle.iconSize,
                   color: isHideTrailingIcon
                       ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      : LinagoraRefColors.material().tertiary[30],
                 ),
               ),
               Expanded(
@@ -82,7 +81,7 @@ class SettingsItemBuilder extends StatelessWidget {
                                     color: LinagoraRefColors.material()
                                         .neutral[40],
                                   ),
-                              maxLines: 3,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -90,9 +89,10 @@ class SettingsItemBuilder extends StatelessWidget {
                       ),
                     ),
                     if (!isHideTrailingIcon)
-                      const Icon(
+                      Icon(
                         Icons.chevron_right_outlined,
                         size: SettingsViewStyle.iconSize,
+                        color: LinagoraRefColors.material().tertiary[30],
                       ),
                   ],
                 ),

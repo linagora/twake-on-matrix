@@ -41,7 +41,7 @@ enum SettingEnum {
   String subtitleSettings(BuildContext context) {
     switch (this) {
       case SettingEnum.chatSettings:
-        return '';
+        return L10n.of(context)!.settingsChatSubtitle;
       case SettingEnum.privacyAndSecurity:
         return L10n.of(context)!.settingsPrivacyAndSecuritySubtitle;
       case SettingEnum.notificationAndSounds:
@@ -64,7 +64,7 @@ enum SettingEnum {
       case SettingEnum.chatSettings:
         return Icons.chat_bubble_outline_outlined;
       case SettingEnum.privacyAndSecurity:
-        return Icons.lock;
+        return Icons.lock_outline;
       case SettingEnum.notificationAndSounds:
         return Icons.notifications_none;
       case SettingEnum.chatFolders:
