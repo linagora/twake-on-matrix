@@ -32,52 +32,58 @@ class ContactsAppBar extends StatelessWidget {
           toolbarHeight: ContactsAppbarStyle.toolbarHeight,
           automaticallyImplyLeading: false,
           leadingWidth: ContactsAppbarStyle.leadingWidth,
-          centerTitle: true,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: ContactsAppbarStyle.alignmentTitle(context),
-                  child: Text(
-                    L10n.of(context)!.contacts,
-                    style: responsiveUtils.isMobile(context)
-                        ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              height: ContactsAppbarStyle.textStyleHeight,
-                            )
-                        : Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+          centerTitle: responsiveUtils.isMobile(context),
+          title: Padding(
+            padding: ContactsAppbarStyle.titlePadding(context),
+            child: Text(
+              L10n.of(context)!.contacts,
+              style: responsiveUtils.isMobile(context)
+                  ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: ContactsAppbarStyle.textStyleHeight,
+                      )
+                  : Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+            ),
+          ),
+          actions: [
+            if (responsiveUtils.isMobile(context))
+              Padding(
+                padding: ContactsAppbarStyle.trailingIconPadding,
+                child: IconButton(
+                  onPressed: null,
+                  icon: Icon(
+                    Icons.person_add_alt_1_outlined,
+                    color: LinagoraSysColors.material().primary,
+                    size: ContactsAppbarStyle.trailingIconSize,
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: null,
-                icon: Icon(
-                  Icons.person_add_alt_1_outlined,
-                  color: LinagoraSysColors.material().primary,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
         ValueListenableBuilder<bool>(
           valueListenable: isSearchModeNotifier,
           builder: (context, isSearchMode, child) {
             return Container(
               decoration: BoxDecoration(
-                color: LinagoraSysColors.material().background,
-                border: Border(
-                  bottom: BorderSide(
-                    color: LinagoraSysColors.material().surface,
-                    width: 1.0,
-                  ),
-                ),
+                color: responsiveUtils.isMobile(context)
+                    ? LinagoraSysColors.material().background
+                    : LinagoraSysColors.material().onPrimary,
+                border: responsiveUtils.isMobile(context)
+                    ? Border(
+                        bottom: BorderSide(
+                          color: LinagoraStateLayer(
+                            LinagoraSysColors.material().surfaceTint,
+                          ).opacityLayer3,
+                          width: 1.0,
+                        ),
+                      )
+                    : null,
               ),
               height: ContactsAppbarStyle.textFieldHeight,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: ContactsAppbarStyle.searchFieldPadding,
                 child: Row(
                   children: [
                     Expanded(
