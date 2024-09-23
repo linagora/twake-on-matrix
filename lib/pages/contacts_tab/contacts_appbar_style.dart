@@ -9,7 +9,7 @@ class ContactsAppbarStyle {
 
   static const double textFieldHeight = 64.0;
 
-  static const double toolbarHeight = 56.0;
+  static const double toolbarHeight = 48.0;
 
   static const double leadingWidth = 76.0;
 
@@ -27,4 +27,12 @@ class ContactsAppbarStyle {
 
   static EdgeInsetsDirectional contentPadding = EdgeInsetsDirectional.zero;
   static const double textStyleHeight = 24 / 17;
+  static const EdgeInsets trailingIconPadding = EdgeInsets.only(right: 16.0);
+  static EdgeInsets titlePadding(context) => EdgeInsets.only(
+        left: ResponsiveUtils().isMobile(context) ? 0 : 16.0,
+      );
+  static const EdgeInsets searchFieldPadding = EdgeInsets.symmetric(
+    horizontal: 16.0,
+  );
+  static const trailingIconSize = 24.0;
 }
