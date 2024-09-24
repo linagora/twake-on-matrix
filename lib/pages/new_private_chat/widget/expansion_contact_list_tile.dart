@@ -40,7 +40,6 @@ class ExpansionContactListTile extends StatelessWidget {
                 child: Avatar(
                   mxContent: snapshot.data?.avatarUrl,
                   name: contact.displayName,
-                  size: 48.0,
                 ),
               ),
               const SizedBox(

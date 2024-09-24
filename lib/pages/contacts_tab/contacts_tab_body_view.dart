@@ -14,16 +14,19 @@ import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
+  final bool enableFriendsInvite = false;
 
   const ContactsTabBodyView(
     this.controller, {
@@ -36,7 +39,7 @@ class ContactsTabBodyView extends StatelessWidget {
       slivers: [
         _SliverWarningBanner(controller: controller),
         _SliverPhonebookLoading(controller: controller),
-        _SliverRecentContacts(controller: controller),
+        if (enableFriendsInvite) const InviteFriendWidget(),
         _SliverContactsList(controller: controller),
         _SliverPhonebookList(controller: controller),
         const _SliverPadding(),
@@ -347,6 +350,7 @@ class _SliverPhonebookLoading extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _SliverRecentContacts extends StatelessWidget {
   final ContactsTabController controller;
 
@@ -482,6 +486,62 @@ class _Contact extends StatelessWidget {
         child: ExpansionContactListTile(
           contact: contact,
           highlightKeyword: controller.textEditingController.text,
+        ),
+      ),
+    );
+  }
+}
+
+class InviteFriendWidget extends StatelessWidget {
+  const InviteFriendWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: LinagoraStateLayer(
+                LinagoraSysColors.material().surfaceTint,
+              ).opacityLayer3,
+            ),
+          ),
+        ),
+        child: InkWell(
+          child: Padding(
+            padding: ContactsTabViewStyle.invitefriendContainterPadding,
+            child: Row(
+              children: [
+                Padding(
+                  padding: ContactsTabViewStyle
+                      .invitefriendContainterLeadingIconPadding,
+                  child: SvgPicture.asset(
+                    ImagePaths.icPersonCheck,
+                    width: ContactsTabViewStyle.leadingIconDimension,
+                    height: ContactsTabViewStyle.leadingIconDimension,
+                    colorFilter: ColorFilter.mode(
+                      Theme.of(context).primaryColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: ContactsTabViewStyle.invitefriendTextPadding,
+                  child: Text(
+                    L10n.of(context)!.inviteFriend,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontSize: 17,
+                          color: LinagoraSysColors.material().primary,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

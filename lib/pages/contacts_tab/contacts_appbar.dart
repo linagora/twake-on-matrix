@@ -47,20 +47,6 @@ class ContactsAppBar extends StatelessWidget {
                       ),
             ),
           ),
-          actions: [
-            if (responsiveUtils.isMobile(context))
-              Padding(
-                padding: ContactsAppbarStyle.trailingIconPadding,
-                child: IconButton(
-                  onPressed: null,
-                  icon: Icon(
-                    Icons.person_add_alt_1_outlined,
-                    color: LinagoraSysColors.material().primary,
-                    size: ContactsAppbarStyle.trailingIconSize,
-                  ),
-                ),
-              ),
-          ],
         ),
         ValueListenableBuilder<bool>(
           valueListenable: isSearchModeNotifier,
@@ -85,6 +71,7 @@ class ContactsAppBar extends StatelessWidget {
               child: Padding(
                 padding: ContactsAppbarStyle.searchFieldPadding,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: SearchTextField(
