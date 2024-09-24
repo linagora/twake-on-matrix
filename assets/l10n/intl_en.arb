@@ -3104,5 +3104,6 @@
   "sFlashModeLabel": "Flash mode: {mode}",
   "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera",
   "photo": "Photo",
-  "video": "Video"
+  "video": "Video",
+  "inviteFriend": "Invite Friend"
 }
