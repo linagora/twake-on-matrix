@@ -76,6 +76,45 @@ flutter pub get && flutter pub run build_runner build --delete-conflicting-outpu
 bash scripts/config-pre-commit.sh
 ```
 
+## Deploy
+### Setup to build web version using Docker
+
+- Create a config file `config.json` in the root of the project with the following
+  [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
+
+- Run the image using the following command:
+```
+docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --name <container name> -v <host path>:/usr/share/nginx/html/web/config.json linagora/twake-web:<tag>
+```
+
+- Open the browser and go to `http://localhost:<hostport>`
+
+### Sample to run Twake Chat web client with `matrix.org`
+
+- Create a config file `config.json` with `matrix.org`
+
+```
+{
+  "app_grid_dashboard_available": true,
+  "application_name": "Twake Chat",
+  "application_welcome_message": "Welcome to Twake Chat!",
+  "default_homeserver": "matrix.org",
+  "hide_redacted_events": false,
+  "hide_unknown_events": false,
+  "homeserver": "https://matrix.org/",
+  "issue_id": "",
+  "privacy_url": "https://twake.app/en/privacy/",
+  "render_html": true
+}
+```
+
+- Run the image using the following command with my port is `6868`:
+```
+docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.6.5
+```
+
+- Open the browser and go to `http://localhost:6868`
+
 # Special thanks
 * <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original repository of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
 
