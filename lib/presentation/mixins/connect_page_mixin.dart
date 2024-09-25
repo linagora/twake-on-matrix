@@ -218,7 +218,7 @@ mixin ConnectPageMixin {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
         return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html';
       }
-      return '${getBaseUrlBeforeHash(html.window.location.href)}/web/auth.html';
+      return '${getBaseUrlBeforeHash(html.window.location.href)}web/auth.html';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
@@ -232,7 +232,7 @@ mixin ConnectPageMixin {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
         return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
       }
-      return '${getBaseUrlBeforeHash(html.window.location.href)}/web/auth.html$homeserverParam';
+      return '${getBaseUrlBeforeHash(html.window.location.href)}web/auth.html$homeserverParam';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
