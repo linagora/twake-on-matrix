@@ -216,9 +216,9 @@ mixin ConnectPageMixin {
   String _generatePostLogoutRedirectUrl() {
     if (kIsWeb) {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+        return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html';
       }
-      return '${html.window.origin!}/web/auth.html';
+      return '${getBaseUrlBeforeHash(html.window.location.href)}/web/auth.html';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
@@ -230,9 +230,9 @@ mixin ConnectPageMixin {
         homeserverParam = '?homeserver=$homeserver';
       }
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.origin!}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
+        return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
       }
-      return '${html.window.origin!}/web/auth.html$homeserverParam';
+      return '${getBaseUrlBeforeHash(html.window.location.href)}/web/auth.html$homeserverParam';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
@@ -295,6 +295,15 @@ mixin ConnectPageMixin {
   }) {
     final loginTokenExisted = getQueryParameter('loginToken') != null;
     if (!loginTokenExisted) return;
-    html.window.history.replaceState({}, '', '/#/${route ?? 'rooms'}');
+    html.window.history.replaceState(
+      {},
+      '',
+      '${getBaseUrlBeforeHash(html.window.location.href)}#/${route ?? 'rooms'}',
+    );
+  }
+
+  String getBaseUrlBeforeHash(String fullUrl) {
+    final fragmentIndex = fullUrl.indexOf('#/');
+    return fragmentIndex != -1 ? fullUrl.substring(0, fragmentIndex) : fullUrl;
   }
 }
