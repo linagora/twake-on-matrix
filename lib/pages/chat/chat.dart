@@ -445,7 +445,7 @@ class ChatController extends State<Chat>
   void _initUnreadLocation(String fullyRead) {
     _markerReadLocation = fullyRead;
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
-    scrollToEventId(fullyRead);
+    scrollToEventId(fullyRead, highlight: false);
   }
 
   void _tryLoadTimeline() async {
