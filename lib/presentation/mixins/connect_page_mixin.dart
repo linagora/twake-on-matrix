@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -216,9 +217,9 @@ mixin ConnectPageMixin {
   String _generatePostLogoutRedirectUrl() {
     if (kIsWeb) {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+        return '${html.window.location.href.getBaseUrlBeforeHash()}/twake-on-matrix/${AppConfig.issueId}/auth.html';
       }
-      return '${getBaseUrlBeforeHash(html.window.location.href)}web/auth.html';
+      return '${html.window.location.href.getBaseUrlBeforeHash()}web/auth.html';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
@@ -230,9 +231,9 @@ mixin ConnectPageMixin {
         homeserverParam = '?homeserver=$homeserver';
       }
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${getBaseUrlBeforeHash(html.window.location.href)}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
+        return '${html.window.location.href.getBaseUrlBeforeHash()}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
       }
-      return '${getBaseUrlBeforeHash(html.window.location.href)}web/auth.html$homeserverParam';
+      return '${html.window.location.href.getBaseUrlBeforeHash()}web/auth.html$homeserverParam';
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
@@ -298,12 +299,7 @@ mixin ConnectPageMixin {
     html.window.history.replaceState(
       {},
       '',
-      '${getBaseUrlBeforeHash(html.window.location.href)}#/${route ?? 'rooms'}',
+      '${html.window.location.href.getBaseUrlBeforeHash()}#/${route ?? 'rooms'}',
     );
-  }
-
-  String getBaseUrlBeforeHash(String fullUrl) {
-    final fragmentIndex = fullUrl.indexOf('#/');
-    return fragmentIndex != -1 ? fullUrl.substring(0, fragmentIndex) : fullUrl;
   }
 }

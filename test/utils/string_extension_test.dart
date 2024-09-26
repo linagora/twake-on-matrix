@@ -598,5 +598,41 @@ void main() {
         expect(result[i].style, expectedSpans[i].style);
       }
     });
+
+    test('getBaseUrlBeforeHash handles URL with hash', () {
+      const url = 'https://example.com/web/f/#/test';
+      const expectedUrl = 'https://example.com/web/f/';
+
+      final result = url.getBaseUrlBeforeHash();
+
+      expect(result, equals(expectedUrl));
+    });
+
+    test('getBaseUrlBeforeHash handles URL without hash', () {
+      const url = 'https://example.com/test';
+      const expectedUrl = 'https://example.com/test';
+
+      final result = url.getBaseUrlBeforeHash();
+
+      expect(result, equals(expectedUrl));
+    });
+
+    test('getBaseUrlBeforeHash handles URL with multiple hashes', () {
+      const url = 'https://example.com/#/test#section';
+      const expectedUrl = 'https://example.com/';
+
+      final result = url.getBaseUrlBeforeHash();
+
+      expect(result, equals(expectedUrl));
+    });
+
+    test('getBaseUrlBeforeHash handles URL with query parameters and hash', () {
+      const url = 'https://example.com/test?query=1#/section';
+      const expectedUrl = 'https://example.com/test?query=1';
+
+      final result = url.getBaseUrlBeforeHash();
+
+      expect(result, equals(expectedUrl));
+    });
   });
 }
