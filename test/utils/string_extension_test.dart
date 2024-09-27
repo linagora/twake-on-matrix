@@ -598,7 +598,9 @@ void main() {
         expect(result[i].style, expectedSpans[i].style);
       }
     });
+  });
 
+  group('getBaseUrlBeforeHash test', () {
     test('getBaseUrlBeforeHash handles URL with hash', () {
       const url = 'https://example.com/web/f/#/test';
       const expectedUrl = 'https://example.com/web/f/';
