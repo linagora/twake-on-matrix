@@ -1,5 +1,5 @@
 server {
-    listen 80;
+    listen ${TWAKECHAT_LISTEN_PORT};
 
     location = / {
        return 301 ${TWAKECHAT_BASE_HREF};
