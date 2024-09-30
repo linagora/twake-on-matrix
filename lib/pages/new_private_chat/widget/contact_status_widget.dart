@@ -19,7 +19,9 @@ class ContactStatusWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return status == ContactStatus.inactive
         ? Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8.0,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

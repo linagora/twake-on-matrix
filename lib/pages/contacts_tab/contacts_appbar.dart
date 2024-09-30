@@ -76,7 +76,6 @@ class ContactsAppBar extends StatelessWidget {
                     Expanded(
                       child: SearchTextField(
                         textEditingController: textEditingController,
-                        hintText: L10n.of(context)!.searchForContacts,
                         autofocus: false,
                         focusNode: searchFocusNode,
                       ),
