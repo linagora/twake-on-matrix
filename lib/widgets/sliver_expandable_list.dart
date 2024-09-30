@@ -1,5 +1,3 @@
-import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:flutter/material.dart';
 
 class SliverExpandableList extends StatefulWidget {
@@ -19,26 +17,12 @@ class SliverExpandableList extends StatefulWidget {
 }
 
 class _SliverExpandableListState extends State<SliverExpandableList> {
-  final isExpandedNotifier = ValueNotifier<bool>(true);
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: isExpandedNotifier,
-      builder: (context, isExpanded, child) {
-        return SliverList.builder(
-          itemCount: (isExpanded ? widget.itemCount : 0) + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return ExpandableTitleBuilder(
-                title: widget.title,
-                isExpanded: isExpanded,
-                onTap: isExpandedNotifier.toggle,
-              );
-            }
-            return widget.itemBuilder(context, index - 1);
-          },
-        );
+    return SliverList.builder(
+      itemCount: widget.itemCount,
+      itemBuilder: (context, index) {
+        return widget.itemBuilder(context, index);
       },
     );
   }
