@@ -77,7 +77,7 @@ bash scripts/config-pre-commit.sh
 ```
 
 ## Deployment
-### Setup to build web version using Docker
+### Web version using Docker
 
 - Create a config file `config.json` in the root of the project with the following
   [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
