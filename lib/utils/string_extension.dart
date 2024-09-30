@@ -376,4 +376,9 @@ extension StringCasingExtension on String {
     final match = regex.firstMatch(this);
     return match?.group(1);
   }
+
+  String getBaseUrlBeforeHash() {
+    final fragmentIndex = indexOf('#/');
+    return fragmentIndex != -1 ? substring(0, fragmentIndex) : this;
+  }
 }
