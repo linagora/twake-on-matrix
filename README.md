@@ -76,7 +76,7 @@ flutter pub get && flutter pub run build_runner build --delete-conflicting-outpu
 bash scripts/config-pre-commit.sh
 ```
 
-## Deploy
+## Deployment
 ### Setup to build web version using Docker
 
 - Create a config file `config.json` in the root of the project with the following
