@@ -37,7 +37,6 @@ class HighlightText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       softWrap: softWrap,
-      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 }

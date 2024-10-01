@@ -57,54 +57,58 @@ class ExpansionContactListTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(
-                  width: 12.0,
+                  width: 8.0,
                 ),
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IntrinsicWidth(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: BuildDisplayName(
-                                      profileDisplayName:
-                                          snapshot.data?.displayName,
-                                      contactDisplayName: contact.displayName,
-                                      highlightKeyword: highlightKeyword,
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
-                                          ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: IntrinsicWidth(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: BuildDisplayName(
+                                        profileDisplayName:
+                                            snapshot.data?.displayName,
+                                        contactDisplayName: contact.displayName,
+                                        highlightKeyword: highlightKeyword,
+                                        style: LinagoraTextStyle.material()
+                                            .bodyMedium2
+                                            .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            if (contact.matrixId != null &&
-                                contact.matrixId!
-                                    .isCurrentMatrixId(context)) ...[
+                              if (contact.matrixId != null &&
+                                  contact.matrixId!
+                                      .isCurrentMatrixId(context)) ...[
+                                const SizedBox(width: 8.0),
+                                TwakeChip(
+                                  text: L10n.of(context)!.owner,
+                                  textColor:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                               const SizedBox(width: 8.0),
-                              TwakeChip(
-                                text: L10n.of(context)!.owner,
-                                textColor:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
+                              if (contact.status != null &&
+                                  contact.status == ContactStatus.inactive)
+                                ContactStatusWidget(
+                                  status: contact.status!,
+                                ),
                             ],
-                            const SizedBox(width: 8.0),
-                            if (contact.status != null &&
-                                contact.status == ContactStatus.inactive)
-                              ContactStatusWidget(
-                                status: contact.status!,
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                       if (contact.matrixId != null &&
@@ -117,7 +121,8 @@ class ExpansionContactListTile extends StatelessWidget {
                               .textTheme
                               .bodyMedium
                               ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
                               ),
                         ),
                       if (contact.email != null)
@@ -128,7 +133,8 @@ class ExpansionContactListTile extends StatelessWidget {
                               .textTheme
                               .bodyMedium
                               ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
                               ),
                         ),
                       if (contact.phoneNumber != null)
@@ -139,7 +145,8 @@ class ExpansionContactListTile extends StatelessWidget {
                               .textTheme
                               .bodyMedium
                               ?.copyWith(
-                                color: LinagoraRefColors.material().neutral[60],
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
                               ),
                         ),
                     ],
