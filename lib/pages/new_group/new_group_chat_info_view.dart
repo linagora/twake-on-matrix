@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
@@ -8,11 +7,13 @@ import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
@@ -199,6 +200,7 @@ class NewGroupChatInfoView extends StatelessWidget {
             : _AvatarForWebBuilder(
                 avatarWebNotifier:
                     newGroupInfoController.avatarFilePickerNotifier,
+                onImageLoaded: newGroupInfoController.updateAvatarFilePicker,
               ),
       ),
     );
@@ -292,10 +294,12 @@ class _AvatarForMobileBuilder extends StatelessWidget {
 }
 
 class _AvatarForWebBuilder extends StatelessWidget {
-  final ValueNotifier<FilePickerResult?> avatarWebNotifier;
+  final ValueNotifier<MatrixFile?> avatarWebNotifier;
+  final Function(MatrixFile) onImageLoaded;
 
   const _AvatarForWebBuilder({
     required this.avatarWebNotifier,
+    required this.onImageLoaded,
   });
 
   @override
@@ -303,21 +307,16 @@ class _AvatarForWebBuilder extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: avatarWebNotifier,
       builder: (context, value, child) {
-        if (value == null || value.files.single.bytes == null) {
+        if (value == null || value.readStream == null) {
           return child!;
         }
         return ClipOval(
           child: SizedBox.fromSize(
             size:
                 const Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
-            child: Image.memory(
-              value.files.single.bytes!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
-              },
+            child: StreamImageViewer(
+              matrixFile: value,
+              onImageLoaded: onImageLoaded,
             ),
           ),
         );

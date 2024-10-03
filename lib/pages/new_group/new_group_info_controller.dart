@@ -18,7 +18,7 @@ extension NewGroupInfoControllerExtension on NewGroupChatInfoController {
     if (avatarFilePickerNotifier.value != null) {
       uploadAvatarNewGroupChatInBytes(
         matrixClient: client,
-        filePickerResult: avatarFilePickerNotifier.value!,
+        matrixFile: avatarFilePickerNotifier.value!,
       );
     } else {
       createNewGroup();
