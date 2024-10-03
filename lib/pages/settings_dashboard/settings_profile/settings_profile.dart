@@ -5,10 +5,12 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
+import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
@@ -30,6 +32,7 @@ import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -70,7 +73,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   Profile? currentProfile;
   AssetEntity? assetEntity;
-  FilePickerResult? filePickerResult;
+  MatrixFile? matrixFile;
 
   List<TwakeChatPresentationAccount> _multipleAccounts = [];
 
@@ -154,7 +157,7 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleRemoveAvatarAction() async {
-    if (assetEntity != null || filePickerResult != null) {
+    if (assetEntity != null || matrixFile != null) {
       isEditedProfileNotifier.toggle();
     }
     if (currentProfile?.avatarUrl == null) {
@@ -182,23 +185,32 @@ class SettingsProfileController extends State<SettingsProfile>
   ) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
+      withData: false,
+      withReadStream: true,
     );
-    Logs().d(
-      'SettingsProfile::_getImageOnWeb(): FilePickerResult - $result',
-    );
-    if (result == null || result.files.single.bytes == null) {
+    if (result == null || result.files.single.readStream == null) {
       return;
     } else {
+      final matrixFile = result.files.single.toMatrixFileOnWeb();
+      Logs().d(
+        'SettingsProfile::_getImageOnWeb(): AvatarWebNotifier - ${matrixFile.size}',
+      );
+      if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSize) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.fileTooBig(
+            AppConfig.defaultMaxUploadAvtarSize.bytesToMBInt(),
+          ),
+        );
+        return;
+      }
       if (!isEditedProfileNotifier.value) {
         isEditedProfileNotifier.toggle();
       }
       settingsProfileUIState.value = Right<Failure, Success>(
         GetAvatarInBytesUIStateSuccess(
-          filePickerResult: result,
+          matrixFile: matrixFile,
         ),
-      );
-      Logs().d(
-        'SettingsProfile::_getImageOnWeb(): AvatarWebNotifier - $result',
       );
     }
   }
@@ -329,12 +341,12 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
-  void _setAvatarInBytes() {
-    if (filePickerResult != null) {
+  void _setAvatarOnWeb() {
+    if (matrixFile != null) {
       uploadContentWebInteractor
           .execute(
             matrixClient: client,
-            filePickerResult: filePickerResult!,
+            matrixFile: matrixFile!,
           )
           .listen(
             (event) => _handleUploadAvatarOnData(context, event),
@@ -352,7 +364,7 @@ class SettingsProfileController extends State<SettingsProfile>
     if (PlatformInfos.isMobile) {
       _setAvatarInStream();
     } else {
-      _setAvatarInBytes();
+      _setAvatarOnWeb();
     }
   }
 
@@ -363,8 +375,8 @@ class SettingsProfileController extends State<SettingsProfile>
     if (assetEntity != null) {
       assetEntity = null;
     }
-    if (filePickerResult != null) {
-      filePickerResult = null;
+    if (matrixFile != null) {
+      matrixFile = null;
     }
   }
 
@@ -641,7 +653,7 @@ class SettingsProfileController extends State<SettingsProfile>
               break;
             case const (GetAvatarInBytesUIStateSuccess):
               final uiState = success as GetAvatarInBytesUIStateSuccess;
-              filePickerResult = uiState.filePickerResult;
+              matrixFile = uiState.matrixFile;
               break;
             case const (GetProfileUIStateSuccess):
               final uiState = success as GetProfileUIStateSuccess;
@@ -653,6 +665,10 @@ class SettingsProfileController extends State<SettingsProfile>
         },
       );
     });
+  }
+
+  void updateMatrixFile(MatrixFile newMatrixFile) {
+    matrixFile = newMatrixFile;
   }
 
   void _handleUpdateProfileFailure(String errorMessage) {

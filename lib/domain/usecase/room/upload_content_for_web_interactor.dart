@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
@@ -9,19 +8,14 @@ import 'package:matrix/matrix.dart';
 class UploadContentInBytesInteractor {
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
-    required FilePickerResult filePickerResult,
+    required MatrixFile matrixFile,
   }) async* {
     try {
       yield Right(UploadContentLoading());
-      if (filePickerResult.files.single.bytes != null) {
+      if (matrixFile.bytes != null) {
         final mediaConfig = await matrixClient.getConfig();
         final maxMediaSize = mediaConfig.mUploadSize;
-        final fileSize = filePickerResult.files.single.size;
-        final matrixFile = MatrixFile.fromMimeType(
-          bytes: filePickerResult.files.single.bytes,
-          name: filePickerResult.files.single.name,
-          filePath: '',
-        );
+        final fileSize = matrixFile.size;
         Logs().d(
           'UploadContentWebInteractor::execute(): FileSized $fileSize || maxMediaSize $maxMediaSize',
         );

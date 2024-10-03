@@ -1,5 +1,5 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/settings_profile_ui_state.dart';
+import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class GetAvatarInitialUIState extends SettingsProfileUIState {}
@@ -16,10 +16,10 @@ class GetAvatarInStreamUIStateSuccess extends SettingsProfileUIState {
 }
 
 class GetAvatarInBytesUIStateSuccess extends SettingsProfileUIState {
-  final FilePickerResult? filePickerResult;
+  final MatrixFile? matrixFile;
 
-  GetAvatarInBytesUIStateSuccess({this.filePickerResult});
+  GetAvatarInBytesUIStateSuccess({this.matrixFile});
 
   @override
-  List<Object?> get props => [filePickerResult];
+  List<Object?> get props => [matrixFile];
 }

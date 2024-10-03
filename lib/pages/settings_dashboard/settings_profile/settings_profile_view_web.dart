@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -19,6 +20,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final Client client;
   final List<Widget>? menuChildren;
   final MenuController? menuController;
+  final Function(MatrixFile) onImageLoaded;
 
   const SettingsProfileViewWeb({
     super.key,
@@ -26,6 +28,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
     required this.workIdentitiesInfoWidget,
     required this.client,
     required this.settingsProfileUIState,
+    required this.onImageLoaded,
     this.menuController,
     this.menuChildren,
   });
@@ -88,9 +91,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                   (success) {
                                     if (success
                                         is GetAvatarInBytesUIStateSuccess) {
-                                      if (success.filePickerResult == null ||
-                                          success.filePickerResult?.files.single
-                                                  .bytes ==
+                                      if (success.matrixFile == null ||
+                                          success.matrixFile?.readStream ==
                                               null) {
                                         return child!;
                                       }
@@ -100,17 +102,9 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                             SettingsProfileViewWebStyle
                                                 .radiusImageMemory,
                                           ),
-                                          child: Image.memory(
-                                            success.filePickerResult!.files
-                                                .single.bytes!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Center(
-                                                child:
-                                                    Icon(Icons.error_outline),
-                                              );
-                                            },
+                                          child: StreamImageViewer(
+                                            matrixFile: success.matrixFile!,
+                                            onImageLoaded: onImageLoaded,
                                           ),
                                         ),
                                       );
