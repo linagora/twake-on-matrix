@@ -30,22 +30,32 @@ class StreamImageViewerState extends State<StreamImageViewer> {
   @override
   void initState() {
     super.initState();
-    _loadImage();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadImage();
+    });
   }
 
   @override
   void didUpdateWidget(covariant StreamImageViewer oldWidget) {
     if (oldWidget.matrixFile != widget.matrixFile) {
-      _loadImage();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _loadImage();
+      });
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    imageBytes.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: imageBytes,
-      builder: (context, bytes, _) {
+      builder: (_, bytes, __) {
         if (bytes == null) {
           return const Center(
             child: CircularProgressIndicator(),

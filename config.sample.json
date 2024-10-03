@@ -11,5 +11,6 @@
   "twake_workplace_homeserver": "https://example.com/",
   "app_grid_dashboard_available": true,
   "homeserver": "https://example.com/",
-  "platform": "platform"
+  "platform": "platform",
+  "default_max_upload_avatar_size_in_bytes": 1000000
 }

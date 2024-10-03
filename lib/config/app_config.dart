@@ -22,17 +22,13 @@ abstract class AppConfig {
   static String _applicationName = 'Twake Chat';
 
   static String get applicationName => _applicationName;
-
   static String? _applicationWelcomeMessage;
 
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
-
   static String _defaultHomeserver = 'matrix.linagora.com';
 
   static String get defaultHomeserver => _defaultHomeserver;
-
   static double bubbleSizeFactor = 1;
-
   static double fontSizeFactor = 1;
 
   static String sampleValue = 'sampleValue';
@@ -57,127 +53,76 @@ abstract class AppConfig {
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
-
   static Color colorSchemeSeed = primaryColor;
-
   static const double messageFontSize = 17.0;
-
   static const bool allowOtherHomeservers = true;
-
   static const bool enableRegistration = true;
-
   static const Color primaryColor = Color.fromARGB(255, 135, 103, 172);
-
   static const Color primaryColorLight = Color(0xFFCCBDEA);
-
   static const Color secondaryColor = Color(0xFF41a2bc);
 
   static String get privacyUrl => _appPolicy;
-
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';
-
   static const String encryptionTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/How-to-use-end-to-end-encryption-in-FluffyChat';
-
   static const String appOpenUrlScheme = 'twake.chat';
-
   static String _webBaseUrl = 'https://fluffychat.im/web';
 
   static String get webBaseUrl => _webBaseUrl;
-
   static const String sourceCodeUrl =
       'https://github.com/linagora/twake-on-matrix';
-
   static const String supportUrl =
       'https://github.com/linagora/twake-on-matrix/issues';
-
   static bool renderHtml = true;
-
   static bool hideRedactedEvents = false;
-
   static bool hideUnknownEvents = true;
-
   static bool hideUnimportantStateEvents = true;
-
   static bool showDirectChatsInSpaces = true;
-
   static bool separateChatTypes = false;
-
   static bool autoplayImages = true;
-
   static bool experimentalVoip = false;
-
   static bool appGridDashboardAvailable = true;
-
   static const bool hideTypingUsernames = false;
-
   static const bool hideAllStateEvents = false;
-
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
-
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
-
   static const String schemePrefix = 'matrix:';
-
   static const String pushNotificationsChannelId = 'twake_push';
-
   static const String pushNotificationsChannelName = 'Twake Chat push channel';
-
   static const String pushNotificationsChannelDescription =
       'Push notifications for Twake Chat';
-
   static String pushNotificationsAppId = Platform.isIOS
       ? kReleaseMode
           ? "app.twake.ios.chat"
           : "app.twake.ios.chat.sandbox"
       : "app.twake.android.chat";
-
   static const String pushNotificationsGatewayUrl =
       'https://sygnal.lin-saas.dev/_matrix/push/v1/notify';
-
   static const String pushNotificationsPusherFormat = 'event_id_only';
-
   static const String emojiFontName = 'Noto Emoji';
-
   static const String emojiFontUrl =
       'https://github.com/googlefonts/noto-emoji/';
-
   static const double borderRadius = 20.0;
-
   static const double columnWidth = 360.0;
-
   static const int maxFetchContacts = 100000;
-
   static const int chatRoomSearchKeywordMin = 2;
-
   static const bool chatRoomSearchWordStrategy = false;
-
   static const String defaultImageBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-
   static const String defaultVideoBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
-
   static const int thumbnailQuality = 70;
-
   static const int blurHashSize = 32;
-
   static const int imageQuality = 50;
-
   static const String iOSKeychainSharingId = 'KUT463DS29.app.twake.ios.chat';
-
   static const String iOSKeychainSharingAccount = 'app.twake.ios.chat.sessions';
-
   static const int maxFilesSendPerDialog = 6;
-
   static const bool supportMultipleAccountsInTheSameHomeserver = false;
-
   static const imageCompressFormmat = CompressFormat.jpeg;
-
   static const videoThumbnailFormat = ImageFormat.JPEG;
 
   static String? issueId;
 
-  static int defaultMaxUploadAvtarSize = 10000000;
+  static int defaultMaxUploadAvtarSizeInBytes = 10 * (1024 * 1024);
 
   static const String appGridConfigurationPath =
       "configurations/app_dashboard.json";
@@ -294,8 +239,9 @@ abstract class AppConfig {
     if (json['platform'] is String?) {
       platform = json['platform'];
     }
-    if (json['default_max_upload_avatar_size'] is int) {
-      defaultMaxUploadAvtarSize = json['default_max_upload_avatar_size'];
+    if (json['default_max_upload_avatar_size_in_bytes'] is int) {
+      defaultMaxUploadAvtarSizeInBytes =
+          json['default_max_upload_avatar_size_in_bytes'];
     }
   }
 }

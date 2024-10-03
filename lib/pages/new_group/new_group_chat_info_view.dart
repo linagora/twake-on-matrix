@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
+import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
@@ -49,26 +51,14 @@ class NewGroupChatInfoView extends StatelessWidget {
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
-                    FutureBuilder(
-                      future: newGroupInfoController.getServerConfig(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final maxMediaSize = snapshot.data!.mUploadSize;
-                          return Text(
-                            L10n.of(context)!
-                                .maxImageSize(maxMediaSize!.bytesToMB()),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color:
-                                      LinagoraRefColors.material().neutral[40],
-                                ),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
+                    Text(
+                      L10n.of(context)!.maxImageSize(
+                        AppConfig.defaultMaxUploadAvtarSizeInBytes
+                            .bytesToMBInt(),
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: LinagoraRefColors.material().neutral[40],
+                          ),
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
@@ -198,8 +188,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                     newGroupInfoController.avatarAssetEntityNotifier,
               )
             : _AvatarForWebBuilder(
-                avatarWebNotifier:
-                    newGroupInfoController.avatarFilePickerNotifier,
+                avatarWebNotifier: newGroupInfoController.pickAvatarUIState,
                 onImageLoaded: newGroupInfoController.updateAvatarFilePicker,
               ),
       ),
@@ -294,7 +283,7 @@ class _AvatarForMobileBuilder extends StatelessWidget {
 }
 
 class _AvatarForWebBuilder extends StatelessWidget {
-  final ValueNotifier<MatrixFile?> avatarWebNotifier;
+  final ValueNotifier<Either<Failure, Success>> avatarWebNotifier;
   final Function(MatrixFile) onImageLoaded;
 
   const _AvatarForWebBuilder({
@@ -306,21 +295,33 @@ class _AvatarForWebBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: avatarWebNotifier,
-      builder: (context, value, child) {
-        if (value == null || value.readStream == null) {
+      builder: (context, uiState, child) => uiState.fold(
+        (failure) {
+          if (failure is GetAvatarBigSizeUIStateFailure) {
+            return child!;
+          }
+          return const SizedBox();
+        },
+        (success) {
+          if (success is GetAvatarOnWebUIStateSuccess) {
+            if (success.matrixFile?.readStream == null) {
+              return child!;
+            }
+            return ClipOval(
+              child: SizedBox.fromSize(
+                size: const Size.fromRadius(
+                  NewGroupChatInfoStyle.avatarRadiusForWeb,
+                ),
+                child: StreamImageViewer(
+                  matrixFile: success.matrixFile!,
+                  onImageLoaded: onImageLoaded,
+                ),
+              ),
+            );
+          }
           return child!;
-        }
-        return ClipOval(
-          child: SizedBox.fromSize(
-            size:
-                const Size.fromRadius(NewGroupChatInfoStyle.avatarRadiusForWeb),
-            child: StreamImageViewer(
-              matrixFile: value,
-              onImageLoaded: onImageLoaded,
-            ),
-          ),
-        );
-      },
+        },
+      ),
       child: Icon(
         Icons.camera_alt_outlined,
         color: Theme.of(context).colorScheme.surface,
