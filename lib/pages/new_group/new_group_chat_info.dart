@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
+import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -54,7 +58,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       getIt.get<CreateNewGroupChatInteractor>();
   final groupNameTextEditingController = TextEditingController();
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
-  final avatarFilePickerNotifier = ValueNotifier<FilePickerResult?>(null);
+  final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
 
   final groupNameFocusNode = FocusNode();
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
@@ -214,12 +218,12 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   void uploadAvatarNewGroupChatInBytes({
     required Client matrixClient,
-    required FilePickerResult filePickerResult,
+    required MatrixFile matrixFile,
   }) {
     uploadContentWebInteractor
         .execute(
           matrixClient: matrixClient,
-          filePickerResult: filePickerResult,
+          matrixFile: matrixFile,
         )
         .listen(
           (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
@@ -260,18 +264,34 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   ) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
+      withData: false,
+      withReadStream: true,
     );
-    Logs().d(
-      'NewGroupController::_getImageOnWeb(): FilePickerResult - $result',
-    );
-    if (result == null || result.files.single.bytes == null) {
+    if (result == null || result.files.single.readStream == null) {
       return;
     } else {
-      avatarFilePickerNotifier.value = result;
+      final matrixFile = result.files.single.toMatrixFileOnWeb();
+      Logs().d(
+        'NewGroupController::_getImageOnWeb(): FilePickerResult - ${matrixFile.size}',
+      );
+      if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSize) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.fileTooBig(
+            AppConfig.defaultMaxUploadAvtarSize.bytesToMBInt(),
+          ),
+        );
+        return;
+      }
+      avatarFilePickerNotifier.value = matrixFile;
       Logs().d(
         'NewGroupController::_getImageOnWeb(): AvatarWebNotifier - ${avatarFilePickerNotifier.value}',
       );
     }
+  }
+
+  void updateAvatarFilePicker(MatrixFile matrixFile) {
+    avatarFilePickerNotifier.value = matrixFile;
   }
 
   void showImagesPickerAction({
