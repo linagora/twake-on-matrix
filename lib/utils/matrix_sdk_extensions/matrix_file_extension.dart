@@ -120,7 +120,7 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   Future<Uint8List> streamToUint8List(Stream<List<int>> stream) async {
-    return await stream.toUint8List();
+    return await stream.toBytes();
   }
 
   bool get isFileHaveThumbnail =>

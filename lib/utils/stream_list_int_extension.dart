@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 extension StreamListIntExtension on Stream<List<int>> {
@@ -43,5 +45,30 @@ extension StreamListIntExtension on Stream<List<int>> {
 
     // Return Uint8List containing the concatenated data
     return Uint8List.view(byteData.buffer, 0, length);
+  }
+
+  Future<Uint8List> toBytes() {
+    final completer = Completer<Uint8List>();
+    final sink = ByteConversionSink.withCallback(
+      (bytes) => completer.complete(
+        Uint8List.fromList(bytes),
+      ),
+    );
+
+    late StreamSubscription<List<int>> subscription;
+    subscription = listen(
+      (val) => sink.add(val),
+      onError: (error) {
+        completer.completeError(error);
+        subscription.cancel();
+      },
+      onDone: () {
+        sink.close();
+        subscription.cancel();
+      },
+      cancelOnError: true,
+    );
+
+    return completer.future;
   }
 }
