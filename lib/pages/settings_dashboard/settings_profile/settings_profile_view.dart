@@ -137,6 +137,7 @@ class SettingsProfileView extends StatelessWidget {
                     },
                     itemCount: controller.getListProfileMobile.length,
                   ),
+                  onImageLoaded: controller.updateMatrixFile,
                 );
               },
             ),
@@ -186,6 +187,7 @@ class SettingsProfileView extends StatelessWidget {
                     },
                     itemCount: controller.getListProfileBasicInfo.length,
                   ),
+                  onImageLoaded: controller.updateMatrixFile,
                   workIdentitiesInfoWidget: ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

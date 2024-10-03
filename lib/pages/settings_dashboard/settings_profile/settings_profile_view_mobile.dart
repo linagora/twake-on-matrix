@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -29,6 +30,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
   final MenuController? menuController;
   final ValueNotifier<Either<Failure, Success>> settingsMultiAccountsUIState;
   final Client client;
+  final Function(MatrixFile) onImageLoaded;
 
   const SettingsProfileViewMobile({
     super.key,
@@ -38,6 +40,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
     required this.client,
     required this.onTapMultipleAccountsButton,
     required this.settingsMultiAccountsUIState,
+    required this.onImageLoaded,
     this.menuChildren,
     this.menuController,
   });
@@ -109,9 +112,8 @@ class SettingsProfileViewMobile extends StatelessWidget {
                         }
                         if (success is GetAvatarInBytesUIStateSuccess &&
                             PlatformInfos.isWeb) {
-                          if (success.filePickerResult == null ||
-                              success.filePickerResult?.files.single.bytes ==
-                                  null) {
+                          if (success.matrixFile == null ||
+                              success.matrixFile?.readStream == null) {
                             return child!;
                           }
                           return ClipOval(
@@ -119,14 +121,9 @@ class SettingsProfileViewMobile extends StatelessWidget {
                               size: const Size.fromRadius(
                                 AvatarStyle.defaultSize,
                               ),
-                              child: Image.memory(
-                                success.filePickerResult!.files.single.bytes!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Center(
-                                    child: Icon(Icons.error_outline),
-                                  );
-                                },
+                              child: StreamImageViewer(
+                                matrixFile: success.matrixFile!,
+                                onImageLoaded: onImageLoaded,
                               ),
                             ),
                           );
