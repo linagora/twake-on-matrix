@@ -3,12 +3,13 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_option.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_avatar_ui_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
+import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -103,8 +104,9 @@ class ChatDetailsEditView extends StatelessWidget {
                           tag: 'content_banner',
                           child: _AvatarBuilder(
                             updateGroupAvatarNotifier:
-                                controller.updateGroupAvatarNotifier,
+                                controller.pickAvatarUIState,
                             room: controller.room!,
+                            onImageLoaded: controller.updateAvatarFilePicker,
                           ),
                         ),
                       ),
@@ -214,10 +216,12 @@ class ChatDetailsEditView extends StatelessWidget {
 class _AvatarBuilder extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> updateGroupAvatarNotifier;
   final Room room;
+  final Function(MatrixFile) onImageLoaded;
 
   const _AvatarBuilder({
     required this.updateGroupAvatarNotifier,
     required this.room,
+    required this.onImageLoaded,
   });
 
   @override
@@ -225,17 +229,25 @@ class _AvatarBuilder extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: updateGroupAvatarNotifier,
       builder: (context, value, child) => value.fold(
-        (failure) => const SizedBox(),
+        (failure) {
+          if (failure is GetAvatarBigSizeUIStateFailure) {
+            return child!;
+          }
+          return const SizedBox();
+        },
         (success) {
           if (PlatformInfos.isMobile &&
-              success is ChatDetailsGetAvatarInStreamSuccess) {
+              success is GetAvatarOnMobileUIStateSuccess) {
+            if (success.assetEntity == null) {
+              return child!;
+            }
             return ClipOval(
               child: SizedBox.fromSize(
                 size: const Size.fromRadius(
                   ChatDetailEditViewStyle.avatarRadiusForMobile,
                 ),
                 child: AssetEntityImage(
-                  success.assetEntity,
+                  success.assetEntity!,
                   thumbnailSize: const ThumbnailSize(
                     ChatDetailEditViewStyle.thumbnailSizeWidth,
                     ChatDetailEditViewStyle.thumbnailSizeHeight,
@@ -261,36 +273,22 @@ class _AvatarBuilder extends StatelessWidget {
             );
           }
 
-          if (PlatformInfos.isWeb &&
-              success is ChatDetailsGetAvatarInByteSuccess) {
+          if (PlatformInfos.isWeb && success is GetAvatarOnWebUIStateSuccess) {
+            if (success.matrixFile?.readStream == null) {
+              return child!;
+            }
             return ClipOval(
               child: SizedBox.fromSize(
                 size: const Size.fromRadius(
                   ChatDetailEditViewStyle.avatarRadiusForWeb,
                 ),
-                child: Image.memory(
-                  success.filePickerResult.files.single.bytes!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.error_outline),
-                    );
-                  },
+                child: StreamImageViewer(
+                  matrixFile: success.matrixFile!,
+                  onImageLoaded: onImageLoaded,
                 ),
               ),
             );
           }
-
-          if (success is ChatDetailsDeleteAvatarSuccess) {
-            return Avatar(
-              fontSize: ChatDetailEditViewStyle.avatarFontSize,
-              name: room.getLocalizedDisplayname(
-                MatrixLocals(L10n.of(context)!),
-              ),
-              size: ChatDetailEditViewStyle.avatarSize(context),
-            );
-          }
-
           return child!;
         },
       ),

@@ -3,25 +3,21 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
-import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
@@ -46,7 +42,7 @@ class NewGroupChatInfo extends StatefulWidget {
 }
 
 class NewGroupChatInfoController extends State<NewGroupChatInfo>
-    with CommonMediaPickerMixin, SingleImagePickerMixin {
+    with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
   final createRoomStateNotifier =
@@ -259,37 +255,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     );
   }
 
-  void _getImageOnWeb(
-    BuildContext context,
-  ) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      withData: false,
-      withReadStream: true,
-    );
-    if (result == null || result.files.single.readStream == null) {
-      return;
-    } else {
-      final matrixFile = result.files.single.toMatrixFileOnWeb();
-      Logs().d(
-        'NewGroupController::_getImageOnWeb(): FilePickerResult - ${matrixFile.size}',
-      );
-      if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSize) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.fileTooBig(
-            AppConfig.defaultMaxUploadAvtarSize.bytesToMBInt(),
-          ),
-        );
-        return;
-      }
-      avatarFilePickerNotifier.value = matrixFile;
-      Logs().d(
-        'NewGroupController::_getImageOnWeb(): AvatarWebNotifier - ${avatarFilePickerNotifier.value}',
-      );
-    }
-  }
-
   void updateAvatarFilePicker(MatrixFile matrixFile) {
     avatarFilePickerNotifier.value = matrixFile;
   }
@@ -301,7 +266,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       return;
     }
     if (PlatformInfos.isWeb) {
-      _getImageOnWeb(context);
+      pickAvatarImageOnWeb();
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission(context);
@@ -347,6 +312,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   @override
   void initState() {
     listenGroupNameChanged();
+    listenToPickAvatarUIState(context);
     contactsList = widget.contactsList;
     super.initState();
   }
@@ -354,13 +320,14 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   @override
   void dispose() {
     super.dispose();
+    disposePickAvatarMixin();
     haveGroupNameNotifier.dispose();
     enableEncryptionNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
-    avatarFilePickerNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
     groupNameTextEditingController.dispose();
     groupNameFocusNode.dispose();
+    avatarFilePickerNotifier.dispose();
   }
 
   @override

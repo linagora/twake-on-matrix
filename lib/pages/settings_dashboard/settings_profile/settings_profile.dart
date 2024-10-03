@@ -2,15 +2,12 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
-import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
@@ -18,11 +15,11 @@ import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_avatar_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_profile_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
+import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
+import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -32,7 +29,6 @@ import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -63,7 +59,8 @@ class SettingsProfileController extends State<SettingsProfile>
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
-        OnProfileChangeMixin {
+        OnProfileChangeMixin,
+        PickAvatarMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
@@ -71,7 +68,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   final MenuController menuController = MenuController();
 
-  Profile? currentProfile;
+  final ValueNotifier<Profile?> currentProfile = ValueNotifier<Profile?>(null);
   AssetEntity? assetEntity;
   MatrixFile? matrixFile;
 
@@ -81,9 +78,6 @@ class SettingsProfileController extends State<SettingsProfile>
       getIt.get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
-
-  final ValueNotifier<Either<Failure, Success>> settingsProfileUIState =
-      ValueNotifier<Either<Failure, Success>>(Right(GetAvatarInitialUIState()));
 
   final settingsMultiAccountsUIState = ValueNotifier<Either<Failure, Success>>(
     Right(GetClientsInitialUIState()),
@@ -95,7 +89,7 @@ class SettingsProfileController extends State<SettingsProfile>
       displayNameEditingController.text != displayName;
 
   String get displayName =>
-      currentProfile?.displayName ??
+      currentProfile.value?.displayName ??
       client.mxid(context).localpart ??
       client.mxid(context);
 
@@ -125,7 +119,7 @@ class SettingsProfileController extends State<SettingsProfile>
           label: L10n.of(context)!.changeProfileAvatar,
           icon: Icons.add_a_photo_outlined,
         ),
-        if (currentProfile?.avatarUrl != null)
+        if (currentProfile.value?.avatarUrl != null)
           SheetAction(
             key: AvatarAction.remove,
             label: L10n.of(context)!.removeYourAvatar,
@@ -160,13 +154,8 @@ class SettingsProfileController extends State<SettingsProfile>
     if (assetEntity != null || matrixFile != null) {
       isEditedProfileNotifier.toggle();
     }
-    if (currentProfile?.avatarUrl == null) {
+    if (currentProfile.value?.avatarUrl == null) {
       _clearImageInLocal();
-      settingsProfileUIState.value = Right<Failure, Success>(
-        GetProfileUIStateSuccess(
-          currentProfile!,
-        ),
-      );
     } else {
       TwakeDialog.showLoadingDialog(context);
       final newProfile = Profile(
@@ -174,50 +163,14 @@ class SettingsProfileController extends State<SettingsProfile>
         displayName: displayName,
         avatarUrl: null,
       );
-      settingsProfileUIState.value =
-          Right<Failure, Success>(GetProfileUIStateSuccess(newProfile));
+      currentProfile.value = newProfile;
       _uploadProfile(isDeleteAvatar: true);
-    }
-  }
-
-  void _getImageOnWeb(
-    BuildContext context,
-  ) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      withData: false,
-      withReadStream: true,
-    );
-    if (result == null || result.files.single.readStream == null) {
-      return;
-    } else {
-      final matrixFile = result.files.single.toMatrixFileOnWeb();
-      Logs().d(
-        'SettingsProfile::_getImageOnWeb(): AvatarWebNotifier - ${matrixFile.size}',
-      );
-      if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSize) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.fileTooBig(
-            AppConfig.defaultMaxUploadAvtarSize.bytesToMBInt(),
-          ),
-        );
-        return;
-      }
-      if (!isEditedProfileNotifier.value) {
-        isEditedProfileNotifier.toggle();
-      }
-      settingsProfileUIState.value = Right<Failure, Success>(
-        GetAvatarInBytesUIStateSuccess(
-          matrixFile: matrixFile,
-        ),
-      );
     }
   }
 
   void _showImagesPickerAction() async {
     if (PlatformInfos.isWeb) {
-      _getImageOnWeb(context);
+      pickAvatarImageOnWeb();
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission(context);
@@ -242,8 +195,8 @@ class SettingsProfileController extends State<SettingsProfile>
         if (!imagePickerController.pickFromCamera()) {
           Navigator.pop(context);
         }
-        settingsProfileUIState.value = Right<Failure, Success>(
-          GetAvatarInStreamUIStateSuccess(
+        pickAvatarUIState.value = Right<Failure, Success>(
+          GetAvatarOnMobileUIStateSuccess(
             assetEntity: selectedAsset?.asset,
           ),
         );
@@ -301,6 +254,9 @@ class SettingsProfileController extends State<SettingsProfile>
         _showImagesPickerAction();
         break;
       case SettingsProfileContextMenuActions.delete:
+        pickAvatarUIState.value = Right<Failure, Success>(
+          GetAvatarInitialUIState(),
+        );
         _handleRemoveAvatarAction();
         break;
     }
@@ -368,7 +324,7 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
-  void _clearImageInLocal() {
+  void _clearImageInMemory() {
     Logs().d(
       'SettingsProfile::_clearImageInLocal() - Clear image in local',
     );
@@ -377,6 +333,9 @@ class SettingsProfileController extends State<SettingsProfile>
     }
     if (matrixFile != null) {
       matrixFile = null;
+    }
+    if (currentProfile.value != null) {
+      currentProfile.value = null;
     }
   }
 
@@ -493,7 +452,7 @@ class SettingsProfileController extends State<SettingsProfile>
           final newProfile = Profile(
             userId: client.userID!,
             displayName: success.displayName ?? displayName,
-            avatarUrl: success.avatar ?? currentProfile?.avatarUrl,
+            avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
           if (!success.isDeleteAvatar) {
@@ -518,11 +477,7 @@ class SettingsProfileController extends State<SettingsProfile>
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );
-    settingsProfileUIState.value =
-        Right<Failure, Success>(GetProfileUIStateSuccess(profile));
-    Logs().d(
-      'SettingsProfileController::_getCurrentProfile() - currentProfile: ${settingsProfileUIState.value}',
-    );
+    currentProfile.value = profile;
     if (profile.avatarUrl == null) {
       _clearImageInLocal();
     }
@@ -639,25 +594,25 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleViewState() {
-    settingsProfileUIState.addListener(() {
+    pickAvatarUIState.addListener(() {
       Logs().d(
-        "settingsProfileUIState()::_handleViewState(): ${settingsProfileUIState.value}",
+        "settingsProfileUIState()::_handleViewState(): ${pickAvatarUIState.value}",
       );
-      settingsProfileUIState.value.fold(
-        (failure) => null,
+      pickAvatarUIState.value.fold(
+        (failure) {
+          if (failure is GetAvatarBigSizeUIStateFailure) {
+            isEditedProfileNotifier.value = false;
+          }
+        },
         (success) {
           switch (success.runtimeType) {
-            case const (GetAvatarInStreamUIStateSuccess):
-              final uiState = success as GetAvatarInStreamUIStateSuccess;
+            case const (GetAvatarOnMobileUIStateSuccess):
+              final uiState = success as GetAvatarOnMobileUIStateSuccess;
               assetEntity = uiState.assetEntity;
               break;
-            case const (GetAvatarInBytesUIStateSuccess):
-              final uiState = success as GetAvatarInBytesUIStateSuccess;
+            case const (GetAvatarOnWebUIStateSuccess):
+              final uiState = success as GetAvatarOnWebUIStateSuccess;
               matrixFile = uiState.matrixFile;
-              break;
-            case const (GetProfileUIStateSuccess):
-              final uiState = success as GetProfileUIStateSuccess;
-              currentProfile = uiState.profile;
               break;
             default:
               break;
@@ -669,6 +624,9 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void updateMatrixFile(MatrixFile newMatrixFile) {
     matrixFile = newMatrixFile;
+    if (!isEditedProfileNotifier.value) {
+      isEditedProfileNotifier.toggle();
+    }
   }
 
   void _handleUpdateProfileFailure(String errorMessage) {
@@ -678,8 +636,20 @@ class SettingsProfileController extends State<SettingsProfile>
       errorMessage,
     );
     _clearImageInLocal();
-    if (currentProfile != null) {
-      _sendAccountDataEvent(profile: currentProfile!);
+    if (currentProfile.value != null) {
+      _sendAccountDataEvent(profile: currentProfile.value!);
+    }
+  }
+
+  void _clearImageInLocal() {
+    Logs().d(
+      'SettingsProfile::_clearImageInLocal() - Clear image in local',
+    );
+    if (assetEntity != null) {
+      assetEntity = null;
+    }
+    if (matrixFile != null) {
+      matrixFile = null;
     }
   }
 
@@ -687,6 +657,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void initState() {
     _handleViewState();
     _getCurrentProfile(client);
+    listenToPickAvatarUIState(context);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       updateNewProfileForAccount();
       _getMultipleAccounts(client);
@@ -697,7 +668,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void updateNewProfileForAccount() {
     listenOnProfileChangeStream(
       client: Matrix.of(context).client,
-      currentProfile: currentProfile,
+      currentProfile: currentProfile.value,
       onProfileChanged: (newProfile) {
         final indexOldAccount = _multipleAccounts
             .indexWhere((element) => element.accountId == client.userID);
@@ -721,11 +692,13 @@ class SettingsProfileController extends State<SettingsProfile>
   @override
   void dispose() {
     _clearImageInLocal();
+    _clearImageInMemory();
+    disposePickAvatarMixin();
+    currentProfile.dispose();
     onAccountDataSubscription?.cancel();
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();
     displayNameFocusNode.dispose();
-    settingsProfileUIState.dispose();
     isEditedProfileNotifier.dispose();
     settingsMultiAccountsUIState.dispose();
     super.dispose();

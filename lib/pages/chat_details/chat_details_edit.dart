@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart' hide State;
-import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -10,12 +9,13 @@ import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_edit_ui_state/upload_avatar_ui_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
+import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -47,7 +47,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         PopupMenuWidgetMixin,
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
-        LeaveChatMixin {
+        LeaveChatMixin,
+        PickAvatarMixin {
   final updateGroupChatInteractor = getIt.get<UpdateGroupChatInteractor>();
 
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
@@ -66,10 +67,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   final descriptionTextEditingController = TextEditingController();
   final descriptionEmptyNotifier = ValueNotifier<bool>(false);
   final descriptionFocusNode = FocusNode();
-  final updateGroupAvatarNotifier = ValueNotifier<Either<Failure, Success>>(
-    Right(ChatDetailsUploadAvatarInitial()),
-  );
-  FilePickerResult? avatarFilePicker;
+  MatrixFile? avatarFilePicker;
   photo_manager.AssetEntity? avatarAssetEntity;
 
   final MenuController menuController = MenuController();
@@ -133,7 +131,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
   void _handleEditAvatarAction({required BuildContext context}) async {
     if (PlatformInfos.isWeb) {
-      _getImageOnWeb(context);
+      pickAvatarImageOnWeb();
       return;
     }
     final currentPermissionPhotos = await getCurrentMediaPermission(context);
@@ -165,8 +163,10 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         if (selectedAsset != null) {
           avatarAssetEntity = selectedAsset.asset;
 
-          updateGroupAvatarNotifier.value = Right(
-            ChatDetailsGetAvatarInStreamSuccess(selectedAsset.asset),
+          pickAvatarUIState.value = Right(
+            GetAvatarOnMobileUIStateSuccess(
+              assetEntity: avatarAssetEntity,
+            ),
           );
         }
 
@@ -177,36 +177,18 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     return imagePickerController;
   }
 
-  void _getImageOnWeb(
-    BuildContext context,
-  ) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
-    Logs().d(
-      'ChatDetailsEditController::_getImageOnWeb(): FilePickerResult - $result',
-    );
-    if (result == null || result.files.single.bytes == null) {
-      return;
-    } else {
-      if (!isEditedGroupInfoNotifier.value) {
-        isEditedGroupInfoNotifier.toggle();
-      }
-      avatarFilePicker = result;
-      updateGroupAvatarNotifier.value = Right(
-        ChatDetailsGetAvatarInByteSuccess(result),
-      );
-      Logs().d(
-        'ChatDetailsEditController::_getImageOnWeb(): AvatarWebNotifier - $avatarFilePicker',
-      );
+  void updateAvatarFilePicker(MatrixFile matrixFile) {
+    if (!isEditedGroupInfoNotifier.value) {
+      isEditedGroupInfoNotifier.toggle();
     }
+    avatarFilePicker = matrixFile;
   }
 
   void _handleRemoveAvatarAction() async {
     if (avatarFilePicker != null) {
       avatarFilePicker = null;
-      updateGroupAvatarNotifier.value = Right(
-        ChatDetailsUploadAvatarInitial(),
+      pickAvatarUIState.value = Right(
+        GetAvatarInitialUIState(),
       );
       if (_isEditDescription || _isEditGroupName) {
         return;
@@ -216,8 +198,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }
     if (avatarAssetEntity != null) {
       avatarAssetEntity = null;
-      updateGroupAvatarNotifier.value = Right(
-        ChatDetailsUploadAvatarInitial(),
+      pickAvatarUIState.value = Right(
+        GetAvatarInitialUIState(),
       );
       if (_isEditDescription || _isEditGroupName) {
         return;
@@ -226,8 +208,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       }
     }
     if (room?.avatar != null) {
-      updateGroupAvatarNotifier.value = Right(
-        ChatDetailsDeleteAvatarSuccess(),
+      pickAvatarUIState.value = Right(
+        GetAvatarInitialUIState(),
       );
       _isDeleteAvatar = true;
       if (_isEditDescription || _isEditGroupName) {
@@ -301,7 +283,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       uploadContentWebInteractor
           .execute(
         matrixClient: client,
-        filePickerResult: avatarFilePicker!,
+        matrixFile: avatarFilePicker!,
       )
           .listen(
         (event) => _handleUploadAvatarOnData(context, event),
@@ -456,8 +438,15 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     TwakeDialog.hideLoadingDialog(context);
   }
 
+  void _clearImageInMemory() {
+    avatarFilePicker = null;
+    avatarAssetEntity = null;
+  }
+
   @override
   void dispose() {
+    _clearImageInMemory();
+    disposePickAvatarMixin();
     groupNameTextEditingController.dispose();
     descriptionTextEditingController.dispose();
     isEditedGroupInfoNotifier.dispose();
@@ -504,6 +493,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     room = Matrix.of(context).client.getRoomById(widget.roomId);
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
+    listenToPickAvatarUIState(context);
     super.initState();
   }
 
