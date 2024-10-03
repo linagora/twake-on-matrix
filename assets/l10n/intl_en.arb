@@ -3104,5 +3104,13 @@
   "sFlashModeLabel": "Flash mode: {mode}",
   "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera",
   "photo": "Photo",
-  "video": "Video"
+  "video": "Video",
+  "fileTooBig": "The selected file is too large. Please choose a file smaller than {maxSize} MB.",
+  "@fileTooBig": {
+    "placeholders": {
+      "maxSize": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -27,6 +27,7 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "app_grid_dashboard_available": true,
   "homeserver": "https://example.com/",
   "platform": "platform"
+  "default_max_upload_avatar_size": 1000000
 }
 ```
 
@@ -43,5 +44,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
 - `app_grid_dashboard_available`: Enable App Grid
 - `homeserver`: Homeserver
 - `platform`: Platform, `saas` for the case of public platform
+- `default_max_upload_avatar_size`: Default max upload avatar size
 
 If you want to disable it, please change the value or remove this from `config.sample.json`
