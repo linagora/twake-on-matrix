@@ -306,8 +306,7 @@ class _SilverExternalContact extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: ContactsTabViewStyle.padding,
         ),
-        child: InkWell(
-          borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+        child: TwakeInkWell(
           onTap: () {
             controller.onContactTap(
               context: context,
@@ -474,8 +473,7 @@ class _Contact extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: ContactsTabViewStyle.padding,
       ),
-      child: InkWell(
-        borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+      child: TwakeInkWell(
         onTap: () {
           controller.onContactTap(
             context: context,

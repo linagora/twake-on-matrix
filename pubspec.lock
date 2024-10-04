@@ -1786,8 +1786,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "0f666ca14fd4f0710775ca3de03cde73b21de7d6"
+      ref: add_List_item_Design
+      resolved-ref: "3f43eff7d77766b36fb4e8a8ff61921e5e3d87e5"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"

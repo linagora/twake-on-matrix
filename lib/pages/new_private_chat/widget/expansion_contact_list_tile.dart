@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
 
@@ -29,18 +28,10 @@ class ExpansionContactListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-                .opacityLayer3,
-            width: 1,
-          ),
-        ),
-      ),
+    return TwakeListItem(
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
+        padding:
+            const EdgeInsetsDirectional.only(start: 8.0, top: 8.0, bottom: 8.0),
         child: FutureBuilder<Profile?>(
           key: contact.matrixId != null ? Key(contact.matrixId!) : null,
           future: contact.status == ContactStatus.active
@@ -48,7 +39,7 @@ class ExpansionContactListTile extends StatelessWidget {
               : null,
           builder: (context, snapshot) {
             return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),

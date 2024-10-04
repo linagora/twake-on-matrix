@@ -23,7 +23,7 @@ class SearchTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      borderRadius: BorderRadius.circular(24.0),
+      borderRadius: const BorderRadius.all(Radius.circular(24.0)),
       child: TextField(
         onTapOutside: (event) {
           dismissKeyboard(context);
