@@ -30,7 +30,8 @@ class ExpansionContactListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return TwakeListItem(
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
+        padding:
+            const EdgeInsetsDirectional.only(start: 8.0, top: 8.0, bottom: 8.0),
         child: FutureBuilder<Profile?>(
           key: contact.matrixId != null ? Key(contact.matrixId!) : null,
           future: contact.status == ContactStatus.active
@@ -38,7 +39,7 @@ class ExpansionContactListTile extends StatelessWidget {
               : null,
           builder: (context, snapshot) {
             return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IgnorePointer(
                   child: Avatar(

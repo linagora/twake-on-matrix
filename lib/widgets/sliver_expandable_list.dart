@@ -21,9 +21,7 @@ class _SliverExpandableListState extends State<SliverExpandableList> {
   Widget build(BuildContext context) {
     return SliverList.builder(
       itemCount: widget.itemCount,
-      itemBuilder: (context, index) {
-        return widget.itemBuilder(context, index);
-      },
+      itemBuilder: widget.itemBuilder,
     );
   }
 }
