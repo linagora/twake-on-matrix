@@ -92,7 +92,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
-        isSelected: isSelectedItem,
+        isSelected: activeChat,
         onTap: () => clickAction(context),
         onSecondaryTapDown: onSecondaryTapDown,
         onLongPress: onLongPress,

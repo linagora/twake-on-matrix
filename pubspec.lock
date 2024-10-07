@@ -1787,7 +1787,7 @@ packages:
     description:
       path: "."
       ref: add_List_item_Design
-      resolved-ref: "3f43eff7d77766b36fb4e8a8ff61921e5e3d87e5"
+      resolved-ref: e93ce0d011faf39a46c8b598b4dadc9662e9f9c6
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
