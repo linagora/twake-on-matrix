@@ -41,10 +41,13 @@ class ExpansionContactListTile extends StatelessWidget {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IgnorePointer(
-                  child: Avatar(
-                    mxContent: snapshot.data?.avatarUrl,
-                    name: contact.displayName,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: IgnorePointer(
+                    child: Avatar(
+                      mxContent: snapshot.data?.avatarUrl,
+                      name: contact.displayName,
+                    ),
                   ),
                 ),
                 const SizedBox(
