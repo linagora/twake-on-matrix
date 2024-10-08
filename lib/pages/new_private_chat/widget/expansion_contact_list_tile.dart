@@ -7,11 +7,10 @@ import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnExpansionListTileTap = void Function();
@@ -58,51 +57,45 @@ class ExpansionContactListTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: IntrinsicWidth(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Flexible(
-                                      child: BuildDisplayName(
-                                        profileDisplayName:
-                                            snapshot.data?.displayName,
-                                        contactDisplayName: contact.displayName,
-                                        highlightKeyword: highlightKeyword,
-                                        style: LinagoraTextStyle.material()
-                                            .bodyMedium2
-                                            .copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                      IntrinsicWidth(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: BuildDisplayName(
+                                      profileDisplayName:
+                                          snapshot.data?.displayName,
+                                      contactDisplayName: contact.displayName,
+                                      highlightKeyword: highlightKeyword,
+                                      style: ListItemStyle.titleTextStyle(
+                                        fontFamily:
+                                            GoogleFonts.inter().fontFamily ??
+                                                'Inter',
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              if (contact.matrixId != null &&
-                                  contact.matrixId!
-                                      .isCurrentMatrixId(context)) ...[
-                                const SizedBox(width: 8.0),
-                                TwakeChip(
-                                  text: L10n.of(context)!.owner,
-                                  textColor:
-                                      Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
+                            ),
+                            if (contact.matrixId != null &&
+                                contact.matrixId!
+                                    .isCurrentMatrixId(context)) ...[
                               const SizedBox(width: 8.0),
-                              if (contact.status != null &&
-                                  contact.status == ContactStatus.inactive)
-                                ContactStatusWidget(
-                                  status: contact.status!,
-                                ),
+                              TwakeChip(
+                                text: L10n.of(context)!.owner,
+                                textColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
                             ],
-                          ),
+                            const SizedBox(width: 8.0),
+                            if (contact.status != null &&
+                                contact.status == ContactStatus.inactive)
+                              ContactStatusWidget(
+                                status: contact.status!,
+                              ),
+                          ],
                         ),
                       ),
                       if (contact.matrixId != null &&
@@ -111,37 +104,32 @@ class ExpansionContactListTile extends StatelessWidget {
                         HighlightText(
                           text: contact.matrixId!,
                           searchWord: highlightKeyword,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
-                              ),
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       if (contact.email != null)
                         HighlightText(
                           text: contact.email!,
                           searchWord: highlightKeyword,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
-                              ),
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       if (contact.phoneNumber != null)
                         HighlightText(
                           text: contact.phoneNumber!,
                           searchWord: highlightKeyword,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
-                              ),
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
                         ),
                     ],
                   ),
