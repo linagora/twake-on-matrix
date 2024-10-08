@@ -115,6 +115,8 @@ class ExpansionContactListTile extends StatelessWidget {
                                 color:
                                     LinagoraRefColors.material().tertiary[30],
                               ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       if (contact.email != null)
                         HighlightText(
@@ -127,6 +129,8 @@ class ExpansionContactListTile extends StatelessWidget {
                                 color:
                                     LinagoraRefColors.material().tertiary[30],
                               ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       if (contact.phoneNumber != null)
                         HighlightText(
