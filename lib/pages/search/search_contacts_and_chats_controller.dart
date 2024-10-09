@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/search/search_mixin.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
+import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -83,7 +84,7 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         .toList();
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
-        .where((contact) => _doesMatchKeyword(contact, keyword))
+        .where((contact) => contact.doesMatchKeyword(keyword))
         .toList();
     _searchRecentChatInteractor
         .execute(
@@ -105,45 +106,6 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
         );
       },
     );
-  }
-
-  bool _matchedMatrixId(PresentationSearch contact, String keyword) {
-    return contact.directChatMatrixID
-            ?.toLowerCase()
-            .contains(keyword.toLowerCase()) ??
-        false;
-  }
-
-  bool _matchedName(PresentationSearch contact, String keyword) {
-    return contact.displayName?.toLowerCase().contains(keyword.toLowerCase()) ??
-        false;
-  }
-
-  bool _matchedEmail(PresentationSearch contact, String keyword) {
-    return contact.email?.toLowerCase().contains(keyword.toLowerCase()) ??
-        false;
-  }
-
-  bool _matchedContactInfo(PresentationSearch contact, String keyword) {
-    return _matchedName(contact, keyword) ||
-        _matchedEmail(contact, keyword) ||
-        _matchedMatrixId(contact, keyword);
-  }
-
-  bool _doesMatchKeyword(PresentationSearch contact, String keyword) {
-    if (contact is! ContactPresentationSearch) {
-      return false;
-    }
-
-    if (contact.displayName == null) {
-      return false;
-    }
-
-    if (contact.email == null) {
-      return false;
-    }
-
-    return _matchedContactInfo(contact, keyword);
   }
 
   void onSearchBarChanged(String keyword) {

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class RecentItemStyle {
-  static EdgeInsetsGeometry get paddingRecentItem => const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      );
+  static EdgeInsetsGeometry get paddingRecentItem => const EdgeInsets.all(8);
 
   static double get avatarSize => 56.0;
+
+  static const double recentItemHeight = 80;
 }

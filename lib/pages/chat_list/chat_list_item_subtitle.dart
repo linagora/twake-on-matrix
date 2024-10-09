@@ -49,7 +49,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                       room: room,
                     )
                   : isMediaEvent
-                      ? chatlistItemMediaPreviewSubTitle(
+                      ? chatListItemMediaPreviewSubTitle(
                           context,
                           room,
                         )

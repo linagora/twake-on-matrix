@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ContactsAppbarStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -16,7 +17,7 @@ class ContactsAppbarStyle {
   static const double textFieldBorderRadius = 24.0;
 
   static AlignmentGeometry alignmentTitle(context) =>
-      ResponsiveUtils().isMobile(context)
+      responsiveUtils.isMobile(context)
           ? Alignment.center
           : AlignmentDirectional.centerStart;
 
@@ -26,10 +27,10 @@ class ContactsAppbarStyle {
   );
 
   static EdgeInsetsDirectional contentPadding = EdgeInsetsDirectional.zero;
-  static const double textStyleHeight = 24 / 17;
   static const EdgeInsets trailingIconPadding = EdgeInsets.only(right: 16.0);
+
   static EdgeInsets titlePadding(context) => EdgeInsets.only(
-        left: ResponsiveUtils().isMobile(context) ? 0 : 16.0,
+        left: responsiveUtils.isMobile(context) ? 0 : 16.0,
       );
   static const EdgeInsets searchFieldPadding = EdgeInsets.only(
     left: 16.0,

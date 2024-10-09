@@ -3,7 +3,9 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
@@ -11,10 +13,12 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+import '../domain/contacts/contacts_manager_test.mocks.dart';
 import 'contacts_view_controller_mixin_test.mocks.dart';
 
 class ConcretePresentationSearch extends PresentationSearch {
@@ -31,6 +35,8 @@ class ConcretePresentationSearch extends PresentationSearch {
   @override
   String get id => "@test:domain.com";
 }
+
+class CustomContactsViewControllerMixin with ContactsViewControllerMixin {}
 
 @GenerateNiceMocks([
   MockSpec<BuildContext>(),
@@ -112,19 +118,19 @@ void main() {
     ),
   ];
 
-  late MockContactsViewControllerMixin mockContactsViewControllerMixin;
-  late Client mockClient;
-  late MatrixLocalizations mockMatrixLocalizations;
-  late BuildContext mockBuildContext;
-
-  setUp(() {
-    mockContactsViewControllerMixin = MockContactsViewControllerMixin();
-    mockMatrixLocalizations = MockMatrixLocalizations();
-    mockClient = MockClient();
-    mockBuildContext = MockBuildContext();
-  });
-
   group('Test ContactsViewControllerMixin on Web', () {
+    late MockContactsViewControllerMixin mockContactsViewControllerMixin;
+    late Client mockClient;
+    late MatrixLocalizations mockMatrixLocalizations;
+    late BuildContext mockBuildContext;
+
+    setUp(() {
+      mockContactsViewControllerMixin = MockContactsViewControllerMixin();
+      mockMatrixLocalizations = MockMatrixLocalizations();
+      mockClient = MockClient();
+      mockBuildContext = MockBuildContext();
+    });
+
     test(
       'WHEN it is not available get Phonebook contact.\n'
       'AND search mode is disable.\n'
@@ -568,6 +574,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -576,6 +583,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -740,6 +748,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -748,6 +757,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -912,6 +922,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -920,6 +931,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1091,6 +1103,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -1099,6 +1112,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1292,6 +1306,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -1300,6 +1315,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1385,6 +1401,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -1393,6 +1410,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -1455,6 +1473,17 @@ void main() {
   });
 
   group('Test ContactsViewControllerMixin on Mobile', () {
+    late MockContactsViewControllerMixin mockContactsViewControllerMixin;
+    late Client mockClient;
+    late MatrixLocalizations mockMatrixLocalizations;
+    late BuildContext mockBuildContext;
+
+    setUp(() {
+      mockContactsViewControllerMixin = MockContactsViewControllerMixin();
+      mockMatrixLocalizations = MockMatrixLocalizations();
+      mockClient = MockClient();
+      mockBuildContext = MockBuildContext();
+    });
     test(
       'WHEN it is available get Phonebook contact.\n'
       'AND search mode is disable.\n'
@@ -1912,6 +1941,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -1920,6 +1950,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2084,6 +2115,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -2092,6 +2124,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2258,6 +2291,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -2266,6 +2300,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2439,6 +2474,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -2447,6 +2483,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2642,6 +2679,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -2650,6 +2688,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2735,6 +2774,7 @@ void main() {
         );
 
         mockContactsViewControllerMixin.refreshAllContactsTest(
+          context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
         );
@@ -2743,6 +2783,7 @@ void main() {
 
         verify(
           mockContactsViewControllerMixin.refreshAllContactsTest(
+            context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
           ),
@@ -2803,4 +2844,157 @@ void main() {
       },
     );
   });
+
+  group(
+    'Test refreshRecentContacts in ContactsViewControllerMixin',
+    () {
+      late CustomContactsViewControllerMixin contactsViewControllerMixin;
+      late GetIt getIt;
+
+      setUpAll(() {
+        getIt = GetIt.instance;
+        getIt.registerSingleton<SearchRecentChatInteractor>(
+          SearchRecentChatInteractor(),
+        );
+        getIt.registerFactory<MockGetTomContactsInteractor>(
+          () => MockGetTomContactsInteractor(),
+        );
+        getIt.registerFactory<MockPhonebookContactInteractor>(
+          () => MockPhonebookContactInteractor(),
+        );
+        getIt.registerSingleton<ContactsManager>(
+          ContactsManager(
+            getTomContactsInteractor: MockGetTomContactsInteractor(),
+            phonebookContactInteractor: MockPhonebookContactInteractor(),
+          ),
+        );
+        contactsViewControllerMixin = CustomContactsViewControllerMixin();
+      });
+
+      test(
+        'WHEN handleSearchRecentContacts is called.\n'
+        'AND not existed recent item in tomContacts\n'
+        'THEN recentFiltered have the list same recentChat\n',
+        () {
+          final List<PresentationSearch> tomContacts = [
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_1',
+              email: 'email1@gmail.com',
+              displayName: 'display_name_1',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_2',
+              email: 'email2@gmail.com',
+              displayName: 'display_name_2',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_3',
+              email: 'email3@gmail.com',
+              displayName: 'display_name_3',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_4',
+              email: 'email4@gmail.com',
+              displayName: 'display_name_4',
+            ),
+          ];
+
+          final List<PresentationSearch> recentChat = [
+            const RecentChatPresentationSearch(
+              directChatMatrixID: 'room_id_5',
+              displayName: 'display_name_1',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_6',
+              displayName: 'display_name_2',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_9',
+              displayName: 'display_name_9',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_10',
+              displayName: 'display_name_10',
+            ),
+          ];
+
+          final recentFiltered =
+              contactsViewControllerMixin.handleSearchRecentContacts(
+            contacts: tomContacts,
+            recentChat: recentChat,
+            keyword: '',
+          );
+
+          expect(recentFiltered.isNotEmpty, true);
+
+          expect(recentFiltered.length, 4);
+
+          expect(recentFiltered, containsAll(recentChat));
+        },
+      );
+
+      test(
+        'WHEN handleSearchRecentContacts is called.\n'
+        'AND recent list have one item duplicated in tom contact\n'
+        'THEN recentFiltered have list but not include duplicated item\n',
+        () {
+          final List<PresentationSearch> tomContacts = [
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_1',
+              email: 'email1@gmail.com',
+              displayName: 'display_name_1',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_2',
+              email: 'email2@gmail.com',
+              displayName: 'display_name_2',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_3',
+              email: 'email3@gmail.com',
+              displayName: 'display_name_3',
+            ),
+            const ContactPresentationSearch(
+              matrixId: 'matrix_id_4',
+              email: 'email4@gmail.com',
+              displayName: 'display_name_4',
+            ),
+          ];
+
+          final List<PresentationSearch> recentChat = [
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_1',
+              directChatMatrixID: 'matrix_id_1',
+              displayName: 'display_name_1',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_6',
+              displayName: 'display_name_2',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_9',
+              displayName: 'display_name_9',
+            ),
+            const RecentChatPresentationSearch(
+              roomId: 'room_id_10',
+              displayName: 'display_name_10',
+            ),
+          ];
+
+          final recentFiltered =
+              contactsViewControllerMixin.handleSearchRecentContacts(
+            contacts: tomContacts,
+            recentChat: recentChat,
+            keyword: 'matrix_id_1',
+          );
+
+          expect(recentFiltered.isNotEmpty, true);
+
+          expect(recentFiltered.length, 3);
+
+          expect(recentFiltered.length < recentChat.length, true);
+        },
+      );
+    },
+  );
 }

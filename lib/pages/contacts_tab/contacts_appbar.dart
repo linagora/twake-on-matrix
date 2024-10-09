@@ -40,7 +40,6 @@ class ContactsAppBar extends StatelessWidget {
               style: responsiveUtils.isMobile(context)
                   ? LinagoraTextStyle.material().bodyLarge1.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
-                        height: ContactsAppbarStyle.textStyleHeight,
                       )
                   : Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
@@ -56,16 +55,6 @@ class ContactsAppBar extends StatelessWidget {
                 color: responsiveUtils.isMobile(context)
                     ? LinagoraSysColors.material().background
                     : LinagoraSysColors.material().onPrimary,
-                border: responsiveUtils.isMobile(context)
-                    ? Border(
-                        bottom: BorderSide(
-                          color: LinagoraStateLayer(
-                            LinagoraSysColors.material().surfaceTint,
-                          ).opacityLayer3,
-                          width: 1.0,
-                        ),
-                      )
-                    : null,
               ),
               height: ContactsAppbarStyle.textFieldHeight,
               child: Padding(

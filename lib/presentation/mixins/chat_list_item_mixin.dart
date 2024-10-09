@@ -6,9 +6,8 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
@@ -44,9 +43,9 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                color: LinagoraRefColors.material().tertiary[30],
-              ),
+          style: ListItemStyle.subtitleTextStyle(
+            fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+          ),
         );
       },
     );
@@ -56,12 +55,9 @@ mixin ChatListItemMixin {
     final displayedTypingText = "$typingText…";
     return Text(
       displayedTypingText,
-      style: LinagoraTextStyle.material().bodyMedium2.merge(
-            TextStyle(
-              overflow: TextOverflow.ellipsis,
-              color: LinagoraRefColors.material().tertiary[30],
-            ),
-          ),
+      style: ListItemStyle.subtitleTextStyle(
+        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+      ),
       maxLines: 2,
       softWrap: true,
     );
@@ -141,13 +137,15 @@ mixin ChatListItemMixin {
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               softWrap: false,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+              style: ListItemStyle.subtitleTextStyle(
+                fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+              ).copyWith(
+                color: LinagoraSysColors.material().onSurface,
+              ),
             ),
             room.lastEvent?.messageType == MessageTypes.Image ||
                     room.lastEvent?.messageType == MessageTypes.Video
-                ? chatlistItemMediaPreviewSubTitle(
+                ? chatListItemMediaPreviewSubTitle(
                     context,
                     room,
                   )
@@ -156,9 +154,9 @@ mixin ChatListItemMixin {
                     softWrap: false,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
+                    style: ListItemStyle.subtitleTextStyle(
+                      fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                    ),
                   ),
           ],
         );
@@ -166,7 +164,7 @@ mixin ChatListItemMixin {
     );
   }
 
-  Widget chatlistItemMediaPreviewSubTitle(
+  Widget chatListItemMediaPreviewSubTitle(
     BuildContext context,
     Room room,
   ) {
@@ -202,9 +200,9 @@ mixin ChatListItemMixin {
             room.lastEvent!.messageType == MessageTypes.Image
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
-            style: LinagoraTextStyle.material()
-                .bodyMedium3
-                .copyWith(color: LinagoraRefColors.material().tertiary[30]),
+            style: ListItemStyle.subtitleTextStyle(
+              fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+            ),
           ),
         ),
       ],
