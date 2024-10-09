@@ -8,12 +8,10 @@ import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/pages/search/recent_item_widget.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
@@ -349,65 +347,6 @@ class _SliverPhonebookLoading extends StatelessWidget {
   }
 }
 
-// ignore: unused_element
-class _SliverRecentContacts extends StatelessWidget {
-  final ContactsTabController controller;
-
-  const _SliverRecentContacts({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.presentationContactNotifier,
-      builder: (context, state, child) {
-        return state.fold(
-          (failure) => child!,
-          (success) {
-            if (success is ContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: SizedBox(),
-              );
-            }
-            return child!;
-          },
-        );
-      },
-      child: ValueListenableBuilder(
-        valueListenable: controller.presentationRecentContactNotifier,
-        builder: (context, recentContacts, child) {
-          if (recentContacts.isEmpty) {
-            return child!;
-          }
-          return SliverExpandableList(
-            title: L10n.of(context)!.recent,
-            itemCount: recentContacts.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: ContactsTabViewStyle.padding,
-              ),
-              child: RecentItemWidget(
-                presentationSearch: recentContacts[index],
-                highlightKeyword: "",
-                client: controller.client,
-                key: Key('contact_recent_${recentContacts[index].id}'),
-                onTap: () => controller.onContactTap(
-                  contact: recentContacts[index].toPresentationContact(),
-                  context: context,
-                  path: 'rooms',
-                ),
-                avatarSize: ContactsTabViewStyle.avatarSize,
-              ),
-            ),
-          );
-        },
-        child: const SliverToBoxAdapter(
-          child: SizedBox(),
-        ),
-      ),
-    );
-  }
-}
-
 class _SliverWarningBanner extends StatelessWidget {
   const _SliverWarningBanner({
     required this.controller,
@@ -511,12 +450,12 @@ class InviteFriendWidget extends StatelessWidget {
         ),
         child: InkWell(
           child: Padding(
-            padding: ContactsTabViewStyle.invitefriendContainterPadding,
+            padding: ContactsTabViewStyle.inviteFriendContainerPadding,
             child: Row(
               children: [
                 Padding(
                   padding: ContactsTabViewStyle
-                      .invitefriendContainterLeadingIconPadding,
+                      .inviteFriendContainerLeadingIconPadding,
                   child: SvgPicture.asset(
                     ImagePaths.icPersonCheck,
                     width: ContactsTabViewStyle.leadingIconDimension,
@@ -528,7 +467,7 @@ class InviteFriendWidget extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: ContactsTabViewStyle.invitefriendTextPadding,
+                  padding: ContactsTabViewStyle.inviteFriendTextPadding,
                   child: Text(
                     L10n.of(context)!.inviteFriend,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
