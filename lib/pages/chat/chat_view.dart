@@ -113,9 +113,13 @@ class ChatView extends StatelessWidget with MessageContentMixin {
             future: controller.loadTimelineFuture,
             builder: (BuildContext context, snapshot) {
               return Scaffold(
-                backgroundColor: LinagoraSysColors.material().onPrimary,
+                backgroundColor: controller.responsive.isMobile(context)
+                    ? LinagoraSysColors.material().background
+                    : LinagoraSysColors.material().onPrimary,
                 appBar: AppBar(
-                  backgroundColor: LinagoraSysColors.material().onPrimary,
+                  backgroundColor: controller.responsive.isMobile(context)
+                      ? LinagoraSysColors.material().surface
+                      : LinagoraSysColors.material().onPrimary,
                   automaticallyImplyLeading: false,
                   toolbarHeight: AppConfig.toolbarHeight(context),
                   title: Padding(
