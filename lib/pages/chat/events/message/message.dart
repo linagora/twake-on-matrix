@@ -217,6 +217,7 @@ class _MessageState extends State<Message> {
           children: rowChildren,
         );
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (displayTime)
               ValueListenableBuilder(
@@ -341,7 +342,7 @@ class _MessageState extends State<Message> {
   ) {
     return Container(
       padding: EdgeInsets.only(
-        left: widget.selectMode ? 12.0 : 8.0,
+        left: widget.selectMode ? 12.0 : 16.0,
       ),
       color: widget.selected
           ? LinagoraSysColors.material().secondaryContainer

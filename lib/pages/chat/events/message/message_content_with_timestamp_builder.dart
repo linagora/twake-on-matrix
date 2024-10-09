@@ -15,6 +15,8 @@ import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
@@ -72,8 +74,9 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment:
-          event.isOwnMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment: responsiveUtils.isMobile(context) && event.isOwnMessage
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (event.isOwnMessage) _menuActionsRowBuilder(context),
@@ -107,10 +110,19 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: MessageStyle.bubbleBorderRadius,
                           color: event.isOwnMessage
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
+                              ? LinagoraRefColors.material().primary[95]
+                              : responsiveUtils.isMobile(context)
+                                  ? LinagoraSysColors.material().onPrimary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                          border: !event.isOwnMessage &&
+                                  responsiveUtils.isMobile(context)
+                              ? Border.all(
+                                  color: MessageStyle
+                                      .borderColorReceivedBubbleMobile,
+                                )
+                              : null,
                         ),
                         padding: noBubble
                             ? const EdgeInsets.symmetric(
