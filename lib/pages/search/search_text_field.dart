@@ -23,7 +23,7 @@ class SearchTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      borderRadius: BorderRadius.circular(16.0),
+      borderRadius: const BorderRadius.all(Radius.circular(24.0)),
       child: TextField(
         onTapOutside: (event) {
           dismissKeyboard(context);
@@ -43,6 +43,9 @@ class SearchTextField extends StatelessWidget {
             borderRadius: SearchViewStyle.borderRadiusTextField,
           ),
           hintText: hintText ?? L10n.of(context)!.search,
+          hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: LinagoraRefColors.material().neutral[60],
+              ),
           floatingLabelBehavior: FloatingLabelBehavior.never,
           prefixIcon: Icon(
             Icons.search_outlined,

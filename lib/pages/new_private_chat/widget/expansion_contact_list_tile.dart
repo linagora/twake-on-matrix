@@ -7,9 +7,10 @@ import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnExpansionListTileTap = void Function();
@@ -26,103 +27,117 @@ class ExpansionContactListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0, top: 8.0, bottom: 12.0),
-      child: FutureBuilder<Profile?>(
-        key: contact.matrixId != null ? Key(contact.matrixId!) : null,
-        future:
-            contact.status == ContactStatus.active ? getProfile(context) : null,
-        builder: (context, snapshot) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IgnorePointer(
-                child: Avatar(
-                  mxContent: snapshot.data?.avatarUrl,
-                  name: contact.displayName,
-                  size: 48.0,
-                ),
-              ),
-              const SizedBox(
-                width: 12.0,
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IntrinsicWidth(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  child: BuildDisplayName(
-                                    profileDisplayName:
-                                        snapshot.data?.displayName,
-                                    contactDisplayName: contact.displayName,
-                                    highlightKeyword: highlightKeyword,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                        ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (contact.matrixId != null &&
-                              contact.matrixId!.isCurrentMatrixId(context)) ...[
-                            const SizedBox(width: 8.0),
-                            TwakeChip(
-                              text: L10n.of(context)!.owner,
-                              textColor: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
-                          const SizedBox(width: 8.0),
-                          if (contact.status != null &&
-                              contact.status == ContactStatus.inactive)
-                            ContactStatusWidget(
-                              status: contact.status!,
-                            ),
-                        ],
-                      ),
+    return TwakeListItem(
+      child: Padding(
+        padding:
+            const EdgeInsetsDirectional.only(start: 8.0, top: 8.0, bottom: 8.0),
+        child: FutureBuilder<Profile?>(
+          key: contact.matrixId != null ? Key(contact.matrixId!) : null,
+          future: contact.status == ContactStatus.active
+              ? getProfile(context)
+              : null,
+          builder: (context, snapshot) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: IgnorePointer(
+                    child: Avatar(
+                      mxContent: snapshot.data?.avatarUrl,
+                      name: contact.displayName,
                     ),
-                    if (contact.matrixId != null)
-                      HighlightText(
-                        text: contact.matrixId!,
-                        searchWord: highlightKeyword,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: LinagoraRefColors.material().neutral[60],
-                            ),
-                      ),
-                    if (contact.email != null)
-                      HighlightText(
-                        text: contact.email!,
-                        searchWord: highlightKeyword,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: LinagoraRefColors.material().neutral[60],
-                            ),
-                      ),
-                    if (contact.phoneNumber != null)
-                      HighlightText(
-                        text: contact.phoneNumber!,
-                        searchWord: highlightKeyword,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: LinagoraRefColors.material().neutral[60],
-                            ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+                const SizedBox(
+                  width: 8.0,
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IntrinsicWidth(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: BuildDisplayName(
+                                      profileDisplayName:
+                                          snapshot.data?.displayName,
+                                      contactDisplayName: contact.displayName,
+                                      highlightKeyword: highlightKeyword,
+                                      style: ListItemStyle.titleTextStyle(
+                                        fontFamily:
+                                            GoogleFonts.inter().fontFamily ??
+                                                'Inter',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (contact.matrixId != null &&
+                                contact.matrixId!
+                                    .isCurrentMatrixId(context)) ...[
+                              const SizedBox(width: 8.0),
+                              TwakeChip(
+                                text: L10n.of(context)!.owner,
+                                textColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                            ],
+                            const SizedBox(width: 8.0),
+                            if (contact.status != null &&
+                                contact.status == ContactStatus.inactive)
+                              ContactStatusWidget(
+                                status: contact.status!,
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (contact.matrixId != null &&
+                          (contact.email == null ||
+                              contact.phoneNumber == null))
+                        HighlightText(
+                          text: contact.matrixId!,
+                          searchWord: highlightKeyword,
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (contact.email != null)
+                        HighlightText(
+                          text: contact.email!,
+                          searchWord: highlightKeyword,
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (contact.phoneNumber != null)
+                        HighlightText(
+                          text: contact.phoneNumber!,
+                          searchWord: highlightKeyword,
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily:
+                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

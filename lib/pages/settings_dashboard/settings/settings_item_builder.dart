@@ -22,83 +22,76 @@ class SettingsItemBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(SettingsViewStyle.borderRadius),
-      clipBehavior: Clip.hardEdge,
-      color: isSelected
-          ? Theme.of(context).colorScheme.secondaryContainer
-          : LinagoraSysColors.material().onPrimary,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: SettingsViewStyle.itemBuilderPadding,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: SettingsViewStyle.leadingItemBuilderPadding,
-                child: Icon(
-                  leading,
-                  size: SettingsViewStyle.iconSize,
-                  color: isHideTrailingIcon
-                      ? Theme.of(context).colorScheme.error
-                      : LinagoraRefColors.material().tertiary[30],
-                ),
+    return TwakeInkWell(
+      isSelected: isSelected,
+      onTap: onTap,
+      child: Padding(
+        padding: SettingsViewStyle.itemBuilderPadding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: SettingsViewStyle.leadingItemBuilderPadding,
+              child: Icon(
+                leading,
+                size: SettingsViewStyle.iconSize,
+                color: isHideTrailingIcon
+                    ? Theme.of(context).colorScheme.error
+                    : LinagoraRefColors.material().tertiary[30],
               ),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: subtitle.isEmpty
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: subtitle.isEmpty
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: isHideTrailingIcon
+                                    ? Theme.of(context).colorScheme.error
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Padding(
+                          padding: SettingsViewStyle.subtitleItemBuilderPadding,
+                          child: Text(
+                            subtitle,
                             style: Theme.of(context)
                                 .textTheme
-                                .titleMedium
+                                .bodySmall
                                 ?.copyWith(
-                                  color: isHideTrailingIcon
-                                      ? Theme.of(context).colorScheme.error
-                                      : Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      LinagoraRefColors.material().neutral[40],
                                 ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Padding(
-                            padding:
-                                SettingsViewStyle.subtitleItemBuilderPadding,
-                            child: Text(
-                              subtitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: LinagoraRefColors.material()
-                                        .neutral[40],
-                                  ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    if (!isHideTrailingIcon)
-                      Icon(
-                        Icons.chevron_right_outlined,
-                        size: SettingsViewStyle.iconSize,
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
-                  ],
-                ),
+                  ),
+                  if (!isHideTrailingIcon)
+                    Icon(
+                      Icons.chevron_right_outlined,
+                      size: SettingsViewStyle.iconSize,
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

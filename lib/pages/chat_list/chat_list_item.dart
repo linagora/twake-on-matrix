@@ -91,85 +91,63 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     );
     return Padding(
       padding: ChatListItemStyle.padding,
-      child: Material(
-        borderRadius: ChatListItemStyle.chatlistItemBorderRadius,
-        clipBehavior: Clip.hardEdge,
-        color: isSelectedItem
-            ? Theme.of(context).colorScheme.primaryContainer
-            : activeChat
-                ? Theme.of(context).colorScheme.secondaryContainer
-                : Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color:
-                    LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-                        .opacityLayer3,
-                width: ChatListItemStyle.chatListBottomBorderWidht,
-              ),
-            ),
-          ),
-          child: InkWell(
-            onTap: () => clickAction(context),
-            onSecondaryTapDown: onSecondaryTapDown,
-            onLongPress: onLongPress,
-            borderRadius: ChatListItemStyle.chatlistItemBorderRadius,
-            child: Container(
-              height: ChatListItemStyle.chatItemHeight,
-              padding: ChatListItemStyle.paddingBody,
-              decoration: BoxDecoration(
-                borderRadius: ChatListItemStyle.chatlistItemBorderRadius,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
-                  Padding(
-                    padding: ChatListItemStyle.paddingAvatar,
-                    child: Stack(
-                      children: [
-                        Avatar(
-                          mxContent: room.avatar,
-                          name: displayName,
-                          onTap: onTapAvatar,
-                        ),
-                        if (_isGroupChat)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              padding: ChatListItemStyle.paddingIconGroup,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                              child: Icon(
-                                Icons.group,
-                                size: ChatListItemStyle.groupIconSize,
-                                color: room.isUnreadOrInvited
-                                    ? LinagoraSysColors.material()
-                                        .onSurfaceVariant
-                                    : LinagoraRefColors.material().tertiary[30],
-                              ),
+      child: TwakeInkWell(
+        isSelected: activeChat,
+        onTap: () => clickAction(context),
+        onSecondaryTapDown: onSecondaryTapDown,
+        onLongPress: onLongPress,
+        child: TwakeListItem(
+          child: Container(
+            height: ChatListItemStyle.chatItemHeight,
+            padding: ChatListItemStyle.paddingBody,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
+                Padding(
+                  padding: ChatListItemStyle.paddingAvatar,
+                  child: Stack(
+                    children: [
+                      Avatar(
+                        mxContent: room.avatar,
+                        name: displayName,
+                        onTap: onTapAvatar,
+                      ),
+                      if (_isGroupChat)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: ChatListItemStyle.paddingIconGroup,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            child: Icon(
+                              Icons.group,
+                              size: ChatListItemStyle.groupIconSize,
+                              color: room.isUnreadOrInvited
+                                  ? LinagoraSysColors.material()
+                                      .onSurfaceVariant
+                                  : LinagoraRefColors.material().tertiary[30],
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        ChatListItemTitle(
-                          room: room,
                         ),
-                        ChatListItemSubtitle(room: room),
-                      ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ChatListItemTitle(
+                        room: room,
+                      ),
+                      ChatListItemSubtitle(room: room),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
