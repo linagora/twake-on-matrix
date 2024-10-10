@@ -1876,7 +1876,7 @@ packages:
     description:
       path: "."
       ref: update-convert-markdown
-      resolved-ref: "1cd9873c9f772f948f5c0ac42708c1250073f001"
+      resolved-ref: "9ef4be5582a0a4f890d0db2498dbc02b2635994c"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
