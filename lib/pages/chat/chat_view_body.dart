@@ -15,6 +15,7 @@ import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
@@ -131,7 +132,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                     ],
                                   ),
                                 )
-                              : _inputMessageWidget(),
+                              : _inputMessageWidget(context),
                         ),
                       ),
                   ],
@@ -185,8 +186,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     );
   }
 
-  Widget _inputMessageWidget() {
+  Widget _inputMessageWidget(BuildContext context) {
     return Container(
+      color: LinagoraSysColors.material().surface,
       constraints: BoxConstraints(
         maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
       ),
@@ -206,11 +208,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ].map(
             (widget) => widget,
           ),
-          ChatEmojiPicker(
-            showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
-            onEmojiSelected: controller.onEmojiSelected,
-            emojiPickerBackspace: controller.emojiPickerBackspace,
-          ),
+          if (!controller.responsive.isMobile(context))
+            ChatEmojiPicker(
+              showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
+              onEmojiSelected: controller.onEmojiSelected,
+              emojiPickerBackspace: controller.emojiPickerBackspace,
+            ),
         ],
       ),
     );

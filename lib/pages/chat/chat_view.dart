@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
@@ -121,7 +120,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                       ? LinagoraSysColors.material().surface
                       : LinagoraSysColors.material().onPrimary,
                   automaticallyImplyLeading: false,
-                  toolbarHeight: AppConfig.toolbarHeight(context),
+                  toolbarHeight: ChatViewStyle.appBarHeight(context),
                   title: Padding(
                     padding: ChatViewStyle.paddingLeading(context),
                     child: Row(
