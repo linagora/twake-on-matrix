@@ -43,4 +43,7 @@ class ChatViewStyle {
           : Theme.of(context).colorScheme.onBackground;
 
   static const paddingBottomContextMenu = 16.0;
+
+  static double appBarHeight(BuildContext context) =>
+      responsive.isMobile(context) ? 64 : 56;
 }
