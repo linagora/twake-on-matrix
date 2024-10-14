@@ -61,23 +61,25 @@ class ChatAppBarTitle extends StatelessWidget {
       onTap: isArchived ? null : onPushDetails,
       child: Row(
         children: [
-          Stack(
-            children: [
-              Hero(
-                tag: 'content_banner',
-                child: Avatar(
-                  fontSize: ChatAppBarTitleStyle.avatarFontSize,
-                  mxContent: room!.avatar,
-                  name: roomName ??
-                      room!.getLocalizedDisplayname(
-                        MatrixLocals(L10n.of(context)!),
-                      ),
-                  size: ChatAppBarTitleStyle.avatarSize(context),
+          Padding(
+            padding: ChatAppBarTitleStyle.avatarPadding,
+            child: Stack(
+              children: [
+                Hero(
+                  tag: 'content_banner',
+                  child: Avatar(
+                    fontSize: ChatAppBarTitleStyle.avatarFontSize,
+                    mxContent: room!.avatar,
+                    name: roomName ??
+                        room!.getLocalizedDisplayname(
+                          MatrixLocals(L10n.of(context)!),
+                        ),
+                    size: ChatAppBarTitleStyle.avatarSize(context),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 8.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
