@@ -11,6 +11,8 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'chat.dart';
@@ -116,15 +118,16 @@ class ChatInputRow extends StatelessWidget {
       suggestionScrollController: controller.suggestionScrollController,
       showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
-        hintText: L10n.of(context)!.chatMessage,
+        contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 8),
+        hintText: L10n.of(context)!.message,
+        isDense: controller.responsive.isMobile(context),
         hintMaxLines: 1,
-        hintStyle: Theme.of(context)
-            .textTheme
-            .bodyLarge
-            ?.merge(
-              Theme.of(context).inputDecorationTheme.hintStyle,
-            )
-            .copyWith(letterSpacing: -0.15),
+        hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: controller.responsive.isMobile(context)
+                  ? LinagoraRefColors.material().tertiary[50]
+                  : LinagoraRefColors.material().tertiary[30],
+              fontFamily: GoogleFonts.inter().fontFamily,
+            ),
       ),
       onChanged: controller.onInputBarChanged,
     );

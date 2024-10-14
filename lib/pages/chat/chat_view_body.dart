@@ -1,5 +1,4 @@
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
@@ -15,7 +14,7 @@ import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
@@ -77,9 +76,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         controller.room!.membership == Membership.join)
                       Center(
                         child: Container(
-                          constraints: const BoxConstraints(
-                            maxWidth: TwakeThemes.columnWidth * 2.5,
-                          ),
                           alignment: Alignment.center,
                           child: controller.room?.isAbandonedDMRoom == true
                               ? Padding(
@@ -188,10 +184,18 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
 
   Widget _inputMessageWidget(BuildContext context) {
     return Container(
-      color: LinagoraSysColors.material().surface,
-      constraints: BoxConstraints(
-        maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-      ),
+      decoration: controller.responsive.isMobile(context)
+          ? BoxDecoration(
+              color: LinagoraSysColors.material().surface,
+              border: Border(
+                top: BorderSide(
+                  color: LinagoraStateLayer(
+                    LinagoraSysColors.material().surfaceTint,
+                  ).opacityLayer3,
+                ),
+              ),
+            )
+          : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -204,7 +208,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               padding: ChatViewBodyStyle.inputBarPadding,
               child: ChatInputRow(controller),
             ),
-            const SizedBox(height: 8),
+            SizedBox(
+              height: controller.responsive.isMobile(context) ? 17.0 : 8.0,
+            ),
           ].map(
             (widget) => widget,
           ),
