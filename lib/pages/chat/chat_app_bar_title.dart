@@ -88,7 +88,7 @@ class ChatAppBarTitle extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    if (room?.encrypted == true)
+                    if (room?.encrypted == true) ...[
                       Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: SvgPicture.asset(
@@ -97,7 +97,8 @@ class ChatAppBarTitle extends StatelessWidget {
                           height: 16,
                         ),
                       ),
-                    const SizedBox(width: 4),
+                      const SizedBox(width: 4),
+                    ],
                     Flexible(
                       child: Text(
                         roomName ??

@@ -27,7 +27,10 @@ class TwakeLinkView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        previewItemWidget,
+        Padding(
+          padding: TwakeLinkViewStyle.previewItemPadding,
+          child: previewItemWidget,
+        ),
         const SizedBox(height: TwakeLinkViewStyle.previewToBodySpacing),
         _buildMessageBody(),
       ],
