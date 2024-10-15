@@ -30,7 +30,10 @@ class ChatInputRow extends StatelessWidget {
       return Container();
     }
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment:
+          ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: controller.selectMode
           ? [

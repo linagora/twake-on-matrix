@@ -55,5 +55,8 @@ class ChatAppBarTitleStyle {
                 color: LinagoraRefColors.material().secondary[40],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
-  static const avatarPadding = EdgeInsetsDirectional.symmetric(horizontal: 8);
+  static const avatarPadding = EdgeInsetsDirectional.only(
+    start: 4,
+    end: 8,
+  );
 }

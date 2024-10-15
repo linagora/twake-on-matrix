@@ -9,7 +9,6 @@ class ChatInputRowStyle {
   static const double chatInputRowHeight = 40.0;
   static const EdgeInsets chatInputRowPaddingMobile =
       EdgeInsets.only(left: 12.0);
-  static const EdgeInsets chatInputRowMargin = EdgeInsets.only(right: 8.0);
   static const BorderRadius chatInputRowBorderRadius =
       BorderRadius.all(Radius.circular(25));
   static const double chatInputRowPaddingBtnWeb = 12.0;
@@ -22,7 +21,6 @@ class ChatInputRowStyle {
 
   static const EdgeInsets sendIconPadding = EdgeInsets.only(
     left: 8,
-    bottom: 6,
   );
 
   static const double inputComposerOpacity = 0.38;

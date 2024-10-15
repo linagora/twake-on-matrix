@@ -76,8 +76,8 @@ class MessageContentStyle {
   static const EdgeInsets endOfBubbleWidgetPadding =
       EdgeInsets.symmetric(vertical: 4);
 
-  static const EdgeInsets emojiPadding = EdgeInsets.only(
-    left: 8.0,
+  static const EdgeInsets emojiPadding = EdgeInsets.symmetric(
+    horizontal: 8.0,
   );
 
   static TextStyle? linkStyleMessageContent(BuildContext context) =>

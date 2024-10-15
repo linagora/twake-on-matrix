@@ -19,7 +19,7 @@ class ChatLoadingView extends StatelessWidget {
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: 6,
+        itemCount: 20,
         itemBuilder: (context, index) {
           if (index < 3) {
             return Padding(

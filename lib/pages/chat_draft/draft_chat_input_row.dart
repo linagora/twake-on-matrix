@@ -45,9 +45,9 @@ class DraftChatInputRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: ChatViewBodyStyle.inputBarPadding,
+      padding: ChatViewBodyStyle.inputBarPadding(context),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))

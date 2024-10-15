@@ -74,53 +74,50 @@ class DraftChatView extends StatelessWidget {
         ),
         body: SafeArea(
           child: Center(
-            child: Container(
-              constraints: DraftChatViewStyle.containerMaxWidthConstraints,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: DropTarget(
-                        onDragDone: (details) =>
-                            controller.handleDragDone(details),
-                        onDragEntered: controller.onDragEntered,
-                        onDragExited: controller.onDragExited,
-                        child: DraftChatEmpty(
-                          onTap: () => controller.handleDraftAction(context),
-                        ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: DropTarget(
+                      onDragDone: (details) =>
+                          controller.handleDragDone(details),
+                      onDragEntered: controller.onDragEntered,
+                      onDragExited: controller.onDragExited,
+                      child: DraftChatEmpty(
+                        onTap: () => controller.handleDraftAction(context),
                       ),
                     ),
                   ),
-                  Column(
-                    children: [
-                      DraftChatInputRow(
-                        onEmojiAction: controller.onEmojiAction,
-                        onInputBarChanged: controller.onInputBarChanged,
-                        onInputBarSubmitted: controller.onInputBarSubmitted,
-                        onKeyboardAction: controller.onKeyboardAction,
-                        onSendFileClick: controller.onSendFileClick,
-                        textEditingController: controller.sendController,
-                        typeAheadFocusNode: controller.inputFocus,
-                        typeAheadKey: controller.draftChatComposerTypeAheadKey,
-                        focusSuggestionController:
-                            controller.focusSuggestionController,
-                        inputText: controller.inputText,
-                        isSendingNotifier: controller.isSendingNotifier,
-                        emojiPickerNotifier: controller.showEmojiPickerNotifier,
-                      ),
-                      const SizedBox(
-                        height: DraftChatViewStyle.bottomBarInputPadding,
-                      ),
-                      ChatEmojiPicker(
-                        showEmojiPickerNotifier:
-                            controller.showEmojiPickerNotifier,
-                        onEmojiSelected: controller.onEmojiBottomSheetSelected,
-                        emojiPickerBackspace: controller.emojiPickerBackspace,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+                Column(
+                  children: [
+                    DraftChatInputRow(
+                      onEmojiAction: controller.onEmojiAction,
+                      onInputBarChanged: controller.onInputBarChanged,
+                      onInputBarSubmitted: controller.onInputBarSubmitted,
+                      onKeyboardAction: controller.onKeyboardAction,
+                      onSendFileClick: controller.onSendFileClick,
+                      textEditingController: controller.sendController,
+                      typeAheadFocusNode: controller.inputFocus,
+                      typeAheadKey: controller.draftChatComposerTypeAheadKey,
+                      focusSuggestionController:
+                          controller.focusSuggestionController,
+                      inputText: controller.inputText,
+                      isSendingNotifier: controller.isSendingNotifier,
+                      emojiPickerNotifier: controller.showEmojiPickerNotifier,
+                    ),
+                    const SizedBox(
+                      height: DraftChatViewStyle.bottomBarInputPadding,
+                    ),
+                    ChatEmojiPicker(
+                      showEmojiPickerNotifier:
+                          controller.showEmojiPickerNotifier,
+                      onEmojiSelected: controller.onEmojiBottomSheetSelected,
+                      emojiPickerBackspace: controller.emojiPickerBackspace,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

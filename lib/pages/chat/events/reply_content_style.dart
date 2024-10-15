@@ -50,7 +50,7 @@ class ReplyContentStyle {
 
   static TextStyle? replyBodyTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: LinagoraRefColors.material().neutral[50],
+          color: Colors.red,
           fontWeight: FontWeight.w500,
           overflow: TextOverflow.ellipsis,
           fontSize: fontSizeDisplayContent,
@@ -59,6 +59,7 @@ class ReplyContentStyle {
 
   static EdgeInsetsDirectional get marginReplyContent =>
       EdgeInsetsDirectional.symmetric(
+        horizontal: 8,
         vertical: 4.0 * AppConfig.bubbleSizeFactor,
       );
 
