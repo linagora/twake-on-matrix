@@ -1079,11 +1079,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notifikasi diaktifkan untuk akun ini",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "notifications": "Notifikasi",
   "@notifications": {
     "type": "text",

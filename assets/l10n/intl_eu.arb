@@ -1465,11 +1465,6 @@
   },
   "shareYourInviteLink": "Partekatu gonbidapen esteka",
   "@shareYourInviteLink": {},
-  "notificationsEnabledForThisAccount": "Kontu honentzat gaitutako jakinarazpenak",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} erabiltzaile idazten ari dira",
   "@numUsersTyping": {
     "type": "text",

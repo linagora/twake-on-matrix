@@ -121,9 +121,12 @@ class _TwakeHeaderState extends State<TwakeHeader>
                         : TwakeHeaderStyle.paddingTitleHeader,
                     child: Text(
                       L10n.of(context)!.chats,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                      style: responsive.isMobile(context)
+                          ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                height: TwakeHeaderStyle.titleLineHeightMobile,
+                              )
+                          : Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                 ] else ...[

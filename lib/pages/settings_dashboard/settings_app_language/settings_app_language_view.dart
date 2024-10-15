@@ -32,10 +32,6 @@ class SettingsAppLanguageView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              L10n.of(context)!.settingsLanguageDescription,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
             ListView.separated(
               padding: SettingsAppLanguageViewStyle.paddingListItems,
               shrinkWrap: true,

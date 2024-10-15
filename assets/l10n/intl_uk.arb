@@ -1288,11 +1288,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Сповіщення ввімкнені для цього облікового запису",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "notifications": "Сповіщення",
   "@notifications": {
     "type": "text",

@@ -20,7 +20,7 @@ enum SettingEnum {
       case SettingEnum.privacyAndSecurity:
         return L10n.of(context)!.privacyAndSecurity;
       case SettingEnum.notificationAndSounds:
-        return L10n.of(context)!.notificationAndSounds;
+        return L10n.of(context)!.notifications;
       case SettingEnum.chatFolders:
         return L10n.of(context)!.chatFolders;
       case SettingEnum.appLanguage:
@@ -33,27 +33,6 @@ enum SettingEnum {
         return L10n.of(context)!.about;
       case SettingEnum.logout:
         return L10n.of(context)!.logout;
-      default:
-        return '';
-    }
-  }
-
-  String subtitleSettings(BuildContext context) {
-    switch (this) {
-      case SettingEnum.chatSettings:
-        return L10n.of(context)!.settingsChatSubtitle;
-      case SettingEnum.privacyAndSecurity:
-        return L10n.of(context)!.settingsPrivacyAndSecuritySubtitle;
-      case SettingEnum.notificationAndSounds:
-        return L10n.of(context)!.settingsNotificationAndSoundsSubtitle;
-      case SettingEnum.chatFolders:
-        return L10n.of(context)!.settingsChatFoldersSubtitle;
-      case SettingEnum.appLanguage:
-        return L10n.of(context)!.settingsAppLanguageSubtitle;
-      case SettingEnum.devices:
-        return L10n.of(context)!.settingsDevicesSubtitle;
-      case SettingEnum.help:
-        return L10n.of(context)!.settingsHelpSubtitle;
       default:
         return '';
     }

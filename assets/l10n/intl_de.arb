@@ -1202,11 +1202,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Benachrichtigungen für dieses Konto aktiviert",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} Mitglieder schreiben",
   "@numUsersTyping": {
     "type": "text",

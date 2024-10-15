@@ -959,11 +959,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notificacions activades per a aquest compte",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} usuaris escrivint",
   "@numUsersTyping": {
     "type": "text",

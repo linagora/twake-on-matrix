@@ -1054,11 +1054,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Powiadomienia są włączone dla tego konta",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "oopsSomethingWentWrong": "Ups! Coś poszło nie tak…",
   "@oopsSomethingWentWrong": {
     "type": "text",

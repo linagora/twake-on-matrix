@@ -1018,11 +1018,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Merknader påslått for denne kontoen",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} brukere skriver",
   "@numUsersTyping": {
     "type": "text",

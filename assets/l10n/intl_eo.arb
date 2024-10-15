@@ -1186,11 +1186,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Sciigoj ŝaltiĝis por ĉi tiu konto",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} uzantoj tajpas",
   "@numUsersTyping": {
     "type": "text",

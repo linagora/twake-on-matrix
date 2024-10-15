@@ -1064,11 +1064,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notifiche abilitate per questo account",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} utenti stanno scrivendo",
   "@numUsersTyping": {
     "type": "text",

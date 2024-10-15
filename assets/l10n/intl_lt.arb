@@ -287,11 +287,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Pranešimai aktyvuoti šitai paskyrai",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "obtainingLocation": "Gaunama vieta…",
   "@obtainingLocation": {
     "type": "text",

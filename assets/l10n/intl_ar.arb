@@ -1849,11 +1849,6 @@
       "count": {}
     }
   },
-  "notificationsEnabledForThisAccount": "الإشعارات مفعلة لهذا الحساب",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "spaceIsPublic": "الفضاء عمومي",
   "@spaceIsPublic": {
     "type": "text",

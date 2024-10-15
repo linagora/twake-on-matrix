@@ -216,7 +216,6 @@ class SettingsView extends StatelessWidget {
                       padding: SettingsViewStyle.bodySettingsScreenPadding,
                       child: SettingsItemBuilder(
                         title: item.titleSettings(context),
-                        subtitle: item.subtitleSettings(context),
                         leading: item.iconLeading(),
                         onTap: () => controller.onClickToSettingsItem(item),
                         isHideTrailingIcon: item.isHideTrailingIcon,

@@ -3,12 +3,10 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-
 import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'settings_notifications.dart';
 
@@ -39,7 +37,9 @@ class SettingsNotificationsView extends StatelessWidget {
                 SwitchListTile.adaptive(
                   value: !Matrix.of(context).client.allPushNotificationsMuted,
                   title: Text(
-                    L10n.of(context)!.notificationsEnabledForThisAccount,
+                    Matrix.of(context).client.allPushNotificationsMuted
+                        ? L10n.of(context)!.enable_notifications
+                        : L10n.of(context)!.disable_notifications,
                   ),
                   onChanged: (_) =>
                       TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -55,9 +55,8 @@ class SettingsNotificationsView extends StatelessWidget {
                   ListTile(
                     title: Text(
                       L10n.of(context)!.pushRules,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                      style: ListItemStyle.titleTextStyle(
+                        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
                       ),
                     ),
                   ),
@@ -73,9 +72,8 @@ class SettingsNotificationsView extends StatelessWidget {
                 ListTile(
                   title: Text(
                     L10n.of(context)!.devices,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
+                    style: ListItemStyle.titleTextStyle(
+                      fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
                     ),
                   ),
                 ),

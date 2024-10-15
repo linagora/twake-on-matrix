@@ -1148,11 +1148,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Обавештења укључена за овај налог",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} корисника куца",
   "@numUsersTyping": {
     "type": "text",
