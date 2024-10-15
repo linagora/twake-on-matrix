@@ -291,19 +291,22 @@ Future<ConfirmResult> showConfirmAlertDialog({
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: TwakeIconButton(
-                        icon: Icons.close,
-                        iconColor: isDestructiveAction
-                            ? CupertinoColors.destructiveRed
-                            : LinagoraSysColors.material().onSurfaceVariant,
-                        onTap: () {
-                          Navigator.of(context).pop(ConfirmResult.cancel);
-                          onClose?.call();
-                        },
+                    if (responsiveUtils.isMobile(context)) ...[
+                      const SizedBox(height: 24),
+                    ] else
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: TwakeIconButton(
+                          icon: Icons.close,
+                          iconColor: isDestructiveAction
+                              ? CupertinoColors.destructiveRed
+                              : LinagoraSysColors.material().onSurfaceVariant,
+                          onTap: () {
+                            Navigator.of(context).pop(ConfirmResult.cancel);
+                            onClose?.call();
+                          },
+                        ),
                       ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
@@ -313,13 +316,21 @@ Future<ConfirmResult> showConfirmAlertDialog({
                             Center(
                               child: Text(
                                 title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      color: LinagoraSysColors.material()
-                                          .onSurfaceVariant,
-                                    ),
+                                style: responsiveUtils.isMobile(context)
+                                    ? Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurfaceVariant,
+                                        )
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurfaceVariant,
+                                        ),
                               ),
                             ),
                           const SizedBox(height: 27),
@@ -328,13 +339,21 @@ Future<ConfirmResult> showConfirmAlertDialog({
                               padding: const EdgeInsets.only(left: 28.0),
                               child: Text(
                                 message,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(
-                                      color: LinagoraSysColors.material()
-                                          .onSurfaceVariant,
-                                    ),
+                                style: responsiveUtils.isMobile(context)
+                                    ? Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurfaceVariant,
+                                        )
+                                    : Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurfaceVariant,
+                                        ),
                               ),
                             ),
                           const SizedBox(height: 65),
