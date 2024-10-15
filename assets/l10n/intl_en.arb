@@ -1350,11 +1350,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notifications enabled for this account",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} users are typing",
   "@numUsersTyping": {
     "type": "text",
@@ -2847,20 +2842,6 @@
   "@appLanguage": {},
   "chatFolders": "Chat Folders",
   "@chatFolders": {},
-  "settingsChatSubtitle": "Appearance, themes, wallpaper, chat history.",
-  "@settingsChatSubtitle": {},
-  "settingsPrivacyAndSecuritySubtitle": "Block contacts, disappearing messages.",
-  "@settingsPrivacyAndSecuritySubtitle": {},
-  "settingsNotificationAndSoundsSubtitle": "Custom how you get notifications from Twake such as previewing messages, sounds, time,...",
-  "@settingsNotificationAndSoundsSubtitle": {},
-  "settingsChatFoldersSubtitle": "Create and manage folders for different groups of chats and quickly switch between them.",
-  "@settingsChatFoldersSubtitle": {},
-  "settingsAppLanguageSubtitle": "Choose in which language you want to use Twake Chat.",
-  "@settingsAppLanguageSubtitle": {},
-  "settingsDevicesSubtitle": "Control your sign in and sign out on any device.",
-  "@settingsDevicesSubtitle": {},
-  "settingsHelpSubtitle": "Help center, contact us, privacy policy.",
-  "@settingsHelpSubtitle": {},
   "displayName": "Display Name",
   "@displayName": {},
   "bio": "Bio (optional)",
@@ -3114,5 +3095,7 @@
       }
     }
   },
+ "enable_notifications":"Enable notifications",
+  "disable_notifications":"Disable notifications",
   "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out"
 }

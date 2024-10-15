@@ -1054,11 +1054,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "已為此帳號啟用通知",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count}個人正在輸入",
   "@numUsersTyping": {
     "type": "text",

@@ -1241,11 +1241,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Tämän tunnuksen ilmoitukset ovat käytössä",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "joinRoom": "Liity huoneeseen",
   "@joinRoom": {
     "type": "text",

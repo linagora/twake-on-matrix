@@ -1215,11 +1215,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notificacións activadas para a conta",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} usuarias están escribindo",
   "@numUsersTyping": {
     "type": "text",

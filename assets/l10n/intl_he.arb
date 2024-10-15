@@ -1328,11 +1328,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "התראות הופעלו עבור חשבון זה",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "bundleName": "שם החבילה",
   "@bundleName": {},
   "offline": "לא מקוון",

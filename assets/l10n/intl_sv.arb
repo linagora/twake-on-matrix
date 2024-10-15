@@ -1006,11 +1006,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notifikationer är påslaget för detta konto",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} användare skriver",
   "@numUsersTyping": {
     "type": "text",

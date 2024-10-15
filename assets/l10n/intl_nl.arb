@@ -1218,11 +1218,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Meldingen ingeschakeld voor dit account",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} personen typen",
   "@numUsersTyping": {
     "type": "text",

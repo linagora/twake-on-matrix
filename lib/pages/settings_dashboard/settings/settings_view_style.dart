@@ -49,4 +49,5 @@ class SettingsViewStyle {
         right: responsiveUtils.isMobile(context) ? 0 : 16.0,
       );
   static const double titleLineHeightMobile = 24 / 17;
+  static const double settingsItemHeight = 80;
 }

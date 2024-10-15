@@ -1166,11 +1166,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "已为此账户启用通知",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} 人正在输入",
   "@numUsersTyping": {
     "type": "text",

@@ -1783,11 +1783,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notificaciones habilitadas para esta cuenta",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offensive": "Ofensiva",
   "@offensive": {
     "type": "text",

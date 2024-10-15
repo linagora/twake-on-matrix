@@ -1215,11 +1215,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Teavitused on sellel kontol kasutusel",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} kasutajat kirjutavad",
   "@numUsersTyping": {
     "type": "text",

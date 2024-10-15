@@ -13,6 +13,7 @@ class TwakeHeaderStyle {
   static const int flexTitle = 6;
   static const int flexActions = 3;
   static const double avatarSize = 36;
+  static const double titleLineHeightMobile = 24 / 17;
 
   static double get avatarFontSizeInAppBar => 14.0;
   static const double avatarOfMultipleAccountSize = 48.0;

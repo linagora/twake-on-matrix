@@ -1667,11 +1667,6 @@
   "@scanQrCode": {},
   "typeInInviteLinkManually": "Meghívási link beírása...",
   "@typeInInviteLinkManually": {},
-  "notificationsEnabledForThisAccount": "Értesítések bekapcsolása ebben a fiókban",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offensive": "Sértő",
   "@offensive": {
     "type": "text",

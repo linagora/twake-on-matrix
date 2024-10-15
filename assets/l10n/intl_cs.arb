@@ -1215,11 +1215,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Oznámení povolena pro tento účet",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} uživatelé píší",
   "@numUsersTyping": {
     "type": "text",

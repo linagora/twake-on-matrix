@@ -1219,11 +1219,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Bu hesap için bildirimler etkinleştirildi",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} kullanıcı yazıyor",
   "@numUsersTyping": {
     "type": "text",

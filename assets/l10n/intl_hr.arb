@@ -1180,11 +1180,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Obavijesti su aktivirane za ovaj račun",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} korisnika pišu",
   "@numUsersTyping": {
     "type": "text",

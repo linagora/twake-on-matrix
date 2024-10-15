@@ -22,6 +22,7 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final responsiveUtils = getIt.get<ResponsiveUtils>();
     return AppBar(
+      centerTitle: true,
       backgroundColor: LinagoraSysColors.material().onPrimary,
       title: title,
       leading: responsiveUtils.isMobile(context)

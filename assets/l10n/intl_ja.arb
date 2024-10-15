@@ -1072,11 +1072,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "このアカウントでは通知が有効です",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count}人が入力中",
   "@numUsersTyping": {
     "type": "text",

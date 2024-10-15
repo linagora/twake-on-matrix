@@ -1246,11 +1246,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "notificationsEnabledForThisAccount": "Notificações ativadas para esta conta",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "Estão {count} utilizadores(as) a escrever",
   "@numUsersTyping": {
     "type": "text",

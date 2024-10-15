@@ -1186,11 +1186,6 @@
       "count": {}
     }
   },
-  "notificationsEnabledForThisAccount": "이 계정에서 알림이 활성화되었습니다",
-  "@notificationsEnabledForThisAccount": {
-    "type": "text",
-    "placeholders": {}
-  },
   "notifications": "알림",
   "@notifications": {
     "type": "text",
