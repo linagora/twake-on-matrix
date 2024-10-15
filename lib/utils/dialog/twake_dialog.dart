@@ -266,10 +266,11 @@ Future<ConfirmResult> showConfirmAlertDialog({
             color: Colors.transparent,
             child: Center(
               child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: responsiveUtils.isMobile(context)
-                      ? responsiveUtils.getSizeScreenWidth(context) - 48
-                      : 448,
+                margin: EdgeInsets.symmetric(
+                  horizontal: responsiveUtils.isMobile(context) ? 24.0 : 36,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsiveUtils.isMobile(context) ? 24.0 : 36,
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
@@ -307,113 +308,105 @@ Future<ConfirmResult> showConfirmAlertDialog({
                           },
                         ),
                       ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (title != null)
-                            Center(
-                              child: Text(
-                                title,
-                                style: responsiveUtils.isMobile(context)
-                                    ? Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurfaceVariant,
-                                        )
-                                    : Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurfaceVariant,
-                                        ),
-                              ),
-                            ),
-                          const SizedBox(height: 27),
-                          if (message != null)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 28.0),
-                              child: Text(
-                                message,
-                                style: responsiveUtils.isMobile(context)
-                                    ? Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurfaceVariant,
-                                        )
-                                    : Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurfaceVariant,
-                                        ),
-                              ),
-                            ),
-                          const SizedBox(height: 65),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              right: 20.0,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TwakeTextButton(
-                                  message:
-                                      cancelLabel ?? L10n.of(context)!.cancel,
-                                  styleMessage: Theme.of(context)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (title != null)
+                          Center(
+                            child: Text(
+                              title,
+                              style: responsiveUtils.isMobile(context)
+                                  ? Theme.of(context)
                                       .textTheme
-                                      .labelLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                  hoverColor: Colors.transparent,
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .pop(ConfirmResult.cancel);
-                                    onClose?.call();
-                                  },
-                                ),
-                                const SizedBox(width: 27),
-                                TwakeTextButton(
-                                  buttonDecoration: BoxDecoration(
-                                    color: LinagoraSysColors.material().primary,
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(100),
-                                    ),
-                                  ),
-                                  margin: const EdgeInsetsDirectional.symmetric(
-                                    horizontal: 24.0,
-                                    vertical: 14.0,
-                                  ),
-                                  message: okLabel ?? L10n.of(context)!.ok,
-                                  styleMessage: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
+                                      .headlineSmall
                                       ?.copyWith(
                                         color: LinagoraSysColors.material()
-                                            .onPrimary,
+                                            .onSurfaceVariant,
+                                      )
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onSurfaceVariant,
                                       ),
-                                  hoverColor: Colors.transparent,
-                                  onTap: () {
-                                    Navigator.of(context).pop(ConfirmResult.ok);
-                                    onClose?.call();
-                                  },
-                                ),
-                              ],
                             ),
                           ),
-                          const SizedBox(height: 24.0),
-                        ],
-                      ),
+                        SizedBox(
+                          height: responsiveUtils.isMobile(context) ? 16 : 27,
+                        ),
+                        if (message != null)
+                          Text(
+                            message,
+                            style: responsiveUtils.isMobile(context)
+                                ? Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: LinagoraSysColors.material()
+                                          .onSurfaceVariant,
+                                    )
+                                : Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      color: LinagoraSysColors.material()
+                                          .onSurfaceVariant,
+                                    ),
+                          ),
+                        SizedBox(
+                          height: responsiveUtils.isMobile(context) ? 24 : 65,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TwakeTextButton(
+                              margin: const EdgeInsetsDirectional.symmetric(
+                                horizontal: 24.0,
+                              ),
+                              message: cancelLabel ?? L10n.of(context)!.cancel,
+                              styleMessage: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                              hoverColor: Colors.transparent,
+                              onTap: () {
+                                Navigator.of(context).pop(ConfirmResult.cancel);
+                                onClose?.call();
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            TwakeTextButton(
+                              buttonDecoration: BoxDecoration(
+                                color: LinagoraSysColors.material().primary,
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(100),
+                                ),
+                              ),
+                              margin: const EdgeInsetsDirectional.symmetric(
+                                horizontal: 24.0,
+                              ),
+                              message: okLabel ?? L10n.of(context)!.ok,
+                              styleMessage: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onPrimary,
+                                  ),
+                              hoverColor: Colors.transparent,
+                              onTap: () {
+                                Navigator.of(context).pop(ConfirmResult.ok);
+                                onClose?.call();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+                      ],
                     ),
                   ],
                 ),

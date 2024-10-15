@@ -58,20 +58,23 @@ class TwakeTextButton extends StatelessWidget {
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
         child: Container(
+          height: 48,
           padding: margin,
           decoration:
               buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
-          child: Tooltip(
-            preferBelow: preferBelow,
-            message: message,
-            child: Padding(
-              padding: EdgeInsets.all(paddingAll ?? 8.0),
-              child: Text(
-                message,
-                style: styleMessage ??
-                    Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: LinagoraSysColors.material().onPrimary,
-                        ),
+          child: Center(
+            child: Tooltip(
+              preferBelow: preferBelow,
+              message: message,
+              child: Padding(
+                padding: EdgeInsets.all(paddingAll ?? 8.0),
+                child: Text(
+                  message,
+                  style: styleMessage ??
+                      Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: LinagoraSysColors.material().onPrimary,
+                          ),
+                ),
               ),
             ),
           ),
