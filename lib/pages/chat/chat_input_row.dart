@@ -120,7 +120,7 @@ class ChatInputRow extends StatelessWidget {
       decoration: InputDecoration(
         contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 8),
         hintText: L10n.of(context)!.message,
-        isDense: controller.responsive.isMobile(context),
+        isDense: controller.responsive.isMobileOrTablet(context),
         hintMaxLines: 1,
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: controller.responsive.isMobile(context)

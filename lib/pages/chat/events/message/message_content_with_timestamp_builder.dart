@@ -74,12 +74,9 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: responsiveUtils.isMobile(context) && event.isOwnMessage
-          ? MainAxisAlignment.end
-          : MainAxisAlignment.start,
+      mainAxisAlignment: MessageStyle.messageAlignment(event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (event.isOwnMessage) _menuActionsRowBuilder(context),
         TwakeContextMenuArea(
           builder: menuChildren != null
               ? (context) => menuChildren!.call(context)
@@ -111,16 +108,10 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                           borderRadius: MessageStyle.bubbleBorderRadius,
                           color: event.isOwnMessage
                               ? LinagoraRefColors.material().primary[95]
-                              : responsiveUtils.isMobile(context)
-                                  ? LinagoraSysColors.material().onPrimary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                          border: !event.isOwnMessage &&
-                                  responsiveUtils.isMobile(context)
+                              : LinagoraSysColors.material().onPrimary,
+                          border: !event.isOwnMessage
                               ? Border.all(
-                                  color: MessageStyle
-                                      .borderColorReceivedBubbleMobile,
+                                  color: MessageStyle.borderColorReceivedBubble,
                                 )
                               : null,
                         ),
@@ -215,8 +206,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             ),
           ),
         ),
-        if (!event.isOwnMessage && event.status.isAvailable)
-          _menuActionsRowBuilder(context),
+        if (event.status.isAvailable) _menuActionsRowBuilder(context),
       ],
     );
   }

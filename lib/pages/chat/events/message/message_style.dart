@@ -146,5 +146,12 @@ class MessageStyle {
   static const double pushpinIconSize = 14.0;
 
   static const double paddingAllPushpin = 0;
-  static const Color borderColorReceivedBubbleMobile = Color(0xFFEBEDF0);
+  static const Color borderColorReceivedBubble = Color(0xFFEBEDF0);
+  static MainAxisAlignment messageAlignment(
+    Event event,
+    BuildContext context,
+  ) =>
+      responsiveUtils.isMobile(context) && event.isOwnMessage
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start;
 }
