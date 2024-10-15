@@ -6,12 +6,14 @@ class SliverExpandableList extends StatefulWidget {
   final String title;
   final int itemCount;
   final Widget Function(BuildContext, int) itemBuilder;
+  final bool enableExpand;
 
   const SliverExpandableList({
     super.key,
     required this.title,
     required this.itemCount,
     required this.itemBuilder,
+    this.enableExpand = false,
   });
 
   @override
@@ -30,11 +32,13 @@ class _SliverExpandableListState extends State<SliverExpandableList> {
           itemCount: (isExpanded ? widget.itemCount : 0) + 1,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return ExpandableTitleBuilder(
-                title: widget.title,
-                isExpanded: isExpanded,
-                onTap: isExpandedNotifier.toggle,
-              );
+              return widget.enableExpand
+                  ? ExpandableTitleBuilder(
+                      title: widget.title,
+                      isExpanded: isExpanded,
+                      onTap: isExpandedNotifier.toggle,
+                    )
+                  : const SizedBox();
             }
             return widget.itemBuilder(context, index - 1);
           },

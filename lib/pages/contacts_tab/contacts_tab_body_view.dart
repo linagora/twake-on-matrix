@@ -303,8 +303,7 @@ class _SilverExternalContact extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: ContactsTabViewStyle.padding,
         ),
-        child: InkWell(
-          borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+        child: TwakeInkWell(
           onTap: () {
             controller.onContactTap(
               context: context,
@@ -384,7 +383,7 @@ class _SliverRecentContacts extends StatelessWidget {
               ),
               child: RecentItemWidget(
                 presentationSearch: recentContacts[index],
-                highlightKeyword: "",
+                highlightKeyword: controller.textEditingController.text,
                 client: controller.client,
                 key: Key('contact_recent_${recentContacts[index].id}'),
                 onTap: () => controller.onContactTap(
@@ -470,8 +469,7 @@ class _Contact extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: ContactsTabViewStyle.padding,
       ),
-      child: InkWell(
-        borderRadius: ContactsTabViewStyle.searchItemsHoverRadius,
+      child: TwakeInkWell(
         onTap: () {
           controller.onContactTap(
             context: context,

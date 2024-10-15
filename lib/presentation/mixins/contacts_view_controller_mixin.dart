@@ -20,6 +20,7 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
+import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -175,10 +176,12 @@ mixin class ContactsViewControllerMixin {
       await _initWarningBanner();
     }
     _refreshAllContacts(
+      context: context,
       client: client,
       matrixLocalizations: matrixLocalizations,
     );
     _listenContactsDataChange(
+      context: context,
       client: client,
       matrixLocalizations: matrixLocalizations,
     );
@@ -188,6 +191,7 @@ mixin class ContactsViewControllerMixin {
 
     _debouncer.values.listen((keyword) {
       _refreshAllContacts(
+        context: context,
         client: client,
         matrixLocalizations: matrixLocalizations,
       );
@@ -200,17 +204,20 @@ mixin class ContactsViewControllerMixin {
   }
 
   void _listenContactsDataChange({
+    required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
     contactsManager.getContactsNotifier().addListener(
           () => _refreshAllContacts(
+            context: context,
             client: client,
             matrixLocalizations: matrixLocalizations,
           ),
         );
     contactsManager.getPhonebookContactsNotifier().addListener(
           () => _refreshAllContacts(
+            context: context,
             client: client,
             matrixLocalizations: matrixLocalizations,
           ),
@@ -218,6 +225,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   void _refreshAllContacts({
+    required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
@@ -225,6 +233,7 @@ mixin class ContactsViewControllerMixin {
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
     _refreshRecentContacts(
+      context: context,
       client: client,
       keyword: keyword.isEmpty ? null : keyword,
       matrixLocalizations: matrixLocalizations,
@@ -266,6 +275,13 @@ mixin class ContactsViewControllerMixin {
               .expand((contact) => contact.toPresentationContacts())
               .toList();
           if (filteredContacts.isEmpty) {
+            if (presentationRecentContactNotifier.value.isNotEmpty) {
+              return Left(
+                GetPresentationContactsEmpty(
+                  keyword: keyword,
+                ),
+              );
+            }
             if (keyword.isValidMatrixId && keyword.startsWith("@")) {
               return Right(
                 PresentationExternalContactSuccess(
@@ -371,6 +387,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _refreshRecentContacts({
+    required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
     String? keyword,
@@ -390,16 +407,65 @@ mixin class ContactsViewControllerMixin {
                 .contacts
                 .where((contact) => contact.directChatMatrixID != null)
                 .toList();
-            if (presentationRecentContactNotifier.isDisposed) return;
-            presentationRecentContactNotifier.value = recent
-                .take(
-                  keyword == null ? _defaultLimitRecentContacts : recent.length,
-                )
+
+            final tomContacts = contactsManager
+                    .getContactsNotifier()
+                    .value
+                    .getSuccessOrNull<GetContactsSuccess>()
+                    ?.contacts ??
+                [];
+            final tomPresentationSearchContacts = tomContacts
+                .expand((contact) => contact.toPresentationContacts())
                 .toList();
+            final tomContactPresentationSearchMatched =
+                tomPresentationSearchContacts
+                    .expand((contact) => contact.toPresentationSearch())
+                    .where(
+                      (contact) => contact.doesMatchKeyword(success.keyword),
+                    )
+                    .toList();
+            if (presentationRecentContactNotifier.isDisposed) return;
+
+            presentationRecentContactNotifier.value =
+                handleSearchRecentContacts(
+              contacts: tomContactPresentationSearchMatched,
+              recentChat: recent,
+              keyword: success.keyword,
+            );
           }
         });
       },
     );
+  }
+
+  List<PresentationSearch> handleSearchRecentContacts({
+    required List<PresentationSearch> contacts,
+    required List<PresentationSearch> recentChat,
+    required String keyword,
+  }) {
+    if (keyword.isEmpty) {
+      return recentChat.take(_defaultLimitRecentContacts).toList();
+    } else {
+      return _getRecentContactsExcludingContacts(
+        recentChat: recentChat,
+        contacts: contacts,
+      );
+    }
+  }
+
+  List<PresentationSearch> _getRecentContactsExcludingContacts({
+    required List<PresentationSearch> contacts,
+    required List<PresentationSearch> recentChat,
+  }) {
+    final contactIds = contacts.map((contact) => contact.id).toSet();
+    final List<PresentationSearch> filteredRecentChat =
+        recentChat.where((chat) {
+      return !contactIds.contains(
+        chat.directChatMatrixID,
+      );
+    }).toList();
+
+    return filteredRecentChat;
   }
 
   void openSearchBar() {
@@ -459,10 +525,12 @@ mixin class ContactsViewControllerMixin {
 
   @visibleForTesting
   void refreshAllContactsTest({
+    required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
     _refreshAllContacts(
+      context: context,
       client: client,
       matrixLocalizations: matrixLocalizations,
     );
