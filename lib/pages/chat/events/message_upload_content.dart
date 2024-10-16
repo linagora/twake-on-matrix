@@ -32,7 +32,8 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
     return Container(
       padding: widget.style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: widget.style.backgroundColor(context, ownMessage: event.isOwnMessage),
+        color: widget.style
+            .backgroundColor(context, ownMessage: event.isOwnMessage),
         shape: RoundedRectangleBorder(
           borderRadius: widget.style.borderRadius,
         ),
