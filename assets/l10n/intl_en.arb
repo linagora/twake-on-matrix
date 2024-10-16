@@ -3112,5 +3112,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out"
 }
