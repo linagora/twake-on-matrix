@@ -16,6 +16,7 @@ class DownloadingFileTileWidget extends StatelessWidget {
     this.fileType,
     this.sizeString,
     required this.downloadFileStateNotifier,
+    this.ownMessage = false,
     this.onCancelDownload,
   });
 
@@ -27,13 +28,14 @@ class DownloadingFileTileWidget extends StatelessWidget {
   final String? fileType;
   final ValueNotifier<DownloadPresentationState> downloadFileStateNotifier;
   final VoidCallback? onCancelDownload;
+  final bool ownMessage;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: style.backgroundColor,
+        color: style.backgroundColor(context, ownMessage: ownMessage),
         shape: RoundedRectangleBorder(
           borderRadius: style.borderRadius,
         ),

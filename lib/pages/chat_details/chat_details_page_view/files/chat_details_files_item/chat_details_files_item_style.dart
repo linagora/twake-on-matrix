@@ -8,7 +8,9 @@ class ChatDetailsFileTileStyle extends FileTileWidgetStyle {
   static const double textTopMargin = 4.0;
 
   @override
-  Color get backgroundColor => Colors.transparent;
+  Color backgroundColor(BuildContext context, {bool ownMessage = false}) {
+    return Colors.transparent;
+  }
 
   @override
   BorderRadiusGeometry get borderRadius => BorderRadius.circular(8);

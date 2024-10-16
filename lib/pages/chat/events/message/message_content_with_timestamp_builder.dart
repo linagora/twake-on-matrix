@@ -108,8 +108,12 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                           borderRadius: MessageStyle.bubbleBorderRadius,
                           color: event.isOwnMessage
                               ? LinagoraRefColors.material().primary[95]
-                              : LinagoraSysColors.material().onPrimary,
-                          border: !event.isOwnMessage
+                              : responsiveUtils.isMobile(context)
+                                ? LinagoraSysColors.material().onPrimary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                          border: !event.isOwnMessage && responsiveUtils.isMobile(context)
                               ? Border.all(
                                   color: MessageStyle.borderColorReceivedBubble,
                                 )

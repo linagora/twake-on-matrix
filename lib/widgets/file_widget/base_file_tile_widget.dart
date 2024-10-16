@@ -18,6 +18,7 @@ class BaseFileTileWidget extends StatelessWidget {
     this.fileTileIcon,
     this.imageBytes,
     this.style = const FileTileWidgetStyle(),
+    this.ownMessage = false,
     required this.subTitle,
   });
 
@@ -31,13 +32,14 @@ class BaseFileTileWidget extends StatelessWidget {
   final String? fileTileIcon;
   final FileTileWidgetStyle style;
   final Widget Function(BuildContext) subTitle;
+  final bool ownMessage;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: backgroundColor ?? style.backgroundColor,
+        color: backgroundColor ?? style.backgroundColor(context, ownMessage: ownMessage),
         shape: RoundedRectangleBorder(
           borderRadius: style.borderRadius,
         ),
