@@ -542,7 +542,7 @@
   },
   "repeatPassword": "Lặp lại mật khẩu",
   "@repeatPassword": {},
-  "updateAvailable": "FluffyChat có bản cập nhật mới",
+  "updateAvailable": "Twake Chat có bản cập nhật mới",
   "@updateAvailable": {},
   "updateNow": "Bắt đầu cập nhật dưới nền",
   "@updateNow": {},
@@ -1222,7 +1222,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Mô tả cuộc trò chuyện",
+  "groupDescription": "Mô tả",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
@@ -2594,7 +2594,7 @@
   "@addMember": {},
   "recentlyChats": "Cuộc trò chuyện gần đây",
   "@recentlyChats": {},
-  "startNewChatMessage": "Thật vui khi được trò chuyện với bạn bè và cộng tác với nhóm của bạn.\nHãy bắt đầu một hộp thoại, tạo cuộc trò chuyện hoặc tham gia cuộc trò chuyện hiện có.",
+  "startNewChatMessage": "Thật vui khi được trò chuyện với bạn bè và cộng tác với nhóm của bạn.\nHãy bắt đầu hội thoại, tạo cuộc trò chuyện hoặc tham gia cuộc trò chuyện hiện có.",
   "@startNewChatMessage": {},
   "searchResultNotFound2": "• Bạn có thể không có người dùng này trong danh bạ của mình.\n",
   "@searchResultNotFound2": {},
@@ -3199,5 +3199,21 @@
   "explainPermissionToAccessMedias": "Twake Chat không đồng bộ dữ liệu giữa thiết bị của bạn và máy chủ của chúng tôi. Chúng tôi chỉ lưu trữ các tệp phương tiện mà bạn đã gửi vào phòng chat. Tất cả các tệp phương tiện được gửi trong chat đều được mã hóa và lưu trữ an toàn. Vào Cài đặt > Quyền và kích hoạt quyền Lưu trữ: Ảnh và Video. Bạn cũng có thể từ chối quyền truy cập vào thư viện phương tiện của mình bất cứ lúc nào.",
   "@explainPermissionToAccessMedias": {},
   "explainPermissionToAccessVideos": "Twake Chat không đồng bộ dữ liệu giữa thiết bị của bạn và máy chủ của chúng tôi. Chúng tôi chỉ lưu trữ các tệp phương tiện mà bạn đã gửi vào phòng chat. Tất cả các tệp phương tiện được gửi trong chat đều được mã hóa và lưu trữ an toàn. Vào Cài đặt > Quyền và kích hoạt quyền Lưu trữ: Video. Bạn cũng có thể từ chối quyền truy cập vào thư viện phương tiện của mình bất cứ lúc nào.",
-  "@explainPermissionToAccessVideos": {}
+  "@explainPermissionToAccessVideos": {},
+  "disable_notifications": "Tắt thông báo",
+  "@disable_notifications": {},
+  "logoutDialogWarning": "Bạn sẽ không thể truy cập vào những tin nhắn mã hoá. Hãy bật sao lưu dữ liệu trước khi thực hiện đăng xuất",
+  "@logoutDialogWarning": {},
+  "message": "Tin nhắn",
+  "@message": {},
+  "fileTooBig": "Tệp quá lớn. Hãy chọn tệp có kích thước nhỏ hơn {maxSize} MB.",
+  "@fileTooBig": {
+    "placeholders": {
+      "maxSize": {
+        "type": "int"
+      }
+    }
+  },
+  "enable_notifications": "Bật thông báo",
+  "@enable_notifications": {}
 }
