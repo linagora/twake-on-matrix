@@ -32,8 +32,8 @@ class TwakeLinkPreviewItem extends StatelessWidget {
       height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
       decoration: ShapeDecoration(
         color: ownMessage
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+            ? LinagoraSysColors.material().primaryContainer
+            : LinagoraSysColors.material().onSurface.withOpacity(0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
             TwakeLinkPreviewItemStyle.radiusBorder,
