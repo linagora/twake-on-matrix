@@ -3,6 +3,8 @@
 
 - Fix cancel button in forward screen on web
 - #2075 Fix upload avatar on web
+- #2067 Fix location path on web
+- Fix wrong highlight message when open chat
 
 ### Added
 
@@ -11,6 +13,9 @@
 - #2057 Update contacts screen ui
 - #2086 Change texts in settings screen
 - #2082 Update composer UI
+- Added support for nginx port customization
+- Added support for base href customization
+- #2040 Update settings UI
 
 ## [2.6.5+2330] - 2024-09-19
 ### Fixed
