@@ -9,6 +9,8 @@
 - #2039 Update readme with customized homeserver
 - #2077 Update markdown when send message in chat
 - #2057 Update contacts screen ui
+- #2086 Change texts in settings screen
+- #2082 Update composer UI
 
 ## [2.6.5+2330] - 2024-09-19
 ### Fixed
