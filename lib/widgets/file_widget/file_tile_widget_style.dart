@@ -14,7 +14,7 @@ class FileTileWidgetStyle {
           ? LinagoraSysColors.material().primaryContainer
           : LinagoraSysColors.material().onSurface.withOpacity(0.08);
 
-  BorderRadiusGeometry get borderRadius => BorderRadius.circular(12);
+  BorderRadiusGeometry get borderRadius => BorderRadius.circular(8.0);
 
   EdgeInsets get paddingIcon => const EdgeInsets.only(right: 8);
 
