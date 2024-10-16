@@ -43,11 +43,12 @@ class ChatInputRowWeb extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
           TwakeIconButton(
             tooltip: L10n.of(context)!.more,
             paddingAll: 0.0,
-            margin: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.all(10.0),
             iconColor: LinagoraSysColors.material().tertiary,
             icon: Icons.add_circle_outline,
             size: ChatInputRowStyle.chatInputRowMoreBtnSize,

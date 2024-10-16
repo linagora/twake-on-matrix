@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class InputBarStyle {
   static const double suggestionAvatarSize = 30;
@@ -11,12 +12,13 @@ class InputBarStyle {
 
   static const double suggestionListPadding = 8.0;
 
-  static TextStyle getTypeAheadTextStyle(BuildContext context) => TextStyle(
-        fontSize: 15,
-        color: Theme.of(context).brightness == Brightness.light
-            ? Colors.black
-            : Colors.white,
-      );
+  static TextStyle? getTypeAheadTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            fontFamily: GoogleFonts.inter().fontFamily,
+          );
 
   static const double suggestionTileAvatarTextGap = 8.0;
 }

@@ -47,7 +47,10 @@ class DraftChatInputRow extends StatelessWidget {
     return Padding(
       padding: ChatViewBodyStyle.inputBarPadding(context),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment:
+            ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
@@ -95,22 +98,26 @@ class DraftChatInputRow extends StatelessWidget {
   }
 
   Widget _buildInputBar(BuildContext context) {
-    return InputBar(
-      typeAheadKey: typeAheadKey,
-      minLines: DraftChatViewStyle.minLinesInputBar,
-      maxLines: DraftChatViewStyle.maxLinesInputBar,
-      autofocus: !PlatformInfos.isMobile,
-      keyboardType: TextInputType.multiline,
-      textInputAction: null,
-      onSubmitted: (_) => onInputBarSubmitted(),
-      typeAheadFocusNode: typeAheadFocusNode,
-      controller: textEditingController,
-      decoration: DraftChatViewStyle.bottomBarInputDecoration(
-        context,
-      ),
-      onChanged: onInputBarChanged,
-      focusSuggestionController: focusSuggestionController,
-      isDraftChat: true,
+    return Column(
+      children: [
+        InputBar(
+          typeAheadKey: typeAheadKey,
+          minLines: DraftChatViewStyle.minLinesInputBar,
+          maxLines: DraftChatViewStyle.maxLinesInputBar,
+          autofocus: !PlatformInfos.isMobile,
+          keyboardType: TextInputType.multiline,
+          textInputAction: null,
+          onSubmitted: (_) => onInputBarSubmitted(),
+          typeAheadFocusNode: typeAheadFocusNode,
+          controller: textEditingController,
+          decoration: DraftChatViewStyle.bottomBarInputDecoration(
+            context,
+          ),
+          onChanged: onInputBarChanged,
+          focusSuggestionController: focusSuggestionController,
+          isDraftChat: true,
+        ),
+      ],
     );
   }
 }

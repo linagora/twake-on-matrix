@@ -20,7 +20,7 @@ class DraftChatEmpty extends StatelessWidget {
           maxWidth: 236,
         ),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(

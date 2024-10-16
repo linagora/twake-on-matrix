@@ -121,9 +121,9 @@ class ChatInputRow extends StatelessWidget {
       suggestionScrollController: controller.suggestionScrollController,
       showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 8),
+        contentPadding: ChatInputRowStyle.contentPadding(context),
         hintText: L10n.of(context)!.message,
-        isDense: controller.responsive.isMobileOrTablet(context),
+        isDense: true,
         hintMaxLines: 1,
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: controller.responsive.isMobile(context)
