@@ -56,7 +56,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         ),
                       Expanded(
                         child: Container(
-                          color: LinagoraSysColors.material().onPrimary,
+                          color: LinagoraRefColors.material().tertiary[99],
                           child: GestureDetector(
                             onTap: controller.clearSingleSelectedEvent,
                             child: ValueListenableBuilder(
