@@ -1,6 +1,7 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_emoji_picker.dart';
+import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
@@ -90,9 +91,7 @@ class DraftChatView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Container(
-                      color: DraftChatViewStyle.responsive.isMobile(context)
-                          ? LinagoraSysColors.material().onPrimary
-                          : LinagoraRefColors.material().tertiary[99],
+                      color: ChatViewBodyStyle.chatViewBackgroundColor(context),
                       child: Center(
                         child: DropTarget(
                           onDragDone: (details) =>
@@ -121,7 +120,7 @@ class DraftChatView extends StatelessWidget {
                         : null,
                     child: Column(
                       children: [
-                        const SizedBox(height: 6.0),
+                        const SizedBox(height: 8.0),
                         DraftChatInputRow(
                           onEmojiAction: controller.onEmojiAction,
                           onInputBarChanged: controller.onInputBarChanged,

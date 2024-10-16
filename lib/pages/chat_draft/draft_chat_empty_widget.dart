@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -20,7 +21,7 @@ class DraftChatEmpty extends StatelessWidget {
           maxWidth: 236,
         ),
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: DraftChatEmptyWidgetStyle.greetingButtonBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(

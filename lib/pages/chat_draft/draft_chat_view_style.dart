@@ -32,7 +32,7 @@ class DraftChatViewStyle {
       );
 
   static double bottomBarInputPadding(BuildContext context) =>
-      responsive.isMobile(context) ? 8.0 : 16;
+      responsive.isMobile(context) ? 8.0 : 8.0;
 
   static EdgeInsetsGeometry get emptyChatChildrenPadding =>
       const EdgeInsetsDirectional.only(
