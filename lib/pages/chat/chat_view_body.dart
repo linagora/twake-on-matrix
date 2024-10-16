@@ -56,7 +56,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         ),
                       Expanded(
                         child: Container(
-                          color: LinagoraRefColors.material().tertiary[99],
+                          color: ChatViewBodyStyle.chatViewBackgroundColor(context),
                           child: GestureDetector(
                             onTap: controller.clearSingleSelectedEvent,
                             child: ValueListenableBuilder(
@@ -215,13 +215,13 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             const ConnectionStatusHeader(),
             // Currently we can't support reactions
             // ReactionsPicker(controller),
-            const SizedBox(height: 6.0),
+            const SizedBox(height: 8.0),
             Padding(
               padding: ChatViewBodyStyle.inputBarPadding(context),
               child: ChatInputRow(controller),
             ),
             SizedBox(
-              height: controller.responsive.isMobile(context) ? 8.0 : 16.0,
+              height: controller.responsive.isMobile(context) ? 8.0 : 8.0,
             ),
           ].map(
             (widget) => widget,
