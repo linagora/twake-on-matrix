@@ -51,6 +51,8 @@ class ImagePaths {
   static String get icShowInChat => _getImagePath('ic_show_in_chat.svg');
   static String get lottieTwakeLoading => _getAssetPath('twake_loading.json');
   static String get icPersonCheck => _getImagePath('ic_person_check.svg');
+  static String get icTwakeImageLogoBeta =>
+      _getImagePath('ic_twake_image_beta.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
