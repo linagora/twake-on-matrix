@@ -14,9 +14,9 @@ class ChatViewBodyStyle {
   static double dividerSize = 1.0;
 
   static Color chatViewBackgroundColor(BuildContext context) =>
-    responsive.isMobile(context)
-      ? LinagoraSysColors.material().background
-      : LinagoraSysColors.material().onPrimary;
+      responsive.isMobile(context)
+          ? LinagoraSysColors.material().background
+          : LinagoraSysColors.material().onPrimary;
 
   static EdgeInsets inputBarPadding(BuildContext context) => EdgeInsets.only(
         left: 8.0,
