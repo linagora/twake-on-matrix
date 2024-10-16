@@ -25,7 +25,7 @@ class ReplyContentStyle {
       color: ownMessage
           ? LinagoraSysColors.material().primaryContainer
           : LinagoraSysColors.material().onSurface.withOpacity(0.08),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8.0),
     );
   }
 
