@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class FileTileWidgetStyle {
   const FileTileWidgetStyle();
@@ -10,8 +11,8 @@ class FileTileWidgetStyle {
 
   Color backgroundColor(BuildContext context, {bool ownMessage = false}) =>
       ownMessage
-          ? Theme.of(context).colorScheme.primaryContainer
-          : Theme.of(context).colorScheme.onSurface.withOpacity(0.08);
+          ? LinagoraSysColors.material().primaryContainer
+          : LinagoraSysColors.material().onSurface.withOpacity(0.08);
 
   BorderRadiusGeometry get borderRadius => BorderRadius.circular(12);
 

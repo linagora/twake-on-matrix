@@ -58,7 +58,7 @@ void main() {
 
           expect(
             twakeLinkPreviewItemBodyDecoration.color,
-            LinagoraRefColors.material().primary[95],
+            LinagoraSysColors.material().primaryContainer,
           );
 
           expect(twakeLinkPreviewItemBodyDecoration.shape, isNotNull);

@@ -23,8 +23,8 @@ class ReplyContentStyle {
   ) {
     return BoxDecoration(
       color: ownMessage
-          ? Theme.of(context).colorScheme.primaryContainer
-          : Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+          ? LinagoraSysColors.material().primaryContainer
+          : LinagoraSysColors.material().onSurface.withOpacity(0.08),
       borderRadius: BorderRadius.circular(12),
     );
   }
