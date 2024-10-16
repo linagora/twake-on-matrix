@@ -39,7 +39,8 @@ class BaseFileTileWidget extends StatelessWidget {
     return Container(
       padding: style.paddingFileTileAll,
       decoration: ShapeDecoration(
-        color: backgroundColor ?? style.backgroundColor(context, ownMessage: ownMessage),
+        color: backgroundColor ??
+            style.backgroundColor(context, ownMessage: ownMessage),
         shape: RoundedRectangleBorder(
           borderRadius: style.borderRadius,
         ),

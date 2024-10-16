@@ -9,9 +9,10 @@ class FileTileWidgetStyle {
   EdgeInsets get paddingFileTileAll =>
       const EdgeInsets.only(left: 8.0, right: 16.0);
 
-  Color backgroundColor(BuildContext context, {bool ownMessage = false}) => ownMessage
-      ? Theme.of(context).colorScheme.primaryContainer
-      : Theme.of(context).colorScheme.onSurface.withOpacity(0.08);
+  Color backgroundColor(BuildContext context, {bool ownMessage = false}) =>
+      ownMessage
+          ? Theme.of(context).colorScheme.primaryContainer
+          : Theme.of(context).colorScheme.onSurface.withOpacity(0.08);
 
   BorderRadiusGeometry get borderRadius => BorderRadius.circular(12);
 

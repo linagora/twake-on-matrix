@@ -109,11 +109,12 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                           color: event.isOwnMessage
                               ? LinagoraRefColors.material().primary[95]
                               : responsiveUtils.isMobile(context)
-                                ? LinagoraSysColors.material().onPrimary
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                          border: !event.isOwnMessage && responsiveUtils.isMobile(context)
+                                  ? LinagoraSysColors.material().onPrimary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                          border: !event.isOwnMessage &&
+                                  responsiveUtils.isMobile(context)
                               ? Border.all(
                                   color: MessageStyle.borderColorReceivedBubble,
                                 )
