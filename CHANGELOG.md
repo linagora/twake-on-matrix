@@ -1,3 +1,22 @@
+## [2.6.6+2330] - 2024-10-16
+### Fixed
+
+- Fix cancel button in forward screen on web
+- #2075 Fix upload avatar on web
+- #2067 Fix location path on web
+- Fix wrong highlight message when open chat
+
+### Added
+
+- #2039 Update readme with customized homeserver
+- #2077 Update markdown when send message in chat
+- #2057 Update contacts screen ui
+- #2086 Change texts in settings screen
+- #2082 Update composer UI
+- Added support for nginx port customization
+- Added support for base href customization
+- #2040 Update settings UI
+
 ## [2.6.5+2330] - 2024-09-19
 ### Fixed
 - 2 types of Chat: Chat and Group Chat
@@ -2439,6 +2458,7 @@ interesting devices. If you have one, I would very like to see some screenshots 
 This CHANGELOG.md was generated with [**Changelog for
 Dart**](https://pub.dartlang.org/packages/changelog)
 
+[2.6.6+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.6.6
 [2.6.0+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.6.0
 [2.5.2+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.5.2
 [2.4.20+2330]: https://github.com/linagora/twake-on-matrix/releases/tag/2.4.20
