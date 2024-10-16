@@ -55,6 +55,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               highlightText: widget.highlightText,
               sizeString: sizeString,
               style: const MessageFileTileStyle(),
+              ownMessage: event.isOwnMessage,
             ),
           );
         } else if (state is DownloadingPresentationState ||
@@ -72,6 +73,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
                   const NotDownloadPresentationState();
               downloadManager.cancelDownload(widget.event.eventId);
             },
+            ownMessage: event.isOwnMessage,
             hasError: state is DownloadErrorPresentationState,
           );
         }
@@ -85,6 +87,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
             highlightText: widget.highlightText,
             sizeString: sizeString,
             downloadFileStateNotifier: downloadFileStateNotifier,
+            ownMessage: event.isOwnMessage,
             style: const MessageFileTileStyle(),
           ),
         );

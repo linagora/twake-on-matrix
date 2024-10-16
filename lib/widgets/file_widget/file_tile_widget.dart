@@ -17,6 +17,7 @@ class FileTileWidget extends BaseFileTileWidget {
     super.fileTileIcon,
     super.imageBytes,
     super.style = const FileTileWidgetStyle(),
+    super.ownMessage = false,
   }) : super(
           subTitle: (context) => Row(
             children: [
