@@ -2585,8 +2585,6 @@
   "@upTo100000Members": {},
   "persistentChatHistory": "Persistent Chat history",
   "@persistentChatHistory": {},
-  "multiInteractionThreadedDiscussion": "Multi-interaction threaded discussions",
-  "@multiInteractionThreadedDiscussion": {},
   "addMember": "Add members",
   "@addMember": {},
   "profile": "Profile",

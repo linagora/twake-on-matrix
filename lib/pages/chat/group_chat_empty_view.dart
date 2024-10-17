@@ -67,8 +67,6 @@ class GroupChatEmptyView extends StatelessWidget {
           _ruleChannel(L10n.of(context)!.upTo100000Members),
           const SizedBox(height: 8),
           _ruleChannel(L10n.of(context)!.persistentChatHistory),
-          const SizedBox(height: 8),
-          _ruleChannel(L10n.of(context)!.multiInteractionThreadedDiscussion),
         ],
       ),
     );
