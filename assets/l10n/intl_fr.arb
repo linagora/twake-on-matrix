@@ -849,7 +849,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "Discussion avec {displayname}",
+  "groupWith": "Salon avec {displayname}",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -2601,7 +2601,7 @@
   "@addAPhoto": {},
   "addMember": "Ajouter des membres",
   "@addMember": {},
-  "startNewChatMessage": "Il est agréable de discuter avec vos amis et de collaborer avec vos équipes.\nEntamons un dialogue, créons une discussion ou rejoignons une discussion existante.",
+  "startNewChatMessage": "Il est agréable de discuter avec vos amis et de collaborer avec vos équipes.\nEngageons une discussion, créons un salon, ou rejoignons un salon existant.",
   "@startNewChatMessage": {},
   "searchResultNotFound2": "• Il se peut que l'utilisateur ne figure pas dans votre carnet d'adresses.\n",
   "@searchResultNotFound2": {},
@@ -2685,7 +2685,7 @@
   "@addACaption": {},
   "errorPreviewingFile": "Erreur de prévisualisation du fichier",
   "@errorPreviewingFile": {},
-  "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Erreur de téléchargement d'image ! Voulez-vous toujours continuer à créer une discussion ?",
+  "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Erreur de téléchargement d'image ! Voulez-vous toujours continuer à créer un salon ?",
   "@youAreUploadingPhotosDoYouWantToCancelOrContinue": {},
   "unread": "Ne pas lire",
   "@unread": {},
