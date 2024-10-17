@@ -89,39 +89,39 @@
     "type": "text",
     "placeholders": {}
   },
-  "areGuestsAllowedToJoin": "Les invités peuvent-ils/elles rejoindre",
+  "areGuestsAllowedToJoin": "Les utilisateurs invités sont-ils autorisés à se joindre",
   "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
   },
-  "areYouSure": "Êtes-vous sûr·e ?",
+  "areYouSure": "Êtes-vous sûr·e ?",
   "@areYouSure": {
     "type": "text",
     "placeholders": {}
   },
-  "areYouSureYouWantToLogout": "Voulez-vous vraiment vous déconnecter ?",
+  "areYouSureYouWantToLogout": "Voulez-vous vraiment vous déconnecter ?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
     "placeholders": {}
   },
-  "askSSSSSign": "Pour pouvoir faire signer l'autre personne, veuillez entrer la phrase de passe de votre trousseau sécurisé ou votre clé de récupération.",
+  "askSSSSSign": "Pour finaliser la vérification, veuillez saisir la phrase secrète ou la clé de récupération de votre trousseau.",
   "@askSSSSSign": {
     "type": "text",
     "placeholders": {}
   },
-  "askVerificationRequest": "Accepter cette demande de vérification de la part de {username} ?",
+  "askVerificationRequest": "Accepter cette demande de vérification de la part de {username} ?",
   "@askVerificationRequest": {
     "type": "text",
     "placeholders": {
       "username": {}
     }
   },
-  "autoplayImages": "Lire automatiquement les autocollants et les émojis animés",
+  "autoplayImages": "Jouer les autocollants et les émojis animés automatiquement",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
   },
-  "badServerLoginTypesException": "Le serveur d'accueil prend en charge les types de connexion :\n{serverVersions}\nMais cette application ne prend en charge que :\n{supportedVersions}",
+  "badServerLoginTypesException": "Le serveur accepte les types de connexion :\n{serverVersions}\nMais cette application ne prend en charge que :\n{supportedVersions}",
   "@badServerLoginTypesException": {
     "type": "text",
     "placeholders": {
@@ -129,7 +129,7 @@
       "supportedVersions": {}
     }
   },
-  "badServerVersionsException": "Le serveur d'accueil prend en charge les versions des spécifications :\n{serverVersions}\nMais cette application ne prend en charge que {supportedVersions}",
+  "badServerVersionsException": "Le serveur supporte les spécifications en version :\n{serverVersions}\nMais cette application n'est compatible qu'avec le·s version·s : {supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",
     "placeholders": {
@@ -165,7 +165,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "botMessages": "Messages de bot",
+  "botMessages": "Messages d'un bot",
   "@botMessages": {
     "type": "text",
     "placeholders": {}
@@ -194,7 +194,7 @@
       "username": {}
     }
   },
-  "changedTheChatDescriptionTo": "{username} a changé la description de la discussion en : '{description}'",
+  "changedTheChatDescriptionTo": "{username} a changé la description de la discussion : '{description}'",
   "@changedTheChatDescriptionTo": {
     "type": "text",
     "placeholders": {
@@ -202,7 +202,7 @@
       "description": {}
     }
   },
-  "changedTheChatNameTo": "{username} a renommé la discussion en : '{chatname}'",
+  "changedTheChatNameTo": "{username} a renommé la discussion : '{chatname}'",
   "@changedTheChatNameTo": {
     "type": "text",
     "placeholders": {
@@ -217,7 +217,7 @@
       "username": {}
     }
   },
-  "changedTheDisplaynameTo": "{username} a changé son nom en : '{displayname}'",
+  "changedTheDisplaynameTo": "{username} s'appelle maintenant : '{displayname}'",
   "@changedTheDisplaynameTo": {
     "type": "text",
     "placeholders": {
@@ -232,7 +232,7 @@
       "username": {}
     }
   },
-  "changedTheGuestAccessRulesTo": "{username} a changé les règles d'accès à la discussion pour les invités en : {rules}",
+  "changedTheGuestAccessRulesTo": "{username} a changé les règles d'accès à la discussion pour les invités en : {rules}",
   "@changedTheGuestAccessRulesTo": {
     "type": "text",
     "placeholders": {
@@ -247,7 +247,7 @@
       "username": {}
     }
   },
-  "changedTheHistoryVisibilityTo": "{username} a changé la visibilité de l'historique de la discussion en : {rules}",
+  "changedTheHistoryVisibilityTo": "{username} a changé la visibilité de l'historique de la discussion en : {rules}",
   "@changedTheHistoryVisibilityTo": {
     "type": "text",
     "placeholders": {
@@ -262,7 +262,7 @@
       "username": {}
     }
   },
-  "changedTheJoinRulesTo": "{username} a changé les règles d'accès à la discussion en : {joinRules}",
+  "changedTheJoinRulesTo": "{username} a changé les règles d'accès à la discussion en : {joinRules}",
   "@changedTheJoinRulesTo": {
     "type": "text",
     "placeholders": {
@@ -296,12 +296,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Changer le serveur d'accueil",
+  "changeTheHomeserver": "Changer l'adresse du serveur",
   "@changeTheHomeserver": {
     "type": "text",
     "placeholders": {}
   },
-  "changeTheme": "Changez votre style",
+  "changeTheme": "Changer de thème visuel",
   "@changeTheme": {
     "type": "text",
     "placeholders": {}
@@ -370,7 +370,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "commandHint_ban": "Bannir l'utilisateur/trice donné(e) de ce salon",
+  "commandHint_ban": "Bannir l'utilisateur/trice de ce salon",
   "@commandHint_ban": {
     "type": "text",
     "description": "Usage hint for the command /ban"
@@ -380,17 +380,17 @@
     "type": "text",
     "description": "Usage hint for the command /html"
   },
-  "commandHint_invite": "Inviter l'utilisateur/trice donné(e) dans ce salon",
+  "commandHint_invite": "Inviter l'utilisateur/trice dans ce salon",
   "@commandHint_invite": {
     "type": "text",
     "description": "Usage hint for the command /invite"
   },
-  "commandHint_join": "Rejoindre le salon donné",
+  "commandHint_join": "Rejoindre le salon",
   "@commandHint_join": {
     "type": "text",
     "description": "Usage hint for the command /join"
   },
-  "commandHint_kick": "Supprime l'utilisateur/trice donné(e) de ce salon",
+  "commandHint_kick": "Supprimer l'utilisateur/trice de ce salon",
   "@commandHint_kick": {
     "type": "text",
     "description": "Usage hint for the command /kick"
@@ -400,7 +400,7 @@
     "type": "text",
     "description": "Usage hint for the command /leave"
   },
-  "commandHint_me": "Décrivez-vous",
+  "commandHint_me": "À propos de vous",
   "@commandHint_me": {
     "type": "text",
     "description": "Usage hint for the command /me"
@@ -415,12 +415,12 @@
     "type": "text",
     "description": "Usage hint for the command /myroomnick"
   },
-  "commandHint_op": "Définir le niveau de puissance de l'utilisateur/trice donné(e) (par défaut : 50)",
+  "commandHint_op": "Définir le niveau de privilèges de l'utilisateur/trice (par défaut : 50)",
   "@commandHint_op": {
     "type": "text",
     "description": "Usage hint for the command /op"
   },
-  "commandHint_plain": "Envoyer du texte non formaté",
+  "commandHint_plain": "Envoyer du texte brut",
   "@commandHint_plain": {
     "type": "text",
     "description": "Usage hint for the command /plain"
@@ -435,7 +435,7 @@
     "type": "text",
     "description": "Usage hint for the command /send"
   },
-  "commandHint_unban": "Débannir l'utilisateur/trice donné(e) de ce salon",
+  "commandHint_unban": "Débannir l'utilisateur/trice de ce salon",
   "@commandHint_unban": {
     "type": "text",
     "description": "Usage hint for the command /unban"
@@ -452,17 +452,17 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Comparez les emojis suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
+  "compareEmojiMatch": "Comparez les emojis suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
   "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
-  "compareNumbersMatch": "Comparez les chiffres suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
+  "compareNumbersMatch": "Comparez les chiffres suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
   "@compareNumbersMatch": {
     "type": "text",
     "placeholders": {}
   },
-  "configureChat": "Configurer la discussion",
+  "configureChat": "Configurer ce salon",
   "@configureChat": {
     "type": "text",
     "placeholders": {}
@@ -482,12 +482,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "containsDisplayName": "Contient un nom d'affichage",
+  "containsDisplayName": "Contient le nom d'affichage",
   "@containsDisplayName": {
     "type": "text",
     "placeholders": {}
   },
-  "containsUserName": "Contient un nom d'utilisateur·ice",
+  "containsUserName": "Contient le nom d'utilisateur/trice",
   "@containsUserName": {
     "type": "text",
     "placeholders": {}
@@ -512,7 +512,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "couldNotDecryptMessage": "Impossible de déchiffrer le message : {error}",
+  "couldNotDecryptMessage": "Impossible de déchiffrer le message : {error}",
   "@couldNotDecryptMessage": {
     "type": "text",
     "placeholders": {
@@ -588,7 +588,7 @@
       "day": {}
     }
   },
-  "deactivateAccountWarning": "Cette opération va désactiver votre compte. Une fois cette action effectuée, aucun retour en arrière n'est possible ! Êtes-vous sûr·e ?",
+  "deactivateAccountWarning": "Cette opération va désactiver votre compte. Une fois cette action effectuée, aucun retour en arrière n'est possible ! Voulez-vous continuer ?",
   "@deactivateAccountWarning": {
     "type": "text",
     "placeholders": {}
@@ -643,7 +643,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "displaynameHasBeenChanged": "Renommage effectué",
+  "displaynameHasBeenChanged": "Le nom d'affichage a bien été modifié",
   "@displaynameHasBeenChanged": {
     "type": "text",
     "placeholders": {}
@@ -683,12 +683,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "emoteExists": "Cette émoticône existe déjà !",
+  "emoteExists": "Cette émoticône existe déjà !",
   "@emoteExists": {
     "type": "text",
     "placeholders": {}
   },
-  "emoteInvalid": "Raccourci d'émoticône invalide !",
+  "emoteInvalid": "Raccourci d'émoticône invalide !",
   "@emoteInvalid": {
     "type": "text",
     "placeholders": {}
@@ -708,7 +708,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "emoteWarnNeedToPick": "Vous devez sélectionner un raccourci d'émoticône et une image !",
+  "emoteWarnNeedToPick": "Vous devez sélectionner un raccourci d'émoticône et une image !",
   "@emoteWarnNeedToPick": {
     "type": "text",
     "placeholders": {}
@@ -718,17 +718,17 @@
     "type": "text",
     "placeholders": {}
   },
-  "enableEmotesGlobally": "Activer globalement le pack d'émoticônes",
+  "enableEmotesGlobally": "Activer le pack d'émoticônes globalement",
   "@enableEmotesGlobally": {
     "type": "text",
     "placeholders": {}
   },
-  "enableEncryption": "Activer le chiffrement intégral",
+  "enableEncryption": "Activer le chiffrement de bout-en-bout",
   "@enableEncryption": {
     "type": "text",
     "placeholders": {}
   },
-  "enableEncryptionWarning": "Vous ne pourrez plus désactiver le chiffrement. Êtes-vous sûr(e) ?",
+  "enableEncryptionWarning": "Vous ne pourrez plus désactiver le chiffrement. Voulez-vous continuer ?",
   "@enableEncryptionWarning": {
     "type": "text",
     "placeholders": {}
@@ -767,19 +767,19 @@
   },
   "enterASpacepName": "Entrer un nom d'espace",
   "@enterASpacepName": {},
-  "enterYourHomeserver": "Renseignez votre serveur d'accueil",
+  "enterYourHomeserver": "Renseignez l'adresse de votre serveur",
   "@enterYourHomeserver": {
     "type": "text",
     "placeholders": {}
   },
-  "errorObtainingLocation": "Erreur lors de l'obtention de la localisation : {error}",
+  "errorObtainingLocation": "Erreur lors de l'obtention de la localisation : {error}",
   "@errorObtainingLocation": {
     "type": "text",
     "placeholders": {
       "error": {}
     }
   },
-  "everythingReady": "Tout est prêt !",
+  "everythingReady": "Tout est prêt !",
   "@everythingReady": {
     "type": "text",
     "placeholders": {}
@@ -789,7 +789,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "fileName": "Nom du ficher",
+  "fileName": "Nom de fichier",
   "@fileName": {
     "type": "text",
     "placeholders": {}
@@ -809,12 +809,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "fromJoining": "À partir de l'entrée dans le salon",
+  "fromJoining": "À partir de la date d'arrivée dans le salon",
   "@fromJoining": {
     "type": "text",
     "placeholders": {}
   },
-  "fromTheInvitation": "À partir de l'invitation",
+  "fromTheInvitation": "À partir de la date de l'invitation",
   "@fromTheInvitation": {
     "type": "text",
     "placeholders": {}
@@ -856,7 +856,7 @@
       "displayname": {}
     }
   },
-  "guestsAreForbidden": "Les invités ne peuvent pas rejoindre",
+  "guestsAreForbidden": "Aucun invités",
   "@guestsAreForbidden": {
     "type": "text",
     "placeholders": {}
@@ -889,7 +889,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "À quel point ce contenu est-il offensant ?",
+  "howOffensiveIsThisContent": "À quel point ce contenu est-il offensant ?",
   "@howOffensiveIsThisContent": {
     "type": "text",
     "placeholders": {}
@@ -909,17 +909,17 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoredUsers": "Utilisateur·ices ignoré·es",
+  "ignoredUsers": "Utilisateur/trices ignoré·es",
   "@ignoredUsers": {
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Vous pouvez ignorer les utilisateur·ices qui vous dérangent en les mettant dans votre liste à ignorer personnelle. Vous ne recevrez plus de messages ou d'invitations à participer à un salon de discussion de la part des utilisateur·ices figurant sur cette liste.",
+  "ignoreListDescription": "Vous pouvez ignorer les utilisateurs/trices qui vous perturbent. Vous ne pourrez pas recevoir de messages ou d'invitations de la part des utilisateurs/trices figurant sur votre liste personnelle des utilisateurs/trices ignoré·es.",
   "@ignoreListDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "ignoreUsername": "Ignorer l'utilisateur·ice",
+  "ignoreUsername": "Ignorer l'utilisateur/trice",
   "@ignoreUsername": {
     "type": "text",
     "placeholders": {}
@@ -929,7 +929,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "incorrectPassphraseOrKey": "Phrase de passe ou clé de récupération incorrecte",
+  "incorrectPassphraseOrKey": "Phrase secrète ou clé de récupération incorrecte",
   "@incorrectPassphraseOrKey": {
     "type": "text",
     "placeholders": {}
@@ -944,7 +944,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteContactToGroup": "Inviter un contact dans {groupName}",
+  "inviteContactToGroup": "Inviter un contact à {groupName}",
   "@inviteContactToGroup": {
     "type": "text",
     "placeholders": {
@@ -964,7 +964,7 @@
       "targetName": {}
     }
   },
-  "invitedUsersOnly": "Uniquement les utilisateur·ices invité·es",
+  "invitedUsersOnly": "Uniquement les utilisateur/trices invité·es",
   "@invitedUsersOnly": {
     "type": "text",
     "placeholders": {}
@@ -974,7 +974,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} vous a invité·e sur FluffyChat. \n1. Installez FluffyChat : https://fluffychat.im \n2. Inscrivez-vous ou connectez-vous \n3. Ouvrez le lien d'invitation : {link}",
+  "inviteText": "{username} vous a invité·e sur FluffyChat.\n1. Installez FluffyChat : https://fluffychat.im\n2. Inscrivez-vous ou connectez-vous\n3. Ouvrez le lien d'invitation : {link}",
   "@inviteText": {
     "type": "text",
     "placeholders": {
@@ -982,12 +982,12 @@
       "link": {}
     }
   },
-  "isTyping": "est en train d'écrire",
+  "isTyping": "écrit",
   "@isTyping": {
     "type": "text",
     "placeholders": {}
   },
-  "joinedTheChat": "👋 {username} a rejoint la discussion",
+  "joinedTheChat": "👋 {username} a rejoint le salon",
   "@joinedTheChat": {
     "type": "text",
     "placeholders": {
@@ -1025,7 +1025,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "lastActiveAgo": "Vu·e pour la dernière fois : {localizedTimeShort}",
+  "lastActiveAgo": "Vu·e pour la dernière fois : {localizedTimeShort}",
   "@lastActiveAgo": {
     "type": "text",
     "placeholders": {
@@ -1037,7 +1037,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "leave": "Partir",
+  "leave": "Quitter",
   "@leave": {
     "type": "text",
     "placeholders": {}
@@ -1057,7 +1057,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "loadCountMoreParticipants": "Afficher {count} de plus",
+  "loadCountMoreParticipants": "Afficher {count} utilisateurs de plus",
   "@loadCountMoreParticipants": {
     "type": "text",
     "placeholders": {
@@ -1074,7 +1074,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "locationDisabledNotice": "Les services de localisation sont désactivés. Il est nécessaire de les activer avant de pouvoir partager votre localisation.",
+  "locationDisabledNotice": "Les services de localisation sont désactivés. Activez les avant de pouvoir partager votre localisation.",
   "@locationDisabledNotice": {
     "type": "text",
     "placeholders": {}
@@ -2073,9 +2073,9 @@
   "@typeInInviteLinkManually": {},
   "shareYourInviteLink": "Partager votre lien d'invitation",
   "@shareYourInviteLink": {},
-  "sendOnEnter": "Envoyer avec Entrée",
+  "sendOnEnter": "Envoyer avec la touche \"Entrée\"",
   "@sendOnEnter": {},
-  "homeserver": "Serveur d'accueil",
+  "homeserver": "Serveur",
   "@homeserver": {},
   "serverRequiresEmail": "Ce serveur doit valider votre adresse e-mail pour l'inscription.",
   "@serverRequiresEmail": {},
@@ -2095,9 +2095,9 @@
   "@oneClientLoggedOut": {},
   "link": "Lien",
   "@link": {},
-  "yourChatBackupHasBeenSetUp": "Votre sauvegarde de la discussion a été mise en place.",
+  "yourChatBackupHasBeenSetUp": "La sauvegarde de vos discussions a été configurée.",
   "@yourChatBackupHasBeenSetUp": {},
-  "yourUserId": "Votre identifiant utilisateur :",
+  "yourUserId": "Votre identifiant utilisateur :",
   "@yourUserId": {},
   "unverified": "Non vérifié",
   "@unverified": {},
@@ -2107,7 +2107,7 @@
   "@pleaseEnterValidEmail": {},
   "repeatPassword": "Répétez le mot de passe",
   "@repeatPassword": {},
-  "pleaseChooseAtLeastChars": "Veuillez choisir au moins {min} caractères.",
+  "pleaseChooseAtLeastChars": "Veuillez renseigner au moins {min} caractères.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
     "placeholders": {
@@ -2132,7 +2132,7 @@
   "@loginWithOneClick": {},
   "start": "Commencer",
   "@start": {},
-  "commandHint_create": "Créer un groupe de discussion vide\nUtilisez --no-encryption pour désactiver le chiffrement",
+  "commandHint_create": "Créer un salon de discussion vide\nUtilisez --no-encryption pour désactiver le chiffrement",
   "@commandHint_create": {
     "type": "text",
     "description": "Usage hint for the command /create"
@@ -2147,7 +2147,7 @@
     "type": "text",
     "description": "Usage hint for the command /clearcache"
   },
-  "commandHint_dm": "Commencer une discussion directe\nUtilisez --no-encryption pour désactiver le chiffrement",
+  "commandHint_dm": "Commencer un salon de messagerie directe\nUtilisez --no-encryption pour désactiver le chiffrement",
   "@commandHint_dm": {
     "type": "text",
     "description": "Usage hint for the command /dm"
@@ -2342,7 +2342,7 @@
   "@custom": {},
   "hydrate": "Restaurer à partir du fichier de sauvegarde",
   "@hydrate": {},
-  "dehydrateWarning": "Cette action ne peut pas être annulée. Assurez-vous d'enregistrer convenablement le fichier de sauvegarde.",
+  "dehydrateWarning": "Cette action ne peut pas être annulée. Vérifiez que vous avez bien enregistrer le fichier de sauvegarde.",
   "@dehydrateWarning": {},
   "dehydrateTorLong": "Pour les utilisateurs/trices de TOR, il est recommandé d'exporter la session avant de fermer la fenêtre.",
   "@dehydrateTorLong": {},
@@ -2364,13 +2364,13 @@
   "@noEmailWarning": {},
   "dehydrate": "Exporter la session et effacer l'appareil",
   "@dehydrate": {},
-  "dehydrateShare": "Ceci est votre export privé de FluffyChat. Assurez-vous de ne pas le perdre et de le garder privé.",
+  "dehydrateShare": "Ceci est votre export privé de FluffyChat. Ne le perdez pas et gardez le privé.",
   "@dehydrateShare": {},
-  "dehydrateTor": "Utilisateurs/trices de TOR : Exporter la session",
+  "dehydrateTor": "Utilisateurs/trices de TOR : Exporter la session",
   "@dehydrateTor": {},
-  "hydrateTor": "Utilisateurs/trices de TOR : Importer une session exportée",
+  "hydrateTor": "Utilisateurs/trices de TOR : Importer une session exportée",
   "@hydrateTor": {},
-  "hydrateTorLong": "Vous avez exporté votre session la dernière fois sur TOR ? Importez-la rapidement et continuez à discuter.",
+  "hydrateTorLong": "Vous avez exporté votre session la dernière fois sur TOR ? Importez-la rapidement et continuez à discuter.",
   "@hydrateTorLong": {},
   "pleaseEnterRecoveryKey": "Veuillez saisir votre clé de récupération :",
   "@pleaseEnterRecoveryKey": {},
@@ -2386,7 +2386,7 @@
       "count": {}
     }
   },
-  "updateAvailable": "Mise à jour de FluffyChat disponible",
+  "updateAvailable": "Mise à jour de Twake Chat disponible",
   "@updateAvailable": {},
   "updateNow": "Lancer la mise à jour en arrière-plan",
   "@updateNow": {},
@@ -2838,7 +2838,7 @@
   "@continueProcess": {},
   "tapToAllowAccessToYourCamera": "Vous pouvez activer l'accès à la caméra dans les Réglages de l'application pour passer des appels vidéo sur",
   "@tapToAllowAccessToYourCamera": {},
-  "unmute": "Réactiver le son",
+  "unmute": "Retirer la sourdine",
   "@unmute": {},
   "selectChat": "Sélectionner la discussion",
   "@selectChat": {},
@@ -2858,7 +2858,7 @@
   "@twakeChatUser": {},
   "noResultsFound": "Aucun résultat trouvé",
   "@noResultsFound": {},
-  "muteThisChat": "Mettre en sourdine",
+  "muteThisChat": "Mettre ce salon en sourdine",
   "@muteThisChat": {},
   "clearAllSelected": "Effacer",
   "@clearAllSelected": {},
@@ -2866,7 +2866,7 @@
   "@encryptionMessage": {},
   "selectedUsers": "Utilisateurs sélectionnés",
   "@selectedUsers": {},
-  "unmuteThisChat": "Activer les notifications",
+  "unmuteThisChat": "Retirer la sourdine de ce salon",
   "@unmuteThisChat": {},
   "encryptionWarning": "Vous risquez de perdre vos messages si vous accédez à l'application Twake Chat sur un autre appareil.",
   "@encryptionWarning": {},
@@ -3164,7 +3164,7 @@
   "@sCameraPreviewLabel": {},
   "sFlashModeLabel": "Mode flash : {mode}",
   "@sFlashModeLabel": {},
-  "sSwitchCameraLensDirectionLabel": "Passer à la caméra {value}",
+  "sSwitchCameraLensDirectionLabel": "Passer à la caméra : {value}",
   "@sSwitchCameraLensDirectionLabel": {},
   "tuesday": "Mar",
   "@tuesday": {
@@ -3214,5 +3214,21 @@
   "explainPermissionToAccessVideos": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés dans la discussion sont cryptés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Vidéos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
   "@explainPermissionToAccessVideos": {},
   "explainPermissionToAccessMedias": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés au chat sont cryptés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Photos et vidéos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
-  "@explainPermissionToAccessMedias": {}
+  "@explainPermissionToAccessMedias": {},
+  "message": "Message",
+  "@message": {},
+  "fileTooBig": "Le fichier sélectionné est trop volumineux. La taille maximale est de {maxSize} MB.",
+  "@fileTooBig": {
+    "placeholders": {
+      "maxSize": {
+        "type": "int"
+      }
+    }
+  },
+  "disable_notifications": "Désactiver les notifications",
+  "@disable_notifications": {},
+  "enable_notifications": "Activer les notifications",
+  "@enable_notifications": {},
+  "logoutDialogWarning": "Vous allez perdre tout vos messages chiffrés. Nous vous recommandons d'activer la sauvegarde des messages avant de vous déconnecter",
+  "@logoutDialogWarning": {}
 }
