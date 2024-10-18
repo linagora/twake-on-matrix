@@ -27,7 +27,8 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "app_grid_dashboard_available": true,
   "homeserver": "https://example.com/",
   "platform": "platform"
-  "default_max_upload_avatar_size_in_bytes": 1000000
+  "default_max_upload_avatar_size_in_bytes": 1000000,
+  "dev_mode": false
 }
 ```
 
@@ -45,5 +46,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
 - `homeserver`: Homeserver
 - `platform`: Platform, `saas` for the case of public platform
 - `default_max_upload_avatar_size_in_bytes`: Default max upload avatar size
+- `dev_mode`: Enable to run app in IDE
 
 If you want to disable it, please change the value or remove this from `config.sample.json`
