@@ -1,3 +1,8 @@
+## [2.6.7+2330] - 2024-10-18
+### Fixed
+
+- Fix redirect path in web app
+
 ## [2.6.6+2330] - 2024-10-16
 ### Fixed
 
