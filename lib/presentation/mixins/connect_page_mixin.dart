@@ -217,9 +217,11 @@ mixin ConnectPageMixin {
   String _generatePostLogoutRedirectUrl() {
     if (kIsWeb) {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.location.href.getBaseUrlBeforeHash()}/twake-on-matrix/${AppConfig.issueId}/auth.html';
+        return '${html.window.location.href.getBaseUrlBeforeHash()}auth.html';
       }
-      return '${html.window.location.href.getBaseUrlBeforeHash()}web/auth.html';
+      return html.window.location.href
+          .getBaseUrlBeforeHash()
+          .generateAuthPath(isDevMode: AppConfig.devMode);
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
@@ -231,9 +233,12 @@ mixin ConnectPageMixin {
         homeserverParam = '?homeserver=$homeserver';
       }
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.location.href.getBaseUrlBeforeHash()}/twake-on-matrix/${AppConfig.issueId}/auth.html$homeserverParam';
+        return '${html.window.location.href.getBaseUrlBeforeHash()}auth.html$homeserverParam';
       }
-      return '${html.window.location.href.getBaseUrlBeforeHash()}web/auth.html$homeserverParam';
+      return html.window.location.href.getBaseUrlBeforeHash().generateAuthPath(
+            homeserverParams: homeserverParam,
+            isDevMode: AppConfig.devMode,
+          );
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }

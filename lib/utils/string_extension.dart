@@ -381,4 +381,15 @@ extension StringCasingExtension on String {
     final fragmentIndex = indexOf('#/');
     return fragmentIndex != -1 ? substring(0, fragmentIndex) : this;
   }
+
+  String generateAuthPath({
+    String? homeserverParams,
+    bool isDevMode = false,
+  }) {
+    if (isDevMode) {
+      return '${this}web/auth.html$homeserverParams';
+    } else {
+      return '${this}auth.html$homeserverParams';
+    }
+  }
 }
