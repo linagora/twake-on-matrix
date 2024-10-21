@@ -1362,7 +1362,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: b902d115c4e6680b353302c0eba74bf66fffd29a
+      resolved-ref: "08e1e697919615410f8a855e500ef5617f90333b"
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"
@@ -1414,6 +1414,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.1.2"
+  google_fonts:
+    dependency: "direct main"
+    description:
+      name: google_fonts
+      sha256: "6b6f10f0ce3c42f6552d1c70d2c28d764cf22bb487f50f66cca31dcd5194f4d6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.4"
   gradient_borders:
     dependency: transitive
     description:
@@ -1783,15 +1791,6 @@ packages:
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
-  linkfy_text:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: main
-      resolved-ref: "6690e87f19e024d70b68efbc70d2159c34b5d0fc"
-      url: "git@github.com:linagora/linkfy_text.git"
-    source: git
-    version: "1.1.6"
   lints:
     dependency: transitive
     description:
@@ -1877,7 +1876,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "345aab06d195035c48784b23c849825a61c5a79a"
+      resolved-ref: "8435e632d7bce166085c6426fbfb4173457526f9"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
@@ -1886,7 +1885,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "9353b6d6b6c1b9cc9e9a9290ffd0c777c6a0b479"
+      resolved-ref: a498051a8a7e41a35bde65f37c25add3f808b929
       url: "https://github.com/linagora/dart_matrix_api_lite.git"
     source: git
     version: "1.7.4"
@@ -2324,14 +2323,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
-  pretty_qr_code:
-    dependency: "direct main"
-    description:
-      name: pretty_qr_code
-      sha256: cbdb4af29da1c1fa21dd76f809646c591320ab9e435d3b0eab867492d43607d5
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
   process:
     dependency: transitive
     description:
@@ -2372,14 +2363,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
-  pull_down_button:
-    dependency: "direct main"
-    description:
-      name: pull_down_button
-      sha256: "12cdd8ff187a3150ebdf075e5074299f085579b158d2b4e655ccbafccf95f25b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.2"
   punycode:
     dependency: "direct main"
     description:
@@ -3007,10 +2990,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher
-      sha256: "9d06212b1362abc2f0f0d78e6f09f726608c74e3b9462e8368bb03314aa8d603"
+      sha256: "6ce1e04375be4eed30548f10a315826fd933c1e493206eab82eed01f438c8d2e"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.1"
+    version: "6.2.6"
   url_launcher_android:
     dependency: transitive
     description:
@@ -3402,4 +3385,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.5.0-259.0.dev <4.0.0"
-  flutter: ">=3.19.3"
+  flutter: ">=3.19.0"

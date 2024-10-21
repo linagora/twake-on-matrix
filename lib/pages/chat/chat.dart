@@ -354,12 +354,14 @@ class ChatController extends State<Chat>
 
   Future<void> requestHistory({
     int? historyCount,
+    StateFilter? filter,
   }) async {
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
       return timeline!.requestHistory(
         historyCount: historyCount ?? _loadHistoryCount,
+        filter: filter,
       );
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1748,10 +1750,19 @@ class ChatController extends State<Chat>
     if (allMembershipEvents || canRequestHistory) {
       try {
         await requestHistory(historyCount: _defaultEventCountDisplay)
-            .then((response) {
-          Logs().d(
+            .then((response) async {
+          Logs().v(
             'Chat::_tryRequestHistory():: Try request history success',
           );
+          if (allMembershipEvents) {
+            await requestHistory(
+              historyCount: _defaultEventCountDisplay,
+              filter: StateFilter(
+                lazyLoadMembers: true,
+                types: [EventTypes.Message],
+              ),
+            );
+          }
         });
       } catch (e) {
         Logs().e(
