@@ -39,7 +39,7 @@ class ChatListItemStyle {
   );
 
   static const EdgeInsetsDirectional paddingAvatar =
-      EdgeInsetsDirectional.only(start: 8, end: 8);
+      EdgeInsetsDirectional.only(end: 8);
 
   static const EdgeInsetsDirectional paddingIconGroup =
       EdgeInsetsDirectional.all(4);

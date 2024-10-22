@@ -59,9 +59,10 @@ class SettingsView extends StatelessWidget {
                 style: responsiveUtils.isMobile(context)
                     ? LinagoraTextStyle.material().bodyLarge1.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
-                          height: SettingsViewStyle.titleLineHeightMobile,
                         )
-                    : Theme.of(context).textTheme.headlineSmall,
+                    : Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
               ),
             ),
           ),
