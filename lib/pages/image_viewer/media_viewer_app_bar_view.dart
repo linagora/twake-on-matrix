@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_style.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -85,8 +86,13 @@ class MediaViewerAppbarView extends StatelessWidget {
                               child: Directionality(
                                 textDirection: TextDirection.rtl,
                                 child: MenuAnchor(
-                                  style: const MenuStyle(
+                                  style: MenuStyle(
                                     alignment: Alignment.bottomRight,
+                                    backgroundColor: WidgetStatePropertyAll(
+                                      PopupMenuWidgetStyle.defaultMenuColor(
+                                        context,
+                                      ),
+                                    ),
                                   ),
                                   controller: controller.menuController,
                                   menuChildren: [

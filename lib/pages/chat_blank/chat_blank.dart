@@ -5,6 +5,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -114,18 +115,27 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
           MenuItemButton(
             leadingIcon: const Icon(Icons.chat),
             onPressed: goToNewPrivateChat,
-            child: Text(L10n.of(context)!.newDirectMessage),
+            child: Text(
+              L10n.of(context)!.newDirectMessage,
+              style: PopupMenuWidgetStyle.defaultItemTextStyle(context),
+            ),
           ),
           MenuItemButton(
             leadingIcon: const Icon(Icons.group),
             onPressed: () => goToNewGroupChat(
               innerNavigatorContext(),
             ),
-            child: Text(L10n.of(context)!.newChat),
+            child: Text(
+              L10n.of(context)!.newChat,
+              style: PopupMenuWidgetStyle.defaultItemTextStyle(context),
+            ),
           ),
         ],
-        style: const MenuStyle(
+        style: MenuStyle(
           alignment: Alignment.topLeft,
+          backgroundColor: WidgetStatePropertyAll(
+            PopupMenuWidgetStyle.defaultMenuColor(context),
+          ),
         ),
         builder: (context, menuController, _) {
           return InkWell(

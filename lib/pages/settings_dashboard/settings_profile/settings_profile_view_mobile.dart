@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -168,6 +169,11 @@ class SettingsProfileViewMobile extends StatelessWidget {
                     right: SettingsProfileViewMobileStyle.positionedRightSize,
                     child: MenuAnchor(
                       controller: menuController,
+                      style: MenuStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                          PopupMenuWidgetStyle.defaultMenuColor(context),
+                        ),
+                      ),
                       builder: (
                         BuildContext context,
                         MenuController menuController,

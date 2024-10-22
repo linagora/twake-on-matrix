@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,17 +89,30 @@ class ChatListView extends StatelessWidget {
                     menuChildren: [
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.chat),
-                        child: Text(L10n.of(context)!.newDirectMessage),
+                        child: Text(
+                          L10n.of(context)!.newDirectMessage,
+                          style: PopupMenuWidgetStyle.defaultItemTextStyle(
+                            context,
+                          ),
+                        ),
                         onPressed: () => controller.goToNewPrivateChat(),
                       ),
                       MenuItemButton(
                         leadingIcon: const Icon(Icons.group),
                         onPressed: () => controller.goToNewGroupChat(context),
-                        child: Text(L10n.of(context)!.newGroupChat),
+                        child: Text(
+                          L10n.of(context)!.newGroupChat,
+                          style: PopupMenuWidgetStyle.defaultItemTextStyle(
+                            context,
+                          ),
+                        ),
                       ),
                     ],
-                    style: const MenuStyle(
+                    style: MenuStyle(
                       alignment: Alignment.topLeft,
+                      backgroundColor: WidgetStatePropertyAll(
+                        PopupMenuWidgetStyle.defaultMenuColor(context),
+                      ),
                     ),
                     builder: (context, menuController, child) {
                       return TwakeFloatingActionButton(
