@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class TwakeHeaderStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -14,6 +15,19 @@ class TwakeHeaderStyle {
   static const int flexActions = 3;
   static const double avatarSize = 36;
   static const double titleLineHeightMobile = 24 / 17;
+  static const double titleLineHeightWeb = 32 / 24;
+
+  static TextStyle? twakeHeaderStyle(BuildContext context) {
+    return responsive.isMobile(context)
+        ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: TwakeHeaderStyle.titleLineHeightMobile,
+            )
+        : Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: TwakeHeaderStyle.titleLineHeightWeb,
+            );
+  }
 
   static double get avatarFontSizeInAppBar => 14.0;
   static const double avatarOfMultipleAccountSize = 48.0;

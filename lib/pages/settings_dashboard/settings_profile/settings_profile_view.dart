@@ -35,7 +35,7 @@ class SettingsProfileView extends StatelessWidget {
         leading: responsive.isMobile(context)
             ? IconButton(
                 icon: const Icon(
-                  Icons.arrow_back_ios,
+                  Icons.chevron_left_outlined,
                   size: SettingsProfileViewStyle.sizeIcon,
                 ),
                 onPressed: () => context.pop(),

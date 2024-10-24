@@ -233,12 +233,11 @@ class ChatView extends StatelessWidget with MessageContentMixin {
   }
 
   Widget _buildBackButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.only(left: 8, right: 8),
         child: TwakeIconButton(
           tooltip: L10n.of(context)!.back,
-          icon: Icons.arrow_back_ios,
+          icon: Icons.chevron_left_outlined,
           onTap: controller.onBackPress,
-          paddingAll: 8.0,
           margin: const EdgeInsets.symmetric(vertical: 12.0),
         ),
       );

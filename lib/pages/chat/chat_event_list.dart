@@ -27,7 +27,7 @@ class ChatEventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = TwakeThemes.isColumnMode(context) ? 8.0 : 0.0;
+    final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
 
     final events = controller.timeline!.events;
     // create a map of eventId --> index to greatly improve performance of

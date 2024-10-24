@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_appbar_style.dart';
 import 'package:fluffychat/pages/search/search_text_field.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -37,13 +38,7 @@ class ContactsAppBar extends StatelessWidget {
             padding: ContactsAppbarStyle.titlePadding(context),
             child: Text(
               L10n.of(context)!.contacts,
-              style: responsiveUtils.isMobile(context)
-                  ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      )
-                  : Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+              style: TwakeHeaderStyle.twakeHeaderStyle(context),
             ),
           ),
         ),

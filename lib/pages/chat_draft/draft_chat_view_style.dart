@@ -36,7 +36,6 @@ class DraftChatViewStyle {
 
   static EdgeInsetsGeometry get emptyChatChildrenPadding =>
       const EdgeInsetsDirectional.only(
-        start: 4,
         end: 8,
       );
   static const double emptyChatGapWidth = 12.0;

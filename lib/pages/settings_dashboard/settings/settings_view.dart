@@ -7,6 +7,7 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -56,13 +57,7 @@ class SettingsView extends StatelessWidget {
                   : Alignment.topLeft,
               child: Text(
                 L10n.of(context)!.settings,
-                style: responsiveUtils.isMobile(context)
-                    ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        )
-                    : Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                style: TwakeHeaderStyle.twakeHeaderStyle(context),
               ),
             ),
           ),

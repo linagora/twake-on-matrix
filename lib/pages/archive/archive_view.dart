@@ -19,7 +19,7 @@ class ArchiveView extends StatelessWidget {
       builder: (BuildContext context, snapshot) => Scaffold(
         appBar: AppBar(
           leading: TwakeIconButton(
-            icon: Icons.arrow_back_ios,
+            icon: Icons.chevron_left_outlined,
             tooltip: L10n.of(context)!.back,
             onTap: () => context.pop(),
           ),

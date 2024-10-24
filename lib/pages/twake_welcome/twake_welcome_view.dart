@@ -21,7 +21,7 @@ class TwakeWelcomeView extends StatelessWidget {
           ? AppBar(
               backgroundColor: Colors.transparent,
               leading: TwakeIconButton(
-                icon: Icons.arrow_back_ios,
+                icon: Icons.chevron_left_outlined,
                 onTap: () => context.pop(),
                 tooltip: L10n.of(context)!.back,
               ),

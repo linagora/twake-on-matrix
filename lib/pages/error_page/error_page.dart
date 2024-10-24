@@ -75,7 +75,9 @@ class _ErrorPageBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton.icon(
-      icon: const Icon(Icons.arrow_back_ios),
+      icon: const Icon(
+        Icons.chevron_left_outlined,
+      ),
       onPressed: () => _goToRooms(context),
       label: Text(
         L10n.of(context)!.errorPageButton,
