@@ -64,7 +64,7 @@ class ChatLoadingView extends StatelessWidget {
             );
           } else {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: ChatLoadingViewStyle.padding(context),
               child: SkeletonItem(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -78,7 +78,7 @@ class ChatLoadingView extends StatelessWidget {
                       child: SkeletonParagraph(
                         style: SkeletonParagraphStyle(
                           padding: EdgeInsets.zero,
-                          lines: _random(1, 3),
+                          lines: index + 1,
                           spacing: 8,
                           lineStyle: SkeletonLineStyle(
                             alignment: AlignmentDirectional.centerEnd,
