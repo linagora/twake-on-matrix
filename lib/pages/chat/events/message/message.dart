@@ -317,22 +317,28 @@ class _MessageState extends State<Message> {
     }
 
     if (sameSender && !ownMessage) {
-      return FutureBuilder<User?>(
-        future: event.fetchSenderUser(),
-        builder: (context, snapshot) {
-          final user = snapshot.data ?? event.senderFromMemoryOrFallback;
-          return Avatar(
-            size: MessageStyle.avatarSize,
-            fontSize: MessageStyle.fontSize,
-            mxContent: user.avatarUrl,
-            name: user.calcDisplayname(),
-            onTap: () => widget.onAvatarTap!(event),
-          );
-        },
+      return Padding(
+        padding: MessageStyle.paddingAvatar,
+        child: FutureBuilder<User?>(
+          future: event.fetchSenderUser(),
+          builder: (context, snapshot) {
+            final user = snapshot.data ?? event.senderFromMemoryOrFallback;
+            return Avatar(
+              size: MessageStyle.avatarSize,
+              fontSize: MessageStyle.fontSize,
+              mxContent: user.avatarUrl,
+              name: user.calcDisplayname(),
+              onTap: () => widget.onAvatarTap!(event),
+            );
+          },
+        ),
       );
     }
 
-    return const SizedBox(width: MessageStyle.avatarSize);
+    return const Padding(
+      padding: MessageStyle.paddingAvatar,
+      child: SizedBox(width: MessageStyle.avatarSize),
+    );
   }
 
   Widget _messageSelectedWidget(
@@ -342,7 +348,7 @@ class _MessageState extends State<Message> {
   ) {
     return Container(
       padding: EdgeInsets.only(
-        left: Message.responsiveUtils.isMobile(context) ? 8.0 : 16.0,
+        left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
       ),
       color: widget.selected
           ? LinagoraSysColors.material().secondaryContainer
