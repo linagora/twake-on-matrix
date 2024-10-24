@@ -342,7 +342,7 @@ class _MessageState extends State<Message> {
   ) {
     return Container(
       padding: EdgeInsets.only(
-        left: widget.selectMode ? 12.0 : 8.0,
+        left: Message.responsiveUtils.isMobile(context) ? 8.0 : 16.0,
       ),
       color: widget.selected
           ? LinagoraSysColors.material().secondaryContainer
@@ -355,19 +355,14 @@ class _MessageState extends State<Message> {
           if (widget.selectMode && event.status.isAvailable)
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: 16.0,
-                ),
-                child: Icon(
-                  widget.selected
-                      ? Icons.check_circle_rounded
-                      : Icons.circle_outlined,
-                  color: widget.selected
-                      ? LinagoraSysColors.material().primary
-                      : Colors.black,
-                  size: 20,
-                ),
+              child: Icon(
+                widget.selected
+                    ? Icons.check_circle_rounded
+                    : Icons.circle_outlined,
+                color: widget.selected
+                    ? LinagoraSysColors.material().primary
+                    : Colors.black,
+                size: 20,
               ),
             ),
           Expanded(

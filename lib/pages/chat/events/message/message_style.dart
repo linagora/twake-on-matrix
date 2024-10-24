@@ -139,7 +139,7 @@ class MessageStyle {
       );
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
-      const EdgeInsetsDirectional.symmetric(horizontal: 12.0);
+      const EdgeInsetsDirectional.symmetric(horizontal: 16.0);
 
   static EdgeInsetsDirectional get paddingDividerUnreadMessage =>
       const EdgeInsetsDirectional.only(top: 16.0);
