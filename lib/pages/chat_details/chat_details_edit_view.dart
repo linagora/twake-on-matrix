@@ -56,7 +56,9 @@ class ChatDetailsEditView extends StatelessWidget {
                 hoverColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 onPressed: controller.onBack,
-                icon: const Icon(Icons.arrow_back_ios),
+                icon: const Icon(
+                  Icons.chevron_left_outlined,
+                ),
               ),
             ),
             Text(

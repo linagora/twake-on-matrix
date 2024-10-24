@@ -104,6 +104,10 @@ class MessageStyle {
         top: 4.0 * AppConfig.bubbleSizeFactor,
       );
 
+  static const EdgeInsets paddingAvatar = EdgeInsets.only(
+    right: 8.0,
+  );
+
   static EdgeInsetsDirectional paddingMessageContainer(
     bool displayTime,
     BuildContext context,
@@ -117,7 +121,6 @@ class MessageStyle {
         nextEvent,
         event,
       ),
-      start: 8,
       end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
     );
   }
@@ -139,7 +142,7 @@ class MessageStyle {
       );
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
-      const EdgeInsetsDirectional.symmetric(horizontal: 12.0);
+      const EdgeInsetsDirectional.symmetric(horizontal: 16.0);
 
   static EdgeInsetsDirectional get paddingDividerUnreadMessage =>
       const EdgeInsetsDirectional.only(top: 16.0);

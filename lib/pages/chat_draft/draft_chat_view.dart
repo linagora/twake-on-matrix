@@ -54,7 +54,7 @@ class DraftChatView extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 12),
                         child: TwakeIconButton(
                           tooltip: L10n.of(context)!.back,
-                          icon: Icons.arrow_back_ios,
+                          icon: Icons.chevron_left_outlined,
                           onTap: () => context.pop(),
                           paddingAll: 8.0,
                           margin: const EdgeInsets.symmetric(vertical: 12.0),

@@ -18,7 +18,7 @@ class AddStoryView extends StatelessWidget {
       backgroundColor: Colors.blueGrey.shade900,
       appBar: AppBar(
         leading: TwakeIconButton(
-          icon: Icons.arrow_back_ios,
+          icon: Icons.chevron_left_outlined,
           tooltip: L10n.of(context)!.back,
           onTap: () => context.pop(),
         ),

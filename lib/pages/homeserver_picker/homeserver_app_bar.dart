@@ -22,7 +22,9 @@ class HomeserverAppBar extends StatelessWidget {
         prefixIcon: Navigator.of(context).canPop()
             ? IconButton(
                 onPressed: Navigator.of(context).pop,
-                icon: const Icon(Icons.arrow_back_ios),
+                icon: const Icon(
+                  Icons.chevron_left_outlined,
+                ),
               )
             : null,
         prefixText: '${L10n.of(context)!.homeserver}: ',

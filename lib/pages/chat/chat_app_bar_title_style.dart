@@ -56,7 +56,6 @@ class ChatAppBarTitleStyle {
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
               );
   static const avatarPadding = EdgeInsetsDirectional.only(
-    start: 4,
     end: 8,
   );
 }
