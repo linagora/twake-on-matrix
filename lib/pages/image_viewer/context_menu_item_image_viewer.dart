@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/image_viewer/context_menu_item_image_viewer_style.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,8 +10,6 @@ class ContextMenuItemImageViewer extends StatelessWidget {
 
   final String? imagePath;
 
-  final Color? color;
-
   final bool haveDivider;
 
   final VoidCallback? onTap;
@@ -19,7 +18,6 @@ class ContextMenuItemImageViewer extends StatelessWidget {
     super.key,
     this.icon,
     this.imagePath,
-    this.color,
     this.haveDivider = true,
     this.onTap,
     required this.title,
@@ -43,23 +41,20 @@ class ContextMenuItemImageViewer extends StatelessWidget {
                     if (icon != null)
                       Icon(
                         icon,
-                        color: color ?? Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     if (imagePath != null)
                       SvgPicture.asset(
                         imagePath!,
                         colorFilter: ColorFilter.mode(
-                          color ?? Theme.of(context).colorScheme.onSurface,
+                          Theme.of(context).colorScheme.onSurface,
                           BlendMode.srcIn,
                         ),
                       ),
                     ContextMenuItemImageViewerStyle.paddingBetweenItems,
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: color ??
-                                Theme.of(context).colorScheme.onSurface,
-                          ),
+                      style: PopupMenuWidgetStyle.defaultItemTextStyle(context),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

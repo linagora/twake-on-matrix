@@ -6,6 +6,7 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -153,6 +154,13 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                     .positionedRightSize,
                                 child: MenuAnchor(
                                   controller: menuController,
+                                  style: MenuStyle(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                      PopupMenuWidgetStyle.defaultMenuColor(
+                                        context,
+                                      ),
+                                    ),
+                                  ),
                                   builder: (
                                     BuildContext context,
                                     MenuController menuController,

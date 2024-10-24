@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fluffychat/pages/chat/chat_loading_view_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletons/skeletons.dart';
@@ -23,7 +24,7 @@ class ChatLoadingView extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index < 3) {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: ChatLoadingViewStyle.padding(context),
               child: SkeletonItem(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -63,7 +64,7 @@ class ChatLoadingView extends StatelessWidget {
             );
           } else {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: ChatLoadingViewStyle.padding(context),
               child: SkeletonItem(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -77,7 +78,7 @@ class ChatLoadingView extends StatelessWidget {
                       child: SkeletonParagraph(
                         style: SkeletonParagraphStyle(
                           padding: EdgeInsets.zero,
-                          lines: _random(1, 3),
+                          lines: index + 1,
                           spacing: 8,
                           lineStyle: SkeletonLineStyle(
                             alignment: AlignmentDirectional.centerEnd,

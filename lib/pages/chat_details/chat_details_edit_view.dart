@@ -9,6 +9,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -119,6 +120,11 @@ class ChatDetailsEditView extends StatelessWidget {
                         builder: (context, _, __) {
                           return MenuAnchor(
                             controller: controller.menuController,
+                            style: MenuStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                PopupMenuWidgetStyle.defaultMenuColor(context),
+                              ),
+                            ),
                             alignmentOffset: ChatDetailEditViewStyle
                                 .contextMenuAlignmentOffset(context),
                             builder: (

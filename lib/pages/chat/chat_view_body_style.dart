@@ -6,6 +6,7 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatViewBodyStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+
   static double bottomSheetPadding(BuildContext context) =>
       TwakeThemes.isColumnMode(context) ? 16.0 : 8.0;
 
@@ -19,7 +20,7 @@ class ChatViewBodyStyle {
           : LinagoraSysColors.material().onPrimary;
 
   static EdgeInsets inputBarPadding(BuildContext context) => EdgeInsets.only(
-        left: 8.0,
-        right: responsive.isMobile(context) ? 16.0 : 8.0,
+        left: responsive.isMobile(context) ? 8.0 : 16.0,
+        right: responsive.isMobile(context) ? 8.0 : 16.0,
       );
 }
