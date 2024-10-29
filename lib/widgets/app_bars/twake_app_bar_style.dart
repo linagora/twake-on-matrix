@@ -28,4 +28,6 @@ class TwakeAppBarStyle {
   static EdgeInsets dividerPadding = const EdgeInsets.only(top: 12);
   static const double dividerHeight = 1.0;
   static const double dividerthickness = 1.0;
+  static const EdgeInsets leadingIconPadding =
+      EdgeInsets.only(left: 12, top: 4);
 }
