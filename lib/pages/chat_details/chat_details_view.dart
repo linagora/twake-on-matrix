@@ -97,7 +97,7 @@ class ChatDetailsView extends StatelessWidget {
                   sliver: SliverAppBar(
                     backgroundColor: LinagoraSysColors.material().onPrimary,
                     toolbarHeight:
-                        ChatDetailViewStyle.toolbarHeightSliverAppBar,
+                        ChatDetailViewStyle.minToolbarHeightSliverAppBar,
                     title: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
