@@ -70,6 +70,13 @@ class ContactsAppBar extends StatelessWidget {
             );
           },
         ),
+        if (responsiveUtils.isMobile(context))
+          Divider(
+            height: ContactsAppbarStyle.dividerHeight,
+            thickness: ContactsAppbarStyle.dividerThickness,
+            color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
+                .opacityLayer3,
+          ),
       ],
     );
   }

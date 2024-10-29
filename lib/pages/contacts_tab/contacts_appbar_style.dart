@@ -38,4 +38,7 @@ class ContactsAppbarStyle {
     bottom: 8.0,
   );
   static const trailingIconSize = 24.0;
+
+  static const dividerHeight = 1.0;
+  static const dividerThickness = 1.0;
 }
