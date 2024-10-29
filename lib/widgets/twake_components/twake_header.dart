@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
@@ -97,91 +98,85 @@ class _TwakeHeaderState extends State<TwakeHeader>
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: responsive.isMobile(context)
-          ? LinagoraSysColors.material().background
-          : LinagoraSysColors.material().onPrimary,
-      toolbarHeight: TwakeHeaderStyle.toolbarHeight,
-      automaticallyImplyLeading: false,
-      leadingWidth: TwakeHeaderStyle.leadingWidth,
-      title: ValueListenableBuilder(
-        valueListenable: widget.selectModeNotifier,
-        builder: (context, selectMode, _) {
-          return Align(
-            alignment: TwakeHeaderStyle.alignment,
-            child: Row(
-              mainAxisAlignment: responsive.isMobile(context)
-                  ? TwakeHeaderStyle.mobileTitleAllignement
-                  : MainAxisAlignment.start,
-              children: [
-                if (selectMode != SelectMode.select) ...[
-                  Padding(
-                    padding: responsive.isMobile(context)
-                        ? EdgeInsets.zero
-                        : TwakeHeaderStyle.paddingTitleHeader,
-                    child: Text(
-                      L10n.of(context)!.chats,
-                      style: TwakeHeaderStyle.twakeHeaderStyle(context),
-                    ),
-                  ),
-                ] else ...[
-                  Expanded(
-                    flex: TwakeHeaderStyle.flexActions,
-                    child: Padding(
-                      padding: TwakeHeaderStyle.leadingPadding,
-                      child: Row(
-                        children: [
-                          InkWell(
-                            onTap: selectMode == SelectMode.select
-                                ? widget.onClearSelection
-                                : null,
-                            borderRadius: BorderRadius.circular(
-                              TwakeHeaderStyle.closeIconSize,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: TwakeHeaderStyle.closeIconSize,
-                              color: selectMode == SelectMode.select
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                  : Colors.transparent,
-                            ),
-                          ),
-                          ValueListenableBuilder(
-                            valueListenable:
-                                widget.conversationSelectionNotifier,
-                            builder: (context, conversationSelection, _) {
-                              return Padding(
-                                padding:
-                                    TwakeHeaderStyle.counterSelectionPadding,
-                                child: Text(
-                                  conversationSelection.length.toString(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
-                                        color: selectMode == SelectMode.select
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant
-                                            : Colors.transparent,
-                                      ),
+    return ValueListenableBuilder(
+      valueListenable: widget.selectModeNotifier,
+      builder: (context, selectMode, _) {
+        return selectMode == SelectMode.normal
+            ? TwakeAppBar(
+                title: L10n.of(context)!.chats,
+                context: context,
+              )
+            : AppBar(
+                backgroundColor: responsive.isMobile(context)
+                    ? LinagoraSysColors.material().background
+                    : LinagoraSysColors.material().onPrimary,
+                toolbarHeight: TwakeHeaderStyle.toolbarHeight,
+                automaticallyImplyLeading: false,
+                leadingWidth: TwakeHeaderStyle.leadingWidth,
+                title: Align(
+                  alignment: TwakeHeaderStyle.alignment,
+                  child: Row(
+                    mainAxisAlignment: responsive.isMobile(context)
+                        ? TwakeHeaderStyle.mobileTitleAllignement
+                        : MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: TwakeHeaderStyle.flexActions,
+                        child: Padding(
+                          padding: TwakeHeaderStyle.leadingPadding,
+                          child: Row(
+                            children: [
+                              InkWell(
+                                onTap: selectMode == SelectMode.select
+                                    ? widget.onClearSelection
+                                    : null,
+                                borderRadius: BorderRadius.circular(
+                                  TwakeHeaderStyle.closeIconSize,
                                 ),
-                              );
-                            },
+                                child: Icon(
+                                  Icons.close,
+                                  size: TwakeHeaderStyle.closeIconSize,
+                                  color: selectMode == SelectMode.select
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              ValueListenableBuilder(
+                                valueListenable:
+                                    widget.conversationSelectionNotifier,
+                                builder: (context, conversationSelection, _) {
+                                  return Padding(
+                                    padding: TwakeHeaderStyle
+                                        .counterSelectionPadding,
+                                    child: Text(
+                                      conversationSelection.length.toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.copyWith(
+                                            color:
+                                                selectMode == SelectMode.select
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant
+                                                    : Colors.transparent,
+                                          ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-      centerTitle: true,
+                ),
+                centerTitle: true,
+              );
+      },
     );
   }
 }
