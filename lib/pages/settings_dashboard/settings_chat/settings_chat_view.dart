@@ -1,29 +1,48 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/voip/callkeep_manager.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 
 import 'settings_chat.dart';
 
 class SettingsChatView extends StatelessWidget {
   final SettingsChatController controller;
-  const SettingsChatView(this.controller, {super.key});
+  final responsive = getIt.get<ResponsiveUtils>();
+  SettingsChatView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
-        title: Text(L10n.of(context)!.chat),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.chat,
         context: context,
+        withDivider: true,
+        centerTitle: true,
+        leading: responsive.isMobile(context)
+            ? Padding(
+                padding: TwakeAppBarStyle.leadingIconPadding,
+                child: TwakeIconButton(
+                  tooltip: L10n.of(context)!.back,
+                  icon: Icons.arrow_back_ios,
+                  onTap: () => context.pop(),
+                  paddingAll: 8.0,
+                ),
+              )
+            : const SizedBox.shrink(),
       ),
       body: ListTileTheme(
         iconColor: Theme.of(context).textTheme.bodyLarge!.color,
@@ -31,7 +50,6 @@ class SettingsChatView extends StatelessWidget {
           withScrolling: true,
           child: Column(
             children: [
-              const Divider(),
               SettingsSwitchListTile.adaptive(
                 title: L10n.of(context)!.renderRichContent,
                 onChanged: (b) => AppConfig.renderHtml = b,

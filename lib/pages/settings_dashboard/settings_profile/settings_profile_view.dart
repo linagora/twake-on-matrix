@@ -6,6 +6,9 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_web.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -30,8 +33,8 @@ class SettingsProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = getIt.get<ResponsiveUtils>();
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.profile,
         leading: responsive.isMobile(context)
             ? IconButton(
                 icon: const Icon(
@@ -41,29 +44,26 @@ class SettingsProfileView extends StatelessWidget {
                 onPressed: () => context.pop(),
               )
             : const SizedBox.shrink(),
-        title: Text(
-          L10n.of(context)!.profile,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-        ),
         actions: [
           ValueListenableBuilder(
             valueListenable: controller.isEditedProfileNotifier,
             builder: (context, edited, _) {
               if (!edited) return const SizedBox();
-              return InkWell(
-                borderRadius: BorderRadius.circular(
-                  SettingsProfileViewStyle.borderRadius,
-                ),
-                onTap: () => controller.onUploadProfileAction(),
-                child: Padding(
-                  padding: SettingsProfileViewStyle.paddingTextButton,
-                  child: Text(
-                    L10n.of(context)!.done,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+              return Padding(
+                padding: SettingsProfileViewStyle.actionButtonPadding,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    SettingsProfileViewStyle.borderRadius,
+                  ),
+                  onTap: () => controller.onUploadProfileAction(),
+                  child: Padding(
+                    padding: SettingsProfileViewStyle.paddingTextButton,
+                    child: Text(
+                      L10n.of(context)!.done,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
                   ),
                 ),
               );
@@ -71,6 +71,8 @@ class SettingsProfileView extends StatelessWidget {
           ),
         ],
         centerTitle: true,
+        context: context,
+        withDivider: true,
       ),
       backgroundColor: responsive.isWebDesktop(context)
           ? Theme.of(context).colorScheme.surface

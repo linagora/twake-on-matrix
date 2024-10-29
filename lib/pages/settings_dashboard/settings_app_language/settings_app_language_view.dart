@@ -1,16 +1,22 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
 import 'package:fluffychat/presentation/extensions/localizations/locale_extension.dart';
 import 'package:fluffychat/utils/extension/string_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsAppLanguageView extends StatelessWidget {
   final SettingsAppLanguageController controller;
+  final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  const SettingsAppLanguageView({
+  SettingsAppLanguageView({
     super.key,
     required this.controller,
   });
@@ -19,12 +25,22 @@ class SettingsAppLanguageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
-        title: Text(
-          L10n.of(context)!.appLanguage,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.appLanguage,
         context: context,
+        leading: responsiveUtils.isMobile(context)
+            ? Padding(
+                padding: TwakeAppBarStyle.leadingIconPadding,
+                child: TwakeIconButton(
+                  tooltip: L10n.of(context)!.back,
+                  icon: Icons.arrow_back_ios,
+                  onTap: () => context.pop(),
+                  paddingAll: 8.0,
+                ),
+              )
+            : null,
+        centerTitle: true,
+        withDivider: true,
       ),
       body: SingleChildScrollView(
         padding: SettingsAppLanguageViewStyle.paddingBody,

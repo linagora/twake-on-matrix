@@ -6,12 +6,14 @@ class SettingsProfileViewStyle {
 
   static const EdgeInsetsDirectional paddingTextButton =
       EdgeInsetsDirectional.symmetric(
-    vertical: 14,
     horizontal: 12,
   );
 
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.symmetric(
     horizontal: 16,
+  );
+  static const actionButtonPadding = EdgeInsets.only(
+    top: 8,
   );
 }

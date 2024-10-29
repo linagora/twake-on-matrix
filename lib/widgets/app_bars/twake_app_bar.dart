@@ -10,12 +10,18 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool withDivider;
   final BuildContext context;
+  final Widget? leading;
+  final bool? centerTitle;
+  final List<Widget>? actions;
 
   const TwakeAppBar({
     super.key,
     required this.title,
     required this.context,
     this.withDivider = false,
+    this.leading,
+    this.centerTitle,
+    this.actions,
   });
 
   @override
@@ -23,7 +29,10 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: TwakeAppBarStyle.appBarBackgroundColor(context),
       toolbarHeight: TwakeAppBarStyle.toolBarHeight(context),
-      centerTitle: TwakeAppBarStyle.responsiveUtils.isMobile(context),
+      centerTitle:
+          centerTitle ?? TwakeAppBarStyle.responsiveUtils.isMobile(context),
+      automaticallyImplyLeading: false,
+      leading: leading,
       title: Column(
         children: [
           if (withDivider)
@@ -37,19 +46,24 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: TwakeAppBarStyle.titleTextStyle(context),
             ),
           ),
-          if (withDivider)
-            Padding(
-              padding: TwakeAppBarStyle.dividerPadding,
-              child: Divider(
-                height: TwakeAppBarStyle.dividerHeight,
-                thickness: TwakeAppBarStyle.dividerthickness,
-                color:
-                    LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-                        .opacityLayer3,
-              ),
-            ),
         ],
       ),
+      actions: actions,
+      bottom: withDivider
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Padding(
+                padding: TwakeAppBarStyle.dividerPadding,
+                child: Divider(
+                  height: TwakeAppBarStyle.dividerHeight,
+                  thickness: TwakeAppBarStyle.dividerthickness,
+                  color: LinagoraStateLayer(
+                    LinagoraSysColors.material().surfaceTint,
+                  ).opacityLayer3,
+                ),
+              ),
+            )
+          : null,
     );
   }
 

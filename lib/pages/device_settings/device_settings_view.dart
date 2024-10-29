@@ -1,27 +1,43 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'user_device_list_item.dart';
 
 class DevicesSettingsView extends StatelessWidget {
   final DevicesSettingsController controller;
+  final responsive = getIt.get<ResponsiveUtils>();
 
-  const DevicesSettingsView(this.controller, {super.key});
+  DevicesSettingsView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
+      appBar: TwakeAppBar(
         context: context,
-        title: Text(
-          L10n.of(context)!.deviceKeys,
-        ),
+        title: L10n.of(context)!.deviceKeys,
+        centerTitle: true,
+        withDivider: true,
+        leading: responsive.isMobile(context)
+            ? Padding(
+                padding: const EdgeInsets.only(left: 12, top: 4),
+                child: TwakeIconButton(
+                  tooltip: L10n.of(context)!.back,
+                  icon: Icons.arrow_back_ios,
+                  onTap: () => context.pop(),
+                  paddingAll: 8.0,
+                ),
+              )
+            : const SizedBox.shrink(),
       ),
       body: MaxWidthBody(
         child: FutureBuilder<bool>(
