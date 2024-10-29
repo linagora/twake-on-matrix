@@ -36,46 +36,23 @@ class ChatDetailsView extends StatelessWidget {
         return Scaffold(
           floatingActionButton: _AddMembersButton(controller: controller),
           backgroundColor: LinagoraSysColors.material().onPrimary,
-          appBar: AppBar(
-            backgroundColor: LinagoraSysColors.material().onPrimary,
-            automaticallyImplyLeading: false,
-            bottom: PreferredSize(
-              preferredSize: const Size(double.infinity, 1),
-              child: Container(
-                color: LinagoraStateLayer(
-                  LinagoraSysColors.material().surfaceTint,
-                ).opacityLayer1,
-                height: 1,
-              ),
+          appBar: TwakeAppBar(
+            backgroundColor: controller.responsive.isMobile(context)
+                ? LinagoraSysColors.material().surface
+                : LinagoraSysColors.material().onPrimary,
+            title: L10n.of(context)!.groupInformation,
+            leading: TwakeIconButton(
+              paddingAll: 8,
+              splashColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              onTap: controller.widget.closeRightColumn,
+              icon: controller.widget.isInStack
+                  ? Icons.arrow_back_ios
+                  : Icons.close,
             ),
-            title: Padding(
-              padding: ChatDetailViewStyle.navigationAppBarPadding,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: ChatDetailViewStyle.backIconPadding,
-                    child: IconButton(
-                      splashColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onPressed: controller.widget.closeRightColumn,
-                      icon: controller.widget.isInStack
-                          ? const Icon(
-                              Icons.chevron_left_outlined,
-                            )
-                          : const Icon(Icons.close),
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      L10n.of(context)!.groupInformation,
-                      style: Theme.of(context).textTheme.titleLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            centerTitle: true,
+            withDivider: true,
             actions: [
               IconButton(
                 splashColor: Colors.transparent,
@@ -85,6 +62,7 @@ class ChatDetailsView extends StatelessWidget {
                 icon: const Icon(Icons.edit_outlined),
               ),
             ],
+            context: context,
           ),
           body: NestedScrollView(
             physics: const ClampingScrollPhysics(),

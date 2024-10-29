@@ -13,6 +13,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final bool? centerTitle;
   final List<Widget>? actions;
+  final Color? backgroundColor;
 
   const TwakeAppBar({
     super.key,
@@ -22,12 +23,14 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.centerTitle,
     this.actions,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: TwakeAppBarStyle.appBarBackgroundColor(context),
+      backgroundColor:
+          backgroundColor ?? TwakeAppBarStyle.appBarBackgroundColor(context),
       toolbarHeight: TwakeAppBarStyle.toolBarHeight(context),
       centerTitle:
           centerTitle ?? TwakeAppBarStyle.responsiveUtils.isMobile(context),
