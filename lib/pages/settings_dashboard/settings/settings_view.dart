@@ -1,13 +1,12 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -29,39 +28,10 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: AppBar(
-        backgroundColor: responsiveUtils.isMobile(context)
-            ? LinagoraSysColors.material().background
-            : LinagoraRefColors.material().primary[100],
-        toolbarHeight: AppConfig.toolbarHeight(context),
-        title: Container(
-          decoration: responsiveUtils.isMobile(context)
-              ? BoxDecoration(
-                  color: LinagoraSysColors.material().background,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: LinagoraStateLayer(
-                        LinagoraSysColors.material().surfaceTint,
-                      ).opacityLayer3,
-                    ),
-                  ),
-                )
-              : null,
-          child: Padding(
-            padding: responsiveUtils.isMobile(context)
-                ? SettingsViewStyle.titlePaddingMobile
-                : SettingsViewStyle.titlePaddingWeb,
-            child: Align(
-              alignment: responsiveUtils.isMobile(context)
-                  ? Alignment.center
-                  : Alignment.topLeft,
-              child: Text(
-                L10n.of(context)!.settings,
-                style: TwakeHeaderStyle.twakeHeaderStyle(context),
-              ),
-            ),
-          ),
-        ),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.settings,
+        withDivider: responsiveUtils.isMobile(context),
+        context: context,
       ),
       bottomNavigationBar: bottomNavigationBar,
       body: ListTileTheme(
