@@ -7,8 +7,6 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';

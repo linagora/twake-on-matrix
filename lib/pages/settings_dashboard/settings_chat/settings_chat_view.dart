@@ -8,7 +8,6 @@ import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -35,11 +34,11 @@ class SettingsChatView extends StatelessWidget {
         leading: responsive.isMobile(context)
             ? Padding(
                 padding: TwakeAppBarStyle.leadingIconPadding,
-                child: TwakeIconButton(
+                child: IconButton(
                   tooltip: L10n.of(context)!.back,
-                  icon: Icons.arrow_back_ios,
-                  onTap: () => context.pop(),
-                  paddingAll: 8.0,
+                  icon: const Icon(Icons.chevron_left_outlined),
+                  onPressed: () => context.pop(),
+                  iconSize: TwakeAppBarStyle.leadingIconSize,
                 ),
               )
             : const SizedBox.shrink(),

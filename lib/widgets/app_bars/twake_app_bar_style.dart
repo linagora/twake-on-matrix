@@ -18,16 +18,13 @@ class TwakeAppBarStyle {
                 color: Theme.of(context).colorScheme.onSurface,
                 height: 24 / 17,
               )
-          : Theme.of(context).textTheme.titleLarge?.copyWith(
+          : Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
-                height: 32 / 22,
+                height: 32 / 24,
               );
 
-  static double toolBarHeight(BuildContext context) =>
-      responsiveUtils.isMobile(context) ? 48.0 : 56.0;
-  static EdgeInsets dividerPadding = const EdgeInsets.only(top: 12);
   static const double dividerHeight = 1.0;
   static const double dividerthickness = 1.0;
-  static const EdgeInsets leadingIconPadding =
-      EdgeInsets.only(left: 12, top: 4);
+  static const EdgeInsets leadingIconPadding = EdgeInsets.only(left: 12);
+  static const double leadingIconSize = 24;
 }
