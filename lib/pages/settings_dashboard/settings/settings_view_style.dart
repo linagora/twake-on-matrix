@@ -10,10 +10,6 @@ class SettingsViewStyle {
 
   static const AlignmentGeometry alignment = AlignmentDirectional.centerStart;
 
-  static const EdgeInsetsDirectional titlePaddingMobile =
-      EdgeInsetsDirectional.only(top: 12, bottom: 11);
-  static const EdgeInsetsDirectional titlePaddingWeb =
-      EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8);
   static EdgeInsetsDirectional itemBuilderPadding =
       const EdgeInsetsDirectional.only(top: 16.0, bottom: 16.0, start: 8.0);
 
@@ -48,6 +44,5 @@ class SettingsViewStyle {
       EdgeInsets.only(
         right: responsiveUtils.isMobile(context) ? 0 : 16.0,
       );
-  static const double titleLineHeightMobile = 24 / 17;
   static const double settingsItemHeight = 80;
 }

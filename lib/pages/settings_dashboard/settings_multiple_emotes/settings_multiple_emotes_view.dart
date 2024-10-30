@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -19,8 +19,8 @@ class MultipleEmotesSettingsView extends StatelessWidget {
     final room = Matrix.of(context).client.getRoomById(controller.roomId!)!;
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
-        title: Text(L10n.of(context)!.emotePacks),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.emotePacks,
         context: context,
       ),
       body: StreamBuilder(

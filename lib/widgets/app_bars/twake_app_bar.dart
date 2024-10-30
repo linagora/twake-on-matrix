@@ -31,19 +31,17 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor:
           backgroundColor ?? TwakeAppBarStyle.appBarBackgroundColor(context),
-      toolbarHeight: TwakeAppBarStyle.toolBarHeight(context),
+      toolbarHeight: AppConfig.toolbarHeight(context),
       centerTitle:
           centerTitle ?? TwakeAppBarStyle.responsiveUtils.isMobile(context),
       automaticallyImplyLeading: false,
       leading: leading,
       title: Column(
         children: [
-          if (withDivider)
-            const SizedBox(
-              height: 12,
-            ),
           Padding(
-            padding: ContactsAppbarStyle.titlePadding(context),
+            padding: centerTitle == true
+                ? EdgeInsets.zero
+                : ContactsAppbarStyle.titlePadding(context),
             child: Text(
               title,
               style: TwakeAppBarStyle.titleTextStyle(context),
@@ -55,15 +53,12 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: withDivider
           ? PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Padding(
-                padding: TwakeAppBarStyle.dividerPadding,
-                child: Divider(
-                  height: TwakeAppBarStyle.dividerHeight,
-                  thickness: TwakeAppBarStyle.dividerthickness,
-                  color: LinagoraStateLayer(
-                    LinagoraSysColors.material().surfaceTint,
-                  ).opacityLayer3,
-                ),
+              child: Divider(
+                height: TwakeAppBarStyle.dividerHeight,
+                thickness: TwakeAppBarStyle.dividerthickness,
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer3,
               ),
             )
           : null,

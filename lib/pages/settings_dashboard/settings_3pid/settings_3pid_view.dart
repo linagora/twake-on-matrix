@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -19,8 +19,8 @@ class Settings3PidView extends StatelessWidget {
     controller.request ??= Matrix.of(context).client.getAccount3PIDs();
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
-        title: Text(L10n.of(context)!.passwordRecovery),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.passwordRecovery,
         actions: [
           IconButton(
             icon: const Icon(Icons.add_outlined),

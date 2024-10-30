@@ -1,7 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -29,12 +29,12 @@ class DevicesSettingsView extends StatelessWidget {
         withDivider: true,
         leading: responsive.isMobile(context)
             ? Padding(
-                padding: const EdgeInsets.only(left: 12, top: 4),
-                child: TwakeIconButton(
+                padding: TwakeAppBarStyle.leadingIconPadding,
+                child: IconButton(
                   tooltip: L10n.of(context)!.back,
-                  icon: Icons.arrow_back_ios,
-                  onTap: () => context.pop(),
-                  paddingAll: 8.0,
+                  icon: const Icon(Icons.chevron_left_outlined),
+                  onPressed: () => context.pop(),
+                  iconSize: TwakeAppBarStyle.leadingIconSize,
                 ),
               )
             : const SizedBox.shrink(),

@@ -1,7 +1,9 @@
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
@@ -37,9 +39,6 @@ class ChatDetailsView extends StatelessWidget {
           floatingActionButton: _AddMembersButton(controller: controller),
           backgroundColor: LinagoraSysColors.material().onPrimary,
           appBar: TwakeAppBar(
-            backgroundColor: controller.responsive.isMobile(context)
-                ? LinagoraSysColors.material().surface
-                : LinagoraSysColors.material().onPrimary,
             title: L10n.of(context)!.groupInformation,
             leading: TwakeIconButton(
               paddingAll: 8,
@@ -48,7 +47,7 @@ class ChatDetailsView extends StatelessWidget {
               highlightColor: Colors.transparent,
               onTap: controller.widget.closeRightColumn,
               icon: controller.widget.isInStack
-                  ? Icons.arrow_back_ios
+                  ? Icons.chevron_left_outlined
                   : Icons.close,
             ),
             centerTitle: true,

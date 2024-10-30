@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_app_bar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +24,8 @@ class EmotesSettingsView extends StatelessWidget {
     final imageKeys = controller.pack!.images.keys.toList();
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: SettingsAppBar(
-        title: Text(L10n.of(context)!.emoteSettings),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.emoteSettings,
         context: context,
       ),
       floatingActionButton: controller.showSave
