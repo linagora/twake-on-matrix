@@ -14,13 +14,15 @@ class PowerLevelManager {
     return DefaultPowerLevelMember.user.powerLevel;
   }
 
+  int getAdminPowerLevel() => DefaultPowerLevelMember.admin.powerLevel;
+
   Map<String, dynamic> getDefaultPowerLevelEventForMember() {
     return {
       EventTypes.RoomPinnedEvents: getUserPowerLevel(),
-      EventTypes.RoomName: getUserPowerLevel(),
-      EventTypes.RoomAvatar: getUserPowerLevel(),
+      EventTypes.RoomName: getAdminPowerLevel(),
+      EventTypes.RoomAvatar: getAdminPowerLevel(),
       EventTypes.RoomMember: getUserPowerLevel(),
-      EventTypes.RoomTopic: getUserPowerLevel(),
+      EventTypes.RoomTopic: getAdminPowerLevel(),
     };
   }
 }

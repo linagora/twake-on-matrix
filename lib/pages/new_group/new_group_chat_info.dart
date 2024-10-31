@@ -106,6 +106,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         urlAvatar: urlAvatar,
         powerLevelContentOverride: {
           'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
+          'invite': powerLevelManager.getAdminPowerLevel(),
+          'kick': powerLevelManager.getAdminPowerLevel(),
         },
       ),
     );
