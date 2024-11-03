@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 abstract class VerifyNameException extends Equatable implements Exception {
-  static const spaceOnlyWithinName = 'The name cannot contain only spaces';
+  static const nameWithOnlySpace = 'The name cannot contain only spaces';
 
   final String? message;
-
   const VerifyNameException(this.message);
 
   @override
@@ -13,5 +12,5 @@ abstract class VerifyNameException extends Equatable implements Exception {
 
 class NameWithSpaceOnlyException extends VerifyNameException {
   const NameWithSpaceOnlyException()
-      : super(VerifyNameException.spaceOnlyWithinName);
+      : super(VerifyNameException.nameWithOnlySpace);
 }
