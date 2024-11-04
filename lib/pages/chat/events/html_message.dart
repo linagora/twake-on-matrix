@@ -2,6 +2,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mentioned_user.dart';
@@ -9,12 +10,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_matrix_html/flutter_html.dart';
+import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 
 import 'package:fluffychat/widgets/matrix.dart';
 
-class HtmlMessage extends StatelessWidget {
+class HtmlMessage extends StatelessWidget with LinkifyMixin {
   final String html;
   final int? maxLines;
   final Room room;
@@ -70,9 +72,16 @@ class HtmlMessage extends StatelessWidget {
             decoration: TextDecoration.underline,
             decorationColor: themeData.colorScheme.secondary,
           ),
+      linkTypes: const [
+        LinkType.url,
+        LinkType.phone,
+      ],
       shrinkToFit: true,
       maxLines: maxLines,
-      onLinkTap: (url) => UrlLauncher(context, url: url.toString()).launchUrl(),
+      onLinkTap: (link) => handleOnTappedLinkHtml(
+        context: context,
+        link: link,
+      ),
       onPillTap: !room.isDirectChat
           ? (url) {
               UrlLauncher(context, url: url, room: room).launchUrl();

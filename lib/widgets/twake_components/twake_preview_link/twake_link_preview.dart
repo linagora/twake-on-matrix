@@ -1,16 +1,16 @@
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
+import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
-import 'package:matrix_link_text/link_text.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class TwakeLinkPreview extends StatefulWidget {
@@ -38,7 +38,7 @@ class TwakeLinkPreview extends StatefulWidget {
 }
 
 class TwakeLinkPreviewController extends State<TwakeLinkPreview>
-    with GetPreviewUrlMixin, AutomaticKeepAliveClientMixin {
+    with GetPreviewUrlMixin, AutomaticKeepAliveClientMixin, LinkifyMixin {
   String? get firstValidUrl => widget.localizedBody.getFirstValidUrl();
 
   Uri get uri => Uri.parse(firstValidUrl ?? '');
@@ -70,13 +70,20 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               linkStyle: widget.linkStyle,
               fontSize: widget.fontSize,
             )
-          : LinkText(
-              text: widget.localizedBody,
+          : LinkifyText(
+              widget.localizedBody,
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
+              softWrap: false,
+              linkTypes: const [
+                LinkType.url,
+                LinkType.phone,
+              ],
               textAlign: TextAlign.start,
-              onLinkTap: (url) =>
-                  UrlLauncher(context, url: url.toString()).launchUrl(),
+              onLinkTap: (link) => handleOnTappedLinkHtml(
+                context: context,
+                link: link,
+              ),
             ),
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,

@@ -73,7 +73,7 @@ class UrlLauncher with GoToDraftChatMixin {
           return;
         }
       }
-      launchUrlString(url!);
+      launchUrlString('https://$url');
       return;
     }
     if (uri.host.isEmpty) {
