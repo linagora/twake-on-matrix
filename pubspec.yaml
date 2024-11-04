@@ -33,7 +33,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: master
+      ref: implement-linkify-text
 
   contacts_service:
     git:
@@ -59,6 +59,11 @@ dependencies:
     git:
       url: git@github.com:linagora/future-loading-dialog.git
       ref: main
+
+  linkfy_text:
+    git:
+      url: git@github.com:nqhhdev/linkfy_text.git
+      ref: refactor-linkify
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
