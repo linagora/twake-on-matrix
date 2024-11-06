@@ -70,8 +70,8 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               linkStyle: widget.linkStyle,
               fontSize: widget.fontSize,
             )
-          : LinkifyText(
-              widget.localizedBody,
+          : MatrixLinkifyText(
+              text: widget.localizedBody,
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
               linkTypes: const [
@@ -79,7 +79,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
                 LinkType.phone,
               ],
               textAlign: TextAlign.start,
-              onLinkTap: (tapDownDetails, link) => handleOnTappedLinkHtml(
+              onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
                 context: context,
                 details: tapDownDetails,
                 link: link,

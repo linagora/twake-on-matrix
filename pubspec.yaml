@@ -33,7 +33,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: implement-linkify-text
+      ref: master
 
   contacts_service:
     git:
@@ -62,8 +62,8 @@ dependencies:
 
   linkfy_text:
     git:
-      url: git@github.com:nqhhdev/linkfy_text.git
-      ref: refactor-linkify
+      url: git@github.com:linagora/linkfy_text.git
+      ref: main
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
@@ -211,6 +211,7 @@ dependencies:
   auto_size_text: 3.0.0
   flutter_avif: 2.4.1
   heif_converter: 1.0.0
+  pull_down_button: 0.10.2
 
 dev_dependencies:
   build_runner: 2.4.12

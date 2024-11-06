@@ -1168,8 +1168,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: implement-linkify-text
-      resolved-ref: "7884a5fa64cbd40f3997c4071bbbdc67049c17ae"
+      ref: master
+      resolved-ref: "1cb28dfcc9536e200b3f74ab1c5d48386b8524d3"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1795,9 +1795,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: refactor-linkify
-      resolved-ref: b4a418e454ef48c60829d6840b1778f03302f8bf
-      url: "git@github.com:nqhhdev/linkfy_text.git"
+      ref: main
+      resolved-ref: "6690e87f19e024d70b68efbc70d2159c34b5d0fc"
+      url: "git@github.com:linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
   lints:
@@ -2372,6 +2372,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
+  pull_down_button:
+    dependency: "direct main"
+    description:
+      name: pull_down_button
+      sha256: "12cdd8ff187a3150ebdf075e5074299f085579b158d2b4e655ccbafccf95f25b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.2"
   punycode:
     dependency: "direct main"
     description:

@@ -78,7 +78,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       ],
       shrinkToFit: true,
       maxLines: maxLines,
-      onLinkTap: (tapDownDetails, link) => handleOnTappedLinkHtml(
+      onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
         context: context,
         details: tapDownDetails,
         link: link,
