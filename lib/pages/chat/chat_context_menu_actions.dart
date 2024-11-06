@@ -8,8 +8,7 @@ enum ChatContextMenuActions {
   pinChat,
   forward,
   downloadFile,
-  jumpToMessage,
-  copyNumber;
+  jumpToMessage;
 
   String getTitle(
     BuildContext context, {
@@ -31,8 +30,6 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.download;
       case ChatContextMenuActions.jumpToMessage:
         return L10n.of(context)!.jumpToMessage;
-      case ChatContextMenuActions.copyNumber:
-        return L10n.of(context)!.copyNumber;
     }
   }
 
@@ -44,7 +41,6 @@ enum ChatContextMenuActions {
       case ChatContextMenuActions.select:
         return isSelected ? Icons.circle_outlined : Icons.check_circle_outline;
       case ChatContextMenuActions.copyMessage:
-      case ChatContextMenuActions.copyNumber:
         return Icons.content_copy;
       case ChatContextMenuActions.pinChat:
         return !unpin ? Icons.push_pin_outlined : null;

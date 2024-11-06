@@ -1,23 +1,29 @@
-import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
+import 'package:fluffychat/pages/chat/phone_number_context_menu_actions.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/services.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart';
+import 'package:pull_down_button/pull_down_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 mixin LinkifyMixin {
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
-  List<ChatContextMenuActions> get phoneNumberContextMenu => [
-        ChatContextMenuActions.copyNumber,
+  List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
+        PhoneNumberContextMenuActions.copy,
       ];
 
   List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions({
     required BuildContext context,
-    required List<ChatContextMenuActions> actions,
+    required List<PhoneNumberContextMenuActions> actions,
   }) {
     return actions.map((action) {
       return ContextMenuAction(
@@ -41,7 +47,7 @@ mixin LinkifyMixin {
     final offset = tapDownDetails.globalPosition;
     final listActions = _mapPopupMenuActionsToContextMenuActions(
       context: context,
-      actions: phoneNumberContextMenu,
+      actions: phoneNumberContextMenuOnWeb,
     );
     final selectedActionIndex = await showTwakeContextMenu(
       context: context,
@@ -51,7 +57,7 @@ mixin LinkifyMixin {
     );
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
-        action: phoneNumberContextMenu[selectedActionIndex],
+        action: phoneNumberContextMenuOnWeb[selectedActionIndex],
         number: number,
       );
     }
@@ -83,11 +89,11 @@ mixin LinkifyMixin {
   }
 
   void _handleClickOnContextMenuItem({
-    required ChatContextMenuActions action,
+    required PhoneNumberContextMenuActions action,
     required String number,
   }) async {
     switch (action) {
-      case ChatContextMenuActions.copyNumber:
+      case PhoneNumberContextMenuActions.copy:
         Logs().i('LinkifyMixin: handleContextMenuAction: copyNumber $number');
         await Clipboard.setData(ClipboardData(text: number));
         break;
@@ -96,11 +102,60 @@ mixin LinkifyMixin {
     }
   }
 
+  Future<void> _handleShowPullDownMenu({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+    required String number,
+  }) {
+    return showPullDownMenu(
+      context: context,
+      items: [
+        PullDownMenuItem(
+          onTap: () async {
+            final phoneUri = Uri(
+              scheme: "tel",
+              path: number.replaceAll(' ', ''),
+            );
+            if (await canLaunchUrl(phoneUri)) {
+              launchUrl(phoneUri);
+            } else {
+              Logs().e(
+                'LinkifyMixin: handleOnTappedLink: Cannot launch phoneUri: $phoneUri',
+              );
+            }
+          },
+          title: L10n.of(context)!.callViaCarrier,
+          icon: Icons.call_outlined,
+        ),
+        PullDownMenuItem(
+          title: L10n.of(context)!.copyNumber,
+          onTap: () async {
+            await Clipboard.setData(
+              ClipboardData(text: number),
+            );
+          },
+          icon: Icons.content_copy_outlined,
+        ),
+        const PullDownMenuDivider.large(),
+        PullDownMenuItem(
+          title: number,
+          onTap: () {},
+          itemTheme: PullDownMenuItemTheme(
+            textStyle: context.textTheme.bodyLarge!.copyWith(
+              color: LinagoraRefColors.material().neutral[30],
+            ),
+          ),
+        ),
+      ],
+      position: tapDownDetails.globalPosition & Size.zero,
+    );
+  }
+
   void handleOnTappedLinkHtml({
     required BuildContext context,
     required TapDownDetails details,
     required Link link,
-  }) {
+  }) async {
     Logs().i(
       'LinkifyMixin: handleOnTappedLink: type: ${link.type} link: ${link.value}',
     );
@@ -109,11 +164,19 @@ mixin LinkifyMixin {
         UrlLauncher(context, url: link.value.toString()).launchUrl();
         break;
       case LinkType.phone:
-        _handleContextMenuAction(
-          context: context,
-          tapDownDetails: details,
-          number: link.value.toString(),
-        );
+        if (PlatformInfos.isMobile) {
+          _handleShowPullDownMenu(
+            context: context,
+            tapDownDetails: details,
+            number: link.value.toString(),
+          );
+        } else {
+          _handleContextMenuAction(
+            context: context,
+            tapDownDetails: details,
+            number: link.value.toString(),
+          );
+        }
         break;
       default:
         Logs().i('LinkifyMixin: handleOnTappedLink: Unhandled link: $link');

@@ -3096,5 +3096,6 @@
   "enable_notifications": "Enable notifications",
   "disable_notifications": "Disable notifications",
   "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out",
-  "copyNumber": "Copy number"
+  "copyNumber": "Copy number",
+  "callViaCarrier": "Call via Carrier"
 }
