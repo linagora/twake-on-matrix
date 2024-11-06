@@ -1169,7 +1169,7 @@ packages:
     description:
       path: "."
       ref: implement-linkify-text
-      resolved-ref: "61b580e093ad2bbcc3a620ac76bd70395c8b6f8f"
+      resolved-ref: "7884a5fa64cbd40f3997c4071bbbdc67049c17ae"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1796,7 +1796,7 @@ packages:
     description:
       path: "."
       ref: refactor-linkify
-      resolved-ref: "48d446a8314299d2986078020bb5b55126467bf2"
+      resolved-ref: b4a418e454ef48c60829d6840b1778f03302f8bf
       url: "git@github.com:nqhhdev/linkfy_text.git"
     source: git
     version: "1.1.6"
