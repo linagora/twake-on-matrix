@@ -74,14 +74,14 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               widget.localizedBody,
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
-              softWrap: false,
               linkTypes: const [
                 LinkType.url,
                 LinkType.phone,
               ],
               textAlign: TextAlign.start,
-              onLinkTap: (link) => handleOnTappedLinkHtml(
+              onLinkTap: (tapDownDetails, link) => handleOnTappedLinkHtml(
                 context: context,
+                details: tapDownDetails,
                 link: link,
               ),
             ),

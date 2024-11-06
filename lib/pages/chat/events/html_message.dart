@@ -25,7 +25,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
   final double? emoteSize;
   final Widget? bottomWidgetSpan;
 
-  const HtmlMessage({
+  HtmlMessage({
     super.key,
     required this.html,
     this.maxLines,
@@ -78,8 +78,9 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       ],
       shrinkToFit: true,
       maxLines: maxLines,
-      onLinkTap: (link) => handleOnTappedLinkHtml(
+      onLinkTap: (tapDownDetails, link) => handleOnTappedLinkHtml(
         context: context,
+        details: tapDownDetails,
         link: link,
       ),
       onPillTap: !room.isDirectChat

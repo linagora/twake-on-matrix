@@ -3084,7 +3084,7 @@
   "sSwitchCameraLensDirectionLabel": "Switch to the {value} camera",
   "photo": "Photo",
   "video": "Video",
-  "message":"Message",
+  "message": "Message",
   "fileTooBig": "The selected file is too large. Please choose a file smaller than {maxSize} MB.",
   "@fileTooBig": {
     "placeholders": {
@@ -3093,7 +3093,8 @@
       }
     }
   },
- "enable_notifications":"Enable notifications",
-  "disable_notifications":"Disable notifications",
-  "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out"
+  "enable_notifications": "Enable notifications",
+  "disable_notifications": "Disable notifications",
+  "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out",
+  "copyNumber": "Copy number"
 }
