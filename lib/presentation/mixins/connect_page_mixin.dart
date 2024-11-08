@@ -221,7 +221,7 @@ mixin ConnectPageMixin {
       }
       return html.window.location.href
           .getBaseUrlBeforeHash()
-          .generateAuthPath(isDevMode: AppConfig.devMode);
+          .generateLogoutAuthPath(isDevMode: AppConfig.devMode);
     }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
@@ -235,7 +235,9 @@ mixin ConnectPageMixin {
       if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
         return '${html.window.location.href.getBaseUrlBeforeHash()}auth.html$homeserverParam';
       }
-      return html.window.location.href.getBaseUrlBeforeHash().generateAuthPath(
+      return html.window.location.href
+          .getBaseUrlBeforeHash()
+          .generateLoginAuthPath(
             homeserverParams: homeserverParam,
             isDevMode: AppConfig.devMode,
           );

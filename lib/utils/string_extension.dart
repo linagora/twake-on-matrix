@@ -382,7 +382,7 @@ extension StringCasingExtension on String {
     return fragmentIndex != -1 ? substring(0, fragmentIndex) : this;
   }
 
-  String generateAuthPath({
+  String generateLoginAuthPath({
     String? homeserverParams,
     bool isDevMode = false,
   }) {
@@ -390,6 +390,16 @@ extension StringCasingExtension on String {
       return '${this}web/auth.html$homeserverParams';
     } else {
       return '${this}auth.html$homeserverParams';
+    }
+  }
+
+  String generateLogoutAuthPath({
+    bool isDevMode = false,
+  }) {
+    if (isDevMode) {
+      return '${this}web/auth.html';
+    } else {
+      return '${this}auth.html';
     }
   }
 }
