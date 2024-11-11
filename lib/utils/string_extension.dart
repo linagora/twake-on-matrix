@@ -387,9 +387,9 @@ extension StringCasingExtension on String {
     bool isDevMode = false,
   }) {
     if (isDevMode) {
-      return '${this}web/auth.html$homeserverParams';
+      return '${this}web/auth.html${homeserverParams ?? ''}';
     } else {
-      return '${this}auth.html$homeserverParams';
+      return '${this}auth.html${homeserverParams ?? ''}';
     }
   }
 
