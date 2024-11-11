@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -93,8 +94,7 @@ mixin MessageContentBuilderMixin {
     Event event,
     double maxWidth,
   ) {
-    const double leftMessagePadding = 8.0;
-    final double messageMaxWidth = maxWidth - leftMessagePadding;
+    final double messageMaxWidth = maxWidth - AppConfig.messagePadding;
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
@@ -162,7 +162,7 @@ mixin MessageContentBuilderMixin {
     double maxWidth,
   ) {
     const spaceMessageAndTime = 4.0;
-    const paddingMessage = 16.0;
+    const paddingMessage = AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
       context,

@@ -31,6 +31,8 @@ abstract class AppConfig {
   static double bubbleSizeFactor = 1;
   static double fontSizeFactor = 1;
 
+  static const double messagePadding = 16.0;
+
   static String sampleValue = 'sampleValue';
 
   ///`REGISTRATION_URL`: Registration URL for public platform, sample is `https://example.com`
