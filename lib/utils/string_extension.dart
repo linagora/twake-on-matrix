@@ -386,11 +386,9 @@ extension StringCasingExtension on String {
     String? homeserverParams,
     bool isDevMode = false,
   }) {
-    if (isDevMode) {
-      return '${this}web/auth.html${homeserverParams ?? ''}';
-    } else {
-      return '${this}auth.html${homeserverParams ?? ''}';
-    }
+    final newHomeserverParams = homeserverParams?.trim() ?? '';
+    final path = isDevMode ? 'web/auth.html' : 'auth.html';
+    return '$this$path$newHomeserverParams';
   }
 
   String generateLogoutAuthPath({
