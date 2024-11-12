@@ -637,4 +637,62 @@ void main() {
       expect(result, equals(expectedUrl));
     });
   });
+
+  group('generateLoginAuthPath test', () {
+    test('returns correct path in dev mode', () {
+      const baseUrl = 'https://example.com/';
+      const homeserverParams = '?hs_url=https://matrix.org';
+      final result = baseUrl.generateLoginAuthPath(
+        homeserverParams: homeserverParams,
+        isDevMode: true,
+      );
+      expect(
+        result,
+        equals('https://example.com/web/auth.html?hs_url=https://matrix.org'),
+      );
+    });
+
+    test('returns correct path in production mode', () {
+      const baseUrl = 'https://example.com/';
+      const homeserverParams = '?hs_url=https://matrix.org';
+      final result = baseUrl.generateLoginAuthPath(
+        homeserverParams: homeserverParams,
+        isDevMode: false,
+      );
+      expect(
+        result,
+        equals('https://example.com/auth.html?hs_url=https://matrix.org'),
+      );
+    });
+
+    test('returns correct path without homeserverParams in dev mode', () {
+      const baseUrl = 'https://example.com/';
+      final result = baseUrl.generateLoginAuthPath(
+        isDevMode: true,
+      );
+      expect(result, equals('https://example.com/web/auth.html'));
+    });
+
+    test('returns correct path without homeserverParams in production mode',
+        () {
+      const baseUrl = 'https://example.com/';
+      final result = baseUrl.generateLoginAuthPath(
+        isDevMode: false,
+      );
+      expect(result, equals('https://example.com/auth.html'));
+    });
+
+    test('trims homeserverParams before appending', () {
+      const baseUrl = 'https://example.com/';
+      const homeserverParams = '  ?hs_url=https://matrix.org  ';
+      final result = baseUrl.generateLoginAuthPath(
+        homeserverParams: homeserverParams,
+        isDevMode: false,
+      );
+      expect(
+        result,
+        equals('https://example.com/auth.html?hs_url=https://matrix.org'),
+      );
+    });
+  });
 }
