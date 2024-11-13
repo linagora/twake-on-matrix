@@ -382,14 +382,22 @@ extension StringCasingExtension on String {
     return fragmentIndex != -1 ? substring(0, fragmentIndex) : this;
   }
 
-  String generateAuthPath({
+  String generateLoginAuthPath({
     String? homeserverParams,
     bool isDevMode = false,
   }) {
+    final newHomeserverParams = homeserverParams?.trim() ?? '';
+    final path = isDevMode ? 'web/auth.html' : 'auth.html';
+    return '$this$path$newHomeserverParams';
+  }
+
+  String generateLogoutAuthPath({
+    bool isDevMode = false,
+  }) {
     if (isDevMode) {
-      return '${this}web/auth.html$homeserverParams';
+      return '${this}web/auth.html';
     } else {
-      return '${this}auth.html$homeserverParams';
+      return '${this}auth.html';
     }
   }
 }
