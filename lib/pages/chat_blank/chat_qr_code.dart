@@ -81,7 +81,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                   onTap: () {
                     UrlLauncher(
                       context,
-                      url: AppConfig.twakeChatGooglePlay,
+                      url: AppConfig.twakeChatAppleStore,
                     ).launchUrl();
                   },
                   child: SvgPicture.asset(
