@@ -1,10 +1,9 @@
 class ConfigurationSaas {
-  static const String registrationUrl = 'https://sign-up.stg.lin-saas.com/';
+  static const String registrationUrl = 'https://sign-up.twake.app/';
 
-  static const String twakeWorkplaceHomeserver =
-      'https://matrix.stg.lin-saas.com/';
+  static const String twakeWorkplaceHomeserver = 'https://matrix.twake.app';
 
-  static const String homeserver = 'https://matrix.stg.lin-saas.com/';
+  static const String homeserver = 'https://matrix.twake.app';
 
   static const String platform = 'saas';
 }
