@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/chat_blank/chat_blank_style.dart';
 import 'package:fluffychat/pages/chat_blank/chat_qr_code.dart';
@@ -36,7 +37,7 @@ class ChatBlank extends StatelessWidget {
           return ValueListenableBuilder(
             valueListenable: Matrix.of(context).showQrCodeDownload,
             builder: (context, value, _) {
-              if (value) {
+              if (value && AppConfig.qrCodeDownloadUrl.isNotEmpty) {
                 return const ChatQrCode();
               }
               return _ChatBlankNotChat(context: context);
