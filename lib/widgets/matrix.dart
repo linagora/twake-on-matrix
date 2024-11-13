@@ -91,6 +91,10 @@ class MatrixState extends State<Matrix>
 
   bool waitForFirstSync = false;
 
+  bool firstLogin = false;
+
+  ValueNotifier<bool> showQrCodeDownload = ValueNotifier(false);
+
   ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
 
   bool get twakeSupported {
@@ -308,6 +312,7 @@ class MatrixState extends State<Matrix>
       } else {
         initConfigMobile().then((_) => initSettings());
       }
+      listenShowToMBootstrap();
     });
   }
 
@@ -424,6 +429,7 @@ class MatrixState extends State<Matrix>
     LoginState loginState,
   ) async {
     waitForFirstSync = false;
+    markFirstLogin();
     await setUpToMServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
     matrixState.reSyncContacts();
@@ -830,6 +836,25 @@ class MatrixState extends State<Matrix>
     _contactsManager.reSyncContacts();
   }
 
+  void markFirstLogin() {
+    firstLogin = true;
+  }
+
+  void resetFirstLogin() {
+    firstLogin = false;
+    handleShowQrCodeDownload(firstLogin);
+  }
+
+  void handleShowQrCodeDownload(bool show) {
+    showQrCodeDownload.value = show;
+  }
+
+  void listenShowToMBootstrap() {
+    showToMBootstrap.addListener(() {
+      handleShowQrCodeDownload(firstLogin);
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
@@ -909,7 +934,7 @@ class MatrixState extends State<Matrix>
     backgroundPush?.onRoomSync?.cancel();
     showToMBootstrap.dispose();
     linuxNotifications?.close();
-
+    showQrCodeDownload.dispose();
     super.dispose();
   }
 

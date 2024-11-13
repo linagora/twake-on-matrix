@@ -3097,5 +3097,6 @@
   "disable_notifications": "Disable notifications",
   "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out",
   "copyNumber": "Copy number",
-  "callViaCarrier": "Call via Carrier"
+  "callViaCarrier": "Call via Carrier",
+  "scanQrCodeToJoin": "Installation of the mobile application will allow you to contact people from your phone's address book, your chats will be synchronised between devices"
 }
