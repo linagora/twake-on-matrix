@@ -52,6 +52,14 @@ abstract class AppConfig {
 
   static String appTermsOfUse = 'https://twake.app/terms';
 
+  static String qrCodeDownloadUrl = '';
+
+  static String twakeChatAppleStore =
+      'https://apps.apple.com/us/app/twake-chat/id6473384641';
+
+  static String twakeChatGooglePlay =
+      'https://play.google.com/store/apps/details?id=app.twake.android.chat';
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -249,6 +257,9 @@ abstract class AppConfig {
     }
     if (json['dev_mode'] is bool) {
       devMode = json['dev_mode'];
+    }
+    if (json['qr_code_download_url'] is String) {
+      qrCodeDownloadUrl = json['qr_code_download_url'];
     }
   }
 }

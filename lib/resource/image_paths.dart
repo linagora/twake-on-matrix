@@ -53,6 +53,9 @@ class ImagePaths {
   static String get icPersonCheck => _getImagePath('ic_person_check.svg');
   static String get icTwakeImageLogoBeta =>
       _getImagePath('ic_twake_image_beta.svg');
+  static String get logoPng => _getAssetPath('logo.png');
+  static String get appStore => _getImagePath('app_store.svg');
+  static String get googlePlay => _getImagePath('google_play.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;

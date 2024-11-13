@@ -212,6 +212,7 @@ dependencies:
   flutter_avif: 2.4.1
   heif_converter: 1.0.0
   pull_down_button: 0.10.2
+  pretty_qr_code: 3.3.0
 
 dev_dependencies:
   build_runner: 2.4.12
