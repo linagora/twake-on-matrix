@@ -1588,7 +1588,7 @@ class ChatController extends State<Chat>
         await room?.join();
         await waitForRoom;
       },
-    );
+    ).then((_) => _tryLoadTimeline());
   }
 
   void onRejectInvitation(BuildContext context) async {
