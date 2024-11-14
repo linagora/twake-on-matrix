@@ -1,6 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -29,12 +28,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     );
     final isMediaEvent = room.lastEvent?.messageType == MessageTypes.Image ||
         room.lastEvent?.messageType == MessageTypes.Video;
-
-    final haveNotificationsAndMuted =
-        room.notificationCount > 0 && room.isMuted;
-
-    final haveNotificationsOrUnread =
-        room.notificationCount > 0 || room.markedUnread;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -133,14 +126,10 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             room.notificationCount,
           ),
           decoration: BoxDecoration(
-            color:
-                room.highlightCount > 0 || room.membership == Membership.invite
-                    ? Theme.of(context).colorScheme.primary
-                    : haveNotificationsAndMuted
-                        ? LinagoraRefColors.material().tertiary[30]
-                        : haveNotificationsOrUnread
-                            ? Theme.of(context).colorScheme.primary
-                            : LinagoraRefColors.material().tertiary[30],
+            color: notificationColor(
+              context: context,
+              room: room,
+            ),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           ),
           child: Center(
