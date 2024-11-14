@@ -15,6 +15,6 @@ class CompositeNameValidator extends Validator<NewNameRequest> {
   Either<Failure, Success> validate(NewNameRequest value) {
     return _listValidator.isNotEmpty
         ? _listValidator.getValidatorNameViewState(value)
-        : Right<Failure, Success>(VerifyNameViewState());
+        : Right<Failure, Success>(VerifyNameSuccessViewState());
   }
 }

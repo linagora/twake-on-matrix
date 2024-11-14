@@ -5,8 +5,9 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 extension ValidatorFailureExtension on VerifyNameFailure {
   String getMessage(BuildContext context) {
-    if (exception is NameWithSpaceOnlyException) {
-      return L10n.of(context)!.this_field_cannot_be_blank;
+    if (exception is NameWithSpaceOnlyException ||
+        exception is EmptyNameException) {
+      return L10n.of(context)!.thisFieldCannotBeBlank;
     } else {
       return '';
     }

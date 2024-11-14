@@ -7,6 +7,7 @@ import 'package:fluffychat/domain/app_state/room/update_group_chat_success.dart'
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
+import 'package:fluffychat/domain/model/verification/empty_name_validator.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
@@ -450,8 +451,10 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   }
 
   String? getErrorMessage(String content) {
-    return verifyNameInteractor
-        .execute(content, [NameWithSpaceOnlyValidator()]).fold(
+    return verifyNameInteractor.execute(
+      content,
+      [EmptyNameValidator(), NameWithSpaceOnlyValidator()],
+    ).fold(
       (failure) {
         if (failure is VerifyNameFailure) {
           return failure.getMessage(context);

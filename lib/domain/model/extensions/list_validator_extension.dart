@@ -15,6 +15,6 @@ extension ListValidatorExtension on List<Validator> {
         return either;
       }
     }
-    return Right<Failure, Success>(VerifyNameViewState());
+    return Right<Failure, Success>(VerifyNameSuccessViewState());
   }
 }
