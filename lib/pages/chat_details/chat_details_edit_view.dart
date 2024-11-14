@@ -67,23 +67,28 @@ class ChatDetailsEditView extends StatelessWidget {
             ),
             const Spacer(),
             ValueListenableBuilder(
-              valueListenable: controller.isEditedGroupInfoNotifier,
-              builder: (context, value, child) {
-                if (!value) {
-                  return const SizedBox.shrink();
-                }
-                return child!;
+              valueListenable: controller.isValidGroupNameNotifier,
+              builder: (context, isValid, child) {
+                return ValueListenableBuilder(
+                  valueListenable: controller.isEditedGroupInfoNotifier,
+                  builder: (context, value, child) {
+                    if (!value || !isValid) {
+                      return const SizedBox.shrink();
+                    }
+                    return child!;
+                  },
+                  child: Padding(
+                    padding: ChatDetailEditViewStyle.doneIconPadding,
+                    child: IconButton(
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onPressed: () => controller.handleSaveAction(context),
+                      icon: const Icon(Icons.done),
+                    ),
+                  ),
+                );
               },
-              child: Padding(
-                padding: ChatDetailEditViewStyle.doneIconPadding,
-                child: IconButton(
-                  highlightColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onPressed: () => controller.handleSaveAction(context),
-                  icon: const Icon(Icons.done),
-                ),
-              ),
             ),
           ],
         ),
@@ -323,40 +328,48 @@ class _GroupNameField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: ChatDetailEditViewStyle.textFieldPadding,
-      child: TextField(
-        style: ChatDetailEditViewStyle.textFieldStyle(context),
-        controller: controller.groupNameTextEditingController,
-        contextMenuBuilder: mobileTwakeContextMenuBuilder,
-        focusNode: controller.groupNameFocusNode,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.shadow),
-          ),
-          labelText: L10n.of(context)!.widgetName,
-          labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
-          hintText: L10n.of(context)!.enterGroupName,
-          hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
-          contentPadding: ChatDetailEditViewStyle.contentPadding,
-          suffixIcon: ValueListenableBuilder<bool>(
-            valueListenable: controller.groupNameEmptyNotifier,
-            builder: (context, isGroupNameEmpty, child) {
-              if (isGroupNameEmpty) {
-                return child!;
-              }
-
-              return IconButton(
-                onPressed: () =>
-                    controller.groupNameTextEditingController.clear(),
-                icon: Icon(
-                  Icons.cancel_outlined,
-                  size: ChatDetailEditViewStyle.clearIconSize,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              );
-            },
-            child: const SizedBox.shrink(),
-          ),
-        ),
+      child: ValueListenableBuilder(
+        valueListenable: controller.isValidGroupNameNotifier,
+        builder: (context, value, _) {
+          return TextField(
+            style: ChatDetailEditViewStyle.textFieldStyle(context),
+            controller: controller.groupNameTextEditingController,
+            contextMenuBuilder: mobileTwakeContextMenuBuilder,
+            focusNode: controller.groupNameFocusNode,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderSide:
+                    BorderSide(color: Theme.of(context).colorScheme.shadow),
+              ),
+              labelText: L10n.of(context)!.widgetName,
+              labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
+              hintText: L10n.of(context)!.enterGroupName,
+              hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
+              contentPadding: ChatDetailEditViewStyle.contentPadding,
+              errorText: controller.getErrorMessage(
+                controller.groupNameTextEditingController.text,
+              ),
+              suffixIcon: ValueListenableBuilder<bool>(
+                valueListenable: controller.groupNameEmptyNotifier,
+                builder: (context, isGroupNameEmpty, child) {
+                  if (isGroupNameEmpty) {
+                    return child!;
+                  }
+                  return IconButton(
+                    onPressed: () =>
+                        controller.groupNameTextEditingController.clear(),
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      size: ChatDetailEditViewStyle.clearIconSize,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  );
+                },
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

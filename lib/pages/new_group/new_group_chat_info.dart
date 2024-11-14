@@ -59,7 +59,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   final groupNameTextEditingController = TextEditingController();
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
   final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
-  VerifyNameInteractor verifyNameInteractor = VerifyNameInteractor();
+  VerifyNameInteractor verifyNameInteractor = getIt.get<VerifyNameInteractor>();
 
   final groupNameFocusNode = FocusNode();
   StreamSubscription? createNewGroupChatInteractorStreamSubscription;
