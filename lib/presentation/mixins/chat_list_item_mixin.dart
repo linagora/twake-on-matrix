@@ -1,4 +1,3 @@
-import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -214,7 +213,8 @@ mixin ChatListItemMixin {
     required BuildContext context,
     required Room room,
   }) {
-    if (room.notificationCount > 0 && room.isMuted) {
+    if (room.notificationCount > 0 &&
+        room.pushRuleState != PushRuleState.notify) {
       return LinagoraRefColors.material().tertiary[30];
     }
     if (room.notificationCount > 0) {
