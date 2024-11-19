@@ -1894,7 +1894,9 @@ class ChatController extends State<Chat>
             !selectedEvents.first.isVideoOrImage)
           ChatAppBarActions.saveToDownload,
       ],
-      if (selectedEvents.length == 1 && selectedEvents.first.isVideoOrImage)
+      if (selectedEvents.length == 1 &&
+          selectedEvents.first.isVideoOrImage &&
+          !PlatformInfos.isWeb)
         ChatAppBarActions.saveToGallery,
       ChatAppBarActions.info,
       ChatAppBarActions.report,
