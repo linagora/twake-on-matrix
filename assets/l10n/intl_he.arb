@@ -1420,5 +1420,43 @@
   "@bubbleSize": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "commandHint_markasgroup": "סמן כצ׳אט",
+  "@commandHint_markasgroup": {},
+  "commandHint_markasdm": "סמן כצ׳אט ישיר",
+  "@commandHint_markasdm": {},
+  "googlyEyesContent": "{senderName} שלח לך עיניים",
+  "@googlyEyesContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "hugContent": "{senderName} מחבק אותך.",
+  "@hugContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "confirmMatrixId": "אנא אשר את ה ID שלך על מנת למחוק את המתשמש.",
+  "@confirmMatrixId": {},
+  "supposedMxid": "זה צריך להיות {mxid}",
+  "@supposedMxid": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "commandHint_hug": "שלח חיבוק",
+  "@commandHint_hug": {},
+  "cuddleContent": "{senderName} מחבק אותך",
+  "@cuddleContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "commandHint_cuddle": "שלח כרבול",
+  "@commandHint_cuddle": {}
 }
