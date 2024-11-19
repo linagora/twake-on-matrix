@@ -1581,7 +1581,12 @@ class ChatController extends State<Chat>
   void onAcceptInvitation() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        throw Exception('Not implemented');
+        final waitForRoom = room?.client.waitForRoomInSync(
+          room!.id,
+          join: true,
+        );
+        await room?.join();
+        await waitForRoom;
       },
     ).then((_) => _tryLoadTimeline());
   }
