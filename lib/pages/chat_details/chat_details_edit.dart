@@ -451,19 +451,17 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   }
 
   String? getErrorMessage(String content) {
-    return verifyNameInteractor.execute(
-      content,
-      [EmptyNameValidator(), NameWithSpaceOnlyValidator()],
-    ).fold(
-      (failure) {
-        if (failure is VerifyNameFailure) {
-          return failure.getMessage(context);
-        } else {
-          return null;
-        }
-      },
-      (success) => null,
-    );
+    return content == room?.name
+        ? null
+        : verifyNameInteractor.execute(
+            content,
+            [EmptyNameValidator(), NameWithSpaceOnlyValidator()],
+          ).fold(
+            (failure) => failure is VerifyNameFailure
+                ? failure.getMessage(context)
+                : null,
+            (success) => null,
+          );
   }
 
   @override
