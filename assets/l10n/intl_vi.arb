@@ -3214,7 +3214,7 @@
   },
   "enable_notifications": "Bật thông báo",
   "@enable_notifications": {},
-  "thisFieldCannotBeBlank": "Trường này không được để trống",
+  "thisFieldCannotBeBlank": "Bắt buộc",
   "@thisFieldCannotBeBlank": {},
   "copyNumber": "Sao chép số",
   "@copyNumber": {},
