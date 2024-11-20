@@ -52,7 +52,8 @@ abstract class AppConfig {
 
   static String appTermsOfUse = 'https://twake.app/terms';
 
-  static String qrCodeDownloadUrl = '';
+  static String qrCodeDownloadUrl =
+      'http://sign-up.stg.lin-saas.com/download/chat';
 
   static String twakeChatAppleStore =
       'https://apps.apple.com/us/app/twake-chat/id6473384641';

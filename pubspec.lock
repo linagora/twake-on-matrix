@@ -1361,8 +1361,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: update-background-color
-      resolved-ref: "62be2b8de6245c8098d7d32eb1d0683e89ed61c8"
+      ref: main
+      resolved-ref: "8e017af6c8d6048351cc646f6da81dd7b1180346"
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"
