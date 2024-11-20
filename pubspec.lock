@@ -1362,7 +1362,7 @@ packages:
     description:
       path: "."
       ref: update-error-dialog
-      resolved-ref: "478a78aa510873a6fcb107e3e98b0fb55b9ff6ff"
+      resolved-ref: "6f5c5950038f593d25e6d178602441deed4cfdc7"
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"
