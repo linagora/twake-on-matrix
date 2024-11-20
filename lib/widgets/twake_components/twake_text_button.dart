@@ -29,6 +29,8 @@ class TwakeTextButton extends StatelessWidget {
 
   final double? borderHover;
 
+  final BoxConstraints? constraints;
+
   const TwakeTextButton({
     super.key,
     required this.message,
@@ -44,6 +46,7 @@ class TwakeTextButton extends StatelessWidget {
     this.margin = const EdgeInsetsDirectional.all(0),
     this.buttonDecoration,
     this.borderHover,
+    this.constraints,
   });
 
   @override
@@ -58,6 +61,7 @@ class TwakeTextButton extends StatelessWidget {
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
         child: Container(
+          constraints: constraints,
           height: 48,
           padding: margin,
           decoration:
@@ -74,6 +78,7 @@ class TwakeTextButton extends StatelessWidget {
                       Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: LinagoraSysColors.material().onPrimary,
                           ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

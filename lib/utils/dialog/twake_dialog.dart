@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:animations/animations.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -21,6 +22,8 @@ class TwakeDialog {
   static const double lottieSizeWeb = 80;
 
   static const double lottieSizeMobile = 48;
+
+  static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
@@ -96,15 +99,21 @@ class TwakeDialog {
       loadingTitleStyle: Theme.of(context).textTheme.titleLarge,
       maxWidth: maxWidthLoadingDialogWeb,
       errorTitle: L10n.of(context)!.errorDialogTitle,
-      errorTitleStyle: Theme.of(context).textTheme.titleLarge,
+      errorTitleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: LinagoraSysColors.material().onSurfaceVariant,
+          ),
+      errorDescriptionStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: LinagoraSysColors.material().onSurfaceVariant,
+          ),
       errorBackLabel: L10n.of(context)!.cancel,
-      errorBackLabelStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+      errorBackLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: Theme.of(context).colorScheme.primary,
           ),
       errorNextLabel: L10n.of(context)!.next,
-      errorNextLabelStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
+      errorNextLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: LinagoraSysColors.material().onPrimary,
           ),
+      backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
     );
   }
@@ -116,6 +125,7 @@ class TwakeDialog {
     return await showFutureLoadingDialog(
       context: context,
       future: future,
+      maxWidth: double.infinity,
       loadingIcon: LottieBuilder.asset(
         ImagePaths.lottieTwakeLoading,
         width: lottieSizeMobile,
@@ -125,16 +135,23 @@ class TwakeDialog {
       loadingTitle: L10n.of(context)!.loading,
       loadingTitleStyle: Theme.of(context).textTheme.titleMedium,
       errorTitle: L10n.of(context)!.errorDialogTitle,
-      errorTitleStyle: Theme.of(context).textTheme.titleMedium,
+      errorTitleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: LinagoraSysColors.material().onSurfaceVariant,
+          ),
+      errorDescriptionStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: LinagoraSysColors.material().onSurfaceVariant,
+          ),
       errorBackLabel: L10n.of(context)!.cancel,
-      errorBackLabelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+      errorBackLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: Theme.of(context).colorScheme.primary,
           ),
       errorNextLabel: L10n.of(context)!.next,
-      errorNextLabelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
+      errorNextLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: LinagoraSysColors.material().onPrimary,
           ),
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
+      backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
+      isMobileResponsive: true,
     );
   }
 
@@ -340,6 +357,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                         color: LinagoraSysColors.material()
                                             .onSurfaceVariant,
                                       ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           SizedBox(
                             height: responsiveUtils.isMobile(context) ? 16 : 27,
@@ -362,6 +381,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                         color: LinagoraSysColors.material()
                                             .onSurfaceVariant,
                                       ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           SizedBox(
                             height: responsiveUtils.isMobile(context) ? 24 : 65,
@@ -375,6 +396,11 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                 ),
                                 message:
                                     cancelLabel ?? L10n.of(context)!.cancel,
+                                constraints: BoxConstraints(
+                                  maxWidth: responsiveUtils.isMobile(context)
+                                      ? 96
+                                      : 112,
+                                ),
                                 styleMessage: Theme.of(context)
                                     .textTheme
                                     .labelLarge
@@ -396,6 +422,11 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(100),
                                   ),
+                                ),
+                                constraints: BoxConstraints(
+                                  maxWidth: responsiveUtils.isMobile(context)
+                                      ? 96
+                                      : 112,
                                 ),
                                 margin: const EdgeInsetsDirectional.symmetric(
                                   horizontal: 24.0,
