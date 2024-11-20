@@ -3228,5 +3228,13 @@
   "enable_notifications": "Activer les notifications",
   "@enable_notifications": {},
   "logoutDialogWarning": "Vous allez perdre tout vos messages chiffrés. Nous vous recommandons d'activer la sauvegarde des messages avant de vous déconnecter",
-  "@logoutDialogWarning": {}
+  "@logoutDialogWarning": {},
+  "thisFieldCannotBeBlank": "Ce champ ne peut pas être vide",
+  "@thisFieldCannotBeBlank": {},
+  "copyNumber": "Copier le numéro",
+  "@copyNumber": {},
+  "callViaCarrier": "Appeler",
+  "@callViaCarrier": {},
+  "scanQrCodeToJoin": "L'installation de l'application mobile vous permettra de contacter des personnes du carnet d'adresses de votre téléphone ; vos conversations seront synchronisées entre les appareils",
+  "@scanQrCodeToJoin": {}
 }
