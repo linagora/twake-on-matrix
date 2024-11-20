@@ -1,3 +1,23 @@
+## [2.6.9+2330] - 2024-11-20
+### Fixed
+
+- #2099 Fix design review v2.6.7
+- #2018 Changed power levels in group chats
+- #2122 Fix group information disappeared
+- #2113 Fix text message overlaps time stamp in message bubble
+- #2124 Fixed wrong url when using logout
+- #1849 Fix bug weird grey counter sometimes appears
+- #2068 Fix can't see message after accept invitation
+- #2065 Remove save to gallery button in web
+
+### Added
+
+- #2014 Display phone number as a clickable in message bubble
+- #2128 Implement QR code to download app
+- #2088 Systemize app bar
+- Improve style for error dialog (#2136)
+- #2046 Add Group name validation
+
 ## [2.6.8+2330] - 2024-11-13
 ### Changed
 
