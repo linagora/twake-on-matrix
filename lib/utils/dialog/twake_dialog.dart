@@ -357,6 +357,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                         color: LinagoraSysColors.material()
                                             .onSurfaceVariant,
                                       ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           SizedBox(
                             height: responsiveUtils.isMobile(context) ? 16 : 27,
@@ -379,6 +381,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                         color: LinagoraSysColors.material()
                                             .onSurfaceVariant,
                                       ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           SizedBox(
                             height: responsiveUtils.isMobile(context) ? 24 : 65,
@@ -392,6 +396,11 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                 ),
                                 message:
                                     cancelLabel ?? L10n.of(context)!.cancel,
+                                constraints: BoxConstraints(
+                                  maxWidth: responsiveUtils.isMobile(context)
+                                      ? 96
+                                      : 112,
+                                ),
                                 styleMessage: Theme.of(context)
                                     .textTheme
                                     .labelLarge
@@ -413,6 +422,11 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(100),
                                   ),
+                                ),
+                                constraints: BoxConstraints(
+                                  maxWidth: responsiveUtils.isMobile(context)
+                                      ? 96
+                                      : 112,
                                 ),
                                 margin: const EdgeInsetsDirectional.symmetric(
                                   horizontal: 24.0,

@@ -1361,8 +1361,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: update-error-dialog
-      resolved-ref: "6f5c5950038f593d25e6d178602441deed4cfdc7"
+      ref: main
+      resolved-ref: "549ad29ac7153964e89ebf04b5693e5a6e50a64a"
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"
