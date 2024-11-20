@@ -3231,5 +3231,13 @@
   "disable_notifications": "Отключить уведомления",
   "@disable_notifications": {},
   "logoutDialogWarning": "Вы потеряете доступ к зашифрованным сообщениям. Рекомендуем активировать резервную копию чатов перед выходом",
-  "@logoutDialogWarning": {}
+  "@logoutDialogWarning": {},
+  "callViaCarrier": "Позвонить через Carrier",
+  "@callViaCarrier": {},
+  "thisFieldCannotBeBlank": "Это поле не может быть пустым",
+  "@thisFieldCannotBeBlank": {},
+  "copyNumber": "Скопировать номер",
+  "@copyNumber": {},
+  "scanQrCodeToJoin": "Установка мобильного приложения позволит вам связаться с людьми из адресной книги телефона; ваши чаты синхронизируются между устройствами",
+  "@scanQrCodeToJoin": {}
 }
