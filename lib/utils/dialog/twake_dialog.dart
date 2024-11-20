@@ -25,6 +25,10 @@ class TwakeDialog {
 
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
+  static const double maxWidthDialogButtonMobile = 112;
+
+  static const double maxWidthDialogButtonWeb = 128;
+
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
       if (TwakeApp.routerKey.currentContext != null) {
@@ -115,6 +119,7 @@ class TwakeDialog {
           ),
       backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
+      maxWidthButton: maxWidthDialogButtonMobile,
     );
   }
 
@@ -152,6 +157,7 @@ class TwakeDialog {
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
       backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
       isMobileResponsive: true,
+      maxWidthButton: maxWidthDialogButtonMobile,
     );
   }
 
@@ -398,8 +404,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                     cancelLabel ?? L10n.of(context)!.cancel,
                                 constraints: BoxConstraints(
                                   maxWidth: responsiveUtils.isMobile(context)
-                                      ? 96
-                                      : 112,
+                                      ? TwakeDialog.maxWidthDialogButtonMobile
+                                      : TwakeDialog.maxWidthDialogButtonWeb,
                                 ),
                                 styleMessage: Theme.of(context)
                                     .textTheme
@@ -425,8 +431,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                 ),
                                 constraints: BoxConstraints(
                                   maxWidth: responsiveUtils.isMobile(context)
-                                      ? 96
-                                      : 112,
+                                      ? TwakeDialog.maxWidthDialogButtonMobile
+                                      : TwakeDialog.maxWidthDialogButtonWeb,
                                 ),
                                 margin: const EdgeInsetsDirectional.symmetric(
                                   horizontal: 24.0,
