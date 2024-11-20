@@ -3213,5 +3213,13 @@
     }
   },
   "enable_notifications": "Bật thông báo",
-  "@enable_notifications": {}
+  "@enable_notifications": {},
+  "thisFieldCannotBeBlank": "Trường này không được để trống",
+  "@thisFieldCannotBeBlank": {},
+  "copyNumber": "Sao chép số",
+  "@copyNumber": {},
+  "callViaCarrier": "Gọi qua Nhà mạng",
+  "@callViaCarrier": {},
+  "scanQrCodeToJoin": "Cài đặt ứng dụng di động sẽ cho phép bạn liên lạc với mọi người từ sổ địa chỉ trên điện thoại của bạn, các cuộc trò chuyện của bạn sẽ được đồng bộ hóa giữa các thiết bị",
+  "@scanQrCodeToJoin": {}
 }
