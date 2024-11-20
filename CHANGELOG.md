@@ -1,3 +1,7 @@
+## [2.6.10+2330] - 2024-11-20
+### Fixed
+- Handle default QR code link
+
 ## [2.6.9+2330] - 2024-11-20
 ### Fixed
 
