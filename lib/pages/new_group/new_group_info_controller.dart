@@ -10,7 +10,8 @@ extension NewGroupInfoControllerExtension on NewGroupChatInfoController {
     groupNameTextEditingController.addListener(() {
       groupName = groupNameTextEditingController.text;
       haveGroupNameNotifier.value =
-          groupNameTextEditingController.text.isNotEmpty;
+          groupNameTextEditingController.text.isNotEmpty &&
+              getErrorMessage(groupNameTextEditingController.text) == null;
     });
   }
 

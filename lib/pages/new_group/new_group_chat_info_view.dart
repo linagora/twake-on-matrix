@@ -201,26 +201,43 @@ class NewGroupChatInfoView extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: newGroupInfoController.createRoomStateNotifier,
         builder: (context, value, child) {
-          return TextField(
-            controller: newGroupInfoController.groupNameTextEditingController,
-            focusNode: newGroupInfoController.groupNameFocusNode,
-            enabled: !newGroupInfoController.isCreatingRoom,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.shadow),
-              ),
-              labelText: L10n.of(context)!.widgetName,
-              labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+          return ValueListenableBuilder(
+            valueListenable:
+                newGroupInfoController.groupNameTextEditingController,
+            builder: (context, value, _) {
+              return TextField(
+                controller:
+                    newGroupInfoController.groupNameTextEditingController,
+                focusNode: newGroupInfoController.groupNameFocusNode,
+                enabled: !newGroupInfoController.isCreatingRoom,
+                decoration: InputDecoration(
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: LinagoraSysColors.material().error,
+                    ),
                   ),
-              hintText: L10n.of(context)!.enterGroupName,
-              hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: LinagoraRefColors.material().neutral[60],
+                  border: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Theme.of(context).colorScheme.shadow),
                   ),
-              contentPadding: NewGroupChatInfoStyle.contentPadding,
-            ),
-            contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                  errorText: newGroupInfoController.getErrorMessage(
+                    newGroupInfoController.groupNameTextEditingController.text,
+                  ),
+                  errorStyle:
+                      TextStyle(color: LinagoraSysColors.material().error),
+                  labelText: L10n.of(context)!.widgetName,
+                  labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                  hintText: L10n.of(context)!.enterGroupName,
+                  hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: LinagoraRefColors.material().neutral[60],
+                      ),
+                  contentPadding: NewGroupChatInfoStyle.contentPadding,
+                ),
+                contextMenuBuilder: mobileTwakeContextMenuBuilder,
+              );
+            },
           );
         },
       ),

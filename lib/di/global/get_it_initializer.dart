@@ -79,6 +79,7 @@ import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
+import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
@@ -343,6 +344,10 @@ class GetItInitializer {
 
     getIt.registerSingleton<DownloadMediaFileInteractor>(
       DownloadMediaFileInteractor(),
+    );
+
+    getIt.registerFactory<VerifyNameInteractor>(
+      () => VerifyNameInteractor(),
     );
   }
 
