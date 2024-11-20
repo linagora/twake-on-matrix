@@ -368,11 +368,13 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           break;
         case BootstrapState.error:
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            Matrix.of(context).showToMBootstrap.value = false;
             Navigator.of(context, rootNavigator: false).pop<bool>();
           });
           break;
         case BootstrapState.done:
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            Matrix.of(context).showToMBootstrap.value = false;
             Navigator.of(context, rootNavigator: false).pop<bool>(true);
           });
           break;

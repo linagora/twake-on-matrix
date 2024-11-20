@@ -30,14 +30,15 @@ class ChatBlank extends StatelessWidget {
       extendBodyBehindAppBar: true,
       body: ValueListenableBuilder(
         valueListenable: Matrix.of(context).showToMBootstrap,
-        builder: (context, value, _) {
-          if (value) {
+        builder: (context, showToMBootstrap, _) {
+          if (showToMBootstrap) {
             return const SizedBox.shrink();
           }
           return ValueListenableBuilder(
             valueListenable: Matrix.of(context).showQrCodeDownload,
-            builder: (context, value, _) {
-              if (value && AppConfig.qrCodeDownloadUrl.isNotEmpty) {
+            builder: (context, showQrCodeDownload, _) {
+              if (showQrCodeDownload &&
+                  AppConfig.qrCodeDownloadUrl.isNotEmpty) {
                 return const ChatQrCode();
               }
               return _ChatBlankNotChat(context: context);
