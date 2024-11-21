@@ -1361,8 +1361,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: update-max-width-button
-      resolved-ref: b324c3e71b3f4c9f032fa614c4fd37d6ad194174
+      ref: main
+      resolved-ref: b902d115c4e6680b353302c0eba74bf66fffd29a
       url: "git@github.com:linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"

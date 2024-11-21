@@ -13,6 +13,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -35,124 +36,131 @@ class DraftChatView extends StatelessWidget {
           child: child,
         );
       },
-      child: Scaffold(
-        backgroundColor: DraftChatViewStyle.responsive.isMobile(context)
-            ? LinagoraSysColors.material().background
-            : LinagoraSysColors.material().onPrimary,
-        appBar: AppBar(
+      child: KeyboardDismissOnTap(
+        child: Scaffold(
           backgroundColor: DraftChatViewStyle.responsive.isMobile(context)
-              ? LinagoraSysColors.material().surface
+              ? LinagoraSysColors.material().background
               : LinagoraSysColors.material().onPrimary,
-          automaticallyImplyLeading: false,
-          toolbarHeight: ChatViewStyle.appBarHeight(context),
-          title: Padding(
-            padding: ChatViewStyle.paddingLeading(context),
-            child: Row(
-              children: [
-                DraftChatViewStyle.responsive.isMobile(context)
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: TwakeIconButton(
-                          tooltip: L10n.of(context)!.back,
-                          icon: Icons.chevron_left_outlined,
-                          onTap: () => context.pop(),
-                          paddingAll: 8.0,
-                          margin: const EdgeInsets.symmetric(vertical: 12.0),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-                Expanded(
-                  child: _EmptyChatTitle(
-                    receiverId: controller.presentationContact!.matrixId!,
-                    displayName: controller.presentationContact!.displayName,
-                    onTap: controller.onPushDetails,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size(double.infinity, 1),
-            child: Container(
-              color: LinagoraStateLayer(
-                LinagoraSysColors.material().surfaceTint,
-              ).opacityLayer1,
-              height: 1,
-            ),
-          ),
-        ),
-        body: Container(
-          color: DraftChatViewStyle.responsive.isMobile(context)
-              ? LinagoraSysColors.material().surface
-              : Colors.transparent,
-          child: SafeArea(
-            child: Center(
-              child: Column(
+          appBar: AppBar(
+            backgroundColor: DraftChatViewStyle.responsive.isMobile(context)
+                ? LinagoraSysColors.material().surface
+                : LinagoraSysColors.material().onPrimary,
+            automaticallyImplyLeading: false,
+            toolbarHeight: ChatViewStyle.appBarHeight(context),
+            title: Padding(
+              padding: ChatViewStyle.paddingLeading(context),
+              child: Row(
                 children: [
+                  DraftChatViewStyle.responsive.isMobile(context)
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: TwakeIconButton(
+                            tooltip: L10n.of(context)!.back,
+                            icon: Icons.chevron_left_outlined,
+                            onTap: () => context.pop(),
+                            paddingAll: 8.0,
+                            margin: const EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                   Expanded(
-                    child: Container(
-                      color: ChatViewBodyStyle.chatViewBackgroundColor(context),
-                      child: Center(
-                        child: DropTarget(
-                          onDragDone: (details) =>
-                              controller.handleDragDone(details),
-                          onDragEntered: controller.onDragEntered,
-                          onDragExited: controller.onDragExited,
-                          child: DraftChatEmpty(
-                            onTap: () => controller.handleDraftAction(context),
+                    child: _EmptyChatTitle(
+                      receiverId: controller.presentationContact!.matrixId!,
+                      displayName: controller.presentationContact!.displayName,
+                      onTap: controller.onPushDetails,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            bottom: PreferredSize(
+              preferredSize: const Size(double.infinity, 1),
+              child: Container(
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer1,
+                height: 1,
+              ),
+            ),
+          ),
+          body: Container(
+            color: DraftChatViewStyle.responsive.isMobile(context)
+                ? LinagoraSysColors.material().surface
+                : Colors.transparent,
+            child: SafeArea(
+              child: Center(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        color:
+                            ChatViewBodyStyle.chatViewBackgroundColor(context),
+                        child: Center(
+                          child: DropTarget(
+                            onDragDone: (details) =>
+                                controller.handleDragDone(details),
+                            onDragEntered: controller.onDragEntered,
+                            onDragExited: controller.onDragExited,
+                            child: DraftChatEmpty(
+                              onTap: () =>
+                                  controller.handleDraftAction(context),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    decoration: DraftChatViewStyle.responsive.isMobile(context)
-                        ? BoxDecoration(
-                            color: LinagoraSysColors.material().surface,
-                            border: Border(
-                              top: BorderSide(
-                                color: LinagoraStateLayer(
-                                  LinagoraSysColors.material().surfaceTint,
-                                ).opacityLayer3,
+                    Container(
+                      decoration: DraftChatViewStyle.responsive
+                              .isMobile(context)
+                          ? BoxDecoration(
+                              color: LinagoraSysColors.material().surface,
+                              border: Border(
+                                top: BorderSide(
+                                  color: LinagoraStateLayer(
+                                    LinagoraSysColors.material().surfaceTint,
+                                  ).opacityLayer3,
+                                ),
                               ),
+                            )
+                          : null,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 8.0),
+                          DraftChatInputRow(
+                            onEmojiAction: controller.onEmojiAction,
+                            onInputBarChanged: controller.onInputBarChanged,
+                            onInputBarSubmitted: controller.onInputBarSubmitted,
+                            onKeyboardAction: controller.onKeyboardAction,
+                            onSendFileClick: controller.onSendFileClick,
+                            textEditingController: controller.sendController,
+                            typeAheadFocusNode: controller.inputFocus,
+                            typeAheadKey:
+                                controller.draftChatComposerTypeAheadKey,
+                            focusSuggestionController:
+                                controller.focusSuggestionController,
+                            inputText: controller.inputText,
+                            isSendingNotifier: controller.isSendingNotifier,
+                            emojiPickerNotifier:
+                                controller.showEmojiPickerNotifier,
+                          ),
+                          SizedBox(
+                            height: DraftChatViewStyle.bottomBarInputPadding(
+                              context,
                             ),
-                          )
-                        : null,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 8.0),
-                        DraftChatInputRow(
-                          onEmojiAction: controller.onEmojiAction,
-                          onInputBarChanged: controller.onInputBarChanged,
-                          onInputBarSubmitted: controller.onInputBarSubmitted,
-                          onKeyboardAction: controller.onKeyboardAction,
-                          onSendFileClick: controller.onSendFileClick,
-                          textEditingController: controller.sendController,
-                          typeAheadFocusNode: controller.inputFocus,
-                          typeAheadKey:
-                              controller.draftChatComposerTypeAheadKey,
-                          focusSuggestionController:
-                              controller.focusSuggestionController,
-                          inputText: controller.inputText,
-                          isSendingNotifier: controller.isSendingNotifier,
-                          emojiPickerNotifier:
-                              controller.showEmojiPickerNotifier,
-                        ),
-                        SizedBox(
-                          height:
-                              DraftChatViewStyle.bottomBarInputPadding(context),
-                        ),
-                        ChatEmojiPicker(
-                          showEmojiPickerNotifier:
-                              controller.showEmojiPickerNotifier,
-                          onEmojiSelected:
-                              controller.onEmojiBottomSheetSelected,
-                          emojiPickerBackspace: controller.emojiPickerBackspace,
-                        ),
-                      ],
+                          ),
+                          ChatEmojiPicker(
+                            showEmojiPickerNotifier:
+                                controller.showEmojiPickerNotifier,
+                            onEmojiSelected:
+                                controller.onEmojiBottomSheetSelected,
+                            emojiPickerBackspace:
+                                controller.emojiPickerBackspace,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

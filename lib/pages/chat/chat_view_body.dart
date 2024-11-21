@@ -44,135 +44,131 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.medium,
               ),
-            SafeArea(
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      if (controller.room!.pinnedEventIds.isNotEmpty)
-                        const SizedBox(
-                          height: ChatViewStyle.pinnedMessageHintHeight,
+            Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                      const SizedBox(
+                        height: ChatViewStyle.pinnedMessageHintHeight,
+                      ),
+                    Expanded(
+                      child: Container(
+                        color: ChatViewBodyStyle.chatViewBackgroundColor(
+                          context,
                         ),
-                      Expanded(
+                        child: GestureDetector(
+                          onTap: controller.clearSingleSelectedEvent,
+                          child: ValueListenableBuilder(
+                            valueListenable:
+                                controller.openingChatViewStateNotifier,
+                            builder: (context, viewState, __) {
+                              if (viewState is ViewEventListLoading ||
+                                  controller.timeline == null) {
+                                return const ChatLoadingView();
+                              }
+
+                              if (viewState is ViewEventListSuccess) {
+                                return ChatEventList(
+                                  controller: controller,
+                                );
+                              }
+
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (controller.room!.canSendDefaultMessages &&
+                        controller.room!.membership == Membership.join)
+                      Center(
                         child: Container(
-                          color: ChatViewBodyStyle.chatViewBackgroundColor(
-                            context,
-                          ),
-                          child: GestureDetector(
-                            onTap: controller.clearSingleSelectedEvent,
-                            child: ValueListenableBuilder(
-                              valueListenable:
-                                  controller.openingChatViewStateNotifier,
-                              builder: (context, viewState, __) {
-                                if (viewState is ViewEventListLoading ||
-                                    controller.timeline == null) {
-                                  return const ChatLoadingView();
-                                }
-
-                                if (viewState is ViewEventListSuccess) {
-                                  return ChatEventList(
-                                    controller: controller,
-                                  );
-                                }
-
-                                return const SizedBox.shrink();
-                              },
-                            ),
-                          ),
+                          alignment: Alignment.center,
+                          child: controller.room?.isAbandonedDMRoom == true
+                              ? Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom:
+                                        ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                    left: ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                    right: ChatViewBodyStyle.bottomSheetPadding(
+                                      context,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.all(16),
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .error,
+                                        ),
+                                        icon: const Icon(
+                                          Icons.archive_outlined,
+                                        ),
+                                        onPressed: () => controller.leaveChat(
+                                          context,
+                                          controller.room,
+                                        ),
+                                        label: Text(
+                                          L10n.of(context)!.leave,
+                                        ),
+                                      ),
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.all(16),
+                                        ),
+                                        icon: const Icon(
+                                          Icons.chat_outlined,
+                                        ),
+                                        onPressed: controller.recreateChat,
+                                        label: Text(
+                                          L10n.of(context)!.reopenChat,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : _inputMessageWidget(context),
                         ),
                       ),
-                      if (controller.room!.canSendDefaultMessages &&
-                          controller.room!.membership == Membership.join)
-                        Center(
-                          child: Container(
-                            alignment: Alignment.center,
-                            child: controller.room?.isAbandonedDMRoom == true
-                                ? Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom:
-                                          ChatViewBodyStyle.bottomSheetPadding(
-                                        context,
-                                      ),
-                                      left:
-                                          ChatViewBodyStyle.bottomSheetPadding(
-                                        context,
-                                      ),
-                                      right:
-                                          ChatViewBodyStyle.bottomSheetPadding(
-                                        context,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        TextButton.icon(
-                                          style: TextButton.styleFrom(
-                                            padding: const EdgeInsets.all(16),
-                                            foregroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .error,
-                                          ),
-                                          icon: const Icon(
-                                            Icons.archive_outlined,
-                                          ),
-                                          onPressed: () => controller.leaveChat(
-                                            context,
-                                            controller.room,
-                                          ),
-                                          label: Text(
-                                            L10n.of(context)!.leave,
-                                          ),
-                                        ),
-                                        TextButton.icon(
-                                          style: TextButton.styleFrom(
-                                            padding: const EdgeInsets.all(16),
-                                          ),
-                                          icon: const Icon(
-                                            Icons.chat_outlined,
-                                          ),
-                                          onPressed: controller.recreateChat,
-                                          label: Text(
-                                            L10n.of(context)!.reopenChat,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : _inputMessageWidget(context),
-                          ),
-                        ),
-                    ],
-                  ),
-                  TombstoneDisplay(controller),
-                  Column(
-                    children: [
-                      PinnedEventsView(controller),
-                      if (controller.room!.pinnedEventIds.isNotEmpty)
-                        Divider(
-                          height: ChatViewBodyStyle.dividerSize,
-                          thickness: ChatViewBodyStyle.dividerSize,
-                          color: Theme.of(context).dividerColor,
-                        ),
-                      SizedBox(
-                        key: controller.stickyTimestampKey,
-                        child: ValueListenableBuilder(
-                          valueListenable: controller.stickyTimestampNotifier,
-                          builder: (context, stickyTimestamp, child) {
-                            return StickyTimestampWidget(
-                              isStickyHeader: stickyTimestamp != null,
-                              content: stickyTimestamp != null
-                                  ? stickyTimestamp.relativeTime(context)
-                                  : '',
-                            );
-                          },
-                        ),
+                  ],
+                ),
+                TombstoneDisplay(controller),
+                Column(
+                  children: [
+                    PinnedEventsView(controller),
+                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                      Divider(
+                        height: ChatViewBodyStyle.dividerSize,
+                        thickness: ChatViewBodyStyle.dividerSize,
+                        color: Theme.of(context).dividerColor,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    SizedBox(
+                      key: controller.stickyTimestampKey,
+                      child: ValueListenableBuilder(
+                        valueListenable: controller.stickyTimestampNotifier,
+                        builder: (context, stickyTimestamp, child) {
+                          return StickyTimestampWidget(
+                            isStickyHeader: stickyTimestamp != null,
+                            content: stickyTimestamp != null
+                                ? stickyTimestamp.relativeTime(context)
+                                : '',
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             ValueListenableBuilder(
               valueListenable: controller.draggingNotifier,

@@ -10,6 +10,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -29,48 +30,75 @@ class ChatInputRow extends StatelessWidget {
         controller.emojiPickerType == EmojiPickerType.reaction) {
       return Container();
     }
-    return Row(
-      crossAxisAlignment:
-          ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: controller.selectMode
-          ? [
-              ActionSelectModeWidget(
-                controller: controller,
-              ),
-            ]
-          : <Widget>[
-              if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
-                SizedBox(
-                  height: ChatInputRowStyle.chatInputRowHeight,
-                  child: TwakeIconButton(
-                    size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                    tooltip: L10n.of(context)!.more,
-                    icon: Icons.add_circle_outline,
-                    onTap: () => controller.onSendFileClick(context),
-                  ),
-                ),
-              if (controller.matrix!.isMultiAccount &&
-                  controller.matrix!.hasComplexBundles &&
-                  controller.matrix!.currentBundle!.length > 1)
-                Container(
-                  height: ChatInputRowStyle.chatInputRowHeight,
-                  alignment: Alignment.center,
-                  child: ChatAccountPicker(controller),
-                ),
-              Expanded(
-                child:
-                    ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-                        ? _buildMobileInputRow(context)
-                        : _buildWebInputRow(context),
-              ),
-              ChatInputRowSendBtn(
-                inputText: controller.inputText,
-                onTap: controller.onInputBarSubmitted,
-              ),
-            ],
+    return KeyboardVisibilityBuilder(
+      builder: (context, isKeyboardVisible) {
+        return Padding(
+          padding: _paddingInputRow(
+            context: context,
+            isKeyboardVisible: isKeyboardVisible,
+          ),
+          child: Row(
+            crossAxisAlignment:
+                ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: controller.selectMode
+                ? [
+                    ActionSelectModeWidget(
+                      controller: controller,
+                    ),
+                  ]
+                : <Widget>[
+                    if (ChatInputRowStyle.responsiveUtils
+                        .isMobileOrTablet(context))
+                      SizedBox(
+                        height: ChatInputRowStyle.chatInputRowHeight,
+                        child: TwakeIconButton(
+                          size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                          tooltip: L10n.of(context)!.more,
+                          icon: Icons.add_circle_outline,
+                          onTap: () => controller.onSendFileClick(context),
+                        ),
+                      ),
+                    if (controller.matrix!.isMultiAccount &&
+                        controller.matrix!.hasComplexBundles &&
+                        controller.matrix!.currentBundle!.length > 1)
+                      Container(
+                        height: ChatInputRowStyle.chatInputRowHeight,
+                        alignment: Alignment.center,
+                        child: ChatAccountPicker(controller),
+                      ),
+                    Expanded(
+                      child: ChatInputRowStyle.responsiveUtils
+                              .isMobileOrTablet(context)
+                          ? _buildMobileInputRow(context)
+                          : _buildWebInputRow(context),
+                    ),
+                    ChatInputRowSendBtn(
+                      inputText: controller.inputText,
+                      onTap: controller.onInputBarSubmitted,
+                    ),
+                  ],
+          ),
+        );
+      },
+    );
+  }
+
+  EdgeInsetsGeometry _paddingInputRow({
+    required BuildContext context,
+    required bool isKeyboardVisible,
+  }) {
+    if (!ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)) {
+      return EdgeInsets.zero;
+    }
+
+    if (isKeyboardVisible) {
+      return EdgeInsets.zero;
+    }
+    return const EdgeInsets.only(
+      bottom: 16,
     );
   }
 
