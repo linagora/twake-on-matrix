@@ -58,7 +58,7 @@ dependencies:
   future_loading_dialog:
     git:
       url: git@github.com:linagora/future-loading-dialog.git
-      ref: update-max-width-button
+      ref: main
 
   linkfy_text:
     git:

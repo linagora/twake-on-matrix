@@ -2,15 +2,16 @@ import 'package:fluffychat/pages/chat/chat_input_row_mobile.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
-import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class DraftChatInputRow extends StatelessWidget {
   final OnSendFileClick onSendFileClick;
@@ -44,37 +45,45 @@ class DraftChatInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ChatViewBodyStyle.inputBarPadding(context),
-      child: Row(
-        crossAxisAlignment:
-            ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
-            SizedBox(
-              height: ChatInputRowStyle.chatInputRowHeight,
-              child: TwakeIconButton(
-                size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                tooltip: L10n.of(context)!.more,
-                icon: Icons.add_circle_outline,
-                onTap: () => onSendFileClick(context),
+    return KeyboardVisibilityBuilder(
+      builder: (context, isKeyboardVisible) {
+        return Padding(
+          padding: DraftChatInputRowStyle.inputBarPadding(
+            context: context,
+            isKeyboardVisible: isKeyboardVisible,
+          ),
+          child: Row(
+            crossAxisAlignment:
+                ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
+                SizedBox(
+                  height: ChatInputRowStyle.chatInputRowHeight,
+                  child: TwakeIconButton(
+                    size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                    tooltip: L10n.of(context)!.more,
+                    icon: Icons.add_circle_outline,
+                    onTap: () => onSendFileClick(context),
+                  ),
+                ),
+              Expanded(
+                child:
+                    ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                        ? _buildMobileInputRow(context)
+                        : _buildWebInputRow(context),
               ),
-            ),
-          Expanded(
-            child: ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-                ? _buildMobileInputRow(context)
-                : _buildWebInputRow(context),
+              ChatInputRowSendBtn(
+                inputText: inputText,
+                onTap: onInputBarSubmitted,
+                sendingNotifier: isSendingNotifier,
+              ),
+            ],
           ),
-          ChatInputRowSendBtn(
-            inputText: inputText,
-            onTap: onInputBarSubmitted,
-            sendingNotifier: isSendingNotifier,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

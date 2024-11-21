@@ -20,7 +20,7 @@ class ChatInputRowStyle {
   static const double sendIconBtnSize = 44.0;
 
   static const EdgeInsets sendIconPadding = EdgeInsets.only(
-    left: 12,
+    left: 8,
   );
 
   static EdgeInsetsDirectional contentPadding(BuildContext context) =>

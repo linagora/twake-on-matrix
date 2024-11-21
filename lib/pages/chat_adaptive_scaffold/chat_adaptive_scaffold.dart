@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat_search/chat_search.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatAdaptiveScaffold extends StatefulWidget {
@@ -26,25 +27,27 @@ class ChatAdaptiveScaffold extends StatefulWidget {
 class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
   @override
   Widget build(BuildContext context) {
-    return ChatAdaptiveScaffoldBuilder(
-      bodyBuilder: (controller) => Chat(
-        roomId: widget.roomId,
-        shareFiles: widget.shareFiles,
-        roomName: widget.roomName,
-        onChangeRightColumnType: controller.setRightColumnType,
-      ),
-      rightBuilder: (
-        controller, {
-        required bool isInStack,
-        required RightColumnType type,
-      }) {
-        return _RightColumnNavigator(
-          isInStack: isInStack,
-          controller: controller,
-          type: type,
+    return KeyboardDismissOnTap(
+      child: ChatAdaptiveScaffoldBuilder(
+        bodyBuilder: (controller) => Chat(
           roomId: widget.roomId,
-        );
-      },
+          shareFiles: widget.shareFiles,
+          roomName: widget.roomName,
+          onChangeRightColumnType: controller.setRightColumnType,
+        ),
+        rightBuilder: (
+          controller, {
+          required bool isInStack,
+          required RightColumnType type,
+        }) {
+          return _RightColumnNavigator(
+            isInStack: isInStack,
+            controller: controller,
+            type: type,
+            roomId: widget.roomId,
+          );
+        },
+      ),
     );
   }
 }
