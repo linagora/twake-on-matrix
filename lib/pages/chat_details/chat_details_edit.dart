@@ -79,7 +79,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   final MenuController menuController = MenuController();
 
   final isEditedGroupInfoNotifier = ValueNotifier<bool>(false);
-  final isValidGroupNameNotifier = ValueNotifier<bool>(false);
+  final isValidGroupNameNotifier = ValueNotifier<bool>(true);
 
   Client get client => Matrix.of(context).client;
 
@@ -483,6 +483,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     groupNameEmptyNotifier.value = groupNameTextEditingController.text.isEmpty;
 
     groupNameTextEditingController.addListener(() {
+      isValidGroupNameNotifier.value =
+          getErrorMessage(groupNameTextEditingController.text) == null;
       if (_isEditAvatar) {
         return;
       }
@@ -490,8 +492,6 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           groupNameTextEditingController.text != room?.name;
       groupNameEmptyNotifier.value =
           groupNameTextEditingController.text.isEmpty;
-      isValidGroupNameNotifier.value =
-          getErrorMessage(groupNameTextEditingController.text) == null;
     });
   }
 
