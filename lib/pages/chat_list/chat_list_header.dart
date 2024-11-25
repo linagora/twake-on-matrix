@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -57,28 +56,46 @@ class ChatListHeader extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OpenContainer(
-            openBuilder: (context, _) {
-              return const SwipeToDismissWrap(
-                child: Search(),
-              );
-            },
-            closedBuilder: (context, action) => TextField(
+          child: GestureDetector(
+            onTap: () => _navigateWithSlideAnimation(context),
+            child: TextField(
               textInputAction: TextInputAction.search,
               enabled: false,
               decoration: ChatListHeaderStyle.searchInputDecoration(context),
             ),
-            closedElevation: 0,
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionType: ContainerTransitionType.fade,
-            closedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                ChatListHeaderStyle.searchRadiusBorder,
-              ),
-            ),
           ),
         ),
       ],
+    );
+  }
+
+  void _navigateWithSlideAnimation(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const SwipeToDismissWrap(
+            child: Search(),
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          final tween = Tween(begin: begin, end: end).chain(
+            CurveTween(
+              curve: curve,
+            ),
+          );
+          final offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
     );
   }
 
