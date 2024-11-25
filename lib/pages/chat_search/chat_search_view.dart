@@ -46,7 +46,7 @@ class ChatSearchView extends StatelessWidget {
         backgroundColor: LinagoraSysColors.material().onPrimary,
         automaticallyImplyLeading: false,
         title: Padding(
-          padding: ChatSearchStyle.searchAppBarPadding,
+          padding: ChatSearchStyle.searchAppBarPadding(context),
           child: _ChatSearchAppBar(controller),
         ),
       ),

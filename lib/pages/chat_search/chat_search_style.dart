@@ -20,8 +20,11 @@ class ChatSearchStyle {
   static const EdgeInsetsGeometry avatarPadding =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 16);
 
-  static const EdgeInsetsGeometry searchAppBarPadding =
-      EdgeInsetsDirectional.only(top: 16.0);
+  static EdgeInsetsGeometry searchAppBarPadding(BuildContext context) =>
+      EdgeInsetsDirectional.only(
+        top: responsive.isMobile(context) ? 0 : 16.0,
+        start: 8,
+      );
 
   static const EdgeInsetsGeometry emptyPadding = EdgeInsetsDirectional.all(16);
 
