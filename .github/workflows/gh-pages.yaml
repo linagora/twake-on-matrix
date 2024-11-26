@@ -10,7 +10,7 @@ name: Deploying on GitHub Pages
 jobs:
   deploy_preview:
     name: Deploy preview versions on pull requests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     permissions:
