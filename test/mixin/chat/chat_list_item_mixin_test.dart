@@ -26,85 +26,144 @@ void main() {
       chatListItemMixinTest = ChatListItemMixinTest();
     });
 
-    testWidgets(
-        'WHEN notification count is zero\n'
-        'AND room is unmuted\n'
-        'THEN color should have transparent\n', (
-      WidgetTester tester,
-    ) async {
-      when(room.notificationCount).thenReturn(0);
-      when(room.pushRuleState).thenReturn(PushRuleState.notify);
+    group('Test highlight message and invitation', () {
+      testWidgets(
+          'WHEN group is invite\n'
+          'THEN color should have color primary\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.membership).thenReturn(Membership.invite);
 
-      final color = chatListItemMixinTest.notificationColor(
-        context: context,
-        room: room,
-      );
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
 
-      expect(color, Colors.transparent);
+        expect(color, Theme.of(context).colorScheme.primary);
+      });
+
+      testWidgets(
+          'WHEN has new message with mention\n'
+          'AND highlight count is greater than zero\n'
+          'AND pushRuleState is notify\n'
+          'THEN color should be primary\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+        when(room.highlightCount).thenReturn(1);
+
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
+
+        expect(color, Theme.of(context).colorScheme.primary);
+      });
     });
 
-    testWidgets(
-        'WHEN group is invite\n'
-        'THEN color should have color primary\n', (
-      WidgetTester tester,
-    ) async {
-      when(room.membership).thenReturn(Membership.invite);
+    group('Test room has new message', () {
+      testWidgets(
+          'WHEN notification count is zero\n'
+          'AND pushRuleState is notify\n'
+          'THEN color should have transparent\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.notificationCount).thenReturn(0);
+        when(room.pushRuleState).thenReturn(PushRuleState.notify);
 
-      final color = chatListItemMixinTest.notificationColor(
-        context: context,
-        room: room,
-      );
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
 
-      expect(color, Theme.of(context).colorScheme.primary);
+        expect(color, Colors.transparent);
+      });
+
+      testWidgets(
+          'WHEN notification count is greater than zero\n'
+          'AND pushRuleState is notify\n'
+          'THEN color should be primary\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.notificationCount).thenReturn(5);
+        when(room.pushRuleState).thenReturn(PushRuleState.notify);
+
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
+
+        expect(color, Theme.of(context).colorScheme.primary);
+      });
+
+      testWidgets(
+          'WHEN notification count is greater than zero\n'
+          'AND pushRuleState is mentionsOnly\n'
+          'THEN color should be tertiary[30]\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.notificationCount).thenReturn(5);
+        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
+
+        expect(color, LinagoraRefColors.material().tertiary[30]);
+      });
+
+      testWidgets(
+          'WHEN has new message \n'
+          'AND pushRuleState is mentionsOnly\n'
+          'THEN color should be tertiary[30]\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+        when(room.hasNewMessages).thenReturn(true);
+
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
+
+        expect(color, LinagoraRefColors.material().tertiary[30]);
+      });
     });
 
-    testWidgets(
-        'WHEN notification count is greater than zero\n'
-        'AND room is unmuted\n'
-        'THEN color should be primary\n', (
-      WidgetTester tester,
-    ) async {
-      when(room.notificationCount).thenReturn(5);
-      when(room.pushRuleState).thenReturn(PushRuleState.notify);
+    group('Test room is mark as unread', () {
+      testWidgets(
+          'WHEN marked unread for room\n'
+          'AND pushRuleState is notify\n'
+          'THEN color should be primary]\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.markedUnread).thenReturn(true);
 
-      final color = chatListItemMixinTest.notificationColor(
-        context: context,
-        room: room,
-      );
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
 
-      expect(color, Theme.of(context).colorScheme.primary);
-    });
+        expect(color, Theme.of(context).colorScheme.primary);
+      });
 
-    testWidgets(
-        'WHEN notification count is greater than zero\n'
-        'AND room is muted\n'
-        'THEN color should be tertiary[30]\n', (
-      WidgetTester tester,
-    ) async {
-      when(room.notificationCount).thenReturn(5);
-      when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
+      testWidgets(
+          'WHEN marked unread for room\n'
+          'AND pushRuleState is mentionsOnly\n'
+          'THEN color should be primary]\n', (
+        WidgetTester tester,
+      ) async {
+        when(room.markedUnread).thenReturn(true);
+        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
 
-      final color = chatListItemMixinTest.notificationColor(
-        context: context,
-        room: room,
-      );
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
 
-      expect(color, LinagoraRefColors.material().tertiary[30]);
-    });
-
-    testWidgets(
-        'WHEN marked unread for room\n'
-        'THEN color should be tertiary[30]\n', (
-      WidgetTester tester,
-    ) async {
-      when(room.markedUnread).thenReturn(true);
-
-      final color = chatListItemMixinTest.notificationColor(
-        context: context,
-        room: room,
-      );
-
-      expect(color, LinagoraRefColors.material().tertiary[30]);
+        expect(color, LinagoraRefColors.material().tertiary[30]);
+      });
     });
   });
 }

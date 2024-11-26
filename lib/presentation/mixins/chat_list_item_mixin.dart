@@ -213,19 +213,50 @@ mixin ChatListItemMixin {
     required BuildContext context,
     required Room room,
   }) {
+    /// highlightCount or Invitation
     if (room.highlightCount > 0 || room.membership == Membership.invite) {
       return Theme.of(context).colorScheme.primary;
     }
-    if (room.notificationCount > 0 &&
-        room.pushRuleState != PushRuleState.notify) {
-      return LinagoraRefColors.material().tertiary[30];
+
+    if (hasNewMessage(room)) {
+      return _handleNotificationColorHasNewMessage(
+        room,
+        context,
+      );
     }
+
     if (room.markedUnread) {
-      return LinagoraRefColors.material().tertiary[30];
-    }
-    if (room.notificationCount > 0) {
-      return Theme.of(context).colorScheme.primary;
+      return _handleNotificationColorMarkedUnread(
+        context: context,
+        room: room,
+      );
     }
     return Colors.transparent;
+  }
+
+  bool hasNewMessage(Room room) {
+    return room.notificationCount > 0 || room.hasNewMessages;
+  }
+
+  Color? _handleNotificationColorHasNewMessage(
+    Room room,
+    BuildContext context,
+  ) {
+    if (room.pushRuleState == PushRuleState.mentionsOnly) {
+      return LinagoraRefColors.material().tertiary[30];
+    } else {
+      return Theme.of(context).colorScheme.primary;
+    }
+  }
+
+  Color? _handleNotificationColorMarkedUnread({
+    required BuildContext context,
+    required Room room,
+  }) {
+    if (room.pushRuleState == PushRuleState.mentionsOnly) {
+      return LinagoraRefColors.material().tertiary[30];
+    } else {
+      return Theme.of(context).colorScheme.primary;
+    }
   }
 }
