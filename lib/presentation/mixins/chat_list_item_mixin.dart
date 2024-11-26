@@ -213,14 +213,17 @@ mixin ChatListItemMixin {
     required BuildContext context,
     required Room room,
   }) {
+    if (room.highlightCount > 0 || room.membership == Membership.invite) {
+      return Theme.of(context).colorScheme.primary;
+    }
     if (room.notificationCount > 0 &&
         room.pushRuleState != PushRuleState.notify) {
       return LinagoraRefColors.material().tertiary[30];
     }
-    if (room.notificationCount > 0) {
-      return Theme.of(context).colorScheme.primary;
+    if (room.markedUnread) {
+      return LinagoraRefColors.material().tertiary[30];
     }
-    if (room.membership == Membership.invite) {
+    if (room.notificationCount > 0) {
       return Theme.of(context).colorScheme.primary;
     }
     return Colors.transparent;

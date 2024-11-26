@@ -91,5 +91,20 @@ void main() {
 
       expect(color, LinagoraRefColors.material().tertiary[30]);
     });
+
+    testWidgets(
+        'WHEN marked unread for room\n'
+        'THEN color should be tertiary[30]\n', (
+      WidgetTester tester,
+    ) async {
+      when(room.markedUnread).thenReturn(true);
+
+      final color = chatListItemMixinTest.notificationColor(
+        context: context,
+        room: room,
+      );
+
+      expect(color, LinagoraRefColors.material().tertiary[30]);
+    });
   });
 }
