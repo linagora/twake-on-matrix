@@ -33,7 +33,7 @@ AppDir:
       - libc6
       - libjsoncpp25
       - libsecret-1-0
-      - libmpv1
+      - libmpv2
       - libdrm2
       - libolm3
   files:
