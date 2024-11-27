@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -64,7 +65,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
             child: SizedBox(
               width: ChatInputRowStyle.sendIconBtnSize,
               height: ChatInputRowStyle.sendIconBtnSize,
-              child: CircularProgressIndicator.adaptive(),
+              child: CupertinoActivityIndicator(),
             ),
           ),
         ),
