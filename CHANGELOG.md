@@ -1,3 +1,16 @@
+## [2.6.11+2330] - 2024-11-27
+### Fixed
+- Fixed issue when packaging linux
+- Update width button dialog
+- Update input bar for draft chat and chat
+- Update send button for draft chat
+- #2150 Fix confirm button not displaying when changing group avatar
+- #2157 Fix can't mark a chat as unread
+- #2154 Fix no counter of unread messages for muted chats
+### Changed
+- #1927 Change animation for Search screen for mobile
+
+
 ## [2.6.10+2330] - 2024-11-20
 ### Fixed
 - Handle default QR code link
