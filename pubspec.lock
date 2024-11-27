@@ -1894,7 +1894,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: a498051a8a7e41a35bde65f37c25add3f808b929
+      resolved-ref: "9353b6d6b6c1b9cc9e9a9290ffd0c777c6a0b479"
       url: "https://github.com/linagora/dart_matrix_api_lite.git"
     source: git
     version: "1.7.4"
