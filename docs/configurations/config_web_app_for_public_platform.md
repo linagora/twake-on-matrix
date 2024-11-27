@@ -29,7 +29,8 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "platform": "platform"
   "default_max_upload_avatar_size_in_bytes": 1000000,
   "dev_mode": false,
-  "qr_code_download_url": "https://example.com/"
+  "qr_code_download_url": "https://example.com/",
+  "enable_logs": true
 }
 ```
 
@@ -49,5 +50,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
 - `default_max_upload_avatar_size_in_bytes`: Default max upload avatar size
 - `dev_mode`: Enable to run app in IDE,
 - `qr_code_download_url`: URL generate QR code to download app
+- `enable_logs`: Enable logs
 
 If you want to disable it, please change the value or remove this from `config.sample.json`

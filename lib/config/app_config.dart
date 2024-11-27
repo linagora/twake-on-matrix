@@ -261,5 +261,8 @@ abstract class AppConfig {
     if (json['qr_code_download_url'] is String) {
       qrCodeDownloadUrl = json['qr_code_download_url'];
     }
+    if (json['enable_logs'] is bool) {
+      DebugUtils.enableLogs = json['enable_logs'];
+    }
   }
 }

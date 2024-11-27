@@ -14,5 +14,6 @@
   "platform": "platform",
   "default_max_upload_avatar_size_in_bytes": 1000000,
   "dev_mode": false,
-  "qr_code_download_url": "https://sign-up.twake.app/download/chat"
+  "qr_code_download_url": "https://sign-up.twake.app/download/chat",
+  "enable_logs": false
 }
