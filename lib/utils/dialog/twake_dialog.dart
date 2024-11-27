@@ -37,6 +37,29 @@ class TwakeDialog {
     }
   }
 
+  static void showLoadingTwakeWelcomeDialog(BuildContext context) {
+    showGeneralDialog(
+      barrierColor: LinagoraSysColors.material().onPrimary,
+      useRootNavigator: false,
+      transitionDuration: const Duration(milliseconds: 700),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0, end: 1).animate(animation),
+          child: const PopScope(
+            canPop: false,
+            child: ProgressDialog(
+              lottieSize: lottieSizeMobile,
+            ),
+          ),
+        );
+      },
+      context: context,
+      pageBuilder: (c, a1, a2) {
+        return const SizedBox();
+      },
+    );
+  }
+
   static void showLoadingDialog(BuildContext context) {
     showGeneralDialog(
       barrierColor: LinagoraSysColors.material().onPrimary.withOpacity(0.75),
