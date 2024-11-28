@@ -1,3 +1,7 @@
+## [2.6.12+2330] - 2024-11-28
+### Changed
+- Enable log for webapp via environment variable
+
 ## [2.6.11+2330] - 2024-11-27
 ### Fixed
 - Fixed issue when packaging linux
