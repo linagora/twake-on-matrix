@@ -25,7 +25,7 @@ enum PickerType {
   IconData getIcon() {
     switch (this) {
       case PickerType.gallery:
-        return Icons.photo;
+        return Icons.photo_outlined;
       case PickerType.documents:
         return Icons.attach_file;
       case PickerType.location:
@@ -51,13 +51,24 @@ enum PickerType {
   Color getBackgroundColor() {
     switch (this) {
       case PickerType.gallery:
-        return ChatActionsStyle.colorBackgroundGalleryBottom;
       case PickerType.documents:
-        return ChatActionsStyle.colorBackgroundDocumentBottom;
+        return ChatActionsStyle.colorBackgroundGalleryBottom;
       case PickerType.location:
         return ChatActionsStyle.colorBackgroundLocationBottom;
       case PickerType.contact:
         return ChatActionsStyle.colorBackgroundContactBottom;
+    }
+  }
+
+  Color? getTextColor(BuildContext context) {
+    switch (this) {
+      case PickerType.gallery:
+        return LinagoraSysColors.material().primary;
+      case PickerType.documents:
+        return LinagoraSysColors.material().tertiary;
+      case PickerType.location:
+      case PickerType.contact:
+        return LinagoraSysColors.material().onBackground;
     }
   }
 }
