@@ -1876,7 +1876,7 @@ packages:
     description:
       path: "."
       ref: support-filter-for-request-history
-      resolved-ref: "420ed04a43f14b15aec6dda50fdad9d23b39414d"
+      resolved-ref: "3f699bc43ce471590e6c43385062c84c7a2393f6"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
