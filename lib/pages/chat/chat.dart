@@ -1759,7 +1759,11 @@ class ChatController extends State<Chat>
               historyCount: _defaultEventCountDisplay,
               filter: StateFilter(
                 lazyLoadMembers: true,
-                types: [EventTypes.Message],
+                types: [
+                  EventTypes.Message,
+                  EventTypes.Encrypted,
+                  EventTypes.Sticker,
+                ],
               ),
             );
           }
