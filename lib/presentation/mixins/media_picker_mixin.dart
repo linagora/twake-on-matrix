@@ -96,6 +96,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     });
 
     return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
+      heightOfBottomSheet: SendFileDialogStyle.heightOfBottomSheet,
       context: context,
       controller: imagePickerController,
       backgroundImageCamera: MediaPickerStyle.cameraIcon,
@@ -115,6 +116,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                 L10n.of(context)!.photoSelectedCounter(counterImage),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+              const Icon(Icons.chevron_right_outlined),
               const Expanded(child: SizedBox.shrink()),
             ],
           ),
@@ -163,7 +165,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
           return child!;
         },
         child: Container(
-          color: Colors.white,
+          color: LinagoraSysColors.material().background,
           child: Column(
             children: [
               Stack(
