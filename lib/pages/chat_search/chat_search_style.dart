@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 class ChatSearchStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static double toolbarHeight(BuildContext context) =>
-      responsive.isMobile(context) ? 64 : 72;
-
   static const EdgeInsetsGeometry inputPadding =
       EdgeInsetsDirectional.only(start: 8, top: 16, bottom: 16, end: 16);
 
@@ -19,12 +16,6 @@ class ChatSearchStyle {
 
   static const EdgeInsetsGeometry avatarPadding =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 16);
-
-  static EdgeInsetsGeometry searchAppBarPadding(BuildContext context) =>
-      EdgeInsetsDirectional.only(
-        top: responsive.isMobile(context) ? 0 : 16.0,
-        start: 8,
-      );
 
   static const EdgeInsetsGeometry emptyPadding = EdgeInsetsDirectional.all(16);
 
