@@ -1,7 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatAppBarTitleStyle {
@@ -37,12 +36,12 @@ class ChatAppBarTitleStyle {
           ? Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: LinagoraRefColors.material().tertiary[30],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-                fontFamily: GoogleFonts.inter().fontFamily,
+                fontFamily: 'Inter',
               )
           : Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: LinagoraRefColors.material().neutral[50],
                 letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-                fontFamily: GoogleFonts.inter().fontFamily,
+                fontFamily: 'Inter',
               );
 
   static TextStyle? onlineStatusTextStyle(BuildContext context) =>

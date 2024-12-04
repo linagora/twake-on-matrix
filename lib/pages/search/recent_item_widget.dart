@@ -8,7 +8,6 @@ import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -114,7 +113,7 @@ class _GroupChatInformation extends StatelessWidget {
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: ListItemStyle.titleTextStyle(
-                  fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                  fontFamily: 'Inter',
                 ),
                 searchWord: searchKeyword,
               ),
@@ -124,7 +123,7 @@ class _GroupChatInformation extends StatelessWidget {
                 maxLines: 1,
                 softWrap: false,
                 style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                  fontFamily: 'Inter',
                 ),
               ),
             ],
@@ -192,14 +191,14 @@ class _DirectChatInformation extends StatelessWidget {
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: ListItemStyle.titleTextStyle(
-                  fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                  fontFamily: 'Inter',
                 ),
                 searchWord: searchKeyword,
               ),
               _SearchHighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
                 style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                  fontFamily: 'Inter',
                 ),
                 searchWord: searchKeyword,
               ),
@@ -250,7 +249,7 @@ class _ContactInformation extends StatelessWidget {
                     child: _SearchHighlightText(
                       text: contactPresentationSearch.displayName ?? "",
                       style: ListItemStyle.titleTextStyle(
-                        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                        fontFamily: 'Inter',
                       ),
                       searchWord: searchKeyword,
                     ),
@@ -273,7 +272,7 @@ class _ContactInformation extends StatelessWidget {
                     _SearchHighlightText(
                       text: contactPresentationSearch.matrixId ?? "",
                       style: ListItemStyle.subtitleTextStyle(
-                        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                        fontFamily: 'Inter',
                       ),
                       searchWord: searchKeyword,
                     ),
@@ -281,7 +280,7 @@ class _ContactInformation extends StatelessWidget {
                     _SearchHighlightText(
                       text: contactPresentationSearch.email ?? "",
                       style: ListItemStyle.subtitleTextStyle(
-                        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                        fontFamily: 'Inter',
                       ),
                       searchWord: searchKeyword,
                     ),

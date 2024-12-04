@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -157,7 +156,7 @@ class ChatInputRow extends StatelessWidget {
               color: controller.responsive.isMobile(context)
                   ? LinagoraRefColors.material().tertiary[50]
                   : LinagoraRefColors.material().tertiary[30],
-              fontFamily: GoogleFonts.inter().fontFamily,
+              fontFamily: 'Inter',
             ),
       ),
       onChanged: controller.onInputBarChanged,

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:google_fonts/google_fonts.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -136,7 +135,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   minLines: 2,
                   maxLines: 4,
                   readOnly: true,
-                  style: GoogleFonts.robotoMono(),
+                  style: Theme.of(context).textTheme.bodyMedium,
                   contextMenuBuilder: mobileTwakeContextMenuBuilder,
                   controller: TextEditingController(text: key),
                   decoration: const InputDecoration(
@@ -268,12 +267,11 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                           ? null
                           : [AutofillHints.password],
                       controller: _recoveryKeyTextEditingController,
-                      style: GoogleFonts.robotoMono(),
+                      style: Theme.of(context).textTheme.bodyLarge,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(16),
-                        hintStyle: TextStyle(
-                          fontFamily:
-                              Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Inter',
                         ),
                         hintText: L10n.of(context)!.recoveryKey,
                         errorText: _recoveryKeyInputError,

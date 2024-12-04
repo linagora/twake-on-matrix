@@ -197,7 +197,6 @@ dependencies:
   video_player: ^2.7.2
   js: ^0.6.7
   super_clipboard: 0.8.15
-  google_fonts: ^4.0.4
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
   flutter_localized_locales: ^2.0.5
@@ -257,6 +256,17 @@ flutter:
     - assets/google_fonts/
     - configurations/
     - configurations/icons/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/google_fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/google_fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/google_fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/google_fonts/Inter-Bold.ttf
+          weight: 700
 
 msix_config:
   display_name: Twake Chat

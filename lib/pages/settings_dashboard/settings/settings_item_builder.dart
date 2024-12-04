@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsItemBuilder extends StatelessWidget {
@@ -53,8 +52,7 @@ class SettingsItemBuilder extends StatelessWidget {
                           Text(
                             title,
                             style: ListItemStyle.titleTextStyle(
-                              fontFamily:
-                                  GoogleFonts.inter().fontFamily ?? 'Inter',
+                              fontFamily: 'Inter',
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

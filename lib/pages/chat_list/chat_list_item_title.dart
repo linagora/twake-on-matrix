@@ -9,7 +9,6 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -46,7 +45,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                         maxLines: 1,
                         softWrap: false,
                         style: ListItemStyle.titleTextStyle(
-                          fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
