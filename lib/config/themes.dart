@@ -26,13 +26,11 @@ abstract class TwakeThemes {
     bodyLarge: TextStyle(
       fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
-      fontSize: 17,
       letterSpacing: -0.15,
     ),
     bodyMedium: TextStyle(
       fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
-      fontSize: 14,
       letterSpacing: 0.25,
     ),
     bodySmall: TextStyle(
