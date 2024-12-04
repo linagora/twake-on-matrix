@@ -1,10 +1,6 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 class ChatSearchStyle {
-  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
-
   static const EdgeInsetsGeometry inputPadding =
       EdgeInsetsDirectional.only(start: 8, top: 16, bottom: 16, end: 16);
 
