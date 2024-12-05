@@ -58,9 +58,11 @@ class TwakeTextButton extends StatelessWidget {
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
         child: Container(
-          constraints: constraints ?? BoxConstraints(
-            maxWidth: TwakeTextButtonStyle.getBoxConstraintMaxWidth(context),
-          ),
+          constraints: constraints ??
+              BoxConstraints(
+                maxWidth:
+                    TwakeTextButtonStyle.getBoxConstraintMaxWidth(context),
+              ),
           height: 48,
           padding: margin,
           decoration:
