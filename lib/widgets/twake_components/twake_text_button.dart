@@ -1,4 +1,5 @@
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -10,8 +11,6 @@ class TwakeTextButton extends StatelessWidget {
   final EdgeInsetsDirectional margin;
 
   final TextStyle? styleMessage;
-
-  final double? paddingAll;
 
   final double? size;
 
@@ -36,7 +35,6 @@ class TwakeTextButton extends StatelessWidget {
     required this.message,
     this.styleMessage,
     this.onTap,
-    this.paddingAll,
     this.size,
     this.fill,
     this.weight,
@@ -57,11 +55,12 @@ class TwakeTextButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         onTapDown: (tapDownDetails) => onTapDown?.call(tapDownDetails),
-        radius: paddingAll,
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
         child: Container(
-          constraints: constraints,
+          constraints: constraints ?? BoxConstraints(
+            maxWidth: TwakeTextButtonStyle.getBoxConstraintMaxWidth(context),
+          ),
           height: 48,
           padding: margin,
           decoration:
@@ -70,16 +69,13 @@ class TwakeTextButton extends StatelessWidget {
             child: Tooltip(
               preferBelow: preferBelow,
               message: message,
-              child: Padding(
-                padding: EdgeInsets.all(paddingAll ?? 8.0),
-                child: Text(
-                  message,
-                  style: styleMessage ??
-                      Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: LinagoraSysColors.material().onPrimary,
-                          ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+              child: Text(
+                message,
+                style: styleMessage ??
+                    Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: LinagoraSysColors.material().onPrimary,
+                        ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),

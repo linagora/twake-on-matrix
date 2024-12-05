@@ -83,7 +83,7 @@ class _PermissionDialogState extends State<PermissionDialog>
                     ),
                     _PermissionTextButton(
                       context: context,
-                      text: L10n.of(context)!.allow,
+                      text: L10n.of(context)!.next,
                       onPressed: () async {
                         if (widget.onAcceptButton != null) {
                           widget.onAcceptButton!.call();
