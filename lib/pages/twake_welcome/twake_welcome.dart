@@ -91,6 +91,8 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
       await handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+      Logs().d("TwakeIdController:_redirectRegistrationUrl: DONE");
+      TwakeDialog.hideLoadingDialog(context);
     } catch (e) {
       Logs().e("TwakeIdController::_redirectRegistrationUrl: $e");
       TwakeDialog.hideLoadingDialog(context);
@@ -138,12 +140,6 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       context,
       url: AppConfig.privacyUrl,
     ).openUrlInAppBrowser();
-  }
-
-  @override
-  void dispose() {
-    TwakeDialog.hideLoadingDialog(context);
-    super.dispose();
   }
 
   @override
