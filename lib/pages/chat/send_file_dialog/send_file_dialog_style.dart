@@ -77,6 +77,4 @@ class SendFileDialogStyle {
           );
 
   static const double errorSubHeaderWidth = 340;
-
-  static const double heightOfBottomSheet = 400;
 }

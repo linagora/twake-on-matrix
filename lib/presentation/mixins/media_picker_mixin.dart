@@ -96,11 +96,11 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     });
 
     return await linagora_image_picker.ImagePicker.showImagesGridBottomSheet(
-      heightOfBottomSheet: SendFileDialogStyle.heightOfBottomSheet,
       context: context,
       controller: imagePickerController,
       backgroundImageCamera: MediaPickerStyle.cameraIcon,
       initialChildSize: MediaPickerStyle.initialChildSize,
+      minChildSize: MediaPickerStyle.initialChildSize,
       permissionStatus: permissionStatusPhotos,
       gridPadding: MediaPickerStyle.gridPadding,
       assetBackgroundColor: LinagoraSysColors.material().background,
@@ -139,7 +139,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
             return Container(
               padding: MediaPickerStyle.itemPickerPadding,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: LinagoraSysColors.material().surface,
                 border: Border(
                   top: BorderSide(
                     color: Theme.of(context)

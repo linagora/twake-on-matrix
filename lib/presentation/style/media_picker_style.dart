@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MediaPickerStyle {
   static const AssetImage cameraIcon = AssetImage("assets/verification.png");
 
-  static const initialChildSize = 0.6;
+  static const initialChildSize = 0.5;
 
   static const EdgeInsets gridPadding = EdgeInsets.only(bottom: 150);
 
