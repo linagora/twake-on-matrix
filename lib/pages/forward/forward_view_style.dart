@@ -37,7 +37,6 @@ class ForwardViewStyle {
 
   static EdgeInsetsDirectional webActionsButtonMargin =
       const EdgeInsetsDirectional.symmetric(
-    vertical: 10.0,
     horizontal: 24.0,
   );
 }

@@ -67,7 +67,7 @@ class ContactsWarningBannerView extends StatelessWidget {
                       ),
                     ),
                     TwakeTextButton(
-                      message: L10n.of(context)!.allow,
+                      message: L10n.of(context)!.next,
                       borderHover: ContactsWarningBannerStyle
                           .borderHoverButtonWaningBanner,
                       onTap: goToSettingsForPermissionActions,
