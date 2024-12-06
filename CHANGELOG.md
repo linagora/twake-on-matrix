@@ -1,3 +1,8 @@
+## [2.6.13+2330] - 2024-12-06
+### Fixed
+- Loading dialog when signing in/signing up TWP
+- Use appropriate text for permission message
+
 ## [2.6.12+2330] - 2024-11-28
 ### Changed
 - Enable log for webapp via environment variable
