@@ -7,7 +7,6 @@ import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -70,9 +69,7 @@ class ExpansionContactListTile extends StatelessWidget {
                                       contactDisplayName: contact.displayName,
                                       highlightKeyword: highlightKeyword,
                                       style: ListItemStyle.titleTextStyle(
-                                        fontFamily:
-                                            GoogleFonts.inter().fontFamily ??
-                                                'Inter',
+                                        fontFamily: 'Inter',
                                       ),
                                     ),
                                   ),
@@ -105,8 +102,7 @@ class ExpansionContactListTile extends StatelessWidget {
                           text: contact.matrixId!,
                           searchWord: highlightKeyword,
                           style: ListItemStyle.subtitleTextStyle(
-                            fontFamily:
-                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                            fontFamily: 'Inter',
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -116,8 +112,7 @@ class ExpansionContactListTile extends StatelessWidget {
                           text: contact.email!,
                           searchWord: highlightKeyword,
                           style: ListItemStyle.subtitleTextStyle(
-                            fontFamily:
-                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                            fontFamily: 'Inter',
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -127,8 +122,7 @@ class ExpansionContactListTile extends StatelessWidget {
                           text: contact.phoneNumber!,
                           searchWord: highlightKeyword,
                           style: ListItemStyle.subtitleTextStyle(
-                            fontFamily:
-                                GoogleFonts.inter().fontFamily ?? 'Inter',
+                            fontFamily: 'Inter',
                           ),
                         ),
                     ],

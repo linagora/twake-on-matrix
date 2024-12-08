@@ -1,6 +1,5 @@
 import 'package:fluffychat/presentation/decorators/chat_list/title_text_style_decorator/title_text_style_component.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -32,7 +31,6 @@ class ReadChatListTitleTextStyleDecorator
   TextStyle textStyle(Room room) {
     return LinagoraTextStyle.material().bodyMedium2.copyWith(
           color: LinagoraSysColors.material().onSurface,
-          fontFamily: GoogleFonts.inter().fontFamily,
         );
   }
 }
@@ -49,7 +47,6 @@ class UnreadChatListTitleTextStyleDecorator
       return _interfaceTextStyleComponent.textStyle(room).merge(
             LinagoraTextStyle.material().bodyMedium2.copyWith(
                   color: LinagoraSysColors.material().onSurface,
-                  fontFamily: GoogleFonts.inter().fontFamily,
                 ),
           );
     } else {

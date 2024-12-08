@@ -3,7 +3,6 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
@@ -23,58 +22,72 @@ abstract class TwakeThemes {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static var fallbackTextTheme = TextTheme(
-    bodyLarge: GoogleFonts.inter(
+  static var fallbackTextTheme = const TextTheme(
+    bodyLarge: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: -0.15,
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.25,
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.4,
     ),
-    labelLarge: GoogleFonts.inter(
+    labelLarge: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    displayLarge: GoogleFonts.inter(
+    displayLarge: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w700,
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       letterSpacing: 0.4,
     ),
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       fontSize: 32,
     ),
-    titleLarge: GoogleFonts.inter(
+    titleLarge: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
       letterSpacing: -0.15,
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.15,
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: TextStyle(
+      fontFamily: 'Inter',
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),

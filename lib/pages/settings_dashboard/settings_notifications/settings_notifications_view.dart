@@ -8,7 +8,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
@@ -74,7 +73,7 @@ class SettingsNotificationsView extends StatelessWidget {
                     title: Text(
                       L10n.of(context)!.pushRules,
                       style: ListItemStyle.titleTextStyle(
-                        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
@@ -91,7 +90,7 @@ class SettingsNotificationsView extends StatelessWidget {
                   title: Text(
                     L10n.of(context)!.devices,
                     style: ListItemStyle.titleTextStyle(
-                      fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                      fontFamily: 'Inter',
                     ),
                   ),
                 ),

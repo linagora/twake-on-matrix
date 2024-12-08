@@ -6,7 +6,6 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -44,7 +43,7 @@ mixin ChatListItemMixin {
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
           style: ListItemStyle.subtitleTextStyle(
-            fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+            fontFamily: 'Inter',
           ),
         );
       },
@@ -56,7 +55,7 @@ mixin ChatListItemMixin {
     return Text(
       displayedTypingText,
       style: ListItemStyle.subtitleTextStyle(
-        fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+        fontFamily: 'Inter',
       ),
       maxLines: 2,
       softWrap: true,
@@ -138,7 +137,7 @@ mixin ChatListItemMixin {
               maxLines: 1,
               softWrap: false,
               style: ListItemStyle.subtitleTextStyle(
-                fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                fontFamily: 'Inter',
               ).copyWith(
                 color: LinagoraSysColors.material().onSurface,
               ),
@@ -155,7 +154,7 @@ mixin ChatListItemMixin {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: ListItemStyle.subtitleTextStyle(
-                      fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+                      fontFamily: 'Inter',
                     ),
                   ),
           ],
@@ -201,7 +200,7 @@ mixin ChatListItemMixin {
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
             style: ListItemStyle.subtitleTextStyle(
-              fontFamily: GoogleFonts.inter().fontFamily ?? 'Inter',
+              fontFamily: 'Inter',
             ),
           ),
         ),
