@@ -66,7 +66,7 @@ class StreamImageViewerState extends State<StreamImageViewer> {
           maxScale: 5.0,
           child: Image.memory(
             bytes.bytes!,
-            fit: BoxFit.contain,
+            fit: BoxFit.cover,
             gaplessPlayback: true,
           ),
         );
