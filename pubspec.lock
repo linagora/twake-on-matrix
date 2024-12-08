@@ -1885,7 +1885,7 @@ packages:
     description:
       path: "."
       ref: TW-2145-HTML-rendering-make-message-bubble-break
-      resolved-ref: f0a790175b3e1223989fb4c10fd629e27c6caa3e
+      resolved-ref: "4ce75c228ffadf943b8f0411903cadbd37471589"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
