@@ -177,7 +177,6 @@ extension LocalizedBody on Event {
       }.contains(messageType);
 
   bool hideDisplayName(Event? nextEvent) =>
-      isOwnMessage ||
       room.isDirectChat ||
       !isSameSenderWith(nextEvent) ||
       type == EventTypes.Encrypted;

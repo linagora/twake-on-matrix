@@ -316,7 +316,8 @@ class _MessageState extends State<Message> {
       return const SizedBox();
     }
 
-    if (sameSender && !ownMessage) {
+    if (sameSender &&
+        (!ownMessage || !Message.responsiveUtils.isMobile(context))) {
       return Padding(
         padding: MessageStyle.paddingAvatar,
         child: FutureBuilder<User?>(

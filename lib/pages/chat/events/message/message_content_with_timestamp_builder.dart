@@ -138,8 +138,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                               Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              event.hideDisplayName(nextEvent) ||
-                                      event.hideDisplayNameInBubbleChat
+                              event.hideDisplayName(nextEvent)
                                   ? const SizedBox()
                                   : DisplayNameWidget(
                                       event: event,
