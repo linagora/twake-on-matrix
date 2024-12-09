@@ -74,11 +74,7 @@ class ChatEventList extends StatelessWidget {
       },
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.trackpad,
-          },
+          dragDevices: dragDevicesSupported(),
         ),
         child: SelectionTextContainer(
           chatController: controller,
@@ -212,6 +208,19 @@ class ChatEventList extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Set<PointerDeviceKind>? dragDevicesSupported() {
+    if (PlatformInfos.isWeb) {
+      return {
+        PointerDeviceKind.touch,
+      };
+    }
+    return {
+      PointerDeviceKind.touch,
+      PointerDeviceKind.mouse,
+      PointerDeviceKind.trackpad,
+    };
   }
 
   Widget _chatEmptyBuilder(Timeline timeline) {
