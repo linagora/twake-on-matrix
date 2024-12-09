@@ -29,7 +29,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: LA-1846_Update_image_picker_design
+      ref: master
 
   flutter_matrix_html:
     git:
