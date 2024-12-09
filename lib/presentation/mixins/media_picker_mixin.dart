@@ -100,6 +100,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       controller: imagePickerController,
       backgroundImageCamera: MediaPickerStyle.cameraIcon,
       initialChildSize: MediaPickerStyle.initialChildSize,
+      minChildSize: MediaPickerStyle.initialChildSize,
       permissionStatus: permissionStatusPhotos,
       gridPadding: MediaPickerStyle.gridPadding,
       assetBackgroundColor: LinagoraSysColors.material().background,
@@ -115,6 +116,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                 L10n.of(context)!.photoSelectedCounter(counterImage),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+              const Icon(Icons.chevron_right_outlined),
               const Expanded(child: SizedBox.shrink()),
             ],
           ),
@@ -137,7 +139,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
             return Container(
               padding: MediaPickerStyle.itemPickerPadding,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: LinagoraSysColors.material().surface,
                 border: Border(
                   top: BorderSide(
                     color: Theme.of(context)
@@ -163,7 +165,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
           return child!;
         },
         child: Container(
-          color: Colors.white,
+          color: LinagoraSysColors.material().background,
           child: Column(
             children: [
               Stack(
