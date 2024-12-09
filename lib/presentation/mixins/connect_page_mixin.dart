@@ -24,7 +24,7 @@ mixin ConnectPageMixin {
 
   static const windowNameValue = '_self';
 
-  static const redirectPublicPlatformOnWeb = 'post_registered_redirect_url';
+  static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
 
   bool supportsFlow({
     required BuildContext context,
