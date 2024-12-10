@@ -1734,6 +1734,12 @@ class ChatController extends State<Chat>
     _currentChatScrollState = ChatScrollState.scrolling;
   }
 
+  List<String> get getEventTypeToFilterUnnecessaryEvent => [
+        EventTypes.Message,
+        EventTypes.Encrypted,
+        EventTypes.Sticker,
+      ];
+
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
 
@@ -1759,11 +1765,7 @@ class ChatController extends State<Chat>
               historyCount: _defaultEventCountDisplay,
               filter: StateFilter(
                 lazyLoadMembers: true,
-                types: [
-                  EventTypes.Message,
-                  EventTypes.Encrypted,
-                  EventTypes.Sticker,
-                ],
+                types: getEventTypeToFilterUnnecessaryEvent,
               ),
             );
           }
