@@ -12,7 +12,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: support-filter-for-request-history
+      ref: twake-supported-0.22.6
 
   receive_sharing_intent:
     git:

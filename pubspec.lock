@@ -1876,8 +1876,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: support-filter-for-request-history
-      resolved-ref: "3709e411df81a0d90cb1d868df4cd23e4d05d4dd"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: "04ec6f3b9ece8e64e031cbe5c6e8164dc2ec7f2d"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
