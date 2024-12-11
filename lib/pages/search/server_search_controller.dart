@@ -100,8 +100,10 @@ class ServerSearchController with SearchDebouncerMixin {
                   ...success.results ?? <Result>[],
                 ]
                     .where(
-                      (result) =>
-                          result.isDisplayableResult(context: currentContext),
+                      (result) => result.isDisplayableResult(
+                        context: currentContext,
+                        searchWord: _searchCategories!.searchTerm,
+                      ),
                     )
                     .toList(),
               );
@@ -118,8 +120,10 @@ class ServerSearchController with SearchDebouncerMixin {
                 ...success.results ?? <Result>[],
               ]
                   .where(
-                    (result) =>
-                        result.isDisplayableResult(context: currentContext),
+                    (result) => result.isDisplayableResult(
+                      context: currentContext,
+                      searchWord: _searchCategories!.searchTerm,
+                    ),
                   )
                   .toList(),
             );
