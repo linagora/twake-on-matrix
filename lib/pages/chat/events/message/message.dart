@@ -311,12 +311,19 @@ class _MessageState extends State<Message> {
     );
   }
 
+  bool shouldDisplayAvatar(bool sameSender, bool ownMessage) {
+    return sameSender &&
+        (!ownMessage || !Message.responsiveUtils.isMobile(context));
+  }
+
   Widget _placeHolderWidget(bool sameSender, bool ownMessage, Event event) {
-    if (widget.selectMode || event.room.isDirectChat) {
+    if (widget.selectMode ||
+        (event.room.isDirectChat &&
+            Message.responsiveUtils.isMobile(context))) {
       return const SizedBox();
     }
 
-    if (sameSender && !ownMessage) {
+    if (shouldDisplayAvatar(sameSender, ownMessage)) {
       return Padding(
         padding: MessageStyle.paddingAvatar,
         child: FutureBuilder<User?>(
