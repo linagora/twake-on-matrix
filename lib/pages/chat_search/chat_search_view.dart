@@ -76,6 +76,11 @@ class _ServerSearchView extends StatelessWidget {
     return CustomScrollView(
       controller: controller.scrollController,
       slivers: [
+        const SliverToBoxAdapter(
+          child: SizedBox(
+            height: 8,
+          ),
+        ),
         ValueListenableBuilder(
           valueListenable: serverSearchController.searchResultsNotifier,
           builder: (context, searchResults, child) {
@@ -196,12 +201,10 @@ class _SearchItem extends StatelessWidget {
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
         final user = snapshot.data ?? event.senderFromMemoryOrFallback;
-        return Padding(
-          padding: ChatSearchStyle.itemMargin,
-          child: InkWell(
-            hoverColor: LinagoraRefColors.material().primary[99],
-            borderRadius:
-                BorderRadius.circular(ChatSearchStyle.itemBorderRadius),
+        return TwakeListItem(
+          height: ChatSearchStyle.itemHeight,
+          margin: ChatSearchStyle.itemMargin,
+          child: TwakeInkWell(
             onTap: () => onTap(event),
             child: Row(
               children: [
@@ -216,18 +219,9 @@ class _SearchItem extends StatelessWidget {
                   child: Container(
                     margin: ChatSearchStyle.itemPadding,
                     height: ChatSearchStyle.itemHeight,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: LinagoraRefColors.material().tertiary[60] ??
-                              Colors.black,
-                          width: 1,
-                        ),
-                      ),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Row(
                           children: [
@@ -237,13 +231,9 @@ class _SearchItem extends StatelessWidget {
                                     ? L10n.of(context)!.you
                                     : user.calcDisplayname(),
                                 maxLines: 1,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                      color: LinagoraSysColors.material()
-                                          .onSurface,
-                                    ),
+                                style: ListItemStyle.titleTextStyle(
+                                  fontFamily: 'Inter',
+                                ),
                               ),
                             ),
                             Text(
@@ -252,8 +242,8 @@ class _SearchItem extends StatelessWidget {
                                   .textTheme
                                   .labelMedium
                                   ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
+                                    color: LinagoraRefColors.material()
+                                        .tertiary[30],
                                   ),
                             ),
                           ],

@@ -12,11 +12,10 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact_succe
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ExpansionList extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> presentationContactsNotifier;
@@ -88,14 +87,13 @@ class ExpansionList extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ..._buildResponsiveButtons(context),
-                  InkWell(
+                  TwakeInkWell(
                     onTap: () {
                       onContactTap(
                         context,
                         success.contact,
                       );
                     },
-                    borderRadius: BorderRadius.circular(16.0),
                     child: ExpansionContactListTile(
                       contact: success.contact,
                       highlightKeyword: textEditingController.text,
@@ -138,14 +136,13 @@ class ExpansionList extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: contacts.length,
                       itemBuilder: (context, index) {
-                        return InkWell(
+                        return TwakeInkWell(
                           onTap: () {
                             onContactTap(
                               context,
                               contacts[index],
                             );
                           },
-                          borderRadius: BorderRadius.circular(16.0),
                           child: ExpansionContactListTile(
                             contact: contacts[index],
                             highlightKeyword: textEditingController.text,
