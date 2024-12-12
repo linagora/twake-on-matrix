@@ -29,6 +29,8 @@ class TwakeDialog {
 
   static const double maxWidthDialogButtonWeb = 128;
 
+  static const int defaultMaxLinesMessage = 3;
+
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
       if (TwakeApp.routerKey.currentContext != null) {
@@ -290,10 +292,18 @@ Future<ConfirmResult> showConfirmAlertDialog({
   bool barrierDismissible = true,
   bool isDestructiveAction = false,
   String? title,
+  Color? titleColor,
   String? message,
   String? okLabel,
   String? cancelLabel,
+  int? maxLinesMessage,
   void Function()? onClose,
+  Color? okLabelButtonColor,
+  Color? cancelLabelButtonColor,
+  Color? okTextColor,
+  Color? cancelTextColor,
+  double? maxWidthOkButton,
+  double? maxWidthCancelButton,
 }) async {
   final result = await showModal<ConfirmResult>(
     context: context,
@@ -376,15 +386,17 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                       .textTheme
                                       .headlineSmall
                                       ?.copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onSurfaceVariant,
+                                        color: titleColor ??
+                                            LinagoraSysColors.material()
+                                                .onSurfaceVariant,
                                       )
                                   : Theme.of(context)
                                       .textTheme
                                       .titleLarge
                                       ?.copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onSurfaceVariant,
+                                        color: titleColor ??
+                                            LinagoraSysColors.material()
+                                                .onSurfaceVariant,
                                       ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -410,7 +422,8 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                         color: LinagoraSysColors.material()
                                             .onSurfaceVariant,
                                       ),
-                              maxLines: 3,
+                              maxLines: maxLinesMessage ??
+                                  TwakeDialog.defaultMaxLinesMessage,
                               overflow: TextOverflow.ellipsis,
                             ),
                           SizedBox(
@@ -423,18 +436,28 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                 margin: const EdgeInsetsDirectional.symmetric(
                                   horizontal: 24.0,
                                 ),
+                                buttonDecoration: BoxDecoration(
+                                  color: cancelLabelButtonColor ??
+                                      LinagoraSysColors.material().onPrimary,
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(100),
+                                  ),
+                                ),
                                 message:
                                     cancelLabel ?? L10n.of(context)!.cancel,
                                 constraints: BoxConstraints(
-                                  maxWidth: responsiveUtils.isMobile(context)
-                                      ? TwakeDialog.maxWidthDialogButtonMobile
-                                      : TwakeDialog.maxWidthDialogButtonWeb,
+                                  maxWidth: maxWidthCancelButton ??
+                                      (responsiveUtils.isMobile(context)
+                                          ? TwakeDialog
+                                              .maxWidthDialogButtonMobile
+                                          : TwakeDialog
+                                              .maxWidthDialogButtonWeb),
                                 ),
                                 styleMessage: Theme.of(context)
                                     .textTheme
                                     .labelLarge
                                     ?.copyWith(
-                                      color:
+                                      color: cancelTextColor ??
                                           Theme.of(context).colorScheme.primary,
                                     ),
                                 hoverColor: Colors.transparent,
@@ -447,15 +470,19 @@ Future<ConfirmResult> showConfirmAlertDialog({
                               const SizedBox(width: 8),
                               TwakeTextButton(
                                 buttonDecoration: BoxDecoration(
-                                  color: LinagoraSysColors.material().primary,
+                                  color: okLabelButtonColor ??
+                                      LinagoraSysColors.material().primary,
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(100),
                                   ),
                                 ),
                                 constraints: BoxConstraints(
-                                  maxWidth: responsiveUtils.isMobile(context)
-                                      ? TwakeDialog.maxWidthDialogButtonMobile
-                                      : TwakeDialog.maxWidthDialogButtonWeb,
+                                  maxWidth: maxWidthOkButton ??
+                                      (responsiveUtils.isMobile(context)
+                                          ? TwakeDialog
+                                              .maxWidthDialogButtonMobile
+                                          : TwakeDialog
+                                              .maxWidthDialogButtonWeb),
                                 ),
                                 margin: const EdgeInsetsDirectional.symmetric(
                                   horizontal: 24.0,
@@ -465,8 +492,9 @@ Future<ConfirmResult> showConfirmAlertDialog({
                                     .textTheme
                                     .labelLarge
                                     ?.copyWith(
-                                      color: LinagoraSysColors.material()
-                                          .onPrimary,
+                                      color: okTextColor ??
+                                          LinagoraSysColors.material()
+                                              .onPrimary,
                                     ),
                                 hoverColor: Colors.transparent,
                                 onTap: () {
