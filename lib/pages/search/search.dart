@@ -58,7 +58,7 @@ class SearchController extends State<Search> {
 
   String get searchWord => textEditingController.text;
 
-  bool get isSearchWordUserId =>
+  bool get isSearchMatrixUserId =>
       searchWord.isValidMatrixId && searchWord.startsWith('@');
 
   String getBodyText(Event event, String searchWord) {

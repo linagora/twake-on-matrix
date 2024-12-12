@@ -119,7 +119,7 @@ class SearchView extends StatelessWidget {
             builder: (context, contacts, emptyChild) {
               if (contacts.isEmpty) {
                 final keyword = searchController.textEditingController.text;
-                if (searchController.isSearchWordUserId) {
+                if (searchController.isSearchMatrixUserId) {
                   return SearchExternalContactWidget(
                     keyword: keyword,
                     searchController: searchController,
