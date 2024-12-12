@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MediaPickerStyle {
   static const AssetImage cameraIcon = AssetImage("assets/verification.png");
 
-  static const initialChildSize = 0.6;
+  static const initialChildSize = 0.5;
 
   static const EdgeInsets gridPadding = EdgeInsets.only(bottom: 150);
 
@@ -16,7 +16,9 @@ class MediaPickerStyle {
 
   static const EdgeInsets itemPickerPadding = EdgeInsets.only(
     top: 8.0,
-    bottom: 34.0,
+    bottom: 17.0,
+    right: 65,
+    left: 65,
   );
 
   static const EdgeInsets composerPadding = EdgeInsets.only(
@@ -26,7 +28,7 @@ class MediaPickerStyle {
     left: 4.0,
   );
 
-  static const EdgeInsets sendButtonPadding = EdgeInsets.only(left: 8);
+  static const EdgeInsets sendButtonPadding = EdgeInsets.only(top: 4, left: 12);
 
   static const BorderRadius sendButtonBorderRadius =
       BorderRadius.all(Radius.circular(100));

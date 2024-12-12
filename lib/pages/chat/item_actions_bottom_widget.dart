@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 typedef OnPickerTypeTap = void Function(PickerType);
 
@@ -21,17 +20,14 @@ class PickerTypeOnBottom extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 56,
-            height: 56,
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
             decoration: ShapeDecoration(
-              color: pickerType.getBackgroundColor(),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(36),
               ),
             ),
             child: Icon(
+              size: 24,
               pickerType.getIcon(),
               color: pickerType.getIconColor(),
             ),
@@ -39,7 +35,7 @@ class PickerTypeOnBottom extends StatelessWidget {
           Text(
             pickerType.getTitle(context),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: LinagoraSysColors.material().onBackground,
+                  color: pickerType.getTextColor(context),
                 ),
           ),
         ],
