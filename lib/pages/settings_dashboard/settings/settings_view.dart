@@ -182,13 +182,15 @@ class SettingsView extends StatelessWidget {
                       padding: SettingsViewStyle.bodySettingsScreenPadding,
                       child: SettingsItemBuilder(
                         title: item.titleSettings(context),
+                        titleColor: item.titleColor(context),
                         leading: item.iconLeading(),
                         onTap: () => controller.onClickToSettingsItem(item),
                         isHideTrailingIcon: item.isHideTrailingIcon,
+                        trailingIconColor: item.iconColor(context),
                         isSelected: controller.optionSelected(item),
                       ),
                     ),
-                    item.index == SettingEnum.logout.index
+                    item.index == SettingEnum.deleteAccount.index
                         ? const SizedBox()
                         : Padding(
                             padding:

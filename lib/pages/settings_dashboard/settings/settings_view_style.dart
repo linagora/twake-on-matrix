@@ -45,4 +45,6 @@ class SettingsViewStyle {
         right: responsiveUtils.isMobile(context) ? 0 : 16.0,
       );
   static const double settingsItemHeight = 80;
+
+  static const double maxWidthCancelButton = 127;
 }
