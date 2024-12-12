@@ -4,6 +4,8 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsItemBuilder extends StatelessWidget {
   final String title;
+  final Color? titleColor;
+  final Color? trailingIconColor;
   final IconData leading;
   final VoidCallback onTap;
   final bool isHideTrailingIcon;
@@ -16,6 +18,8 @@ class SettingsItemBuilder extends StatelessWidget {
     required this.onTap,
     this.isHideTrailingIcon = false,
     this.isSelected = false,
+    this.trailingIconColor,
+    this.titleColor,
   });
 
   @override
@@ -35,9 +39,7 @@ class SettingsItemBuilder extends StatelessWidget {
                 child: Icon(
                   leading,
                   size: SettingsViewStyle.iconSize,
-                  color: isHideTrailingIcon
-                      ? Theme.of(context).colorScheme.error
-                      : LinagoraRefColors.material().tertiary[30],
+                  color: trailingIconColor,
                 ),
               ),
               Expanded(
@@ -51,9 +53,12 @@ class SettingsItemBuilder extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: ListItemStyle.titleTextStyle(
-                              fontFamily: 'Inter',
-                            ),
+                            style: LinagoraTextStyle.material()
+                                .bodyMedium2
+                                .copyWith(
+                                  color: titleColor,
+                                  fontFamily: 'Inter',
+                                ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
