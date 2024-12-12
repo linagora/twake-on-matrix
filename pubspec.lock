@@ -1877,7 +1877,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: "345aab06d195035c48784b23c849825a61c5a79a"
+      resolved-ref: "04ec6f3b9ece8e64e031cbe5c6e8164dc2ec7f2d"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
@@ -3007,10 +3007,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher
-      sha256: "9d06212b1362abc2f0f0d78e6f09f726608c74e3b9462e8368bb03314aa8d603"
+      sha256: "6ce1e04375be4eed30548f10a315826fd933c1e493206eab82eed01f438c8d2e"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.1"
+    version: "6.2.6"
   url_launcher_android:
     dependency: transitive
     description:
