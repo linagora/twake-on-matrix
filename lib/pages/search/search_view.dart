@@ -13,7 +13,6 @@ import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart';
 
 class SearchView extends StatelessWidget {
   final SearchController searchController;
@@ -73,15 +72,7 @@ class SearchView extends StatelessWidget {
                 searchController.serverSearchController.searchResultsNotifier,
             builder: ((context, searchResults, child) {
               if (searchResults is PresentationServerSideEmptySearch) {
-                if (searchController.searchContactAndRecentChatController!
-                    .recentAndContactsNotifier.value.isNotEmpty) {
-                  return child!;
-                }
-                return _SearchHeader(
-                  header: L10n.of(context)!.messages,
-                  searchController: searchController,
-                  needShowMore: false,
-                );
+                return child!;
               }
 
               if (searchResults is PresentationServerSideSearch) {
@@ -128,7 +119,7 @@ class SearchView extends StatelessWidget {
             builder: (context, contacts, emptyChild) {
               if (contacts.isEmpty) {
                 final keyword = searchController.textEditingController.text;
-                if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+                if (searchController.isSearchMatrixUserId) {
                   return SearchExternalContactWidget(
                     keyword: keyword,
                     searchController: searchController,

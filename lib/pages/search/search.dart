@@ -58,6 +58,9 @@ class SearchController extends State<Search> {
 
   String get searchWord => textEditingController.text;
 
+  bool get isSearchMatrixUserId =>
+      searchWord.isValidMatrixId && searchWord.startsWith('@');
+
   String getBodyText(Event event, String searchWord) {
     final senderName = event.senderFromMemoryOrFallback.calcDisplayname(
       i18n: MatrixLocals(L10n.of(context)!),
