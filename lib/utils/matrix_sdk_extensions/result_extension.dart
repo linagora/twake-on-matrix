@@ -1,11 +1,12 @@
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 extension ResultExtension on Result {
-  Event? getEvent(BuildContext context) {
+  Event? getEvent(BuildContext? context) {
+    if (context == null) {
+      return null;
+    }
     if (result?.roomId == null) {
       return null;
     }
@@ -18,17 +19,18 @@ extension ResultExtension on Result {
 
   bool isDisplayableResult({
     BuildContext? context,
+    Event? event,
     required String searchWord,
+    required MatrixLocalizations matrixLocalizations,
   }) {
     if (context == null) {
       return false;
     }
-    final event = getEvent(context);
     if (event == null) {
       return false;
     }
     final bodyContent = event.calcLocalizedBodyFallback(
-      MatrixLocals(L10n.of(context)!),
+      matrixLocalizations,
       hideEdit: true,
       hideReply: true,
       plaintextBody: true,
