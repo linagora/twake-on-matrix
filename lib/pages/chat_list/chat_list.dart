@@ -35,7 +35,6 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -534,6 +533,7 @@ class ChatListController extends State<ChatList>
     Room room,
     TapDownDetails details,
   ) async {
+    disableRightClick();
     final offset = details.globalPosition;
     final listPopupActions = _popupMenuActions(room);
     final listContextActions = _mapPopupMenuActionsToContextMenuActions(
@@ -546,6 +546,7 @@ class ChatListController extends State<ChatList>
       context: context,
       listActions: listContextActions,
     );
+    enableRightClick();
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
         listPopupActions[selectedActionIndex],
@@ -774,9 +775,6 @@ class ChatListController extends State<ChatList>
 
   @override
   void initState() {
-    if (kIsWeb) {
-      BrowserContextMenu.disableContextMenu();
-    }
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
     if (!matrixState.waitForFirstSync) {
