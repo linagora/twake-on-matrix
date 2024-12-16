@@ -1778,8 +1778,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "730692596f54708fab806f54912e3cbecb027825"
+      ref: add_padding_attribute_in_twakeListItem
+      resolved-ref: "0752427cdf79bbadba21a65a2045787b7f2d90d9"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"

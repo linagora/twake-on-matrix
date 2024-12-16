@@ -201,62 +201,59 @@ class _SearchItem extends StatelessWidget {
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
         final user = snapshot.data ?? event.senderFromMemoryOrFallback;
-        return Container(
-          padding: ChatSearchStyle.itemMargin,
+        return TwakeListItem(
           height: ChatSearchStyle.itemHeight,
+          padding: ChatSearchStyle.itemMargin,
           child: TwakeInkWell(
             onTap: () => onTap(event),
-            child: TwakeListItem(
-              child: Row(
-                children: [
-                  Padding(
-                    padding: ChatSearchStyle.avatarPadding,
-                    child: Avatar(
-                      mxContent: user.avatarUrl,
-                      name: user.calcDisplayname(),
-                    ),
+            child: Row(
+              children: [
+                Padding(
+                  padding: ChatSearchStyle.avatarPadding,
+                  child: Avatar(
+                    mxContent: user.avatarUrl,
+                    name: user.calcDisplayname(),
                   ),
-                  Expanded(
-                    child: Container(
-                      margin: ChatSearchStyle.itemPadding,
-                      height: ChatSearchStyle.itemHeight,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  user.id == Matrix.of(context).client.userID
-                                      ? L10n.of(context)!.you
-                                      : user.calcDisplayname(),
-                                  maxLines: 1,
-                                  style: ListItemStyle.titleTextStyle(
-                                    fontFamily: 'Inter',
-                                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: ChatSearchStyle.itemPadding,
+                    height: ChatSearchStyle.itemHeight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                user.id == Matrix.of(context).client.userID
+                                    ? L10n.of(context)!.you
+                                    : user.calcDisplayname(),
+                                maxLines: 1,
+                                style: ListItemStyle.titleTextStyle(
+                                  fontFamily: 'Inter',
                                 ),
                               ),
-                              Text(
-                                event.originServerTs
-                                    .localizedTimeShort(context),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
-                                      color: LinagoraRefColors.material()
-                                          .tertiary[30],
-                                    ),
-                              ),
-                            ],
-                          ),
-                          _MessageContent(event: event, searchWord: searchWord),
-                        ],
-                      ),
+                            ),
+                            Text(
+                              event.originServerTs.localizedTimeShort(context),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                    color: LinagoraRefColors.material()
+                                        .tertiary[30],
+                                  ),
+                            ),
+                          ],
+                        ),
+                        _MessageContent(event: event, searchWord: searchWord),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
