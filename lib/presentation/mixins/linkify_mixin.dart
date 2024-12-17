@@ -99,7 +99,10 @@ mixin LinkifyMixin {
       case PhoneNumberContextMenuActions.copy:
         Logs().i('LinkifyMixin: handleContextMenuAction: copyNumber $number');
         await Clipboard.setData(ClipboardData(text: number));
-        TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.phoneNumberCopiedToClipboard,
+        );
         break;
       default:
         break;
@@ -137,7 +140,10 @@ mixin LinkifyMixin {
             await Clipboard.setData(
               ClipboardData(text: number),
             );
-            TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.phoneNumberCopiedToClipboard,
+            );
           },
           icon: Icons.content_copy_outlined,
         ),
