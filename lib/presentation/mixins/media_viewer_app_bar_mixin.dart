@@ -68,7 +68,6 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   ) async =>
       await showDialog(
         context: context,
-        barrierDismissible: false,
         useSafeArea: false,
         useRootNavigator: false,
         builder: (context) {
