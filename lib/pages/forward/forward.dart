@@ -125,9 +125,12 @@ class ForwardController extends State<Forward>
         case const (ForwardMessageSuccess):
           final dataOnSuccess = success as ForwardMessageSuccess;
           if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop(const PopResultFromForward());
+            Navigator.of(context).pop(
+              PopResultFromForward(
+                roomReceiver: dataOnSuccess.room,
+              ),
+            );
           }
-          context.go('/rooms/${dataOnSuccess.room.id}');
           break;
         case const (ForwardMessageIsShareFileState):
           final dataOnSuccess = success as ForwardMessageIsShareFileState;

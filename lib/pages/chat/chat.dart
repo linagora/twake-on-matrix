@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
@@ -838,12 +839,16 @@ class ChatController extends State<Chat>
       );
     }
     _clearSelectEvent();
-    context.push(
+    final result = await context.push<PopResultFromForward>(
       '/rooms/forward',
       extra: ForwardArgument(
         fromRoomId: roomId ?? '',
       ),
     );
+
+    if (result != null) {
+      context.go('/rooms/${result.roomReceiver.id}');
+    }
   }
 
   void sendAgainAction() {
