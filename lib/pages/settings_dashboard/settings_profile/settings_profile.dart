@@ -455,11 +455,24 @@ class SettingsProfileController extends State<SettingsProfile>
             avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
-          if (!success.isDeleteAvatar) {
-            isEditedProfileNotifier.toggle();
-          }
+          isEditedProfileNotifier.toggle();
           _getCurrentProfile(client, isUpdated: true);
           TwakeDialog.hideLoadingDialog(context);
+        }
+
+        if (success is DeleteProfileSuccess) {
+          final newProfile = Profile(
+            userId: client.userID!,
+            displayName: success.displayName ?? displayName,
+            avatarUrl: null,
+          );
+          _sendAccountDataEvent(profile: newProfile);
+          isEditedProfileNotifier.toggle();
+          _getCurrentProfile(client, isUpdated: true);
+          TwakeDialog.hideLoadingDialog(context);
+          pickAvatarUIState.value = Right<Failure, Success>(
+            DeleteAvatarUIStateSuccess(),
+          );
         }
       },
     );

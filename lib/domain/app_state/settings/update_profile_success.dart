@@ -8,14 +8,22 @@ class UpdateProfileInitial extends Success {
 class UpdateProfileSuccess extends Success {
   final Uri? avatar;
   final String? displayName;
-  final bool isDeleteAvatar;
 
   const UpdateProfileSuccess({
     this.avatar,
     this.displayName,
-    this.isDeleteAvatar = false,
   });
 
   @override
-  List<Object?> get props => [avatar, displayName, isDeleteAvatar];
+  List<Object?> get props => [avatar, displayName];
+}
+
+class DeleteProfileSuccess extends Success {
+  final String? displayName;
+
+  const DeleteProfileSuccess({
+    this.displayName,
+  });
+  @override
+  List<Object?> get props => [displayName];
 }
