@@ -203,7 +203,7 @@ class _SearchItem extends StatelessWidget {
         final user = snapshot.data ?? event.senderFromMemoryOrFallback;
         return TwakeListItem(
           height: ChatSearchStyle.itemHeight,
-          padding: ChatSearchStyle.itemMargin,
+          margin: ChatSearchStyle.itemMargin,
           child: TwakeInkWell(
             onTap: () => onTap(event),
             child: Row(
