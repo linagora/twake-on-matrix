@@ -38,3 +38,10 @@ class GetAvatarBigSizeUIStateFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+class DeleteAvatarUIStateSuccess extends PickAvatarState {
+  DeleteAvatarUIStateSuccess();
+
+  @override
+  List<Object?> get props => [];
+}
