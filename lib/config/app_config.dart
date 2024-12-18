@@ -130,6 +130,13 @@ abstract class AppConfig {
   static const imageCompressFormmat = CompressFormat.jpeg;
   static const videoThumbnailFormat = ImageFormat.JPEG;
 
+  static const List<String> allowedExtensionsSupportedAvatar = [
+    'png',
+    'jpg',
+    'jpeg',
+    'jfif',
+  ];
+
   static String? issueId;
 
   static int defaultMaxUploadAvtarSizeInBytes = 10 * (1024 * 1024);
