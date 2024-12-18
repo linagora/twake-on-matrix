@@ -263,6 +263,7 @@ abstract class AppConfig {
     }
     if (json['enable_logs'] is bool) {
       DebugUtils.enableLogs = json['enable_logs'];
+      Logs().level = DebugUtils().isDebugMode ? Level.verbose : Level.warning;
     }
   }
 }
