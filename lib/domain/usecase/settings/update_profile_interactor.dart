@@ -30,11 +30,18 @@ class UpdateProfileInteractor {
           displayName,
         );
       }
+      if (isDeleteAvatar) {
+        yield Right(
+          DeleteProfileSuccess(
+            displayName: displayName,
+          ),
+        );
+        return;
+      }
       yield Right(
         UpdateProfileSuccess(
           displayName: displayName,
           avatar: avatarUrl,
-          isDeleteAvatar: isDeleteAvatar,
         ),
       );
     } catch (e) {
