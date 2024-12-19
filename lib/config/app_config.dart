@@ -82,7 +82,7 @@ abstract class AppConfig {
   static String get webBaseUrl => _webBaseUrl;
   static const String sourceCodeUrl =
       'https://github.com/linagora/twake-on-matrix';
-  static const String supportUrl = 'https://twake.app/support';
+  static String supportUrl = 'https://twake.app/support';
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;
@@ -269,6 +269,9 @@ abstract class AppConfig {
     }
     if (json['enable_logs'] is bool) {
       DebugUtils.enableLogs = json['enable_logs'];
+    }
+    if (json['support_url'] is String) {
+      supportUrl = json['support_url'];
     }
   }
 }
