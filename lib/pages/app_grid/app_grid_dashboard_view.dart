@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AppGridDashboardView extends StatelessWidget {
   final AppGridDashboardController controller;
@@ -33,16 +34,43 @@ class AppGridDashboardView extends StatelessWidget {
                   url: AppConfig.supportUrl,
                 ).openUrlInAppBrowser();
               },
+              onTapOutside: (_) {
+                controller.hoverColorAppHelp.value = Colors.transparent;
+              },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: SizedBox(
-                  width: AppGridDashboardViewStyle.sizeSupportButton,
-                  height: AppGridDashboardViewStyle.sizeSupportButton,
-                  child: SvgPicture.asset(
-                    ImagePaths.icTwakeSupport,
-                    width: AppGridDashboardViewStyle.sizeIcSupportButton,
-                    height: AppGridDashboardViewStyle.sizeIcSupportButton,
-                  ),
+                onEnter: (_) => controller.hoverColorAppHelp.value =
+                    AppGridDashboardViewStyle.hoverColor,
+                onExit: (_) {
+                  controller.hoverColorAppHelp.value = Colors.transparent;
+                },
+                child: ValueListenableBuilder(
+                  valueListenable: controller.hoverColorAppHelp,
+                  builder: (context, color, _) {
+                    return TooltipVisibility(
+                      visible: true,
+                      child: Tooltip(
+                        message: L10n.of(context)!.help,
+                        showDuration: const Duration(seconds: 1),
+                        waitDuration: const Duration(seconds: 1),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: AppGridDashboardViewStyle
+                                .appGridIconBorderRadius,
+                          ),
+                          padding: AppGridDashboardViewStyle.appGridIconPadding,
+                          child: SvgPicture.asset(
+                            ImagePaths.icTwakeSupport,
+                            width:
+                                AppGridDashboardViewStyle.sizeIcSupportButton,
+                            height:
+                                AppGridDashboardViewStyle.sizeIcSupportButton,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -56,19 +84,19 @@ class AppGridDashboardView extends StatelessWidget {
                 },
                 onTapOutside: (_) {
                   controller.hideAppGridDashboard();
-                  controller.hoverColor.value = Colors.transparent;
+                  controller.hoverColorAppGrid.value = Colors.transparent;
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
-                  onEnter: (_) => controller.hoverColor.value =
+                  onEnter: (_) => controller.hoverColorAppGrid.value =
                       AppGridDashboardViewStyle.hoverColor,
                   onExit: (_) {
                     if (!isOpenAppGridDashboard) {
-                      controller.hoverColor.value = Colors.transparent;
+                      controller.hoverColorAppGrid.value = Colors.transparent;
                     }
                   },
                   child: ValueListenableBuilder(
-                    valueListenable: controller.hoverColor,
+                    valueListenable: controller.hoverColorAppGrid,
                     builder: (context, color, child) {
                       return PortalTarget(
                         portalFollower: const SizedBox(
