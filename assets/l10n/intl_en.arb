@@ -3103,5 +3103,12 @@
   "phoneNumberCopiedToClipboard": "Phone number copied to clipboard",
   "deleteAccountMessage": "Groups chats that you have created will remain unadministered unless you have given another user administrator rights. Users will still have a history of messages with you. Deleting the account won't help.",
   "deleteLater": "Delete later",
-  "areYouSureYouWantToDeleteAccount": "Are you sure you want to delete account?"
+  "areYouSureYouWantToDeleteAccount": "Are you sure you want to delete account?",
+  "messageForwardedTo": "Message forwarded to {roomName}",
+  "@messageForwardedTo": {
+    "type": "text",
+    "placeholders": {
+      "roomName": {}
+    }
+  }
 }

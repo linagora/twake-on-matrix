@@ -7,11 +7,13 @@ import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   final MenuController menuController = MenuController();
@@ -37,10 +39,12 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
     final result = responsive.isMobile(context)
         ? await _showForwardMobileDialog(context)
         : await _showForwardWebDialog(context);
-
-    if (result is PopResultFromForward) {
-      Navigator.of(context).pop<PopResultFromForward>();
-    }
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.messageForwardedTo(
+        result?.roomReceiver.getLocalizedDisplayname() ?? '',
+      ),
+    );
   }
 
   Future<PopResultFromForward?> _showForwardMobileDialog(
@@ -64,7 +68,6 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   ) async =>
       await showDialog(
         context: context,
-        barrierDismissible: false,
         useSafeArea: false,
         useRootNavigator: false,
         builder: (context) {
