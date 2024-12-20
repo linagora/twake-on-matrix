@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
+import 'message.dart';
 
 class MessageContentBuilder extends StatelessWidget
     with MessageContentBuilderMixin {
@@ -46,6 +47,7 @@ class MessageContentBuilder extends StatelessWidget
       ownMessage: event.isOwnMessage,
       hideDisplayName: event.hideDisplayName(
         nextEvent,
+        Message.responsiveUtils.isMobile(context),
       ),
     );
     final stepWidth = sizeMessageBubble?.totalMessageWidth;

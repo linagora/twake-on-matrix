@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -73,14 +74,15 @@ class _PermissionDialogState extends State<PermissionDialog>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _PermissionTextButton(
-                      context: context,
-                      text: L10n.of(context)!.deny,
-                      onPressed: () {
-                        widget.onRefuseTap?.call();
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                    if (!PlatformInfos.isIOS)
+                      _PermissionTextButton(
+                        context: context,
+                        text: L10n.of(context)!.deny,
+                        onPressed: () {
+                          widget.onRefuseTap?.call();
+                          Navigator.of(context).pop();
+                        },
+                      ),
                     _PermissionTextButton(
                       context: context,
                       text: L10n.of(context)!.next,

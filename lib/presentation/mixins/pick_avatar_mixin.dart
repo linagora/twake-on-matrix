@@ -41,7 +41,8 @@ mixin PickAvatarMixin {
       PickingAvatarUIState(),
     );
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+      type: FileType.custom,
+      allowedExtensions: AppConfig.allowedExtensionsSupportedAvatar,
       withReadStream: true,
     );
     if (result == null || result.files.single.readStream == null) {

@@ -5,6 +5,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -20,7 +21,9 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'settings_view.dart';
 
@@ -43,6 +46,9 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
   final _responsiveUtils = getIt.get<ResponsiveUtils>();
 
+  static const String generateEmailSubject =
+      'Request for Deletion of Twake Chat Account';
+
   StreamSubscription? onAccountDataSubscription;
 
   final List<SettingEnum> getListSettingItem = [
@@ -54,6 +60,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     SettingEnum.help,
     SettingEnum.about,
     SettingEnum.logout,
+    if (PlatformInfos.isIOS) SettingEnum.deleteAccount,
   ];
 
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
@@ -257,6 +264,34 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         PlatformInfos.showAboutDialogFullScreen();
       case SettingEnum.logout:
         logoutAction();
+        break;
+      case SettingEnum.deleteAccount:
+        if (await showConfirmAlertDialog(
+              useRootNavigator: false,
+              context: context,
+              responsiveUtils: _responsiveUtils,
+              title: L10n.of(context)!.areYouSureYouWantToDeleteAccount,
+              message: L10n.of(context)!.deleteAccountMessage,
+              okLabel: L10n.of(context)!.continueProcess,
+              okLabelButtonColor: Colors.transparent,
+              okTextColor: LinagoraSysColors.material().primary,
+              cancelLabel: L10n.of(context)!.deleteLater,
+              cancelLabelButtonColor: LinagoraSysColors.material().primary,
+              cancelTextColor: LinagoraSysColors.material().onPrimary,
+              maxWidthCancelButton: SettingsViewStyle.maxWidthCancelButton,
+              maxLinesMessage: 7,
+            ) ==
+            ConfirmResult.cancel) {
+          return;
+        }
+
+        final emailUri = Uri.parse(
+          'mailto:software@linagora.com?subject=${Uri.encodeComponent(generateEmailSubject)}',
+        );
+        if (await canLaunchUrl(emailUri)) {
+          await launchUrl(emailUri);
+        }
+
         break;
       default:
         break;

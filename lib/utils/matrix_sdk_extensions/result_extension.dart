@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 extension ResultExtension on Result {
-  Event? getEvent(BuildContext context) {
+  Event? getEvent(BuildContext? context) {
+    if (context == null) {
+      return null;
+    }
     if (result?.roomId == null) {
       return null;
     }
@@ -14,13 +17,26 @@ extension ResultExtension on Result {
     return Event.fromMatrixEvent(result!, room);
   }
 
-  bool isDisplayableResult({BuildContext? context}) {
+  bool isDisplayableResult({
+    BuildContext? context,
+    Event? event,
+    required String searchWord,
+    required MatrixLocalizations matrixLocalizations,
+  }) {
     if (context == null) {
       return false;
     }
-    final event = getEvent(context);
-    return event != null &&
-        (event.relationshipType == null ||
-            event.relationshipType != RelationshipTypes.reply);
+    if (event == null) {
+      return false;
+    }
+    final bodyContent = event.calcLocalizedBodyFallback(
+      matrixLocalizations,
+      hideEdit: true,
+      hideReply: true,
+      plaintextBody: true,
+      removeMarkdown: true,
+    );
+
+    return bodyContent.toLowerCase().contains(searchWord.toLowerCase());
   }
 }

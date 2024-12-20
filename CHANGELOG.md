@@ -1,3 +1,8 @@
+## [2.6.14+2330] - 2024-12-06
+### Fixed
+- [Apple rejection] Add Delete Account button in settings
+- [Apple rejection] Remove `Deny` button in permission explaination dialog
+
 ## [2.6.13+2330] - 2024-12-06
 ### Fixed
 - Loading dialog when signing in/signing up TWP

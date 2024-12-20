@@ -10,6 +10,8 @@ import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -100,8 +102,14 @@ class ServerSearchController with SearchDebouncerMixin {
                   ...success.results ?? <Result>[],
                 ]
                     .where(
-                      (result) =>
-                          result.isDisplayableResult(context: currentContext),
+                      (result) => result.isDisplayableResult(
+                        context: currentContext,
+                        event: result.getEvent(currentContext),
+                        matrixLocalizations: currentContext == null
+                            ? const MatrixDefaultLocalizations()
+                            : MatrixLocals(L10n.of(currentContext!)!),
+                        searchWord: _searchCategories!.searchTerm,
+                      ),
                     )
                     .toList(),
               );
@@ -118,8 +126,14 @@ class ServerSearchController with SearchDebouncerMixin {
                 ...success.results ?? <Result>[],
               ]
                   .where(
-                    (result) =>
-                        result.isDisplayableResult(context: currentContext),
+                    (result) => result.isDisplayableResult(
+                      context: currentContext,
+                      event: result.getEvent(currentContext),
+                      matrixLocalizations: currentContext == null
+                          ? const MatrixDefaultLocalizations()
+                          : MatrixLocals(L10n.of(currentContext!)!),
+                      searchWord: _searchCategories!.searchTerm,
+                    ),
                   )
                   .toList(),
             );

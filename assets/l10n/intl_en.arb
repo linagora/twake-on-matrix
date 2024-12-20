@@ -691,7 +691,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "deleteAccount": "Delete account",
+  "deleteAccount": "Delete Account",
   "@deleteAccount": {
     "type": "text",
     "placeholders": {}
@@ -3100,5 +3100,8 @@
   "callViaCarrier": "Call via Carrier",
   "scanQrCodeToJoin": "Installation of the mobile application will allow you to contact people from your phone's address book, your chats will be synchronised between devices",
   "thisFieldCannotBeBlank": "This field cannot be blank",
-  "phoneNumberCopiedToClipboard": "Phone number copied to clipboard"
+  "phoneNumberCopiedToClipboard": "Phone number copied to clipboard",
+  "deleteAccountMessage": "Groups chats that you have created will remain unadministered unless you have given another user administrator rights. Users will still have a history of messages with you. Deleting the account won't help.",
+  "deleteLater": "Delete later",
+  "areYouSureYouWantToDeleteAccount": "Are you sure you want to delete account?"
 }
