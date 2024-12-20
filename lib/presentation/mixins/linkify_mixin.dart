@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/phone_number_context_menu_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu.dart';
@@ -57,6 +58,7 @@ mixin LinkifyMixin {
     );
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
+        context: context,
         action: phoneNumberContextMenuOnWeb[selectedActionIndex],
         number: number,
       );
@@ -89,6 +91,7 @@ mixin LinkifyMixin {
   }
 
   void _handleClickOnContextMenuItem({
+    required BuildContext context,
     required PhoneNumberContextMenuActions action,
     required String number,
   }) async {
@@ -96,6 +99,10 @@ mixin LinkifyMixin {
       case PhoneNumberContextMenuActions.copy:
         Logs().i('LinkifyMixin: handleContextMenuAction: copyNumber $number');
         await Clipboard.setData(ClipboardData(text: number));
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.phoneNumberCopiedToClipboard,
+        );
         break;
       default:
         break;
@@ -132,6 +139,10 @@ mixin LinkifyMixin {
           onTap: () async {
             await Clipboard.setData(
               ClipboardData(text: number),
+            );
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.phoneNumberCopiedToClipboard,
             );
           },
           icon: Icons.content_copy_outlined,
