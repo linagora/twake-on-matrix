@@ -14,7 +14,6 @@ import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -35,6 +34,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   final responsive = getIt.get<ResponsiveUtils>();
 
   final ValueNotifier<List<User>?> _membersNotifier = ValueNotifier(null);
+
+  final ValueNotifier<List<User>?> _displayMembersNotifier =
+      ValueNotifier(null);
 
   late final List<ChatDetailsPage> tabList;
 
@@ -59,6 +61,8 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const _mediaFetchLimit = 20;
   static const _linksFetchLimit = 20;
   static const _filesFetchLimit = 20;
+  static const _maxMembers = 30;
+  int _currentMembersCount = _maxMembers;
 
   static const _memberPageKey = PageStorageKey('members');
   static const _mediaPageKey = PageStorageKey('media');
@@ -109,11 +113,36 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   void _requestMoreMembersAction() async {
-    final participants = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room!.requestParticipants(),
-    );
-    if (participants.error == null) {
-      _membersNotifier.value = participants.result;
+    final currentMembersCount = _displayMembersNotifier.value?.length ?? 0;
+    _currentMembersCount += _maxMembers;
+
+    final members = _membersNotifier.value;
+    if (members != null && currentMembersCount < members.length) {
+      final endIndex = _currentMembersCount > members.length
+          ? members.length
+          : _currentMembersCount;
+      final newMembers = members.sublist(currentMembersCount, endIndex);
+      _displayMembersNotifier.value = [
+        ...?_displayMembersNotifier.value,
+        ...newMembers,
+      ];
+    } else {
+      _displayMembersNotifier.value = [
+        ...?_displayMembersNotifier.value,
+        ...?members,
+      ];
+    }
+  }
+
+  void _initDisplayMembers() {
+    final members = _membersNotifier.value;
+    if (members != null && members.isNotEmpty) {
+      final endIndex = _currentMembersCount > members.length
+          ? members.length
+          : _currentMembersCount;
+      _displayMembersNotifier.value = members.sublist(0, endIndex);
+    } else {
+      _displayMembersNotifier.value = [];
     }
   }
 
@@ -188,6 +217,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void _initMembers() {
     if (chatType == ChatDetailsScreenEnum.group) {
       _membersNotifier.value ??= room?.getParticipants();
+      _initDisplayMembers();
     }
   }
 
@@ -236,10 +266,8 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
               page: page,
               child: ChatDetailsMembersPage(
                 key: _memberPageKey,
-                membersNotifier: _membersNotifier,
+                displayMembersNotifier: _displayMembersNotifier,
                 actualMembersCount: actualMembersCount,
-                canRequestMoreMembers:
-                    (_membersNotifier.value?.length ?? 0) < actualMembersCount,
                 requestMoreMembersAction: _requestMoreMembersAction,
                 openDialogInvite: _openDialogInvite,
                 isMobileAndTablet: isMobileAndTablet,
@@ -308,6 +336,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void dispose() {
     _disposeControllers();
     _membersNotifier.dispose();
+    _displayMembersNotifier.dispose();
     _onRoomEventChangedSubscription?.cancel();
     nestedScrollViewState.currentState?.innerController.dispose();
     super.dispose();
