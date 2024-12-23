@@ -40,11 +40,9 @@ class ContactsSelectionList extends StatelessWidget {
       valueListenable: presentationContactNotifier,
       builder: (context, state, child) {
         final isSearchModeEnable = textEditingController.text.isNotEmpty;
-
+        final recentContact = presentationRecentContactNotifier.value.isEmpty;
         return state.fold(
           (failure) {
-            final recentContact =
-                presentationRecentContactNotifier.value.isEmpty;
             final textControllerIsEmpty = textEditingController.text.isEmpty;
             if (failure is GetPresentationContactsEmpty ||
                 failure is GetPresentationContactsFailure) {
@@ -70,7 +68,8 @@ class ContactsSelectionList extends StatelessWidget {
               );
             }
 
-            if (success is PresentationExternalContactSuccess) {
+            if (success is PresentationExternalContactSuccess &&
+                recentContact) {
               return SliverToBoxAdapter(
                 child: ContactItem(
                   contact: success.contact,
