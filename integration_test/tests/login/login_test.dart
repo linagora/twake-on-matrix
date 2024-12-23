@@ -3,8 +3,7 @@ import '../../scenarios/login_scenario.dart';
 
 void main() {
   TestBase().runPatrolTest(
-    description:
-        'Should see chat list after successful login',
+    description: 'Should see chat list after successful login',
     test: ($) async {
       final loginScenario = LoginScenario(
         $,

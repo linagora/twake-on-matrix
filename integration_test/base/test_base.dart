@@ -1,12 +1,7 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:patrol/patrol.dart';
+import 'package:fluffychat/main.dart' as app;
 
 class TestBase {
   void runPatrolTest({
@@ -15,15 +10,17 @@ class TestBase {
   }) {
     patrolTest(description,
         config: const PatrolTesterConfig(
-          settlePolicy: SettlePolicy.trySettle,
+          printLogs: true,
           visibleTimeout: Duration(minutes: 1),
         ),
         nativeAutomatorConfig: const NativeAutomatorConfig(
-          findTimeout: Duration(seconds: 10),
+          connectionTimeout: Duration(minutes: 1, seconds: 10),
+          findTimeout: Duration(seconds: 60),
+          keyboardBehavior: KeyboardBehavior.alternative,
         ),
         framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
         ($) async {
-      await initTwakeChat($);
+      await initTwakeChat();
       final originalOnError = FlutterError.onError!;
       FlutterError.onError = (FlutterErrorDetails details) {
         originalOnError(details);
@@ -32,17 +29,7 @@ class TestBase {
     });
   }
 
-  Future<void> initTwakeChat(PatrolIntegrationTester $) async {
-    MediaKit.ensureInitialized();
-    GoRouter.optionURLReflectsImperativeAPIs = true;
-    await Hive.initFlutter();
-    GetItInitializer().setUp();
-    final clients = await ClientManager.getClients();
-    final firstClient = clients.firstOrNull;
-    await firstClient?.roomsLoading;
-    await firstClient?.accountDataLoading;
-    await $.pumpWidgetAndSettle(
-      TwakeApp(clients: clients),
-    );
+  Future<void> initTwakeChat() async {
+    app.main();
   }
 }
