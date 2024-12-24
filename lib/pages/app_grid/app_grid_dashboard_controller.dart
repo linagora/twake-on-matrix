@@ -84,6 +84,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
     isOpenAppGridDashboardNotifier.dispose();
     linagoraApplications.dispose();
     hoverColorAppGrid.dispose();
+    hoverColorAppHelp.dispose();
     super.dispose();
   }
 
