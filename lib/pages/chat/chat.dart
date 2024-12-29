@@ -2015,6 +2015,16 @@ class ChatController extends State<Chat>
     }
   }
 
+  void requestNotificationPermission() {
+    if (PlatformInfos.isWeb) {
+      try {
+        html.Notification.requestPermission();
+      } catch (e) {
+        Logs().e("Error requesting notification permission: $e");
+      }
+    }
+  }
+
   @override
   void dispose() {
     unregisterPasteShortcutListeners();
@@ -2058,7 +2068,10 @@ class ChatController extends State<Chat>
   Widget build(BuildContext context) {
     return MouseRegion(
       onHover: (_) => _resetLocationPath(),
-      child: ChatView(this, key: widget.key),
+      child: GestureDetector(
+        onTap: requestNotificationPermission,
+        child: ChatView(this, key: widget.key),
+      ),
     );
   }
 }
