@@ -1877,7 +1877,7 @@ packages:
     description:
       path: "."
       ref: TW-2165-support-store-members-in-local-database
-      resolved-ref: cb37032f466004500c98949739720b3b4457cc73
+      resolved-ref: "878b5e873c5196ae0207db762a3253f66a4c337b"
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
