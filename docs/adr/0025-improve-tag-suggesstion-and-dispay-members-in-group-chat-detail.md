@@ -37,16 +37,16 @@ More details about this logic can be found in the [ADR #0005](https://github.com
 
 1.2 **Display members in the group chat detail**
 - When the user clicks on the group chat, how to display the members?
-  1. Display members with a maximum size defined by the `_maxMembers` variable defined in `chat_details_tab_mixin.dart`.
+  1. Display members with a maximum size defined by the `_membersPerPage` variable defined in `chat_details_tab_mixin.dart`.
       ```dart
-         static const _maxMembers = 30;
+         static const _membersPerPage = 30;
       ```
   2. If more members can be loaded, display the Load more button at the end of the list.
   3. When the user clicks on the Load more button, call the function to get more members from the Hive database.
       ```dart
         void _requestMoreMembersAction() async {
         final currentMembersCount = _displayMembersNotifier.value?.length ?? 0;
-        _currentMembersCount += _maxMembers;
+        _currentMembersCount += _membersPerPage;
         
             final members = _membersNotifier.value;
             if (members != null && currentMembersCount < members.length) {

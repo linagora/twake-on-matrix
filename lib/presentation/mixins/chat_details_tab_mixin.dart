@@ -61,8 +61,8 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const _mediaFetchLimit = 20;
   static const _linksFetchLimit = 20;
   static const _filesFetchLimit = 20;
-  static const _maxMembers = 30;
-  int _currentMembersCount = _maxMembers;
+  static const _membersPerPage = 30;
+  int _currentMembersCount = _membersPerPage;
 
   static const _memberPageKey = PageStorageKey('members');
   static const _mediaPageKey = PageStorageKey('media');
@@ -114,7 +114,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   void _requestMoreMembersAction() async {
     final currentMembersCount = _displayMembersNotifier.value?.length ?? 0;
-    _currentMembersCount += _maxMembers;
+    _currentMembersCount += _membersPerPage;
 
     final members = _membersNotifier.value;
     if (members != null && currentMembersCount < members.length) {
