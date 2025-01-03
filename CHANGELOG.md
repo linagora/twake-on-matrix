@@ -1,3 +1,23 @@
+## [2.6.15+2330] - 2025-01-03
+### Fixed
+- #2152 Fix full-word search for unencrypted messages isn't performed until you put a space after the word
+- #2111 Fix replies do not appear in search results.
+- #2112 Fix bug Remove profile picture / avatar doesn't work
+- #2106 Fix duplicate result when adding member with mxid
+- #2165 Improve tag suggestion in chat
+
+### Change
+- Upgrade gradle to `Xmx4096m`
+- #2100 Update image type supported when picking new avatar
+- #2151 Support enable/disable context menu Browser
+- #2144 Update search result list item
+- Update new link support page - [TWP-217](https://github.com/linagora/twake-workplace-private/issues/217) 
+
+### Added
+- #2169 Added avatar and name for sender messages in web
+- Added widget test for message_avatar_mixin
+- #2151 Add a toast message when copying a phone number
+
 ## [2.6.14+2330] - 2024-12-06
 ### Fixed
 - [Apple rejection] Add Delete Account button in settings
