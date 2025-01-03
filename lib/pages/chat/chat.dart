@@ -291,6 +291,19 @@ class ChatController extends State<Chat>
     }
   }
 
+  Future<void> _requestParticipants() async {
+    if (room == null) return;
+    try {
+      await room!.requestParticipants(
+        at: room!.prev_batch,
+        notMembership: Membership.leave,
+      );
+    } catch (e) {
+      Logs()
+          .e('Chat::_requestParticipants(): Failed to request participants', e);
+    }
+  }
+
   bool isUnpinEvent(Event event) =>
       room?.pinnedEventIds
           .firstWhereOrNull((eventId) => eventId == event.eventId) !=
@@ -1995,13 +2008,14 @@ class ChatController extends State<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (room == null) {
         return context.go("/error");
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
       initCachedPresence();
+      await _requestParticipants();
     });
   }
 
