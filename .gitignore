@@ -12,6 +12,9 @@
 .svn/
 prime
 
+#nix/direnv
+.direnv/
+
 #generated file
 *.g.dart
 **/*.mocks.dart
