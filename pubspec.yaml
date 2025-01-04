@@ -12,7 +12,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: TW-2165-support-store-members-in-local-database
+      ref: twake-supported-0.22.6
 
   receive_sharing_intent:
     git:

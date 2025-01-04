@@ -1876,8 +1876,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: TW-2165-support-store-members-in-local-database
-      resolved-ref: "5db9aac805dc165508ee10abfe06a4489b98f26a"
+      ref: "twake-supported-0.22.6"
+      resolved-ref: ff95aa820c383baf7b808d8df6ebf4d25a3c6c33
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
