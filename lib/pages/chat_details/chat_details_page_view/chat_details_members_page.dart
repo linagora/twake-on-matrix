@@ -7,21 +7,19 @@ import 'package:matrix/matrix.dart';
 class ChatDetailsMembersPage extends StatelessWidget {
   static const int addMemberItemCount = 1;
 
-  final ValueNotifier<List<User>?> membersNotifier;
+  final ValueNotifier<List<User>?> displayMembersNotifier;
   final int actualMembersCount;
   final VoidCallback openDialogInvite;
   final VoidCallback requestMoreMembersAction;
   final VoidCallback? onUpdatedMembers;
-  final bool canRequestMoreMembers;
   final bool isMobileAndTablet;
 
   const ChatDetailsMembersPage({
     super.key,
-    required this.membersNotifier,
+    required this.displayMembersNotifier,
     required this.actualMembersCount,
     required this.openDialogInvite,
     required this.requestMoreMembersAction,
-    required this.canRequestMoreMembers,
     required this.isMobileAndTablet,
     this.onUpdatedMembers,
   });
@@ -29,9 +27,10 @@ class ChatDetailsMembersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: membersNotifier,
+      valueListenable: displayMembersNotifier,
       builder: (context, members, child) {
         members ??= [];
+        final canRequestMoreMembers = members.length < actualMembersCount;
         return Column(
           children: [
             Expanded(
