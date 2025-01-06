@@ -195,7 +195,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (avatarFilePicker != null) {
       avatarFilePicker = null;
       pickAvatarUIState.value = Right(
-        GetAvatarInitialUIState(),
+        DeleteAvatarUIStateSuccess(),
       );
       if (_isEditDescription || _isEditGroupName) {
         return;
@@ -206,7 +206,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (avatarAssetEntity != null) {
       avatarAssetEntity = null;
       pickAvatarUIState.value = Right(
-        GetAvatarInitialUIState(),
+        DeleteAvatarUIStateSuccess(),
       );
       if (_isEditDescription || _isEditGroupName) {
         return;
@@ -216,7 +216,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }
     if (room?.avatar != null) {
       pickAvatarUIState.value = Right(
-        GetAvatarInitialUIState(),
+        DeleteAvatarUIStateSuccess(),
       );
       _isDeleteAvatar = true;
       if (_isEditDescription || _isEditGroupName) {
