@@ -286,21 +286,33 @@ class _AvatarBuilder extends StatelessWidget {
             );
           }
 
-          if (PlatformInfos.isWeb && success is GetAvatarOnWebUIStateSuccess) {
-            if (success.matrixFile?.readStream == null) {
-              return child!;
+          if (PlatformInfos.isWeb) {
+            if (success is GetAvatarOnWebUIStateSuccess) {
+              if (success.matrixFile?.readStream == null) {
+                return child!;
+              }
+              return ClipOval(
+                child: SizedBox.fromSize(
+                  size: const Size.fromRadius(
+                    ChatDetailEditViewStyle.avatarRadiusForWeb,
+                  ),
+                  child: StreamImageViewer(
+                    matrixFile: success.matrixFile!,
+                    onImageLoaded: onImageLoaded,
+                  ),
+                ),
+              );
             }
-            return ClipOval(
-              child: SizedBox.fromSize(
-                size: const Size.fromRadius(
-                  ChatDetailEditViewStyle.avatarRadiusForWeb,
+
+            if (success is DeleteAvatarUIStateSuccess) {
+              return Avatar(
+                fontSize: ChatDetailEditViewStyle.avatarFontSize,
+                name: room.getLocalizedDisplayname(
+                  MatrixLocals(L10n.of(context)!),
                 ),
-                child: StreamImageViewer(
-                  matrixFile: success.matrixFile!,
-                  onImageLoaded: onImageLoaded,
-                ),
-              ),
-            );
+                size: ChatDetailEditViewStyle.avatarSize(context),
+              );
+            }
           }
           return child!;
         },
