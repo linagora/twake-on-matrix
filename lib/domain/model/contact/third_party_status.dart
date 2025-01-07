@@ -1,0 +1,1 @@
+enum ThirdPartyStatus { inactive, active }
