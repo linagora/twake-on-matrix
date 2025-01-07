@@ -7,17 +7,15 @@ class TestBase {
   void runPatrolTest({
     required String description,
     required Function(PatrolIntegrationTester $) test,
+    NativeAutomatorConfig? nativeAutomatorConfig,
   }) {
     patrolTest(description,
         config: const PatrolTesterConfig(
           printLogs: true,
           visibleTimeout: Duration(minutes: 1),
         ),
-        nativeAutomatorConfig: const NativeAutomatorConfig(
-          connectionTimeout: Duration(minutes: 1, seconds: 10),
-          findTimeout: Duration(seconds: 60),
-          keyboardBehavior: KeyboardBehavior.alternative,
-        ),
+        nativeAutomatorConfig:
+            nativeAutomatorConfig ?? const NativeAutomatorConfig(),
         framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
         ($) async {
       await initTwakeChat();
