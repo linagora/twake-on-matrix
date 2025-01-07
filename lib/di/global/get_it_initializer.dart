@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
+import 'package:fluffychat/data/datasource/contact/phonebook_datasource_v2.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
@@ -13,6 +14,7 @@ import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_v2_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
@@ -205,6 +207,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<PhonebookContactDatasource>(
       () => PhonebookContactDatasourceImpl(),
+    );
+    getIt.registerFactory<PhonebookContactDatasourceV2>(
+      () => PhonebookContactDatasourceV2Impl(),
     );
     getIt.registerLazySingleton(
       () => MediaDataSourceImpl(
