@@ -1,3 +1,10 @@
+## [2.6.16+2330] - 2025-01-07
+### Fixed
+- Hotfix: Missing state when deleting avatar in chat details edit
+
+### Changed
+- Downgrade ruby to fix building mobile app
+
 ## [2.6.15+2330] - 2025-01-03
 ### Fixed
 - #2152 Fix full-word search for unencrypted messages isn't performed until you put a space after the word
