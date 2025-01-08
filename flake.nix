@@ -58,7 +58,7 @@
             ## Chrome target
             yq
             google-chrome
-            chromedriver
+            # chromedriver
 
             ## Android target
             androidSdk
