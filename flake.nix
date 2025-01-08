@@ -54,9 +54,11 @@
           buildInputs = [
             ## General needs
             flutter324
-            # # web chrome target
-            # google-chrome
-            # chromedriver
+
+            ## Chrome target
+            yq
+            google-chrome
+            chromedriver
 
             ## Android target
             # androidSdk
