@@ -69,28 +69,28 @@
             # android-udev-rules
 
             ## Linux target
-            # clang
-            # cmake
-            # # ffmpeg
-            # fribidi.dev
-            # gtk3.dev
-            # jsoncpp.dev
-            # libass.dev
-            # libdrm.dev
-            # libepoxy.dev
-            # libgbm
-            # libsecret.dev
-            # libsysprof-capture
-            # mount
-            # mpv-unwrapped.dev
-            # ninja
-            # olm
-            # pcre2.dev
-            # pkg-config
-            # rhash
-            # xorg.libXdmcp.dev
+            clang
+            cmake
+            # ffmpeg
+            fribidi.dev
+            gtk3.dev
+            jsoncpp.dev
+            libass.dev
+            libdrm.dev
+            libepoxy.dev
+            libgbm
+            libsecret.dev
+            libsysprof-capture
+            mount
+            mpv-unwrapped.dev
+            ninja
+            olm
+            pcre2.dev
+            pkg-config
+            rhash
+            xorg.libXdmcp.dev
           ];
-          # LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
+          LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
           # CMAKE_PREFIX_PATH = "${pkgs.lib.makeLibraryPath [ gtk3.dev libdrm.dev libgbm ]}";
 
           # emulator related: vulkan-loader and libGL shared libs are necessary for hardware decoding
