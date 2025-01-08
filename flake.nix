@@ -106,6 +106,9 @@
             fi
 
             flutter doctor -v
+
+            ## TODO: find flag to set -I fribidi
+            sed -i 's#<fribidi.h>#<fribidi/fribidi.h>#' ./linux/flutter/ephemeral/.plugin_symlinks/handy_window/linux/libhandy/src/src/hdy-bidi.c
           '';
         };
       }
