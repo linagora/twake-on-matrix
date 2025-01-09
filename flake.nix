@@ -108,6 +108,7 @@
               export PATH="$PATH:$PUB_CACHE/bin"
             fi
 
+            flutter pub get
             flutter doctor -v
 
             ## TODO: find flag to set -I fribidi
