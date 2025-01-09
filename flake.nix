@@ -58,16 +58,11 @@
             ## Chrome target
             yq
             google-chrome
-            # chromedriver
 
             ## Android target
             androidSdk
-            gradle
             jdk17
             ruby
-            ## really needed?
-            # android-tools
-            # android-udev-rules
 
             ## Linux target
             alsa-lib.dev
