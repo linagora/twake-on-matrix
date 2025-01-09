@@ -64,6 +64,7 @@
             androidSdk
             gradle
             jdk17
+            ruby
             ## really needed?
             # android-tools
             # android-udev-rules
