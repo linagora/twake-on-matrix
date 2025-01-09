@@ -70,9 +70,10 @@
             # android-udev-rules
 
             ## Linux target
+            cargo
             clang
             cmake
-            # ffmpeg
+            ffmpeg-headless.dev
             fribidi.dev
             gtk3.dev
             jsoncpp.dev
@@ -82,13 +83,14 @@
             libgbm
             libsecret.dev
             libsysprof-capture
-            mount
             mpv-unwrapped.dev
             ninja
             olm
             pcre2.dev
             pkg-config
             rhash
+            rustc
+            util-linux.dev
             xorg.libXdmcp.dev
           ];
           LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
