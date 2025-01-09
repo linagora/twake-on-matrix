@@ -45,6 +45,8 @@
           ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
           CHROME_EXECUTABLE = "google-chrome-stable";
           JAVA_HOME = jdk17.home;
+          JAVA_8_HOME = jdk8.home;
+          JAVA_17_HOME = jdk17.home;
           FLUTTER_ROOT = flutter324;
           DART_ROOT = "${flutter324}/bin/cache/dart-sdk";
           GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/30.0.3/aapt2";
@@ -62,6 +64,7 @@
             ## Android target
             androidSdk
             jdk17
+            jdk8  # for gradle sake...
             ruby
 
             ## Linux target
@@ -144,6 +147,14 @@
 
             ## TODO: find flag to set `-I fribidi`
             sed -i 's#<fribidi.h>#<fribidi/fribidi.h>#' ./linux/flutter/ephemeral/.plugin_symlinks/handy_window/linux/libhandy/src/src/hdy-bidi.c
+
+            ## Just to please Gradle with a JDK8
+            echo
+            echo
+            echo "Please Make Sure That: '$HOME/.gradle/gradle.properties' contains:"
+            echo "org.gradle.java.installations.paths=$JAVA_8_HOME,$JAVA_17_HOME"
+            echo
+            echo
           '';
         };
       }
