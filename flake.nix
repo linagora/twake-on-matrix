@@ -70,6 +70,7 @@
             # android-udev-rules
 
             ## Linux target
+            alsa-lib.dev
             cargo
             clang
             cmake
@@ -77,21 +78,56 @@
             fribidi.dev
             gtk3.dev
             jsoncpp.dev
+            lcms.dev
+            lerc.dev
+            libarchive.dev
             libass.dev
+            libbluray.out
+            libcaca.dev
+            libdatrie.dev
+            libdovi
             libdrm.dev
+            libdvdnav
+            libdvdread
             libepoxy.dev
             libgbm
+            libgcrypt.dev
+            libgpg-error.dev
+            libplacebo
+            libpulseaudio.dev
             libsecret.dev
+            libselinux.dev
+            libsepol.dev
             libsysprof-capture
+            libthai.dev
+            libuchardet.dev
+            libunwind.dev
+            libva.dev
+            libvdpau.dev
+            libxkbcommon.dev
+            libxml2.dev
+            lua
             mpv-unwrapped.dev
+            mujs
             ninja
+            nv-codec-headers-11
             olm
+            openal
+            openssl.dev
             pcre2.dev
+            pipewire.dev
             pkg-config
             rhash
+            rubberband
             rustc
+            shaderc.dev
             util-linux.dev
+            vulkan-loader.dev
             xorg.libXdmcp.dev
+            xorg.libXpresent
+            xorg.libXScrnSaver
+            xorg.libXtst
+            zimg.dev
           ];
           LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
           # CMAKE_PREFIX_PATH = "${pkgs.lib.makeLibraryPath [ gtk3.dev libdrm.dev libgbm ]}";
@@ -111,7 +147,7 @@
             flutter pub get
             flutter doctor -v
 
-            ## TODO: find flag to set -I fribidi
+            ## TODO: find flag to set `-I fribidi`
             sed -i 's#<fribidi.h>#<fribidi/fribidi.h>#' ./linux/flutter/ephemeral/.plugin_symlinks/handy_window/linux/libhandy/src/src/hdy-bidi.c
           '';
         };
