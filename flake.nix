@@ -22,6 +22,11 @@
           ## Details about default values: https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/mobile/androidenv/compose-android-packages.nix
           #
           buildToolsVersions = [ "30.0.3" "35.0.0" ];
+          ## Emulators seem to be buggy for the momment
+          # includeSystemImages = true;
+          # systemImageTypes = [ "google_apis" "google_apis_playstore" ];
+          # abiVersions = [ "x86_64" ];
+          # includeEmulator = true;
           platformVersions = [ "31" "32" "33" "34" ];
           cmakeVersions = [ "3.18.1" ];
           includeNDK = true;
