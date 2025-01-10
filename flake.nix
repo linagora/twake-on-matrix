@@ -153,7 +153,8 @@
               export PATH="$PATH:$PUB_CACHE/bin"
             fi
 
-            flutter doctor -v
+            ## direnv (sometimes) stays stuck...
+            # flutter doctor -v
 
             ## TODO: find flag to set `-I fribidi`
             echo
