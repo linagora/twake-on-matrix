@@ -146,7 +146,10 @@
             flutter doctor -v
 
             ## TODO: find flag to set `-I fribidi`
-            sed -i 's#<fribidi.h>#<fribidi/fribidi.h>#' ./linux/flutter/ephemeral/.plugin_symlinks/handy_window/linux/libhandy/src/src/hdy-bidi.c
+            echo
+            echo
+            echo "In case of fribidi include issue, consider using:"
+            echo "sed -i 's#<fribidi.h>#<fribidi/fribidi.h>#' ./linux/flutter/ephemeral/.plugin_symlinks/handy_window/linux/libhandy/src/src/hdy-bidi.c"
 
             ## Just to please Gradle with a JDK8
             echo
