@@ -1,7 +1,7 @@
 {
   "@@locale": "uk",
   "@@last_modified": "2021-08-14 12:41:09.790615",
-  "about": "Про застосунок",
+  "about": "Про додаток",
   "@about": {
     "type": "text",
     "placeholders": {}
@@ -11,19 +11,19 @@
     "type": "text",
     "placeholders": {}
   },
-  "acceptedTheInvitation": "👍 {username} погоджується на запрошення",
+  "acceptedTheInvitation": "👍 {username} прийняв запрошення",
   "@acceptedTheInvitation": {
     "type": "text",
     "placeholders": {
       "username": {}
     }
   },
-  "account": "Обліковий запис",
+  "account": "Акаунт",
   "@account": {
     "type": "text",
     "placeholders": {}
   },
-  "activatedEndToEndEncryption": "🔐 {username} активує наскрізне шифрування",
+  "activatedEndToEndEncryption": "🔐 {username} увімкнув наскрізне шифрування",
   "@activatedEndToEndEncryption": {
     "type": "text",
     "placeholders": {
@@ -2117,13 +2117,13 @@
   "@editBundlesForAccount": {},
   "addToBundle": "Додати до вузлів",
   "@addToBundle": {},
-  "pleaseEnterValidEmail": "Введіть дійсну адресу е-пошти.",
+  "pleaseEnterValidEmail": "Будь ласка, введіть чинну адресу е-пошти.",
   "@pleaseEnterValidEmail": {},
-  "passwordsDoNotMatch": "Паролі не збігаються!",
+  "passwordsDoNotMatch": "Паролі не співпадають!",
   "@passwordsDoNotMatch": {},
   "repeatPassword": "Повторити пароль",
   "@repeatPassword": {},
-  "pleaseChooseAtLeastChars": "Виберіть принаймні {min} символів.",
+  "pleaseChooseAtLeastChars": "Будь ласка, виберіть принаймні {min} символів.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
     "placeholders": {
@@ -2400,7 +2400,7 @@
   "@user": {},
   "custom": "Користувацький",
   "@custom": {},
-  "updateAvailable": "Доступне оновлення FluffyChat",
+  "updateAvailable": "Доступне оновлення Twake Chat",
   "@updateAvailable": {},
   "updateNow": "Почати оновлення у фоновому режимі",
   "@updateNow": {},
