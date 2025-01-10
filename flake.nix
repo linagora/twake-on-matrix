@@ -20,7 +20,7 @@
         androidComposition = androidEnv.composeAndroidPackages {
           ## Details about default values: https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/mobile/androidenv/compose-android-packages.nix
           #
-          buildToolsVersions = [ "30.0.3" ];
+          buildToolsVersions = [ "30.0.3" "35.0.0" ];
           platformVersions = [ "31" "32" "33" "34" ];
           cmakeVersions = [ "3.18.1" ];
           includeNDK = true;
@@ -49,7 +49,7 @@
           JAVA_17_HOME = jdk17.home;
           FLUTTER_ROOT = flutter324;
           DART_ROOT = "${flutter324}/bin/cache/dart-sdk";
-          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/30.0.3/aapt2";
+          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/35.0.0/aapt2";
           QT_QPA_PLATFORM = "wayland;xcb"; # emulator related: try using wayland, otherwise fall back to X
           # NB: due to the emulator's bundled qt version, it currently does not start with QT_QPA_PLATFORM="wayland".
           # Maybe one day this will be supported.
