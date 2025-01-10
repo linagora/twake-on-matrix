@@ -16,6 +16,7 @@
             "olm-3.2.16"
           ];
         };
+
         androidEnv = pkgs.androidenv.override { licenseAccepted = true; };
         androidComposition = androidEnv.composeAndroidPackages {
           ## Details about default values: https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/mobile/androidenv/compose-android-packages.nix
@@ -41,18 +42,23 @@
       in
       {
         devShell = with pkgs; mkShell rec {
+          FLUTTER_ROOT = flutter324;
+          DART_ROOT = "${flutter324}/bin/cache/dart-sdk";
+
           ANDROID_HOME = "${androidSdk}/libexec/android-sdk";
           ANDROID_SDK_ROOT = "${androidSdk}/libexec/android-sdk";
-          CHROME_EXECUTABLE = "google-chrome-stable";
+
           JAVA_HOME = jdk17.home;
           JAVA_8_HOME = jdk8.home;
           JAVA_17_HOME = jdk17.home;
-          FLUTTER_ROOT = flutter324;
-          DART_ROOT = "${flutter324}/bin/cache/dart-sdk";
           GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/libexec/android-sdk/build-tools/35.0.0/aapt2";
-          QT_QPA_PLATFORM = "wayland;xcb"; # emulator related: try using wayland, otherwise fall back to X
-          # NB: due to the emulator's bundled qt version, it currently does not start with QT_QPA_PLATFORM="wayland".
-          # Maybe one day this will be supported.
+
+          # QT_QPA_PLATFORM = "wayland;xcb";  # emulator related: try using wayland, otherwise fall back to X
+                                              # NB: due to the emulator's bundled qt version, it currently does not start with QT_QPA_PLATFORM="wayland".
+                                              # Maybe one day this will be supported.
+
+          CHROME_EXECUTABLE = "google-chrome-stable";
+
           buildInputs = [
             ## General needs
             flutter324
@@ -127,11 +133,11 @@
             xorg.libXtst
             zimg.dev
           ];
-          LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
-          # CMAKE_PREFIX_PATH = "${pkgs.lib.makeLibraryPath [ gtk3.dev libdrm.dev libgbm ]}";
 
           # emulator related: vulkan-loader and libGL shared libs are necessary for hardware decoding
           # LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ vulkan-loader libGL ]}";
+          LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [ libdrm libgbm ]}";
+          # CMAKE_PREFIX_PATH = "${pkgs.lib.makeLibraryPath [ fribidi ]}";
 
           # Globally installed packages, which are installed through `dart pub global activate package_name`,
           # are located in the `$PUB_CACHE/bin` directory.
