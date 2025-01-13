@@ -2507,5 +2507,7 @@
   "sorryThatsNotPossible": "非常抱歉……这是做不到的",
   "@sorryThatsNotPossible": {},
   "deviceKeys": "设备密钥：",
-  "@deviceKeys": {}
+  "@deviceKeys": {},
+  "editProfileDescriptions": "用新名称、照片和简短介绍更新您的个人资料。",
+  "@editProfileDescriptions": {}
 }
