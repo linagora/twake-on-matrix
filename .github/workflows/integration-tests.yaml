@@ -1,0 +1,84 @@
+on:
+  pull_request:
+
+name: Integration
+
+jobs:
+  integration_test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      actions: write
+      checks: write
+      pull-requests: write
+
+    env:
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      SERVER_URL: ${{ secrets.SERVER_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
+       
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: "temurin"
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: setup project
+        run:
+          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Run Patrol Tests
+        shell: bash
+
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          SERVER_URL: ${{ secrets.SERVER_URL }}
+        run: |
+
+          dart pub global activate patrol_cli
+
+          flutter build apk --config-only
+
+          patrol build android \
+          -v \
+          --dart-define=USERNAME="$USERNAME" \
+          --dart-define=SERVER_URL="$SERVER_URL" \
+          --dart-define=PASSWORD="$PASSWORD"
+
+          gcloud firebase test android run \
+          --type instrumentation \
+          --app build/app/outputs/apk/debug/app-debug.apk \
+          --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+          --device model=MediumPhone.arm,version=34 \
+          --timeout 5m \
+          --use-orchestrator \
+          --environment-variables clearPackageData=true
