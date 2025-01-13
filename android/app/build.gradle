@@ -51,6 +51,8 @@ android {
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: "true"
     }
 
     signingConfigs {
@@ -75,6 +77,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        execution "ANDROIDX_TEST_ORCHESTRATOR"
+    }
 }
 
 flutter {
@@ -88,6 +93,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation 'androidx.multidex:multidex:2.0.1'
+    androidTestUtil "androidx.test:orchestrator:1.5.1"
 }
 
 apply plugin: 'com.google.gms.google-services'

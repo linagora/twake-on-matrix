@@ -249,58 +249,81 @@ class _AvatarBuilder extends StatelessWidget {
           return const SizedBox();
         },
         (success) {
-          if (PlatformInfos.isMobile &&
-              success is GetAvatarOnMobileUIStateSuccess) {
-            if (success.assetEntity == null) {
-              return child!;
-            }
-            return ClipOval(
-              child: SizedBox.fromSize(
-                size: const Size.fromRadius(
-                  ChatDetailEditViewStyle.avatarRadiusForMobile,
-                ),
-                child: AssetEntityImage(
-                  success.assetEntity!,
-                  thumbnailSize: const ThumbnailSize(
-                    ChatDetailEditViewStyle.thumbnailSizeWidth,
-                    ChatDetailEditViewStyle.thumbnailSizeHeight,
+          if (PlatformInfos.isMobile) {
+            if (success is GetAvatarOnMobileUIStateSuccess) {
+              if (success.assetEntity == null) {
+                return child!;
+              }
+              return ClipOval(
+                child: SizedBox.fromSize(
+                  size: const Size.fromRadius(
+                    ChatDetailEditViewStyle.avatarRadiusForMobile,
                   ),
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress != null &&
-                        loadingProgress.cumulativeBytesLoaded !=
-                            loadingProgress.expectedTotalBytes) {
+                  child: AssetEntityImage(
+                    success.assetEntity!,
+                    thumbnailSize: const ThumbnailSize(
+                      ChatDetailEditViewStyle.thumbnailSizeWidth,
+                      ChatDetailEditViewStyle.thumbnailSizeHeight,
+                    ),
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress != null &&
+                          loadingProgress.cumulativeBytesLoaded !=
+                              loadingProgress.expectedTotalBytes) {
+                        return const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        );
+                      }
+                      return child;
+                    },
+                    errorBuilder: (context, error, stackTrace) {
                       return const Center(
-                        child: CircularProgressIndicator.adaptive(),
+                        child: Icon(Icons.error_outline),
                       );
-                    }
-                    return child;
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.error_outline),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            );
+              );
+            }
+
+            if (success is DeleteAvatarUIStateSuccess) {
+              return Avatar(
+                fontSize: ChatDetailEditViewStyle.avatarFontSize,
+                name: room.getLocalizedDisplayname(
+                  MatrixLocals(L10n.of(context)!),
+                ),
+                size: ChatDetailEditViewStyle.avatarSize(context),
+              );
+            }
           }
 
-          if (PlatformInfos.isWeb && success is GetAvatarOnWebUIStateSuccess) {
-            if (success.matrixFile?.readStream == null) {
-              return child!;
+          if (PlatformInfos.isWeb) {
+            if (success is GetAvatarOnWebUIStateSuccess) {
+              if (success.matrixFile?.readStream == null) {
+                return child!;
+              }
+              return ClipOval(
+                child: SizedBox.fromSize(
+                  size: const Size.fromRadius(
+                    ChatDetailEditViewStyle.avatarRadiusForWeb,
+                  ),
+                  child: StreamImageViewer(
+                    matrixFile: success.matrixFile!,
+                    onImageLoaded: onImageLoaded,
+                  ),
+                ),
+              );
             }
-            return ClipOval(
-              child: SizedBox.fromSize(
-                size: const Size.fromRadius(
-                  ChatDetailEditViewStyle.avatarRadiusForWeb,
+
+            if (success is DeleteAvatarUIStateSuccess) {
+              return Avatar(
+                fontSize: ChatDetailEditViewStyle.avatarFontSize,
+                name: room.getLocalizedDisplayname(
+                  MatrixLocals(L10n.of(context)!),
                 ),
-                child: StreamImageViewer(
-                  matrixFile: success.matrixFile!,
-                  onImageLoaded: onImageLoaded,
-                ),
-              ),
-            );
+                size: ChatDetailEditViewStyle.avatarSize(context),
+              );
+            }
           }
           return child!;
         },
