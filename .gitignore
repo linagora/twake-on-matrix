@@ -12,6 +12,9 @@
 .svn/
 prime
 
+# App base config
+config.json
+
 #nix/direnv
 .direnv/
 

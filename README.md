@@ -52,10 +52,73 @@ Twake Chat is an open source, decentralized chat app based on the Matrix protoco
 - Emoji verification & cross signing
 - And much more...
 
-## Setup
-### Rust
-Before building, please ensure that Rust is installed because the [super_clipboard](https://pub.dev/packages/super_clipboard) package requires it.
-For macOS or Linux, execute the following command in Terminal.
+## Development
+
+Please make sure to run the following command at first, to verify your code before each commit:
+
+```bash
+bash scripts/config-pre-commit.sh
+```
+### Requirements
+
+- [ ] Flutter 3.24 (more recent versions are not yet supported)
+
+You can at any moment verify your flutter installation using:
+
+```bash
+flutter doctor -v
+```
+
+#### Web
+
+If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target *(Flutter being developped by Google)*.
+
+It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can build a version using:
+
+```bash
+docker run -v ./assets/js/package:/package nixos/nix:2.22.1
+
+# within the docker
+nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/3.2.16?host=gitlab.matrix.org\#javascript
+cp /result/javascript/* /package/. -v
+exit
+
+# back on your host
+sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
+```
+#### Android
+
+- [ ] An implementation of JDK 17 *(tested with openjdk-17.0.13+11)*
+- [ ] An implementation of JDK 8 *(tested with openjdk-8u432-b06)*
+- [ ] (Optional) Android Studio
+- [ ] An Android SDK with:
+  - [ ] Android build tools: 30.0.3
+  - [ ] Android platform: 31, 32, 33, 34
+  - [ ] CMake: 3.18.1
+  - [ ] Android NDK: 23.1.7779620
+  - [ ] Google APIs: enabled
+
+*Note: Gradle will try to install the JDK 8. If for any reasons the operation failed, try to install your own and use [this method](https://github.com/pm-McFly/twake-on-matrix/issues/1#issuecomment-2581428804) to tell Gradle where to find it.*
+
+#### Linux
+
+- [ ] Lib JsonCPP
+- [ ] Lib Secret
+- [ ] Lib RHash
+- [ ] Lib WebKit 2 GTK
+- [ ] Lib OLM
+
+*If needed, a complete list is available in the `flake.nix`.*
+
+On Ubuntu, the following command should install all the required elements:
+
+```bash
+sudo apt install libjsoncpp1 libsecret-1-dev libsecret-1-0 librhash0 libwebkit2gtk-4.0-dev libolm3
+```
+---
+
+In addition, the Linux build requires Rust. For macOS or Linux, execute the following command in a terminal emulator:
+
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
@@ -66,17 +129,84 @@ In case you have Rust already installed, make sure to update it to latest versio
 ```bash
 rustup update
 ```
-### Flutter
+
+#### `flake.nix`
+
+A `flake.nix` is provided in order to ease the process of setting up your dev environment.
+
+It should be automatically loaded if you have `[nix-direnv](https://github.com/nix-community/nix-direnv/)` installed and correctly configured.
+
+### Configure the app
+
+In order to run the web target you must provide a default configuration file. This can be done by copying the `config.sample.json` to `config.json`.
+Here is an example working with `matrix.org`:
+
+```json
+{
+  "application_name": "Twake Chat",
+  "application_welcome_message": "Welcome to Twake Chat!",
+  "default_homeserver": "matrix.org",
+  "privacy_url": "https://twake.app/en/privacy/",
+  "render_html": true,
+  "hide_redacted_events": false,
+  "hide_unknown_events": false,
+  "issue_id": "",
+  "app_grid_dashboard_available": true,
+  "homeserver": "https://matrix.org/",
+  "platform": "localDebug",
+  "default_max_upload_avatar_size_in_bytes": 1000000,
+  "dev_mode": true,
+  "qr_code_download_url": "https://sign-up.twake.app/download/chat",
+  "enable_logs": true,
+  "support_url": "https://twake.app/support"
+}
+```
+
+### Runing the code
+
+Before running the app, please update the dependancies:
+
 ```bash
 flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-### Add commit hook to format and code analyze
+Now you can run the project:
+
 ```bash
-bash scripts/config-pre-commit.sh
+flutter devices   # To list available run targets
+```
+
+```bash
+# flutter run -d <device>, e.g:
+flutter run -d chrome
+```
+
+## Build
+
+Please use the helper script corresponding to your target in order to build:
+
+### Web
+
+```bash
+./scripts/build-web.sh
+```
+
+### Linux
+
+```bash
+# ./scripts/build-linux.sh          ## For release purposes
+./scripts/build-linux-debug.sh
+```
+
+### Android
+
+```bash
+# ./scripts/build-android-apk.sh    ## For release purposes
+./scripts/build-android-debug.sh
 ```
 
 ## Deployment
+
 ### Web version using Docker
 
 - Create a config file `config.json` in the root of the project with the following
@@ -93,7 +223,7 @@ docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --
 
 - Create a config file `config.json` with `matrix.org`
 
-```
+```json
 {
   "app_grid_dashboard_available": true,
   "application_name": "Twake Chat",
@@ -116,6 +246,7 @@ docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /pa
 - Open the browser and go to `http://localhost:6868`
 
 # Special thanks
+
 * <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original repository of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
 
 * <a href="https://github.com/fabiyamada">Fabiyamada</a> is a graphics designer from Brasil and has made the fluffychat logo and the banner. Big thanks for her great designs.
