@@ -1,5 +1,7 @@
 on:
-  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
 
 name: Integration
 
@@ -18,6 +20,8 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       PASSWORD: ${{ secrets.PASSWORD }}
       SERVER_URL: ${{ secrets.SERVER_URL }}
+      FLUTTER_VERSION: "3.24.0"
+      JAVA_VERSION: 17
 
     steps:
       - name: Checkout repository
@@ -36,7 +40,7 @@ jobs:
       - name: Setup flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.0"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
@@ -44,7 +48,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
 
       - uses: webfactory/ssh-agent@v0.9.0
