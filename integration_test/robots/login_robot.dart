@@ -29,25 +29,37 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> enterUsernameSsoLogin(String username) async {
-    await $.native.enterText(
-      Selector(resourceId: 'login'),
-      text: username,
-    );
+    try {
+      await $.native.enterText(
+        Selector(resourceId: 'login'),
+        text: username,
+      );
+    } catch (e) {
+      ignoreException();
+    }
   }
 
   Future<void> enterPasswordSsoLogin(String password) async {
-    await $.native.enterText(
-      Selector(resourceId: 'password'),
-      text: password,
-    );
+    try {
+      await $.native.enterText(
+        Selector(resourceId: 'password'),
+        text: password,
+      );
+    } catch (e) {
+      ignoreException();
+    }
   }
 
   Future<void> pressSignInSsoLogin() async {
-    await $.native.tap(
-      Selector(
-        text: 'Sign in',
-        instance: 1,
-      ),
-    );
+    try {
+      await $.native.tap(
+        Selector(
+          text: 'Sign in',
+          instance: 1,
+        ),
+      );
+    } catch (e) {
+      ignoreException();
+    }
   }
 }

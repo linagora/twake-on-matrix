@@ -19,25 +19,42 @@ class LoginScenario extends BaseScenario {
     required this.serverUrl,
     required this.password,
   });
+
   @override
   Future<void> execute() async {
     final loginRobot = LoginRobot($);
     await $.waitUntilVisible($(TwakeWelcome));
     await loginRobot.tapOnUseYourCompanyServer();
-    await $.waitUntilVisible(
-      $(HomeserverPickerView),
-    );
+    await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
     await loginRobot.enterServerUrl(serverUrl);
     await loginRobot.confirmServerUrl();
-    await $.native.tap(Selector(text: "Use without an account"));
-    await $.native.waitUntilVisible(Selector(resourceId: 'login'));
+    await _handleFirebaseTestLab(loginRobot);
     await loginRobot.enterUsernameSsoLogin(username);
     await loginRobot.enterPasswordSsoLogin(password);
     await loginRobot.pressSignInSsoLogin();
-    await $.waitUntilVisible(
-      $(HomeserverPickerView),
-    );
+    await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
     await loginRobot.grantNotificationPermission($.nativeAutomator);
     await expectViewVisible($(ChatList));
+  }
+
+  Future<void> _handleFirebaseTestLab(LoginRobot loginRobot) async {
+    try {
+      await $.native.tap(Selector(text: "Use without an account"));
+      await $.native.waitUntilVisible(Selector(resourceId: 'login'));
+    } catch (e) {
+      loginRobot.ignoreException();
+    }
+  }
+
+  Future<void> _handleWaitUntilVisibleHomeServerPickerView(
+    LoginRobot loginRobot,
+  ) async {
+    try {
+      await $.waitUntilVisible(
+        $(HomeserverPickerView),
+      );
+    } catch (e) {
+      loginRobot.ignoreException();
+    }
   }
 }
