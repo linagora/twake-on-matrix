@@ -77,9 +77,6 @@ abstract class ThirdPartyContact with EquatableMixin {
   });
 
   String? calLookupAddress({required HashDetailsResponse hashDetails}) {
-    if (matrixId != null) {
-      return null;
-    }
     final algorithm = hashDetails.algorithms?.firstOrNull ?? 'sha256';
     if (algorithm == 'sha256') {
       final pepper = hashDetails.lookupPepper ?? '';

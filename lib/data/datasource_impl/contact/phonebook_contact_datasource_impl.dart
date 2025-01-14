@@ -33,7 +33,7 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
 
     final listAllContacts = [
       ..._removeDuplicatedPhoneNumbers(listPhoneContacts),
-      ...listEmailContacts,
+      ..._removeDuplicatedEmails(listEmailContacts),
     ];
 
     return listAllContacts;
@@ -51,7 +51,7 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
       final normalizedPhoneNumber = phoneNumber!.normalizePhoneNumber();
 
       if (listVisitedPhoneNumbers.contains(normalizedPhoneNumber)) {
-        final hasSameFilteredContact = _hasSameFilteredContact(
+        final hasSameFilteredContact = _hasSameFilteredContactByPhoneNumber(
           listFilteredContacts,
           contact.displayName ?? '',
           normalizedPhoneNumber,
@@ -68,7 +68,35 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
     return listFilteredContacts;
   }
 
-  bool _hasSameFilteredContact(
+  List<Contact> _removeDuplicatedEmails(List<Contact> listContacts) {
+    final listVisitedEmails = <String>[];
+    final listFilteredContacts = <Contact>[];
+
+    final listContactHasEmail =
+        listContacts.where((contact) => contact.email != null).toList();
+
+    for (final contact in listContactHasEmail) {
+      final email = contact.email;
+
+      if (listVisitedEmails.contains(email)) {
+        final hasSameFilteredContact = _hasSameFilteredContactByEmail(
+          listFilteredContacts,
+          contact.displayName ?? '',
+          email!,
+        );
+        if (!hasSameFilteredContact) {
+          listFilteredContacts.add(contact);
+        }
+      } else {
+        listVisitedEmails.add(email!);
+        listFilteredContacts.add(contact);
+      }
+    }
+
+    return listFilteredContacts;
+  }
+
+  bool _hasSameFilteredContactByPhoneNumber(
     List<Contact> listFilteredContacts,
     String contactName,
     String phoneNumberNormalized,
@@ -78,6 +106,18 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
           filteredContact.displayName == contactName &&
           filteredContact.phoneNumber?.normalizePhoneNumber() ==
               phoneNumberNormalized,
+    );
+  }
+
+  bool _hasSameFilteredContactByEmail(
+    List<Contact> listFilteredContacts,
+    String contactName,
+    String email,
+  ) {
+    return listFilteredContacts.any(
+      (filteredContact) =>
+          filteredContact.displayName == contactName &&
+          filteredContact.email == email,
     );
   }
 }
