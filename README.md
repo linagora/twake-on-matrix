@@ -136,6 +136,13 @@ A `flake.nix` is provided in order to ease the process of setting up your dev en
 
 It should be automatically loaded if you have `[nix-direnv](https://github.com/nix-community/nix-direnv/)` installed and correctly configured.
 
+Supported platforms:
+
+- [x] Linux x86_64
+- [ ] MacOS aarch_64
+- [ ] MacOS x86_64
+- [ ] Windows
+
 ### Configure the app
 
 In order to run the web target you must provide a default configuration file. This can be done by copying the `config.sample.json` to `config.json`.
