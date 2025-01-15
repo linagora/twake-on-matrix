@@ -69,6 +69,8 @@ abstract class ThirdPartyContact with EquatableMixin {
 
   final ThirdPartyStatus? status;
 
+  final Map<String, List<String>> _thirdPartyIdToHashMap = {};
+
   ThirdPartyContact({
     required this.thirdPartyId,
     required this.thirdPartyIdType,
@@ -76,18 +78,54 @@ abstract class ThirdPartyContact with EquatableMixin {
     this.status,
   });
 
-  String? calLookupAddress({required HashDetailsResponse hashDetails}) {
-    final algorithm = hashDetails.algorithms?.firstOrNull ?? 'sha256';
-    if (algorithm == 'sha256') {
-      final pepper = hashDetails.lookupPepper ?? '';
-      final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
-      final bytes = utf8.encode(input);
-      final lookupHash =
-          encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
-      return lookupHash;
-    } else {
-      return [thirdPartyId, thirdPartyIdType].join(' ');
+  String calculateHashWithAlgorithmSha256({
+    required HashDetailsResponse hashDetails,
+    required String pepper,
+  }) {
+    final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
+    final bytes = utf8.encode(input);
+    final lookupHash =
+        encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
+    return lookupHash;
+  }
+
+  String calculateHashWithoutAlgorithm() {
+    return [thirdPartyId, thirdPartyIdType].join(' ');
+  }
+
+  List<String> calculateHashUsingAllPeppers({
+    required HashDetailsResponse hashDetails,
+  }) {
+    final List<String> hashes = [];
+
+    if (hashDetails.algorithms == null || hashDetails.algorithms!.isEmpty) {
+      return hashes;
     }
+
+    for (final algorithm in hashDetails.algorithms!) {
+      final peppers = {
+        hashDetails.lookupPepper,
+        ...?hashDetails.altLookupPeppers,
+      };
+
+      for (final pepper in peppers) {
+        if (algorithm == 'sha256') {
+          final hash = calculateHashWithAlgorithmSha256(
+            hashDetails: hashDetails,
+            pepper: pepper ?? '',
+          );
+          hashes.add(hash);
+        } else {
+          final hash = calculateHashWithoutAlgorithm();
+          hashes.add(hash);
+        }
+      }
+    }
+    return hashes;
+  }
+
+  void setThirdPartyIdToHashMap(List<String> hashes) {
+    _thirdPartyIdToHashMap[thirdPartyId] = hashes;
   }
 
   @override
