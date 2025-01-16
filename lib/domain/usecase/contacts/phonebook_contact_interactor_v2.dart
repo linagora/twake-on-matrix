@@ -20,7 +20,8 @@ class PhonebookContactInteractorV2 {
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
   }) async* {
-    yield const Right(GetPhonebookContactsLoading(progress: 0));
+    int progress = 0;
+    yield Right(GetPhonebookContactsLoading(progress: progress));
     final contacts = await _phonebookContactRepository.fetchContacts();
 
     if (contacts.isEmpty) {
@@ -37,18 +38,16 @@ class PhonebookContactInteractorV2 {
 
     for (final chunkContacts in chunks) {
       final Map<String, List<String>> hashToContactIdMappings = {};
-      for (final contact in chunkContacts) {
-        final updatedContact = processContacts(
-          chunkContacts,
-          hashDetails,
-          hashToContactIdMappings,
-          contactIdToHashMap,
-        );
+      final updatedContact = calculateHashForContact(
+        chunkContacts,
+        hashDetails,
+        hashToContactIdMappings,
+        contactIdToHashMap,
+      );
 
-        if (updatedContact == null) continue;
+      if (updatedContact == null) continue;
 
-        contactIdToHashMap[contact.id] = updatedContact;
-      }
+      contactIdToHashMap[updatedContact.id] = updatedContact;
 
       final response = await _lookupRepository.lookupListMxid(
         LookupListMxidRequest(
@@ -59,12 +58,8 @@ class PhonebookContactInteractorV2 {
         ),
       );
 
-      final totalChunks = chunks.length;
-
       yield await _handleLookupMappings(
-        progress: lookupChunkSize ~/ totalChunks,
-        chunkSize: lookupChunkSize,
-        totalChunks: totalChunks,
+        progress: progress++ ~/ lookupChunkSize,
         mappings: response.mappings ?? {},
         hashToContactIdMappings: hashToContactIdMappings,
         chunkContacts: chunkContacts,
@@ -114,10 +109,18 @@ class PhonebookContactInteractorV2 {
     final updatedEmails = <Email>{};
 
     for (final phoneNumber in contact.phoneNumbers!) {
+      final hashes = phoneToHashMap[phoneNumber.number];
+      if (hashes != null) {
+        phoneNumber.setThirdPartyIdToHashMap(hashes);
+      }
       updatedPhoneNumbers.add(phoneNumber);
     }
 
     for (final email in contact.emails!) {
+      final hashes = emailToHashMap[email.address];
+      if (hashes != null) {
+        email.setThirdPartyIdToHashMap(hashes);
+      }
       updatedEmails.add(email);
     }
 
@@ -127,7 +130,7 @@ class PhonebookContactInteractorV2 {
     );
   }
 
-  Contact? processContacts(
+  Contact? calculateHashForContact(
     List<Contact> chunkContacts,
     HashDetailsResponse hashDetails,
     Map<String, List<String>> hashToContactIdMappings,
@@ -172,8 +175,6 @@ class PhonebookContactInteractorV2 {
     required Map<String, List<String>> hashToContactIdMappings,
     required List<Contact> chunkContacts,
     required int progress,
-    required int chunkSize,
-    required int totalChunks,
   }) async {
     final Set<Contact> foundContact =
         _findContacts(mappings, hashToContactIdMappings, chunkContacts);
@@ -185,8 +186,6 @@ class PhonebookContactInteractorV2 {
     return Right(
       GetPhonebookContactsSuccess(
         progress: progress,
-        chunkSize: chunkSize,
-        totalChunks: totalChunks,
         foundContacts: updatedContacts.toList(),
         notFoundContacts: notFoundContact.toList(),
       ),

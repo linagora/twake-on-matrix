@@ -20,15 +20,11 @@ class GetPhonebookContactsLoading extends Success {
 
 class GetPhonebookContactsSuccess extends Success {
   final int progress;
-  final int chunkSize;
-  final int totalChunks;
   final List<Contact> foundContacts;
   final List<Contact> notFoundContacts;
 
   const GetPhonebookContactsSuccess({
     required this.progress,
-    required this.chunkSize,
-    required this.totalChunks,
     required this.foundContacts,
     required this.notFoundContacts,
   });
@@ -36,8 +32,6 @@ class GetPhonebookContactsSuccess extends Success {
   @override
   List<Object?> get props => [
         progress,
-        chunkSize,
-        totalChunks,
         foundContacts,
         notFoundContacts,
       ];
