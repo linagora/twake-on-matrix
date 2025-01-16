@@ -1,23 +1,29 @@
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
-import 'package:fluffychat/data/network/contact/lookup_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+
+// import 'package:fluffychat/data/network/contact/lookup_api.dart';
+// import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
 
 class LookupDatasourceImpl implements LookupDatasource {
-  final LookupAPI _lookupAPI = getIt.get<LookupAPI>();
+  // final LookupAPI _lookupAPI = getIt.get<LookupAPI>();
 
   @override
-  Future<HashDetailsResponse> getHashDetails() {
-    return _lookupAPI.getHashDetails();
+  Future<HashDetailsResponse> getHashDetails() async {
+    // TODO: Implement this method
+    // return _lookupAPI.getHashDetails();
+
+    return _mockHashDetailsResponse();
   }
 
   @override
   Future<LookupListMxidResponse> lookupListMxid(
     LookupListMxidRequest request,
   ) async {
+    // TODO: Implement this method
     // return _lookupAPI.lookupListMxid(request);
+
     if (request.addresses?.containsAll(mapping1.keys) == true) {
       return _createLookupListMxidResponse(mapping1);
     }
@@ -73,8 +79,20 @@ class LookupDatasourceImpl implements LookupDatasource {
     return _createLookupListMxidResponse({});
   }
 
+  // [TEMP] Mock response
+  HashDetailsResponse _mockHashDetailsResponse() {
+    return const HashDetailsResponse(
+      algorithms: {
+        "sha256",
+      },
+      lookupPepper: "your-pepper-string",
+      altLookupPeppers: {},
+    );
+  }
+
   LookupListMxidResponse _createLookupListMxidResponse(
-      Map<String, String> mapping) {
+    Map<String, String> mapping,
+  ) {
     return LookupListMxidResponse(
       mappings: mapping,
     );
@@ -114,7 +132,7 @@ class LookupDatasourceImpl implements LookupDatasource {
   };
 
   final mapping5 = {
-    "33Nl5nMsY2E7-xzASrFxzvHeYVdBFzzbsU6ncqUU2k8": "@hello45:matrix.org"
+    "33Nl5nMsY2E7-xzASrFxzvHeYVdBFzzbsU6ncqUU2k8": "@hello45:matrix.org",
   };
 
   final mapping6 = {
@@ -144,7 +162,7 @@ class LookupDatasourceImpl implements LookupDatasource {
   };
 
   final mapping9 = {
-    "p9b0OuiUPeBkvYyWiJtQbxJWQWDjT-na--zuQW57FRw": "@hello81:matrix.org"
+    "p9b0OuiUPeBkvYyWiJtQbxJWQWDjT-na--zuQW57FRw": "@hello81:matrix.org",
   };
   final mapping10 = {
     "mokSrGILWsXv0SaYGvl2VTMpdNXh8dO5rMiUrbmJMts": "@hello91:matrix.org",
