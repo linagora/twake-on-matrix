@@ -542,7 +542,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "emoteInvalid": "Epäkelpo emote-lyhytkoodi",
+  "emoteInvalid": "Epäkelpo emote-lyhytkoodi!",
   "@emoteInvalid": {
     "type": "text",
     "placeholders": {}
@@ -1061,7 +1061,7 @@
     "type": "text",
     "description": "Usage hint for the command /me"
   },
-  "compareEmojiMatch": "Vertaile ja varmista emojien olevan samat molemmilla laitteilla:",
+  "compareEmojiMatch": "Vertaa emojia",
   "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
@@ -1118,7 +1118,7 @@
   "@commandInvalid": {
     "type": "text"
   },
-  "compareNumbersMatch": "Vertaile ja varmista numeroiden olevan samat molemmilla laitteilla:",
+  "compareNumbersMatch": "Vertaa numeroita",
   "@compareNumbersMatch": {
     "type": "text",
     "placeholders": {}
