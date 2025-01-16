@@ -9,7 +9,8 @@ class PhonebookContactDatasourceV2Impl implements PhonebookContactDatasourceV2 {
     final phonebookContacts =
         await flutter_contact.FlutterContacts.getContacts(withProperties: true);
 
-    return mappingToContact(phonebookContacts);
+    final contacts = mappingToContact(phonebookContacts);
+    return _sortContactsByDisplayName(contacts);
   }
 
   List<Contact> mappingToContact(
@@ -20,17 +21,24 @@ class PhonebookContactDatasourceV2Impl implements PhonebookContactDatasourceV2 {
           .map((phone) => PhoneNumber(number: phone.number))
           .toList();
       final emails =
-          contact.emails.map((email) => Email(address: email.address)).toSet();
+          contact.emails.map((email) => Email(address: email.address)).toList();
 
       return Contact(
         id: contact.id,
         displayName: contact.displayName,
         phoneNumbers: _removeDuplicatedPhoneNumbers(phoneNumbers).toSet(),
-        emails: emails,
+        emails: _removeDuplicatedEmails(emails).toSet(),
       );
     }).toList();
 
     return listAllContacts;
+  }
+
+  List<Contact> _sortContactsByDisplayName(List<Contact> contacts) {
+    contacts.sort(
+      (pre, next) => (pre.displayName ?? '').compareTo(next.displayName ?? ''),
+    );
+    return contacts;
   }
 
   List<PhoneNumber> _removeDuplicatedPhoneNumbers(
@@ -44,7 +52,7 @@ class PhonebookContactDatasourceV2Impl implements PhonebookContactDatasourceV2 {
       final normalizedPhoneNumber = phoneNumber.normalizePhoneNumber();
 
       if (listVisitedPhoneNumbers.contains(normalizedPhoneNumber)) {
-        final hasSameFilteredContact = _hasSameFilteredContact(
+        final hasSameFilteredContact = _hasSameFilteredPhoneNumber(
           filteredPhoneNumbers,
           normalizedPhoneNumber,
         );
@@ -60,7 +68,7 @@ class PhonebookContactDatasourceV2Impl implements PhonebookContactDatasourceV2 {
     return filteredPhoneNumbers;
   }
 
-  bool _hasSameFilteredContact(
+  bool _hasSameFilteredPhoneNumber(
     List<PhoneNumber> filteredPhoneNumbers,
     String phoneNumberNormalized,
   ) {
@@ -68,6 +76,39 @@ class PhonebookContactDatasourceV2Impl implements PhonebookContactDatasourceV2 {
       (filteredContact) =>
           filteredContact.number.normalizePhoneNumber() ==
           phoneNumberNormalized,
+    );
+  }
+
+  List<Email> _removeDuplicatedEmails(List<Email> emails) {
+    final listVisitedEmails = <String>[];
+    final filteredEmails = <Email>[];
+
+    for (final email in emails) {
+      final emailAddress = email.address;
+
+      if (listVisitedEmails.contains(emailAddress)) {
+        final hasSameFilteredEmail = _hasSameFilteredEmail(
+          filteredEmails,
+          emailAddress,
+        );
+        if (!hasSameFilteredEmail) {
+          filteredEmails.add(email);
+        }
+      } else {
+        listVisitedEmails.add(emailAddress);
+        filteredEmails.add(email);
+      }
+    }
+
+    return filteredEmails;
+  }
+
+  bool _hasSameFilteredEmail(
+    List<Email> filteredEmails,
+    String emailAddress,
+  ) {
+    return filteredEmails.any(
+      (filteredEmail) => filteredEmail.address == emailAddress,
     );
   }
 }
