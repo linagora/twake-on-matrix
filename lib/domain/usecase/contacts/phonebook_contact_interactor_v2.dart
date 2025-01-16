@@ -9,11 +9,12 @@ import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
-import 'package:fluffychat/domain/repository/phonebook_contact_repository_v2.dart';
+// import 'package:fluffychat/domain/repository/phonebook_contact_repository_v2.dart';
+import 'package:fluffychat/domain/usecase/contacts/mock_contacts_list.dart';
 
 class PhonebookContactInteractorV2 {
-  final PhonebookContactRepositoryV2 _phonebookContactRepository =
-      getIt.get<PhonebookContactRepositoryV2>();
+  // final PhonebookContactRepositoryV2 _phonebookContactRepository =
+  //     getIt.get<PhonebookContactRepositoryV2>();
 
   final LookupRepository _lookupRepository = getIt.get<LookupRepository>();
 
@@ -22,7 +23,11 @@ class PhonebookContactInteractorV2 {
   }) async* {
     int progress = 0;
     yield Right(GetPhonebookContactsLoading(progress: progress));
-    final contacts = await _phonebookContactRepository.fetchContacts();
+
+    //TODO: Replace this with actual contacts
+    // final contacts = await _phonebookContactRepository.fetchContacts();
+
+    final contacts = mockContacts;
 
     if (contacts.isEmpty) {
       return;
