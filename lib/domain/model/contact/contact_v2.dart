@@ -128,6 +128,10 @@ abstract class ThirdPartyContact with EquatableMixin {
     _thirdPartyIdToHashMap[thirdPartyId] = hashes;
   }
 
+  Map<String, List<String>> getThirdPartyIdToHashMap() {
+    return _thirdPartyIdToHashMap;
+  }
+
   @override
   List<Object?> get props => [
         thirdPartyId,
