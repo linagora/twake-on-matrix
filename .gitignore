@@ -12,6 +12,7 @@
 .svn/
 prime
 .direnv/
+config.json
 
 #generated file
 *.g.dart
