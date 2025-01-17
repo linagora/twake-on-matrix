@@ -72,12 +72,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "archive": "存档",
+  "archive": "归档",
   "@archive": {
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "已存档的聊天室",
+  "archivedRoom": "已归档的群聊",
   "@archivedRoom": {
     "type": "text",
     "placeholders": {}
@@ -342,7 +342,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "clearArchive": "清除存档",
+  "clearArchive": "清除归档",
   "@clearArchive": {},
   "close": "关闭",
   "@close": {
@@ -2148,7 +2148,7 @@
   "@removeFromSpace": {},
   "start": "开始",
   "@start": {},
-  "commandHint_discardsession": "丢弃会话",
+  "commandHint_discardsession": "舍弃会话",
   "@commandHint_discardsession": {
     "type": "text",
     "description": "Usage hint for the command /discardsession"
