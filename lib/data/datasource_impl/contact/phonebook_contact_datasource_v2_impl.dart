@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact_v2.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contact;
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource_v2.dart';
