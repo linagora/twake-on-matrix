@@ -69,13 +69,14 @@ abstract class ThirdPartyContact with EquatableMixin {
 
   final ThirdPartyStatus? status;
 
-  final Map<String, List<String>> _thirdPartyIdToHashMap = {};
+  final Map<String, List<String>>? thirdPartyIdToHashMap;
 
   ThirdPartyContact({
     required this.thirdPartyId,
     required this.thirdPartyIdType,
     this.matrixId,
     this.status,
+    this.thirdPartyIdToHashMap,
   });
 
   String calculateHashWithAlgorithmSha256({
@@ -124,20 +125,13 @@ abstract class ThirdPartyContact with EquatableMixin {
     return hashes;
   }
 
-  void setThirdPartyIdToHashMap(List<String> hashes) {
-    _thirdPartyIdToHashMap[thirdPartyId] = hashes;
-  }
-
-  Map<String, List<String>> getThirdPartyIdToHashMap() {
-    return _thirdPartyIdToHashMap;
-  }
-
   @override
   List<Object?> get props => [
         thirdPartyId,
         thirdPartyIdType,
         matrixId,
         status,
+        thirdPartyIdToHashMap,
       ];
 }
 
@@ -148,6 +142,7 @@ class PhoneNumber extends ThirdPartyContact {
     required this.number,
     super.matrixId,
     super.status,
+    super.thirdPartyIdToHashMap,
   }) : super(
           thirdPartyId: number.msisdnSanitizer(),
           thirdPartyIdType: ThirdPartyIdType.msisdn,
@@ -158,16 +153,22 @@ class PhoneNumber extends ThirdPartyContact {
         number,
         matrixId,
         status,
+        thirdPartyIdToHashMap,
+        thirdPartyId,
+        thirdPartyIdType,
       ];
 
   PhoneNumber copyWith({
     String? matrixId,
     ThirdPartyStatus? status,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
   }) {
     return PhoneNumber(
       number: number,
       matrixId: matrixId ?? this.matrixId,
       status: status ?? this.status,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
     );
   }
 }
@@ -179,6 +180,7 @@ class Email extends ThirdPartyContact {
     required this.address,
     super.matrixId,
     super.status,
+    super.thirdPartyIdToHashMap,
   }) : super(
           thirdPartyId: address,
           thirdPartyIdType: ThirdPartyIdType.email,
@@ -187,11 +189,14 @@ class Email extends ThirdPartyContact {
   Email copyWith({
     String? matrixId,
     ThirdPartyStatus? status,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
   }) {
     return Email(
       address: address,
       matrixId: matrixId ?? this.matrixId,
       status: status ?? this.status,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
     );
   }
 
@@ -200,5 +205,8 @@ class Email extends ThirdPartyContact {
         address,
         matrixId,
         status,
+        thirdPartyIdToHashMap,
+        thirdPartyId,
+        thirdPartyIdType,
       ];
 }
