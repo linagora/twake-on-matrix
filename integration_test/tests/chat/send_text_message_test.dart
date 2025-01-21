@@ -1,5 +1,3 @@
-import 'package:patrol/patrol.dart';
-
 import '../../base/test_base.dart';
 import '../../scenarios/login_scenario.dart';
 import '../../scenarios/send_text_message_scenario.dart';

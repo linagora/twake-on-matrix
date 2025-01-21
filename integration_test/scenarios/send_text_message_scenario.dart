@@ -1,9 +1,10 @@
-import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
+import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../base/base_scenario.dart';
+import '../robots/send_text_message_robot.dart';
 import 'login_scenario.dart';
 
 class SendTextMessageScenario extends BaseScenario {
@@ -15,10 +16,17 @@ class SendTextMessageScenario extends BaseScenario {
 
   @override
   Future<void> execute() async {
+    final SendTextMessageRobot sendTextMessageRobot = SendTextMessageRobot($);
     await loginScenario.execute();
+    await $.pumpAndSettle();
     await $.tap($(ChatListItem));
     await $.waitUntilVisible($(ChatView));
-    await $.enterText($(InputBar), "test message");
-    await $.tap($(ChatInputRowSendBtn));
+    final messagesCount = $(ListView).$(Message).evaluate().length;
+    await sendTextMessageRobot.enterTextMessage('Hello World');
+    await sendTextMessageRobot.tapOnSendButton();
+    await $.pumpAndSettle();
+    await Future.delayed(const Duration(seconds: 5));
+    final messagesCountAfterSending = $(ListView).$(Message).evaluate().length;
+    expect(messagesCountAfterSending, messagesCount + 1);
   }
 }
