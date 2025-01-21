@@ -1,343 +1,279 @@
-import 'package:fluffychat/domain/model/contact/contact_v2.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 
 final List<Contact> mockContacts = [
+  // ================== 1
   Contact(
-    id: 'a7cc58e4-9c4b-4f23-96ae-a7cd36d1c1b1',
+    id: '3f8e76b7-2ded-40f9-9347-d0d7939f4e0b',
     displayName: '. Thủy. Cj',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0912373191',
-      ),
+      PhoneNumber(number: '0912373191'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'd5fe52b3-dc48-4e26-afd1-8efdc5d4a2e9',
+    id: '204c1fba-fd18-46de-ae9f-8f0fb01cc99e',
     displayName: 'Xe Ôm',
     phoneNumbers: {
-      PhoneNumber(
-        number: '098 119 56 95',
-      ),
+      PhoneNumber(number: '098 119 56 95'),
     },
     emails: const {},
   ),
   Contact(
-    id: '183587cf-7409-4128-8290-fae26a240232',
+    id: 'f6af0901-2955-4887-90a1-ca0fa7a60b4e',
     displayName: 'Lag',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0973911538',
-      ),
+      PhoneNumber(number: '0973911538'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'f3488a4c-366c-4600-9cea-7b15fb878e34',
+    id: '2c801776-64ff-49f0-a651-cd3d95732109',
     displayName: 'N Cườg',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0916439093',
-      ),
+      PhoneNumber(number: '0916439093'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'b22a9048-3e1f-4f81-a048-e1a735e7be9a',
+    id: 'b210354c-a192-4932-9dc4-2a52e381fdc6',
     displayName: 'Cuong',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0334224884',
-      ),
+      PhoneNumber(number: '0334224884'),
     },
     emails: const {},
   ),
   Contact(
-    id: '5fc064fd-354f-426f-83ea-b5404ce8884b',
+    id: '761d04ba-925e-4087-a8fd-338122dde15d',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '1068',
-      ),
+      PhoneNumber(number: '1068'),
     },
     emails: const {},
   ),
   Contact(
-    id: '474d96c9-45bf-4297-baea-923efc52d52d',
+    id: '4c220e4e-e442-4453-85f4-64b2ed21aba8',
     displayName: 'Khuyenmai',
     phoneNumbers: {
-      PhoneNumber(
-        number: '*098#',
-      ),
+      PhoneNumber(number: '*098#'),
     },
     emails: const {},
   ),
   Contact(
-    id: '76139759-9195-432b-a227-dbb9f74d168b',
+    id: 'e0919a9a-837e-48ba-b5a4-0d6e8d3ccaf5',
     displayName: 'Ngọc',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0398962711',
-      ),
+      PhoneNumber(number: '0398962711'),
     },
     emails: const {},
   ),
   Contact(
-    id: '50b0f8be-3157-48dd-99df-20bb7d5348e8',
+    id: '19184315-a8c7-4fd4-8de0-e82612e65fc7',
     displayName: 'sjeng',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0358020615',
-      ),
+      PhoneNumber(number: '0358020615'),
     },
     emails: const {},
   ),
   Contact(
-    id: '12782c20-6bc6-4080-bf9e-599313d505d0',
+    id: '6701b100-5817-48c8-a230-ab72f3b149ab',
     displayName: 'Hợp',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0363673467',
-      ),
+      PhoneNumber(number: '0363673467'),
     },
     emails: const {},
   ),
+  // ================== 2
   Contact(
-    id: 'f1bad105-d159-4ae4-a974-06bb90d079b6',
+    id: '442bc91b-ad7e-44a0-9e8e-b6ffa9a73af0',
     displayName: '.hiển b',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0336100212',
-      ),
+      PhoneNumber(number: '0336100212'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'f8203b5a-a424-475c-a5c7-c118e0fcecfc',
+    id: '780fe9be-e39a-4c4f-9c14-07869488d35b',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0974844456',
-      ),
+      PhoneNumber(number: '0974844456'),
     },
     emails: const {},
   ),
   Contact(
-    id: '970c90bf-0d63-49be-9143-391dc8026a5d',
+    id: 'f9f0fb64-76de-438c-bc7e-089f945a1628',
     displayName: '.hưng C',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0328615843',
-      ),
+      PhoneNumber(number: '0328615843'),
     },
     emails: const {},
   ),
   Contact(
-    id: '9d3dd55f-badb-4d26-9e0e-1a8351385b95',
+    id: '608750cd-1bd9-477e-8a41-6932cf4f6fd9',
     displayName: '.dũng c',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0975759350',
-      ),
+      PhoneNumber(number: '0975759350'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'b82c8f6c-c802-4720-a7a7-ca013ef423ff',
+    id: 'e5fd6f07-d408-43c4-b169-e91861c27625',
     displayName: '.long A',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0986296797',
-      ),
+      PhoneNumber(number: '0986296797'),
     },
     emails: const {},
   ),
   Contact(
-    id: '6d0f106f-aa67-49bf-8db8-9ca49faa16f2',
+    id: '7232d395-0f1d-4bbd-b384-acb53d2c6661',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+841665585336',
-      ),
+      PhoneNumber(number: '+841665585336'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4092ecf3-b106-4ce3-b92e-d69fe064a1bf',
+    id: '0ff211b8-ab54-4e70-9e7d-ed52c00e47e9',
     displayName: '.phòng. dj',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0986596884',
-      ),
+      PhoneNumber(number: '0986596884'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'c60ebc40-a016-4492-a691-4971e9506aaf',
+    id: '29dae6e0-b40a-4dc7-9d33-25284c2067c6',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '01685802372',
-      ),
+      PhoneNumber(number: '01685802372'),
     },
     emails: const {},
   ),
   Contact(
-    id: '58ed9bb2-ee80-4c06-a426-844bef3ec745',
-    displayName: 'Thu',
+    id: 'c4a2c39f-4d12-4246-86e6-0f4a70029f74',
+    displayName: 'Th',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0979451097',
-      ),
+      PhoneNumber(number: '0979451097'),
     },
     emails: const {},
   ),
   Contact(
-    id: '08109d63-1cd9-4d74-8337-74d5e9762f9f',
+    id: '760a695c-3e1f-40b4-b554-d272af5267cc',
     displayName: 'tùng',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0376386744',
-      ),
+      PhoneNumber(number: '0376386744'),
     },
     emails: const {},
   ),
+  // ================== 3
   Contact(
-    id: 'cba17773-fd88-4935-afd7-99dd19d8bdcb',
+    id: '7f36a3be-a1bb-4db9-a16a-9807b71b1ebb',
     displayName: '0987777777',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0983944300',
-      ),
+      PhoneNumber(number: '0983944300'),
     },
     emails: const {},
   ),
   Contact(
-    id: '70f5c399-d4a1-4a19-b3a2-b149a9548251',
+    id: '8ccb0a10-0186-455a-831f-2893683a1921',
     displayName: '1 Xe',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0981486262',
-      ),
+      PhoneNumber(number: '0981486262'),
     },
     emails: const {},
   ),
   Contact(
-    id: '0b1fe672-c739-4bfe-864a-9af751a023b0',
+    id: 'b7b9a2c2-588c-417c-885d-f4450d257706',
     displayName: '.bjên c',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0968808178',
-      ),
+      PhoneNumber(number: '0968808178'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'ff74e841-d6cb-4f9a-833f-152b924179b2',
+    id: '7bad39b7-ca01-43b7-a9be-1b17cb0f754b',
     displayName: '.nhọ C',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0988192551',
-      ),
+      PhoneNumber(number: '0988192551'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'd23f266f-d899-4bd9-86b3-eafda3c5a4bf',
+    id: 'bad739e8-11e2-49b2-9808-860a5d4d03cb',
     displayName: '.tuan A',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0972149681',
-      ),
+      PhoneNumber(number: '0972149681'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'd0ca09f2-373e-42c1-a05e-dff860891fea',
+    id: '16925d1a-c932-464d-a19b-3c0ae6870bed',
     displayName: '2 Xe',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0966992922',
-      ),
+      PhoneNumber(number: '0966992922'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3519590a-e112-4841-8ca1-368a2e740957',
+    id: '727ead9d-d028-4789-bfcd-c5d418f80bde',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '1-800-MY-APPLE',
-      ),
+      PhoneNumber(number: '1-800-MY-APPLE'),
     },
     emails: const {},
   ),
   Contact(
-    id: '2f6f7045-0370-41aa-a069-1c8d5a95f785',
+    id: 'ddaf06e7-2e88-4f66-a331-b495d467d3f2',
     displayName: 'phượg',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0374562402',
-      ),
+      PhoneNumber(number: '0374562402'),
     },
     emails: const {},
   ),
   Contact(
-    id: '5e58e7d5-475f-468a-851c-cc0bbab11480',
+    id: 'b2feab45-8162-493e-8671-2a70e3b08fde',
     displayName: '.Tam E',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0382554998',
-      ),
+      PhoneNumber(number: '0382554998'),
     },
     emails: const {},
   ),
   Contact(
-    id: '92744a57-fa53-4958-b6b3-2e7c58d5275e',
+    id: 'c8788103-1c52-48a8-bd5b-d46f2acdd8fc',
     displayName: '.trg A',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0964260126',
-      ),
+      PhoneNumber(number: '0964260126'),
     },
     emails: const {},
   ),
+  // ================== 4
   Contact(
-    id: 'bd602b73-e474-4a72-98ad-fcfcf51990fa',
+    id: '876849fc-3589-430c-98bf-26bfef571f5f',
     displayName: '3D Dũg',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0386449403',
-      ),
+      PhoneNumber(number: '0386449403'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'f65caf7b-093f-4c37-a3be-f425b6ac78a8',
+    id: 'dbf78dc7-4d0f-4663-90d8-1398ef0516cc',
     displayName: 'van. dj',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0977763168',
-      ),
+      PhoneNumber(number: '0977763168'),
     },
     emails: const {},
   ),
   Contact(
-    id: '434a4de4-7064-4266-be3e-606bea1e1517',
+    id: 'fe6976b9-a358-46cf-8813-59ff0349b1be',
     displayName: '.trang H',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0343137142',
-      ),
+      PhoneNumber(number: '0343137142'),
     },
     emails: const {},
   ),
   Contact(
-    id: '9e129667-e404-476c-9b1a-ec09a24637e1',
+    id: '11938768-33d3-4e33-a4c8-c8fd9d6fd453',
     displayName: 'Anna Haro',
     phoneNumbers: {
-      PhoneNumber(
-        number: '555-522-8243',
-      ),
+      PhoneNumber(number: '555-522-8243'),
     },
     emails: {
       Email(
@@ -346,175 +282,140 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '8183329a-ecf1-4f5c-87c8-c5718247632c',
+    id: 'ba4d6d29-eaeb-439a-8cf7-1d98ccba0741',
     displayName: 'TứĐệ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0337849400',
-      ),
+      PhoneNumber(number: '0337849400'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'adf555c0-d798-4857-9387-45c38e616b53',
+    id: '4260a9b0-045c-4acb-936c-564a441cbe46',
     displayName: 'Huyền',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0333982561',
-      ),
+      PhoneNumber(number: '0333982561'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'd3edb3be-f102-48ea-a535-e34df022a443',
+    id: '7443bb9b-0b6f-49c8-a48b-50a276df6d7e',
     displayName: '.cơ C',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0967076012',
-      ),
+      PhoneNumber(number: '0967076012'),
     },
     emails: const {},
   ),
   Contact(
-    id: '46cb2c3c-47f4-45d0-b0ef-b9ea955b45a6',
+    id: '2ba48cdf-4eb8-41ab-9a0e-501093166f64',
     displayName: 'Điệp',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0344840890',
-      ),
+      PhoneNumber(number: '0344840890'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3f30419e-2fb3-4363-86cc-2d8adfe6fb03',
+    id: '3d89d2fc-7323-4bc0-8aec-8fa0ff41ce19',
     displayName: 'c Quag',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0397423759',
-      ),
+      PhoneNumber(number: '0397423759'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'b3a0b9f3-735c-4f42-9b72-2edb478326c5',
+    id: '4c710741-7d7b-4c75-b941-4f9f9950a760',
     displayName: 'Quyết',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0915770648',
-      ),
+      PhoneNumber(number: '0915770648'),
     },
     emails: const {},
   ),
+  // ================== 5
   Contact(
-    id: 'ab51c185-173d-45dd-894a-8485e10221b6',
+    id: 'c88fa07e-1ba2-4f68-b71f-4a46f21d5011',
     displayName: '.thủy C',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84912373791',
-      ),
+      PhoneNumber(number: '+84912373791'),
     },
     emails: const {},
   ),
   Contact(
-    id: '02792bb9-0d14-4db1-a2fd-7bded4d80300',
+    id: '8bb6a2cb-af16-407c-b289-6715b5743d6a',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+841626749212',
-      ),
+      PhoneNumber(number: '+841626749212'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'd2af3fb6-31c8-4fa2-81a2-eecc6c6b455a',
+    id: '4481fc92-864f-4ee0-be61-e59f90582e56',
     displayName: '. P Dì',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0986596884',
-      ),
+      PhoneNumber(number: '0986596884'),
     },
     emails: const {},
   ),
   Contact(
-    id: '96714c1b-0cf4-46d0-9c6b-84bb33ace375',
+    id: 'fd448d5d-d693-46f1-847b-42e60d09096b',
     displayName: '.trag t',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0327738656',
-      ),
+      PhoneNumber(number: '0327738656'),
     },
     emails: const {},
   ),
   Contact(
-    id: '95c1f203-f81e-4bea-b381-50b20a4606a4',
+    id: 'bfbcb4f4-30fa-4be4-915b-d94dfe417d78',
     displayName: 'Đệ Tam',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0964112811',
-      ),
+      PhoneNumber(number: '0964112811'),
     },
     emails: const {},
   ),
   Contact(
-    id: '145aa449-0f9c-413a-84b4-b03ecf168539',
+    id: '743091cc-5eba-4ccd-b200-5ae257ea702b',
     displayName: 'Dug',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0985856290',
-      ),
+      PhoneNumber(number: '0985856290'),
     },
     emails: const {},
   ),
   Contact(
-    id: '88e0d6fc-7f88-4e9f-9971-ccf085ce37ac',
+    id: '0f8ec38c-4524-4766-894e-77dcd2159ca4',
     displayName: 'thím',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84986579538',
-      ),
+      PhoneNumber(number: '+84986579538'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'fd019735-0c61-42a8-9ed1-bc326efb80ce',
+    id: '03542e99-3aa0-4135-9fc8-8ed1af188227',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0965757092',
-      ),
+      PhoneNumber(number: '0965757092'),
     },
     emails: const {},
   ),
   Contact(
-    id: '5f14923c-6bd3-473c-8ec5-bdd7d1782a88',
+    id: '32265286-5949-45d5-bd82-daa116375b64',
     displayName: '.tú t',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0365418663',
-      ),
+      PhoneNumber(number: '0365418663'),
     },
     emails: const {},
   ),
   Contact(
-    id: '0ef76a63-e936-43e5-818a-f6fd9cb328c5',
+    id: 'f52d01a8-79fd-4cf2-a0be-0df10aac6240',
     displayName: 'Rồ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0389799893',
-      ),
+      PhoneNumber(number: '0389799893'),
     },
     emails: const {},
   ),
+  // ================= 6
   Contact(
-    id: '1ba1b08a-38b1-43ed-b978-5c9eb9f361cd',
+    id: '7a2c8633-b5b9-4413-ac4d-6d34b901f28c',
     displayName: 'Hank M. Zakroff',
     phoneNumbers: {
-      PhoneNumber(
-        number: '(555) 766-4823',
-      ),
-      PhoneNumber(
-        number: '(707) 555-1854',
-      ),
+      PhoneNumber(number: '(555) 766-4823'),
     },
     emails: {
       Email(
@@ -523,62 +424,50 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '695b4c85-78ec-42d8-9894-a0028e186318',
+    id: '0d3ed44f-c226-473c-9783-87b6bf299b5e',
     displayName: 'Sang Cao',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0398489210',
-      ),
+      PhoneNumber(number: '0398489210'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4227019d-8e89-4751-9e58-897206de9e56',
+    id: '36e43647-31db-4e83-a85c-51a6e4d3d0bc',
     displayName: '.anh T',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0965939880',
-      ),
+      PhoneNumber(number: '0965939880'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'a55a1313-5f1b-42c7-aa65-b6db38f5b771',
+    id: 'a9086c49-8c5e-4742-8750-1ca4f5d8d9af',
     displayName: 'HuyhĐệ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0982873715',
-      ),
+      PhoneNumber(number: '0982873715'),
     },
     emails: const {},
   ),
   Contact(
-    id: '21bb50e6-85c9-4d10-9e99-e25c4998a8c8',
+    id: '5bd2e278-d6d2-4f44-9fc9-e91e97ff0b13',
     displayName: 'Điên',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0336429455',
-      ),
+      PhoneNumber(number: '0336429455'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4fba69cd-aa58-4d06-ac50-20063ef9f2bb',
+    id: '187cc742-df3d-4ae5-8357-e64bf3da7f8a',
     displayName: 'Đen',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0962014979',
-      ),
+      PhoneNumber(number: '0962014979'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4232df62-f8d1-44b0-a4ca-7816e2fa0d9f',
+    id: '7dc2207d-63f8-41f8-977a-9a2864ca0f92',
     displayName: 'Huy Nguyễn',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0869833269',
-      ),
+      PhoneNumber(number: '0869833269'),
     },
     emails: {
       Email(
@@ -587,155 +476,124 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '726d3055-9ee5-4c21-b524-24a91d6f3e00',
+    id: 'f5d2d8dd-7e92-44bf-9f9a-bcce5291d7e2',
     displayName: 'Hươnq',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0336863405',
-      ),
+      PhoneNumber(number: '0336863405'),
     },
     emails: const {},
   ),
   Contact(
-    id: '97eb726a-c3c9-4417-9467-6095a39af1bb',
+    id: '3c9e176a-54a7-496e-a3de-255842ecbd0d',
     displayName: '.n A',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0974833603',
-      ),
+      PhoneNumber(number: '0974833603'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'efa7ced3-1a70-4657-9793-bdeca3856c36',
+    id: '5e76819e-4a36-47c6-a25e-86e4aeb68c6e',
     displayName: 'Ah Bờm',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0976500451',
-      ),
+      PhoneNumber(number: '0976500451'),
     },
     emails: const {},
   ),
+  // ================= 7
   Contact(
-    id: '4c59284d-b2fc-4c54-88a8-c44e2ea7c83f',
+    id: '6a38d1c3-83f4-43bb-bc90-507a56d931e2',
     displayName: 'chú',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0963114585',
-      ),
+      PhoneNumber(number: '0963114585'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'e1287a47-5536-46a9-b542-d151f3253cb5',
+    id: '27320821-6228-40b8-a939-395309e3df25',
     displayName: 'Đca',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0394084741',
-      ),
+      PhoneNumber(number: '0394084741'),
     },
     emails: const {},
   ),
   Contact(
-    id: '26ad3ab3-7b31-4984-a005-bcda4f15e65e',
+    id: '5adbf16e-d424-4f7f-965d-0f633fa3b610',
     displayName: 'Hồng',
     phoneNumbers: {
-      PhoneNumber(
-        number: '096 4657913',
-      ),
+      PhoneNumber(number: '096 4657913'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'fe1088e8-6e59-4295-b48a-f9d685493120',
+    id: 'f0960a96-679d-4df2-8252-c0868cfd0484',
     displayName: 'David Taylor',
     phoneNumbers: {
-      PhoneNumber(
-        number: '555-610-6679',
-      ),
+      PhoneNumber(number: '555-610-6679'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'a29f76b2-80b8-4719-a806-208261e00578',
+    id: 'dbe6492a-6691-4493-86c8-1c6a3350dd08',
     displayName: 'Ngà',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0964484487',
-      ),
+      PhoneNumber(number: '0964484487'),
     },
     emails: const {},
   ),
   Contact(
-    id: '9be868ec-dfeb-4bfd-8610-ace630f0516d',
+    id: 'e2ee298f-7281-44db-a608-f6543b3f8c3d',
     displayName: 'Khuyenmai',
     phoneNumbers: {
-      PhoneNumber(
-        number: '*098#',
-      ),
+      PhoneNumber(number: '*098#'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4df4e4ed-89cd-4e8a-9b8a-3bf502453cc1',
+    id: '03406eb4-913a-4355-a17c-247ddba555b6',
     displayName: 'Taxi',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0328868288',
-      ),
+      PhoneNumber(number: '0328868288'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'f3fc2c16-b289-4964-9cb4-5b41cdbd5d43',
+    id: '5f19d0b7-03bd-4dc5-9493-41d508c831fa',
     displayName: 'thủy Kô',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0963334568',
-      ),
+      PhoneNumber(number: '0963334568'),
     },
     emails: const {},
   ),
   Contact(
-    id: '389c8f91-4b1a-4793-8c11-643d14a0552c',
+    id: '0480f3eb-1e78-4dc8-8bb8-4f8222740c5a',
     displayName: 'CSKH',
     phoneNumbers: {
-      PhoneNumber(
-        number: '18008098',
-      ),
+      PhoneNumber(number: '18008098'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'acc493b0-de1d-40d3-8ef6-6bea25e99fe9',
+    id: '300b2d94-dc14-439a-98db-042779d354a1',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0942775629',
-      ),
+      PhoneNumber(number: '0942775629'),
     },
     emails: const {},
   ),
   Contact(
-    id: '47774ae2-8d6b-4f5f-9a76-ac8233aa792f',
+    id: '04d2bece-b7b9-4765-92d1-3f2bb7bce7cc',
     displayName: '.cô E',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0399170336',
-      ),
+      PhoneNumber(number: '0399170336'),
     },
     emails: const {},
   ),
   Contact(
-    id: '0786f79e-d6c7-4ce4-be65-1a5cbba6ae89',
+    id: '4b2adf39-856c-49c5-aaed-1c3582760fea',
     displayName: 'John Appleseed',
     phoneNumbers: {
-      PhoneNumber(
-        number: '888-555-1212',
-      ),
-      PhoneNumber(
-        number: '888-555-5512',
-      ),
+      PhoneNumber(number: '888-555-1212'),
+      PhoneNumber(number: '888-555-5512'),
     },
     emails: {
       Email(
@@ -744,168 +602,132 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '2cf950c0-4f78-4e91-8826-01f37b04dde0',
+    id: '9672a298-18c9-46ab-bcf2-0b2c92e1aac3',
     displayName: 'CSKH',
     phoneNumbers: {
-      PhoneNumber(
-        number: '18008098',
-      ),
+      PhoneNumber(number: '18008098'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'b2b8e845-3bb0-4ed6-acbc-858ef3dc7756',
+    id: '97c6492b-f5b3-4fb2-8294-5511f68a5781',
     displayName: 'Thiên Log',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0373555316',
-      ),
+      PhoneNumber(number: '0373555316'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3d5e1206-5f2d-4a7e-80de-2edf86878b47',
+    id: 'e92c19d4-05bb-4e77-8de0-db33cc4f317e',
     displayName: '0989999999',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0988204739',
-      ),
+      PhoneNumber(number: '0988204739'),
     },
     emails: const {},
   ),
   Contact(
-    id: '743bd198-dbe7-4e18-bb15-79e495677467',
+    id: 'af1e75d6-e23b-4f86-b061-8f3d6c2e9521',
     displayName: 'đjệp',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0984589542',
-      ),
+      PhoneNumber(number: '0984589542'),
     },
     emails: const {},
   ),
   Contact(
-    id: '0599c8cd-9738-4537-a942-d6bd4c7529ac',
+    id: '1287282d-bf8b-41c2-b713-2b9417973dca',
     displayName: 'Cáo',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0368772392',
-      ),
+      PhoneNumber(number: '0368772392'),
     },
     emails: const {},
   ),
   Contact(
-    id: '73923315-45a9-4774-809e-00255831d826',
+    id: 'f7f36f9d-21fe-456c-b05a-44be3def4097',
     displayName: '.lien C',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0356463940',
-      ),
+      PhoneNumber(number: '0356463940'),
     },
     emails: const {},
   ),
   Contact(
-    id: '1e90bde0-c5ae-4f8d-b2da-16b0ebd55567',
+    id: '25280563-6235-4d18-93eb-6c108231db8c',
     displayName: 'Hạh Cô',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0358869720',
-      ),
+      PhoneNumber(number: '0358869720'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3594ce40-0a9c-4eab-95db-4eef1a466e4f',
+    id: 'b5c1023d-36b4-43e2-9bfe-c19f6f9a6c21',
     displayName: 'hằng',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0388145390',
-      ),
+      PhoneNumber(number: '0388145390'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'fc40babc-474e-492f-8230-629a2277b255',
+    id: 'ff619fd4-395b-4a21-8384-0d4f8151f5d2',
     displayName: 'Lạ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '01647954988',
-      ),
+      PhoneNumber(number: '01647954988'),
     },
     emails: const {},
   ),
   Contact(
-    id: '7c88b789-378b-4369-be0d-8c895703703d',
+    id: 'd0fbf525-b1b8-488a-a887-ab4833dfb0e6',
     displayName: 'Ml',
     phoneNumbers: {
-      PhoneNumber(
-        number: '195',
-      ),
+      PhoneNumber(number: '195'),
     },
     emails: const {},
   ),
   Contact(
-    id: '2d0c6b34-7001-46d0-bfb4-bc4f00757c87',
+    id: '1a094ec2-1166-460e-a1a3-d59539f04698',
     displayName: 'Phươg',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0964055397',
-      ),
+      PhoneNumber(number: '0964055397'),
     },
     emails: const {},
   ),
   Contact(
-    id: '9c5f04ea-5d1c-44ae-809b-3047ac1009b0',
+    id: '953780ed-558c-4e00-9371-88145d27a10f',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '01682554998',
-      ),
+      PhoneNumber(number: '01682554998'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4a911b0c-984c-4e88-9179-5f8359b5eb67',
+    id: '55cf7745-52e1-467d-8d57-aa12b9571362',
     displayName: '.tra. T',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0365388512',
-      ),
+      PhoneNumber(number: '0365388512'),
     },
     emails: const {},
   ),
   Contact(
-    id: '19a46b69-3f7f-4239-8ff8-ec1ff8800804',
+    id: 'f610e571-00c9-4db7-9e34-851e7b24474c',
     displayName: 'thúy',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0354624560',
-      ),
+      PhoneNumber(number: '0354624560'),
     },
     emails: const {},
   ),
   Contact(
-    id: '92c508ef-35a9-4afb-9f81-3820d4702258',
+    id: '0ce7b4b6-7063-451d-94ea-9a737480dcc0',
     displayName: '.điệp A',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0989488895',
-      ),
+      PhoneNumber(number: '0989488895'),
     },
     emails: const {},
   ),
   Contact(
-    id: '43cb5652-db15-4afe-b3ed-d7618d18b461',
+    id: '843e12f7-b869-4f15-bbc8-e63db9276b10',
     displayName: 'Daniel Higgins Jr.',
     phoneNumbers: {
-      PhoneNumber(
-        number: '(408) 555-3514',
-      ),
-      PhoneNumber(
-        number: '555-478-7672',
-      ),
-      PhoneNumber(
-        number: '(408) 555-5270',
-      ),
+      PhoneNumber(number: '(408) 555-5270'),
+      PhoneNumber(number: '(408) 555-3514'),
+      PhoneNumber(number: '555-478-7672'),
     },
     emails: {
       Email(
@@ -914,328 +736,272 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '4ad8eacf-11d0-4d30-ab2f-da0d157ee334',
+    id: '3a9a9c50-6b6a-47f5-af38-fe441b1cf75c',
     displayName: 'Tuấn Nguyễn Anh',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84987402464',
-      ),
+      PhoneNumber(number: '+84987402464'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'fa0f81bf-d863-4b41-8a6e-250d327b9ff9',
+    id: '157e86ea-a6b9-4703-b491-6164b9a6efea',
     displayName: 'Nguyen Van Chuyen',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84839661155',
-      ),
+      PhoneNumber(number: '+84839661155'),
     },
     emails: const {},
   ),
   Contact(
-    id: '2be0e7d1-072a-4674-804f-0fb29509936e',
+    id: 'e2234f45-b199-45e0-8b31-03864518a78d',
     displayName: '',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+34617621310',
-      ),
+      PhoneNumber(number: '+34617621310'),
     },
     emails: const {},
   ),
   Contact(
-    id: '628e3857-f002-4b5c-b3b4-9cb0afc3787d',
+    id: '35f8bc27-2b36-4527-9b3f-0683c3a3ce5f',
     displayName: 'Chị Hương Chủ Nhà Trung Hoà',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0936782486',
-      ),
+      PhoneNumber(number: '0936782486'),
     },
     emails: const {},
   ),
   Contact(
-    id: '28e01a13-b046-4a10-9792-e207be22bb43',
+    id: 'f6e052e8-73f2-45a8-8884-92ec1a40df45',
     displayName: 'Bác Cần Bảo Vệ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0352315680',
-      ),
+      PhoneNumber(number: '0352315680'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'fff2eb0b-29c2-4e47-9d01-22cf0468b3d0',
+    id: 'fa7f82f6-e85c-4159-a5fb-bb5d3298e9ad',
     displayName: 'Chú Thắng Chủ Nhà 14/36 TH',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0944026776',
-      ),
+      PhoneNumber(number: '0944026776'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4ecf0b68-c619-4aa3-a95b-5f1c9767e3f1',
+    id: 'f4b09160-a1f7-4063-a70d-b87d12b60e1d',
     displayName: 'Taxi Thanh Nga',
     phoneNumbers: {
-      PhoneNumber(
-        number: '02438215215',
-      ),
+      PhoneNumber(number: '02438215215'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'a56d80aa-24b6-49b5-b5c8-0e21c7ca8b55',
+    id: 'b5f03002-4c4b-4670-aff6-b70e3f81a22a',
     displayName: 'A Hoàng Đạt Linagora',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84 36 6769439',
-      ),
+      PhoneNumber(number: '+84 36 6769439'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'c8afd4a1-3281-4d34-985d-22839ee71f09',
+    id: 'ba9004e2-e2ef-4dfb-b08a-c7d2d45680ae',
     displayName: 'Khải Linagora Holmes',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84 94 469 73 89',
-      ),
+      PhoneNumber(number: '+84 94 469 73 89'),
     },
     emails: const {},
   ),
   Contact(
-    id: '4de1a62e-1594-4292-86df-12e4d6574c47',
+    id: '5a8f353d-b00d-4bb1-bdd6-25c69db81a5e',
     displayName: 'Anh Rể Nam',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0981976397',
-      ),
+      PhoneNumber(number: '0981976397'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'a844e94c-a0d9-4652-880f-31b735f06f09',
+    id: '5e44f161-dfb2-4ec1-b76c-102399f15e60',
     displayName: 'Cô Huyền',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0982373832',
-      ),
+      PhoneNumber(number: '0982373832'),
     },
     emails: const {},
   ),
   Contact(
-    id: '7130cf74-2a32-456e-baeb-9bfbf0116499',
+    id: 'e85b94e5-2b64-416f-b4cf-952f4943647c',
     displayName: 'Babee 🫶🏻',
     phoneNumbers: {
-      PhoneNumber(
-        number: '035 2444899',
-      ),
+      PhoneNumber(number: '035 2444899'),
     },
     emails: const {},
   ),
   Contact(
-    id: '77e83888-0eed-48b8-8e81-3c87d0e866c9',
+    id: '2d3a80a1-ce68-450b-819a-70a812265f8d',
     displayName: 'Linagora a Quang',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0975110096',
-      ),
+      PhoneNumber(number: '0975110096'),
     },
     emails: const {},
   ),
   Contact(
-    id: '487ace07-4b6e-4938-bb4f-ce4031495d53',
+    id: '3723f10c-00e2-4859-97c9-ea325fa6f0b5',
     displayName: 'A Giang Taxi Kiến Xương',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0917266981',
-      ),
+      PhoneNumber(number: '0917266981'),
     },
     emails: const {},
   ),
   Contact(
-    id: '17bb36ad-41a8-4003-b51b-46e871ab7de8',
+    id: 'f99bd0d0-7524-4c9d-9def-74ec844704c6',
     displayName: 'Chú Dũng Chủ Nhà 36 TH',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0914382384',
-      ),
+      PhoneNumber(number: '0914382384'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'cfb7a89b-e702-4d18-9d52-f2929011c538',
+    id: '81309053-65b4-4bab-aed5-d6fb3ce987d4',
     displayName: 'Mẹ Hợpp',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0987901959',
-      ),
+      PhoneNumber(number: '0987901959'),
     },
     emails: const {},
   ),
   Contact(
-    id: '8694c1e0-9d9c-4fbf-bba8-875da35cad20',
+    id: 'f19c6907-60f4-4637-bc2d-8c1d6526b3eb',
     displayName: 'Cô Liên',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0818998889',
-      ),
+      PhoneNumber(number: '0818998889'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'a5e9c30d-b661-40c3-b17a-d005609d48c2',
+    id: 'd52cc5b9-f989-4c34-9de4-a2c407501332',
     displayName: 'Chú Nam',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84986722299',
-      ),
+      PhoneNumber(number: '+84986722299'),
     },
     emails: const {},
   ),
   Contact(
-    id: '140da678-34dd-4e33-b1ed-c52b1f179a1b',
+    id: '4f7c33b0-1db4-44d2-abf8-f13a4be24145',
     displayName: 'Phiệt Học',
     phoneNumbers: {
-      PhoneNumber(
-        number: '19009016',
-      ),
+      PhoneNumber(number: '19009016'),
     },
     emails: const {},
   ),
   Contact(
-    id: '453fb61d-4002-488a-9f38-3130c622ae6b',
+    id: 'b353bd38-1c12-4f1c-be60-185218e3d836',
     displayName: 'Linagora C Yến',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0372019465',
-      ),
+      PhoneNumber(number: '0372019465'),
     },
     emails: const {},
   ),
   Contact(
-    id: '9320268a-37c5-4cd1-ba3a-a595f3087252',
+    id: '8b5a04e1-fc7f-4cd1-bae8-883bd8e26f30',
     displayName: 'Duy 97 BD Blockchain',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0357251753',
-      ),
+      PhoneNumber(number: '0357251753'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3a8d7af0-5d15-45ad-996d-35177a607278',
+    id: '8781cda5-56e7-4c41-bf57-c93f1a77545c',
     displayName: 'C Phương Mẹ Bonn',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0375571363',
-      ),
+      PhoneNumber(number: '0375571363'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'e23472a9-e129-4035-a425-1882f18e69a0',
+    id: 'db7e4282-8bdd-4536-8d52-04cb9b05e728',
     displayName: 'B Minhh',
     phoneNumbers: {
-      PhoneNumber(
-        number: '035 8350234',
-      ),
+      PhoneNumber(number: '035 8350234'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'e4db67df-d5e1-4461-8f0a-10e994de7ecd',
+    id: '5d068db3-9c20-4e8b-8c7a-5942814c94f0',
     displayName: 'B Minhhh',
     phoneNumbers: {
-      PhoneNumber(
-        number: '094 7779209',
-      ),
+      PhoneNumber(number: '094 7779209'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3bc7fd0e-28c3-41d9-a624-0eed88152b6a',
+    id: 'dee3354b-352b-41af-94f2-c779ce8382a0',
     displayName: 'M Phương TB',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84345174980',
-      ),
+      PhoneNumber(number: '+84345174980'),
     },
     emails: const {},
   ),
   Contact(
-    id: '3e3ffae2-a783-4799-9907-f326a2cd5424',
+    id: 'c75a2644-ca45-4224-b332-943fa2d22e03',
     displayName: 'A Sáu Sân Thi Bằng Lái Xe PCCC',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0858867975',
-      ),
+      PhoneNumber(number: '0858867975'),
     },
     emails: const {},
   ),
   Contact(
-    id: '1f2ed1ee-b92b-4736-ad3a-ee9e533e93a3',
+    id: 'bf0aec2d-7c15-4a30-a0a7-6b9a34008479',
     displayName: 'Chú Tiệp Kia',
     phoneNumbers: {
-      PhoneNumber(
-        number: '096 3998815',
-      ),
+      PhoneNumber(number: '096 3998815'),
     },
     emails: const {},
   ),
   Contact(
-    id: '8f1cf098-1234-4fa0-9472-472afdddcf45',
+    id: 'd3fe3ad2-3184-4d5d-a79e-9bf25ec986df',
     displayName: 'Chú Tiệp Kia 2',
     phoneNumbers: {
-      PhoneNumber(
-        number: '093 8900740',
-      ),
+      PhoneNumber(number: '093 8900740'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'bf55fe04-dae0-43b6-8eff-caa5f10b60b5',
+    id: 'a4513602-e1ec-4483-bee1-5199cf9b2aef',
     displayName: 'Nqhhdev Phụ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0969596637',
-      ),
+      PhoneNumber(number: '0969596637'),
     },
     emails: const {},
   ),
   Contact(
-    id: '7ca4dbe2-a8f7-4def-8edc-0b17b7311e98',
+    id: 'e8f4b242-ea64-41ec-920d-82dc7ab0c746',
     displayName: 'Bác Duy Gửi Xe Trường Trung Cấp Bách Nghệ',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0969643168',
-      ),
+      PhoneNumber(number: '0969643168'),
     },
     emails: const {},
   ),
   Contact(
-    id: 'debfaa7f-84b4-43a0-a40e-ff9caf8fa85e',
+    id: 'b3422c1f-a008-49fd-bdca-aef957ed3ad3',
     displayName: 'Khanh Củi BxLC',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0916091906',
-      ),
+      PhoneNumber(number: '0916091906'),
     },
     emails: const {},
   ),
   Contact(
-    id: '6e936825-e771-4e8f-87f1-ca3547700ba4',
+    id: 'c7b1f393-23ec-4415-b582-7d4c4c72f46b',
+    displayName: 'Khanh Củi BxLC',
+    phoneNumbers: {
+      PhoneNumber(number: '0916091906'),
+    },
+    emails: const {},
+  ),
+  Contact(
+    id: '38dfbac5-d219-42c0-a464-28465d9e8f4a',
     displayName: 'Chú Tuyển',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0916826955',
-      ),
+      PhoneNumber(number: '0916826955'),
     },
     emails: const {},
   ),
   Contact(
-    id: '5cba1819-afc9-4bb1-94d6-c84ab3ca6aa3',
-    displayName: 'huy dev',
+    id: '5fcf3bef-9a9e-468b-9120-eae761b16161',
+    displayName: '',
     phoneNumbers: const {},
     emails: {
       Email(
@@ -1244,70 +1010,27 @@ final List<Contact> mockContacts = [
     },
   ),
   Contact(
-    id: '87977260-3bb4-4987-a6fe-bf3bc3462236',
+    id: '9ca5b20b-5241-441d-81bf-a8de56dd4219',
     displayName: 'Thuc',
     phoneNumbers: {
-      PhoneNumber(
-        number: '+84 98 6417492',
-      ),
-      PhoneNumber(
-        number: '0976554321',
-      ),
+      PhoneNumber(number: '+84 98 6417492'),
     },
     emails: const {},
   ),
   Contact(
-    id: '7624a6c7-1b46-4e4a-a399-f72489a44259',
+    id: '3e68251e-828e-43ab-a217-59d1a38e9bfa',
     displayName: 'A Trinh CA BX',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0981065666',
-      ),
+      PhoneNumber(number: '096 3998815'),
     },
-    emails: {
-      Email(
-        address: 'atrinh@gmail.com',
-      ),
-    },
+    emails: const {},
   ),
   Contact(
-    id: '555b2abe-0d0b-4901-8059-297c7b6a700c',
+    id: '0335097b-5f03-455c-bbcc-215ca183bc8b',
     displayName: 'Bà Hương',
     phoneNumbers: {
-      PhoneNumber(
-        number: '0816477536',
-      ),
-      PhoneNumber(
-        number: '0986335354',
-      ),
-      PhoneNumber(
-        number: '0931234422',
-      ),
+      PhoneNumber(number: '096 3998815'),
     },
-    emails: {
-      Email(
-        address: 'bahuong@gmail.com',
-      ),
-      Email(
-        address: 'huongba@gmail.com',
-      ),
-    },
-  ),
-  Contact(
-    id: '555b2abe-0b0d-4910-8059-297c4b6a711c',
-    displayName: 'Alex test',
-    phoneNumbers: {
-      PhoneNumber(
-        number: '+33 6 60 46 98 41',
-      ),
-    },
-    emails: {
-      Email(
-        address: 'bahuong@gmail.com',
-      ),
-      Email(
-        address: 'huongba@gmail.com',
-      ),
-    },
+    emails: const {},
   ),
 ];
