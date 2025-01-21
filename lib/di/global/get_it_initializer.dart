@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
+import 'package:fluffychat/data/datasource/contact/phonebook_datasource_v2.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
@@ -13,6 +14,7 @@ import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_v2_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
@@ -55,6 +57,7 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor_v2.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
@@ -206,6 +209,9 @@ class GetItInitializer {
     getIt.registerFactory<PhonebookContactDatasource>(
       () => PhonebookContactDatasourceImpl(),
     );
+    getIt.registerFactory<PhonebookContactDatasourceV2>(
+      () => PhonebookContactDatasourceV2Impl(),
+    );
     getIt.registerLazySingleton(
       () => MediaDataSourceImpl(
         getIt.get<MediaAPI>(),
@@ -270,6 +276,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<PhonebookContactInteractor>(
       () => PhonebookContactInteractor(),
+    );
+    getIt.registerFactory<PhonebookContactInteractorV2>(
+      () => PhonebookContactInteractorV2(),
     );
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
