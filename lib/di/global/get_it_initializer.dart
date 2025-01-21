@@ -277,6 +277,9 @@ class GetItInitializer {
     getIt.registerFactory<PhonebookContactInteractor>(
       () => PhonebookContactInteractor(),
     );
+    getIt.registerFactory<PhonebookContactInteractorV2>(
+      () => PhonebookContactInteractorV2(),
+    );
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
     );
@@ -354,10 +357,6 @@ class GetItInitializer {
 
     getIt.registerFactory<VerifyNameInteractor>(
       () => VerifyNameInteractor(),
-    );
-
-    getIt.registerFactory<PhonebookContactInteractorV2>(
-      () => PhonebookContactInteractorV2(),
     );
   }
 

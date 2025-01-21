@@ -21,59 +21,26 @@ class LookupDatasourceImpl implements LookupDatasource {
   Future<LookupListMxidResponse> lookupListMxid(
     LookupListMxidRequest request,
   ) async {
-    // TODO: Implement this method
-    // return _lookupAPI.lookupListMxid(request);
+    final mappings = [
+      mapping1,
+      mapping2,
+      mapping3,
+      mapping4,
+      mapping5,
+      mapping6,
+      mapping7,
+      mapping8,
+      mapping9,
+      mapping10,
+      mapping11,
+      mapping12,
+      mapping13,
+    ];
 
-    if (request.addresses?.containsAll(mapping1.keys) == true) {
-      return _createLookupListMxidResponse(mapping1);
-    }
-
-    if (request.addresses?.containsAll(mapping2.keys) == true) {
-      return _createLookupListMxidResponse(mapping2);
-    }
-
-    if (request.addresses?.containsAll(mapping3.keys) == true) {
-      return _createLookupListMxidResponse(mapping3);
-    }
-
-    if (request.addresses?.containsAll(mapping4.keys) == true) {
-      return _createLookupListMxidResponse(mapping4);
-    }
-
-    if (request.addresses?.containsAll(mapping5.keys) == true) {
-      return _createLookupListMxidResponse(mapping5);
-    }
-
-    if (request.addresses?.containsAll(mapping6.keys) == true) {
-      return _createLookupListMxidResponse(mapping6);
-    }
-
-    if (request.addresses?.containsAll(mapping7.keys) == true) {
-      return _createLookupListMxidResponse(mapping7);
-    }
-
-    if (request.addresses?.containsAll(mapping8.keys) == true) {
-      return _createLookupListMxidResponse(mapping8);
-    }
-
-    if (request.addresses?.containsAll(mapping9.keys) == true) {
-      return _createLookupListMxidResponse(mapping9);
-    }
-
-    if (request.addresses?.containsAll(mapping10.keys) == true) {
-      return _createLookupListMxidResponse(mapping10);
-    }
-
-    if (request.addresses?.containsAll(mapping11.keys) == true) {
-      return _createLookupListMxidResponse(mapping11);
-    }
-
-    if (request.addresses?.containsAll(mapping12.keys) == true) {
-      return _createLookupListMxidResponse(mapping12);
-    }
-
-    if (request.addresses?.containsAll(mapping13.keys) == true) {
-      return _createLookupListMxidResponse(mapping13);
+    for (final mapping in mappings) {
+      if (request.addresses?.containsAll(mapping.keys) == true) {
+        return _createLookupListMxidResponse(mapping);
+      }
     }
 
     return _createLookupListMxidResponse({});
@@ -102,12 +69,12 @@ class LookupDatasourceImpl implements LookupDatasource {
     "fJcNGXVoRaa8cxZJpE9gfVX4JF4u1cWUb7SzlGXIWSI": "@hello1:matrix.org",
     "Rs8uZy6KNiVcjpk1dDKtsvrB9LTNEpNU5ZyZnP1txjo": "@hello3:matrix.org",
     "1rqNXP6OpnZrXtlA_k0NE6a-8vdmLwlm8lyKF0wTYq4": "@hello5:matrix.org",
-    "CMGM0mdXgX0kAzPbTph4CUtaE7-fwVGsm7Ko-wMGccQ": "@hello7:matrix.org",
+    "fBIs-RZlUX9sfHtHo_dvRBAvNpUqPgfC8cUPUbkXXIU": "@hello7:matrix.org",
     "PIfY-6L-CB9h3YzC1Mn33EtXv5TFbTETHC7FERgBWpw": "@hello9:matrix.org",
   };
 
   final mapping2 = {
-    "mMdPZHt4WrzcqlCL2KRpDSqZVyw1kGld-SmGVfwFQc": "@hello11:matrix.org",
+    "mMdPZHt4WrzcqlCL2KRpDSqZVyw1kGld-SmGVfwFQcU": "@hello11:matrix.org",
     "lxvAR5E06tcWbuZoaTnG3TnGAAUoW4mkT8S2yu5SCT8": "@hello13:matrix.org",
     "3i7Wh86KNkH8-BIC4PypN9j4mnP9k_qR1riO_oHHxmE": "@hello15:matrix.org",
   };
@@ -124,8 +91,8 @@ class LookupDatasourceImpl implements LookupDatasource {
     "QDLfPwaO2HnZyb-6ywscoxJ5qvsAJjbJIPAPg4zH0Es": "@hello31:matrix.org",
     "yjk5lzHL_XSP4Un-6wuH_Lna558IZMLksuSntEq2xaY": "@hello32:matrix.org",
     "EWujCkcxjriGcHp3316jNl3GCCHm952FuBgZKViHICg": "@hello33:matrix.org",
-    "3Qd3Bx3-Ecxs2GHpi4Gu8rjowReqx6aym0Z2U31WJQ": "@hello34:matrix.org",
-    "iC7b4PG4a7vwyqF8ITiMZMxVQPHFELK02uPECh1Nor": "@hello35:matrix.org",
+    "zMGiIN-TN4lVmCAR63phhDfqHSCQyOL1c-3fqmpW50g": "@hello34:matrix.org",
+    "iC7b4PG4a7vwyqF8ITiMZMxVQPHFELK02uPECh1NorU": "@hello35:matrix.org",
     "HMSCmpsEvNIkgmGUAxOLCB5IYCLlumDnS4aSEm8ecgE": "@hello36:matrix.org",
     "-jWCkSp5FqBVudCEYADpHa-fXk42b7rt5zwKIBDOBdA": "@hello37:matrix.org",
     "3kHKgujM9UrS6DvI1nXlt-cDpFAKr68Lb927U6zP5ns": "@hello39:matrix.org",
@@ -136,7 +103,7 @@ class LookupDatasourceImpl implements LookupDatasource {
   };
 
   final mapping6 = {
-    "PZbqrkIKgJuYMFz8njXnwm4IYKYaVDx0uXvRbianjM8": "@hello51:matrix.org",
+    "Dmw20FcaG8I7t9D27FoxsDYjwxdkvyskJU5F-Gji4qE": "@hello51:matrix.org",
     "9C-kscxjsIYgRDt4RpPSJzyjeFwqbctAqzupKXUeSko": "@hello52:matrix.org",
     "ZnZozSu5fyBocNQFUoa47Ww6IuiruUEaIgxyVr7vpvc": "@hello53:matrix.org",
     "zM2nsjxiGaE_8C3EuJyv_vpJK7Rpp7XA5BL6rnGKuXc": "@hello54:matrix.org",
@@ -165,7 +132,7 @@ class LookupDatasourceImpl implements LookupDatasource {
     "p9b0OuiUPeBkvYyWiJtQbxJWQWDjT-na--zuQW57FRw": "@hello81:matrix.org",
   };
   final mapping10 = {
-    "mokSrGILWsXv0SaYGvl2VTMpdNXh8dO5rMiUrbmJMts": "@hello91:matrix.org",
+    "5RN14rVi1Y0Duen0XcMNIig8pV0aUzj6P4kOOZKQWwc": "@hello91:matrix.org",
     "rmxEC4cVsjx-YFTS8Z8epWn2emSOsr5wTYIuPSqdAAw": "@hello92:matrix.org",
   };
 
@@ -173,11 +140,12 @@ class LookupDatasourceImpl implements LookupDatasource {
     "j8jA8FYPxtccIP2yRkrusmcxu59mxBgjM3-PV1Y66ec": "@hello105:matrix.org",
   };
   final mapping12 = {
-    "TwCC4vHJsOmVd6ewWE4LCYJFOc-5WeOVQZQ2uxVuJZ4": "@hello112:matrix.org",
-    "LArSA69WKYFvHhOAxdNQzh_rF3MMfulH9xH2eV-MP7I": "@hello113:matrix.org",
+    "laIgw-feEKS-lE-r0KVH-1Xu_ioazfiZSJmtGWmHNNg": "@hello112:matrix.org",
+    "dzN5qAjM4SRRDnoS9n-qUQ5ztEF9KwgpyE6Hh1gnGPk": "@hello113:matrix.org",
   };
 
   final mapping13 = {
-    "ah46z-6iBMnJ8EWLt4PqWJLWeceHsw-S3MtE0QRR69w": "@hello123:matrix.org",
+    "ODQ5ODY0MTc0OTIgbXNpc2RuIHlvdXItcGVwcGVyLXN0cmluZw":
+        "@hello123:matrix.org",
   };
 }

@@ -1,38 +1,54 @@
+import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/contact/contact_v2.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 
-class GetPhonebookContactsInitial extends Initial {
-  const GetPhonebookContactsInitial() : super();
+class GetPhonebookContactsV2Initial extends Initial {
+  const GetPhonebookContactsV2Initial() : super();
 
   @override
   List<Object?> get props => [];
 }
 
-class GetPhonebookContactsLoading extends Success {
+class GetPhonebookContactsV2Loading extends Success {
   final int progress;
 
-  const GetPhonebookContactsLoading({required this.progress});
+  const GetPhonebookContactsV2Loading({required this.progress});
 
   @override
   List<Object?> get props => [progress];
 }
 
-class GetPhonebookContactsSuccess extends Success {
+class GetPhonebookContactsV2Success extends Success {
   final int progress;
-  final List<Contact> foundContacts;
-  final List<Contact> notFoundContacts;
+  final List<Contact> contacts;
 
-  const GetPhonebookContactsSuccess({
+  const GetPhonebookContactsV2Success({
     required this.progress,
-    required this.foundContacts,
-    required this.notFoundContacts,
+    required this.contacts,
   });
 
   @override
   List<Object?> get props => [
         progress,
-        foundContacts,
-        notFoundContacts,
+        contacts,
       ];
+}
+
+class GetPhonebookContactsV2IsEmpty extends Success {
+  const GetPhonebookContactsV2IsEmpty();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class GetPhonebookContactsV2Failure extends Failure {
+  final dynamic exception;
+
+  const GetPhonebookContactsV2Failure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
 }
