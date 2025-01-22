@@ -215,6 +215,10 @@ extension LocalizedBody on Event {
   Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
     await TwakeClipboard.instance
         .copyText(getSelectedEventString(context, timeline));
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.textCopiedToClipboard,
+    );
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
