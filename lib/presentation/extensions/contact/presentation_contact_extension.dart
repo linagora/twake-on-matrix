@@ -1,46 +1,13 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:collection/collection.dart';
 
 extension PresentaionContactExtension on PresentationContact {
-  bool matched({required bool Function(String) condition}) {
-    if (displayName != null && condition(displayName!)) {
-      return true;
-    }
-
-    if (matrixId != null && condition(matrixId!)) {
-      return true;
-    }
-
-    if (email != null && condition(email!)) {
-      return true;
-    }
-
-    if (status != null && condition(status.toString())) {
-      return true;
-    }
-
-    return false;
-  }
-
-  Set<Contact> toContacts() {
-    final listContacts = {
-      Contact(
-        email: email,
-        displayName: displayName,
-        matrixId: matrixId,
-        status: status,
-      ),
-    };
-
-    return listContacts;
-  }
-
   Set<PresentationSearch> toPresentationSearch() {
     final listContacts = {
       ContactPresentationSearch(
         matrixId: matrixId,
-        email: email,
         displayName: displayName,
       ),
     };
@@ -50,16 +17,57 @@ extension PresentaionContactExtension on PresentationContact {
 
 extension ContactExtensionInPresentation on Contact {
   Set<PresentationContact> toPresentationContacts() {
+    final phoneNumberHasMatrixId = phoneNumbers?.firstWhereOrNull(
+      (phoneNumber) => phoneNumber.matrixId != null,
+    );
+
+    final emailHasMatrixId = emails?.firstWhereOrNull(
+      (email) => email.matrixId != null,
+    );
+
+    final displayName = (this.displayName?.isNotEmpty == true)
+        ? this.displayName
+        : phoneNumberHasMatrixId?.number ??
+            emailHasMatrixId?.address ??
+            phoneNumbers?.firstOrNull?.number ??
+            emails?.firstOrNull?.address;
+
+    final contactMatrix = phoneNumberHasMatrixId ?? emailHasMatrixId;
     final listContacts = {
       PresentationContact(
-        email: email,
-        phoneNumber: phoneNumber,
+        emails: emails?.map((email) => email.toPresentationEmails()).toSet(),
+        phoneNumbers: phoneNumbers
+            ?.map((phoneNumber) => phoneNumber.toPresentationPhoneNumbers())
+            .toSet(),
         displayName: displayName,
-        matrixId: matrixId,
-        status: status,
+        matrixId: contactMatrix?.matrixId ?? '',
       ),
     };
 
     return listContacts;
+  }
+}
+
+extension EmailExtensionInPresentation on Email {
+  PresentationEmail toPresentationEmails() {
+    return PresentationEmail(
+      email: address,
+      thirdPartyId: thirdPartyId,
+      thirdPartyIdType: thirdPartyIdType,
+      status: status,
+      matrixId: matrixId,
+    );
+  }
+}
+
+extension PhoneNumberExtensionInPresentation on PhoneNumber {
+  PresentationPhoneNumber toPresentationPhoneNumbers() {
+    return PresentationPhoneNumber(
+      phoneNumber: number,
+      thirdPartyId: thirdPartyId,
+      thirdPartyIdType: thirdPartyIdType,
+      status: status,
+      matrixId: matrixId,
+    );
   }
 }

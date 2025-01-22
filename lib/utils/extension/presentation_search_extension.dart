@@ -14,13 +14,13 @@ extension PresentationSearchExtension on PresentationSearch {
     return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
   }
 
-  bool _matchedEmail(String keyword) {
-    return email?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
-  }
+  // bool _matchedEmail(String keyword) {
+  //   return email?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
+  // }
 
   bool _matchedContactInfo(String keyword) {
     return _matchedName(keyword) ||
-        _matchedEmail(keyword) ||
+        // _matchedEmail(keyword) ||
         _matchedMatrixId(keyword) ||
         _matchedDirectChatMatrixId(keyword);
   }
