@@ -1,5 +1,5 @@
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_v2_impl.dart';
-import 'package:fluffychat/domain/model/contact/contact_v2.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';

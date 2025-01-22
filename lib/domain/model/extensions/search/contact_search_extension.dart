@@ -5,7 +5,6 @@ extension SearchExtension on ContactSearchModel {
   ContactPresentationSearch toContactPresentationSearch() {
     return ContactPresentationSearch(
       matrixId: id,
-      email: email,
       displayName: displayName,
     );
   }
