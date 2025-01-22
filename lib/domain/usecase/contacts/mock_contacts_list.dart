@@ -16,7 +16,14 @@ final List<Contact> mockContacts = [
     phoneNumbers: {
       PhoneNumber(number: '098 119 56 95'),
     },
-    emails: const {},
+    emails: {
+      Email(
+        address: 'xeom@gmail.com',
+      ),
+      Email(
+        address: 'xeom123@gmail.com',
+      ),
+    },
   ),
   Contact(
     id: 'f6af0901-2955-4887-90a1-ca0fa7a60b4e',

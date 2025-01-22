@@ -142,8 +142,6 @@ class SearchController extends State<Search> {
         extra: {
           PresentationContactConstant.receiverId:
               contactPresentationSearch.matrixId ?? '',
-          PresentationContactConstant.email:
-              contactPresentationSearch.email ?? '',
           PresentationContactConstant.displayName:
               contactPresentationSearch.displayName ?? '',
           PresentationContactConstant.status: '',

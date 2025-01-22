@@ -48,7 +48,6 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
     if (extra.isNotEmpty) {
       return PresentationContact(
         matrixId: extra[PresentationContactConstant.receiverId],
-        email: extra[PresentationContactConstant.email],
         displayName: extra[PresentationContactConstant.displayName],
       );
     } else {

@@ -11,12 +11,10 @@ class GetPhonebookContactsV2Initial extends Initial {
 }
 
 class GetPhonebookContactsV2Loading extends Success {
-  final int progress;
-
-  const GetPhonebookContactsV2Loading({required this.progress});
+  const GetPhonebookContactsV2Loading();
 
   @override
-  List<Object?> get props => [progress];
+  List<Object?> get props => [];
 }
 
 class GetPhonebookContactsV2Success extends Success {
