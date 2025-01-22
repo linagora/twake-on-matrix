@@ -39,6 +39,7 @@ class LookupDatasourceImpl implements LookupDatasource {
 
     for (final mapping in mappings) {
       if (request.addresses?.containsAll(mapping.keys) == true) {
+        await Future.delayed(const Duration(seconds: 2));
         return _createLookupListMxidResponse(mapping);
       }
     }

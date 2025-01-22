@@ -42,9 +42,11 @@ class LookupMatchContactInteractor {
         Logs().i(
           'LookupMatchContactInteractor:: contactMatched ${contactMatched.first}',
         );
-        yield Right(
-          LookupMatchContactSuccess(contact: contactMatched.first),
-        );
+
+        ///TODO: IMPL After implementing Contact model
+        // yield Right(
+        //   LookupMatchContactSuccess(contact: contactMatched.first),
+        // );
       }
     } catch (e) {
       Logs().e('LookupMatchContactInteractor:: Error $e');
