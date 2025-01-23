@@ -18,7 +18,12 @@ class HiveCollectionToMDatabase {
   late BoxCollection _collection;
 
   String get _tomConfigurationsBoxName => 'tom_configurations_box';
+
+  String get _federationConfigurationsBoxName =>
+      'federation_configurations_box';
   late CollectionBox<Map> tomConfigurationsBox;
+
+  late CollectionBox<Map> federationConfigurationsBox;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -114,12 +119,19 @@ class HiveCollectionToMDatabase {
   Future<void> open() async {
     _collection = await BoxCollection.open(
       name,
-      {_tomConfigurationsBoxName},
+      {
+        _tomConfigurationsBoxName,
+        _federationConfigurationsBoxName,
+      },
       path: path,
       key: key,
     );
     tomConfigurationsBox = await _collection.openBox(
       _tomConfigurationsBoxName,
+      preload: true,
+    );
+    federationConfigurationsBox = await _collection.openBox(
+      _federationConfigurationsBoxName,
       preload: true,
     );
   }

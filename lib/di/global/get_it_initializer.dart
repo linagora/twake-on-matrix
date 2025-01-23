@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
+import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
@@ -14,6 +15,7 @@ import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/federation_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
@@ -33,6 +35,7 @@ import 'package:fluffychat/data/network/server_config_api.dart';
 import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
+import 'package:fluffychat/data/repository/federation_configurations_repository_impl.dart';
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/multiple_account/multiple_account_repository_impl.dart';
@@ -45,6 +48,7 @@ import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
+import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
@@ -174,6 +178,9 @@ class GetItInitializer {
     getIt.registerFactory<ToMConfigurationsDatasource>(
       () => HiveToMConfigurationDatasource(),
     );
+    getIt.registerFactory<FederationConfigurationsDatasource>(
+      () => HiveFederationConfigurationsDatasourceImpl(),
+    );
     getIt.registerFactory<MediaDataSource>(
       () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
     );
@@ -225,6 +232,9 @@ class GetItInitializer {
   void bindingRepositories() {
     getIt.registerFactory<ToMConfigurationsRepository>(
       () => ToMConfigurationsRepositoryImpl(),
+    );
+    getIt.registerFactory<FederationConfigurationsRepository>(
+      () => FederationConfigurationsRepositoryImpl(),
     );
     getIt.registerLazySingleton<RecoveryWordsRepository>(
       () => RecoveryWordsRepositoryImpl(),
