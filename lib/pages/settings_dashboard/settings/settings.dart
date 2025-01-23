@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
@@ -44,6 +45,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
+  final federationConfigurationsRepository =
+      getIt.get<FederationConfigurationsRepository>();
   final _responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const String generateEmailSubject =
@@ -132,6 +135,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
+            _deleteFederationConfigurations(matrix.client),
           ]);
         } catch (e) {
           Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
@@ -150,6 +154,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
+            _deleteFederationConfigurations(matrix.client),
           ]);
         } catch (e) {
           Logs().e('SettingsController()::_logoutActions - error: $e');
@@ -340,6 +345,25 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     } catch (e) {
       Logs().e(
         'SettingsController::_deleteTomConfigurations - error: $e',
+      );
+    }
+  }
+
+  Future<void> _deleteFederationConfigurations(Client currentClient) async {
+    try {
+      Logs().d(
+        'SettingsController::_deleteFederationConfigurations - Client ID: ${currentClient.userID}',
+      );
+      if (matrix.twakeSupported) {
+        await federationConfigurationsRepository
+            .deleteFederationConfigurations(currentClient.userID!);
+      }
+      Logs().d(
+        'SettingsController::_deleteFederationConfigurations - Success',
+      );
+    } catch (e) {
+      Logs().e(
+        'SettingsController::_deleteFederationConfigurations - error: $e',
       );
     }
   }
