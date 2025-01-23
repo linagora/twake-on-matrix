@@ -2519,5 +2519,7 @@
   "@enterGroupName": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "email": "电子邮件",
+  "@email": {}
 }
