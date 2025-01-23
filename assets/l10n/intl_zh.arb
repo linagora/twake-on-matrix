@@ -2523,5 +2523,7 @@
   "email": "电子邮件",
   "@email": {},
   "channels": "频道",
-  "@channels": {}
+  "@channels": {},
+  "mute": "静音",
+  "@mute": {}
 }
