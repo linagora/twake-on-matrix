@@ -2521,5 +2521,7 @@
     "placeholders": {}
   },
   "email": "电子邮件",
-  "@email": {}
+  "@email": {},
+  "channels": "频道",
+  "@channels": {}
 }
