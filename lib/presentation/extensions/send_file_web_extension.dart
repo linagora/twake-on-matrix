@@ -152,7 +152,7 @@ extension SendFileWebExtension on Room {
       try {
         final mediaApi = getIt.get<MediaAPI>();
         final uploadFileResponse = await mediaApi.uploadFileWeb(
-          file: file,
+          file: uploadFile,
           cancelToken: cancelToken,
           onSendProgress: (receive, total) {
             uploadStreamController?.add(
