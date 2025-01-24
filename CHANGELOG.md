@@ -2,6 +2,7 @@
 ### Fixed
 - #1139 Toast when copy message
 - #2215 Fix can not download file 
+- #2214 Navigate when sharing file from 3rd party app
 
 ## [2.6.16+2330] - 2025-01-07
 ### Fixed
