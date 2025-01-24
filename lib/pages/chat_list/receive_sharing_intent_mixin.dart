@@ -86,9 +86,9 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (_intentOpenApp(text)) {
       return;
     }
-    openSharePage();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, url: text).openMatrixToUrl();
+      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text)
+          .openMatrixToUrl();
     });
   }
 
