@@ -1,3 +1,8 @@
+## [2.6.17+2330] - 2025-01-24
+### Fixed
+- #1139 Toast when copy message
+- #2215 Fix can not download file 
+
 ## [2.6.16+2330] - 2025-01-07
 ### Fixed
 - Hotfix: Missing state when deleting avatar in chat details edit
