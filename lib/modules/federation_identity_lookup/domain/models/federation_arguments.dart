@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/modules/federation_indetity_request_token/domain/models/federation_token_information.dart';
+import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 
 class FederationArguments with EquatableMixin {
   final String federationUrl;
