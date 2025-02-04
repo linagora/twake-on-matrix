@@ -2,7 +2,7 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
-import 'package:fluffychat/modules/federation_indetity_request_token/domain/models/federation_token_information.dart';
+import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 
 abstract class FederationIdentityLookupRepository {
   Future<FederationRegisterResponse> register({
