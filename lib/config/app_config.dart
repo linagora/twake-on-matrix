@@ -269,6 +269,7 @@ abstract class AppConfig {
     }
     if (json['enable_logs'] is bool) {
       DebugUtils.enableLogs = json['enable_logs'];
+      Logs().level = DebugUtils().isDebugMode ? Level.verbose : Level.warning;
     }
     if (json['support_url'] is String) {
       supportUrl = json['support_url'];
