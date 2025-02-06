@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart';
+import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class InitClientDialog extends StatefulWidget {
   final Future Function() future;
@@ -28,6 +33,12 @@ class _InitClientDialogState extends State<InitClientDialog>
   Client? _clientAddAnotherAccount;
 
   StreamSubscription? _clientLoginStateChangedSubscription;
+
+  static const breakpointMobileDialogKey =
+      Key('BreakPointMobileInitClientDialog');
+
+  static const breakpointWebAndDesktopDialogKey =
+      Key('BreakpointWebAndDesktopKeyInitClientDialog');
 
   @override
   void initState() {
@@ -130,8 +141,25 @@ class _InitClientDialogState extends State<InitClientDialog>
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.transparent,
+    return SlotLayout(
+      config: <Breakpoint, SlotLayoutConfig>{
+        const WidthPlatformBreakpoint(
+          end: ResponsiveUtils.maxMobileWidth,
+        ): SlotLayout.from(
+          key: breakpointMobileDialogKey,
+          builder: (_) => TomBootstrapDialogMobileView(
+            description: L10n.of(context)!.backingUpYourMessage,
+          ),
+        ),
+        const WidthPlatformBreakpoint(
+          begin: ResponsiveUtils.minTabletWidth,
+        ): SlotLayout.from(
+          key: breakpointWebAndDesktopDialogKey,
+          builder: (_) => TomBootstrapDialogWebView(
+            description: L10n.of(context)!.backingUpYourMessage,
+          ),
+        ),
+      },
     );
   }
 }
