@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -147,19 +145,11 @@ mixin ConnectPageMixin {
       if (token?.isEmpty ?? false) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () => Matrix.of(context)
-            .getLoginClient()
-            .login(
+        future: () => Matrix.of(context).getLoginClient().login(
               LoginType.mLoginToken,
               token: token,
               initialDeviceDisplayName: PlatformInfos.clientName,
-            )
-            .timeout(
-          AutoHomeserverPickerController.autoHomeserverPickerTimeout,
-          onTimeout: () {
-            throw CheckHomeserverTimeoutException();
-          },
-        ),
+            ),
       );
       return SsoLoginState.success;
     } catch (e) {
@@ -276,19 +266,11 @@ mixin ConnectPageMixin {
       }
       matrix.loginType = LoginType.mLoginToken;
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () => matrix
-            .getLoginClient()
-            .login(
+        future: () => matrix.getLoginClient().login(
               LoginType.mLoginToken,
               token: token,
               initialDeviceDisplayName: PlatformInfos.clientName,
-            )
-            .timeout(
-          AutoHomeserverPickerController.autoHomeserverPickerTimeout,
-          onTimeout: () {
-            throw CheckHomeserverTimeoutException();
-          },
-        ),
+            ),
       );
       return SsoLoginState.success;
     } catch (e) {
