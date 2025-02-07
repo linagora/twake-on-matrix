@@ -1,4 +1,5 @@
 {
+  "originHash" : "7f5fcf596f627e6732627c3704bf607576accd5e6f6b9b2b0145de215dc5bd8e",
   "pins" : [
     {
       "identity" : "compound-design-tokens",
@@ -134,5 +135,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
