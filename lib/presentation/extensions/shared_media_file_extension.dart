@@ -6,14 +6,15 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 extension SharedMediaFileExtension on SharedMediaFile {
   MatrixFile toMatrixFile() {
-    if (type == SharedMediaType.IMAGE) {
+    if (type == SharedMediaType.image) {
       return MatrixImageFile(
         bytes: null,
         name: path.split("/").last,
         filePath: path,
+        mimeType: mimeType,
       );
     }
-    if (type == SharedMediaType.VIDEO) {
+    if (type == SharedMediaType.video) {
       Uint8List? thumbnailBytes;
       if (thumbnail != null) {
         thumbnailBytes = File(thumbnail!).readAsBytesSync();
@@ -23,12 +24,20 @@ extension SharedMediaFileExtension on SharedMediaFile {
         name: path.split("/").last,
         filePath: path,
         duration: duration,
+        mimeType: mimeType,
       );
     }
     return MatrixFile(
       bytes: null,
       name: path.split("/").last,
       filePath: path,
+      mimeType: mimeType,
+    );
+  }
+
+  File toFile() {
+    return File(
+      path,
     );
   }
 }
