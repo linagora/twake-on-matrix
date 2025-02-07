@@ -96,11 +96,24 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         ConfirmResult.cancel) {
       return;
     }
+
+    await _tryToUploadKeyBackup();
+
     if (PlatformInfos.isMobile) {
       await _logoutActionsOnMobile();
     } else {
       await _logoutActions();
     }
+  }
+
+  Future<void> _tryToUploadKeyBackup() async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        await matrix.client.encryption?.keyManager.uploadInboundGroupSessions();
+      },
+    );
+
+    return;
   }
 
   Future<void> _logoutActionsOnMobile() async {
