@@ -1,6 +1,8 @@
 import 'package:app_links/app_links.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share.dart';
+import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -11,7 +13,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -28,16 +29,32 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     return text.contains('twake.chat://openApp');
   }
 
-  void _processIncomingSharedFiles(List<SharedMediaFile> files) {
+  Future<void> _processIncomingSharedFiles(List<SharedMediaFile> files) async {
+    Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
-    matrixState.shareContentList = files
-        .map(
-          (files) => {
+    if (files.length == 1 && files.first.type == SharedMediaType.text) {
+      Logs().d('Received text: ${files.first.path}');
+      _processIncomingSharedText(files.first.path);
+      return;
+    }
+    matrixState.shareContentList = await Future.wait(
+      files.map(
+        (sharedMediaFile) async {
+          final file = sharedMediaFile.toFile();
+          final matrixFile = await file.toMatrixFile();
+          Logs().d(
+            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${matrixFile.filePath}',
+          );
+          Logs().d(
+            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${matrixFile.size}',
+          );
+          return {
             'msgtype': TwakeEventTypes.shareFileEventType,
-            'file': files.toMatrixFile(),
-          },
-        )
-        .toList();
+            'file': matrixFile,
+          };
+        },
+      ).toList(),
+    );
     openSharePage();
   }
 
@@ -92,22 +109,29 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     });
   }
 
-  void initReceiveSharingIntent() {
+  void _clearPendingSharedFiles() {
+    matrixState.shareContentList = null;
+    matrixState.shareContent = null;
+  }
+
+  Future<void> initReceiveSharingIntent() async {
     if (!PlatformInfos.isMobile) return;
 
     // For sharing images coming from outside the app while the app is in the memory
-    intentFileStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen(_processIncomingSharedFiles, onError: print);
+    intentFileStreamSubscription =
+        ReceiveSharingIntent.instance.getMediaStream().listen(
+      (shareMedia) async {
+        await _processIncomingSharedFiles(shareMedia);
+      },
+      onError: print,
+    );
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then(_processIncomingSharedFiles);
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    intentDataStreamSubscription = ReceiveSharingIntent.getTextStream()
-        .listen(_processIncomingSharedText, onError: print);
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then(_processIncomingSharedText);
+    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
+      _clearPendingSharedFiles();
+      _processIncomingSharedFiles(value);
+      ReceiveSharingIntent.instance.reset();
+    });
 
     // For receiving shared Uris
     final appLinks = AppLinks();
