@@ -16,7 +16,8 @@ class LoginRobot extends CoreRobot {
     }
   }
 
-  Future<void> tapOnUseYourCompanyServer() async {
+  Future<void>  
+  tapOnUseYourCompanyServer() async {
     await $('Use your company server').tap();
   }
 
