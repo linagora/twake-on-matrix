@@ -1,6 +1,5 @@
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state_v2.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
@@ -68,7 +67,7 @@ class _SliverPhonebookList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.presentationPhonebookContactNotifier,
+      valueListenable: controller.presentationPhonebookContactV2Notifier,
       builder: (context, phonebookContactState, child) {
         return phonebookContactState.fold(
           (failure) {
@@ -331,15 +330,30 @@ class _SliverPhonebookLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.presentationPhonebookContactNotifier,
-      builder: (context, phonebookContactState, child) {
-        final loading = phonebookContactState
-            .getSuccessOrNull<GetPhonebookContactsLoading>();
-        if (loading == null) {
-          return const SliverToBoxAdapter();
-        }
-        return SliverToBoxAdapter(
-          child: _PhonebookLoading(progress: loading.progress),
+      valueListenable:
+          controller.contactsManager.getPhonebookContactsV2Notifier(),
+      builder: (context, state, _) {
+        return state.fold(
+          (failure) {
+            return const SliverToBoxAdapter(
+              child: SizedBox(),
+            );
+          },
+          (success) {
+            if (success is GetPhonebookContactsV2Success) {
+              if (success.progress == 100) {
+                return const SliverToBoxAdapter(
+                  child: SizedBox(),
+                );
+              }
+              return SliverToBoxAdapter(
+                child: _PhonebookLoading(progress: success.progress),
+              );
+            }
+            return const SliverToBoxAdapter(
+              child: SizedBox(),
+            );
+          },
         );
       },
     );

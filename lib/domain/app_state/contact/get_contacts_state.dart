@@ -1,7 +1,7 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 
 class ContactsInitial extends Initial {
   const ContactsInitial() : super();

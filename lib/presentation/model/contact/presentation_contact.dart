@@ -1,11 +1,13 @@
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 
 class PresentationContact extends Equatable {
-  final String? email;
+  final Set<PresentationEmail>? emails;
 
-  final String? phoneNumber;
+  final Set<PresentationPhoneNumber>? phoneNumbers;
 
   final String? displayName;
 
@@ -16,8 +18,8 @@ class PresentationContact extends Equatable {
   final ContactType? type;
 
   const PresentationContact({
-    this.email,
-    this.phoneNumber,
+    this.emails,
+    this.phoneNumbers,
     this.displayName,
     this.matrixId,
     this.status,
@@ -25,13 +27,78 @@ class PresentationContact extends Equatable {
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
-        email: '',
+        emails: {},
         displayName: '',
         matrixId: '',
         status: ContactStatus.inactive,
       );
 
   @override
-  List<Object?> get props =>
-      [email, phoneNumber, displayName, matrixId, status, type];
+  List<Object?> get props => [
+        emails,
+        phoneNumbers,
+        displayName,
+        matrixId,
+        status,
+        type,
+      ];
+}
+
+abstract class PresentationThirdPartyContact with EquatableMixin {
+  final String? matrixId;
+
+  final String thirdPartyId;
+
+  final ThirdPartyIdType thirdPartyIdType;
+
+  final ThirdPartyStatus? status;
+
+  PresentationThirdPartyContact({
+    this.matrixId,
+    required this.thirdPartyId,
+    required this.thirdPartyIdType,
+    this.status,
+  });
+}
+
+class PresentationEmail extends PresentationThirdPartyContact {
+  final String email;
+
+  PresentationEmail({
+    required this.email,
+    super.matrixId,
+    required super.thirdPartyId,
+    required super.thirdPartyIdType,
+    super.status,
+  });
+
+  @override
+  List<Object?> get props => [
+        email,
+        matrixId,
+        thirdPartyId,
+        thirdPartyIdType,
+        status,
+      ];
+}
+
+class PresentationPhoneNumber extends PresentationThirdPartyContact {
+  final String? phoneNumber;
+
+  PresentationPhoneNumber({
+    this.phoneNumber,
+    super.matrixId,
+    required super.thirdPartyId,
+    required super.thirdPartyIdType,
+    super.status,
+  });
+
+  @override
+  List<Object?> get props => [
+        phoneNumber,
+        matrixId,
+        thirdPartyId,
+        thirdPartyIdType,
+        status,
+      ];
 }

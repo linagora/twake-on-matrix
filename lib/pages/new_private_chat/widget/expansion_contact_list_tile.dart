@@ -37,7 +37,7 @@ class ExpansionContactListTile extends StatelessWidget {
               : null,
           builder: (context, snapshot) {
             return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -96,8 +96,8 @@ class ExpansionContactListTile extends StatelessWidget {
                         ),
                       ),
                       if (contact.matrixId != null &&
-                          (contact.email == null ||
-                              contact.phoneNumber == null))
+                          contact.matrixId!.isNotEmpty) ...[
+                        const SizedBox(height: 4.0),
                         HighlightText(
                           text: contact.matrixId!,
                           searchWord: highlightKeyword,
@@ -107,24 +107,49 @@ class ExpansionContactListTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      if (contact.email != null)
-                        HighlightText(
-                          text: contact.email!,
-                          searchWord: highlightKeyword,
-                          style: ListItemStyle.subtitleTextStyle(
-                            fontFamily: 'Inter',
+                      ] else ...[
+                        Container(
+                          decoration: BoxDecoration(
+                            color: LinagoraSysColors.material()
+                                .onSurfaceVariant
+                                .withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      if (contact.phoneNumber != null)
-                        HighlightText(
-                          text: contact.phoneNumber!,
-                          searchWord: highlightKeyword,
-                          style: ListItemStyle.subtitleTextStyle(
-                            fontFamily: 'Inter',
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 4.0,
+                          ),
+                          margin: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            'Invite to Matrix',
+                            style: LinagoraTextStyle.material()
+                                .bodyMedium
+                                .copyWith(
+                                  color: LinagoraRefColors.material().primary,
+                                  fontFamily: 'Inter',
+                                ),
                           ),
                         ),
+                      ],
+
+                      // if (contact.email != null)
+                      //   HighlightText(
+                      //     text: contact.email!,
+                      //     searchWord: highlightKeyword,
+                      //     style: ListItemStyle.subtitleTextStyle(
+                      //       fontFamily: 'Inter',
+                      //     ),
+                      //     maxLines: 1,
+                      //     overflow: TextOverflow.ellipsis,
+                      //   ),
+                      // if (contact.phoneNumber != null)
+                      //   HighlightText(
+                      //     text: contact.phoneNumber!,
+                      //     searchWord: highlightKeyword,
+                      //     style: ListItemStyle.subtitleTextStyle(
+                      //       fontFamily: 'Inter',
+                      //     ),
+                      //   ),
                     ],
                   ),
                 ),

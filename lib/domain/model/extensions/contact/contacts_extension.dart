@@ -1,5 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/domain/model/contact/contact_new.dart';
 
 extension ContactsExtension on Iterable<Contact> {
   Iterable<Contact> searchContacts(String keyword) {
@@ -9,20 +8,25 @@ extension ContactsExtension on Iterable<Contact> {
     final contactsMatched = where((contact) {
       final supportedFields = [
         contact.displayName,
-        contact.matrixId,
-        contact.email,
+        contact.id,
       ];
       final plainTextContains = supportedFields.any(
         (field) =>
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
-      final phoneNumberContains = keyword.msisdnSanitizer().isNotEmpty
-          ? contact.phoneNumber
-                  ?.msisdnSanitizer()
-                  .contains(keyword.msisdnSanitizer()) ??
-              false
-          : false;
-      return plainTextContains || phoneNumberContains;
+      final phoneNumberContains = contact.phoneNumbers?.any(
+            (phoneNumber) => phoneNumber.number.contains(keyword),
+          ) ??
+          false;
+
+      final emailContains = contact.emails?.any(
+            (email) => email.address.contains(keyword),
+          ) ??
+          false;
+      return plainTextContains ||
+          phoneNumberContains ||
+          emailContains ||
+          contact.id.contains(keyword);
     });
     return contactsMatched;
   }

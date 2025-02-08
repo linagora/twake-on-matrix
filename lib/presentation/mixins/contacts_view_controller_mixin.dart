@@ -4,6 +4,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state_v2.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
@@ -59,6 +60,11 @@ mixin class ContactsViewControllerMixin {
   final presentationPhonebookContactNotifier =
       ValueNotifierCustom<Either<Failure, Success>>(
     const Right(GetPhonebookContactsInitial()),
+  );
+
+  final presentationPhonebookContactV2Notifier =
+      ValueNotifierCustom<Either<Failure, Success>>(
+    const Right(GetPhonebookContactsV2Initial()),
   );
 
   final FocusNode searchFocusNode = FocusNode();
@@ -222,6 +228,14 @@ mixin class ContactsViewControllerMixin {
             matrixLocalizations: matrixLocalizations,
           ),
         );
+
+    contactsManager.getPhonebookContactsV2Notifier().addListener(
+          () => _refreshAllContacts(
+            context: context,
+            client: client,
+            matrixLocalizations: matrixLocalizations,
+          ),
+        );
   }
 
   void _refreshAllContacts({
@@ -231,7 +245,8 @@ mixin class ContactsViewControllerMixin {
   }) {
     final keyword = _debouncer.value;
     _refreshContacts(keyword);
-    _refreshPhoneBookContacts(keyword);
+    // _refreshPhoneBookContacts(keyword);
+    _refreshPhoneBookContactsV2(keyword);
     _refreshRecentContacts(
       context: context,
       client: client,
@@ -313,12 +328,66 @@ mixin class ContactsViewControllerMixin {
     );
   }
 
-  Future<void> _refreshPhoneBookContacts(String keyword) async {
-    if (presentationPhonebookContactNotifier.isDisposed) return;
-    presentationPhonebookContactNotifier.value =
-        contactsManager.getPhonebookContactsNotifier().value.fold(
+  // Future<void> _refreshPhoneBookContacts(String keyword) async {
+  //   if (presentationPhonebookContactNotifier.isDisposed) return;
+  //   presentationPhonebookContactNotifier.value =
+  //       contactsManager.getPhonebookContactsNotifier().value.fold(
+  //     (failure) {
+  //       if (failure is GetPhonebookContactsFailure) {
+  //         return _handleSearchExternalContact(
+  //           keyword,
+  //           otherResult: Left(
+  //             GetPresentationContactsFailure(
+  //               keyword: keyword,
+  //             ),
+  //           ),
+  //         );
+  //       }
+  //
+  //       if (failure is GetPhonebookContactsIsEmpty) {
+  //         return _handleSearchExternalContact(
+  //           keyword,
+  //           otherResult: Left(
+  //             GetPresentationContactsEmpty(
+  //               keyword: keyword,
+  //             ),
+  //           ),
+  //         );
+  //       }
+  //       return Left(failure);
+  //     },
+  //     (success) {
+  //       if (success is GetPhonebookContactsSuccess) {
+  //         final filteredContacts = success.contacts
+  //             .searchContacts(keyword)
+  //             .expand((contact) => contact.toPresentationContacts())
+  //             .toList();
+  //         if (filteredContacts.isEmpty) {
+  //           return Left(
+  //             GetPresentationContactsEmpty(
+  //               keyword: keyword,
+  //             ),
+  //           );
+  //         } else {
+  //           return Right(
+  //             GetPresentationContactsSuccess(
+  //               contacts: filteredContacts,
+  //               keyword: keyword,
+  //             ),
+  //           );
+  //         }
+  //       }
+  //       return Right(success);
+  //     },
+  //   );
+  // }
+
+  Future<void> _refreshPhoneBookContactsV2(String keyword) async {
+    if (presentationPhonebookContactV2Notifier.isDisposed) return;
+    presentationPhonebookContactV2Notifier.value =
+        contactsManager.getPhonebookContactsV2Notifier().value.fold(
       (failure) {
-        if (failure is GetPhonebookContactsFailure) {
+        if (failure is GetPhonebookContactsV2Failure) {
           return _handleSearchExternalContact(
             keyword,
             otherResult: Left(
@@ -329,7 +398,7 @@ mixin class ContactsViewControllerMixin {
           );
         }
 
-        if (failure is GetPhonebookContactsIsEmpty) {
+        if (failure is GetPhonebookContactsV2IsEmpty) {
           return _handleSearchExternalContact(
             keyword,
             otherResult: Left(
@@ -342,7 +411,7 @@ mixin class ContactsViewControllerMixin {
         return Left(failure);
       },
       (success) {
-        if (success is GetPhonebookContactsSuccess) {
+        if (success is GetPhonebookContactsV2Success) {
           final filteredContacts = success.contacts
               .searchContacts(keyword)
               .expand((contact) => contact.toPresentationContacts())
